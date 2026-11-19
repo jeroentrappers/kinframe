@@ -89,11 +89,15 @@ extension API {
     }
 
     /// `maxUses` nil is unlimited.
-    public func createFeedInvite(_ id: String, purpose: FeedInvitePurpose, hours: Int, maxUses: Int?, note: String) async throws -> FeedInvite {
+    public func createFeedInvite(_ id: String, purpose: FeedInvitePurpose, hours: Int, maxUses: Int?, note: String,
+                                 allowRemote: Bool = false) async throws -> FeedInvite {
         let key = UUID().uuidString.lowercased()
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        let body = Components.Schemas.FeedInviteCreate(purpose: purpose, maxUses: maxUses, expiresInHours: hours,
-                                                       note: trimmed.isEmpty ? nil : String(trimmed.prefix(80)))
+        var draft = Components.Schemas.FeedInviteCreate(purpose: purpose, maxUses: maxUses, expiresInHours: hours,
+                                                        note: trimmed.isEmpty ? nil : String(trimmed.prefix(80)))
+        // Frames on other servers may use it (README §5.22): subscribe invites only.
+        if allowRemote, purpose == .subscribe { draft.allowRemote = true }
+        let body = draft
         return try await call {
             try await $0.createFeedInvite(path: .init(feedId: id), headers: .init(idempotencyKey: key), body: .json(body)).created.body.json
         }

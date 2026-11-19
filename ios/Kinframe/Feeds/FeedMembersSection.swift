@@ -12,6 +12,8 @@ struct FeedMembersSection: View {
     @State private var showing: FeedInvite?
     @State private var confirmLeave = false
     @State private var removeMyPosts = false
+    /// Leaving (README §5.21): the leave sheet with photos, comments and frames.
+    @State private var leavingWithChoice = false
 
     private var abilities: FeedAbilities? { model.abilities }
 
@@ -20,10 +22,19 @@ struct FeedMembersSection: View {
             if !model.requests.isEmpty { requests }
             members
             if abilities?.canSeeInvites == true { invites }
+            if app.leavingEnabled, abilities?.isAdmin == true { TakenAwayCard(api: model.api, scope: .feed(model.id)) }
             leave
         }
         .sheet(item: $editing) { m in
             FeedMemberSheet(model: model, member: m)
+        }
+        .sheet(isPresented: $leavingWithChoice) {
+            LeaveFeedSheet(api: model.api, feedId: model.id, name: model.feed?.name ?? "") { line, leftFrames in
+                app.removeFeed(model.id)
+                leftFrames.forEach(app.removeFrame)
+                app.feedsPath = NavigationPath()
+                app.toasts.show([L("ios.feeds.left", ["name": model.feed?.name ?? ""]), line].compactMap { $0 }.joined(separator: " "))
+            }
         }
         .sheet(isPresented: $inviting) {
             FeedInviteCreateSheet(model: model) { showing = $0 }
@@ -208,8 +219,8 @@ struct FeedMembersSection: View {
             if abilities?.isOwner == true {
                 Text(L("ios.feeds.ownerLeaveHint")).font(.subheadline).foregroundStyle(Palette.textMuted)
             } else {
-                Toggle(L("ios.feeds.removeMyPosts"), isOn: $removeMyPosts).tint(Palette.danger)
-                Button(role: .destructive) { confirmLeave = true } label: {
+                if !app.leavingEnabled { Toggle(L("ios.feeds.removeMyPosts"), isOn: $removeMyPosts).tint(Palette.danger) }
+                Button(role: .destructive) { if app.leavingEnabled { leavingWithChoice = true } else { confirmLeave = true } } label: {
                     Label(L("ios.feeds.leave"), systemImage: "rectangle.portrait.and.arrow.right")
                 }
                 .buttonStyle(.kf(.secondary))
@@ -367,6 +378,8 @@ private struct FeedInviteCreateSheet: View {
     @State private var singleUse = true
     @State private var note = ""
     @State private var busy = false
+    /// Frames on other servers may use this link (README §5.22).
+    @State private var allowRemote = false
 
     var body: some View {
         NavigationStack {
@@ -381,6 +394,13 @@ private struct FeedInviteCreateSheet: View {
                     } footer: {
                         Text(purpose == .join ? (model.feed?.value2.inviteRequiresApproval ?? true ? L("ios.feeds.inviteHintApproval") : L("ios.feeds.inviteHint"))
                                               : L("ios.feeds.inviteSubscribeHint"))
+                    }
+                }
+                if purpose == .subscribe, app.remoteFamiliesEnabled, model.feed?.value2.allowRemoteFrames == true {
+                    Section {
+                        Toggle(L("servers.remote.inviteAllow"), isOn: $allowRemote).tint(Palette.accent)
+                    } footer: {
+                        Text(L("servers.remote.inviteAllowHint"))
                     }
                 }
                 Section(L("people.expires")) {
@@ -420,7 +440,8 @@ private struct FeedInviteCreateSheet: View {
         busy = true
         defer { busy = false }
         do {
-            let invite = try await model.createInvite(purpose: purpose, hours: hours, singleUse: singleUse, note: note)
+            let invite = try await model.createInvite(purpose: purpose, hours: hours, singleUse: singleUse, note: note,
+                                                      allowRemote: allowRemote)
             dismiss()
             created(invite)
         } catch {

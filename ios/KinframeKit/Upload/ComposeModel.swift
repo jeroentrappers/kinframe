@@ -187,13 +187,51 @@ public final class ComposeModel {
     public var canSend: Bool { blocker == nil && !isProbing }
 
     /// Move the files into the upload queue and describe the send. The composer is empty afterwards.
-    public func makeJob(server: URL, frames: [FrameSummary], feeds: [FeedSummary] = [], store: OutboxStore) throws -> OutboxJob {
+    /// One server's recipients, for a send to several accounts (docs/spec/multi-server.md §2.2).
+    public struct ServerTargets: Sendable {
+        public var server: URL
+        public var serverName: String?
+        public var frames: [FrameSummary]
+        public var feeds: [FeedSummary]
+
+        public init(server: URL, serverName: String? = nil, frames: [FrameSummary], feeds: [FeedSummary]) {
+            self.server = server
+            self.serverName = serverName
+            self.frames = frames
+            self.feeds = feeds
+        }
+    }
+
+    /// One job per server that has chosen recipients: two uploads, one sheet. The first job prepares the media; the
+    /// others take its prepared masters (`OutboxJob.preparedBy`). Ids are unique per server, so the chosen ids are
+    /// looked up in each server's own lists.
+    public func makeJobs(_ targets: [ServerTargets], store: OutboxStore) throws -> [OutboxJob] {
+        let used = targets.filter { t in
+            t.frames.contains { frameIds.contains($0.id) } || t.feeds.contains { feedIds.contains($0.id) }
+        }
+        guard !used.isEmpty else { return [] }
+        var jobs: [OutboxJob] = []
+        for (n, t) in used.enumerated() {
+            var job = try makeJob(server: t.server, frames: t.frames, feeds: t.feeds, store: store, keepDrafts: n < used.count - 1)
+            if used.count > 1 { job.serverName = t.serverName }
+            if let leader = jobs.first { job.preparedBy = leader.id }
+            jobs.append(job)
+        }
+        return jobs
+    }
+
+    public func makeJob(server: URL, frames: [FrameSummary], feeds: [FeedSummary] = [], store: OutboxStore,
+                        keepDrafts: Bool = false) throws -> OutboxJob {
         let id = UUID()
         let dir = try store.makeDirectory(for: id)
         var items: [OutboxItem] = []
         for (n, d) in drafts.enumerated() {
             let file = "item-\(n).\(d.file.pathExtension)"
-            try FileManager.default.moveItem(at: d.file, to: dir.appending(path: file))
+            if keepDrafts {
+                try FileManager.default.copyItem(at: d.file, to: dir.appending(path: file))
+            } else {
+                try FileManager.default.moveItem(at: d.file, to: dir.appending(path: file))
+            }
             var thumbnail: String?
             if let data = d.info?.thumbnail {
                 thumbnail = "thumb-\(n).jpg"
@@ -205,11 +243,15 @@ public final class ComposeModel {
             if let clip = d.motionFile {
                 if d.isLive {
                     let name = "motion-\(n).\(clip.pathExtension)"
-                    try FileManager.default.moveItem(at: clip, to: dir.appending(path: name))
+                    if keepDrafts {
+                        try FileManager.default.copyItem(at: clip, to: dir.appending(path: name))
+                    } else {
+                        try FileManager.default.moveItem(at: clip, to: dir.appending(path: name))
+                    }
                     let size = (try? dir.appending(path: name).resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
                     motion = TusUpload(file: name, size: size, filename: ((d.filename as NSString).deletingPathExtension) + "." + clip.pathExtension,
                                        mime: ComposeRules.mimeType(forExtension: clip.pathExtension))
-                } else {
+                } else if !keepDrafts {
                     try? FileManager.default.removeItem(at: clip)
                 }
             }
@@ -233,6 +275,7 @@ public final class ComposeModel {
         let circles = chosenFeeds.compactMap { circleByFeed[$0.id] }
         job.circleIds = circles.isEmpty ? nil : circles
         job.promptId = chosenFeeds.isEmpty ? nil : promptId
+        if keepDrafts { return job }
         circleByFeed = [:]
         promptId = nil
         drafts = []

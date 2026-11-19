@@ -121,7 +121,7 @@ struct ReactionListSheet: View {
                                     HStack(spacing: 12) {
                                         Image(systemName: "photo.on.rectangle").frame(width: 36, height: 36)
                                             .background(Circle().fill(Palette.surface2)).foregroundStyle(Palette.textMuted)
-                                        Text(f.frameName)
+                                        Text(RemoteLabel.frame(f.frameName, server: f.serverName))
                                         Spacer()
                                         Text(PersonReaction(f.reaction).emoji).font(.title3)
                                     }
@@ -191,7 +191,7 @@ struct MentionText: View {
             .environment(\.openURL, OpenURLAction { url in
                 if url.scheme == "kinframe-person" {
                     let id = url.absoluteString.replacingOccurrences(of: "kinframe-person:", with: "")
-                    app.social.personSheet = PersonRoute(userId: id)
+                    app.social.personSheet = PersonRoute(userId: id, account: app.accountId)
                     return .handled
                 }
                 return .systemAction

@@ -92,6 +92,8 @@ struct FrameRoute: Hashable {
     var section: FrameSection = .overview
     /// Open this album in the photos (a photo source's notification).
     var albumId: String? = nil
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
 }
 
 enum FrameSection: String, Hashable, CaseIterable {
@@ -100,9 +102,11 @@ enum FrameSection: String, Hashable, CaseIterable {
 
 struct MainTabs: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
 
     var body: some View {
         @Bindable var app = app
+        @Bindable var accounts = accounts
         TabView(selection: $app.tab) {
             // Family social: Home (timeline and strip) and Chats, each only when the server has it.
             if app.social.features.home {
@@ -113,7 +117,7 @@ struct MainTabs: View {
             if app.social.features.chats {
                 ChatsTab()
                     .tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
-                    .badge(ChatList.unreadChats(app.social.conversations))
+                    .badge(accounts.unreadChats)
                     .tag(AppModel.Tab.chats)
             }
             FramesTab()
@@ -165,6 +169,42 @@ struct MainTabs: View {
         .sheet(item: $app.activeLink) { link in
             DeepLinkSheet(link: link)
         }
+        // Several servers (docs/spec/multi-server.md §2.1): the other accounts' sheets, "Add a server", and links of
+        // servers the app isn't signed in to.
+        .background(SecondaryAccountPresenters())
+        .background {
+            Color.clear.sheet(item: $accounts.adding) { request in
+                AddServerSheet(request: request)
+            }
+        }
+        .background {
+            Color.clear.sheet(item: $accounts.remoteFollow) { request in
+                if let api = request.model.api {
+                    RemoteFollowSheet(api: api, inviteURL: request.inviteURL).environment(request.model)
+                }
+            }
+        }
+        .alert(
+            L("servers.account.foreignTitle"),
+            isPresented: Binding(get: { accounts.foreignLink != nil }, set: { if !$0 { accounts.foreignLink = nil } }),
+            presenting: accounts.foreignLink
+        ) { request in
+            Button(L("servers.account.foreignSignIn")) {
+                accounts.foreignLink = nil
+                accounts.startAdding(server: request.server, link: request.link)
+            }
+            // A family invite can also be followed by a frame you manage here, without an account there.
+            if let m = accounts.followAccount(for: request.link), let url = Accounts.inviteURL(request.link, server: request.server) {
+                Button(L("servers.account.foreignFollow")) {
+                    accounts.foreignLink = nil
+                    accounts.remoteFollow = .init(model: m, inviteURL: url)
+                }
+            }
+            Button(L("common.cancel"), role: .cancel) { accounts.foreignLink = nil }
+        } message: { request in
+            Text(L(request.link.isInvite || request.link.isFeedInvite ? "servers.account.foreignFamily" : "servers.account.foreignFrame",
+                   ["server": ServerAddress.display(request.server)]))
+        }
         // "Add from Google Photos": waiting for Google, progress and the result (docs/spec/photo-sources.md §7.3).
         .sheet(isPresented: Binding(get: { app.googleImport.presented }, set: { if !$0 { app.googleImport.close() } })) {
             GoogleImportSheet(controller: app.googleImport)
@@ -207,7 +247,7 @@ extension DeepLink: @retroactive Identifiable {
 }
 
 /// Frame codes, frame invites and feed invites from links.
-private struct DeepLinkSheet: View {
+struct DeepLinkSheet: View {
     @Environment(AppModel.self) private var app
     let link: DeepLink
 

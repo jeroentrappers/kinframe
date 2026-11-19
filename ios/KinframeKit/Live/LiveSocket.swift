@@ -56,6 +56,10 @@ public enum LiveEvent: Equatable, Sendable {
     case telegramLinkUpdated(TelegramLink?)
     /// Family social: timeline, threads, reactions, circles, chats, badge and encouragement (SocialEvents.swift).
     case social(SocialEvent)
+    /// A frame's follow of a family on another server changed (README §5.22).
+    case remoteSubscriptionUpdated(frameId: String, subscription: RemoteSubscription?)
+    /// Leaving (Leaving.swift): placements taken away or restored, keep requests.
+    case leaving(LeavingEvent)
 
     public struct BirthdayRef: Equatable, Sendable {
         public var feedId: String
@@ -151,6 +155,9 @@ public enum LiveEvent: Equatable, Sendable {
             return decode(TelegramCode.self, obj["code"]).map { .telegramCodeUpdated($0) }
         case "telegram_link.updated":
             return .telegramLinkUpdated(decode(TelegramLink.self, obj["link"]))
+        case "remote_subscription.updated":
+            guard let f = str("frame_id") else { return nil }
+            return .remoteSubscriptionUpdated(frameId: f, subscription: decode(RemoteSubscription.self, obj["remote_subscription"]))
         case "frame.status":
             guard let f = str("frame_id") else { return nil }
             return .frameStatus(frameId: f, online: obj["online"] as? Bool ?? false, lastSeenAt: str("last_seen_at").flatMap(FlexibleDateTranscoder.parse))
@@ -167,7 +174,7 @@ public enum LiveEvent: Equatable, Sendable {
                   let invitation = try? OutboxRunner.decoder.decode(EventInvitation.self, from: raw) else { return nil }
             return .invitationDecided(frameId: f, invitation: invitation)
         default:
-            return SocialEvent.parse(type, obj).map { .social($0) }
+            return SocialEvent.parse(type, obj).map { .social($0) } ?? LeavingEvent.parse(type, obj).map { .leaving($0) }
         }
     }
 

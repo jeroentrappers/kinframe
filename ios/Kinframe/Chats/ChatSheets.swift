@@ -152,7 +152,7 @@ struct ConversationInfoView: View {
                             Button(L("chat.info.openFamily")) { dismiss(); app.openFeed(feedId) }
                         }
                         if c.kind == .direct, let other = c.other, other.formerMember != true {
-                            Button(L("chat.info.profile")) { dismiss(); app.social.personSheet = PersonRoute(userId: other.userId) }
+                            Button(L("chat.info.profile")) { dismiss(); app.social.personSheet = PersonRoute(userId: other.userId, account: app.accountId) }
                         }
                     }
                     .listRowBackground(Palette.surface)

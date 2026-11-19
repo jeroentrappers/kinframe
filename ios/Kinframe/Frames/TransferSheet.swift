@@ -165,7 +165,8 @@ struct TransferSheet: View {
         var left = false
         if leaveAfter {
             do {
-                _ = try await api.call { try await $0.leaveFrame(path: .init(frameId: id), body: .json(.init(removeMyItems: removeMine))).noContent }
+                // Leaving (README §5.21): the photo choice as `photos` when the server has it.
+                _ = try await api.leaveFrame(id, photos: app.leavingEnabled ? (removeMine ? .take : .keep) : nil, removeMyItems: removeMine)
                 left = true
             } catch {
                 // The transfer itself worked; the error says why leaving didn't.

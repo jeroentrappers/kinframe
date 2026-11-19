@@ -41,6 +41,22 @@ final class OutboxMonitor {
         }
     }
 
+    /// One session per account's server (docs/spec/multi-server.md §2.2).
+    func configure(sessions: [URL: TokenProvider]) {
+        let sessions = UncheckedSendable(sessions)
+        Task {
+            await runner.configure(sessions: sessions.value)
+            await runner.kick()
+        }
+    }
+
+    /// Queue a send that goes to several servers: one job per server, the first prepares the media.
+    func enqueue(_ list: [OutboxJob]) throws {
+        for job in list { try store.save(job) }
+        jobs.insert(contentsOf: list, at: 0)
+        Task { await runner.kick() }
+    }
+
     func kick() {
         jobs = store.all()
         Task { await runner.kick() }

@@ -23,6 +23,10 @@ public protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//v1/me/patch(updateMe)`.
     func updateMe(_ input: Operations.UpdateMe.Input) async throws -> Operations.UpdateMe.Output
     /// Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
+    /// The body's `photos` (README §5.21 "Account deletion") says what happens to the photos: `take` (default) or
+    /// `leave` (handed over to the families' and frames' owners). Older clients send only `remove_items`: `true`
+    /// means `take`, `false` means `leave`. `photos` wins when both are sent.
+    ///
     ///
     /// - Remark: HTTP `DELETE /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/delete(deleteMe)`.
@@ -67,7 +71,10 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /v1/frames/{frameId}`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/delete(removeFrame)`.
     func removeFrame(_ input: Operations.RemoveFrame.Input) async throws -> Operations.RemoveFrame.Output
-    /// Remove your own membership. The owner must transfer ownership first.
+    /// Remove your own membership. The owner must transfer ownership first. `photos` (README §5.21): `keep` (default)
+    /// leaves your direct placements on the frame; `take` takes them away with the 30-day notice. Requests with
+    /// `photos` get `200` with the result; requests without it (older clients) get `204`.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/frames/{frameId}/leave`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/leave/post(leaveFrame)`.
@@ -263,6 +270,10 @@ public protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)`.
     func deleteFeed(_ input: Operations.DeleteFeed.Input) async throws -> Operations.DeleteFeed.Output
     /// Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+    /// README §5.21: `photos` `keep` (default) or `take`, `comments` `keep` (default) or `delete`, and
+    /// `leave_frame_ids` to leave frames in the same request. Requests with `photos` get `200` with the result;
+    /// requests without it (older clients) get `204`.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/feeds/{feedId}/leave`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)`.
@@ -1288,6 +1299,166 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/frames/{frameId}/photo-requests`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/photo-requests/get(listFramePhotoRequests)`.
     func listFramePhotoRequests(_ input: Operations.ListFramePhotoRequests.Input) async throws -> Operations.ListFramePhotoRequests.Output
+    /// What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
+    /// caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
+    /// subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
+    /// current members and for people who already left or were removed and still have photos there (the take-away
+    /// sheet); `404 not_found` for scopes the caller has nothing in.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/me/leave-preview`.
+    /// - Remark: Generated from `#/paths//v1/me/leave-preview/get(getLeavePreview)`.
+    func getLeavePreview(_ input: Operations.GetLeavePreview.Input) async throws -> Operations.GetLeavePreview.Output
+    /// Families and frames the caller no longer belongs to (left or removed) where photos they sent are still live,
+    /// for "Take my photos away from Janssens" in the sent history (README §5.21).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/me/former-places`.
+    /// - Remark: Generated from `#/paths//v1/me/former-places/get(listFormerPlaces)`.
+    func listFormerPlaces(_ input: Operations.ListFormerPlaces.Input) async throws -> Operations.ListFormerPlaces.Output
+    /// Take the caller's own photos away from this family (README §5.21 "Taking away"): their live posts leave the
+    /// family, and the posts' placements on every subscribed frame (local and on other servers) are taken away with
+    /// the 30-day notice. Works for current members, people who left and people who were removed. Idempotent: a
+    /// second call takes away only what came back or was posted since. `404 not_found` when the caller has nothing
+    /// live in the family.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/take-away`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/take-away/post(takeAwayFromFeed)`.
+    func takeAwayFromFeed(_ input: Operations.TakeAwayFromFeed.Input) async throws -> Operations.TakeAwayFromFeed.Output
+    /// Take the caller's own direct placements (sends, forwards, shares) away from this frame with the 30-day notice.
+    /// Placements that reached the frame through a family are not touched (take them away from the family). Works
+    /// for current members, people who left and people who were removed. `404 not_found` when the caller has nothing
+    /// live on the frame.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/take-away`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/take-away/post(takeAwayFromFrame)`.
+    func takeAwayFromFrame(_ input: Operations.TakeAwayFromFrame.Input) async throws -> Operations.TakeAwayFromFrame.Output
+    /// Frame owner, admins and `manage_library` members. The frame's "Taken away" groups (one per taking: person,
+    /// date, count, until), newest first, while their 30 days run; the placements themselves are listed with
+    /// `listPlacements?visibility=taken_away&taking_id=`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/taken-away`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/taken-away/get(listFrameTakenAway)`.
+    func listFrameTakenAway(_ input: Operations.ListFrameTakenAway.Input) async throws -> Operations.ListFrameTakenAway.Output
+    /// Family owner and admins. Posts taken away from the family, grouped per taking, while their 30 days run (for
+    /// "Ask to keep" on the family side).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/taken-away`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/taken-away/get(listFeedTakenAway)`.
+    func listFeedTakenAway(_ input: Operations.ListFeedTakenAway.Input) async throws -> Operations.ListFeedTakenAway.Output
+    /// Ask the person who took photos away to let them stay (README §5.21 "Ask to keep"). Exactly one of `frame_id`
+    /// (frame owner, admins, `manage_library`) and `feed_id` (family owner and admins). One request per scope and
+    /// taking: a second answers `409 limit_reached`. `403 forbidden` when the person blocked the caller (the group's
+    /// `can_ask` is then false with `cannot_ask_reason: blocked`), `409 invalid_transition` when the 30 days are over.
+    /// `item_ids` picks photos (items of the taking in that scope); absent means all of them.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/keep-requests/post(createKeepRequest)`.
+    func createKeepRequest(_ input: Operations.CreateKeepRequest.Input) async throws -> Operations.CreateKeepRequest.Output
+    /// Requests sent to the caller (the person who took photos away), newest first. Default `open` only.
+    ///
+    /// - Remark: HTTP `GET /v1/me/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/me/keep-requests/get(listMyKeepRequests)`.
+    func listMyKeepRequests(_ input: Operations.ListMyKeepRequests.Input) async throws -> Operations.ListMyKeepRequests.Output
+    /// Frame owner, admins and `manage_library` members. Requests made for this frame, newest first (all states, 60 days).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/keep-requests/get(listFrameKeepRequests)`.
+    func listFrameKeepRequests(_ input: Operations.ListFrameKeepRequests.Input) async throws -> Operations.ListFrameKeepRequests.Output
+    /// Family owner and admins. Requests made for this family, newest first (all states, 60 days).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/keep-requests/get(listFeedKeepRequests)`.
+    func listFeedKeepRequests(_ input: Operations.ListFeedKeepRequests.Input) async throws -> Operations.ListFeedKeepRequests.Output
+    /// The person asked and the askers (the scope's managers). Includes the photos asked for (`items`, with thumbnails)
+    /// so the person can pick which to allow.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/keep-requests/{requestId}`.
+    /// - Remark: Generated from `#/paths//v1/keep-requests/{requestId}/get(getKeepRequest)`.
+    func getKeepRequest(_ input: Operations.GetKeepRequest.Input) async throws -> Operations.GetKeepRequest.Output
+    /// The person asked only. `all` and `none` need no `item_ids`; `some` needs at least one of the requested items.
+    /// Allowed photos come back (placement and post as before, credited as before); the rest are deleted when the 30
+    /// days end. The answer is final: `409 already_decided` for a second answer, `409 invalid_transition` after expiry.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/keep-requests/{requestId}/answer`.
+    /// - Remark: Generated from `#/paths//v1/keep-requests/{requestId}/answer/post(answerKeepRequest)`.
+    func answerKeepRequest(_ input: Operations.AnswerKeepRequest.Input) async throws -> Operations.AnswerKeepRequest.Output
+    /// The caller's private memories filter (README §5.21 "Memories"). Nobody else ever sees it.
+    ///
+    /// - Remark: HTTP `GET /v1/me/memories`.
+    /// - Remark: Generated from `#/paths//v1/me/memories/get(getMemoryPreferences)`.
+    func getMemoryPreferences(_ input: Operations.GetMemoryPreferences.Input) async throws -> Operations.GetMemoryPreferences.Output
+    /// Replaces the lists that are present (an absent field is left unchanged). People must be people the caller
+    /// shares or shared a family, frame or chat with; unknown ids are dropped. Hiding someone does not block them.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/me/memories`.
+    /// - Remark: Generated from `#/paths//v1/me/memories/put(updateMemoryPreferences)`.
+    func updateMemoryPreferences(_ input: Operations.UpdateMemoryPreferences.Input) async throws -> Operations.UpdateMemoryPreferences.Output
+    /// Frame managers on this server (B), before following a family on another server (A). The server fetches A's
+    /// `/.well-known/kinframe`, checks the invite with A (`federationSubscribe` with `preview: true`, signed) and
+    /// returns what the confirmation shows. `422 validation_failed` for a URL that isn't a kinframe subscribe invite,
+    /// `404 invite_invalid` / `410 invite_expired` as A answers, `403 forbidden` when A or this server refuses
+    /// (federation off, not on the allow list, blocked, or the family doesn't allow frames on other servers),
+    /// `502 upstream_unavailable` when A can't be reached. `503 feature_disabled` when federation is off here.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/remote-invites:preview`.
+    /// - Remark: Generated from `#/paths//v1/remote-invites:preview/post(previewRemoteInvite)`.
+    func previewRemoteInvite(_ input: Operations.PreviewRemoteInvite.Input) async throws -> Operations.PreviewRemoteInvite.Output
+    /// Families on other servers this frame follows. Frame managers (owner, admin, `change_settings`) see every
+    /// status; other members see `active` ones. Ended ones are listed for 30 days.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/remote-subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/get(listRemoteSubscriptions)`.
+    func listRemoteSubscriptions(_ input: Operations.ListRemoteSubscriptions.Input) async throws -> Operations.ListRemoteSubscriptions.Output
+    /// Frame managers. Follow a family on another server with its subscribe invite URL (the family must allow frames
+    /// on other servers and the invite must have `allow_remote`). The server asks A (`federationSubscribe`, signed);
+    /// the result is `active` for pre-approved invites, else `pending` until A's admins decide. Errors as for
+    /// `previewRemoteInvite`; `409 already_subscribed` when the frame already follows that family.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/remote-subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/post(createRemoteSubscription)`.
+    func createRemoteSubscription(_ input: Operations.CreateRemoteSubscription.Input) async throws -> Operations.CreateRemoteSubscription.Output
+    /// Frame managers. What happens to the copied photos when the subscription ends (`on_end`).
+    ///
+    /// - Remark: HTTP `PATCH /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}/patch(updateRemoteSubscription)`.
+    func updateRemoteSubscription(_ input: Operations.UpdateRemoteSubscription.Input) async throws -> Operations.UpdateRemoteSubscription.Output
+    /// Frame managers. Unsubscribe (or withdraw a pending request): tells A (`federationUnsubscribe`, signed, retried
+    /// in the background when A is down) and keeps or removes the copied photos (`placements`, default the
+    /// subscription's `on_end`).
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}/delete(deleteRemoteSubscription)`.
+    func deleteRemoteSubscription(_ input: Operations.DeleteRemoteSubscription.Input) async throws -> Operations.DeleteRemoteSubscription.Output
+    /// Family owner and admins. Servers whose frames may not follow this family.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/blocked-servers/get(listFeedBlockedServers)`.
+    func listFeedBlockedServers(_ input: Operations.ListFeedBlockedServers.Input) async throws -> Operations.ListFeedBlockedServers.Output
+    /// Family owner and admins. Blocks a server for this family: its remote subscriptions to the family end
+    /// (`removed_reason: server_blocked`) and new requests from it are refused. Idempotent per host.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/blocked-servers/post(blockFeedServer)`.
+    func blockFeedServer(_ input: Operations.BlockFeedServer.Input) async throws -> Operations.BlockFeedServer.Output
+    /// Family owner and admins. Ended subscriptions stay ended.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/blocked-servers/{blockedServerId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/blocked-servers/{blockedServerId}/delete(unblockFeedServer)`.
+    func unblockFeedServer(_ input: Operations.UnblockFeedServer.Input) async throws -> Operations.UnblockFeedServer.Output
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
     /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
@@ -1721,6 +1892,51 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/operator/reservations/{reservationId}`.
     /// - Remark: Generated from `#/paths//v1/operator/reservations/{reservationId}/patch(operatorUpdateReservation)`.
     func operatorUpdateReservation(_ input: Operations.OperatorUpdateReservation.Input) async throws -> Operations.OperatorUpdateReservation.Output
+    /// Find frames and families for an ownership transfer (README §5.21 "Ownership by the operator"): by id, name, or a
+    /// member's email or display name (`q`, at least 2 characters). At most 20 of each, with their members.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/ownership/search`.
+    /// - Remark: Generated from `#/paths//v1/operator/ownership/search/get(operatorSearchOwnership)`.
+    func operatorSearchOwnership(_ input: Operations.OperatorSearchOwnership.Input) async throws -> Operations.OperatorSearchOwnership.Output
+    /// Move ownership of a frame to an existing member (`422 validation_failed` otherwise). The previous owner
+    /// becomes admin, or is removed with `remove_previous: true`. Both get `ownership_changed`; the change is logged
+    /// with the reason (`operatorListOwnershipLog`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/frames/{frameId}/owner`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/owner/post(operatorTransferFrameOwner)`.
+    func operatorTransferFrameOwner(_ input: Operations.OperatorTransferFrameOwner.Input) async throws -> Operations.OperatorTransferFrameOwner.Output
+    /// The same for a family (feed). The new owner must be a member of the family.
+    ///
+    /// - Remark: HTTP `POST /v1/operator/feeds/{feedId}/owner`.
+    /// - Remark: Generated from `#/paths//v1/operator/feeds/{feedId}/owner/post(operatorTransferFeedOwner)`.
+    func operatorTransferFeedOwner(_ input: Operations.OperatorTransferFeedOwner.Input) async throws -> Operations.OperatorTransferFeedOwner.Output
+    /// Operator ownership transfers and account-deletion handovers (README §5.21), newest first, kept 2 years.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/ownership-log`.
+    /// - Remark: Generated from `#/paths//v1/operator/ownership-log/get(operatorListOwnershipLog)`.
+    func operatorListOwnershipLog(_ input: Operations.OperatorListOwnershipLog.Input) async throws -> Operations.OperatorListOwnershipLog.Output
+    /// Servers blocked for the whole instance (README §5.22 "Trust").
+    ///
+    /// - Remark: HTTP `GET /v1/operator/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/operator/blocked-servers/get(operatorListBlockedServers)`.
+    func operatorListBlockedServers(_ input: Operations.OperatorListBlockedServers.Input) async throws -> Operations.OperatorListBlockedServers.Output
+    /// Block a server instance-wide: every remote subscription with it ends on both sides (`server_blocked`), its
+    /// federation requests answer `403 forbidden`, and this server stops calling it. Idempotent per host.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/operator/blocked-servers/post(operatorBlockServer)`.
+    func operatorBlockServer(_ input: Operations.OperatorBlockServer.Input) async throws -> Operations.OperatorBlockServer.Output
+    /// - Remark: HTTP `DELETE /v1/operator/blocked-servers/{blockedServerId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/blocked-servers/{blockedServerId}/delete(operatorUnblockServer)`.
+    func operatorUnblockServer(_ input: Operations.OperatorUnblockServer.Input) async throws -> Operations.OperatorUnblockServer.Output
+    /// Servers this one federates with (either direction), with counts and their last contact.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/remote-servers`.
+    /// - Remark: Generated from `#/paths//v1/operator/remote-servers/get(operatorListRemoteServers)`.
+    func operatorListRemoteServers(_ input: Operations.OperatorListRemoteServers.Input) async throws -> Operations.OperatorListRemoteServers.Output
 }
 
 /// Convenience overloads for operation inputs.
@@ -1763,16 +1979,22 @@ extension APIProtocol {
         ))
     }
     /// Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
+    /// The body's `photos` (README §5.21 "Account deletion") says what happens to the photos: `take` (default) or
+    /// `leave` (handed over to the families' and frames' owners). Older clients send only `remove_items`: `true`
+    /// means `take`, `false` means `leave`. `photos` wins when both are sent.
+    ///
     ///
     /// - Remark: HTTP `DELETE /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/delete(deleteMe)`.
     public func deleteMe(
-        query: Operations.DeleteMe.Input.Query,
-        headers: Operations.DeleteMe.Input.Headers = .init()
+        query: Operations.DeleteMe.Input.Query = .init(),
+        headers: Operations.DeleteMe.Input.Headers = .init(),
+        body: Operations.DeleteMe.Input.Body? = nil
     ) async throws -> Operations.DeleteMe.Output {
         try await deleteMe(Operations.DeleteMe.Input(
             query: query,
-            headers: headers
+            headers: headers,
+            body: body
         ))
     }
     /// - Remark: HTTP `PUT /v1/me/avatar`.
@@ -1873,7 +2095,10 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Remove your own membership. The owner must transfer ownership first.
+    /// Remove your own membership. The owner must transfer ownership first. `photos` (README §5.21): `keep` (default)
+    /// leaves your direct placements on the frame; `take` takes them away with the 30-day notice. Requests with
+    /// `photos` get `200` with the result; requests without it (older clients) get `204`.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/frames/{frameId}/leave`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/leave/post(leaveFrame)`.
@@ -2375,6 +2600,10 @@ extension APIProtocol {
         ))
     }
     /// Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+    /// README §5.21: `photos` `keep` (default) or `take`, `comments` `keep` (default) or `delete`, and
+    /// `leave_frame_ids` to leave frames in the same request. Requests with `photos` get `200` with the result;
+    /// requests without it (older clients) get `204`.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/feeds/{feedId}/leave`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)`.
@@ -4676,6 +4905,342 @@ extension APIProtocol {
             headers: headers
         ))
     }
+    /// What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
+    /// caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
+    /// subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
+    /// current members and for people who already left or were removed and still have photos there (the take-away
+    /// sheet); `404 not_found` for scopes the caller has nothing in.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/me/leave-preview`.
+    /// - Remark: Generated from `#/paths//v1/me/leave-preview/get(getLeavePreview)`.
+    public func getLeavePreview(
+        query: Operations.GetLeavePreview.Input.Query = .init(),
+        headers: Operations.GetLeavePreview.Input.Headers = .init()
+    ) async throws -> Operations.GetLeavePreview.Output {
+        try await getLeavePreview(Operations.GetLeavePreview.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Families and frames the caller no longer belongs to (left or removed) where photos they sent are still live,
+    /// for "Take my photos away from Janssens" in the sent history (README §5.21).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/me/former-places`.
+    /// - Remark: Generated from `#/paths//v1/me/former-places/get(listFormerPlaces)`.
+    public func listFormerPlaces(headers: Operations.ListFormerPlaces.Input.Headers = .init()) async throws -> Operations.ListFormerPlaces.Output {
+        try await listFormerPlaces(Operations.ListFormerPlaces.Input(headers: headers))
+    }
+    /// Take the caller's own photos away from this family (README §5.21 "Taking away"): their live posts leave the
+    /// family, and the posts' placements on every subscribed frame (local and on other servers) are taken away with
+    /// the 30-day notice. Works for current members, people who left and people who were removed. Idempotent: a
+    /// second call takes away only what came back or was posted since. `404 not_found` when the caller has nothing
+    /// live in the family.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/take-away`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/take-away/post(takeAwayFromFeed)`.
+    public func takeAwayFromFeed(
+        path: Operations.TakeAwayFromFeed.Input.Path,
+        headers: Operations.TakeAwayFromFeed.Input.Headers = .init(),
+        body: Operations.TakeAwayFromFeed.Input.Body? = nil
+    ) async throws -> Operations.TakeAwayFromFeed.Output {
+        try await takeAwayFromFeed(Operations.TakeAwayFromFeed.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Take the caller's own direct placements (sends, forwards, shares) away from this frame with the 30-day notice.
+    /// Placements that reached the frame through a family are not touched (take them away from the family). Works
+    /// for current members, people who left and people who were removed. `404 not_found` when the caller has nothing
+    /// live on the frame.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/take-away`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/take-away/post(takeAwayFromFrame)`.
+    public func takeAwayFromFrame(
+        path: Operations.TakeAwayFromFrame.Input.Path,
+        headers: Operations.TakeAwayFromFrame.Input.Headers = .init()
+    ) async throws -> Operations.TakeAwayFromFrame.Output {
+        try await takeAwayFromFrame(Operations.TakeAwayFromFrame.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame owner, admins and `manage_library` members. The frame's "Taken away" groups (one per taking: person,
+    /// date, count, until), newest first, while their 30 days run; the placements themselves are listed with
+    /// `listPlacements?visibility=taken_away&taking_id=`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/taken-away`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/taken-away/get(listFrameTakenAway)`.
+    public func listFrameTakenAway(
+        path: Operations.ListFrameTakenAway.Input.Path,
+        headers: Operations.ListFrameTakenAway.Input.Headers = .init()
+    ) async throws -> Operations.ListFrameTakenAway.Output {
+        try await listFrameTakenAway(Operations.ListFrameTakenAway.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Family owner and admins. Posts taken away from the family, grouped per taking, while their 30 days run (for
+    /// "Ask to keep" on the family side).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/taken-away`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/taken-away/get(listFeedTakenAway)`.
+    public func listFeedTakenAway(
+        path: Operations.ListFeedTakenAway.Input.Path,
+        headers: Operations.ListFeedTakenAway.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedTakenAway.Output {
+        try await listFeedTakenAway(Operations.ListFeedTakenAway.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Ask the person who took photos away to let them stay (README §5.21 "Ask to keep"). Exactly one of `frame_id`
+    /// (frame owner, admins, `manage_library`) and `feed_id` (family owner and admins). One request per scope and
+    /// taking: a second answers `409 limit_reached`. `403 forbidden` when the person blocked the caller (the group's
+    /// `can_ask` is then false with `cannot_ask_reason: blocked`), `409 invalid_transition` when the 30 days are over.
+    /// `item_ids` picks photos (items of the taking in that scope); absent means all of them.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/keep-requests/post(createKeepRequest)`.
+    public func createKeepRequest(
+        headers: Operations.CreateKeepRequest.Input.Headers = .init(),
+        body: Operations.CreateKeepRequest.Input.Body
+    ) async throws -> Operations.CreateKeepRequest.Output {
+        try await createKeepRequest(Operations.CreateKeepRequest.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Requests sent to the caller (the person who took photos away), newest first. Default `open` only.
+    ///
+    /// - Remark: HTTP `GET /v1/me/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/me/keep-requests/get(listMyKeepRequests)`.
+    public func listMyKeepRequests(
+        query: Operations.ListMyKeepRequests.Input.Query = .init(),
+        headers: Operations.ListMyKeepRequests.Input.Headers = .init()
+    ) async throws -> Operations.ListMyKeepRequests.Output {
+        try await listMyKeepRequests(Operations.ListMyKeepRequests.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Frame owner, admins and `manage_library` members. Requests made for this frame, newest first (all states, 60 days).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/keep-requests/get(listFrameKeepRequests)`.
+    public func listFrameKeepRequests(
+        path: Operations.ListFrameKeepRequests.Input.Path,
+        headers: Operations.ListFrameKeepRequests.Input.Headers = .init()
+    ) async throws -> Operations.ListFrameKeepRequests.Output {
+        try await listFrameKeepRequests(Operations.ListFrameKeepRequests.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Family owner and admins. Requests made for this family, newest first (all states, 60 days).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/keep-requests`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/keep-requests/get(listFeedKeepRequests)`.
+    public func listFeedKeepRequests(
+        path: Operations.ListFeedKeepRequests.Input.Path,
+        headers: Operations.ListFeedKeepRequests.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedKeepRequests.Output {
+        try await listFeedKeepRequests(Operations.ListFeedKeepRequests.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The person asked and the askers (the scope's managers). Includes the photos asked for (`items`, with thumbnails)
+    /// so the person can pick which to allow.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/keep-requests/{requestId}`.
+    /// - Remark: Generated from `#/paths//v1/keep-requests/{requestId}/get(getKeepRequest)`.
+    public func getKeepRequest(
+        path: Operations.GetKeepRequest.Input.Path,
+        headers: Operations.GetKeepRequest.Input.Headers = .init()
+    ) async throws -> Operations.GetKeepRequest.Output {
+        try await getKeepRequest(Operations.GetKeepRequest.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The person asked only. `all` and `none` need no `item_ids`; `some` needs at least one of the requested items.
+    /// Allowed photos come back (placement and post as before, credited as before); the rest are deleted when the 30
+    /// days end. The answer is final: `409 already_decided` for a second answer, `409 invalid_transition` after expiry.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/keep-requests/{requestId}/answer`.
+    /// - Remark: Generated from `#/paths//v1/keep-requests/{requestId}/answer/post(answerKeepRequest)`.
+    public func answerKeepRequest(
+        path: Operations.AnswerKeepRequest.Input.Path,
+        headers: Operations.AnswerKeepRequest.Input.Headers = .init(),
+        body: Operations.AnswerKeepRequest.Input.Body
+    ) async throws -> Operations.AnswerKeepRequest.Output {
+        try await answerKeepRequest(Operations.AnswerKeepRequest.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The caller's private memories filter (README §5.21 "Memories"). Nobody else ever sees it.
+    ///
+    /// - Remark: HTTP `GET /v1/me/memories`.
+    /// - Remark: Generated from `#/paths//v1/me/memories/get(getMemoryPreferences)`.
+    public func getMemoryPreferences(headers: Operations.GetMemoryPreferences.Input.Headers = .init()) async throws -> Operations.GetMemoryPreferences.Output {
+        try await getMemoryPreferences(Operations.GetMemoryPreferences.Input(headers: headers))
+    }
+    /// Replaces the lists that are present (an absent field is left unchanged). People must be people the caller
+    /// shares or shared a family, frame or chat with; unknown ids are dropped. Hiding someone does not block them.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/me/memories`.
+    /// - Remark: Generated from `#/paths//v1/me/memories/put(updateMemoryPreferences)`.
+    public func updateMemoryPreferences(
+        headers: Operations.UpdateMemoryPreferences.Input.Headers = .init(),
+        body: Operations.UpdateMemoryPreferences.Input.Body
+    ) async throws -> Operations.UpdateMemoryPreferences.Output {
+        try await updateMemoryPreferences(Operations.UpdateMemoryPreferences.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Frame managers on this server (B), before following a family on another server (A). The server fetches A's
+    /// `/.well-known/kinframe`, checks the invite with A (`federationSubscribe` with `preview: true`, signed) and
+    /// returns what the confirmation shows. `422 validation_failed` for a URL that isn't a kinframe subscribe invite,
+    /// `404 invite_invalid` / `410 invite_expired` as A answers, `403 forbidden` when A or this server refuses
+    /// (federation off, not on the allow list, blocked, or the family doesn't allow frames on other servers),
+    /// `502 upstream_unavailable` when A can't be reached. `503 feature_disabled` when federation is off here.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/remote-invites:preview`.
+    /// - Remark: Generated from `#/paths//v1/remote-invites:preview/post(previewRemoteInvite)`.
+    public func previewRemoteInvite(
+        headers: Operations.PreviewRemoteInvite.Input.Headers = .init(),
+        body: Operations.PreviewRemoteInvite.Input.Body
+    ) async throws -> Operations.PreviewRemoteInvite.Output {
+        try await previewRemoteInvite(Operations.PreviewRemoteInvite.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Families on other servers this frame follows. Frame managers (owner, admin, `change_settings`) see every
+    /// status; other members see `active` ones. Ended ones are listed for 30 days.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/remote-subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/get(listRemoteSubscriptions)`.
+    public func listRemoteSubscriptions(
+        path: Operations.ListRemoteSubscriptions.Input.Path,
+        headers: Operations.ListRemoteSubscriptions.Input.Headers = .init()
+    ) async throws -> Operations.ListRemoteSubscriptions.Output {
+        try await listRemoteSubscriptions(Operations.ListRemoteSubscriptions.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame managers. Follow a family on another server with its subscribe invite URL (the family must allow frames
+    /// on other servers and the invite must have `allow_remote`). The server asks A (`federationSubscribe`, signed);
+    /// the result is `active` for pre-approved invites, else `pending` until A's admins decide. Errors as for
+    /// `previewRemoteInvite`; `409 already_subscribed` when the frame already follows that family.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/remote-subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/post(createRemoteSubscription)`.
+    public func createRemoteSubscription(
+        path: Operations.CreateRemoteSubscription.Input.Path,
+        headers: Operations.CreateRemoteSubscription.Input.Headers = .init(),
+        body: Operations.CreateRemoteSubscription.Input.Body
+    ) async throws -> Operations.CreateRemoteSubscription.Output {
+        try await createRemoteSubscription(Operations.CreateRemoteSubscription.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Frame managers. What happens to the copied photos when the subscription ends (`on_end`).
+    ///
+    /// - Remark: HTTP `PATCH /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}/patch(updateRemoteSubscription)`.
+    public func updateRemoteSubscription(
+        path: Operations.UpdateRemoteSubscription.Input.Path,
+        headers: Operations.UpdateRemoteSubscription.Input.Headers = .init(),
+        body: Operations.UpdateRemoteSubscription.Input.Body
+    ) async throws -> Operations.UpdateRemoteSubscription.Output {
+        try await updateRemoteSubscription(Operations.UpdateRemoteSubscription.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Frame managers. Unsubscribe (or withdraw a pending request): tells A (`federationUnsubscribe`, signed, retried
+    /// in the background when A is down) and keeps or removes the copied photos (`placements`, default the
+    /// subscription's `on_end`).
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}/delete(deleteRemoteSubscription)`.
+    public func deleteRemoteSubscription(
+        path: Operations.DeleteRemoteSubscription.Input.Path,
+        query: Operations.DeleteRemoteSubscription.Input.Query = .init(),
+        headers: Operations.DeleteRemoteSubscription.Input.Headers = .init()
+    ) async throws -> Operations.DeleteRemoteSubscription.Output {
+        try await deleteRemoteSubscription(Operations.DeleteRemoteSubscription.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Family owner and admins. Servers whose frames may not follow this family.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/blocked-servers/get(listFeedBlockedServers)`.
+    public func listFeedBlockedServers(
+        path: Operations.ListFeedBlockedServers.Input.Path,
+        headers: Operations.ListFeedBlockedServers.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedBlockedServers.Output {
+        try await listFeedBlockedServers(Operations.ListFeedBlockedServers.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Family owner and admins. Blocks a server for this family: its remote subscriptions to the family end
+    /// (`removed_reason: server_blocked`) and new requests from it are refused. Idempotent per host.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/blocked-servers/post(blockFeedServer)`.
+    public func blockFeedServer(
+        path: Operations.BlockFeedServer.Input.Path,
+        headers: Operations.BlockFeedServer.Input.Headers = .init(),
+        body: Operations.BlockFeedServer.Input.Body
+    ) async throws -> Operations.BlockFeedServer.Output {
+        try await blockFeedServer(Operations.BlockFeedServer.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Family owner and admins. Ended subscriptions stay ended.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/blocked-servers/{blockedServerId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/blocked-servers/{blockedServerId}/delete(unblockFeedServer)`.
+    public func unblockFeedServer(
+        path: Operations.UnblockFeedServer.Input.Path,
+        headers: Operations.UnblockFeedServer.Input.Headers = .init()
+    ) async throws -> Operations.UnblockFeedServer.Output {
+        try await unblockFeedServer(Operations.UnblockFeedServer.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
     /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
@@ -5594,6 +6159,107 @@ extension APIProtocol {
             headers: headers,
             body: body
         ))
+    }
+    /// Find frames and families for an ownership transfer (README §5.21 "Ownership by the operator"): by id, name, or a
+    /// member's email or display name (`q`, at least 2 characters). At most 20 of each, with their members.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/ownership/search`.
+    /// - Remark: Generated from `#/paths//v1/operator/ownership/search/get(operatorSearchOwnership)`.
+    public func operatorSearchOwnership(
+        query: Operations.OperatorSearchOwnership.Input.Query,
+        headers: Operations.OperatorSearchOwnership.Input.Headers = .init()
+    ) async throws -> Operations.OperatorSearchOwnership.Output {
+        try await operatorSearchOwnership(Operations.OperatorSearchOwnership.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Move ownership of a frame to an existing member (`422 validation_failed` otherwise). The previous owner
+    /// becomes admin, or is removed with `remove_previous: true`. Both get `ownership_changed`; the change is logged
+    /// with the reason (`operatorListOwnershipLog`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/frames/{frameId}/owner`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/owner/post(operatorTransferFrameOwner)`.
+    public func operatorTransferFrameOwner(
+        path: Operations.OperatorTransferFrameOwner.Input.Path,
+        headers: Operations.OperatorTransferFrameOwner.Input.Headers = .init(),
+        body: Operations.OperatorTransferFrameOwner.Input.Body
+    ) async throws -> Operations.OperatorTransferFrameOwner.Output {
+        try await operatorTransferFrameOwner(Operations.OperatorTransferFrameOwner.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The same for a family (feed). The new owner must be a member of the family.
+    ///
+    /// - Remark: HTTP `POST /v1/operator/feeds/{feedId}/owner`.
+    /// - Remark: Generated from `#/paths//v1/operator/feeds/{feedId}/owner/post(operatorTransferFeedOwner)`.
+    public func operatorTransferFeedOwner(
+        path: Operations.OperatorTransferFeedOwner.Input.Path,
+        headers: Operations.OperatorTransferFeedOwner.Input.Headers = .init(),
+        body: Operations.OperatorTransferFeedOwner.Input.Body
+    ) async throws -> Operations.OperatorTransferFeedOwner.Output {
+        try await operatorTransferFeedOwner(Operations.OperatorTransferFeedOwner.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Operator ownership transfers and account-deletion handovers (README §5.21), newest first, kept 2 years.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/ownership-log`.
+    /// - Remark: Generated from `#/paths//v1/operator/ownership-log/get(operatorListOwnershipLog)`.
+    public func operatorListOwnershipLog(
+        query: Operations.OperatorListOwnershipLog.Input.Query = .init(),
+        headers: Operations.OperatorListOwnershipLog.Input.Headers = .init()
+    ) async throws -> Operations.OperatorListOwnershipLog.Output {
+        try await operatorListOwnershipLog(Operations.OperatorListOwnershipLog.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Servers blocked for the whole instance (README §5.22 "Trust").
+    ///
+    /// - Remark: HTTP `GET /v1/operator/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/operator/blocked-servers/get(operatorListBlockedServers)`.
+    public func operatorListBlockedServers(headers: Operations.OperatorListBlockedServers.Input.Headers = .init()) async throws -> Operations.OperatorListBlockedServers.Output {
+        try await operatorListBlockedServers(Operations.OperatorListBlockedServers.Input(headers: headers))
+    }
+    /// Block a server instance-wide: every remote subscription with it ends on both sides (`server_blocked`), its
+    /// federation requests answer `403 forbidden`, and this server stops calling it. Idempotent per host.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/blocked-servers`.
+    /// - Remark: Generated from `#/paths//v1/operator/blocked-servers/post(operatorBlockServer)`.
+    public func operatorBlockServer(
+        headers: Operations.OperatorBlockServer.Input.Headers = .init(),
+        body: Operations.OperatorBlockServer.Input.Body
+    ) async throws -> Operations.OperatorBlockServer.Output {
+        try await operatorBlockServer(Operations.OperatorBlockServer.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `DELETE /v1/operator/blocked-servers/{blockedServerId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/blocked-servers/{blockedServerId}/delete(operatorUnblockServer)`.
+    public func operatorUnblockServer(
+        path: Operations.OperatorUnblockServer.Input.Path,
+        headers: Operations.OperatorUnblockServer.Input.Headers = .init()
+    ) async throws -> Operations.OperatorUnblockServer.Output {
+        try await operatorUnblockServer(Operations.OperatorUnblockServer.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Servers this one federates with (either direction), with counts and their last contact.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/remote-servers`.
+    /// - Remark: Generated from `#/paths//v1/operator/remote-servers/get(operatorListRemoteServers)`.
+    public func operatorListRemoteServers(headers: Operations.OperatorListRemoteServers.Input.Headers = .init()) async throws -> Operations.OperatorListRemoteServers.Output {
+        try await operatorListRemoteServers(Operations.OperatorListRemoteServers.Input(headers: headers))
     }
 }
 

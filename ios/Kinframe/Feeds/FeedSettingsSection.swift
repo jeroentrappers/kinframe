@@ -81,6 +81,8 @@ struct FeedSettingsSection: View {
             group(L("ios.feeds.settingsFrames")) {
                 toggle($autoApprove, L("ios.feeds.setAutoApprove"), L("ios.feeds.setAutoApproveHint"))
             }
+            // Frames on other servers and blocked servers (Remote/RemoteFamilySettings.swift, README §5.22).
+            if app.remoteFamiliesEnabled { RemoteFamilySettings(model: model) }
             if app.birthdaysEnabled {
                 group(L("ios.bday.settingsTitle")) {
                     toggle($postersCanAddBirthdays, L("ios.bday.setPosters"), L("ios.bday.setPostersHint"))

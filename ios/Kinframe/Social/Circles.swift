@@ -27,7 +27,7 @@ struct CirclesSection: View {
                 VStack(spacing: 0) {
                     ForEach(Array(circles.enumerated()), id: \.element.id) { n, c in
                         if n > 0 { Divider().overlay(Palette.border) }
-                        NavigationLink(value: CircleRoute(feedId: model.id, circleId: c.id)) {
+                        NavigationLink(value: CircleRoute(feedId: model.id, circleId: c.id, account: app.accountId)) {
                             HStack(spacing: 12) {
                                 Image(systemName: "person.2.circle").font(.title3).foregroundStyle(Palette.accentText)
                                     .frame(width: 40, height: 40).background(Circle().fill(Palette.accentSoft))

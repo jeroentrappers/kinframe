@@ -134,7 +134,7 @@ struct FreshSendSheet: View {
                                     Button(L("engagement.otd.open")) {
                                         dismiss()
                                         app.tab = .home
-                                        app.homePath = NavigationPath([PostRoute(postId: post)])
+                                        app.homePath = NavigationPath([PostRoute(postId: post, account: app.accountId)])
                                     }
                                     .buttonStyle(.kf(.secondary))
                                 }

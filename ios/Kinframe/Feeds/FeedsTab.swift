@@ -5,12 +5,16 @@ import SwiftUI
 struct FeedRoute: Hashable {
     var id: String
     var section: FeedSection = .posts
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
 }
 
 /// A feed post whose receipts should open (from a notification).
 struct FeedPostRoute: Hashable, Identifiable {
     var feedId: String
     var postId: String
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
     var id: String { postId }
 }
 
@@ -45,6 +49,7 @@ enum FeedSection: String, Hashable, CaseIterable {
 /// code, open one.
 struct FeedsTab: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
     @State private var creating = false
     @State private var enteringCode = false
 
@@ -56,7 +61,7 @@ struct FeedsTab: View {
                     Text(L("ios.feeds.lede")).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
                     if !app.feedsLoaded {
                         LoadingView()
-                    } else if app.feeds.isEmpty {
+                    } else if accounts.feeds.isEmpty {
                         EmptyStateView(systemImage: "rectangle.stack.badge.person.crop", title: L("ios.feeds.emptyTitle"), message: L("ios.feeds.emptyBody")) {
                             VStack(spacing: 10) {
                                 Button(L("ios.feeds.new")) { creating = true }.buttonStyle(.kf(.primary, large: true))
@@ -65,9 +70,12 @@ struct FeedsTab: View {
                         }
                         .card(padding: 8)
                     } else {
-                        ForEach(app.feeds) { feed in
-                            NavigationLink(value: FeedRoute(id: feed.id)) {
-                                FeedCard(feed: feed)
+                        // Every account's families (docs/spec/multi-server.md §2.2), each opening on its own server.
+                        ForEach(accounts.feeds, id: \.value.id) { owned in
+                            NavigationLink(value: FeedRoute(id: owned.value.id, account: owned.model.accountId)) {
+                                FeedCard(feed: owned.value)
+                                    .overlay(alignment: .bottomTrailing) { ServerChip(model: owned.model).padding(10) }
+                                    .environment(owned.model)
                             }
                             .buttonStyle(CardButtonStyle())
                         }
@@ -77,7 +85,7 @@ struct FeedsTab: View {
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
             }
-            .refreshable { await app.loadFeeds() }
+            .refreshable { await accounts.loadFeeds() }
             .pageBackground()
             .navigationTitle(L("ios.feeds.title"))
             .toolbar {
@@ -92,7 +100,7 @@ struct FeedsTab: View {
                 }
             }
             .navigationDestination(for: FeedRoute.self) { route in
-                FeedDetailView(route: route)
+                FeedDetailView(route: route).account(route.account, in: accounts)
             }
         }
         .task(id: app.api?.baseURL) { await app.loadFeeds() }
@@ -100,7 +108,7 @@ struct FeedsTab: View {
             if let api = app.api {
                 FeedCreateSheet(api: api) { feed in
                     app.updateFeed(feed.summary)
-                    app.feedsPath.append(FeedRoute(id: feed.id))
+                    app.feedsPath.append(FeedRoute(id: feed.id, account: app.accountId))
                 }
             }
         }

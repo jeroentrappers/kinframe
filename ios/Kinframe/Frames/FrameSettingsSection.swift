@@ -32,6 +32,10 @@ struct FrameSettingsSection: View {
                 if app.feedsEnabled {
                     FrameFeedsCard(api: model.api, frame: frame, subscriptions: $subscriptions).id("feeds")
                 }
+                // Families on other servers this frame follows (Remote/RemoteFamiliesCard.swift, README §5.22).
+                if app.remoteFamiliesEnabled {
+                    RemoteFamiliesCard(api: model.api, frame: frame).id("remoteFamilies")
+                }
                 // Frame managers only (this section is): email to frame and Telegram, when the server offers them.
                 if ChannelFeatures(app.discovery).email {
                     EmailInboxCard(api: model.api, target: .frame(frame.id), targetName: frame.name).id("email")

@@ -125,7 +125,7 @@ public enum ReactionRow {
         guard s.total > 0 else { return "" }
         var names: [String] = []
         if s.mine != nil { names.append(L("social.you")) }
-        for f in s.frames where names.count < 2 { names.append(f.frameName) }
+        for f in s.frames where names.count < 2 { names.append(RemoteLabel.frame(f.frameName, server: f.serverName)) }
         for p in s.people where names.count < 2 && p.person.userId != me { names.append(PersonName.display(p.person)) }
         // Frames and the caller may also be counted in `people`: the rest are "others".
         let shown = names.count
@@ -233,13 +233,15 @@ public enum ThreadLogic {
     /// The line a frame entry shows.
     public static func frameEntryText(_ c: Comment) -> String {
         guard let f = c.frame else { return "" }
+        // "Oma's frame (kinframe.appmire.be)" for a frame on another server (README §5.22).
+        let frame = RemoteLabel.frame(f.frameName, server: f.serverName)
         if let reply = f.reply {
-            return L("social.frameEntry.reply", ["frame": f.frameName, "reply": L("reply.\(reply.rawValue)")])
+            return L("social.frameEntry.reply", ["frame": frame, "reply": L("reply.\(reply.rawValue)")])
         }
         if let r = f.reaction {
-            return L("social.frameEntry.\(r.rawValue)", ["frame": f.frameName])
+            return L("social.frameEntry.\(r.rawValue)", ["frame": frame])
         }
-        return f.frameName
+        return frame
     }
 
     /// The newest person comment, to mark the thread read up to it.
@@ -451,7 +453,7 @@ public enum TimelineLogic {
             parts.append(s.seen > 0 ? Lp("social.post.seenOn", count: s.seen) : Lp("social.post.deliveredTo", count: s.frames))
         }
         if let f = p.thread.reactions.frames.first(where: { $0.reaction == .love }) {
-            parts.append(L("social.post.loveFrom", ["frame": f.frameName]))
+            parts.append(L("social.post.loveFrom", ["frame": RemoteLabel.frame(f.frameName, server: f.serverName)]))
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

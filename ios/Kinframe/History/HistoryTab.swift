@@ -3,18 +3,23 @@ import SwiftUI
 
 struct HistoryRoute: Hashable {
     var sendId: String
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
 }
 
 struct HistoryTab: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
     @State private var model: HistoryModel?
+    /// The other accounts' sends, merged by time (docs/spec/multi-server.md §2.2).
+    @State private var others: [String: HistoryModel] = [:]
 
     var body: some View {
         @Bindable var app = app
         NavigationStack(path: $app.historyPath) {
             Group {
                 if let model {
-                    HistoryList(model: model)
+                    HistoryList(model: model, others: accounts.active.dropFirst().compactMap { m in others[m.accountId].map { (m, $0) } })
                 } else {
                     LoadingView()
                 }
@@ -22,9 +27,12 @@ struct HistoryTab: View {
             .pageBackground()
             .navigationTitle(L("history.title"))
             .navigationDestination(for: HistoryRoute.self) { route in
-                if let api = app.api {
-                    SendDetailView(model: SendDetailModel(api: api, id: route.sendId, send: model?.sends.first { $0.id == route.sendId }),
-                                   onRemoved: { model?.remove(route.sendId) })
+                let owner = accounts.model(for: route.account)
+                let list = owner === app ? model : others[owner.accountId]
+                if let api = owner.api {
+                    SendDetailView(model: SendDetailModel(api: api, id: route.sendId, send: list?.sends.first { $0.id == route.sendId }),
+                                   onRemoved: { list?.remove(route.sendId) })
+                        .environment(owner)
                 }
             }
         }
@@ -33,14 +41,64 @@ struct HistoryTab: View {
             if model == nil { model = HistoryModel(api: api) }
             await model?.load()
         }
-        .onChange(of: app.historyVersion) { Task { await model?.load() } }
+        .task(id: accounts.active.map(\.accountId)) {
+            var next: [String: HistoryModel] = [:]
+            for m in accounts.active.dropFirst() {
+                if let api = m.api { next[m.accountId] = others[m.accountId] ?? HistoryModel(api: api) }
+            }
+            others = next
+            for h in next.values { await h.load() }
+        }
+        .onChange(of: app.historyVersion) {
+            Task {
+                await model?.load()
+                for h in others.values { await h.load() }
+            }
+        }
         .onLiveEvent(app.events) { model?.apply($0) }
+        .onOtherAccountsLiveEvents(accounts) { m, e in others[m.accountId]?.apply(e) }
     }
 }
 
 private struct HistoryList: View {
     @Environment(AppModel.self) private var app
     @Bindable var model: HistoryModel
+    /// Other accounts' histories (same filter), merged in by time.
+    var others: [(AppModel, HistoryModel)] = []
+
+    private struct Row: Identifiable {
+        let owner: AppModel
+        let send: Send
+        var id: String { owner.accountId + "/" + send.id }
+    }
+
+    private var allEmpty: Bool { model.sends.isEmpty && others.allSatisfy { $0.1.sends.isEmpty } }
+    private var hasMore: Bool { model.cursor != nil || others.contains { $0.1.cursor != nil } }
+
+    /// Day groups over every account's sends, newest first.
+    private var groups: [(bucket: Format.DayBucket, rows: [Row])] {
+        let lists = [model.sends.map { Row(owner: app, send: $0) }] + others.map { m, h in h.sends.map { Row(owner: m, send: $0) } }
+        let rows = others.isEmpty ? lists[0] : AccountMerge.interleave(lists) { $0.send.createdAt }
+        var out: [(bucket: Format.DayBucket, rows: [Row])] = []
+        for r in rows {
+            let b = Format.dayBucket(r.send.createdAt)
+            if out.last?.bucket == b { out[out.count - 1].rows.append(r) } else { out.append((b, [r])) }
+        }
+        return out
+    }
+
+    private func loadAll() async {
+        await model.load()
+        for (_, h) in others {
+            h.filter = model.filter
+            await h.load()
+        }
+    }
+
+    private func loadMoreAll() async {
+        await model.loadMore()
+        for (_, h) in others where h.cursor != nil { await h.loadMore() }
+    }
 
     var body: some View {
         ScrollView {
@@ -53,9 +111,11 @@ private struct HistoryList: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    .onChange(of: model.filter) { Task { await model.load() } }
+                    .onChange(of: model.filter) { Task { await loadAll() } }
                 }
                 .frame(maxWidth: PageWidth.text, alignment: .leading)
+
+                if app.leavingEnabled, let api = app.api { LeavingHistorySection(api: api) }
 
                 ForEach(app.outbox.active) { job in
                     SendingCard(job: job, onRetry: { app.outbox.retry(job.id) }, onCancel: { app.outbox.cancel(job.id) })
@@ -70,7 +130,7 @@ private struct HistoryList: View {
                 } else if let error = model.error, model.sends.isEmpty {
                     ErrorRetryView(message: error) { Task { await model.load() } }
                         .frame(maxWidth: PageWidth.text)
-                } else if model.sends.isEmpty, app.outbox.active.isEmpty {
+                } else if allEmpty, app.outbox.active.isEmpty {
                     if model.filter == .all {
                         EmptyStateView(systemImage: "paperplane", title: L("history.emptyTitle"), message: L("history.emptyBody")) {
                             Button(L("nav.sendPhotos")) { app.tab = .send }.buttonStyle(.kf(.primary, large: true))
@@ -82,7 +142,7 @@ private struct HistoryList: View {
                             .frame(maxWidth: PageWidth.text)
                     }
                 } else {
-                    ForEach(model.groups) { group in
+                    ForEach(groups, id: \.bucket) { group in
                         Text(label(group.bucket))
                             .font(.footnote.weight(.semibold))
                             .textCase(.uppercase)
@@ -91,31 +151,34 @@ private struct HistoryList: View {
                             .accessibilityAddTraits(.isHeader)
                         // One column on phones; a grid on iPad and iPhone Duo unfolded.
                         LazyVGrid(columns: cardColumns(spacing: 14), spacing: 14) {
-                            ForEach(group.sends) { send in
-                                NavigationLink(value: HistoryRoute(sendId: send.id)) {
+                            ForEach(group.rows) { row in
+                                let send = row.send
+                                NavigationLink(value: HistoryRoute(sendId: send.id, account: row.owner.accountId)) {
                                     SendCard(send: send)
+                                        .overlay(alignment: .topLeading) { ServerChip(model: row.owner).padding(10) }
+                                        .environment(row.owner)
                                 }
                                 .buttonStyle(CardButtonStyle())
                                 .accessibilityHint(L("history.openSend", ["when": Format.dateTime(send.createdAt, locale: L10n.locale)]))
                             }
                         }
                     }
-                    if model.cursor != nil {
+                    if hasMore {
                         Button {
-                            Task { await model.loadMore() }
+                            Task { await loadMoreAll() }
                         } label: {
                             if model.loadingMore { ProgressView() } else { Text(L("common.loadMore")) }
                         }
                         .buttonStyle(.kf(.secondary, fill: true))
                         .frame(maxWidth: PageWidth.text)
                         .frame(maxWidth: .infinity)
-                        .onAppear { Task { await model.loadMore() } }
+                        .onAppear { Task { await loadMoreAll() } }
                     }
                 }
             }
             .pageColumn(PageWidth.wide)
         }
-        .refreshable { await model.load() }
+        .refreshable { await loadAll() }
     }
 
     private func label(_ bucket: Format.DayBucket) -> String {

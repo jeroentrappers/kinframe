@@ -5,17 +5,23 @@ import SwiftUI
 struct PostRoute: Hashable {
     var postId: String
     var commentId: String? = nil
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
 }
 
 /// A conversation to open in Chats.
 struct ChatRoute: Hashable {
     var id: String
     var messageId: String? = nil
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
 }
 
 /// A contact's profile.
 struct PersonRoute: Hashable, Identifiable {
     var userId: String
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
     var id: String { userId }
 }
 
@@ -23,6 +29,8 @@ struct PersonRoute: Hashable, Identifiable {
 struct CircleRoute: Hashable {
     var feedId: String
     var circleId: String
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
 }
 
 /// Sheets family social opens from anywhere (notifications, toasts, the Home strip).
@@ -87,11 +95,11 @@ extension AppModel {
         case .post(let postId, let commentId):
             guard f.social else { return }
             tab = .home
-            homePath = NavigationPath([PostRoute(postId: postId, commentId: commentId)])
+            homePath = NavigationPath([PostRoute(postId: postId, commentId: commentId, account: accountId)])
         case .conversation(let id, let messageId):
             guard f.chats else { return }
             tab = .chats
-            chatsPath = NavigationPath([ChatRoute(id: id, messageId: messageId)])
+            chatsPath = NavigationPath([ChatRoute(id: id, messageId: messageId, account: accountId)])
         case .reports(let feedId):
             social.sheet = feedId.map { .feedReports(feedId: $0) } ?? .operatorReports
         case .frameNudge(let frameId, let requestId):
@@ -116,7 +124,7 @@ extension AppModel {
     func openChat(_ id: String) {
         guard social.features.chats else { return }
         tab = .chats
-        chatsPath = NavigationPath([ChatRoute(id: id)])
+        chatsPath = NavigationPath([ChatRoute(id: id, account: accountId)])
     }
 
     /// Start (or find) the direct chat with someone and open it.

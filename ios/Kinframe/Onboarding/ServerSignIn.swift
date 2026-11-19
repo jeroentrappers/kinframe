@@ -341,4 +341,9 @@ extension DeepLink {
         if case .invite = self { return true }
         return false
     }
+
+    var isFeedInvite: Bool {
+        if case .feedInvite = self { return true }
+        return false
+    }
 }

@@ -112,7 +112,8 @@ final class SocialStore {
         prompts = [:]
         newReports = 0
         openConversationId = nil
-        Task { try? await UNUserNotificationCenter.current().setBadgeCount(0) }
+        let total = app?.accounts?.badgeTotal ?? 0
+        Task { try? await UNUserNotificationCenter.current().setBadgeCount(total) }
     }
 
     // MARK: Updates from screens
@@ -147,9 +148,13 @@ final class SocialStore {
 
     // MARK: Badge
 
+    /// This account's unread total (the app badge is the sum over all accounts).
+    var badgeCount: Int { badge?.total ?? 0 }
+
     func setBadge(_ b: Badge) {
         badge = b
-        Task { try? await UNUserNotificationCenter.current().setBadgeCount(b.total) }
+        let total = app?.accounts?.badgeTotal ?? b.total
+        Task { try? await UNUserNotificationCenter.current().setBadgeCount(total) }
     }
 
     /// Delivered notifications of a chat or thread that is now read.

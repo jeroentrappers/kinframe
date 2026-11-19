@@ -90,6 +90,11 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
     /// the posts answer (`prompt_id`). Optional so older jobs still load.
     public var circleIds: [String]?
     public var promptId: String?
+    /// A send to targets on several servers is one job per server (docs/spec/multi-server.md §2.2). The other jobs
+    /// name the one that prepares the media, and take its prepared masters (`OutboxRunner.borrowPrepared`).
+    public var preparedBy: UUID?
+    /// The server's label for the "sending" card when there are several accounts.
+    public var serverName: String?
     public var items: [OutboxItem]
     /// Sent with `POST /v1/sends`, stable across retries so a retry never creates a second send.
     public var idempotencyKey: String

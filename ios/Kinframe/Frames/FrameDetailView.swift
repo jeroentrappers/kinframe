@@ -270,6 +270,8 @@ struct FrameOverviewSection: View {
     @State private var typedName = ""
     @State private var transferring: TransferRequest?
     @State private var leavingAsOwner = false
+    /// Leaving (README §5.21): the leave sheet with the photo question.
+    @State private var leavingWithChoice = false
     @State private var replacing = false
     @State private var editName = ""
     @State private var editLocation = ""
@@ -500,10 +502,20 @@ struct FrameOverviewSection: View {
                     Button(L("overview.removeButton"), role: .destructive) { confirmRemove = true }.buttonStyle(.kf(.dangerGhost))
                 } else {
                     Text(L("overview.leaveBody")).font(.subheadline).foregroundStyle(Palette.textMuted)
-                    Button(L("overview.leaveButton"), role: .destructive) { confirmLeave = true }.buttonStyle(.kf(.dangerGhost))
+                    Button(L("overview.leaveButton"), role: .destructive) {
+                        if app.leavingEnabled { leavingWithChoice = true } else { confirmLeave = true }
+                    }
+                    .buttonStyle(.kf(.dangerGhost))
                 }
             }
             .card(padding: 16)
+        }
+        .sheet(isPresented: $leavingWithChoice) {
+            LeaveFrameSheet(api: model.api, frame: frame) { line in
+                app.removeFrame(frame.id)
+                app.framesPath = NavigationPath()
+                app.toasts.show([L("overview.left", ["name": frame.name]), line].compactMap { $0 }.joined(separator: " "))
+            }
         }
         .alert(L("overview.leaveConfirm", ["name": frame.name]), isPresented: $confirmLeave) {
             Button(L("overview.leaveButton"), role: .destructive) { Task { await leave(frame, removeMine: false) } }

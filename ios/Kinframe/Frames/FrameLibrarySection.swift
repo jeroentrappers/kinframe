@@ -75,6 +75,7 @@ struct FrameLibrarySection: View {
             }
             if model.album == nil, model.view == .trashed {
                 Text(L("library.trashNote")).font(.footnote).foregroundStyle(Palette.textMuted)
+                if app.leavingEnabled, manage { TakenAwayCard(api: model.api, scope: .frame(frame.id)) }
             }
 
             if model.loading {
@@ -99,6 +100,7 @@ struct FrameLibrarySection: View {
             if model.selecting, !model.selection.isEmpty { bulkBar }
         }
         .task {
+            if app.leaving.takeTrashFocus(frame.id) { model.view = .trashed }
             await model.loadAlbums()
             if let initialAlbumId, model.albums.contains(where: { $0.id == initialAlbumId }) { model.select(album: initialAlbumId) }
             await model.loadMemories()
@@ -342,7 +344,7 @@ struct FrameLibrarySection: View {
         if let caption = p.item.caption, !caption.isEmpty {
             parts.append(caption)
         } else {
-            parts.append(L("library.itemBy", ["name": Credit.item(p.item) ?? "?"]))
+            parts.append(L("library.itemBy", ["name": RemoteLabel.credit(p) ?? Credit.item(p.item) ?? "?"]))
         }
         if p.item.kind == .live { parts.append(L("ios.live.a11y")) }
         if model.album?.coverPlacementId == p.id { parts.append(L("albums.cover")) }
@@ -673,7 +675,7 @@ struct PlacementSheet: View {
                         Text(caption).font(.title3).foregroundStyle(Palette.text)
                     }
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(L("library.from", ["name": Credit.item(placement.item) ?? "?"]))
+                        Text(L("library.from", ["name": RemoteLabel.credit(placement) ?? Credit.item(placement.item) ?? "?"]))
                         if let sharer = placement.sharedByName {
                             Label(L("share.sharedBy", ["name": sharer]), systemImage: "arrowshape.turn.up.right")
                         }

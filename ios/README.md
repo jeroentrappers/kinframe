@@ -136,6 +136,22 @@ OpenAPI 3.1. Afterwards `tools/openapi/split.py` lays the output out as it is ch
 
 ## Architecture
 
+**Several accounts** (`docs/spec/multi-server.md` §2, README §5.22). The app keeps a list of accounts in the App
+Group (`AccountStore`: server address and discovery, the first is primary), one `AppModel` each with its own
+`AuthService`, API client, websocket, push registration, caches and discovery flags (`Kinframe/App/Accounts.swift`).
+The primary model owns navigation; the others forward tabs, paths and preselections to it, and every route carries
+its account so a detail screen gets the right model in the environment. Home, Chats (badge = the sum), Frames,
+Families, History and the composer list every account, with a server chip (discovery `server_name`) when there is
+more than one; Settings → Accounts adds a server (the onboarding screens run with the new account's model), signs out
+of one, makes one primary and opens each account's own Settings. A send to recipients on two servers is one outbox
+job per server (`ComposeModel.makeJobs`); the first prepares the media and the others take its masters
+(`OutboxJob.preparedBy`); the runner holds one session per server. The share extension reads the same list and shows
+recipients grouped per server. A tapped notification opens the account named by the payload's `server`. A link of a
+server without an account asks "This family is on kinframe.janssens.be. Sign in there to join." and adds that server
+after sign-in. An install from before keeps its session: its account is `default`, whose Keychain names are the old
+ones. The Logto SDK keeps one session in its own Keychain service, so each account keeps its tokens under its own
+names and lends them to a Logto client right before using it (`LogtoSlot`).
+
 **Server and sign-in.** Onboarding validates a server by fetching `/.well-known/kinframe` and shows its name and
 version. `ServerConfig` (address plus discovery) lives in the App Group's user defaults. `AuthService` signs in with
 the Logto Swift SDK: Authorization Code with PKCE in `ASWebAuthenticationSession` (ephemeral, so there's no extra
@@ -269,6 +285,37 @@ Snooze 1 month and Fewer reminders (category `kinframe.reminder`), chat notifica
 `KinframeKit/API/SocialAPI.swift`, `ChatAPI.swift` and `EngagementAPI.swift`, the strings in
 `ios-strings-social.json`, `ios-strings-chat.json` and `ios-strings-engagement.json`. Debug builds also take
 `-kfTab home|chats`, `-kfPost <id>` and `-kfChat <id>`.
+
+**Families on other servers** (`docs/spec/multi-server.md` §3, README §5.22) appear only when discovery says
+`remote_families`. A frame's settings get *Families on other servers*: "Add a family from another server" takes a
+pasted `/fi/<token>` link of another kinframe server (also the `app.kinframe://fi/…?server=` form), checks it with
+`previewRemoteInvite` and confirms naming both servers, that this server's operator can see the copies, and whether
+the family's admins approve first, with the history option, birthdays and what happens to the copies when it ends;
+the list shows each follow's status (waiting, following, not syncing with the error, ended with its reason), copy
+progress, photo count and last sync, with the on-end choice and unsubscribe (keep or remove the photos), kept fresh
+by `remote_subscription.updated`. `RemoteFollowSheet(api:frame:inviteURL:done:)` is the same flow without a fixed
+frame (pick one you manage). Family settings get "Allow frames on other servers" (turning it off ends every remote
+follow, asked first) and the blocked servers; subscribe invites can allow frames on other servers; remote frames in
+the Frames section carry their server and "Block this server". Remote frame entries and reactions read "Oma's frame
+(kinframe.appmire.be)", and copied photos in the library are credited "Lies · Janssens". The rules are in
+`KinframeKit/Core/RemoteFamilies.swift`, the calls in `KinframeKit/API/RemoteAPI.swift`, the screens in
+`Kinframe/Remote/`, the strings in `ios-strings-remote.json`.
+**Leaving** (`docs/spec/leaving.md`, README §5.21) appears only when discovery says `leaving`; without it the old
+leave dialogs stay. Leaving a family opens a sheet from `getLeavePreview`: your photos stay (default) or go with you,
+your comments stay or are deleted, and "Leave this frame too" per frame (checked where the server suggests it; owned
+frames aren't offered); the toast carries the result line ("214 photos were taken away from 2 frame(s). They stay in
+the frames' trash until 19 December."). Leaving a frame asks the same photo question (also after a transfer). The
+history lists keep requests to you (allow all, pick some, decline; final) and the families and frames you left that
+still show your photos, with "Take my photos away". A frame's trash and a family's Members section (managers) show
+"Taken away by Tom" groups with the day they go, the photos of a taking (`visibility=taken_away`) and "Ask Tom to keep
+them" for all or picked photos with a note ("Tom doesn't accept requests" when blocked). Account deletion asks take
+(default) or leave to the families; handed-over photos are credited "Tom (former member)". Settings → Memories
+leaves people out and shows the hidden memories; On this day has "Don't show this memory again". Direct chats with
+someone you no longer share a family or frame with say "You can no longer message Lies". `photos_taken_away`,
+`keep_request`, `keep_answered` and `ownership_changed` notifications and the `placement.updated` /
+`keep_request.updated` events route through `PushRoute.leaving` and `LiveEvent.leaving`. The rules are in
+`KinframeKit/Core/Leaving.swift`, the calls in `KinframeKit/API/LeavingAPI.swift`, the screens in `Kinframe/Leaving/`,
+the strings in `ios-strings-leaving.json`.
 
 **Push.** APNs is behind the `KINFRAME_APNS_ENABLED` build setting (off). When on, the app asks for notification
 permission after the first send and registers the device token with `POST /v1/me/push-endpoints {kind: "apns"}`.

@@ -410,6 +410,8 @@ public enum PushRoute: Equatable, Sendable {
     case telegramChat(chatId: String, frameId: String?, feedId: String?)
     /// Family social keys (SocialPush.swift).
     case social(SocialRoute)
+    /// Leaving keys (Leaving.swift).
+    case leaving(LeavingRoute)
 
     public enum FeedSectionHint: String, Sendable {
         case posts, members, frames, birthdays, settings
@@ -446,6 +448,7 @@ public enum PushRoute: Equatable, Sendable {
         default:
             return PhotoSourcePush.route(key: key, id: id) ?? ChannelPush.route(key: key, id: id)
                 ?? SocialPush.route(key: key, id: id).map { .social($0) }
+                ?? LeavingRoute.route(key: key, id: id).map { .leaving($0) }
         }
     }
 }
