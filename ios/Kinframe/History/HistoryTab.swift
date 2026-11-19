@@ -115,6 +115,8 @@ private struct HistoryList: View {
                 }
                 .frame(maxWidth: PageWidth.text, alignment: .leading)
 
+                if app.leavingEnabled, let api = app.api { LeavingHistorySection(api: api) }
+
                 ForEach(app.outbox.active) { job in
                     SendingCard(job: job, onRetry: { app.outbox.retry(job.id) }, onCancel: { app.outbox.cancel(job.id) })
                         .frame(maxWidth: PageWidth.text)

@@ -7,6 +7,8 @@ struct DeleteAccountSheet: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @State private var removeItems = false
+    /// Leaving (README §5.21): take the photos (default) or leave them to the families.
+    @State private var photos: AccountPhotos = .take
     @State private var deleting = false
 
     private var owned: [FrameSummary] { app.frames.filter { $0.role == .owner } }
@@ -17,9 +19,21 @@ struct DeleteAccountSheet: View {
                 if owned.isEmpty {
                     Section {
                         Text(L("account.deleteBody"))
-                        Toggle(L("account.deleteItems"), isOn: $removeItems)
+                        if app.leavingEnabled {
+                            Picker(L("leaving.account.photos"), selection: $photos) {
+                                Text(L("leaving.account.take")).tag(AccountPhotos.take)
+                                Text(L("leaving.account.leave")).tag(AccountPhotos.leave)
+                            }
+                            .pickerStyle(.inline)
+                        } else {
+                            Toggle(L("account.deleteItems"), isOn: $removeItems)
+                        }
                     } footer: {
-                        if !removeItems { Text(L("account.deleteItemsHint")) }
+                        if app.leavingEnabled {
+                            Text(photos == .take ? L("leaving.account.takeHint") : L("leaving.account.leaveHint"))
+                        } else if !removeItems {
+                            Text(L("account.deleteItemsHint"))
+                        }
                     }
                     .listRowBackground(Palette.surface)
                     Section {
@@ -61,7 +75,7 @@ struct DeleteAccountSheet: View {
     private func delete() async {
         deleting = true
         do {
-            try await app.deleteAccount(removeItems: removeItems)
+            try await app.deleteAccount(photos: app.leavingEnabled ? photos : (removeItems ? .take : .leave))
         } catch {
             deleting = false
             app.toasts.error(error)

@@ -43011,6 +43011,1621 @@
         }
       }
     },
+    "leaving.account.leave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave my photos to the families"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn foto’s aan de families laten"
+          }
+        }
+      }
+    },
+    "leaving.account.leaveHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each photo still in a family or on a frame goes to the owner of that family or frame and stays credited “your name (former member)”. Photos only in your history are deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elke foto die nog in een familie of op een kader staat, gaat naar de eigenaar van die familie of dat kader en blijft op jouw naam staan, met “(voormalig lid)”. Foto’s die alleen in je geschiedenis staan, worden verwijderd."
+          }
+        }
+      }
+    },
+    "leaving.account.photos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s"
+          }
+        }
+      }
+    },
+    "leaving.account.take": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take my photos with me"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn foto’s meenemen"
+          }
+        }
+      }
+    },
+    "leaving.account.takeHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos leave every family and frame. Frames keep them in their trash for 30 days and their owners are told."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s verdwijnen uit elke familie en van elk kader. Kaders houden ze 30 dagen in hun prullenbak en hun eigenaars krijgen een melding."
+          }
+        }
+      }
+    },
+    "leaving.ask.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} gets one message and decides which photos may stay. You can ask once."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} krijgt één bericht en beslist welke foto’s mogen blijven. Je kunt het één keer vragen."
+          }
+        }
+      }
+    },
+    "leaving.ask.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask {name} to keep them"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vragen ze te laten staan"
+          }
+        }
+      }
+    },
+    "leaving.ask.notePlaceholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A note (optional), e.g. “The ones with the children, for Oma”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een woordje (optioneel), bv. “Die met de kinderen, voor oma”"
+          }
+        }
+      }
+    },
+    "leaving.ask.pick": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s kiezen"
+          }
+        }
+      }
+    },
+    "leaving.ask.picked.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 photo picked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 foto gekozen"
+          }
+        }
+      }
+    },
+    "leaving.ask.picked.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos picked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s gekozen"
+          }
+        }
+      }
+    },
+    "leaving.ask.selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geselecteerd"
+          }
+        }
+      }
+    },
+    "leaving.ask.sent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked. {name} decides."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevraagd. {name} beslist."
+          }
+        }
+      }
+    },
+    "leaving.ask.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask {name} to keep them"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vragen ze te laten staan"
+          }
+        }
+      }
+    },
+    "leaving.cannotAsk.accountDeleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} deleted their account, so there is nobody to ask."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} heeft het account verwijderd, er is dus niemand om het te vragen."
+          }
+        }
+      }
+    },
+    "leaving.cannotAsk.blocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} doesn’t accept requests."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} aanvaardt geen verzoeken."
+          }
+        }
+      }
+    },
+    "leaving.cannotAsk.expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The 30 days are over."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De 30 dagen zijn voorbij."
+          }
+        }
+      }
+    },
+    "leaving.chat.noLongerContacts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can no longer message {name}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je kunt {name} geen berichten meer sturen."
+          }
+        }
+      }
+    },
+    "leaving.comments.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete them too"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook verwijderen"
+          }
+        }
+      }
+    },
+    "leaving.comments.keep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave them"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laten staan"
+          }
+        }
+      }
+    },
+    "leaving.comments.title.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your comment (1)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je reactie (1)"
+          }
+        }
+      }
+    },
+    "leaving.comments.title.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your comments ({count})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je reacties ({count})"
+          }
+        }
+      }
+    },
+    "leaving.former.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos are still there. You can take them away: they leave at once, and frames keep them in their trash for 30 days."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s staan er nog. Je kunt ze weghalen: ze verdwijnen meteen, en kaders houden ze 30 dagen in hun prullenbak."
+          }
+        }
+      }
+    },
+    "leaving.former.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families and frames you left"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families en kaders die je verliet"
+          }
+        }
+      }
+    },
+    "leaving.formerMember": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} (former member)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} (voormalig lid)"
+          }
+        }
+      }
+    },
+    "leaving.frames.leaveToo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave this frame too"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit kader ook verlaten"
+          }
+        }
+      }
+    },
+    "leaving.frames.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames you are a member of through this family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders waar je via deze familie lid van bent"
+          }
+        }
+      }
+    },
+    "leaving.group.count.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 foto"
+          }
+        }
+      }
+    },
+    "leaving.group.count.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s"
+          }
+        }
+      }
+    },
+    "leaving.group.explain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} took these photos away. They wait in the trash until {date} and are deleted then, unless {name} lets them stay."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} heeft deze foto’s weggehaald. Ze wachten in de prullenbak tot {date} en worden dan verwijderd, tenzij {name} ze laat staan."
+          }
+        }
+      }
+    },
+    "leaving.group.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken away"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weggehaald"
+          }
+        }
+      }
+    },
+    "leaving.group.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken away by {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weggehaald door {name}"
+          }
+        }
+      }
+    },
+    "leaving.group.until": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "until {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tot {date}"
+          }
+        }
+      }
+    },
+    "leaving.laterHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can still remove any of your photos later from your history."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je kunt al je foto’s later nog altijd weghalen via je geschiedenis."
+          }
+        }
+      }
+    },
+    "leaving.leaveFeed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} verlaten"
+          }
+        }
+      }
+    },
+    "leaving.leaveFeedTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave {name}?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} verlaten?"
+          }
+        }
+      }
+    },
+    "leaving.live.takenAway.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 photo was taken away from {frame}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werd 1 foto weggehaald van {frame}."
+          }
+        }
+      }
+    },
+    "leaving.live.takenAway.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos were taken away from {frame}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werden {count} foto’s weggehaald van {frame}."
+          }
+        }
+      }
+    },
+    "leaving.memories.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave someone out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iemand weglaten"
+          }
+        }
+      }
+    },
+    "leaving.memories.hidden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hidden memories"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verborgen herinneringen"
+          }
+        }
+      }
+    },
+    "leaving.memories.hiddenCount.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 memory hidden"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 herinnering verborgen"
+          }
+        }
+      }
+    },
+    "leaving.memories.hiddenCount.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} memories hidden"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} herinneringen verborgen"
+          }
+        }
+      }
+    },
+    "leaving.memories.hiddenHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memories you chose not to see again with “Don’t show this memory again”."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herinneringen die je niet meer wilt zien, via “Deze herinnering niet meer tonen”."
+          }
+        }
+      }
+    },
+    "leaving.memories.hiddenToast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You won’t see this memory again."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je ziet deze herinnering niet meer."
+          }
+        }
+      }
+    },
+    "leaving.memories.hideThis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t show this memory again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze herinnering niet meer tonen"
+          }
+        }
+      }
+    },
+    "leaving.memories.linkHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave people out of On this day, recaps and suggestions"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensen weglaten uit Op deze dag, overzichten en suggesties"
+          }
+        }
+      }
+    },
+    "leaving.memories.nobody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nobody to leave out."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niemand om weg te laten."
+          }
+        }
+      }
+    },
+    "leaving.memories.noneHidden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hidden memories."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen verborgen herinneringen."
+          }
+        }
+      }
+    },
+    "leaving.memories.people": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave people out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensen weglaten"
+          }
+        }
+      }
+    },
+    "leaving.memories.peopleHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On this day, the monthly recap, suggestions and the weekly summary no longer show you their posts. Nobody is told, and frames don’t change. This doesn’t block anyone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op deze dag, het maandoverzicht, suggesties en de wekelijkse samenvatting tonen jou hun berichten niet meer. Niemand krijgt een melding en kaders veranderen niet. Je blokkeert er niemand mee."
+          }
+        }
+      }
+    },
+    "leaving.memories.showAgain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weer tonen"
+          }
+        }
+      }
+    },
+    "leaving.memories.showAll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show them all again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles weer tonen"
+          }
+        }
+      }
+    },
+    "leaving.memories.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memories"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herinneringen"
+          }
+        }
+      }
+    },
+    "leaving.photos.choice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s"
+          }
+        }
+      }
+    },
+    "leaving.photos.keep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave them with the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij de familie laten"
+          }
+        }
+      }
+    },
+    "leaving.photos.keepHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They stay in the family and on its frames, still credited to you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze blijven in de familie en op haar kaders, nog altijd op jouw naam."
+          }
+        }
+      }
+    },
+    "leaving.photos.take": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take them with me"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meenemen"
+          }
+        }
+      }
+    },
+    "leaving.photos.takeHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They leave at once. Frames keep them in their trash for 30 days and their owners are told; they can ask you to let some stay."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze verdwijnen meteen. Kaders houden ze 30 dagen in hun prullenbak en hun eigenaars krijgen een melding; ze kunnen je vragen er een paar te laten staan."
+          }
+        }
+      }
+    },
+    "leaving.photos.title.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photo (1)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto (1)"
+          }
+        }
+      }
+    },
+    "leaving.photos.title.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos ({count})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s ({count})"
+          }
+        }
+      }
+    },
+    "leaving.request.allowed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} let them stay."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} liet ze staan."
+          }
+        }
+      }
+    },
+    "leaving.request.declined": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} declined."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} weigerde."
+          }
+        }
+      }
+    },
+    "leaving.request.expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The request expired."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het verzoek is verlopen."
+          }
+        }
+      }
+    },
+    "leaving.request.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked. Waiting for {name}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevraagd. Wachten op {name}."
+          }
+        }
+      }
+    },
+    "leaving.request.partly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} let {allowed} of {count} stay."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} liet er {allowed} van de {count} staan."
+          }
+        }
+      }
+    },
+    "leaving.result.comments.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 comment was deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 reactie werd verwijderd."
+          }
+        }
+      }
+    },
+    "leaving.result.comments.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} comments were deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} reacties werden verwijderd."
+          }
+        }
+      }
+    },
+    "leaving.result.photos.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 photo was taken away."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werd 1 foto weggehaald."
+          }
+        }
+      }
+    },
+    "leaving.result.photos.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos were taken away."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werden {count} foto’s weggehaald."
+          }
+        }
+      }
+    },
+    "leaving.result.photosFrames.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 photo was taken away from {frames} frame(s)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werd 1 foto weggehaald van {frames} kader(s)."
+          }
+        }
+      }
+    },
+    "leaving.result.photosFrames.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos were taken away from {frames} frame(s)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werden {count} foto’s weggehaald van {frames} kader(s)."
+          }
+        }
+      }
+    },
+    "leaving.result.until": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They stay in the frames’ trash until {date}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze blijven tot {date} in de prullenbak van de kaders."
+          }
+        }
+      }
+    },
+    "leaving.takeAway.bodyFeed.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photo in {name} leaves the family and its frames."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto in {name} verdwijnt uit de familie en van haar kaders."
+          }
+        }
+      }
+    },
+    "leaving.takeAway.bodyFeed.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your {count} photos in {name} leave the family and its frames."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je {count} foto’s in {name} verdwijnen uit de familie en van haar kaders."
+          }
+        }
+      }
+    },
+    "leaving.takeAway.bodyFrame.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The photo you sent to {name} leaves the frame."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De foto die je naar {name} stuurde, verdwijnt van het kader."
+          }
+        }
+      }
+    },
+    "leaving.takeAway.bodyFrame.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The {count} photos you sent to {name} leave the frame."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De {count} foto’s die je naar {name} stuurde, verdwijnen van het kader."
+          }
+        }
+      }
+    },
+    "leaving.takeAway.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take my photos away from {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn foto’s weghalen uit {name}"
+          }
+        }
+      }
+    },
+    "leaving.takeAway.deleteComments": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete my comments there too"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn reacties daar ook verwijderen"
+          }
+        }
+      }
+    },
+    "leaving.takeAway.nothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There was nothing left to take away."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er was niets meer om weg te halen."
+          }
+        }
+      }
+    },
+    "leaving.takeAway.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take away"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weghalen"
+          }
+        }
+      }
+    },
+    "leaving.takeAway.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take my photos away"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn foto’s weghalen"
+          }
+        }
+      }
+    },
+    "leaving.toMe.allowAll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow all"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles toelaten"
+          }
+        }
+      }
+    },
+    "leaving.toMe.allowPicked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow the picked photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De gekozen foto’s toelaten"
+          }
+        }
+      }
+    },
+    "leaving.toMe.allowSome": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow some"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een paar toelaten"
+          }
+        }
+      }
+    },
+    "leaving.toMe.allowed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done. The photos are back."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klaar. De foto’s staan er weer."
+          }
+        }
+      }
+    },
+    "leaving.toMe.decline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decline"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weigeren"
+          }
+        }
+      }
+    },
+    "leaving.toMe.declined": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Declined. The photos are deleted when the 30 days end."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geweigerd. De foto’s worden verwijderd als de 30 dagen voorbij zijn."
+          }
+        }
+      }
+    },
+    "leaving.toMe.explain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos you allow go back as before, still yours: you can take them away again later. Your answer is final."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s die je toelaat, komen terug zoals voordien en blijven van jou: je kunt ze later opnieuw weghalen. Je antwoord is definitief."
+          }
+        }
+      }
+    },
+    "leaving.toMe.feed.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} asks to keep 1 photo in {place}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vraagt om 1 foto in {place} te laten staan."
+          }
+        }
+      }
+    },
+    "leaving.toMe.feed.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} asks to keep {count} photos in {place}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vraagt om {count} foto’s in {place} te laten staan."
+          }
+        }
+      }
+    },
+    "leaving.toMe.frame.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} asks to keep 1 photo on {place}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vraagt om 1 foto op {place} te laten staan."
+          }
+        }
+      }
+    },
+    "leaving.toMe.frame.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} asks to keep {count} photos on {place}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vraagt om {count} foto’s op {place} te laten staan."
+          }
+        }
+      }
+    },
+    "leaving.toMe.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked to keep your photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevraagd om je foto’s te laten staan"
+          }
+        }
+      }
+    },
+    "leaving.toMe.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep request"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzoek om te laten staan"
+          }
+        }
+      }
+    },
+    "leaving.toMe.until": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer before {date}; after that they are deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwoord vóór {date}; daarna worden ze verwijderd."
+          }
+        }
+      }
+    },
     "legal.contents": {
       "extractionState": "manual",
       "localizations": {

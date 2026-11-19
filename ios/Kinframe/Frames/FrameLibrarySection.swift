@@ -75,6 +75,7 @@ struct FrameLibrarySection: View {
             }
             if model.album == nil, model.view == .trashed {
                 Text(L("library.trashNote")).font(.footnote).foregroundStyle(Palette.textMuted)
+                if app.leavingEnabled, manage { TakenAwayCard(api: model.api, scope: .frame(frame.id)) }
             }
 
             if model.loading {
@@ -99,6 +100,7 @@ struct FrameLibrarySection: View {
             if model.selecting, !model.selection.isEmpty { bulkBar }
         }
         .task {
+            if app.leaving.takeTrashFocus(frame.id) { model.view = .trashed }
             await model.loadAlbums()
             if let initialAlbumId, model.albums.contains(where: { $0.id == initialAlbumId }) { model.select(album: initialAlbumId) }
             await model.loadMemories()

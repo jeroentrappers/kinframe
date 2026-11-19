@@ -284,6 +284,22 @@ the Frames section carry their server and "Block this server". Remote frame entr
 (kinframe.appmire.be)", and copied photos in the library are credited "Lies · Janssens". The rules are in
 `KinframeKit/Core/RemoteFamilies.swift`, the calls in `KinframeKit/API/RemoteAPI.swift`, the screens in
 `Kinframe/Remote/`, the strings in `ios-strings-remote.json`.
+**Leaving** (`docs/spec/leaving.md`, README §5.21) appears only when discovery says `leaving`; without it the old
+leave dialogs stay. Leaving a family opens a sheet from `getLeavePreview`: your photos stay (default) or go with you,
+your comments stay or are deleted, and "Leave this frame too" per frame (checked where the server suggests it; owned
+frames aren't offered); the toast carries the result line ("214 photos were taken away from 2 frame(s). They stay in
+the frames' trash until 19 December."). Leaving a frame asks the same photo question (also after a transfer). The
+history lists keep requests to you (allow all, pick some, decline; final) and the families and frames you left that
+still show your photos, with "Take my photos away". A frame's trash and a family's Members section (managers) show
+"Taken away by Tom" groups with the day they go, the photos of a taking (`visibility=taken_away`) and "Ask Tom to keep
+them" for all or picked photos with a note ("Tom doesn't accept requests" when blocked). Account deletion asks take
+(default) or leave to the families; handed-over photos are credited "Tom (former member)". Settings → Memories
+leaves people out and shows the hidden memories; On this day has "Don't show this memory again". Direct chats with
+someone you no longer share a family or frame with say "You can no longer message Lies". `photos_taken_away`,
+`keep_request`, `keep_answered` and `ownership_changed` notifications and the `placement.updated` /
+`keep_request.updated` events route through `PushRoute.leaving` and `LiveEvent.leaving`. The rules are in
+`KinframeKit/Core/Leaving.swift`, the calls in `KinframeKit/API/LeavingAPI.swift`, the screens in `Kinframe/Leaving/`,
+the strings in `ios-strings-leaving.json`.
 
 **Push.** APNs is behind the `KINFRAME_APNS_ENABLED` build setting (off). When on, the app asks for notification
 permission after the first send and registers the device token with `POST /v1/me/push-endpoints {kind: "apns"}`.

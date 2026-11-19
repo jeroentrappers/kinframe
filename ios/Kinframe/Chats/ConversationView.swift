@@ -187,7 +187,7 @@ struct ConversationView: View {
     @ViewBuilder private func composer(_ model: ConversationModel, _ c: Conversation) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if !ChatAbilities.canSend(c) {
-                Callout(L(c.kind == .direct ? "chat.readOnlyDirect" : "chat.readOnly"))
+                Callout(LeavingText.readOnlyLine(c) ?? L(c.kind == .direct ? "chat.readOnlyDirect" : "chat.readOnly"))
             } else if recorder.state == .recording {
                 recording(model)
             } else {

@@ -45,6 +45,7 @@ struct SettingsTab: View {
                     notifications
                     // Family social: read receipts, blocked people, reminders, milestones, operator reports.
                     SocialSettingsSections()
+                    LeavingSettingsSection()
                     if app.photoSources.sources, let api = app.api {
                         Section {
                             NavigationLink {

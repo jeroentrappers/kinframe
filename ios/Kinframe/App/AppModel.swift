@@ -136,6 +136,8 @@ final class AppModel {
     let events = EventHub()
     /// Family social: chats, badge, reminders, milestones (Social/SocialStore.swift).
     let social = SocialStore()
+    /// Leaving (Leaving/): a keep request or a frame's trash to open from a notification.
+    let leaving = LeavingState()
 
     init(accountId: String = AccountRecord.legacyId, toasts: ToastCenter = ToastCenter(), outbox: OutboxMonitor? = nil, host: AppModel? = nil) {
         L10n.bootstrap()
@@ -358,11 +360,12 @@ final class AppModel {
 
     /// `DELETE /v1/me`, then sign out. The server refuses the old token from now on, so sign-out must not call the
     /// API again (push endpoints are already gone with the account).
-    func deleteAccount(removeItems: Bool) async throws {
+    func deleteAccount(photos: AccountPhotos) async throws {
         guard let api else { return }
-        _ = try await api.call { try await $0.deleteMe(query: .init(removeItems: removeItems)).noContent }
+        try await api.deleteAccount(photos: photos)
         self.api = nil
-        await signOut()
+        // Several accounts: only this one goes; the others stay signed in.
+        if let accounts { await accounts.signOut(self) } else { await signOut() }
         toasts.show(L("account.deleted"))
     }
 
@@ -509,6 +512,7 @@ final class AppModel {
             openChannel(.telegramChat(chatId), frameId: frameId, feedId: feedId)
         case .social(let r):
             openSocial(r)
+        case .leaving(let r): openLeaving(r)
         }
     }
 
@@ -672,6 +676,7 @@ final class AppModel {
             handleSocial(e)
         case .remoteSubscriptionUpdated:
             break
+        case .leaving(let e): handleLeaving(e)
         case .sendUpdated, .reply, .feedReply, .feedPostUpdated, .birthdayUpdated, .birthdayRemoved, .photoSourceRemoved,
              .emailAddressUpdated, .emailAddressRemoved, .emailSenderDecided, .telegramChatRemoved, .telegramCodeUpdated,
              .telegramLinkUpdated:
