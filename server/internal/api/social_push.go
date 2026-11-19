@@ -19,11 +19,11 @@ import (
 // reaction_digest at 19:00 local time.
 
 const (
-	commentWindow     = 10 * time.Minute // comment bundles
-	reactionPushLimit = 3                // people per target pushed before the digest takes over
-	digestHour        = 19               // local hour of the reaction digest
-	socialTickEvery   = 30 * time.Second
-	pushTextRunes     = 120 // comment text in a push body
+	commentWindow      = 10 * time.Minute // comment bundles
+	reactionPushLimit  = 3                // people per target pushed before the digest takes over
+	reactionDigestHour = 19               // local hour of the reaction digest
+	socialTickEvery    = 30 * time.Second
+	pushTextRunes      = 120 // comment text in a push body
 )
 
 // emojiChars are the reactions as shown in push texts.
@@ -428,7 +428,7 @@ func (s *Server) flushCommentBundle(ctx context.Context, b store.PushBundle) boo
 func (s *Server) nextDigest(ctx context.Context, userID uuid.UUID, now time.Time) time.Time {
 	tz, _ := s.st.UserTimezone(ctx, userID)
 	local := now.In(loadZone(tz))
-	due := time.Date(local.Year(), local.Month(), local.Day(), digestHour, 0, 0, 0, local.Location())
+	due := time.Date(local.Year(), local.Month(), local.Day(), reactionDigestHour, 0, 0, 0, local.Location())
 	if !local.Before(due) {
 		due = due.AddDate(0, 0, 1)
 	}

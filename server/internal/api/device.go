@@ -285,6 +285,7 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 		return nil, err
 	}
 	owner, _ := s.st.FrameOwnerName(ctx, s.st.Q(), f.ID)
+	promptIDs := s.placementPromptIDs(ctx, placementIDs) // engagement: Placement.prompt_id
 	target := deviceTarget(d)
 	withholdBackfill := s.withholdsBackfill(d)
 
@@ -306,6 +307,9 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				continue
 			}
 			pc := placementChange{Placement: s.placementJSON(&p)}
+			if id, ok := promptIDs[p.Placement.ID]; ok {
+				pc.PromptId = &id
+			}
 			variant := worker.Variant(p.Kind, target)
 			for _, r := range renditions[p.MediaID] {
 				if r.Variant != variant {
@@ -386,6 +390,15 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,
 			}})
+		default:
+			// engagement: `comments`, `photo_request` and `prompts`
+			c, _, err := s.engagementChange(ctx, f, e, snapshot)
+			if err != nil {
+				return nil, err
+			}
+			if c != nil {
+				out = append(out, c)
+			}
 		}
 	}
 	return out, nil

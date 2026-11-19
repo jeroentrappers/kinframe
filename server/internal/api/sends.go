@@ -426,6 +426,10 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 	if err != nil {
 		return nil, err
 	}
+	prompt, err := s.checkSendPrompt(ctx, req.Body.PromptId, feeds) // engagement: SendCreate.prompt_id
+	if err != nil {
+		return nil, err
+	}
 	sendID := store.NewID()
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
 		if err := tx.CreateSend(ctx, sendID, u.ID); err != nil {
@@ -528,6 +532,8 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 		return nil, err
 	}
 	if personal {
+		// engagement: the answered prompt, then freshness, requests, streaks, outcomes and milestones
+		s.tagSendPrompt(ctx, sendID, prompt)
 		s.afterPersonalSend(ctx, sendID)
 	}
 	sd, err := s.renderSend(ctx, sendID)

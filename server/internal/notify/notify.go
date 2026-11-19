@@ -79,6 +79,15 @@ func (n *Notifier) Users(userIDs []uuid.UUID, ev Event, push *Push) {
 	}
 }
 
+// PushAlways delivers a push notification even when the user has a websocket open (reminders, which have
+// no websocket event of their own). It is sent in the background.
+func (n *Notifier) PushAlways(userID uuid.UUID, ev Event, push *Push) {
+	if push == nil || n.Sender == nil {
+		return
+	}
+	go n.push(userID, ev, push)
+}
+
 func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

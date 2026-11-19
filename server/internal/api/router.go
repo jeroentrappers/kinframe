@@ -77,6 +77,8 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.HandleFunc("POST /v1/inbound/email:check", s.checkInboundEmailRecipients) // the same, recipient pre-check
 	mux.HandleFunc("POST /v1/telegram/webhook", s.telegramWebhook)                // Telegram only: secret header (telegram.go)
 	mux.HandleFunc("GET /v1/shop/media/{name}", s.shopMedia)
+	mux.HandleFunc("GET /v1/email-digest/stop", s.digestStop)  // engagement: the digest's stop link (signed, no sign-in)
+	mux.HandleFunc("POST /v1/email-digest/stop", s.digestStop) // its one button
 	mux.HandleFunc("GET /v1/ws", s.userWS)
 	mux.HandleFunc("GET /v1/tv/{token}/mirror", s.tvMirrorWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)
@@ -427,7 +429,7 @@ func (s *Server) realIP(next http.Handler) http.Handler {
 				host = strings.TrimSpace(first)
 			}
 		}
-		ctx := context.WithValue(r.Context(), ipKey, ip)
+		ctx := context.WithValue(withAcceptLanguage(r.Context(), r), ipKey, ip)
 		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, hostKey, host)))
 	})
 }

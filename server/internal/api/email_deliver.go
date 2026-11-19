@@ -163,6 +163,9 @@ func (s *Server) deliverGroup(ctx context.Context, g []*emailDecision, files []*
 		}
 		d.msg.SendIDs = sendIDs
 	}
+	for _, id := range sendIDs {
+		s.afterPersonalSend(ctx, id) // engagement
+	}
 	return nil
 }
 

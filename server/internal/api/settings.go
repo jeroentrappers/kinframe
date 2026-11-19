@@ -39,6 +39,7 @@ func (s *Server) renderSettings(f *store.Frame, forDevice bool) json.RawMessage 
 		m = map[string]any{}
 	}
 	settings.DerivePinSet(m)
+	settings.FillSocial(m) // frames made before family social
 	if !forDevice {
 		settings.StripPinHash(m)
 	}
@@ -134,6 +135,9 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 	}
 	if err == nil && s.calendar != nil && touchesCalendar(paths) {
 		s.calendar.RebuildLater(frameID)
+	}
+	if err == nil {
+		s.socialSettingsChanged(ctx, frameID, paths) // engagement: comment cards on or off
 	}
 	return out, err
 }

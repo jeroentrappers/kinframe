@@ -27,6 +27,7 @@ func (s *Server) ListMyFrames(ctx context.Context, _ gen.ListMyFramesRequestObje
 	for i := range views {
 		out[i] = s.frameSummary(&views[i])
 	}
+	s.frameFreshness(ctx, out) // engagement: freshness and photo_request
 	return ok(out), nil
 }
 
@@ -40,7 +41,12 @@ func (s *Server) GetFrame(ctx context.Context, req gen.GetFrameRequestObject) (g
 	if err != nil {
 		return nil, err
 	}
-	return ok(s.frameJSON(v)), nil
+	out := s.frameJSON(v)
+	// engagement: freshness and photo_request
+	fs := []gen.FrameSummary{{Id: out.Id}}
+	s.frameFreshness(ctx, fs)
+	out.Freshness, out.PhotoRequest = fs[0].Freshness, fs[0].PhotoRequest
+	return ok(out), nil
 }
 
 func (s *Server) UpdateFrame(ctx context.Context, req gen.UpdateFrameRequestObject) (gen.UpdateFrameResponseObject, error) {
