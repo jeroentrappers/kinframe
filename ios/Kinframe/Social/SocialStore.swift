@@ -29,6 +29,14 @@ final class SocialStore {
     var personSheet: PersonRoute?
     /// The newest reports to handle (badge on family settings and the operator's list).
     private(set) var newReports = 0
+    /// Open photo requests of frames you're not on that reached you through a family (`photo_request.*` without a
+    /// push), by frame id: the Home strip shows them and "Send photos" posts to the families reaching the frame.
+    private(set) var familyRequests: [String: PhotoRequest] = [:]
+
+    /// Keep a request heard of for a frame you're not on (dropped once answered or expired).
+    func noteFamilyRequest(_ r: PhotoRequest) {
+        if r.state == .open { familyRequests[r.frameId] = r } else { familyRequests[r.frameId] = nil }
+    }
 
     var features: SocialFeatures { SocialFeatures(app?.discovery) }
     private var api: API? { app?.api }
@@ -111,6 +119,7 @@ final class SocialStore {
         circles = [:]
         prompts = [:]
         newReports = 0
+        familyRequests = [:]
         openConversationId = nil
         let total = app?.accounts?.badgeTotal ?? 0
         Task { try? await UNUserNotificationCenter.current().setBadgeCount(total) }

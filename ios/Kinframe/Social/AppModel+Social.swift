@@ -60,17 +60,20 @@ extension AppModel {
         case .photoRequestCreated(let r):
             setPhotoRequest(r)
             guard r.state == .open else { break }
-            toasts.show(L("engagement.request.toast", ["frame": r.frameName]), action: .init(title: L("engagement.request.send")) { [weak self] in
+            // Everyone who can see the request hears it (README §6.2): those not on the frame send through a family.
+            toasts.show(L("engagement.wouldLikeToast", ["frame": r.frameName]), action: .init(title: L("engagement.request.send")) { [weak self] in
                 self?.social.sheet = .freshSend(frameId: r.frameId, requestId: r.id)
             })
         case .photoRequestUpdated(let r):
             setPhotoRequest(r)
+            // Answered (perhaps by a post of a family): the families' freshness moved too.
+            if r.state == .answered, frame(r.frameId) == nil { Task { await loadFeeds() } }
         case .streakUpdated(let feedId, let s):
             if let i = feeds.firstIndex(where: { $0.id == feedId }) { feeds[i].streak = s }
         case .milestoneAchieved(let m):
             toasts.show(L("engagement.milestone.toast", ["title": m.key.title]))
         case .reportCreated(let r):
-            toasts.show(L("chat.report.toastNew"), action: .init(title: L("common.review")) { [weak self] in
+            toasts.show(L("chat.newReport"), action: .init(title: L("common.review")) { [weak self] in
                 if let feedId = r?.feedId { self?.social.sheet = .feedReports(feedId: feedId) } else { self?.social.sheet = .operatorReports }
             })
         case .conversationRemoved(let id):
@@ -80,10 +83,14 @@ extension AppModel {
         }
     }
 
+    /// A frame you send to keeps its request on its summary; one you're not on (a family member's view) is kept apart.
     private func setPhotoRequest(_ r: PhotoRequest) {
-        guard let i = frames.firstIndex(where: { $0.id == r.frameId }) else { return }
-        frames[i].photoRequest = r.state == .expired ? nil : r
-        if let f = r.freshness { frames[i].freshness = f }
+        if let i = frames.firstIndex(where: { $0.id == r.frameId }) {
+            frames[i].photoRequest = r.state == .expired ? nil : r
+            if let f = r.freshness { frames[i].freshness = f }
+            if frames[i].can(\.send) { return }
+        }
+        social.noteFamilyRequest(r)
     }
 
     // MARK: Routes
