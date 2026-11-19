@@ -20,9 +20,9 @@ struct DeleteAccountSheet: View {
                     Section {
                         Text(L("account.deleteBody"))
                         if app.leavingEnabled {
-                            Picker(L("leaving.account.photos"), selection: $photos) {
-                                Text(L("leaving.account.take")).tag(AccountPhotos.take)
-                                Text(L("leaving.account.leave")).tag(AccountPhotos.leave)
+                            Picker(L("leaving.deleteLegend"), selection: $photos) {
+                                Text(L("leaving.deleteTake")).tag(AccountPhotos.take)
+                                Text(L("leaving.deleteLeave")).tag(AccountPhotos.leave)
                             }
                             .pickerStyle(.inline)
                         } else {

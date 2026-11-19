@@ -200,6 +200,8 @@ public final class LiveSocket {
     private var attempt = 0
     private var retry: Task<Void, Never>?
     private var generation = 0
+    /// The token the open connection was made with (a 4401 refuses that one).
+    private var sentToken: String?
     private let session: URLSession = {
         let config = URLSessionConfiguration.default
         config.identifyApp()
@@ -251,6 +253,7 @@ public final class LiveSocket {
             }
             c.scheme = c.scheme == "https" ? "wss" : "ws"
             c.queryItems = [URLQueryItem(name: "access_token", value: token)]
+            self.sentToken = token
             guard let url = c.url else { return }
             var handshake = URLRequest(url: url)
             handshake.identifyApp()
@@ -303,7 +306,7 @@ public final class LiveSocket {
         if ws.closeCode.rawValue == 4401, let api {
             // Token expired: get a fresh one and reconnect right away.
             Task {
-                _ = await api.tokens.refreshAfterUnauthorized()
+                _ = await api.refreshedToken(rejected: self.sentToken)
                 self.attempt = 0
                 self.connect()
             }

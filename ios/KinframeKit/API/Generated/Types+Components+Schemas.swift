@@ -16700,6 +16700,12 @@ extension Components {
             public var answeredBy: Components.Schemas.PersonRef?
             /// - Remark: Generated from `#/components/schemas/PhotoRequest/freshness`.
             public var freshness: Components.Schemas.Freshness?
+            /// The families with an active subscription to the frame. A family member who is not on the frame answers
+            /// the request by posting to one of these (the apps preselect it when sending).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/feed_ids`.
+            public var feedIds: [Components.Schemas.Id]?
             /// Creates a new `PhotoRequest`.
             ///
             /// - Parameters:
@@ -16712,6 +16718,7 @@ extension Components {
             ///   - answeredAt:
             ///   - answeredBy:
             ///   - freshness:
+            ///   - feedIds: The families with an active subscription to the frame. A family member who is not on the frame answers
             public init(
                 id: Components.Schemas.Id,
                 frameId: Components.Schemas.Id,
@@ -16721,7 +16728,8 @@ extension Components {
                 expiresAt: Foundation.Date,
                 answeredAt: Foundation.Date? = nil,
                 answeredBy: Components.Schemas.PersonRef? = nil,
-                freshness: Components.Schemas.Freshness? = nil
+                freshness: Components.Schemas.Freshness? = nil,
+                feedIds: [Components.Schemas.Id]? = nil
             ) {
                 self.id = id
                 self.frameId = frameId
@@ -16732,6 +16740,7 @@ extension Components {
                 self.answeredAt = answeredAt
                 self.answeredBy = answeredBy
                 self.freshness = freshness
+                self.feedIds = feedIds
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -16743,6 +16752,7 @@ extension Components {
                 case answeredAt = "answered_at"
                 case answeredBy = "answered_by"
                 case freshness
+                case feedIds = "feed_ids"
             }
         }
         /// The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change).

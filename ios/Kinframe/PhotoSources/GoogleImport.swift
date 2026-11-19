@@ -75,6 +75,12 @@ final class GoogleImportController {
         perform(flow.handle(.update(imp)))
     }
 
+    /// Whether a `google-import` return is for this controller's import (several accounts: one controller each).
+    func owns(_ url: URL) -> Bool {
+        guard let r = GoogleImportFlow.parseReturn(url), active else { return false }
+        return r.importId == nil || r.importId == flow.importId
+    }
+
     /// `app.kinframe:/google-import?…` reached the app through `onOpenURL` (the browser session normally takes it).
     func handleReturn(_ url: URL) -> Bool {
         guard let r = GoogleImportFlow.parseReturn(url) else { return false }

@@ -32,7 +32,7 @@ struct PersonView: View {
                                     } label: { Label(L("chat.person.message"), systemImage: "bubble.left") }
                                     .buttonStyle(.kf(.primary))
                                 }
-                                Button(L(p.blocked ? "chat.person.unblock" : "chat.person.block"), role: p.blocked ? nil : .destructive) {
+                                Button(L(p.blocked ? "chat.unblock" : "chat.blockShort"), role: p.blocked ? nil : .destructive) {
                                     if p.blocked { Task { await setBlocked(false) } } else { confirmBlock = true }
                                 }
                                 .buttonStyle(.kf(p.blocked ? .secondary : .dangerGhost))
@@ -72,7 +72,7 @@ struct PersonView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .confirmationDialog(L("chat.person.blockConfirm", ["name": person.map { PersonName.display($0.person) } ?? ""]), isPresented: $confirmBlock, titleVisibility: .visible) {
-            Button(L("chat.person.block"), role: .destructive) { Task { await setBlocked(true) } }
+            Button(L("chat.blockShort"), role: .destructive) { Task { await setBlocked(true) } }
             Button(L("common.cancel"), role: .cancel) {}
         } message: {
             Text(L("chat.person.blockBody"))
@@ -111,7 +111,7 @@ struct PersonView: View {
         do {
             if on { try await api.block(userId) } else { try await api.unblock(userId) }
             person?.blocked = on
-            app.toasts.show(L(on ? "chat.person.blockedToast" : "chat.person.unblockedToast", ["name": person.map { PersonName.display($0.person) } ?? ""]))
+            app.toasts.show(L(on ? "chat.blocked" : "chat.person.unblockedToast", ["name": person.map { PersonName.display($0.person) } ?? ""]))
         } catch {
             app.toasts.error(error)
         }
@@ -135,13 +135,13 @@ struct BlockedPeopleView: View {
     var body: some View {
         List {
             if let list {
-                if list.isEmpty { Text(L("chat.blocked.empty")).foregroundStyle(Palette.textMuted) }
+                if list.isEmpty { Text(L("chat.noBlocked")).foregroundStyle(Palette.textMuted) }
                 ForEach(list) { b in
                     HStack(spacing: 12) {
                         PersonChip(person: b.person, size: 36)
                         Text(PersonName.display(b.person))
                         Spacer()
-                        Button(L("chat.person.unblock")) { Task { await unblock(b) } }.buttonStyle(.kf(.secondary))
+                        Button(L("chat.unblock")) { Task { await unblock(b) } }.buttonStyle(.kf(.secondary))
                     }
                 }
             } else {
@@ -152,7 +152,7 @@ struct BlockedPeopleView: View {
         .listRowBackground(Palette.surface)
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("chat.blocked.title"))
+        .navigationTitle(L("chat.blockedPeople"))
         .task { list = (try? await app.api?.blocks()) ?? [] }
     }
 
@@ -195,13 +195,13 @@ struct ReportsView: View {
                                     Button(L("chat.report.remove"), role: .destructive) { Task { await resolve(r, remove: true) } }.buttonStyle(.kf(.danger))
                                     Button(L("chat.report.dismiss")) { Task { await resolve(r, remove: false) } }.buttonStyle(.kf(.secondary))
                                     if let post = r.postId, app.social.features.social {
-                                        Button(L("chat.report.open")) {
+                                        Button(L("chat.open")) {
                                             dismiss()
                                             app.openSocial(.post(postId: post, commentId: r.targetKind == .comment ? r.targetId : nil))
                                         }
                                         .buttonStyle(.kf(.ghost))
                                     } else if let conv = r.conversationId, app.social.features.chats {
-                                        Button(L("chat.report.open")) {
+                                        Button(L("chat.open")) {
                                             dismiss()
                                             app.openSocial(.conversation(conversationId: conv, messageId: r.targetId))
                                         }
@@ -221,7 +221,7 @@ struct ReportsView: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L(feedId == nil ? "chat.report.operatorTitle" : "chat.report.familyTitle"))
+            .navigationTitle(L(feedId == nil ? "chat.report.operatorTitle" : "chat.operatorReports"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task { await load() }

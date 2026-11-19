@@ -53,7 +53,7 @@ public enum RemoteInvite {
 /// How remote frames and remote photos are named in threads, reaction rows and the library.
 public enum RemoteLabel {
     /// "Oma's frame (kinframe.appmire.be)" for a frame on another server, else just the frame's name.
-    public static func frame(_ name: String, server: String?, template: String = L("servers.remote.frameOnServer")) -> String {
+    public static func frame(_ name: String, server: String?, template: String = L("remote.frameOnServer")) -> String {
         guard let server = server?.trimmingCharacters(in: .whitespaces), !server.isEmpty else { return name }
         let t = template.contains("{frame}") ? template : "{frame} ({server})"
         return t.replacingOccurrences(of: "{frame}", with: name).replacingOccurrences(of: "{server}", with: server)
@@ -97,12 +97,12 @@ public enum RemoteSubscriptionLogic {
     /// The status line: "Waiting for the family's admins", "Ended: the family removed this frame", …
     public static func statusText(_ s: RemoteSubscription) -> String {
         switch s.status {
-        case .pending: return L("servers.remote.status.pending")
-        case .active: return L("servers.remote.status.active")
-        case .rejected: return L("servers.remote.status.rejected")
-        case .error: return L("servers.remote.status.error")
+        case .pending: return L("remote.status.pending")
+        case .active: return L("remote.status.active")
+        case .rejected: return L("remote.status.rejected")
+        case .error: return L("remote.status.error")
         case .removed:
-            guard let r = s.removedReason else { return L("servers.remote.status.removed") }
+            guard let r = s.removedReason else { return L("remote.status.removed") }
             return L("servers.remote.reason.\(r.rawValue)")
         }
     }
@@ -113,7 +113,7 @@ public enum RemoteSubscriptionLogic {
         let head = L("servers.remote.confirmHead", ["feed": p.feedName, "server": RemoteInvite.host(p.server)])
         let frames = p.frameCount.map { " — " + Lp("servers.remote.frameCount", count: $0) } ?? ""
         let here = p.thisServerHost.flatMap { $0.isEmpty ? nil : $0 } ?? p.thisServerName
-        let body = L("servers.remote.confirmBody", ["server": here, "frame": frameName])
+        let body = L("remote.previewCopy", ["server": here, "frame": frameName])
         return head + frames + ". " + body
     }
 }

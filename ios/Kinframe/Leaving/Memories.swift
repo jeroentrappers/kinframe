@@ -10,7 +10,7 @@ struct LeavingSettingsSection: View {
             Section {
                 NavigationLink { MemoriesSettingsView(api: api) } label: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L("leaving.memories.title"))
+                        Text(L("leaving.memoriesTitle"))
                         Text(L("leaving.memories.linkHint")).font(.footnote).foregroundStyle(Palette.textMuted)
                     }
                 }
@@ -37,13 +37,13 @@ struct MemoriesSettingsView: View {
                             AvatarView(name: p.displayName, url: p.avatarUrl, size: 32)
                             Text(PersonName.display(p))
                             Spacer()
-                            Button(L("leaving.memories.showAgain")) { Task { await unhide(person: p.userId) } }
+                            Button(L("leaving.include")) { Task { await unhide(person: p.userId) } }
                                 .buttonStyle(.borderless)
                         }
                     }
                     Button { adding = true } label: { Label(L("leaving.memories.add"), systemImage: "person.badge.minus") }
                 } header: {
-                    Text(L("leaving.memories.people"))
+                    Text(L("leaving.leaveOutTitle"))
                 } footer: {
                     Text(L("leaving.memories.peopleHint"))
                 }
@@ -53,10 +53,10 @@ struct MemoriesSettingsView: View {
                         Text(L("leaving.memories.noneHidden")).foregroundStyle(Palette.textMuted)
                     } else {
                         Text(Lp("leaving.memories.hiddenCount", count: prefs.hiddenMemories.count))
-                        Button(L("leaving.memories.showAll")) { Task { await save(memories: []) } }
+                        Button(L("leaving.showAllAgain")) { Task { await save(memories: []) } }
                     }
                 } header: {
-                    Text(L("leaving.memories.hidden"))
+                    Text(L("leaving.hiddenTitle"))
                 } footer: {
                     Text(L("leaving.memories.hiddenHint"))
                 }
@@ -69,7 +69,7 @@ struct MemoriesSettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("leaving.memories.title"))
+        .navigationTitle(L("leaving.memoriesTitle"))
         .task { await load() }
         .sheet(isPresented: $adding) {
             HidePersonPicker(api: api, hidden: Set(prefs?.hiddenPeople.map(\.userId) ?? [])) { id in
@@ -170,12 +170,12 @@ struct HideMemoryButton: View {
     var body: some View {
         if app.leavingEnabled, let api = app.api, !postIds.isEmpty {
             Menu {
-                Button(L("leaving.memories.hideThis"), systemImage: "eye.slash") { Task { await hide(api) } }
+                Button(L("leaving.hideMemory"), systemImage: "eye.slash") { Task { await hide(api) } }
             } label: {
                 Image(systemName: "ellipsis.circle").font(.title3).foregroundStyle(Palette.textMuted)
                     .frame(minWidth: 44, minHeight: 44)
             }
-            .accessibilityLabel(L("leaving.memories.hideThis"))
+            .accessibilityLabel(L("leaving.hideMemory"))
         }
     }
 
@@ -185,7 +185,7 @@ struct HideMemoryButton: View {
             let ids = current.hiddenMemories + postIds.filter { !current.hiddenMemories.contains($0) }
             _ = try await api.updateMemoryPreferences(hiddenMemories: ids)
             hidden()
-            app.toasts.show(L("leaving.memories.hiddenToast"))
+            app.toasts.show(L("leaving.memoryHidden"))
         } catch {
             app.toasts.error(error)
         }

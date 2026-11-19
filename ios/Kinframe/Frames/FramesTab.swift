@@ -67,7 +67,8 @@ struct FramesTab: View {
                 FrameDetailView(route: route).account(route.account, in: accounts)
             }
             .sheet(isPresented: $adding) {
-                if let api = app.api {
+                // Several accounts: on which server the code is first (it's redeemed there).
+                ServerChoiceSheet(accounts: accounts.frameAccounts, title: L("add.title"), message: L("servers.choose.code")) { _, api in
                     NavigationStack { AddFrameView(api: api) }
                 }
             }

@@ -71,7 +71,7 @@ struct TimelinePostCard: View {
     private var menu: some View {
         Menu {
             if app.social.features.chats {
-                Button { sharing = true } label: { Label(L("social.post.shareInChat"), systemImage: "bubble.left.and.bubble.right") }
+                Button { sharing = true } label: { Label(L("social.shareInChat"), systemImage: "bubble.left.and.bubble.right") }
             }
             Button {
                 Task { try? await model.setMuted(post, !(post.thread.muted ?? false)) }
@@ -89,15 +89,15 @@ struct TimelinePostCard: View {
                     }
                 } label: {
                     if post.thread.state == .closed {
-                        Label(L("social.thread.open"), systemImage: "text.bubble")
+                        Label(L("social.openComments"), systemImage: "text.bubble")
                     } else {
-                        Label(L("social.thread.close"), systemImage: "nosign")
+                        Label(L("social.closeComments"), systemImage: "nosign")
                     }
                 }
             }
             if !isOwn {
                 Button { reporting = ReportTarget(kind: .post, id: post.id, inFamily: post.kind == .feed) } label: {
-                    Label(L("chat.report.action"), systemImage: "flag")
+                    Label(L("chat.report"), systemImage: "flag")
                 }
             }
             if post.canRemove == true {
@@ -150,7 +150,7 @@ struct TimelinePostCard: View {
                 }
             }
             Button { openThread(PostRoute(postId: post.id, account: app.accountId)) } label: {
-                Label(post.thread.state == .closed ? L("social.thread.closedShort") : L("social.thread.comment"), systemImage: "bubble.left")
+                Label(post.thread.state == .closed ? L("social.commentsOff") : L("social.thread.comment"), systemImage: "bubble.left")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(Palette.textMuted)
                     .frame(minHeight: 44)
@@ -161,7 +161,7 @@ struct TimelinePostCard: View {
                     Image(systemName: "paperplane").foregroundStyle(Palette.textMuted).frame(minWidth: 44, minHeight: 44)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(L("social.post.shareInChat"))
+                .accessibilityLabel(L("social.shareInChat"))
             }
             Spacer()
             if let unread = post.thread.unreadCount, unread > 0 {

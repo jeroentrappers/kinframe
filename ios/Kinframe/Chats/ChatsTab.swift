@@ -11,20 +11,28 @@ struct ChatsTab: View {
     @State private var creatingOn: AppModel?
     @State private var showArchived = false
 
+    /// The accounts whose server has chats (the tab shows when one has).
+    private var chatAccounts: [AppModel] { accounts.active.filter(\.social.features.chats) }
+
+    private func loadAll() async {
+        let list = chatAccounts
+        await withTaskGroup(of: Void.self) { g in for m in list { g.addTask { await m.social.loadConversations() } } }
+    }
+
     var body: some View {
         @Bindable var app = app
         NavigationStack(path: $app.chatsPath) {
             List {
-                if !app.social.conversationsLoaded {
-                    if let error = app.social.conversationsError {
-                        ErrorRetryView(message: error) { Task { await app.social.loadConversations() } }
+                if !chatAccounts.contains(where: \.social.conversationsLoaded) {
+                    if let error = chatAccounts.lazy.compactMap(\.social.conversationsError).first {
+                        ErrorRetryView(message: error) { Task { await loadAll() } }
                             .listRowBackground(Color.clear)
                     } else {
                         LoadingView().listRowBackground(Color.clear)
                     }
                 } else if accounts.conversations.isEmpty {
-                    EmptyStateView(systemImage: "bubble.left.and.bubble.right", title: L("chat.list.emptyTitle"), message: L("chat.list.emptyBody")) {
-                        Button(L("chat.new.title")) { creating = true }.buttonStyle(.kf(.primary, large: true))
+                    EmptyStateView(systemImage: "bubble.left.and.bubble.right", title: L("chat.emptyTitle"), message: L("chat.list.emptyBody")) {
+                        Button(L("chat.newChat")) { creating = true }.buttonStyle(.kf(.primary, large: true))
                     }
                     .listRowBackground(Color.clear)
                 } else {
@@ -45,22 +53,22 @@ struct ChatsTab: View {
                             }
                             .swipeActions(edge: .leading) {
                                 if c.muted {
-                                    Button { Task { await mute(c, .off, on: m) } } label: { Label(L("chat.mute.off"), systemImage: "bell") }
+                                    Button { Task { await mute(c, .off, on: m) } } label: { Label(L("chat.muteFor.off"), systemImage: "bell") }
                                 } else {
-                                    Button { Task { await mute(c, .always, on: m) } } label: { Label(L("chat.mute.action"), systemImage: "bell.slash") }
+                                    Button { Task { await mute(c, .always, on: m) } } label: { Label(L("chat.mute"), systemImage: "bell.slash") }
                                         .tint(Palette.accent)
                                 }
                             }
                     }
                 }
                 Section {
-                    OperatorNote(server: app.server.map { ServerAddress.display($0.url) } ?? "")
+                    OperatorNote(server: ListText.join(chatAccounts.compactMap { $0.server.map { ServerAddress.display($0.url) } }))
                 }
                 .listRowBackground(Color.clear)
             }
             .scrollContentBackground(.hidden)
             .refreshable {
-                await withTaskGroup(of: Void.self) { g in for m in accounts.active { g.addTask { await m.social.loadConversations() } } }
+                await loadAll()
             }
             .pageBackground()
             .navigationTitle(L("chat.title"))
@@ -70,7 +78,6 @@ struct ChatsTab: View {
                         .accessibilityLabel(L("chat.archived"))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    let chatAccounts = accounts.active.filter(\.social.features.chats)
                     if chatAccounts.count > 1 {
                         // Contacts are per server: pick where the chat starts.
                         Menu {
@@ -80,25 +87,25 @@ struct ChatsTab: View {
                         } label: {
                             Image(systemName: "square.and.pencil").frame(width: 44, height: 44)
                         }
-                        .accessibilityLabel(L("chat.new.title"))
+                        .accessibilityLabel(L("chat.newChat"))
                     } else {
                         Button { creatingOn = nil; creating = true } label: { Image(systemName: "square.and.pencil").frame(width: 44, height: 44) }
-                            .accessibilityLabel(L("chat.new.title"))
+                            .accessibilityLabel(L("chat.newChat"))
                     }
                 }
             }
             .socialDestinations()
         }
-        .task(id: app.api?.baseURL) { await app.social.loadConversations() }
+        .task(id: chatAccounts.map(\.accountId)) { await loadAll() }
         .sheet(isPresented: $creating) {
-            let m = creatingOn ?? app
+            let m = creatingOn ?? chatAccounts.first ?? app
             NewChatSheet { c in
                 m.social.update(c)
                 app.chatsPath.append(ChatRoute(id: c.id, account: m.accountId))
             }
             .environment(m)
         }
-        .sheet(isPresented: $showArchived) { ArchivedChatsSheet() }
+        .sheet(isPresented: $showArchived) { ArchivedChatsSheet(accounts: chatAccounts) }
     }
 
     private func archive(_ c: Conversation, _ on: Bool, on owner: AppModel? = nil) async {
@@ -186,25 +193,36 @@ struct ConversationAvatar: View {
 }
 
 /// Archived chats (yours, or of a deleted family or circle): open, or bring back to the list.
+/// Archived chats of every account with chats, each moving back on its own server.
 private struct ArchivedChatsSheet: View {
-    @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
-    @State private var list: [Conversation]?
+    let accounts: [AppModel]
+    @State private var lists: [String: [Conversation]] = [:]
+    @State private var loaded = false
+
+    private var rows: [(AppModel, Conversation)] {
+        AccountMerge.interleave(accounts.map { m in (lists[m.accountId] ?? []).map { (m, $0) } }) { $0.1.lastActivityAt }
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                if let list {
-                    if list.isEmpty {
-                        Text(L("chat.archivedEmpty")).foregroundStyle(Palette.textMuted).listRowBackground(Color.clear)
+                if loaded {
+                    let rows = rows
+                    if rows.isEmpty {
+                        Text(L("chat.noArchived")).foregroundStyle(Palette.textMuted).listRowBackground(Color.clear)
                     }
-                    ForEach(list) { c in
+                    ForEach(rows, id: \.1.id) { m, c in
                         HStack {
-                            ChatRow(conversation: c)
+                            VStack(alignment: .leading, spacing: 4) {
+                                ChatRow(conversation: c)
+                                ServerChip(model: m).padding(.leading, 60)
+                            }
                             if c.readOnly != true {
-                                Button(L("chat.unarchive")) { Task { await unarchive(c) } }.buttonStyle(.kf(.secondary))
+                                Button(L("chat.unarchive")) { Task { await unarchive(c, on: m) } }.buttonStyle(.kf(.secondary))
                             }
                         }
+                        .environment(m)
                         .listRowBackground(Palette.surface)
                     }
                 } else {
@@ -216,18 +234,23 @@ private struct ArchivedChatsSheet: View {
             .navigationTitle(L("chat.archived"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
-            .task { list = ((try? await app.api?.conversations(archived: true)) ?? []).filter(\.archived) }
+            .task {
+                for m in accounts {
+                    lists[m.accountId] = ((try? await m.api?.conversations(archived: true)) ?? []).filter(\.archived)
+                }
+                loaded = true
+            }
         }
     }
 
-    private func unarchive(_ c: Conversation) async {
-        guard let api = app.api else { return }
+    private func unarchive(_ c: Conversation, on m: AppModel) async {
+        guard let api = m.api else { return }
         do {
             let updated = try await api.setConversationArchived(c.id, false)
-            app.social.update(updated)
-            list?.removeAll { $0.id == c.id }
+            m.social.update(updated)
+            lists[m.accountId]?.removeAll { $0.id == c.id }
         } catch {
-            app.toasts.error(error)
+            m.toasts.error(error)
         }
     }
 }

@@ -174,7 +174,7 @@ struct SubscriptionRow: View {
         let s = subscription
         var parts: [String] = []
         if side == .feed {
-            if let r = s.remote { parts.append(L("servers.remote.otherServer", ["server": r.host ?? r.serverName])) }
+            if let r = s.remote { parts.append(L("remote.onServer", ["server": r.host ?? r.serverName])) }
             if let loc = s.frame.location, !loc.isEmpty { parts.append(loc) }
             if s.status == .pending, let who = s.requestedByName ?? s.remote?.requestedByName { parts.append(L("ios.feeds.requestedBy", ["name": who])) }
             if s.viaInvite == true { parts.append(L("ios.feeds.viaInvite")) }

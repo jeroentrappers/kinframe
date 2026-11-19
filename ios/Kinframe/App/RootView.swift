@@ -109,12 +109,13 @@ struct MainTabs: View {
         @Bindable var accounts = accounts
         TabView(selection: $app.tab) {
             // Family social: Home (timeline and strip) and Chats, each only when the server has it.
-            if app.social.features.home {
+            // Each tab shows when any account has it (docs/spec/multi-server.md §2.2).
+            if accounts.features.home {
                 HomeTab()
-                    .tabItem { Label(L("social.home.title"), systemImage: "house") }
+                    .tabItem { Label(L("social.homeTitle"), systemImage: "house") }
                     .tag(AppModel.Tab.home)
             }
-            if app.social.features.chats {
+            if accounts.features.chats {
                 ChatsTab()
                     .tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
                     .badge(accounts.unreadChats)
@@ -123,8 +124,8 @@ struct MainTabs: View {
             FramesTab()
                 .tabItem { Label(L("nav.frames"), systemImage: "photo.on.rectangle") }
                 .tag(AppModel.Tab.frames)
-            // Only when the server has feeds (discovery `feeds`).
-            if app.feedsEnabled {
+            // Only when a server has feeds (discovery `feeds`).
+            if accounts.feedsEnabled {
                 FeedsTab()
                     .tabItem { Label(L("ios.feeds.title"), systemImage: "rectangle.stack.badge.person.crop") }
                     .tag(AppModel.Tab.feeds)
@@ -141,16 +142,16 @@ struct MainTabs: View {
         }
         .adaptiveTabStyle()
         .onAppear { app.consumePendingLink() }
-        .onChange(of: app.feedsEnabled) { _, on in
+        .onChange(of: accounts.feedsEnabled) { _, on in
             if !on, app.tab == .feeds { app.tab = .frames }
         }
-        .onChange(of: app.social.features) { _, f in
+        .onChange(of: accounts.features) { _, f in
             if !f.home, app.tab == .home { app.tab = .frames }
             if !f.chats, app.tab == .chats { app.tab = .frames }
         }
-        // Home is the start once the server has family social (unless something else was opened already).
-        .task(id: app.social.features.home) {
-            if app.social.features.home, app.tab == .frames, app.framesPath.isEmpty { app.tab = .home }
+        // Home is the start once a server has family social (unless something else was opened already).
+        .task(id: accounts.features.home) {
+            if accounts.features.home, app.tab == .frames, app.framesPath.isEmpty { app.tab = .home }
         }
         .sheet(item: Binding(get: { app.social.sheet }, set: { app.social.sheet = $0 })) { sheet in
             switch sheet {
@@ -206,8 +207,17 @@ struct MainTabs: View {
                    ["server": ServerAddress.display(request.server)]))
         }
         // "Add from Google Photos": waiting for Google, progress and the result (docs/spec/photo-sources.md §7.3).
+        // The other accounts' imports show through `SecondaryAccountPresenters`.
         .sheet(isPresented: Binding(get: { app.googleImport.presented }, set: { if !$0 { app.googleImport.close() } })) {
             GoogleImportSheet(controller: app.googleImport)
+        }
+        // Leaving: a keep request to answer, over whatever is on screen (a notification, a toast).
+        .background {
+            Color.clear.sheet(item: Binding(get: { app.leaving.answering }, set: { app.leaving.answering = $0 })) { ref in
+                if let api = app.api {
+                    KeepRequestAnswerSheet(api: api, requestId: ref.id) { app.historyVersion += 1 }
+                }
+            }
         }
         .overlay(alignment: .top) {
             VStack(spacing: 6) {

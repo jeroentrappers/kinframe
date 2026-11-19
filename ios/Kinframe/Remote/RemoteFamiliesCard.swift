@@ -21,7 +21,7 @@ struct RemoteFamiliesCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(L("servers.remote.title"), trailing: canManage ? AnyView(addButton) : nil)
+            SectionHeader(L("remote.followsTitle"), trailing: canManage ? AnyView(addButton) : nil)
             if loaded, current.isEmpty {
                 Text(L("servers.remote.none"))
                     .font(.subheadline)
@@ -47,7 +47,7 @@ struct RemoteFamiliesCard: View {
         .sheet(isPresented: $adding) {
             RemoteFollowSheet(api: api, frame: frame) { upsert($0) }
         }
-        .confirmationDialog(unsubscribing.map { L("servers.remote.unsubscribeTitle", ["feed": $0.feedName]) } ?? "",
+        .confirmationDialog(unsubscribing.map { L("remote.unsubscribeTitle", ["feed": $0.feedName]) } ?? "",
                             isPresented: Binding(get: { unsubscribing != nil }, set: { if !$0 { unsubscribing = nil } }),
                             titleVisibility: .visible, presenting: unsubscribing) { s in
             Button(L("servers.remote.unsubscribeRemove"), role: .destructive) { Task { await unsubscribe(s, .remove) } }
@@ -58,11 +58,11 @@ struct RemoteFamiliesCard: View {
 
     private var addButton: some View {
         Button { adding = true } label: {
-            Label(L("servers.remote.add"), systemImage: "globe")
+            Label(L("remote.add"), systemImage: "globe")
                 .font(.subheadline.weight(.semibold))
                 .frame(minHeight: 44)
         }
-        .accessibilityLabel(L("servers.remote.add"))
+        .accessibilityLabel(L("remote.add"))
     }
 
     private func row(_ s: RemoteSubscription) -> some View {
@@ -88,12 +88,24 @@ struct RemoteFamiliesCard: View {
                 .tint(Palette.accent)
             }
             if canManage, RemoteSubscriptionLogic.isLive(s.status) {
-                Picker(L("servers.remote.onEnd.title"), selection: Binding(get: { s.onEnd }, set: { v in Task { await setOnEnd(s, v) } })) {
-                    Text(L("servers.remote.onEnd.remove")).tag(RemoteOnEnd.remove)
-                    Text(L("servers.remote.onEnd.keep")).tag(RemoteOnEnd.keep)
+                Picker(L("remote.onEnd"), selection: Binding(get: { s.onEnd }, set: { v in Task { await setOnEnd(s, v) } })) {
+                    Text(L("remote.onEnd.remove")).tag(RemoteOnEnd.remove)
+                    Text(L("remote.onEnd.keep")).tag(RemoteOnEnd.keep)
                 }
                 .font(.subheadline)
                 .disabled(busy == s.id)
+                // The family's birthdays on this frame (`updateRemoteSubscription {birthdays}`).
+                if app.birthdaysEnabled {
+                    Toggle(isOn: Binding(get: { s.birthdays ?? true }, set: { v in Task { await setBirthdays(s, v) } })) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L("ios.bday.subShow"))
+                            Text(L("ios.bday.subShowHint")).font(.footnote).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .font(.subheadline)
+                    .tint(Palette.accent)
+                    .disabled(busy == s.id)
+                }
                 Button(role: .destructive) { unsubscribing = s } label: {
                     Label(s.status == .pending ? L("servers.remote.withdraw") : L("servers.remote.unsubscribe"), systemImage: "minus.circle")
                 }
@@ -110,7 +122,7 @@ struct RemoteFamiliesCard: View {
         var parts = [RemoteSubscriptionLogic.statusText(s)]
         if s.status == .active || s.status == .error {
             if let n = s.itemCount { parts.append(Lp("servers.remote.copied", count: n)) }
-            if let at = s.lastSyncAt { parts.append(L("servers.remote.lastSync", ["when": Format.relative(at)])) }
+            if let at = s.lastSyncAt { parts.append(L("remote.lastSync", ["when": Format.relative(at)])) }
             parts.append(HistoryChoice(history: s.history, count: s.historyCount).label)
         }
         return parts.joined(separator: " · ")
@@ -133,6 +145,18 @@ struct RemoteFamiliesCard: View {
         defer { busy = nil }
         do {
             upsert(try await api.updateRemoteSubscription(frameId: frame.id, id: s.id, onEnd: v))
+            app.toasts.show(L("common.saved"))
+        } catch {
+            app.toasts.error(error)
+        }
+    }
+
+    private func setBirthdays(_ s: RemoteSubscription, _ on: Bool) async {
+        guard on != (s.birthdays ?? true) else { return }
+        busy = s.id
+        defer { busy = nil }
+        do {
+            upsert(try await api.updateRemoteSubscription(frameId: frame.id, id: s.id, birthdays: on))
             app.toasts.show(L("common.saved"))
         } catch {
             app.toasts.error(error)

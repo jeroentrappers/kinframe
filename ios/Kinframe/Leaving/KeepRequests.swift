@@ -16,7 +16,7 @@ struct TakenAwayCard: View {
         Group {
             if !groups.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(L("leaving.group.header"))
+                    SectionHeader(L("leaving.takenAwayTitle"))
                     ForEach(groups) { g in
                         Button { open = g } label: { row(g) }
                             .buttonStyle(.plain)
@@ -140,10 +140,10 @@ struct TakenAwayGroupSheet: View {
             Callout(LeavingText.requestStatus(r, person: group.byName), kind: r.status == .declined || r.status == .expired ? .warn : .info)
         } else if group.canAsk {
             VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(L("leaving.ask.title", ["name": group.byName]))
+                SectionHeader(L("leaving.askToKeep", ["name": group.byName]))
                 Text(L("leaving.ask.body", ["name": group.byName])).font(.subheadline).foregroundStyle(Palette.textMuted)
                 if !placements.isEmpty {
-                    Toggle(L("leaving.ask.pick"), isOn: $picking.animation()).tint(Palette.accent)
+                    Toggle(L("leaving.askPick"), isOn: $picking.animation()).tint(Palette.accent)
                     if picking { Text(Lp("leaving.ask.picked", count: picked.count)).font(.footnote).foregroundStyle(Palette.textMuted) }
                 }
                 TextField(L("leaving.ask.notePlaceholder"), text: $note, axis: .vertical)
@@ -153,7 +153,7 @@ struct TakenAwayGroupSheet: View {
                 Button {
                     Task { await askNow() }
                 } label: {
-                    Text(L("leaving.ask.button", ["name": group.byName]))
+                    Text(L("leaving.askToKeep", ["name": group.byName]))
                 }
                 .buttonStyle(.kf(.primary))
                 .disabled(busy || (picking && picked.isEmpty))
@@ -255,11 +255,11 @@ struct KeepRequestAnswerSheet: View {
                         .buttonStyle(.kf(.primary)).disabled(busy || picked.isEmpty)
                     Button(L("common.cancel")) { picking = false; picked = [] }.buttonStyle(.kf(.ghost))
                 } else {
-                    Button(L("leaving.toMe.allowAll")) { Task { await answer(.all) } }.buttonStyle(.kf(.primary)).disabled(busy)
+                    Button(L("leaving.allowAll")) { Task { await answer(.all) } }.buttonStyle(.kf(.primary)).disabled(busy)
                     if items.count > 1 {
-                        Button(L("leaving.toMe.allowSome")) { picking = true }.buttonStyle(.kf(.secondary)).disabled(busy)
+                        Button(L("leaving.allowSome")) { picking = true }.buttonStyle(.kf(.secondary)).disabled(busy)
                     }
-                    Button(L("leaving.toMe.decline"), role: .destructive) { Task { await answer(.none) } }
+                    Button(L("leaving.allowNone"), role: .destructive) { Task { await answer(.none) } }
                         .buttonStyle(.kf(.dangerGhost)).disabled(busy)
                 }
             }

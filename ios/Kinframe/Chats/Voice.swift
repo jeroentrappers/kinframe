@@ -191,10 +191,10 @@ struct VoiceBubble: View {
             }
             .buttonStyle(.plain)
             .disabled(clip.status != .ready)
-            .accessibilityLabel(L(playback.playingItem == clip.itemId ? "chat.voice.pause" : "chat.voice.play"))
+            .accessibilityLabel(L(playback.playingItem == clip.itemId ? "chat.pause" : "chat.voice.play"))
             if clip.status == .processing {
                 ProgressView().controlSize(.small)
-                Text(L("chat.voice.processing")).font(.caption).foregroundStyle(Palette.textMuted)
+                Text(L("chat.processing")).font(.caption).foregroundStyle(Palette.textMuted)
             } else if clip.status == .failed {
                 Text(L("chat.voice.failed")).font(.caption).foregroundStyle(Palette.danger)
             } else {

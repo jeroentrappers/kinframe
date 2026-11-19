@@ -158,6 +158,10 @@ struct FeedMembersSection: View {
                                     if inv.note?.isEmpty == false {
                                         Pill(L(inv.purpose == .join ? "ios.feeds.inviteJoinShort" : "ios.feeds.inviteSubscribeShort"))
                                     }
+                                    // Frames on other servers may use this link (README §5.22).
+                                    if inv.allowRemote == true {
+                                        Pill(L("remote.inviteAllowsRemote"), systemImage: "globe")
+                                    }
                                 }
                                 Text([
                                     CodeEntry.displayFeedCode(inv.code),
@@ -398,9 +402,9 @@ private struct FeedInviteCreateSheet: View {
                 }
                 if purpose == .subscribe, app.remoteFamiliesEnabled, model.feed?.value2.allowRemoteFrames == true {
                     Section {
-                        Toggle(L("servers.remote.inviteAllow"), isOn: $allowRemote).tint(Palette.accent)
+                        Toggle(L("remote.inviteAllow"), isOn: $allowRemote).tint(Palette.accent)
                     } footer: {
-                        Text(L("servers.remote.inviteAllowHint"))
+                        Text(L("remote.inviteAllowHint"))
                     }
                 }
                 Section(L("people.expires")) {

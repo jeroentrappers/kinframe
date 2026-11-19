@@ -103,6 +103,8 @@ private struct AccountsRoot: View {
         RootView()
             .environment(accounts.primary)
             .environment(accounts)
+            // Kinframe links tapped inside the app (chats, comments, captions) open here, whatever their server.
+            .environment(\.openURL, OpenURLAction { url in accounts.openInApp(url) ? .handled : .systemAction })
             .id(accounts.primary.accountId)
     }
 }

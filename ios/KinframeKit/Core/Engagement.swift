@@ -38,8 +38,8 @@ public enum FreshnessText {
     public static func label(_ f: Freshness) -> String {
         let days = f.daysQuiet ?? 0
         switch f.state {
-        case .never: return L("engagement.fresh.never")
-        case .fresh: return L("engagement.fresh.fresh")
+        case .never: return L("engagement.never")
+        case .fresh: return L("engagement.fresh")
         case .recent: return Lp("engagement.fresh.days", count: max(1, days))
         case .quiet:
             if days >= 14 { return Lp("engagement.fresh.weeksQuiet", count: days / 7) }
@@ -225,8 +225,8 @@ public enum MilestoneLogic {
 // MARK: Reminders
 
 extension Components.Schemas.ReminderLevel {
-    public var label: String { L("engagement.reminders.level.\(rawValue)") }
-    public var hint: String { L("engagement.reminders.levelHint.\(rawValue)") }
+    public var label: String { L("engagement.level.\(rawValue)") }
+    public var hint: String { L("engagement.levelHint.\(rawValue)") }
 }
 
 extension Components.Schemas.EmailDigest {

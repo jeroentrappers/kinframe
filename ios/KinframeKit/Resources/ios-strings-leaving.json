@@ -1,19 +1,7 @@
 {
-  "leaving.account.leave": {
-    "en": "Leave my photos to the families",
-    "nl": "Mijn foto’s aan de families laten"
-  },
   "leaving.account.leaveHint": {
     "en": "Each photo still in a family or on a frame goes to the owner of that family or frame and stays credited “your name (former member)”. Photos only in your history are deleted.",
     "nl": "Elke foto die nog in een familie of op een kader staat, gaat naar de eigenaar van die familie of dat kader en blijft op jouw naam staan, met “(voormalig lid)”. Foto’s die alleen in je geschiedenis staan, worden verwijderd."
-  },
-  "leaving.account.photos": {
-    "en": "Your photos",
-    "nl": "Je foto’s"
-  },
-  "leaving.account.take": {
-    "en": "Take my photos with me",
-    "nl": "Mijn foto’s meenemen"
   },
   "leaving.account.takeHint": {
     "en": "Your photos leave every family and frame. Frames keep them in their trash for 30 days and their owners are told.",
@@ -23,17 +11,9 @@
     "en": "{name} gets one message and decides which photos may stay. You can ask once.",
     "nl": "{name} krijgt één bericht en beslist welke foto’s mogen blijven. Je kunt het één keer vragen."
   },
-  "leaving.ask.button": {
-    "en": "Ask {name} to keep them",
-    "nl": "{name} vragen ze te laten staan"
-  },
   "leaving.ask.notePlaceholder": {
     "en": "A note (optional), e.g. “The ones with the children, for Oma”",
     "nl": "Een woordje (optioneel), bv. “Die met de kinderen, voor oma”"
-  },
-  "leaving.ask.pick": {
-    "en": "Pick photos",
-    "nl": "Foto’s kiezen"
   },
   "leaving.ask.picked.one": {
     "en": "1 photo picked",
@@ -51,61 +31,17 @@
     "en": "Asked. {name} decides.",
     "nl": "Gevraagd. {name} beslist."
   },
-  "leaving.ask.title": {
-    "en": "Ask {name} to keep them",
-    "nl": "{name} vragen ze te laten staan"
-  },
   "leaving.cannotAsk.accountDeleted": {
     "en": "{name} deleted their account, so there is nobody to ask.",
     "nl": "{name} heeft het account verwijderd, er is dus niemand om het te vragen."
-  },
-  "leaving.cannotAsk.blocked": {
-    "en": "{name} doesn’t accept requests.",
-    "nl": "{name} aanvaardt geen verzoeken."
-  },
-  "leaving.cannotAsk.expired": {
-    "en": "The 30 days are over.",
-    "nl": "De 30 dagen zijn voorbij."
-  },
-  "leaving.chat.noLongerContacts": {
-    "en": "You can no longer message {name}.",
-    "nl": "Je kunt {name} geen berichten meer sturen."
-  },
-  "leaving.comments.delete": {
-    "en": "Delete them too",
-    "nl": "Ook verwijderen"
-  },
-  "leaving.comments.keep": {
-    "en": "Leave them",
-    "nl": "Laten staan"
-  },
-  "leaving.comments.title.one": {
-    "en": "Your comment (1)",
-    "nl": "Je reactie (1)"
-  },
-  "leaving.comments.title.other": {
-    "en": "Your comments ({count})",
-    "nl": "Je reacties ({count})"
   },
   "leaving.former.body": {
     "en": "Your photos are still there. You can take them away: they leave at once, and frames keep them in their trash for 30 days.",
     "nl": "Je foto’s staan er nog. Je kunt ze weghalen: ze verdwijnen meteen, en kaders houden ze 30 dagen in hun prullenbak."
   },
-  "leaving.former.header": {
-    "en": "Families and frames you left",
-    "nl": "Families en kaders die je verliet"
-  },
-  "leaving.formerMember": {
-    "en": "{name} (former member)",
-    "nl": "{name} (voormalig lid)"
-  },
   "leaving.frames.leaveToo": {
     "en": "Leave this frame too",
     "nl": "Dit kader ook verlaten"
-  },
-  "leaving.frames.title": {
-    "en": "Frames you are a member of through this family",
-    "nl": "Kaders waar je via deze familie lid van bent"
   },
   "leaving.group.count.one": {
     "en": "1 photo",
@@ -119,29 +55,13 @@
     "en": "{name} took these photos away. They wait in the trash until {date} and are deleted then, unless {name} lets them stay.",
     "nl": "{name} heeft deze foto’s weggehaald. Ze wachten in de prullenbak tot {date} en worden dan verwijderd, tenzij {name} ze laat staan."
   },
-  "leaving.group.header": {
-    "en": "Taken away",
-    "nl": "Weggehaald"
-  },
-  "leaving.group.title": {
-    "en": "Taken away by {name}",
-    "nl": "Weggehaald door {name}"
-  },
   "leaving.group.until": {
     "en": "until {date}",
     "nl": "tot {date}"
   },
-  "leaving.laterHint": {
-    "en": "You can still remove any of your photos later from your history.",
-    "nl": "Je kunt al je foto’s later nog altijd weghalen via je geschiedenis."
-  },
   "leaving.leaveFeed": {
     "en": "Leave {name}",
     "nl": "{name} verlaten"
-  },
-  "leaving.leaveFeedTitle": {
-    "en": "Leave {name}?",
-    "nl": "{name} verlaten?"
   },
   "leaving.live.takenAway.one": {
     "en": "1 photo was taken away from {frame}.",
@@ -155,10 +75,6 @@
     "en": "Leave someone out",
     "nl": "Iemand weglaten"
   },
-  "leaving.memories.hidden": {
-    "en": "Hidden memories",
-    "nl": "Verborgen herinneringen"
-  },
   "leaving.memories.hiddenCount.one": {
     "en": "1 memory hidden",
     "nl": "1 herinnering verborgen"
@@ -170,14 +86,6 @@
   "leaving.memories.hiddenHint": {
     "en": "Memories you chose not to see again with “Don’t show this memory again”.",
     "nl": "Herinneringen die je niet meer wilt zien, via “Deze herinnering niet meer tonen”."
-  },
-  "leaving.memories.hiddenToast": {
-    "en": "You won’t see this memory again.",
-    "nl": "Je ziet deze herinnering niet meer."
-  },
-  "leaving.memories.hideThis": {
-    "en": "Don’t show this memory again",
-    "nl": "Deze herinnering niet meer tonen"
   },
   "leaving.memories.linkHint": {
     "en": "Leave people out of On this day, recaps and suggestions",
@@ -191,41 +99,9 @@
     "en": "No hidden memories.",
     "nl": "Geen verborgen herinneringen."
   },
-  "leaving.memories.people": {
-    "en": "Leave people out",
-    "nl": "Mensen weglaten"
-  },
   "leaving.memories.peopleHint": {
     "en": "On this day, the monthly recap, suggestions and the weekly summary no longer show you their posts. Nobody is told, and frames don’t change. This doesn’t block anyone.",
     "nl": "Op deze dag, het maandoverzicht, suggesties en de wekelijkse samenvatting tonen jou hun berichten niet meer. Niemand krijgt een melding en kaders veranderen niet. Je blokkeert er niemand mee."
-  },
-  "leaving.memories.showAgain": {
-    "en": "Show again",
-    "nl": "Weer tonen"
-  },
-  "leaving.memories.showAll": {
-    "en": "Show them all again",
-    "nl": "Alles weer tonen"
-  },
-  "leaving.memories.title": {
-    "en": "Memories",
-    "nl": "Herinneringen"
-  },
-  "leaving.photos.choice": {
-    "en": "Your photos",
-    "nl": "Je foto’s"
-  },
-  "leaving.photos.keep": {
-    "en": "Leave them with the family",
-    "nl": "Bij de familie laten"
-  },
-  "leaving.photos.keepHint": {
-    "en": "They stay in the family and on its frames, still credited to you.",
-    "nl": "Ze blijven in de familie en op haar kaders, nog altijd op jouw naam."
-  },
-  "leaving.photos.take": {
-    "en": "Take them with me",
-    "nl": "Meenemen"
   },
   "leaving.photos.takeHint": {
     "en": "They leave at once. Frames keep them in their trash for 30 days and their owners are told; they can ask you to let some stay.",
@@ -261,11 +137,11 @@
   },
   "leaving.result.comments.one": {
     "en": "1 comment was deleted.",
-    "nl": "1 reactie werd verwijderd."
+    "nl": "1 opmerking werd verwijderd."
   },
   "leaving.result.comments.other": {
     "en": "{count} comments were deleted.",
-    "nl": "{count} reacties werden verwijderd."
+    "nl": "{count} opmerkingen werden verwijderd."
   },
   "leaving.result.photos.one": {
     "en": "1 photo was taken away.",
@@ -303,17 +179,9 @@
     "en": "The {count} photos you sent to {name} leave the frame.",
     "nl": "De {count} foto’s die je naar {name} stuurde, verdwijnen van het kader."
   },
-  "leaving.takeAway.button": {
-    "en": "Take my photos away from {name}",
-    "nl": "Mijn foto’s weghalen uit {name}"
-  },
   "leaving.takeAway.deleteComments": {
     "en": "Delete my comments there too",
-    "nl": "Mijn reacties daar ook verwijderen"
-  },
-  "leaving.takeAway.nothing": {
-    "en": "There was nothing left to take away.",
-    "nl": "Er was niets meer om weg te halen."
+    "nl": "Mijn opmerkingen daar ook verwijderen"
   },
   "leaving.takeAway.short": {
     "en": "Take away",
@@ -323,25 +191,13 @@
     "en": "Take my photos away",
     "nl": "Mijn foto’s weghalen"
   },
-  "leaving.toMe.allowAll": {
-    "en": "Allow all",
-    "nl": "Alles toelaten"
-  },
   "leaving.toMe.allowPicked": {
     "en": "Allow the picked photos",
     "nl": "De gekozen foto’s toelaten"
   },
-  "leaving.toMe.allowSome": {
-    "en": "Allow some",
-    "nl": "Een paar toelaten"
-  },
   "leaving.toMe.allowed": {
     "en": "Done. The photos are back.",
     "nl": "Klaar. De foto’s staan er weer."
-  },
-  "leaving.toMe.decline": {
-    "en": "Decline",
-    "nl": "Weigeren"
   },
   "leaving.toMe.declined": {
     "en": "Declined. The photos are deleted when the 30 days end.",
@@ -366,10 +222,6 @@
   "leaving.toMe.frame.other": {
     "en": "{name} asks to keep {count} photos on {place}.",
     "nl": "{name} vraagt om {count} foto’s op {place} te laten staan."
-  },
-  "leaving.toMe.header": {
-    "en": "Asked to keep your photos",
-    "nl": "Gevraagd om je foto’s te laten staan"
   },
   "leaving.toMe.title": {
     "en": "Keep request",

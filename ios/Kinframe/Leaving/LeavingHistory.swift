@@ -24,7 +24,7 @@ struct LeavingHistorySection: View {
         VStack(alignment: .leading, spacing: 14) {
             if !requests.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(L("leaving.toMe.header"))
+                    SectionHeader(L("leaving.requestsTitle"))
                     ForEach(requests) { r in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(LeavingText.requestToMe(r)).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
@@ -38,7 +38,7 @@ struct LeavingHistorySection: View {
             }
             if let places, !(places.feeds.isEmpty && places.frames.isEmpty) {
                 VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(L("leaving.former.header"))
+                    SectionHeader(L("leaving.formerTitle"))
                     Text(L("leaving.former.body")).font(.footnote).foregroundStyle(Palette.textMuted)
                     ForEach(places.feeds, id: \.feedId) { f in
                         placeRow(name: f.name, photos: f.photos) {
@@ -58,11 +58,6 @@ struct LeavingHistorySection: View {
         .frame(maxWidth: PageWidth.text, alignment: .leading)
         .task { await load() }
         .onChange(of: app.historyVersion) { Task { await load() } }
-        .onChange(of: app.leaving.openRequestId, initial: true) { _, id in
-            guard let id else { return }
-            app.leaving.openRequestId = nil
-            answering = KeepRequestRef(id: id)
-        }
         .onLiveEvent(app.events) { e in
             if case .leaving(.keepRequestUpdated) = e { Task { await load() } }
         }
@@ -84,7 +79,7 @@ struct LeavingHistorySection: View {
             Button(L("leaving.takeAway.short"), role: .destructive, action: take).buttonStyle(.kf(.dangerGhost))
         }
         .accessibilityElement(children: .combine)
-        .accessibilityHint(L("leaving.takeAway.button", ["name": name]))
+        .accessibilityHint(L("leaving.takeAwayFrom", ["name": name]))
     }
 
     private func load() async {
@@ -93,11 +88,12 @@ struct LeavingHistorySection: View {
     }
 }
 
-/// Leaving's app-wide state: a keep request to open once History is on screen, and a frame whose trash to show.
+/// Leaving's app-wide state: a keep request to answer (a sheet over the tabs, from a notification or a toast), and a
+/// frame whose trash to show.
 @MainActor
 @Observable
 final class LeavingState {
-    var openRequestId: String?
+    var answering: LeavingHistorySection.KeepRequestRef?
     var trashFrameId: String?
 
     /// The library asks once whether to open straight on the trash (from a notification).

@@ -62,7 +62,7 @@ struct ReactButton: View {
         } label: {
             HStack(spacing: 5) {
                 if let mine { Text(mine.emoji) } else { Image(systemName: "heart") }
-                if label { Text(mine?.label ?? L("social.reaction.react")).font(.subheadline.weight(.medium)) }
+                if label { Text(mine?.label ?? L("social.react")).font(.subheadline.weight(.medium)) }
             }
             .foregroundStyle(mine != nil ? Palette.primary : Palette.textMuted)
             .frame(minHeight: 44)
@@ -70,7 +70,7 @@ struct ReactButton: View {
         } primaryAction: {
             react(mine == nil ? .love : nil)
         }
-        .accessibilityLabel(mine.map { L("social.reaction.yours", ["emoji": $0.label]) } ?? L("social.reaction.react"))
+        .accessibilityLabel(mine.map { L("social.reaction.yours", ["emoji": $0.label]) } ?? L("social.react"))
         .accessibilityHint(L("social.reaction.hint"))
     }
 }
@@ -130,7 +130,7 @@ struct ReactionListSheet: View {
                             .listRowBackground(Palette.surface)
                         }
                         if !list.people.isEmpty {
-                            Section(L("social.reactions.people")) {
+                            Section(L("social.circlePeople")) {
                                 ForEach(Array(list.people.enumerated()), id: \.offset) { _, p in
                                     HStack(spacing: 12) {
                                         AvatarView(name: PersonName.display(p.person), url: p.person.avatarUrl, size: 36)
@@ -152,7 +152,7 @@ struct ReactionListSheet: View {
                 }
             }
             .pageBackground()
-            .navigationTitle(L("social.reactions.title"))
+            .navigationTitle(L("social.whoReacted"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task { await load() }
@@ -194,7 +194,9 @@ struct MentionText: View {
                     app.social.personSheet = PersonRoute(userId: id, account: app.accountId)
                     return .handled
                 }
-                return .systemAction
+                // Everything else as anywhere in the app (kinframe links open here).
+                openURL(url)
+                return .handled
             })
     }
 }
@@ -367,13 +369,13 @@ struct ReportSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker(L("chat.report.reason"), selection: $reason) {
+                    Picker(L("chat.reportReason"), selection: $reason) {
                         ForEach(ReportReason.allCases, id: \.self) { r in Text(r.label).tag(r) }
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
                 } header: {
-                    Text(L("chat.report.reason"))
+                    Text(L("chat.reportReason"))
                 } footer: {
                     Text(L(inFamily ? "chat.report.toFamily" : "chat.report.toOperator"))
                 }
@@ -387,12 +389,12 @@ struct ReportSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("chat.report.title.\(kind.rawValue)"))
+            .navigationTitle(L("chat.reportTitle.\(kind.rawValue)"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L("chat.report.send")) { Task { await send() } }.fontWeight(.semibold).disabled(busy)
+                    Button(L("chat.report")) { Task { await send() } }.fontWeight(.semibold).disabled(busy)
                 }
             }
         }

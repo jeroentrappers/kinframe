@@ -427,7 +427,7 @@ public actor OutboxRunner {
                 failures = 0
                 try save(id, item: index, motion: motion, upload)
             } catch TusError.unauthorized {
-                guard !refreshedToken, await tokens.refreshAfterUnauthorized() != nil else { throw APIError.unauthorized }
+                guard !refreshedToken, await tokens.refreshAfterUnauthorized(rejected: token) != nil else { throw APIError.unauthorized }
                 refreshedToken = true
             } catch TusError.failed(let e) {
                 throw e
@@ -514,7 +514,7 @@ public actor OutboxRunner {
                 }
                 return
             case 401:
-                guard !refreshedToken, await tokens.refreshAfterUnauthorized() != nil else { throw APIError.unauthorized }
+                guard !refreshedToken, await tokens.refreshAfterUnauthorized(rejected: token) != nil else { throw APIError.unauthorized }
                 refreshedToken = true
             case 400..<500 where response.status != 408 && response.status != 429:
                 let problem = APIError.from(status: response.status, body: response.body)

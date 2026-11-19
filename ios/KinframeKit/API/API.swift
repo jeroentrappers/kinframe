@@ -9,6 +9,15 @@ public protocol TokenProvider: Sendable {
     func accessToken() async throws -> String?
     /// Called after a 401: drop the cached token and return a fresh one, or nil to give up (signed out).
     func refreshAfterUnauthorized() async -> String?
+    /// Called after a 401 for `rejected`: when another request already replaced that token, the replacement; else
+    /// as `refreshAfterUnauthorized()`. Concurrent 401s then share one refresh.
+    func refreshAfterUnauthorized(rejected: String?) async -> String?
+}
+
+extension TokenProvider {
+    public func refreshAfterUnauthorized(rejected: String?) async -> String? {
+        await refreshAfterUnauthorized()
+    }
 }
 
 /// The kinframe API for one server: the generated client plus auth, language and problem handling.
@@ -52,9 +61,10 @@ public struct API: Sendable {
         try await tokens.accessToken()
     }
 
-    /// After a 401 outside the generated client: a fresh token, or nil when signed out.
-    public func refreshedToken() async -> String? {
-        await tokens.refreshAfterUnauthorized()
+    /// After a 401 outside the generated client: a fresh token, or nil when signed out. Pass the token that was
+    /// refused, so concurrent 401s share one refresh.
+    public func refreshedToken(rejected: String? = nil) async -> String? {
+        await tokens.refreshAfterUnauthorized(rejected: rejected)
     }
 
     /// Absolute URL for a path on this server.
@@ -83,12 +93,14 @@ struct APIMiddleware: ClientMiddleware {
             request.headerFields[.ifMatch] = decoded
         }
         let anonymous = operationID == "getDiscovery" || operationID == "devToken"
+        var sent: String?
         if !anonymous, let token = try await tokens.accessToken() {
             request.headerFields[.authorization] = "Bearer \(token)"
+            sent = token
         }
         var (response, responseBody) = try await next(request, body, baseURL)
         if response.status.code == 401, !anonymous, body?.iterationBehavior != .single,
-           let fresh = await tokens.refreshAfterUnauthorized() {
+           let fresh = await tokens.refreshAfterUnauthorized(rejected: sent) {
             request.headerFields[.authorization] = "Bearer \(fresh)"
             (response, responseBody) = try await next(request, body, baseURL)
         }

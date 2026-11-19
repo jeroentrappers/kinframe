@@ -86,5 +86,29 @@
   "servers.account.title": {
     "en": "Accounts",
     "nl": "Accounts"
+  },
+  "servers.choose.code": {
+    "en": "A code belongs to the server the frame or family is on. Pick that server.",
+    "nl": "Een code hoort bij de server waar het fotokader of de familie op staat. Kies die server."
+  },
+  "servers.choose.family": {
+    "en": "The family lives on this server: its members sign in there.",
+    "nl": "De familie staat op deze server: haar leden melden zich daar aan."
+  },
+  "servers.choose.hint": {
+    "en": "Continue on {server}",
+    "nl": "Verder op {server}"
+  },
+  "servers.choose.title": {
+    "en": "Which server?",
+    "nl": "Welke server?"
+  },
+  "servers.share.link": {
+    "en": "Open kinframe to continue: this link is waiting there.",
+    "nl": "Open kinframe om verder te gaan: deze link wacht daar."
+  },
+  "servers.share.notLink": {
+    "en": "This isn’t a kinframe link. Share photos or videos, or a kinframe join or invite link.",
+    "nl": "Dit is geen kinframe-link. Deel foto’s of video’s, of een kinframe-link om mee te doen of uit te nodigen."
   }
 }

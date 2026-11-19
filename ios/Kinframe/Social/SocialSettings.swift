@@ -14,12 +14,12 @@ struct SocialSettingsSections: View {
             Section {
                 Toggle(isOn: Binding(get: { app.me?.showReadReceipts ?? true }, set: { on in Task { await setReceipts(on) } })) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L("chat.settings.readReceipts"))
+                        Text(L("chat.readReceipts"))
                         Text(L("chat.settings.readReceiptsHint")).font(.footnote).foregroundStyle(Palette.textMuted)
                     }
                 }
                 .tint(Palette.accent)
-                NavigationLink { BlockedPeopleView() } label: { Text(L("chat.blocked.title")) }
+                NavigationLink { BlockedPeopleView() } label: { Text(L("chat.blockedPeople")) }
             } header: {
                 Text(L("chat.title"))
             } footer: {
@@ -30,7 +30,7 @@ struct SocialSettingsSections: View {
             Section(L("engagement.settings.title")) {
                 NavigationLink { ReminderSettingsView() } label: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L("engagement.reminders.title"))
+                        Text(L("engagement.remindersTitle"))
                         if let r = app.social.reminders {
                             Text(ReminderLogic.isSnoozed(r) ? L("engagement.reminders.snoozedShort") : r.level.label)
                                 .font(.footnote).foregroundStyle(Palette.textMuted)
@@ -81,20 +81,20 @@ struct ReminderSettingsView: View {
                     .listRowBackground(Palette.surface)
                 }
                 Section {
-                    Picker(L("engagement.reminders.level"), selection: Binding(get: { p.level }, set: { v in Task { await update(.init(level: v)) } })) {
+                    Picker(L("engagement.reminderLevel"), selection: Binding(get: { p.level }, set: { v in Task { await update(.init(level: v)) } })) {
                         ForEach(ReminderLevel.allCases, id: \.self) { l in Text(l.label).tag(l) }
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Text(L("engagement.reminders.level"))
+                    Text(L("engagement.reminderLevel"))
                 } footer: {
                     Text(p.level.hint)
                 }
                 .listRowBackground(Palette.surface)
                 Section {
-                    toggle(p.frameRequests, L("engagement.reminders.frameRequests"), L("engagement.reminders.frameRequestsHint")) { .init(frameRequests: $0) }
+                    toggle(p.frameRequests, L("engagement.frameRequests"), L("engagement.reminders.frameRequestsHint")) { .init(frameRequests: $0) }
                     toggle(p.weeklySummary, L("engagement.reminders.summary"), L("engagement.reminders.summaryHint")) { .init(weeklySummary: $0) }
-                    toggle(p.birthdayReminders, L("engagement.reminders.birthdays"), L("engagement.reminders.birthdaysHint")) { .init(birthdayReminders: $0) }
+                    toggle(p.birthdayReminders, L("engagement.birthdayReminders"), L("engagement.reminders.birthdaysHint")) { .init(birthdayReminders: $0) }
                 }
                 .listRowBackground(Palette.surface)
                 Section {
@@ -109,16 +109,16 @@ struct ReminderSettingsView: View {
                 }
                 .listRowBackground(Palette.surface)
                 Section {
-                    DatePicker(L("engagement.reminders.quietFrom"), selection: Binding(get: { ReminderLogic.date(p.quietHours.start) }, set: { d in
+                    DatePicker(L("engagement.quietFrom"), selection: Binding(get: { ReminderLogic.date(p.quietHours.start) }, set: { d in
                         Task { await update(.init(quietHours: .init(start: ReminderLogic.hhmm(from: d), end: p.quietHours.end))) }
                     }), displayedComponents: .hourAndMinute)
                     DatePicker(L("engagement.reminders.quietTo"), selection: Binding(get: { ReminderLogic.date(p.quietHours.end) }, set: { d in
                         Task { await update(.init(quietHours: .init(start: p.quietHours.start, end: ReminderLogic.hhmm(from: d)))) }
                     }), displayedComponents: .hourAndMinute)
                 } header: {
-                    Text(L("engagement.reminders.quiet"))
+                    Text(L("engagement.quietHours"))
                 } footer: {
-                    Text(L("engagement.reminders.quietHint"))
+                    Text(L("engagement.quietHoursHint"))
                 }
                 .listRowBackground(Palette.surface)
                 if app.social.features.emailDigest || p.emailDigestAvailable == true {
@@ -127,7 +127,7 @@ struct ReminderSettingsView: View {
                             ForEach(EmailDigest.allCases, id: \.self) { d in Text(d.label).tag(d) }
                         }
                     } footer: {
-                        Text(L("engagement.digest.hint"))
+                        Text(L("engagement.emailDigestHint"))
                     }
                     .listRowBackground(Palette.surface)
                 }
@@ -137,7 +137,7 @@ struct ReminderSettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("engagement.reminders.title"))
+        .navigationTitle(L("engagement.remindersTitle"))
         .task { await app.social.loadReminders() }
     }
 

@@ -26,8 +26,8 @@ struct NewChatSheet: View {
         NavigationStack {
             List {
                 if isGroup, adding == nil {
-                    Section(L("chat.new.groupName")) {
-                        TextField(L("chat.new.groupNamePlaceholder"), text: $name)
+                    Section(L("chat.groupName")) {
+                        TextField(L("chat.groupNamePlaceholder"), text: $name)
                             .onChange(of: name) { if name.count > GroupRules.maxName { name = String(name.prefix(GroupRules.maxName)) } }
                     }
                     .listRowBackground(Palette.surface)
@@ -65,12 +65,12 @@ struct NewChatSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L(adding == nil ? "chat.new.title" : "chat.info.addPeople"))
+            .navigationTitle(L(adding == nil ? "chat.newChat" : "chat.addPeople"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L(adding != nil ? "chat.info.add" : isGroup ? "chat.new.createGroup" : "chat.new.start")) { Task { await create() } }
+                    Button(L(adding != nil ? "chat.add" : isGroup ? "chat.createGroup" : "chat.startChat")) { Task { await create() } }
                         .fontWeight(.semibold)
                         .disabled(problem != nil || busy)
                 }
@@ -141,25 +141,25 @@ struct ConversationInfoView: View {
                             }
                         }
                         if ChatAbilities.canManageGroup(c) {
-                            TextField(L("chat.new.groupName"), text: $name)
+                            TextField(L("chat.groupName"), text: $name)
                                 .onSubmit { Task { await rename() } }
-                            PhotosPicker(selection: $photoPick, matching: .images) { Label(L("chat.info.photo"), systemImage: "photo") }
+                            PhotosPicker(selection: $photoPick, matching: .images) { Label(L("chat.changePhoto"), systemImage: "photo") }
                             if c.photoUrl != nil {
-                                Button(L("chat.info.removePhoto"), role: .destructive) { Task { await removePhoto() } }
+                                Button(L("chat.removePhoto"), role: .destructive) { Task { await removePhoto() } }
                             }
                         }
                         if c.kind == .family, let feedId = c.feedId {
-                            Button(L("chat.info.openFamily")) { dismiss(); app.openFeed(feedId) }
+                            Button(L("chat.openFamily")) { dismiss(); app.openFeed(feedId) }
                         }
                         if c.kind == .direct, let other = c.other, other.formerMember != true {
-                            Button(L("chat.info.profile")) { dismiss(); app.social.personSheet = PersonRoute(userId: other.userId, account: app.accountId) }
+                            Button(L("chat.viewProfile")) { dismiss(); app.social.personSheet = PersonRoute(userId: other.userId, account: app.accountId) }
                         }
                     }
                     .listRowBackground(Palette.surface)
 
-                    Section(L("chat.info.notifications")) {
-                        Picker(L("chat.mute.title"), selection: Binding(get: { muteChoice(c) }, set: { m in Task { await mute(m) } })) {
-                            Text(L("chat.mute.off")).tag(MuteFor.off)
+                    Section(L("chat.notifications")) {
+                        Picker(L("chat.mute"), selection: Binding(get: { muteChoice(c) }, set: { m in Task { await mute(m) } })) {
+                            Text(L("chat.muteFor.off")).tag(MuteFor.off)
                             ForEach(MuteFor.choices, id: \.self) { m in Text(m.label).tag(m) }
                         }
                         Button(L(c.archived ? "chat.unarchive" : "chat.archive")) { Task { await archive(!c.archived) } }
@@ -176,13 +176,13 @@ struct ConversationInfoView: View {
                             }
                             .contextMenu {
                                 if ChatAbilities.canManageGroup(c), m.person.userId != app.me?.id {
-                                    Button(L(m.role == .admin ? "chat.info.makeMember" : "chat.info.makeAdmin")) { Task { await setAdmin(m, m.role != .admin) } }
+                                    Button(L(m.role == .admin ? "chat.info.makeMember" : "chat.makeAdmin")) { Task { await setAdmin(m, m.role != .admin) } }
                                     Button(L("chat.info.remove"), role: .destructive) { Task { await remove(m) } }
                                 }
                             }
                         }
                         if ChatAbilities.canAddPeople(c, limit: app.limits.maxGroupMembers) {
-                            Button { adding = true } label: { Label(L("chat.info.addPeople"), systemImage: "person.badge.plus") }
+                            Button { adding = true } label: { Label(L("chat.addPeople"), systemImage: "person.badge.plus") }
                         }
                     } header: {
                         Text(Lp("chat.info.members", count: c.memberCount))
@@ -194,7 +194,7 @@ struct ConversationInfoView: View {
 
                     if ChatAbilities.canLeave(c) {
                         Section {
-                            Button(L("chat.info.leave"), role: .destructive) { confirmLeave = true }
+                            Button(L("chat.leaveGroup"), role: .destructive) { confirmLeave = true }
                         }
                         .listRowBackground(Palette.surface)
                     }
@@ -206,7 +206,7 @@ struct ConversationInfoView: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("chat.info.title"))
+            .navigationTitle(L("chat.details"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { Task { await rename(); dismiss() } } } }
             .onAppear { name = c?.name ?? "" }
@@ -219,7 +219,7 @@ struct ConversationInfoView: View {
                 if let c { NewChatSheet(adding: c) { updated in apply(updated) } }
             }
             .confirmationDialog(L("chat.info.leaveConfirm"), isPresented: $confirmLeave, titleVisibility: .visible) {
-                Button(L("chat.info.leave"), role: .destructive) { Task { await leave() } }
+                Button(L("chat.leaveGroup"), role: .destructive) { Task { await leave() } }
                 Button(L("common.cancel"), role: .cancel) {}
             }
         }
@@ -417,7 +417,7 @@ struct ShareInChatSheet: View {
                 }
                 .listRowBackground(Palette.surface)
                 Section(L("chat.share.to")) {
-                    if app.social.conversations.isEmpty { Text(L("chat.list.emptyTitle")).foregroundStyle(Palette.textMuted) }
+                    if app.social.conversations.isEmpty { Text(L("chat.emptyTitle")).foregroundStyle(Palette.textMuted) }
                     ForEach(app.social.conversations.filter { ChatAbilities.canSend($0) }) { c in
                         Button { Task { await share(to: c) } } label: {
                             HStack(spacing: 12) {
@@ -434,7 +434,7 @@ struct ShareInChatSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("social.post.shareInChat"))
+            .navigationTitle(L("social.shareInChat"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } } }
             .task { if !app.social.conversationsLoaded { await app.social.loadConversations() } }

@@ -102,6 +102,7 @@ final class Accounts {
 
     func didBecomeActive() {
         for m in models { m.didBecomeActive() }
+        openPendingLink()
     }
 
     // MARK: Adding and removing
@@ -212,6 +213,34 @@ final class Accounts {
         return true
     }
 
+    /// A link tapped inside the app (a chat, a comment, a caption) or pasted: kinframe links of any server open in the
+    /// app. The system would send them to Safari (an app's own Universal Links don't open it, and other servers'
+    /// links can't be Universal Links at all). Links of an unknown host are checked first (`/.well-known/kinframe`),
+    /// so an ordinary web page with a similar path still opens in the browser. False: not a kinframe link.
+    @discardableResult
+    func openInApp(_ url: URL) -> Bool {
+        guard let link = DeepLink.parse(url) else { return false }
+        let primary = primary
+        guard let server = link.server, url.scheme?.lowercased() != DeepLink.scheme, model(server: server) == nil else {
+            primary.open(url)
+            return true
+        }
+        Task {
+            if (try? await DiscoveryClient.fetch(server)) != nil {
+                primary.open(url)
+            } else {
+                await UIApplication.shared.open(url)
+            }
+        }
+        return true
+    }
+
+    /// A link the share extension left for the app ("Share → kinframe" on a link).
+    func openPendingLink() {
+        guard primary.phase != .launching, let url = PendingLink.take() else { return }
+        primary.open(url)
+    }
+
     // MARK: Merged lists
 
     struct Owned<T> {
@@ -243,7 +272,29 @@ final class Accounts {
     }
 
     var framesLoaded: Bool { active.allSatisfy(\.framesLoaded) }
-    var feedsLoaded: Bool { active.allSatisfy(\.feedsLoaded) }
+    /// Every account with families has loaded them (accounts without families never load any).
+    var feedsLoaded: Bool { active.filter(\.feedsEnabled).allSatisfy(\.feedsLoaded) }
+
+    // MARK: What the app shows
+
+    /// The accounts whose discovery decides the tabs: the signed-in ones, and the primary one while it connects.
+    private var deciding: [AppModel] {
+        let list = active
+        return list.contains { $0 === primary } ? list : [primary] + list
+    }
+
+    /// Family social of any account: the Home and Chats tabs show when one account has them. Inside, each post, chat,
+    /// card or button still follows its own account's `social.features`.
+    var features: SocialFeatures { SocialFeatures.any(deciding.map(\.social.features)) }
+
+    /// The Families tab shows when any account's server has families.
+    var feedsEnabled: Bool { deciding.contains(where: \.feedsEnabled) }
+
+    /// Accounts where frames can be added ("Enter a code"), in account order.
+    var frameAccounts: [AppModel] { active }
+
+    /// Accounts where families can be created or joined.
+    var familyAccounts: [AppModel] { active.filter(\.feedsEnabled) }
 
     func loadFrames() async {
         await withTaskGroup(of: Void.self) { g in for m in active { g.addTask { await m.loadFrames() } } }

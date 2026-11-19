@@ -26,14 +26,18 @@ public enum ServerStore {
 /// Signs people in with Logto (Authorization Code + PKCE through ASWebAuthenticationSession), or with a dev token
 /// on development servers, and hands out access tokens for the API resource.
 ///
-/// Refresh tokens live in the Keychain and the current access token is cached there too, so the share extension uses
-/// the same session. Before refreshing, the Logto client is rebuilt from the Keychain so a refresh token rotated by
-/// the other process is picked up.
+/// One instance per account (docs/spec/multi-server.md §2.1). Each account keeps its refresh token, ID token and
+/// current access token in the Keychain under its own names, shared with the share extension. The Logto SDK only runs
+/// the browser sign-in, with its persistent storage off, so its single Keychain slot never holds (or hands out) any
+/// account's tokens. Refreshing is one call to the account's own Logto tenant (`TokenEndpoint`) with the account's own
+/// refresh token, so a token of one server is never sent to another:
 ///
-/// One instance per account (docs/spec/multi-server.md §2.1). The Logto SDK keeps a single session in its own Keychain
-/// service, so each account keeps its tokens under its own names (`LogtoSlot`) and lends them to a Logto client right
-/// before using it; what the client ends up with (a rotated refresh token) is copied back from its memory, never from
-/// the shared slot another account may have written meanwhile.
+/// - Refreshes of one account are serialized: within the process one refresh at a time per account (whichever
+///   `AuthService` asks), across the app and the share extension by a file lock (`SessionLock`). Under the lock the
+///   Keychain is read again, so a refresh the other process just did is used instead of spending the rotated token.
+/// - A 401 only refreshes when the refused token is still the cached one; concurrent 401s share one refresh.
+/// - A token is only cached and sent when it was issued for this account (`TokenAudience`).
+/// - Signing in or out while a refresh runs wins: the refresh's result is dropped.
 @MainActor
 public final class AuthService {
     public enum Mode: String, Sendable {
@@ -49,7 +53,7 @@ public final class AuthService {
         static let accessToken = "accessToken"
     }
 
-    private struct CachedToken: Codable {
+    struct CachedToken: Codable {
         var token: String
         var expiresAt: Date
         var resource: String
@@ -59,15 +63,30 @@ public final class AuthService {
     /// The account this session belongs to (`AccountRecord.id`).
     public let accountId: String
     private var discovery: Discovery?
-    private var refreshing: Task<String?, Error>?
     private let slot: LogtoSlot
+    private let vault: SessionVault
+    private let endpoint: TokenEndpoint
+    private let lock: SessionLock
+    private let defaults: UserDefaults
+    /// Bumped by sign-in and sign-out: a refresh that started before doesn't write its result.
+    private var generation = 0
     /// Called when the session ended on its own (refresh token rejected).
     public var onSignedOut: (() -> Void)?
 
-    public init(account: String = AccountRecord.legacyId) {
+    /// The refreshes running in this process, per account (several `AuthService`s may serve one account).
+    private let refreshes: RefreshRegistry
+
+    public init(account: String = AccountRecord.legacyId, vault: SessionVault = KeychainVault(),
+                endpoint: TokenEndpoint = LogtoTokenEndpoint.shared, lock: SessionLock = FileSessionLock(),
+                defaults: UserDefaults = AppGroup.defaults, refreshes: RefreshRegistry = .shared) {
         accountId = account
-        slot = LogtoSlot(account: account)
-        mode = AppGroup.defaults.string(forKey: Self.name(Key.mode, account)).flatMap(Mode.init(rawValue:))
+        self.refreshes = refreshes
+        self.vault = vault
+        self.endpoint = endpoint
+        self.lock = lock
+        self.defaults = defaults
+        slot = LogtoSlot(account: account, vault: vault)
+        mode = defaults.string(forKey: Self.name(Key.mode, account)).flatMap(Mode.init(rawValue:))
         if mode == .logto { slot.migrateIfNeeded() }
     }
 
@@ -84,31 +103,10 @@ public final class AuthService {
 
     public var isSignedIn: Bool {
         switch mode {
-        case .dev: Keychain.string(name(Key.devToken)) != nil
+        case .dev: vault.string(name(Key.devToken)) != nil
         case .logto: slot.idToken != nil && discovery?.logtoConfigured == true
         case nil: false
         }
-    }
-
-    private func makeLogto() -> LogtoClient? {
-        guard let discovery, discovery.logtoConfigured,
-              let config = try? LogtoConfig(
-                  endpoint: discovery.logtoEndpoint,
-                  appId: discovery.auth.mobileClientId,
-                  scopes: Self.scopes,
-                  resources: [discovery.auth.apiResource],
-                  prefersEphemeralWebBrowserSession: true
-              )
-        else { return nil }
-        // The SDK reads its Keychain slot while initialising: put this account's tokens there first (no suspension
-        // point in between, so no other account can write the slot meanwhile).
-        slot.lend()
-        return LogtoClient(useConfig: config)
-    }
-
-    /// Keep what the client holds now (a rotated refresh token, the ID token after a sign-in).
-    private func keep(_ logto: LogtoClient) {
-        slot.store(refreshToken: logto.refreshToken, idToken: logto.idToken)
     }
 
     // MARK: Sign in and out
@@ -116,45 +114,66 @@ public final class AuthService {
     /// Run the Logto sign-in in the system browser sheet. Returns the name from the ID token, if any.
     @discardableResult
     public func signIn() async throws -> String? {
-        // A fresh client: never sign in on top of another account's session.
-        slot.store(refreshToken: nil, idToken: nil)
-        guard let logto = makeLogto(), let discovery else { throw APIError(status: 0, code: "feature_disabled") }
+        guard let discovery, discovery.logtoConfigured,
+              let config = try? LogtoConfig(
+                  endpoint: discovery.logtoEndpoint,
+                  appId: discovery.auth.mobileClientId,
+                  scopes: Self.scopes,
+                  resources: [discovery.auth.apiResource],
+                  usingPersistStorage: false,
+                  prefersEphemeralWebBrowserSession: true
+              )
+        else { throw APIError(status: 0, code: "feature_disabled") }
+        // A client of its own, in memory only: it starts without anyone's session and keeps nothing.
+        let logto = LogtoClient(useConfig: config)
         try await logto.signInWithBrowser(redirectUri: Self.redirectURI)
-        keep(logto)
-        setMode(.logto)
         let token = try await logto.getAccessToken(for: discovery.auth.apiResource)
-        keep(logto)
-        cache(token, resource: discovery.auth.apiResource)
+        generation += 1
+        let handle = await lock.acquire(accountId)
+        defer { handle.release() }
+        slot.store(refreshToken: logto.refreshToken, idToken: logto.idToken)
+        setMode(.logto)
+        vault.set(nil, name(Key.accessToken))
+        if TokenAudience.matches(token, auth: discovery.auth) { cache(token, resource: discovery.auth.apiResource) }
         let claims = try? logto.getIdTokenClaims()
         return (claims?.name ?? claims?.username).map { $0.trimmingCharacters(in: .whitespaces) }
     }
 
     /// Development servers only: `POST /dev/token {email, name}`.
     public func devSignIn(token: String) {
-        Keychain.set(token, for: name(Key.devToken))
+        generation += 1
+        vault.set(token, name(Key.devToken))
         setMode(.dev)
     }
 
     /// Forget the session on this device and revoke the refresh token.
     public func signOut() async {
-        if mode == .logto, let logto = makeLogto() {
-            _ = await logto.clearCredentials()
-        }
-        slot.store(refreshToken: nil, idToken: nil)
+        let refresh = mode == .logto ? slot.refreshToken : nil
+        let discovery = discovery
         clearLocal()
+        if let refresh, let discovery, discovery.logtoConfigured {
+            await endpoint.revoke(refresh, auth: discovery.auth, endpoint: discovery.logtoEndpoint)
+        }
     }
 
     private func clearLocal() {
-        Keychain.set(nil as Data?, for: name(Key.devToken))
-        Keychain.set(nil as Data?, for: name(Key.accessToken))
-        refreshing?.cancel()
-        refreshing = nil
+        generation += 1
+        vault.set(nil, name(Key.devToken))
+        vault.set(nil, name(Key.accessToken))
+        slot.store(refreshToken: nil, idToken: nil)
         setMode(nil)
     }
 
     private func setMode(_ mode: Mode?) {
         self.mode = mode
-        AppGroup.defaults.set(mode?.rawValue, forKey: name(Key.mode))
+        defaults.set(mode?.rawValue, forKey: name(Key.mode))
+    }
+
+    /// The session is over (refresh token refused): forget it and say so once.
+    private func sessionEnded() {
+        guard mode != nil else { return }
+        clearLocal()
+        onSignedOut?()
     }
 
     // MARK: Tokens
@@ -163,138 +182,150 @@ public final class AuthService {
     public func accessToken() async throws -> String? {
         switch mode {
         case .dev:
-            return Keychain.string(name(Key.devToken))
+            return vault.string(name(Key.devToken))
         case .logto:
             guard let resource = discovery?.auth.apiResource else { return nil }
-            if let cached = Keychain.data(name(Key.accessToken)).flatMap({ try? JSONDecoder().decode(CachedToken.self, from: $0) }),
-               cached.resource == resource, cached.expiresAt.timeIntervalSinceNow > 60 {
-                return cached.token
-            }
-            return try await refresh()
+            if let cached = cachedToken(resource) { return cached }
+            return try await refresh(rejected: nil)
         case nil:
             return nil
         }
     }
 
-    /// After a 401: drop the cached token and get a new one.
+    /// After a 401 without knowing which token was refused: treat the cached one as refused.
     public func refreshAfterUnauthorized() async -> String? {
+        await refreshAfterUnauthorized(rejected: nil)
+    }
+
+    /// After a 401: when another request already replaced the refused token, the new one; else a fresh one; nil when
+    /// the session is over (or the network is down: the request fails as it is).
+    public func refreshAfterUnauthorized(rejected: String?) async -> String? {
         switch mode {
         case .dev:
-            // Dev tokens can't be refreshed: the session is over.
-            clearLocal()
-            onSignedOut?()
+            // Dev tokens can't be refreshed: the session is over (unless it changed meanwhile).
+            if let current = vault.string(name(Key.devToken)), rejected != nil, current != rejected { return current }
+            sessionEnded()
             return nil
         case .logto:
-            Keychain.set(nil as Data?, for: name(Key.accessToken))
-            return try? await refresh()
+            guard let resource = discovery?.auth.apiResource else { return nil }
+            if let cached = cachedToken(resource), rejected != nil, cached != rejected { return cached }
+            let refused = rejected ?? cachedToken(resource, minimum: -.infinity)
+            return try? await refresh(rejected: refused)
         case nil:
             return nil
         }
     }
 
-    private func refresh() async throws -> String? {
-        if let refreshing { return try await refreshing.value }
+    /// The cached access token for `resource` while it is valid for more than `minimum` seconds.
+    private func cachedToken(_ resource: String, minimum: TimeInterval = 60) -> String? {
+        guard let data = vault.string(name(Key.accessToken)).map({ Data($0.utf8) }),
+              let cached = try? JSONDecoder().decode(CachedToken.self, from: data),
+              cached.resource == resource, cached.expiresAt.timeIntervalSinceNow > minimum else { return nil }
+        return cached.token
+    }
+
+    /// One refresh per account at a time in this process; callers meanwhile share its result.
+    private func refresh(rejected: String?) async throws -> String? {
+        if let running = refreshes.running[accountId] { return try await running.task.value }
+        let id = UUID()
+        let account = accountId
+        let registry = refreshes
         let task = Task<String?, Error> { @MainActor in
-            defer { self.refreshing = nil }
-            guard let logto = self.makeLogto(), let resource = self.discovery?.auth.apiResource else { return nil }
-            guard logto.isAuthenticated else {
-                self.clearLocal()
-                self.onSignedOut?()
-                return nil
-            }
-            do {
-                let token = try await logto.getAccessToken(for: resource)
-                self.keep(logto)
-                self.cache(token, resource: resource)
-                return token
-            } catch {
-                if Self.isTransient(error) { throw APIError.network }
-                // The refresh token was rejected: the session is over.
-                self.clearLocal()
-                self.onSignedOut?()
-                return nil
-            }
+            defer { if registry.running[account]?.id == id { registry.running[account] = nil } }
+            return try await self.refreshLocked(rejected: rejected)
         }
-        refreshing = task
+        registry.running[account] = (id, task)
         return try await task.value
     }
 
-    private func cache(_ token: String, resource: String) {
-        let expiry = JWT.expiry(token) ?? Date().addingTimeInterval(30 * 60)
-        let cached = CachedToken(token: token, expiresAt: expiry, resource: resource)
-        Keychain.set(try? JSONEncoder().encode(cached), for: name(Key.accessToken))
+    private func refreshLocked(rejected: String?) async throws -> String? {
+        guard let discovery, discovery.logtoConfigured else { return nil }
+        let resource = discovery.auth.apiResource
+        let started = generation
+        let handle = await lock.acquire(accountId)
+        defer { handle.release() }
+        guard generation == started, mode == .logto else { return nil }
+        // The other process (or an earlier refresh here) may have refreshed while this one waited for the lock.
+        if let cached = cachedToken(resource), cached != rejected { return cached }
+        guard let refreshToken = slot.refreshToken else {
+            sessionEnded()
+            return nil
+        }
+        let grant: TokenGrant
+        do {
+            grant = try await endpoint.refresh(refreshToken, auth: discovery.auth, endpoint: discovery.logtoEndpoint)
+        } catch TokenEndpointError.rejected {
+            // Signed out or in again meanwhile: not this refresh's session any more.
+            guard generation == started else { return nil }
+            sessionEnded()
+            return nil
+        } catch {
+            throw APIError.network
+        }
+        guard generation == started else { return nil }
+        // Keep the rotated refresh token first: the old one is spent.
+        slot.store(refreshToken: grant.refreshToken ?? refreshToken, idToken: grant.idToken ?? slot.idToken)
+        guard TokenAudience.matches(grant.accessToken, auth: discovery.auth) else {
+            vault.set(nil, name(Key.accessToken))
+            throw APIError(status: 401, code: "unauthorized")
+        }
+        cache(grant.accessToken, resource: resource, expiresIn: grant.expiresIn)
+        return grant.accessToken
     }
 
-    /// Network trouble (keep the session) versus a rejected refresh token (sign out).
-    static func isTransient(_ error: Error) -> Bool {
-        var current: Error? = error
-        for _ in 0..<4 {
-            guard let e = current else { return false }
-            if e is URLError { return true }
-            if let a = e as? LogtoClientErrors.AccessToken { current = a.innerError; continue }
-            let mirror = Mirror(reflecting: e)
-            current = mirror.children.first { $0.label == "innerError" }?.value as? Error
-        }
-        return false
+    private func cache(_ token: String, resource: String, expiresIn: Int? = nil) {
+        let expiry = JWT.expiry(token) ?? expiresIn.map { Date().addingTimeInterval(TimeInterval($0)) } ?? Date().addingTimeInterval(30 * 60)
+        let cached = CachedToken(token: token, expiresAt: expiry, resource: resource)
+        vault.set((try? JSONEncoder().encode(cached)).flatMap { String(data: $0, encoding: .utf8) }, name(Key.accessToken))
     }
 }
 
 extension AuthService: TokenProvider {}
 
-/// One account's Logto tokens, kept under its own Keychain names, and the SDK's single slot (`io.logto.client`,
-/// written the way its KeychainAccess store does) they are lent to.
+/// The refreshes running in one process, per account. One per process (`shared`); tests make a second one to stand
+/// for the share extension.
+@MainActor
+public final class RefreshRegistry {
+    public static let shared = RefreshRegistry()
+    var running: [String: (id: UUID, task: Task<String?, Error>)] = [:]
+    public init() {}
+}
+
+/// One account's Logto tokens, kept under its own Keychain names. Earlier builds kept the only account's tokens in
+/// the Logto SDK's slot (`io.logto.client`): those are read once for the legacy account, never written.
 struct LogtoSlot {
     let account: String
+    let vault: SessionVault
 
     private var refreshName: String { AuthService.name("logto.refresh_token", account) }
     private var idName: String { AuthService.name("logto.id_token", account) }
 
-    var refreshToken: String? { Keychain.string(refreshName) }
-    var idToken: String? { Keychain.string(idName) }
+    var refreshToken: String? { vault.string(refreshName) }
+    var idToken: String? { vault.string(idName) }
 
     func store(refreshToken: String?, idToken: String?) {
-        Keychain.set(refreshToken, for: refreshName)
-        Keychain.set(idToken, for: idName)
+        vault.set(refreshToken, refreshName)
+        vault.set(idToken, idName)
     }
 
     /// The account signed in before several accounts were possible has its tokens only in the SDK's slot.
     func migrateIfNeeded() {
-        guard account == AccountRecord.legacyId, idToken == nil, refreshToken == nil else { return }
+        guard account == AccountRecord.legacyId, vault is KeychainVault, idToken == nil, refreshToken == nil else { return }
         let refresh = SDKSlot.get("refresh_token"), id = SDKSlot.get("id_token")
         if refresh != nil || id != nil { store(refreshToken: refresh, idToken: id) }
-    }
-
-    /// Put this account's tokens into the SDK's slot (an empty slot for an account without a session).
-    func lend() {
-        SDKSlot.set(refreshToken, "refresh_token")
-        SDKSlot.set(idToken, "id_token")
     }
 
     /// The Logto SDK's Keychain items: service `io.logto.client`, account = the key name, UTF-8 values.
     enum SDKSlot {
         static let service = "io.logto.client"
 
-        private static func query(_ key: String) -> [String: Any] {
-            [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: key,
-             kSecAttrSynchronizable as String: kSecAttrSynchronizableAny]
-        }
-
         static func get(_ key: String) -> String? {
-            var q = query(key)
-            q[kSecReturnData as String] = true
-            q[kSecMatchLimit as String] = kSecMatchLimitOne
+            let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
+                                    kSecAttrAccount as String: key, kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+                                    kSecReturnData as String: true, kSecMatchLimit as String: kSecMatchLimitOne]
             var out: CFTypeRef?
             guard SecItemCopyMatching(q as CFDictionary, &out) == errSecSuccess, let data = out as? Data else { return nil }
             return String(data: data, encoding: .utf8)
-        }
-
-        static func set(_ value: String?, _ key: String) {
-            SecItemDelete(query(key) as CFDictionary)
-            guard let value else { return }
-            let add: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
-                                      kSecAttrAccount as String: key, kSecValueData as String: Data(value.utf8),
-                                      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock]
-            SecItemAdd(add as CFDictionary, nil)
         }
     }
 }

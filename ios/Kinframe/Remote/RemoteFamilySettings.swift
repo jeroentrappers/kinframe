@@ -16,14 +16,14 @@ struct RemoteFamilySettings: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(L("servers.remote.title"))
+            SectionHeader(L("remote.followsTitle"))
             VStack(spacing: 0) {
                 Toggle(isOn: Binding(get: { allowed }, set: { on in
                     if on { Task { await setAllowed(true) } } else { confirmOff = true }
                 })) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L("servers.remote.allow"))
-                        Text(L("servers.remote.allowHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                        Text(L("remote.allowFrames"))
+                        Text(L("remote.allowFramesHint")).font(.footnote).foregroundStyle(Palette.textMuted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -33,14 +33,14 @@ struct RemoteFamilySettings: View {
             }
             .card(padding: 0)
 
-            SectionHeader(L("servers.remote.blocked.title"), trailing: AnyView(
+            SectionHeader(L("remote.feedBlockedTitle"), trailing: AnyView(
                 Button { blocking = true } label: {
                     Label(L("servers.remote.blocked.add"), systemImage: "nosign").font(.subheadline.weight(.semibold)).frame(minHeight: 44)
                 }
             ))
             VStack(alignment: .leading, spacing: 0) {
                 if blocked.isEmpty {
-                    Text(L("servers.remote.blocked.none")).font(.subheadline).foregroundStyle(Palette.textMuted).padding(14)
+                    Text(L("remote.blockedNone")).font(.subheadline).foregroundStyle(Palette.textMuted).padding(14)
                 }
                 ForEach(Array(blocked.enumerated()), id: \.element.id) { n, b in
                     if n > 0 { Divider().overlay(Palette.border) }
@@ -52,14 +52,14 @@ struct RemoteFamilySettings: View {
                             if !line.isEmpty { Text(line).font(.footnote).foregroundStyle(Palette.textMuted) }
                         }
                         Spacer()
-                        Button(L("servers.remote.blocked.unblock")) { Task { await unblock(b) } }
+                        Button(L("remote.unblock")) { Task { await unblock(b) } }
                             .buttonStyle(.kf(.secondary))
                     }
                     .padding(14)
                 }
             }
             .card(padding: 0)
-            Text(L("servers.remote.blocked.hint")).font(.footnote).foregroundStyle(Palette.textMuted)
+            Text(L("remote.feedBlockedHint")).font(.footnote).foregroundStyle(Palette.textMuted)
         }
         .task { await load() }
         .confirmationDialog(L("servers.remote.allowOffTitle"), isPresented: $confirmOff, titleVisibility: .visible) {
@@ -97,7 +97,7 @@ struct RemoteFamilySettings: View {
         do {
             try await model.api.unblockFeedServer(model.id, id: b.id)
             blocked.removeAll { $0.id == b.id }
-            app.toasts.show(L("servers.remote.blocked.unblocked", ["host": b.host]))
+            app.toasts.show(L("remote.unblockedToast", ["host": b.host]))
         } catch {
             app.toasts.error(error)
         }
@@ -121,18 +121,18 @@ struct RemoteBlockServerSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L("servers.remote.blocked.host")) {
+                Section(L("remote.blockHost")) {
                     TextField(L("servers.remote.blocked.hostPlaceholder"), text: $typed)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    if invalid { Text(L("servers.remote.blocked.invalid")).font(.footnote).foregroundStyle(Palette.danger) }
+                    if invalid { Text(L("remote.serverInvalid")).font(.footnote).foregroundStyle(Palette.danger) }
                 }
-                Section(L("servers.remote.blocked.reason")) {
+                Section(L("remote.blockReason")) {
                     TextField("", text: $reason, axis: .vertical)
                         .onChange(of: reason) { if reason.count > 300 { reason = String(reason.prefix(300)) } }
                 }
-                Section { } footer: { Text(L("servers.remote.blocked.hint")) }
+                Section { } footer: { Text(L("remote.feedBlockedHint")) }
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
@@ -141,7 +141,7 @@ struct RemoteBlockServerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L("servers.remote.blocked.do"), role: .destructive) { Task { await block() } }.disabled(busy)
+                    Button(L("remote.block"), role: .destructive) { Task { await block() } }.disabled(busy)
                 }
             }
             .onAppear { if typed.isEmpty { typed = host } }
@@ -158,7 +158,7 @@ struct RemoteBlockServerSheet: View {
         defer { busy = false }
         do {
             let b = try await api.blockFeedServer(feedId, host: h, reason: reason)
-            app.toasts.show(L("servers.remote.blocked.done", ["host": b.host]))
+            app.toasts.show(L("remote.blockedToast", ["host": b.host]))
             done(b)
             dismiss()
         } catch {

@@ -24,14 +24,14 @@ struct LeaveFeedSheet: View {
                     photosSection(count: preview.photos)
                     if (preview.comments ?? 0) > 0 {
                         Section {
-                            Picker(Lp("leaving.comments.title", count: preview.comments ?? 0), selection: $choices.comments) {
-                                Text(L("leaving.comments.keep")).tag(CommentsChoice.keep)
-                                Text(L("leaving.comments.delete")).tag(CommentsChoice.delete)
+                            Picker(L("leaving.commentsLegend", ["n": preview.comments ?? 0]), selection: $choices.comments) {
+                                Text(L("leaving.commentsKeep")).tag(CommentsChoice.keep)
+                                Text(L("leaving.commentsDelete")).tag(CommentsChoice.delete)
                             }
                             .pickerStyle(.inline)
                             .labelsHidden()
                         } header: {
-                            Text(Lp("leaving.comments.title", count: preview.comments ?? 0))
+                            Text(L("leaving.commentsLegend", ["n": preview.comments ?? 0]))
                         }
                         .listRowBackground(Palette.surface)
                     }
@@ -49,7 +49,7 @@ struct LeaveFeedSheet: View {
                                 .tint(Palette.accent)
                             }
                         } header: {
-                            Text(L("leaving.frames.title"))
+                            Text(L("leaving.framesLegend"))
                         }
                         .listRowBackground(Palette.surface)
                     }
@@ -62,7 +62,7 @@ struct LeaveFeedSheet: View {
                         }
                         .disabled(busy)
                     } footer: {
-                        Text(L("leaving.laterHint"))
+                        Text(L("leaving.laterLine"))
                     }
                     .listRowBackground(Palette.surface)
                 } else if let error {
@@ -73,7 +73,7 @@ struct LeaveFeedSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("leaving.leaveFeedTitle", ["name": name]))
+            .navigationTitle(L("leaving.leaveTitle", ["name": name]))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() }.disabled(busy) }
@@ -140,7 +140,7 @@ struct LeaveFrameSheet: View {
                     }
                     .disabled(busy)
                 } footer: {
-                    Text(L("leaving.laterHint"))
+                    Text(L("leaving.laterLine"))
                 }
                 .listRowBackground(Palette.surface)
             }
@@ -176,16 +176,16 @@ struct LeavePhotosSection: View {
 
     var body: some View {
         Section {
-            Picker(L("leaving.photos.choice"), selection: $photos) {
-                Text(L("leaving.photos.keep")).tag(PhotosChoice.keep)
-                Text(L("leaving.photos.take")).tag(PhotosChoice.take)
+            Picker(L("leaving.deleteLegend"), selection: $photos) {
+                Text(L("leaving.photosKeep")).tag(PhotosChoice.keep)
+                Text(L("leaving.photosTake")).tag(PhotosChoice.take)
             }
             .pickerStyle(.inline)
             .labelsHidden()
         } header: {
-            if let count { Text(Lp("leaving.photos.title", count: count)) } else { Text(L("leaving.photos.choice")) }
+            if let count { Text(Lp("leaving.photos.title", count: count)) } else { Text(L("leaving.deleteLegend")) }
         } footer: {
-            Text(photos == .keep ? L("leaving.photos.keepHint") : L("leaving.photos.takeHint"))
+            Text(photos == .keep ? L("leaving.photosKeepHint") : L("leaving.photos.takeHint"))
         }
         .listRowBackground(Palette.surface)
     }
@@ -222,7 +222,7 @@ struct TakeAwaySheet: View {
                 Section {
                     Button(role: .destructive) { Task { await takeAway() } } label: {
                         HStack {
-                            Text(L("leaving.takeAway.button", ["name": name]))
+                            Text(L("leaving.takeAwayFrom", ["name": name]))
                             if busy { Spacer(); ProgressView() }
                         }
                     }
@@ -247,7 +247,7 @@ struct TakeAwaySheet: View {
         do {
             let result = try await api.takeAway(scope, comments: scope.feedId != nil ? comments : nil)
             dismiss()
-            app.toasts.show(LeavingText.result(result) ?? L("leaving.takeAway.nothing"))
+            app.toasts.show(LeavingText.result(result) ?? L("leaving.resultNothing"))
             onDone()
         } catch {
             app.toasts.error(error)

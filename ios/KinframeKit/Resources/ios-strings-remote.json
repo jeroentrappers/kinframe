@@ -1,16 +1,4 @@
 {
-  "servers.remote.add": {
-    "en": "Add a family from another server",
-    "nl": "Een familie van een andere server toevoegen"
-  },
-  "servers.remote.allow": {
-    "en": "Allow frames on other servers",
-    "nl": "Kaders op andere servers toestaan"
-  },
-  "servers.remote.allowHint": {
-    "en": "Frames on other kinframe servers may follow this family through subscribe links that allow it. Their server gets copies of whole-family posts, never circles, chats or members.",
-    "nl": "Kaders op andere kinframe-servers mogen deze familie volgen via abonneerlinks die dat toestaan. Hun server krijgt kopieën van berichten aan de hele familie, nooit kringen, chats of leden."
-  },
   "servers.remote.allowOff": {
     "en": "Turn off",
     "nl": "Uitzetten"
@@ -39,57 +27,13 @@
     "en": "Blocked by {name}",
     "nl": "Geblokkeerd door {name}"
   },
-  "servers.remote.blocked.do": {
-    "en": "Block",
-    "nl": "Blokkeren"
-  },
-  "servers.remote.blocked.done": {
-    "en": "{host} is blocked for this family.",
-    "nl": "{host} is geblokkeerd voor deze familie."
-  },
-  "servers.remote.blocked.hint": {
-    "en": "Frames on a blocked server can’t follow this family; the ones that did stop.",
-    "nl": "Kaders op een geblokkeerde server kunnen deze familie niet volgen; wie dat deed, stopt."
-  },
-  "servers.remote.blocked.host": {
-    "en": "Server address",
-    "nl": "Serveradres"
-  },
   "servers.remote.blocked.hostPlaceholder": {
     "en": "kinframe.example.org",
     "nl": "kinframe.example.org"
   },
-  "servers.remote.blocked.invalid": {
-    "en": "Enter a server address like kinframe.example.org.",
-    "nl": "Vul een serveradres in, zoals kinframe.example.org."
-  },
-  "servers.remote.blocked.none": {
-    "en": "No servers are blocked.",
-    "nl": "Geen servers geblokkeerd."
-  },
-  "servers.remote.blocked.reason": {
-    "en": "Reason (only admins see it)",
-    "nl": "Reden (alleen beheerders zien die)"
-  },
-  "servers.remote.blocked.title": {
-    "en": "Blocked servers",
-    "nl": "Geblokkeerde servers"
-  },
-  "servers.remote.blocked.unblock": {
-    "en": "Unblock",
-    "nl": "Deblokkeren"
-  },
-  "servers.remote.blocked.unblocked": {
-    "en": "{host} is no longer blocked.",
-    "nl": "{host} is niet meer geblokkeerd."
-  },
   "servers.remote.check": {
     "en": "Check the link",
     "nl": "Link controleren"
-  },
-  "servers.remote.confirmBody": {
-    "en": "Photos from this family will be copied to this server ({server}) and shown on {frame}.",
-    "nl": "Foto’s van deze familie worden naar deze server ({server}) gekopieerd en getoond op {frame}."
   },
   "servers.remote.confirmHead": {
     "en": "{feed} (on {server})",
@@ -119,10 +63,6 @@
     "en": "Follow",
     "nl": "Volgen"
   },
-  "servers.remote.followed": {
-    "en": "{frame} now follows {feed}.",
-    "nl": "{frame} volgt nu {feed}."
-  },
   "servers.remote.frameCount.one": {
     "en": "1 frame",
     "nl": "1 kader"
@@ -131,37 +71,9 @@
     "en": "{count} frames",
     "nl": "{count} kaders"
   },
-  "servers.remote.frameOnServer": {
-    "en": "{frame} ({server})",
-    "nl": "{frame} ({server})"
-  },
   "servers.remote.instant": {
     "en": "The link is pre-approved: photos start arriving right away.",
     "nl": "De link is al goedgekeurd: de foto’s komen meteen binnen."
-  },
-  "servers.remote.invalidUrl": {
-    "en": "That isn’t a kinframe subscribe link. It looks like https://server/fi/…",
-    "nl": "Dat is geen kinframe-abonneerlink. Die ziet eruit als https://server/fi/…"
-  },
-  "servers.remote.inviteAllow": {
-    "en": "Frames on other servers may use this link",
-    "nl": "Kaders op andere servers mogen deze link gebruiken"
-  },
-  "servers.remote.inviteAllowHint": {
-    "en": "Off by default. Their server gets copies of the family’s posts.",
-    "nl": "Standaard uit. Hun server krijgt kopieën van de berichten van de familie."
-  },
-  "servers.remote.lastSync": {
-    "en": "Synced {when}",
-    "nl": "Gesynchroniseerd {when}"
-  },
-  "servers.remote.lede": {
-    "en": "Paste the subscribe link an admin of a family on another kinframe server gave you.",
-    "nl": "Plak de abonneerlink die een beheerder van een familie op een andere kinframe-server je gaf."
-  },
-  "servers.remote.needsApproval": {
-    "en": "The family’s admins approve it first.",
-    "nl": "De beheerders van de familie keuren het eerst goed."
   },
   "servers.remote.noFrames": {
     "en": "You don’t manage a frame on this server yet.",
@@ -174,26 +86,6 @@
   "servers.remote.onEnd.hint": {
     "en": "What happens to the copied photos when the family or you stop it.",
     "nl": "Wat er met de gekopieerde foto’s gebeurt als de familie of jij het stopzet."
-  },
-  "servers.remote.onEnd.keep": {
-    "en": "Keep the photos already there",
-    "nl": "Foto’s die er al zijn houden"
-  },
-  "servers.remote.onEnd.remove": {
-    "en": "Remove the copied photos",
-    "nl": "Gekopieerde foto’s verwijderen"
-  },
-  "servers.remote.onEnd.title": {
-    "en": "When it ends",
-    "nl": "Als het stopt"
-  },
-  "servers.remote.operatorNote": {
-    "en": "Whoever runs {server} can see the copies, as with any photo on it.",
-    "nl": "Wie {server} beheert, kan de kopieën zien, zoals elke foto op die server."
-  },
-  "servers.remote.otherServer": {
-    "en": "On {server}",
-    "nl": "Op {server}"
   },
   "servers.remote.paste": {
     "en": "Paste",
@@ -231,34 +123,6 @@
     "en": "Ended: the request was withdrawn",
     "nl": "Gestopt: het verzoek is ingetrokken"
   },
-  "servers.remote.requested": {
-    "en": "Asked {feed} to approve {frame}.",
-    "nl": "{feed} gevraagd om {frame} goed te keuren."
-  },
-  "servers.remote.status.active": {
-    "en": "Following",
-    "nl": "Volgt"
-  },
-  "servers.remote.status.error": {
-    "en": "Can’t reach the other server; retrying",
-    "nl": "De andere server is niet bereikbaar; we proberen opnieuw"
-  },
-  "servers.remote.status.pending": {
-    "en": "Waiting for the family’s admins",
-    "nl": "Wacht op de beheerders van de familie"
-  },
-  "servers.remote.status.rejected": {
-    "en": "Declined by the family",
-    "nl": "Geweigerd door de familie"
-  },
-  "servers.remote.status.removed": {
-    "en": "Ended",
-    "nl": "Gestopt"
-  },
-  "servers.remote.title": {
-    "en": "Families on other servers",
-    "nl": "Families op andere servers"
-  },
   "servers.remote.unsubscribe": {
     "en": "Unsubscribe",
     "nl": "Opzeggen"
@@ -271,17 +135,9 @@
     "en": "Stop and remove the photos",
     "nl": "Stoppen en foto’s verwijderen"
   },
-  "servers.remote.unsubscribeTitle": {
-    "en": "Stop following {feed}?",
-    "nl": "{feed} niet meer volgen?"
-  },
   "servers.remote.unsubscribed": {
     "en": "{frame} no longer follows {feed}.",
     "nl": "{frame} volgt {feed} niet meer."
-  },
-  "servers.remote.urlLabel": {
-    "en": "Invite link",
-    "nl": "Uitnodigingslink"
   },
   "servers.remote.urlPlaceholder": {
     "en": "https://kinframe.example.org/fi/…",

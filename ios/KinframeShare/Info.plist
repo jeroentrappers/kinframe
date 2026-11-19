@@ -37,6 +37,8 @@
 				<integer>200</integer>
 				<key>NSExtensionActivationSupportsMovieWithMaxCount</key>
 				<integer>200</integer>
+				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
+				<integer>1</integer>
 			</dict>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>

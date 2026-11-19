@@ -18,7 +18,10 @@ struct AddFrameView: View {
     private let api: API
 
     init(api: API, prefill: String? = nil, context: Context = .sheet, onFinish: ((Bool) -> Void)? = nil) {
-        let feeds = ServerStore.load()?.discovery.feeds == true
+        // Family codes only where this server (the account `api` talks to) has families.
+        let records = AccountStore.load()
+        let server = records.first { $0.server.apiBase == api.baseURL }?.server ?? records.first?.server
+        let feeds = server?.discovery.feeds == true
         _model = State(initialValue: AddFrameModel(api: api, prefill: prefill, allowsLetters: feeds))
         self.api = api
         self.context = context
@@ -85,7 +88,7 @@ struct AddFrameView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            CodeField(model: model, onComplete: { Task { await submit() } })
+            CodeField(model: model, onComplete: { Task { await submit() } }, onPaste: pasted)
 
             if let error = model.error {
                 Label(error, systemImage: "exclamationmark.circle.fill")
@@ -128,6 +131,26 @@ struct AddFrameView: View {
                 .padding(.top, 8)
             }
         }
+    }
+
+    /// A pasted kinframe link: a frame code of this server fills the boxes; an invite, or a link of another server,
+    /// opens the way links do (the account on that server, or adding it). Plain text (a code) isn't handled here.
+    private func pasted(_ text: String) -> Bool {
+        guard let url = DeepLink.find(in: text), let link = DeepLink.parse(url) else { return false }
+        let here = link.server.map { s in app.server.map { AccountServers.matches(AccountRecord(id: app.accountId, server: $0), s) } ?? false } ?? true
+        if here, case .frameCode(_, let code) = link {
+            model.setCode(code)
+            if model.isComplete { Task { await submit() } }
+            return true
+        }
+        guard let accounts = app.accounts else { return false }
+        if context == .sheet { dismiss() }
+        // After this sheet is gone, so the link's own sheet can show.
+        Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            accounts.openInApp(url)
+        }
+        return true
     }
 
     private func submit() async {
@@ -289,6 +312,8 @@ extension AddFrameModel: CodeEntryModel {
 struct CodeField<Model: CodeEntryModel>: View {
     let model: Model
     var onComplete: () -> Void
+    /// Pasted text first goes here; true when it was handled (a link).
+    var onPaste: ((String) -> Bool)? = nil
     @FocusState private var focused: Bool
     /// The letter keyboard, for feed codes; frame codes use the number pad.
     @State private var letters = false
@@ -327,6 +352,8 @@ struct CodeField<Model: CodeEntryModel>: View {
                 PasteButton(payloadType: String.self) { strings in
                     guard let text = strings.first else { return }
                     Task { @MainActor in
+                        // A pasted link (of this or another server) goes where links go.
+                        if onPaste?(text) == true { return }
                         model.setCode(text)
                         if model.isComplete { onComplete() }
                     }

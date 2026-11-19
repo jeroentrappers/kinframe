@@ -1,35 +1,7 @@
 {
-  "chat.archive": {
-    "en": "Archive",
-    "nl": "Archiveren"
-  },
-  "chat.archived": {
-    "en": "Archived chats",
-    "nl": "Gearchiveerde chats"
-  },
-  "chat.archivedEmpty": {
-    "en": "No archived chats.",
-    "nl": "Geen gearchiveerde chats."
-  },
-  "chat.archivedToast": {
-    "en": "Archived. A new message brings it back.",
-    "nl": "Gearchiveerd. Een nieuw bericht haalt de chat terug."
-  },
-  "chat.attach": {
-    "en": "Add photos or videos",
-    "nl": "Foto’s of video’s toevoegen"
-  },
-  "chat.blocked.empty": {
-    "en": "You haven’t blocked anyone.",
-    "nl": "Je hebt niemand geblokkeerd."
-  },
   "chat.blocked.hint": {
     "en": "Blocked people can’t message you or add you to groups; you don’t see what they write.",
     "nl": "Geblokkeerde mensen kunnen je geen berichten sturen of aan groepen toevoegen; jij ziet niet wat ze schrijven."
-  },
-  "chat.blocked.title": {
-    "en": "Blocked people",
-    "nl": "Geblokkeerde mensen"
   },
   "chat.charsLeft.one": {
     "en": "1 character left",
@@ -43,10 +15,6 @@
     "en": "Discard",
     "nl": "Weggooien"
   },
-  "chat.editing": {
-    "en": "Editing your message",
-    "nl": "Je bericht bewerken"
-  },
   "chat.failed": {
     "en": "Not sent",
     "nl": "Niet verstuurd"
@@ -59,25 +27,9 @@
     "en": "This chat is gone",
     "nl": "Deze chat is weg"
   },
-  "chat.info.add": {
-    "en": "Add",
-    "nl": "Toevoegen"
-  },
-  "chat.info.addPeople": {
-    "en": "Add people",
-    "nl": "Mensen toevoegen"
-  },
-  "chat.info.leave": {
-    "en": "Leave group",
-    "nl": "Groep verlaten"
-  },
   "chat.info.leaveConfirm": {
     "en": "Leave this group?",
     "nl": "Deze groep verlaten?"
-  },
-  "chat.info.makeAdmin": {
-    "en": "Make admin",
-    "nl": "Beheerder maken"
   },
   "chat.info.makeMember": {
     "en": "No longer admin",
@@ -99,33 +51,9 @@
     "en": "Hold a name to make them an admin or remove them.",
     "nl": "Houd een naam vast om iemand beheerder te maken of te verwijderen."
   },
-  "chat.info.notifications": {
-    "en": "Notifications",
-    "nl": "Meldingen"
-  },
-  "chat.info.openFamily": {
-    "en": "Open the family",
-    "nl": "De familie openen"
-  },
-  "chat.info.photo": {
-    "en": "Change photo",
-    "nl": "Foto wijzigen"
-  },
-  "chat.info.profile": {
-    "en": "View profile",
-    "nl": "Profiel bekijken"
-  },
   "chat.info.remove": {
     "en": "Remove from the group",
     "nl": "Uit de groep verwijderen"
-  },
-  "chat.info.removePhoto": {
-    "en": "Remove photo",
-    "nl": "Foto verwijderen"
-  },
-  "chat.info.title": {
-    "en": "Chat details",
-    "nl": "Over deze chat"
   },
   "chat.invite.action": {
     "en": "Invite to the family",
@@ -139,17 +67,9 @@
     "en": "Someone missing?",
     "nl": "Ontbreekt er iemand?"
   },
-  "chat.kind.circle": {
-    "en": "Circle chat",
-    "nl": "Kringchat"
-  },
   "chat.kind.direct": {
     "en": "Chat",
     "nl": "Chat"
-  },
-  "chat.kind.family": {
-    "en": "Family chat",
-    "nl": "Familiechat"
   },
   "chat.kind.group.one": {
     "en": "Group · 1 person",
@@ -163,10 +83,6 @@
     "en": "Your family chats appear here. Start one with anyone you share a family or a frame with.",
     "nl": "Je familiechats verschijnen hier. Begin er een met iedereen met wie je een familie of kader deelt."
   },
-  "chat.list.emptyTitle": {
-    "en": "No chats yet",
-    "nl": "Nog geen chats"
-  },
   "chat.loadOlder": {
     "en": "Earlier messages",
     "nl": "Eerdere berichten"
@@ -179,57 +95,17 @@
     "en": "Delete this message for everyone?",
     "nl": "Dit bericht voor iedereen verwijderen?"
   },
-  "chat.message.deleted": {
-    "en": "This message was deleted",
-    "nl": "Dit bericht is verwijderd"
-  },
-  "chat.message.remove": {
-    "en": "Remove message",
-    "nl": "Bericht weghalen"
-  },
   "chat.message.removeConfirm": {
     "en": "Remove this message for everyone?",
     "nl": "Dit bericht voor iedereen weghalen?"
-  },
-  "chat.message.removed": {
-    "en": "This message was removed",
-    "nl": "Dit bericht is weggehaald"
-  },
-  "chat.mute.action": {
-    "en": "Mute",
-    "nl": "Dempen"
   },
   "chat.mute.always": {
     "en": "Always",
     "nl": "Altijd"
   },
-  "chat.mute.eightHours": {
-    "en": "For 8 hours",
-    "nl": "8 uur"
-  },
-  "chat.mute.hour": {
-    "en": "For 1 hour",
-    "nl": "1 uur"
-  },
-  "chat.mute.off": {
-    "en": "Not muted",
-    "nl": "Niet gedempt"
-  },
-  "chat.mute.title": {
-    "en": "Mute",
-    "nl": "Dempen"
-  },
   "chat.mute.week": {
     "en": "For 1 week",
     "nl": "1 week"
-  },
-  "chat.muted": {
-    "en": "Muted",
-    "nl": "Gedempt"
-  },
-  "chat.mutedUntil": {
-    "en": "Muted until {when}",
-    "nl": "Gedempt tot {when}"
   },
   "chat.new.contacts": {
     "en": "People",
@@ -238,18 +114,6 @@
   "chat.new.contactsHint": {
     "en": "You can chat with people you share a family or a frame with. Pick one for a chat, several for a group.",
     "nl": "Je kunt chatten met mensen met wie je een familie of kader deelt. Kies er één voor een chat, meerdere voor een groep."
-  },
-  "chat.new.createGroup": {
-    "en": "Create group",
-    "nl": "Groep maken"
-  },
-  "chat.new.groupName": {
-    "en": "Group name",
-    "nl": "Naam van de groep"
-  },
-  "chat.new.groupNamePlaceholder": {
-    "en": "Cousins weekend",
-    "nl": "Neven-en-nichtenweekend"
   },
   "chat.new.groupNeedsName": {
     "en": "Give the group a name.",
@@ -267,25 +131,9 @@
     "en": "Nobody to chat with yet: join a family or share a frame first.",
     "nl": "Nog niemand om mee te chatten: word eerst lid van een familie of deel een kader."
   },
-  "chat.new.start": {
-    "en": "Start chat",
-    "nl": "Chat beginnen"
-  },
-  "chat.new.title": {
-    "en": "New chat",
-    "nl": "Nieuwe chat"
-  },
-  "chat.operatorNote": {
-    "en": "Chats aren’t end-to-end encrypted: whoever runs {server} could read them.",
-    "nl": "Chats zijn niet end-to-end versleuteld: wie {server} beheert, zou ze kunnen lezen."
-  },
-  "chat.person.block": {
-    "en": "Block",
-    "nl": "Blokkeren"
-  },
   "chat.person.blockBody": {
     "en": "You no longer see their comments, messages and reactions, and they can’t message you or add you to groups. They aren’t told. Shared families stay.",
-    "nl": "Je ziet hun reacties en berichten niet meer, en ze kunnen je geen berichten sturen of aan groepen toevoegen. Ze krijgen dat niet te horen. Gedeelde families blijven."
+    "nl": "Je ziet hun opmerkingen, berichten en reacties niet meer, en ze kunnen je geen berichten sturen of aan groepen toevoegen. Ze krijgen dat niet te horen. Gedeelde families blijven."
   },
   "chat.person.blockConfirm": {
     "en": "Block {name}?",
@@ -294,10 +142,6 @@
   "chat.person.blocked": {
     "en": "Blocked",
     "nl": "Geblokkeerd"
-  },
-  "chat.person.blockedToast": {
-    "en": "{name} is blocked",
-    "nl": "{name} is geblokkeerd"
   },
   "chat.person.families": {
     "en": "Families you share",
@@ -311,10 +155,6 @@
     "en": "Message",
     "nl": "Bericht sturen"
   },
-  "chat.person.unblock": {
-    "en": "Unblock",
-    "nl": "Deblokkeren"
-  },
   "chat.person.unblockedToast": {
     "en": "{name} is no longer blocked",
     "nl": "{name} is niet meer geblokkeerd"
@@ -322,10 +162,6 @@
   "chat.placeholder": {
     "en": "Message… (@ to mention)",
     "nl": "Bericht… (@ om iemand te noemen)"
-  },
-  "chat.post.unavailable": {
-    "en": "This post isn’t available",
-    "nl": "Dit bericht is niet beschikbaar"
   },
   "chat.preview.person": {
     "en": "{name}: {text}",
@@ -338,10 +174,6 @@
   "chat.preview.photos.other": {
     "en": "📷 {count} photos",
     "nl": "📷 {count} foto’s"
-  },
-  "chat.preview.post": {
-    "en": "Shared a post",
-    "nl": "Deelde een bericht"
   },
   "chat.preview.remove": {
     "en": "Send without the preview",
@@ -379,10 +211,6 @@
     "en": "Photos",
     "nl": "Foto’s"
   },
-  "chat.putOnFrame": {
-    "en": "Put on a frame",
-    "nl": "Op een kader zetten"
-  },
   "chat.quote.photo": {
     "en": "📷 Photo",
     "nl": "📷 Foto"
@@ -395,10 +223,6 @@
     "en": "🎬 Video",
     "nl": "🎬 Video"
   },
-  "chat.readOnly": {
-    "en": "This chat is read-only now.",
-    "nl": "Deze chat kan alleen nog gelezen worden."
-  },
   "chat.readOnlyDirect": {
     "en": "You can’t send messages in this chat anymore.",
     "nl": "Je kunt in deze chat geen berichten meer sturen."
@@ -407,33 +231,9 @@
     "en": "Reply",
     "nl": "Antwoorden"
   },
-  "chat.replyingTo": {
-    "en": "Replying to {name}",
-    "nl": "Antwoord aan {name}"
-  },
-  "chat.report.action": {
-    "en": "Report",
-    "nl": "Melden"
-  },
   "chat.report.dismiss": {
     "en": "Keep",
     "nl": "Laten staan"
-  },
-  "chat.report.familyTitle": {
-    "en": "Reports",
-    "nl": "Meldingen"
-  },
-  "chat.report.kind.comment": {
-    "en": "Comment",
-    "nl": "Reactie"
-  },
-  "chat.report.kind.message": {
-    "en": "Message",
-    "nl": "Bericht"
-  },
-  "chat.report.kind.post": {
-    "en": "Post",
-    "nl": "Bericht"
   },
   "chat.report.none": {
     "en": "Nothing reported.",
@@ -447,69 +247,21 @@
     "en": "Anything the admins should know",
     "nl": "Wat de beheerders moeten weten"
   },
-  "chat.report.open": {
-    "en": "Open",
-    "nl": "Openen"
-  },
   "chat.report.operatorTitle": {
     "en": "Reports to the operator",
     "nl": "Meldingen aan de beheerder"
-  },
-  "chat.report.reason": {
-    "en": "What’s wrong?",
-    "nl": "Wat is er mis?"
-  },
-  "chat.report.reason.inappropriate": {
-    "en": "Inappropriate",
-    "nl": "Ongepast"
-  },
-  "chat.report.reason.other": {
-    "en": "Something else",
-    "nl": "Iets anders"
-  },
-  "chat.report.reason.spam": {
-    "en": "Spam",
-    "nl": "Spam"
-  },
-  "chat.report.reason.unkind": {
-    "en": "Unkind or hurtful",
-    "nl": "Onvriendelijk of kwetsend"
   },
   "chat.report.remove": {
     "en": "Remove",
     "nl": "Weghalen"
   },
-  "chat.report.send": {
-    "en": "Report",
-    "nl": "Melden"
-  },
   "chat.report.sent": {
     "en": "Reported. Thank you.",
     "nl": "Gemeld. Dank je."
   },
-  "chat.report.status.dismissed": {
-    "en": "Kept",
-    "nl": "Behouden"
-  },
   "chat.report.status.open": {
     "en": "Open",
     "nl": "Open"
-  },
-  "chat.report.status.removed": {
-    "en": "Removed",
-    "nl": "Weggehaald"
-  },
-  "chat.report.title.comment": {
-    "en": "Report comment",
-    "nl": "Reactie melden"
-  },
-  "chat.report.title.message": {
-    "en": "Report message",
-    "nl": "Bericht melden"
-  },
-  "chat.report.title.post": {
-    "en": "Report post",
-    "nl": "Bericht melden"
   },
   "chat.report.toFamily": {
     "en": "The family’s admins get the report. Nobody learns who reported it.",
@@ -519,33 +271,13 @@
     "en": "The server’s operator gets the report. Nobody learns who reported it.",
     "nl": "De beheerder van de server krijgt de melding. Niemand komt te weten wie meldde."
   },
-  "chat.report.toastNew": {
-    "en": "Something was reported",
-    "nl": "Er is iets gemeld"
-  },
-  "chat.seen": {
-    "en": "Seen",
-    "nl": "Gezien"
-  },
-  "chat.seenBy": {
-    "en": "Seen by {names}",
-    "nl": "Gezien door {names}"
-  },
   "chat.send": {
     "en": "Send",
     "nl": "Versturen"
   },
-  "chat.sending": {
-    "en": "Sending…",
-    "nl": "Versturen…"
-  },
   "chat.sendingMedia": {
     "en": "Preparing and uploading…",
     "nl": "Voorbereiden en uploaden…"
-  },
-  "chat.settings.readReceipts": {
-    "en": "Read receipts",
-    "nl": "Leesbevestigingen"
   },
   "chat.settings.readReceiptsHint": {
     "en": "Others see “Seen” in direct chats and small groups. Off: you don’t see theirs either.",
@@ -563,14 +295,6 @@
     "en": "Send to",
     "nl": "Sturen naar"
   },
-  "chat.system.joined": {
-    "en": "{name} joined",
-    "nl": "{name} kwam erbij"
-  },
-  "chat.system.left": {
-    "en": "{name} left",
-    "nl": "{name} is vertrokken"
-  },
   "chat.system.prompt": {
     "en": "This week’s prompt: {title}",
     "nl": "De vraag van deze week: {title}"
@@ -583,10 +307,6 @@
     "en": "{name} put {count} photos on {places}",
     "nl": "{name} zette {count} foto’s op {places}"
   },
-  "chat.system.recap": {
-    "en": "The family’s {month}",
-    "nl": "De familie in {month}"
-  },
   "chat.system.streak.one": {
     "en": "🔥 1 week in a row of sharing together!",
     "nl": "🔥 1 week op rij samen gedeeld!"
@@ -594,10 +314,6 @@
   "chat.system.streak.other": {
     "en": "🔥 {count} weeks in a row of sharing together!",
     "nl": "🔥 {count} weken op rij samen gedeeld!"
-  },
-  "chat.title": {
-    "en": "Chats",
-    "nl": "Chats"
   },
   "chat.typing.many": {
     "en": "Several people are typing…",
@@ -607,29 +323,9 @@
     "en": "{name} is typing…",
     "nl": "{name} typt…"
   },
-  "chat.typing.recordingOne": {
-    "en": "{name} is recording…",
-    "nl": "{name} neemt op…"
-  },
   "chat.typing.two": {
     "en": "{a} and {b} are typing…",
     "nl": "{a} en {b} typen…"
-  },
-  "chat.unarchive": {
-    "en": "Back to chats",
-    "nl": "Terug bij de chats"
-  },
-  "chat.unarchivedToast": {
-    "en": "Back in your chats",
-    "nl": "Terug bij je chats"
-  },
-  "chat.unread.one": {
-    "en": "1 unread message",
-    "nl": "1 ongelezen bericht"
-  },
-  "chat.unread.other": {
-    "en": "{count} unread messages",
-    "nl": "{count} ongelezen berichten"
   },
   "chat.voice.a11y": {
     "en": "Voice message, {duration}",
@@ -651,21 +347,9 @@
     "en": "Couldn’t process this recording",
     "nl": "Deze opname kon niet verwerkt worden"
   },
-  "chat.voice.pause": {
-    "en": "Pause",
-    "nl": "Pauzeren"
-  },
   "chat.voice.play": {
     "en": "Play",
     "nl": "Afspelen"
-  },
-  "chat.voice.processing": {
-    "en": "Processing…",
-    "nl": "Verwerken…"
-  },
-  "chat.voice.record": {
-    "en": "Record a voice message",
-    "nl": "Spraakbericht opnemen"
   },
   "chat.voice.recording": {
     "en": "Recording a voice message",
@@ -678,13 +362,5 @@
   "chat.voice.tooShort": {
     "en": "Too short to send: hold on a little longer.",
     "nl": "Te kort om te versturen: neem iets langer op."
-  },
-  "problem.audio_too_long": {
-    "en": "This voice message is too long.",
-    "nl": "Dit spraakbericht is te lang."
-  },
-  "problem.cannot_message": {
-    "en": "You can’t send messages to this person.",
-    "nl": "Je kunt deze persoon geen berichten sturen."
   }
 }

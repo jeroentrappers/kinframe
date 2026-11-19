@@ -25,7 +25,7 @@ extension API {
                 throw APIError.wrap(error)
             }
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-            if status == 401, !refreshed, await tokens.refreshAfterUnauthorized() != nil {
+            if status == 401, !refreshed, await tokens.refreshAfterUnauthorized(rejected: token) != nil {
                 refreshed = true
                 continue
             }

@@ -67,7 +67,21 @@ public enum DeepLink: Equatable, Sendable {
         return token
     }
 
+    /// The first kinframe link in pasted or shared text ("Join us: https://kinframe.janssens.be/fi/…", a bare
+    /// `kinframe.janssens.be/f/12345678`, the `app.kinframe://` forms), of any server.
+    public static func find(in text: String) -> URL? {
+        let separators = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "<>\"'()[]{}"))
+        for token in text.components(separatedBy: separators) where !token.isEmpty {
+            let s = token.trimmingCharacters(in: CharacterSet(charactersIn: ".,;:!?…"))
+            for candidate in s.contains("://") || s.hasPrefix(Self.scheme + ":") ? [s] : ["https://" + s] {
+                if let url = URL(string: candidate), parse(url) != nil { return url }
+            }
+        }
+        return nil
+    }
+
     /// Whether this link points at a server other than `current` (then the app asks before switching).
+    /// (Several accounts: `Accounts.route` decides first.)
     public func needsServerSwitch(from current: URL?) -> Bool {
         guard let server else { return false }
         guard let current else { return true }
