@@ -3,11 +3,17 @@ package mailin
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
+	"math/big"
 	"net"
 	"os"
 	"strings"
@@ -122,15 +128,27 @@ func NewSMTPServer(cfg SMTPConfig, b Backend) (*SMTPServer, error) {
 	srv.WriteTimeout = cfg.CommandTimeout
 	srv.EnableSMTPUTF8 = true
 	srv.ErrorLog = slogLogger{cfg.Log}
+	var getCert func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 	if cfg.CertFile != "" && cfg.KeyFile != "" {
 		cr, err := newCertReloader(cfg.CertFile, cfg.KeyFile)
 		if err != nil {
 			return nil, err
 		}
 		s.certs = cr
+		getCert = cr.get
+	} else {
+		// No certificate configured: offer STARTTLS with a self-signed one. Sending servers use
+		// opportunistic TLS and accept it, so mail is still encrypted on the way in.
+		c, err := selfSignedCert(cfg.Hostname)
+		if err != nil {
+			return nil, err
+		}
+		getCert = func(*tls.ClientHelloInfo) (*tls.Certificate, error) { return c, nil }
+	}
+	{
 		srv.TLSConfig = &tls.Config{
 			MinVersion:     tls.VersionTLS12,
-			GetCertificate: cr.get,
+			GetCertificate: getCert,
 			GetConfigForClient: func(h *tls.ClientHelloInfo) (*tls.Config, error) {
 				_ = h.Conn.SetDeadline(time.Now().Add(10 * time.Second)) // handshake timeout
 				return nil, nil
@@ -523,3 +541,30 @@ type slogLogger struct{ l *slog.Logger }
 
 func (s slogLogger) Printf(format string, v ...any) { s.l.Debug("smtp: " + fmt.Sprintf(format, v...)) }
 func (s slogLogger) Println(v ...any)               { s.l.Debug("smtp: " + fmt.Sprintln(v...)) }
+
+// selfSignedCert makes a throwaway ECDSA certificate for host, valid for a year.
+func selfSignedCert(host string) (*tls.Certificate, error) {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, err
+	}
+	serial, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 120))
+	if err != nil {
+		return nil, err
+	}
+	now := time.Now()
+	tmpl := &x509.Certificate{
+		SerialNumber: serial,
+		Subject:      pkix.Name{CommonName: host},
+		DNSNames:     []string{host},
+		NotBefore:    now.Add(-time.Hour),
+		NotAfter:     now.AddDate(1, 0, 0),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+	if err != nil {
+		return nil, fmt.Errorf("self-signed email certificate: %w", err)
+	}
+	return &tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}, nil
+}

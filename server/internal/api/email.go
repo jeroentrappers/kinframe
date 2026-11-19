@@ -196,7 +196,7 @@ func (s *Server) RunEmailInbox(ctx context.Context) {
 	log := s.log.With("component", "email")
 	if s.em.cfg.SMTPListen != "" {
 		if s.em.cfg.TLSCertFile == "" {
-			log.Warn("email: no TLS certificate (KINFRAME_EMAIL_TLS_CERT_FILE): the SMTP receiver offers no STARTTLS")
+			log.Info("email: no TLS certificate (KINFRAME_EMAIL_TLS_CERT_FILE): STARTTLS uses a self-signed certificate")
 		}
 		srv, err := mailin.NewSMTPServer(mailin.SMTPConfig{
 			Listen: s.em.cfg.SMTPListen, Hostname: s.em.cfg.SMTPHostname, Domain: s.em.cfg.Domain,

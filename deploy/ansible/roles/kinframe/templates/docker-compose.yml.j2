@@ -113,6 +113,9 @@ services:
 {% endif %}
     ports:
       - "127.0.0.1:{{ kinframe_port }}:8110"
+{% if kinframe_email_inbox_domain | length > 0 %}
+      - "{{ kinframe_email_smtp_port }}:2525"   # email to frame: public SMTP (MX)
+{% endif %}
 
 volumes:
   pgdata:

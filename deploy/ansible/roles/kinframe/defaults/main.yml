@@ -113,5 +113,17 @@ kinframe_apns_key_id: ""
 kinframe_apns_team_id: QB4NQU492U
 kinframe_apns_topic: app.kinframe.family
 
+# Email to frame (docs/spec/email-inbox.md). Empty domain = off. With a domain, the built-in SMTP receiver listens
+# on the host's port kinframe_email_smtp_port (public; point the domain's MX at this host). Without a certificate the
+# receiver offers STARTTLS with a self-signed one, which sending servers accept. Replies go out over kinframe_smtp_*.
+kinframe_email_inbox_domain: ""      # e.g. in.kinframe.example.org
+kinframe_email_smtp_hostname: "{{ kinframe_domain }}"   # the MX host name (greeting)
+kinframe_email_smtp_port: 25
+kinframe_email_postmaster: ""        # forward postmaster@/abuse@ of the inbox domain here; empty = refuse them
+
+# Telegram bridge (docs/spec/telegram.md): the BotFather token (vault); empty = off. The server registers its webhook
+# at https://kinframe_domain itself.
+kinframe_telegram_bot_token: ""
+
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}
