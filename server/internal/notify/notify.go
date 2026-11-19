@@ -63,6 +63,15 @@ func (n *Notifier) User(userID uuid.UUID, ev Event, push *Push) {
 	go n.push(userID, ev, push)
 }
 
+// PushOnly delivers a push without a websocket event (bundled and daily pushes, whose events went out
+// already): typ is the payload's "type". Callers decide whether a connected user should get it.
+func (n *Notifier) PushOnly(userID uuid.UUID, typ string, push *Push) {
+	if push == nil || n.Sender == nil {
+		return
+	}
+	go n.push(userID, Event{"type": typ}, push)
+}
+
 // Users sends the same event to several users.
 func (n *Notifier) Users(userIDs []uuid.UUID, ev Event, push *Push) {
 	for _, u := range userIDs {

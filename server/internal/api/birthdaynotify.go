@@ -28,7 +28,7 @@ func (s *Server) birthdayViewers(ctx context.Context, feedID uuid.UUID) ([]bdVie
 	}
 	out := make([]bdViewer, len(ms))
 	for i, m := range ms {
-		out[i] = bdViewer{userID: m.UserID, role: m.Role, pcab: f.PostersCanAddBirthdays, loc: loadZone(deref(m.Timezone))}
+		out[i] = bdViewer{userID: m.UserID, role: m.Role, pcab: f.PostersCanAddBirthdays && m.Role != "member", loc: loadZone(deref(m.Timezone))}
 	}
 	return out, f
 }
@@ -112,7 +112,7 @@ func (s *Server) announceDecision(ctx context.Context, fv *store.FeedView, id, s
 	if err != nil {
 		return
 	}
-	v := bdViewer{userID: suggester, role: m.Role, pcab: fv.PostersCanAddBirthdays, loc: loadZone(deref(u.Timezone))}
+	v := bdViewer{userID: suggester, role: m.Role, pcab: fv.PostersCanAddBirthdays && m.Role != "member", loc: loadZone(deref(u.Timezone))}
 	out, err := s.renderBirthday(ctx, v, b)
 	if err != nil {
 		return

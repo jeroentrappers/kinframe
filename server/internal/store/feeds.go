@@ -26,8 +26,12 @@ type Feed struct {
 	MembersSeeReactions      bool       `db:"members_see_reactions"`
 	PostersCanInvite         bool       `db:"posters_can_invite"`
 	PostersCanAddBirthdays   bool       `db:"posters_can_add_birthdays"`
-	CreatedAt                time.Time  `db:"created_at"`
-	DeletedAt                *time.Time `db:"deleted_at"`
+	// Family social (README §5.18): receipts for every member, the role joiners get, who creates circles.
+	MembersSeeReceipts      bool       `db:"members_see_receipts"`
+	NewMembersCanPost       bool       `db:"new_members_can_post"`
+	MembersCanCreateCircles bool       `db:"members_can_create_circles"`
+	CreatedAt               time.Time  `db:"created_at"`
+	DeletedAt               *time.Time `db:"deleted_at"`
 }
 
 // FeedView is a feed with counts and the viewer's role ("" when not a member).
@@ -46,13 +50,17 @@ type FeedView struct {
 	BirthdayNotifications bool `db:"birthday_notifications"`
 	BirthdayCount         int  `db:"birthday_count"`
 	PendingBirthdayCount  int  `db:"pending_birthday_count"`
+	// Family social: the viewer's mute (FeedMute) and the circles they can see.
+	Mute        string `db:"mute"`
+	CircleCount int    `db:"circle_count"`
 }
 
 // IsAdmin: owner or admin of the feed.
 func (v *FeedView) IsAdmin() bool { return v.Role == "owner" || v.Role == "admin" }
 
 const feedCols = `f.id, f.name, f.cover_item_id, f.auto_approve_subscriptions, f.invite_requires_approval,
-	f.members_see_reactions, f.posters_can_invite, f.posters_can_add_birthdays, f.created_at, f.deleted_at`
+	f.members_see_reactions, f.posters_can_invite, f.posters_can_add_birthdays,
+	f.members_see_receipts, f.new_members_can_post, f.members_can_create_circles, f.created_at, f.deleted_at`
 
 const feedViewSelect = `SELECT ` + feedCols + `, COALESCE(m.role, '') AS role,
 	(SELECT count(*) FROM feed_members x WHERE x.feed_id = f.id)::int AS member_count,
@@ -65,7 +73,10 @@ const feedViewSelect = `SELECT ` + feedCols + `, COALESCE(m.role, '') AS role,
 	(SELECT i.thumb512_key FROM items i WHERE i.id = f.cover_item_id) AS cover_thumb_key,
 	COALESCE(m.birthday_notifications, true) AS birthday_notifications,
 	(SELECT count(*) FROM feed_birthdays b WHERE b.feed_id = f.id AND b.status = 'approved')::int AS birthday_count,
-	(SELECT count(*) FROM feed_birthdays b WHERE b.feed_id = f.id AND b.status = 'pending')::int AS pending_birthday_count
+	(SELECT count(*) FROM feed_birthdays b WHERE b.feed_id = f.id AND b.status = 'pending')::int AS pending_birthday_count,
+	COALESCE(m.mute, 'none') AS mute,
+	(SELECT count(*) FROM circles c WHERE c.feed_id = f.id AND c.deleted_at IS NULL AND (m.role IN ('owner', 'admin')
+		OR EXISTS (SELECT 1 FROM circle_members cm WHERE cm.circle_id = c.id AND cm.user_id = $1)))::int AS circle_count
 	FROM feeds f LEFT JOIN feed_members m ON m.feed_id = f.id AND m.user_id = $1
 	WHERE f.deleted_at IS NULL`
 
@@ -101,8 +112,10 @@ func (s *Store) GetFeed(ctx context.Context, q db.DBTX, id uuid.UUID) (*Feed, er
 // CreateFeed inserts a feed with ownerID as its owner.
 func (tx *Tx) CreateFeed(ctx context.Context, f Feed, ownerID uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `INSERT INTO feeds (id, name, auto_approve_subscriptions, invite_requires_approval, members_see_reactions, posters_can_invite,
-		posters_can_add_birthdays) VALUES ($1, $2, $3, $4, $5, $6, $7)`, f.ID, f.Name, f.AutoApproveSubscriptions, f.InviteRequiresApproval,
-		f.MembersSeeReactions, f.PostersCanInvite, f.PostersCanAddBirthdays); err != nil {
+		posters_can_add_birthdays, members_see_receipts, new_members_can_post, members_can_create_circles)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, f.ID, f.Name, f.AutoApproveSubscriptions, f.InviteRequiresApproval,
+		f.MembersSeeReactions, f.PostersCanInvite, f.PostersCanAddBirthdays, f.MembersSeeReceipts, f.NewMembersCanPost,
+		f.MembersCanCreateCircles); err != nil {
 		return err
 	}
 	_, err := tx.Exec(ctx, `INSERT INTO feed_members (feed_id, user_id, role) VALUES ($1, $2, 'owner')`, f.ID, ownerID)
@@ -118,6 +131,9 @@ type FeedPatch struct {
 	MembersSeeReactions      *bool
 	PostersCanInvite         *bool
 	PostersCanAddBirthdays   *bool
+	MembersSeeReceipts       *bool
+	NewMembersCanPost        *bool
+	MembersCanCreateCircles  *bool
 }
 
 func (tx *Tx) UpdateFeed(ctx context.Context, id uuid.UUID, p FeedPatch) error {
@@ -127,9 +143,13 @@ func (tx *Tx) UpdateFeed(ctx context.Context, id uuid.UUID, p FeedPatch) error {
 		invite_requires_approval = COALESCE($6, invite_requires_approval),
 		members_see_reactions = COALESCE($7, members_see_reactions),
 		posters_can_invite = COALESCE($8, posters_can_invite),
-		posters_can_add_birthdays = COALESCE($9, posters_can_add_birthdays)
+		posters_can_add_birthdays = COALESCE($9, posters_can_add_birthdays),
+		members_see_receipts = COALESCE($10, members_see_receipts),
+		new_members_can_post = COALESCE($11, new_members_can_post),
+		members_can_create_circles = COALESCE($12, members_can_create_circles)
 		WHERE id = $1`, id, p.Name, p.ClearCover, p.CoverItemID, p.AutoApproveSubscriptions, p.InviteRequiresApproval,
-		p.MembersSeeReactions, p.PostersCanInvite, p.PostersCanAddBirthdays)
+		p.MembersSeeReactions, p.PostersCanInvite, p.PostersCanAddBirthdays, p.MembersSeeReceipts, p.NewMembersCanPost,
+		p.MembersCanCreateCircles)
 	return err
 }
 
@@ -500,8 +520,9 @@ func (s *Store) EstimateSubscription(ctx context.Context, sub *Subscription, max
 	}
 	return one[SubscriptionEstimate](s.Pool.Query(ctx, `WITH wanted AS (`+wantedSQL+`)
 		SELECT count(*)::int AS items, COALESCE(sum(COALESCE(m.master_bytes, 0)), 0)::bigint AS bytes
-		FROM wanted w JOIN items i ON i.id = w.item_id JOIN media m ON m.id = i.media_id`,
-		sub.FeedID, boundary, historyLimit(sub, maxBackfill)))
+		FROM wanted w JOIN items i ON i.id = w.item_id JOIN media m ON m.id = i.media_id JOIN feed_posts p ON p.id = w.post_id
+		WHERE `+circleReachSQL("$4"),
+		sub.FeedID, boundary, historyLimit(sub, maxBackfill), sub.FrameID))
 }
 
 // ---------------------------------------------------------------- posts
@@ -524,11 +545,15 @@ type FeedPost struct {
 	ViaEmailAddressID *uuid.UUID `db:"via_email_address_id"`
 	// ViaTelegramChatID: Telegram posts.
 	ViaTelegramChatID *uuid.UUID `db:"via_telegram_chat_id"`
+	// CircleID, CircleName: the audience when shared with one circle (README §5.18).
+	CircleID   *uuid.UUID `db:"circle_id"`
+	CircleName *string    `db:"circle_name"`
 }
 
 const feedPostSelect = `SELECT p.id, p.feed_id, p.send_id, p.poster_user_id, COALESCE(u.display_name, '') AS poster_name,
 	u.avatar_key AS poster_avatar_key, p.created_at, p.removed_at, fd.name AS feed_name, sd.via, sd.photo_source_id AS via_source_id,
-	sd.via_label, sd.email_address_id AS via_email_address_id, sd.telegram_chat_id AS via_telegram_chat_id
+	sd.via_label, sd.email_address_id AS via_email_address_id, sd.telegram_chat_id AS via_telegram_chat_id,
+	p.circle_id, (SELECT c.name FROM circles c WHERE c.id = p.circle_id) AS circle_name
 	FROM feed_posts p JOIN feeds fd ON fd.id = p.feed_id LEFT JOIN users u ON u.id = p.poster_user_id LEFT JOIN sends sd ON sd.id = p.send_id`
 
 // CreateFeedPost inserts a post with the given items (in order).
@@ -554,11 +579,13 @@ func (s *Store) GetFeedPost(ctx context.Context, q db.DBTX, feedID, postID uuid.
 	return one[FeedPost](q.Query(ctx, feedPostSelect+` WHERE p.feed_id = $1 AND p.id = $2 AND p.removed_at IS NULL`, feedID, postID))
 }
 
-// ListFeedPosts pages live posts newest first.
-func (s *Store) ListFeedPosts(ctx context.Context, feedID uuid.UUID, poster *uuid.UUID, before *uuid.UUID, limit int) ([]FeedPost, error) {
+// ListFeedPosts pages live posts newest first, as viewer may see them: circle posts only for the circle's
+// members and the poster (README §5.18).
+func (s *Store) ListFeedPosts(ctx context.Context, viewer, feedID uuid.UUID, poster *uuid.UUID, before *uuid.UUID, limit int) ([]FeedPost, error) {
 	return many[FeedPost](s.Pool.Query(ctx, feedPostSelect+` WHERE p.feed_id = $1 AND p.removed_at IS NULL
 		AND ($2::uuid IS NULL OR p.poster_user_id = $2) AND ($3::uuid IS NULL OR p.id < $3)
-		ORDER BY p.id DESC LIMIT $4`, feedID, poster, before, limit))
+		AND (p.circle_id IS NULL OR p.poster_user_id = $5 OR EXISTS (SELECT 1 FROM circle_members cm WHERE cm.circle_id = p.circle_id AND cm.user_id = $5))
+		ORDER BY p.id DESC LIMIT $4`, feedID, poster, before, limit, viewer))
 }
 
 // PostsOfSends lists the posts (live and removed) of sends, for Send.feeds[].

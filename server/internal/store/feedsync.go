@@ -37,6 +37,16 @@ const wantedSQL = `
 	WHERE p.feed_id = $1 AND p.removed_at IS NULL AND pi.removed_at IS NULL AND p.created_at < $2
 	ORDER BY p.created_at DESC, p.id DESC, pi.position DESC LIMIT $3)`
 
+// circleReachSQL limits post items to those a frame may get (README §5.18): whole-family posts, and circle
+// posts when the frame has a manager (owner, admin or change_settings) in the circle or is one of its
+// circle_frames. p is the feed post; the frame id is the parameter given as %s. Applied when placing (fanout and
+// backfill) only, so later changes to a circle never move existing placements.
+func circleReachSQL(frameParam string) string {
+	return `(p.circle_id IS NULL OR EXISTS (SELECT 1 FROM circle_frames cf WHERE cf.circle_id = p.circle_id AND cf.frame_id = ` + frameParam + `)
+		OR EXISTS (SELECT 1 FROM circle_members cm JOIN memberships ms ON ms.user_id = cm.user_id AND ms.frame_id = ` + frameParam + `
+			WHERE cm.circle_id = p.circle_id AND (ms.role IN ('owner', 'admin') OR (ms.permissions->>'change_settings')::boolean)))`
+}
+
 // historyLimit is how many items from before the boundary the subscription's
 // history option wants (all is capped at maxBackfill).
 func historyLimit(sub *Subscription, maxBackfill int) int {
@@ -442,10 +452,11 @@ var errSkip = errors.New("skip")
 // transaction per frame. Returns the subscriptions it touched.
 func (s *Store) FeedFanout(ctx context.Context, postID uuid.UUID) ([]uuid.UUID, error) {
 	var feedID uuid.UUID
+	var circleID *uuid.UUID
 	var live, quiet bool
 	var postedAt time.Time
-	err := s.Pool.QueryRow(ctx, `SELECT p.feed_id, p.removed_at IS NULL AND f.deleted_at IS NULL, p.created_at, p.quiet FROM feed_posts p JOIN feeds f ON f.id = p.feed_id
-		WHERE p.id = $1`, postID).Scan(&feedID, &live, &postedAt, &quiet)
+	err := s.Pool.QueryRow(ctx, `SELECT p.feed_id, p.removed_at IS NULL AND f.deleted_at IS NULL, p.created_at, p.quiet, p.circle_id
+		FROM feed_posts p JOIN feeds f ON f.id = p.feed_id WHERE p.id = $1`, postID).Scan(&feedID, &live, &postedAt, &quiet, &circleID)
 	if db.NotFound(err) || (err == nil && !live) {
 		return nil, nil
 	}
@@ -477,6 +488,16 @@ func (s *Store) FeedFanout(ctx context.Context, postID uuid.UUID) ([]uuid.UUID, 
 			// its reconcile decides (quietly, per the history option).
 			if sub.ActivatedAt == nil || postedAt.Before(*sub.ActivatedAt) {
 				return errSkip
+			}
+			// A circle post goes only to the frames the circle reaches now (README §5.18).
+			if circleID != nil {
+				var reached bool
+				if err := tx.QueryRow(ctx, `SELECT `+circleReachSQL("$2")+` FROM feed_posts p WHERE p.id = $1`, postID, f.ID).Scan(&reached); err != nil {
+					return err
+				}
+				if !reached {
+					return errSkip
+				}
 			}
 			refs, err := many[postItemRef](tx.Query(ctx, `SELECT `+postItemRefCols+` FROM feed_post_items pi
 				JOIN feed_posts p ON p.id = pi.post_id JOIN items i ON i.id = pi.item_id
@@ -553,12 +574,14 @@ func (s *Store) FeedReconcile(ctx context.Context, job ReconcileJob, maxBackfill
 			JOIN feed_post_items pi ON pi.post_id = w.post_id AND pi.item_id = w.item_id
 			JOIN feed_posts p ON p.id = w.post_id JOIN items i ON i.id = w.item_id
 			WHERE NOT EXISTS (SELECT 1 FROM feed_deliveries d WHERE d.subscription_id = $4 AND d.post_id = w.post_id AND d.item_id = w.item_id)
+			AND ` + circleReachSQL("$5") + `
 			ORDER BY w.created_at DESC, w.post_id DESC, pi.position`
 		trimSQL := `WITH wanted AS (` + wantedSQL + `)
 			SELECT d.post_id, d.item_id FROM feed_deliveries d WHERE d.subscription_id = $4 AND d.state = 'placed'
 			AND NOT EXISTS (SELECT 1 FROM wanted w WHERE w.post_id = d.post_id AND w.item_id = d.item_id)
 			ORDER BY d.post_id, d.item_id`
-		args := []any{sub.FeedID, *sub.ActivatedAt, limit, sub.ID}
+		args := []any{sub.FeedID, *sub.ActivatedAt, limit, sub.ID, f.ID}
+		trimArgs := args[:4] // the trim never looks at circles: existing placements stay
 		if sub.BackfillState == "queued" {
 			var total int
 			if err := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM (`+missingSQL+`) m) + (SELECT count(*) FROM (`+trimSQL+`) t)`, args...).Scan(&total); err != nil {
@@ -575,7 +598,7 @@ func (s *Store) FeedReconcile(ctx context.Context, job ReconcileJob, maxBackfill
 		type key struct{ Post, Item uuid.UUID }
 		var trim []key
 		if left := FeedBatch - len(missing); left > 0 {
-			rows, err := tx.Query(ctx, trimSQL+` LIMIT `+itoa(left), args...)
+			rows, err := tx.Query(ctx, trimSQL+` LIMIT `+itoa(left), trimArgs...)
 			if err != nil {
 				return err
 			}

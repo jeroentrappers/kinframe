@@ -418,6 +418,10 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 	if err != nil {
 		return nil, err
 	}
+	circles, err := s.sendCircles(ctx, feeds, req.Body.CircleIds)
+	if err != nil {
+		return nil, err
+	}
 	items, err := s.prepareItems(ctx, req.Body)
 	if err != nil {
 		return nil, err
@@ -504,11 +508,15 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 		if err := createPosts(ctx, s.st, tx, sendID, u.ID, feeds, itemIDs); err != nil {
 			return err
 		}
+		if err := applySendCircles(ctx, tx, sendID, circles); err != nil {
+			return err
+		}
 		if key != "" {
 			return tx.SaveIdempotent(ctx, u.ID, "send", key, sendRef{sendID})
 		}
 		return nil
 	})
+	personal := err == nil
 	if db.IsUniqueViolation(err, "idempotency_keys_pkey") {
 		var prev sendRef
 		if found, _ := store.IdempotentResult(ctx, s.st.Q(), u.ID, "send", key, &prev); found {
@@ -518,6 +526,9 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 	}
 	if err != nil {
 		return nil, err
+	}
+	if personal {
+		s.afterPersonalSend(ctx, sendID)
 	}
 	sd, err := s.renderSend(ctx, sendID)
 	if err != nil {
@@ -633,6 +644,7 @@ func (s *Server) Unsend(ctx context.Context, req gen.UnsendRequestObject) (gen.U
 	if _, err := s.ownSend(ctx, req.SendId); err != nil {
 		return nil, err
 	}
+	audience := s.sendPostsAudience(ctx, req.SendId)
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
 		// Shared placements carry the original send too; matching the send's
 		// items as well keeps every copy covered (feed placements included).
@@ -658,6 +670,7 @@ func (s *Server) Unsend(ctx context.Context, req gen.UnsendRequestObject) (gen.U
 		return nil, err
 	}
 	s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{req.SendId: me(ctx).ID}, "")
+	s.publishPostGone(ctx, audience)
 	return noContent(), nil
 }
 
@@ -677,6 +690,10 @@ func (s *Server) ForwardSend(ctx context.Context, req gen.ForwardSendRequestObje
 		return nil, err
 	}
 	feeds, err := s.feedTargets(ctx, feedIDs)
+	if err != nil {
+		return nil, err
+	}
+	circles, err := s.sendCircles(ctx, feeds, req.Body.CircleIds)
 	if err != nil {
 		return nil, err
 	}
@@ -703,11 +720,15 @@ func (s *Server) ForwardSend(ctx context.Context, req gen.ForwardSendRequestObje
 		for i, r := range rows {
 			itemIDs[i] = r.ItemID
 		}
-		return createPosts(ctx, s.st, tx, req.SendId, me(ctx).ID, feeds, itemIDs)
+		if err := createPosts(ctx, s.st, tx, req.SendId, me(ctx).ID, feeds, itemIDs); err != nil {
+			return err
+		}
+		return applySendCircles(ctx, tx, req.SendId, circles)
 	})
 	if err != nil {
 		return nil, err
 	}
+	s.afterPersonalSend(ctx, req.SendId)
 	sd, err := s.renderSend(ctx, req.SendId)
 	if err != nil {
 		return nil, err

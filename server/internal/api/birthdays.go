@@ -102,7 +102,7 @@ func (v bdViewer) canDecide(b *store.Birthday) bool { return v.admin() && b.Stat
 
 func (s *Server) bdViewer(ctx context.Context, fv *store.FeedView) bdViewer {
 	u := me(ctx)
-	return bdViewer{userID: u.ID, role: fv.Role, pcab: fv.PostersCanAddBirthdays, loc: loadZone(deref(u.Timezone))}
+	return bdViewer{userID: u.ID, role: fv.Role, pcab: fv.PostersCanAddBirthdays && fv.Role != "member", loc: loadZone(deref(u.Timezone))}
 }
 
 // visibleBirthday loads an entry the caller may see; others are 404 like unknown ones.
@@ -860,6 +860,9 @@ func (s *Server) UpdateFeedPreferences(ctx context.Context, req gen.UpdateFeedPr
 		if err := s.st.InTx(ctx, func(tx *store.Tx) error { return tx.SetBirthdayNotifications(ctx, req.FeedId, me(ctx).ID, *on) }); err != nil {
 			return nil, err
 		}
+	}
+	if err := s.setFeedMute(ctx, req.FeedId, req.Body.Mute); err != nil {
+		return nil, err
 	}
 	fv, err := s.feedView(ctx, s.st.Q(), req.FeedId)
 	if err != nil {
