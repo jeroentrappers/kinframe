@@ -26,13 +26,15 @@
 	import PhotoSources from '../sources/PhotoSources.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import type { Subscription } from '$lib/api/client';
+	import TakenAwayGroups from '../leaving/TakenAwayGroups.svelte';
 
 	type View = 'visible' | 'hidden' | 'trashed';
 	type Action = 'hide' | 'unhide' | 'trash' | 'restore';
 
 	let { frame }: { frame: Frame } = $props();
 
-	let view = $state<View>('visible');
+	// `?view=trashed` opens the trash (the `photos_taken_away` notification).
+	let view = $state<View>(page.url.searchParams.get('view') === 'trashed' ? 'trashed' : 'visible');
 	/** Only placements held by this feed (`feed_id` filter, feeds.md §3); null = everything. */
 	let feedFilter = $state<string | null>(null);
 	let feedSubs = $state<Subscription[]>([]);
@@ -671,6 +673,11 @@
 {/if}
 {#if !album && view === 'trashed' && items.length > 0}
 	<p class="callout small own-only"><Icon name="trash" size={18} />{t('library.trashNote')}</p>
+{/if}
+
+{#if !album && view === 'trashed' && manage && discovery.leaving}
+	<!-- "Taken away by Tom" (leaving.md story 2) -->
+	<TakenAwayGroups scope="frame" id={frame.id} onchanged={() => load()} />
 {/if}
 
 {#if loading}

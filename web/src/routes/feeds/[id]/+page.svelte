@@ -26,6 +26,7 @@
 	import FeedSocialBar from '$components/social/FeedSocialBar.svelte';
 	import FeedTimeline from '$components/social/FeedTimeline.svelte';
 	import ReportList from '$components/social/ReportList.svelte';
+	import TakenAwayGroups from '$components/leaving/TakenAwayGroups.svelte';
 
 	type Tab = 'posts' | 'birthdays' | 'members' | 'circles' | 'subscriptions' | 'sources' | 'invites' | 'reports' | 'settings';
 	/** Family social: the posts tab is a timeline with threads; the classic list keeps the per-frame details. */
@@ -164,6 +165,7 @@
 
 		<div id="fpanel-{tab}" role="tabpanel" aria-labelledby="ftab-{tab}" class="panel" tabindex="-1">
 			{#if tab === 'posts'}
+				{#if discovery.leaving && isFeedAdmin(feed.role)}<TakenAwayGroups scope="feed" id={feed.id} />{/if}
 				{#if discovery.social && !classicPosts}
 					<FeedTimeline {feed} ondetails={() => (classicPosts = true)} />
 				{:else}

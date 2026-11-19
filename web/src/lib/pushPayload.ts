@@ -10,6 +10,8 @@ export interface PushPayload {
 	ids?: Record<string, string>;
 	/** Notification buttons (README §6.3): `snooze_month`, `fewer_reminders` on reminders. */
 	actions?: string[];
+	/** The sending server's base URL (README §6.3). The web is signed in to one server, so it only reads it. */
+	server?: string;
 }
 
 /** The notification buttons the app knows (others are ignored). */
@@ -52,6 +54,17 @@ export function pushUrl(p: PushPayload): string {
 	if (p.key === 'weekly_summary') {
 		const week = p.ids?.week_of;
 		return week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? `/home?week=${week}` : '/home';
+	}
+	// Leaving (README §6.3, §5.21): the frame's trash, the family, the person's history.
+	const request = id(p.ids?.request_id);
+	if (p.key === 'keep_request') return request ? `/history?keep=${request}` : '/history';
+	if (p.key === 'photos_taken_away' || p.key === 'keep_answered') {
+		if (frame) return `/frames/${frame}?tab=library&view=trashed`;
+		if (feed) return `/feeds/${feed}`;
+	}
+	if (p.key === 'ownership_changed') {
+		if (frame) return `/frames/${frame}`;
+		if (feed) return `/feeds/${feed}`;
 	}
 	// Feeds (README §6.3).
 	if (p.key === 'subscription_request' && feed) return `/feeds/${feed}?tab=subscriptions`;

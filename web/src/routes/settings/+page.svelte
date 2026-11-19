@@ -18,6 +18,8 @@
 	import TelegramLinkSection from '$components/telegram/TelegramLinkSection.svelte';
 	import SocialSettings from '$components/social/SocialSettings.svelte';
 	import { PUSH_ACTIONS, type KnownPushAction } from '$lib/pushPayload';
+	import ChoiceGroup from '$components/leaving/ChoiceGroup.svelte';
+	import OtherServers from '$components/remote/OtherServers.svelte';
 
 	// After a first sign-in without a name claim: ask once, then continue where they were going.
 	const welcome = page.url.searchParams.get('welcome') === '1';
@@ -118,8 +120,10 @@
 	const ownedFrames = $derived(frames.list.filter((f) => f.role === 'owner'));
 	const ownedNames = $derived(new Intl.ListFormat(i18n.tag, { type: 'conjunction' }).format(ownedFrames.map((f) => f.name)));
 
+	let deletePhotos = $state<'take' | 'leave'>('take');
 	function openDelete() {
 		deleteItems = false;
+		deletePhotos = 'take';
 		deleteOpen = true;
 		void frames.load(true);
 	}
@@ -127,7 +131,9 @@
 	async function deleteAccount() {
 		deleting = true;
 		try {
-			await call(api.DELETE('/v1/me', { params: { query: { remove_items: deleteItems } } }));
+			// Leaving (README §5.21): `photos` take (default) or leave; older servers get `remove_items`.
+			if (discovery.leaving) await call(api.DELETE('/v1/me', { body: { photos: deletePhotos } }));
+			else await call(api.DELETE('/v1/me', { params: { query: { remove_items: deleteItems } } }));
 		} catch (err) {
 			deleting = false;
 			toasts.error(problemMessage(err));
@@ -234,6 +240,26 @@
 			</a>
 		{/if}
 
+		<!-- Leaving and other servers (README §5.21, §5.22) -->
+		{#if discovery.leaving}
+			<a class="card card-pad row between shop-link" href="/settings/memories">
+				<span><span class="s-label">{t('leaving.memoriesTitle')}</span><span class="hint">{t('leaving.memoriesHint')}</span></span>
+				<Icon name="chevronRight" size={20} />
+			</a>
+		{/if}
+		{#if auth.me?.is_operator && discovery.leaving}
+			<a class="card card-pad row between shop-link" href="/settings/ownership">
+				<span><span class="s-label">{t('leaving.opLink')}</span><span class="hint">{t('leaving.opLinkHint')}</span></span>
+				<Icon name="chevronRight" size={20} />
+			</a>
+		{/if}
+		{#if auth.me?.is_operator && discovery.remoteFamilies}
+			<a class="card card-pad row between shop-link" href="/settings/servers">
+				<span><span class="s-label">{t('remote.opLink')}</span><span class="hint">{t('remote.opLinkHint')}</span></span>
+				<Icon name="chevronRight" size={20} />
+			</a>
+		{/if}
+
 		{#if auth.me?.is_operator && discovery.shop}
 			<a class="card card-pad row between shop-link" href="/settings/reservations">
 				<span>
@@ -254,6 +280,7 @@
 				<div><dt>{t('settings.maxVideo')}</dt><dd class="num">{formatDuration(limits.max_video_seconds)}</dd></div>
 				<div><dt>{t('settings.maxUpload')}</dt><dd class="num">{formatBytes(limits.max_upload_bytes, i18n.tag)}</dd></div>
 			</dl>
+			{#if discovery.serverId}<OtherServers />{/if}
 			{#if auth.mode === 'dev'}<p class="hint dev-note"><span class="badge">DEV</span> {t('settings.devMode')}</p>{/if}
 		</section>
 
@@ -280,8 +307,20 @@
 			<p>{t('account.deleteOwner', { frames: ownedNames })}</p>
 		{:else}
 			<p class="muted">{t('account.deleteBody')}</p>
-			<label class="switch"><input type="checkbox" bind:checked={deleteItems} /><span>{t('account.deleteItems')}</span></label>
-			{#if !deleteItems}<p class="hint">{t('account.deleteItemsHint')}</p>{/if}
+			{#if discovery.leaving}
+				<ChoiceGroup
+					name="delete-photos"
+					legend={t('leaving.deleteLegend')}
+					bind:value={deletePhotos}
+					options={[
+						{ id: 'take', label: t('leaving.deleteTake'), hint: t('leaving.deleteTakeHint') },
+						{ id: 'leave', label: t('leaving.deleteLeave'), hint: t('leaving.deleteLeaveHint', { name: auth.me?.display_name ?? '' }) }
+					]}
+				/>
+			{:else}
+				<label class="switch"><input type="checkbox" bind:checked={deleteItems} /><span>{t('account.deleteItems')}</span></label>
+				{#if !deleteItems}<p class="hint">{t('account.deleteItemsHint')}</p>{/if}
+			{/if}
 		{/if}
 	</div>
 	{#snippet footer()}

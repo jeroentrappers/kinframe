@@ -11,6 +11,7 @@
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
 	import QrCode from '../QrCode.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 
 	let { feed }: { feed: Feed } = $props();
 
@@ -34,6 +35,9 @@
 	});
 
 	let purpose = $state<FeedInvitePurpose>('join');
+	// "Frames on other servers may use this link" (README §5.22): subscribe invites of families that allow it.
+	let allowRemote = $state(false);
+	const remoteOk = $derived(discovery.remoteFamilies && purpose === 'subscribe' && feed.allow_remote_frames === true);
 	let expiresIn = $state(168);
 	let uses = $state<InviteUses>('single');
 	let note = $state('');
@@ -51,7 +55,7 @@
 			const inv = await call(
 				api.POST('/v1/feeds/{feedId}/invites', {
 					params: { path: { feedId: feed.id }, header: { 'Idempotency-Key': newIdempotencyKey() } },
-					body: inviteBody({ purpose, expiresInHours: expiresIn, uses, note })
+					body: { ...inviteBody({ purpose, expiresInHours: expiresIn, uses, note }), ...(remoteOk && allowRemote ? { allow_remote: true } : {}) }
 				})
 			);
 			fresh = inv;
@@ -148,6 +152,12 @@
 							<span><strong>{t('feedInvites.subscribe')}</strong><span class="hint">{t('feedInvites.subscribeHint')}</span></span>
 						</label>
 					</fieldset>
+					{#if remoteOk}
+						<label class="switch">
+							<input type="checkbox" bind:checked={allowRemote} />
+							<span class="sw"><span class="s-label">{t('remote.inviteAllow')}</span><span class="hint">{t('remote.inviteAllowHint')}</span></span>
+						</label>
+					{/if}
 				{:else}
 					<p class="muted small">{feed.invite_requires_approval === false ? t('feedInvites.joinHintInstant') : t('feedInvites.joinHint')}</p>
 				{/if}
@@ -193,7 +203,7 @@
 						<div class="who">
 							<span class="small">
 								<strong>{inv.purpose === 'subscribe' ? t('feedInvites.subscribe') : t('feedInvites.join')}</strong>
-								· <span class="num">{formatFeedCode(inv.code)}</span>{#if inv.note} · {inv.note}{/if}
+								· <span class="num">{formatFeedCode(inv.code)}</span>{#if inv.note} · {inv.note}{/if}{#if inv.allow_remote} · <span class="badge"><Icon name="globe" size={12} />{t('remote.inviteAllowsRemote')}</span>{/if}
 							</span>
 							<span class="muted tiny num">
 								{inv.max_uses ? t('people.usesOf', { n: inv.uses ?? 0, max: inv.max_uses }) : t('people.usesN', { n: inv.uses ?? 0 })} · {t('people.expiresIn', { when: relativeTime(inv.expires_at, i18n.tag) })}{#if inv.created_by_name} · {t('people.byName', { name: inv.created_by_name })}{/if}
@@ -251,6 +261,13 @@
 	.p-opt > span {
 		display: flex;
 		flex-direction: column;
+	}
+	.sw {
+		display: flex;
+		flex-direction: column;
+	}
+	.s-label {
+		font-weight: 600;
 	}
 	.p-opt input {
 		margin-top: 4px;

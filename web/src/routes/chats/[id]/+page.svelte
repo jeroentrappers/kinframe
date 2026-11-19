@@ -24,6 +24,7 @@
 	import MoreMenu from '$components/social/MoreMenu.svelte';
 	import ReportDialog from '$components/social/ReportDialog.svelte';
 	import TargetDialog from '$components/social/TargetDialog.svelte';
+	import { readOnlyName } from '$lib/leaving';
 
 	const id = $derived(page.params.id!);
 	let conv = $state<Conversation | null>(null);
@@ -422,7 +423,9 @@
 
 		{#if conv}
 			{#if conv.read_only}
-				<p class="readonly small muted"><Icon name="lock" size={14} />{t('chat.readOnly')}</p>
+				<p class="readonly small muted">
+					<Icon name="lock" size={14} />{conv.read_only_reason === 'no_longer_contacts' ? t('leaving.noLongerContacts', { name: readOnlyName(conv, auth.me?.id) }) : t('chat.readOnly')}
+				</p>
 			{:else}
 				<div class="composer-wrap">
 					<ChatComposer {people} bind:replyTo bind:editing {onsend} {onedit} {ontyping} {onvoice} />

@@ -10,6 +10,11 @@
 	import Icon, { type IconName } from '../Icon.svelte';
 	import ReplaceDeviceDialog from './ReplaceDeviceDialog.svelte';
 	import TransferDialog from './TransferDialog.svelte';
+	// Leaving with a choice (leaving.md story 6, README §5.21)
+	import { discovery } from '$lib/discovery.svelte';
+	import { resultMessage } from '$lib/leavingText';
+	import LeaveSheet from '../leaving/LeaveSheet.svelte';
+	let sheetOpen = $state(false);
 
 	let { frame, onupdated }: { frame: Frame; onupdated: (f: Frame) => void } = $props();
 
@@ -316,7 +321,7 @@
 				</div>
 			{:else}
 				<p class="muted small">{t('overview.leaveBody')}</p>
-				<button class="btn btn-danger-ghost" onclick={() => (leaveOpen = true)}><Icon name="logout" size={18} />{t('overview.leaveButton')}</button>
+				<button class="btn btn-danger-ghost" onclick={() => (discovery.leaving ? (sheetOpen = true) : (leaveOpen = true))}><Icon name="logout" size={18} />{t('overview.leaveButton')}</button>
 			{/if}
 		</section>
 	</div>
@@ -331,6 +336,20 @@
 		frames.upsert(f);
 	}}
 />
+
+{#if discovery.leaving}
+	<LeaveSheet
+		bind:open={sheetOpen}
+		scope="frame"
+		id={frame.id}
+		name={frame.name}
+		ondone={async ({ result, frameNames }) => {
+			frames.remove(frame.id);
+			toasts.success(resultMessage(result, frameNames, frame.name));
+			await goto('/frames');
+		}}
+	/>
+{/if}
 
 <Dialog bind:open={leaveOpen} title={t('overview.leaveConfirm', { name: frame.name })}>
 	<div class="stack">

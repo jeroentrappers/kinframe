@@ -12,6 +12,7 @@
 	import MoreMenu, { type MenuItem } from './MoreMenu.svelte';
 	import ReactionRow from './ReactionRow.svelte';
 	import RichText from './RichText.svelte';
+	import { remoteFrameName } from '$lib/leavingText';
 
 	let {
 		comment: c,
@@ -77,9 +78,9 @@
 		<span class="frame-ic" aria-hidden="true"><Icon name="frame" size={16} /></span>
 		<p>
 			{#if c.frame.reply}
-				<strong>{c.frame.frame_name}:</strong> {t(`reply.${c.frame.reply}`)}
+				<strong>{remoteFrameName(c.frame.frame_name, c.frame.server_name)}:</strong> {t(`reply.${c.frame.reply}`)}
 			{:else if c.frame.reaction}
-				{t(`social.frameReacted.${c.frame.reaction}`, { frame: c.frame.frame_name })} <span aria-hidden="true">{REACTION_EMOJI[c.frame.reaction]}</span>
+				{t(`social.frameReacted.${c.frame.reaction}`, { frame: remoteFrameName(c.frame.frame_name, c.frame.server_name) })} <span aria-hidden="true">{REACTION_EMOJI[c.frame.reaction]}</span>
 			{/if}
 			<time class="faint tiny" datetime={c.created_at}>{relativeTime(c.created_at, i18n.tag)}</time>
 		</p>

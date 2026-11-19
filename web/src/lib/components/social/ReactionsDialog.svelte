@@ -9,6 +9,7 @@
 	import Avatar from '../Avatar.svelte';
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
+	import { remoteFrameName } from '$lib/leavingText';
 
 	let { open = $bindable(false), kind, targetId, postId }: { open?: boolean; kind: ReactionTargetKind; targetId: string; postId?: string } = $props();
 
@@ -40,7 +41,7 @@
 			{#each list.frames as f (f.frame_id + (f.item_id ?? ''))}
 				<li>
 					<span class="frame-icon" aria-hidden="true"><Icon name="frame" size={18} /></span>
-					<span class="name">{f.frame_name}</span>
+					<span class="name">{remoteFrameName(f.frame_name, f.server_name)}</span>
 					<span class="emoji" title={t(`reaction.${f.reaction}`)}>{REACTION_EMOJI[f.reaction]}</span>
 				</li>
 			{/each}

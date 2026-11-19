@@ -27,6 +27,8 @@
 	import Icon from '../Icon.svelte';
 	import Thumb from '../Thumb.svelte';
 	import ShareInChatDialog from './ShareInChatDialog.svelte';
+	import { withMemories } from '$lib/leaving';
+	import { problemMessage } from '$lib/problem';
 	import TargetDialog from './TargetDialog.svelte';
 
 	let { day }: { day: OnThisDay } = $props();
@@ -36,13 +38,30 @@
 	let shareOpen = $state(false);
 	let sharePost = $state<{ postId: string; feedId: string } | null>(null);
 
+	// "Don't show this memory again" (leaving.md story 8): adds the group's posts to the private memories filter.
+	let hiddenGroups = $state(new Set<string>());
+	function hideMemory(g: OnThisDay['groups'][number]) {
+		const key = g.feed_id + g.years_ago;
+		toasts.deferred({
+			message: t('leaving.memoryHidden'),
+			undoLabel: t('common.undo'),
+			apply: () => (hiddenGroups = new Set([...hiddenGroups, key])),
+			rollback: () => (hiddenGroups = new Set([...hiddenGroups].filter((k) => k !== key))),
+			commit: async () => {
+				const prefs = await call(api.GET('/v1/me/memories'));
+				await call(api.PUT('/v1/me/memories', { body: withMemories(prefs, g.post_ids, true) }));
+			},
+			onCommitError: (e) => toasts.error(problemMessage(e))
+		});
+	}
+
 	function openResend(items: Item[]) {
 		resendItemsList = items.filter((i) => i.sender_id === auth.me?.id);
 		resendOpen = true;
 	}
 </script>
 
-{#each day.groups as g (g.feed_id + g.years_ago)}
+{#each day.groups.filter((x) => !hiddenGroups.has(x.feed_id + x.years_ago)) as g (g.feed_id + g.years_ago)}
 	{@const own = g.items.filter((i) => i.sender_id === auth.me?.id)}
 	<section class="card otd" aria-labelledby="otd-{g.feed_id}-{g.years_ago}">
 		<header>
@@ -67,6 +86,9 @@
 				</button>
 			{/if}
 			{#if g.post_ids[0]}<a class="btn btn-sm btn-ghost" href="/posts/{g.post_ids[0]}">{t('engagement.viewPost')}</a>{/if}
+			{#if discovery.leaving && g.post_ids.length > 0}
+				<button class="btn btn-sm btn-ghost" onclick={() => hideMemory(g)}><Icon name="eyeOff" size={16} />{t('leaving.hideMemory')}</button>
+			{/if}
 		</div>
 	</section>
 {/each}

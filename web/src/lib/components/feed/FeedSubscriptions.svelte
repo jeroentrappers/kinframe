@@ -12,6 +12,10 @@
 	import OnlineStatus from '../OnlineStatus.svelte';
 	import SubscribeDialog from './SubscribeDialog.svelte';
 	import SubscriptionStatusBadge from './SubscriptionStatusBadge.svelte';
+	// Frames on other servers (README §5.22): server names, blocking a server.
+	import { discovery } from '$lib/discovery.svelte';
+	import BlockedServers from '../remote/BlockedServers.svelte';
+	let blockHost = $state<string | null>(null);
 
 	let { feed, onchanged }: { feed: Feed; onchanged?: () => void } = $props();
 
@@ -38,7 +42,7 @@
 	});
 
 	const groups = $derived(groupSubscriptions(subs ?? [], 'frame'));
-	const taken = $derived((subs ?? []).filter((s) => s.status === 'pending' || s.status === 'active' || s.status === 'paused').map((s) => s.frame.id));
+	const taken = $derived((subs ?? []).filter((s) => !s.remote && s.status === 'pending' || s.status === 'active' || s.status === 'paused').map((s) => s.frame.id));
 
 	function replace(s: Subscription) {
 		subs = (subs ?? []).some((x) => x.id === s.id) ? (subs ?? []).map((x) => (x.id === s.id ? s : x)) : [s, ...(subs ?? [])];
@@ -99,9 +103,12 @@
 						<li class="row-item wrap" out:softFly>
 							<span class="f-icon"><Icon name="frame" size={18} /></span>
 							<div class="who">
-								<strong>{s.frame.name}</strong>
+								<strong>{s.frame.name}{#if s.remote} <span class="badge"><Icon name="globe" size={12} />{s.remote.server_name}</span>{/if}</strong>
+								{#if s.remote}
+									<span class="small">{t('remote.wantsToShow', { name: s.remote.requested_by_name ?? s.requested_by_name ?? '', feed: feed.name, frame: s.frame.name, server: s.remote.host ?? s.remote.server_name })}</span>
+								{/if}
 								<span class="muted small">
-									{s.requested_by_name ? t('subs.requestedBy', { name: s.requested_by_name }) : ''}{#if s.frame.location} · {s.frame.location}{/if} · {relativeTime(s.created_at, i18n.tag)}
+									{s.requested_by_name && !s.remote ? t('subs.requestedBy', { name: s.requested_by_name }) : ''}{#if s.frame.location} · {s.frame.location}{/if} · {relativeTime(s.created_at, i18n.tag)}
 								</span>
 								<span class="tiny muted">{t(`subs.historyShort.${s.history}`, { n: s.history_count ?? 0 })}</span>
 							</div>
@@ -132,11 +139,17 @@
 							<div class="who">
 								<strong>{s.frame.name}</strong>
 								<span class="muted small row-wrap meta">
+									{#if s.remote}<span class="badge" title={s.remote.server_url}><Icon name="globe" size={12} />{t('remote.frameOnServer', { frame: s.remote.server_name, server: s.remote.host ?? s.remote.server_url })}</span>{/if}
 									{#if s.frame.location}<span>{s.frame.location}</span>{/if}
 									{#if s.frame.online !== undefined}<OnlineStatus online={s.frame.online} lastSeen={s.frame.last_seen_at ?? null} />{/if}
 								</span>
 							</div>
 							<SubscriptionStatusBadge status={s.status} />
+							{#if s.remote && admin && discovery.remoteFamilies}
+								<button class="btn btn-ghost btn-icon btn-sm" aria-label={t('remote.blockServer', { server: s.remote.server_name })} title={t('remote.blockServer', { server: s.remote.server_name })} onclick={() => (blockHost = s.remote?.host ?? s.remote?.server_url ?? null)}>
+									<Icon name="ban" size={16} />
+								</button>
+							{/if}
 							{#if s.can_decide}
 								<button
 									class="btn btn-danger-ghost btn-icon btn-sm"
@@ -173,6 +186,10 @@
 	</div>
 {/if}
 
+{#if admin && discovery.remoteFamilies && (subs ?? []).some((s) => s.remote)}
+	<div class="blocked"><BlockedServers scope={{ kind: 'feed', feedId: feed.id }} bind:prefill={blockHost} onchange={load} /></div>
+{/if}
+
 <SubscribeDialog bind:open={subscribeOpen} feedId={feed.id} {taken} onsubscribed={(s) => (replace(s), onchanged?.())} />
 
 <Dialog bind:open={removeOpen} title={t('subs.removeConfirm', { frame: removing?.frame.name ?? '' })}>
@@ -184,6 +201,9 @@
 </Dialog>
 
 <style>
+	.blocked {
+		margin-top: var(--s-4);
+	}
 	.toolbar {
 		display: flex;
 		gap: var(--s-3);

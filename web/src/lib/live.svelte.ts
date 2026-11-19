@@ -85,7 +85,11 @@ export type LiveEvent =
 	| E['PhotoRequestEvent']
 	| E['StreakEvent']
 	| E['PromptEvent']
-	| E['MilestoneEvent'];
+	| E['MilestoneEvent']
+	// Leaving and families on other servers (README §6.2, §5.21, §5.22)
+	| E['KeepRequestEvent']
+	| E['PlacementUpdatedEvent']
+	| E['RemoteSubscriptionEvent'];
 
 type Handler = (e: LiveEvent) => void;
 

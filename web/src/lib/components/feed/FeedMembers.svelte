@@ -16,6 +16,11 @@
 	import Icon from '../Icon.svelte';
 	import FeedRoleBadge from './FeedRoleBadge.svelte';
 	import { discovery } from '$lib/discovery.svelte';
+	// Leaving with a choice (leaving.md, README §5.21)
+	import LeaveSheet from '../leaving/LeaveSheet.svelte';
+	import { resultMessage } from '$lib/leavingText';
+	import { frames } from '$lib/frames.svelte';
+	let sheetOpen = $state(false);
 
 	let { feed, onchanged }: { feed: Feed; onchanged?: () => void } = $props();
 
@@ -279,6 +284,7 @@
 					class="btn btn-danger-ghost"
 					onclick={() => {
 						if (feed.role === 'owner') toasts.show(t('feedMembers.ownerCannotLeave'));
+						else if (discovery.leaving) sheetOpen = true;
 						else {
 							leavePosts = false;
 							leaveOpen = true;
@@ -301,6 +307,21 @@
 		<button class="btn btn-danger" onclick={removeMember}>{t('people.remove')}</button>
 	{/snippet}
 </Dialog>
+
+{#if discovery.leaving}
+	<LeaveSheet
+		bind:open={sheetOpen}
+		scope="feed"
+		id={feed.id}
+		name={feed.name}
+		ondone={async ({ result, frameNames }) => {
+			feeds.remove(feed.id);
+			for (const f of result?.left_frame_ids ?? []) frames.remove(f);
+			toasts.success(resultMessage(result, frameNames, feed.name));
+			await goto('/feeds');
+		}}
+	/>
+{/if}
 
 <Dialog bind:open={leaveOpen} title={t('feedMembers.leaveConfirm', { feed: feed.name })}>
 	<div class="stack">
