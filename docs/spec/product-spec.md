@@ -206,7 +206,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Crash-loop guard | Skip the current media, then a recovery screen | Same. Also reports to the owner. | P |
 | Diagnostics | Support page plus QR | Same QR idea, plus owner-visible health in the app (Wi-Fi strength, storage, uptime, app version, last sync). | P |
 | Factory reset | Clear data / OS reset | Clear data from frame settings or remotely by the owner. | P |
-| Retail mode | Yes | — | — |
+| Retail mode | Yes | Planned, not built: an offline demo mode that shows kinframe's features (kinframe-additions, "Demo mode"). | — |
 | Telemetry | Default-on analytics | **None.** Health data goes only to the family's own server. | M |
 
 ### 4.11 Home automation and integrations (beyond Frameo)

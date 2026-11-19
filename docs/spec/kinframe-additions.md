@@ -53,3 +53,21 @@ Casting from Chrome uses the Presentation API (the TV page itself) or, for a mir
 each photo the frame shows. A browser frame on a Chromecast needs a TV browser (Google TV) or a presenting laptop, as
 the Default Media Receiver cannot run a page.
 
+
+## Demo mode (planned, not built)
+
+A store or fair demo for frames on a counter, like Frameo's retail mode (2019; frameo-behaviour-spec.md B.7), but
+built for kinframe. Decided 2026-11-19: keep the plan, don't build it yet.
+
+- **Offline.** The demo photos ship inside the frame app (CC0 photos without people, like the App Store screenshots in
+  `ios/tools/storeshots/photos/`), so it works without the shop's Wi-Fi. No server enrolment, nothing is sent.
+- **Shows kinframe, not just a slideshow.** A scripted loop over made-up data: a "new photos from Oma" card, a heart
+  reaction, a birthday card with balloons, a countdown and the calendar sidebar. Texts follow the chosen language
+  (36 languages).
+- **Call to action.** A small corner card "kinframe — scan to learn more" with a QR code to the landing page or the
+  operator's shop (configurable at build time or by the convert tool).
+- **Entering.** A hidden gesture in the setup wizard (a long press on the logo on the language step), or the convert
+  tool's `--demo` option (website checkbox) for preparing many frames.
+- **Locked down.** Settings hidden; taps only change the photo. Leaving needs a long press plus a confirmation, or a
+  reset; it then goes back to the setup wizard.
+- **Scope.** Frame app plus a small convert-tool option; server and family apps unchanged.
