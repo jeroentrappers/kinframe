@@ -24,7 +24,7 @@ object FcmPush {
 
 class FcmService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
-        (application as FamilyApp).graph.push.onEndpoint("fcm", token, null)
+        (application as FamilyApp).graph.push.onEndpoint("fcm", token, null, null)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -37,7 +37,9 @@ class FcmService : FirebaseMessagingService() {
             key = data["key"].orEmpty(),
             tag = data["tag"].orEmpty(),
             actions = SocialNotifications.parseActions(data["actions"]),
+            server = data["server"].orEmpty(),
         )
+        (application as FamilyApp).graph.routePush(msg, null)
         Notifications.showPush(this, msg)
         (application as FamilyApp).graph.onPush(msg)
     }

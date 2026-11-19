@@ -7,13 +7,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import app.kinframe.core.api.AppVersionInterceptor
-import app.kinframe.core.api.DevAuthClient
 import app.kinframe.core.api.FamilyAppHeader
 import app.kinframe.family.update.AppUpdates
 import app.kinframe.family.update.PrefsDismissStore
 import kotlinx.coroutines.flow.map
-import app.kinframe.core.api.DiscoveryClient
-import app.kinframe.core.api.HttpKinApi
 import app.kinframe.core.api.KinApi
 import app.kinframe.core.api.TusUploader
 import app.kinframe.core.api.TusResult
@@ -53,8 +50,25 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.io.File
-import java.util.Locale
 import java.util.concurrent.TimeUnit
+import app.kinframe.core.api.AccessTokenSource
+import app.kinframe.core.api.Discovery
+import app.kinframe.core.api.SessionExpiredException
+import app.kinframe.core.leaving.LeavingApi
+import app.kinframe.core.servers.RemoteApi
+import app.kinframe.core.servers.RoutingKinApi
+import app.kinframe.core.servers.RoutingLeavingApi
+import app.kinframe.family.accounts.AddServerRequest
+import app.kinframe.family.accounts.Account
+import app.kinframe.family.accounts.AccountDeps
+import app.kinframe.family.accounts.AccountManager
+import app.kinframe.family.accounts.AccountStore
+import app.kinframe.family.data.ServerChoice
+import app.kinframe.family.notify.PushAccount
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
 
 /** A request from outside the app: a notification tap. */
 data class OpenTarget(
@@ -68,12 +82,18 @@ data class OpenTarget(
     val ids: Map<String, String> = emptyMap(),
 )
 
+
 /**
  * The app's object graph (hand-wired; the app is small enough). One per process, created by [FamilyApp].
+ *
+ * Several servers (docs/spec/multi-server.md): [accounts] holds every account; [servers], [auth] and [me] are the
+ * primary account's, and [api] and [social] are routing clients that merge lists across accounts and send every call
+ * about one frame, family, send, post or chat to its own server.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class AppGraph(
     val app: Application,
-    val secure: SecureStore = EncryptedSecureStore(app),
+    secureFor: (String) -> SecureStore = { id -> EncryptedSecureStore(app, AccountStore.secureName(id)) },
 ) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -89,39 +109,78 @@ class AppGraph(
 
     private val prefs = app.getSharedPreferences("kinframe", Context.MODE_PRIVATE)
 
-    val servers = ServerRepository(prefs, DiscoveryClient(http))
+    private val userAgent = "kinframe-family/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
+
+    /** Every account of the app (multi-server.md §2.1). */
+    val accounts = AccountManager(
+        AccountDeps(app, http, scope, userAgent, appHeader, { id -> app.getSharedPreferences(AccountStore.prefsName(id), Context.MODE_PRIVATE) }, secureFor),
+        prefs,
+    )
+
+    /** The primary account's server (onboarding, settings, discovery flags). */
+    val servers: ServerRepository get() = accounts.primary.value.servers
+    /** The primary account's sign-in. */
+    val auth: AuthRepository get() = accounts.primary.value.auth
+
+    /** The primary account's server, following a change of primary. */
+    val server: StateFlow<ServerChoice?> = accounts.primary.flatMapLatest { it.servers.current }
+        .stateIn(scope, SharingStarted.Eagerly, accounts.primary.value.servers.current.value)
+
+    /** The primary account's sign-in state, following a change of primary. */
+    val authState: StateFlow<AuthState> = accounts.primary.flatMapLatest { it.auth.state }
+        .stateIn(scope, SharingStarted.Eagerly, accounts.primary.value.auth.state.value)
+    val authExpired: StateFlow<Boolean> = accounts.primary.flatMapLatest { it.auth.expired }
+        .stateIn(scope, SharingStarted.Eagerly, false)
 
     /** Force update and "new version available" (discovery `app_versions.android`). */
     val updates = AppUpdates(
         build = BuildConfig.VERSION_CODE,
-        policy = servers.current.map { it?.discovery?.appVersions?.android }
-            .stateIn(scope, SharingStarted.Eagerly, servers.current.value?.discovery?.appVersions?.android),
+        policy = server.map { it?.discovery?.appVersions?.android }
+            .stateIn(scope, SharingStarted.Eagerly, server.value?.discovery?.appVersions?.android),
         dismissals = PrefsDismissStore(prefs),
-        refreshDiscovery = { servers.refresh() },
+        refreshDiscovery = { accounts.accounts.value.map { it.servers.refresh() }.any { it } || servers.refresh() },
         scope = scope,
     )
-    val auth = AuthRepository(app, secure, DevAuthClient(http), { servers.current.value })
 
-    private val userAgent = "kinframe-family/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
-    private var apiCache: Pair<String, HttpKinApi>? = null
+    private val primaryClients: StateFlow<Account.Clients?> = accounts.primary.flatMapLatest { it.clients }
+        .stateIn(scope, SharingStarted.Eagerly, accounts.primary.value.clients.value)
 
-    /** The API client while signed in to a server, else null. */
-    val api: StateFlow<KinApi?> = combine(servers.current, auth.state) { s, a ->
-        if (s == null || a !is AuthState.SignedIn) null
-        else {
-            val key = s.apiBase.toString()
-            apiCache?.takeIf { it.first == key }?.second ?: HttpKinApi(http, s.apiBase, auth, userAgent, appHeader) { Locale.getDefault().toLanguageTag() }
-                .also { apiCache = key to it }
-        }
+    private var apiCache: Triple<Account.Clients, Int, RoutingKinApi>? = null
+
+    /**
+     * The API client while the primary account is signed in, else null. A new instance when the primary account or
+     * the set of signed-in accounts changes, so merged lists load again.
+     */
+    val api: StateFlow<KinApi?> = combine(primaryClients, accounts.version) { c, v ->
+        if (c == null) null
+        else apiCache?.takeIf { it.first === c && it.second == v }?.third
+            ?: RoutingKinApi(accounts.routes, c.kin).also { apiCache = Triple(c, v, it) }
     }.stateIn(scope, SharingStarted.Eagerly, null)
 
+    /** Leaving (README §5.21) on the server [key] (a frame, family, request… id) belongs to; null where it is off. */
+    fun leavingFor(key: String?): LeavingApi? = accounts.forKey(key).route()?.leaving
+
+    /** Leaving across accounts (keep requests and former places merged; the rest on its own server). */
+    val leaving = RoutingLeavingApi(accounts.routes)
+
+    /** Families on other servers (README §5.22) on [key]'s server; null where it is off. */
+    fun remoteFor(key: String?): RemoteApi? = accounts.forKey(key).route()?.remote
+
+    /** Discovery of [key]'s server. */
+    fun discoveryFor(key: String?): Discovery? = accounts.forKey(key).server?.discovery
+
     val outbox = OutboxStore(File(app.filesDir, "outbox.json"))
-    val live = LiveEvents(http, scope, auth)
-    val push = PushRegistrar(app, prefs, scope) { api.value }
+
+    /** Every account's websocket events in one stream (ids of two servers don't collide). */
+    val live = LiveEvents(http, scope, object : AccessTokenSource {
+        override suspend fun accessToken(forceRefresh: Boolean): String = throw SessionExpiredException()
+    })
+
+    val push = PushRegistrar(app, scope) { accounts.accounts.value.map { PushAccount(it.id, it.prefs, it.clients.value?.kin) } }
     /** Shows a frame's library on a TV connected to the phone (Cast screen / Miracast). */
     val tv = TvPresenter(app, scope) { api.value }
 
-    /** The signed-in person (from `GET /v1/me`). */
+    /** The primary account's profile (from `GET /v1/me`). */
     val me = MutableStateFlow<User?>(null)
 
     /** Media shared into the app from other apps, waiting for the Send screen. */
@@ -129,6 +188,9 @@ class AppGraph(
 
     /** A frame-code or invite link waiting to be handled (possibly until sign-in). */
     val pendingLink = MutableStateFlow<DeepLink?>(null)
+
+    /** Settings → Accounts → "Add a server", or a link of a server the app is not signed in to (multi-server.md §2.1). */
+    val addServer = MutableStateFlow<AddServerRequest?>(null)
 
     /** A notification tap to route. */
     val openTarget = MutableStateFlow<OpenTarget?>(null)
@@ -165,22 +227,51 @@ class AppGraph(
                 updateLive()
             }
         })
-        scope.launch { api.collect { updateLive(); if (it != null) push.ensureRegistered() } }
+        // Each account's websocket feeds the one stream.
+        scope.launch {
+            accounts.accounts.collectLatest { list -> coroutineScope { list.forEach { a -> launch { a.live.events.collect { live.emit(it) } } } } }
+        }
+        scope.launch {
+            accounts.version.collect {
+                updateLive()
+                if (accounts.accounts.value.any { a -> a.signedIn }) push.ensureRegistered()
+            }
+        }
+        // A new primary account: its profile loads again.
+        scope.launch {
+            var last = accounts.primary.value.id
+            accounts.primary.collect { if (it.id != last) { last = it.id; me.value = it.me.value } }
+        }
+        scope.launch { me.collect { u -> if (u != null) accounts.primary.value.me.value = u } }
         // Sends left in the outbox (app killed mid-upload, phone rebooted) are picked up again.
         outbox.sends.value.filter { it.state != OutboxState.FAILED }.forEach { SendWorker.enqueue(app, it.id) }
     }
 
     private fun updateLive() {
-        val a = api.value
-        if (foreground && a != null) live.start(a) else live.stop()
+        accounts.accounts.value.forEach { a ->
+            val c = a.clients.value
+            if (foreground && c != null) a.live.start(c.kin) else a.live.stop()
+        }
     }
 
-    fun sendRunner(): SendRunner? {
-        val s = servers.current.value ?: return null
-        val a = api.value ?: return null
-        val tus = TusUploader(http, s.apiBase.newBuilder().addPathSegment("uploads").build(), auth)
+    /**
+     * A push arrived: its account is the payload's `server`, else the endpoint's account ([instanceAccount]), else the
+     * primary one (README §6.3). Its ids are recorded for that account, so the tap opens screens on the right server.
+     */
+    fun routePush(msg: PushMessage, instanceAccount: String?): Account {
+        val a = accounts.forServer(msg.server.ifBlank { null }) ?: accounts.byId(instanceAccount) ?: accounts.primary.value
+        accounts.index.putAll(msg.ids.filterKeys { it.endsWith("_id") }.values, a.id)
+        return a
+    }
+
+    /** The send runner for [server]'s account (an outbox send's `server`), else the primary account's. */
+    fun sendRunner(server: String? = null): SendRunner? {
+        val account = accounts.forServer(server) ?: accounts.primary.value
+        val s = account.server ?: return null
+        val c = account.clients.value ?: return null
+        val tus = TusUploader(http, s.apiBase.newBuilder().addPathSegment("uploads").build(), account.auth)
         val preparer = MediaPreparer(app)
-        return SendRunner(outbox, a, tus, sourceFor = { ItemSource(app, it) }, hash = { item ->
+        return SendRunner(outbox, c.kin, tus, sourceFor = { ItemSource(app, it) }, hash = { item ->
             runCatching { MediaFiles.sha256(ItemSource(app, item).open(0)) }.getOrNull()
         }, prepare = { sendId, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, sendId), onProgress) },
             sendChat = social.chatSender)
@@ -188,10 +279,11 @@ class AppGraph(
 
     /**
      * Uploads the photo of an event sent to a frame: prepared on the phone like any photo (never the full original), then
-     * a tus upload. Returns the upload id for `photo_upload_id`.
+     * a tus upload to [frameId]'s server. Returns the upload id for `photo_upload_id`.
      */
-    suspend fun uploadEventPhoto(uri: Uri, onProgress: (Float) -> Unit): String = kotlinx.coroutines.withContext(Dispatchers.IO) {
-        val s = servers.current.value ?: throw java.io.IOException("no server")
+    suspend fun uploadEventPhoto(uri: Uri, frameId: String? = null, onProgress: (Float) -> Unit): String = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val account = accounts.forKey(frameId)
+        val s = account.server ?: throw java.io.IOException("no server")
         val info = MediaFiles.inspect(app, uri) ?: throw java.io.IOException("cannot read $uri")
         val dir = java.io.File(app.cacheDir, "event-photo/${java.util.UUID.randomUUID()}")
         try {
@@ -199,7 +291,7 @@ class AppGraph(
                 id = "event", uri = uri.toString(), mime = info.mime, name = info.name, size = info.size,
             )
             val prepared = MediaPreparer(app).prepare(item, dir) { onProgress(it * 0.3f) }
-            val tus = TusUploader(http, s.apiBase.newBuilder().addPathSegment("uploads").build(), auth)
+            val tus = TusUploader(http, s.apiBase.newBuilder().addPathSegment("uploads").build(), account.auth)
             val meta = buildMap {
                 put("filename", prepared.uploadName); put("filetype", prepared.uploadMime)
                 if (prepared.isPrepared) prepared.prepared?.let { put(PreparedProfile.KEY, it) }
@@ -221,20 +313,34 @@ class AppGraph(
         _pushes.tryEmit(msg)
     }
 
-    /** Signs out everywhere: server push endpoint, tokens, cached profile, websocket. */
-    suspend fun signOut(activity: android.app.Activity?) {
-        push.unregisterFromServerNow()
-        live.stop()
-        auth.signOut(activity)
-        me.value = null
+    private fun pushAccount(a: Account) = PushAccount(a.id, a.prefs, a.clients.value?.kin)
+
+    /**
+     * Signs out of [account] (default: the primary one): its push endpoint, tokens, cached profile, websocket. With
+     * other accounts left it leaves the list and the next one becomes primary; the only account stays, signed out.
+     */
+    suspend fun signOut(activity: android.app.Activity?, account: Account = accounts.primary.value) {
+        val others = accounts.accounts.value.any { it.id != account.id }
+        push.unregisterFromServerNow(pushAccount(account), alsoInstance = others)
+        account.live.stop()
+        account.auth.signOut(activity)
+        if (others) {
+            accounts.remove(account)
+            me.value = null
+        } else {
+            account.me.value = null
+            me.value = null
+        }
     }
 
-    /** Switching servers signs out first (product spec 4.1). */
+    /** Switching the only server signs out first (product spec 4.1). */
     suspend fun forgetServer() {
-        push.unregisterFromServerNow()
-        live.stop()
-        auth.forgetServer()
+        val a = accounts.primary.value
+        push.unregisterFromServerNow(pushAccount(a))
+        a.live.stop()
+        a.auth.forgetServer()
         me.value = null
-        servers.clear()
+        a.me.value = null
+        a.servers.clear()
     }
 }

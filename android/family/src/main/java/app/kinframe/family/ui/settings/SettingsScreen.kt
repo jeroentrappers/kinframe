@@ -76,6 +76,10 @@ fun SettingsScreen(
     /** Deletes the account (removeItems: also what they sent); null hides the button. */
     onDeleteAccount: ((Boolean) -> Unit)? = null,
     deletingAccount: Boolean = false,
+    /** Leaving and other servers: Accounts, Memories, keep requests, places you left (ui/leaving, ui/servers). */
+    leaving: (@Composable () -> Unit)? = null,
+    /** The server has leaving (README §5.21): deleting asks "Take my photos with me" or "Leave them to the families". */
+    deletionChoice: Boolean = false,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -140,6 +144,7 @@ fun SettingsScreen(
 
         telegram?.invoke()
         social?.invoke()
+        leaving?.invoke()
 
         SectionTitle(stringResource(R.string.settings_server))
         Surface(Modifier.fillMaxWidth()) {
@@ -159,7 +164,7 @@ fun SettingsScreen(
         if (onDeleteAccount != null) {
             var asking by rememberSaveable { mutableStateOf(false) }
             QuietButton(stringResource(R.string.account_delete), { asking = true }, enabled = !deletingAccount)
-            if (asking) DeleteAccountDialog(ownedFrames, deletingAccount, onDismiss = { asking = false }, onDelete = onDeleteAccount)
+            if (asking) DeleteAccountDialog(ownedFrames, deletingAccount, onDismiss = { asking = false }, onDelete = onDeleteAccount, choice = deletionChoice)
         }
         Text(stringResource(R.string.settings_about, BuildConfig.VERSION_NAME), style = Kin.type.caption, color = c.inkFaint)
         if (onOpenWeb != null) {
@@ -172,9 +177,10 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismiss: () -> Unit, onDelete: (Boolean) -> Unit) {
+private fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismiss: () -> Unit, onDelete: (Boolean) -> Unit, choice: Boolean = false) {
     val c = Kin.colors
-    var removeItems by rememberSaveable { mutableStateOf(false) }
+    // With leaving the default is "Take my photos with me" (leaving.md decision A).
+    var removeItems by rememberSaveable { mutableStateOf(choice) }
     AlertDialog(
         onDismissRequest = { if (!deleting) onDismiss() },
         title = { Text(stringResource(R.string.account_delete_title)) },
@@ -184,12 +190,14 @@ private fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismis
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(stringResource(R.string.account_delete_body))
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
+                    if (choice) {
+                        app.kinframe.family.ui.leaving.AccountDeletionChoice(removeItems, !deleting) { removeItems = it }
+                    } else Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
                         .toggleable(removeItems, enabled = !deleting, role = Role.Checkbox) { removeItems = it }) {
                         Checkbox(removeItems, onCheckedChange = null)
                         Text(stringResource(R.string.account_delete_items), Modifier.padding(start = 8.dp))
                     }
-                    if (!removeItems) Text(stringResource(R.string.account_delete_items_hint), style = Kin.type.caption, color = c.inkSoft)
+                    if (!choice && !removeItems) Text(stringResource(R.string.account_delete_items_hint), style = Kin.type.caption, color = c.inkSoft)
                 }
             }
         },

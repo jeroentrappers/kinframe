@@ -34,6 +34,8 @@ data class PushMessage(
     val tag: String = "",
     /** Notification buttons (`snooze_month`, `fewer_reminders` on reminders; README §6.3). */
     val actions: List<String> = emptyList(),
+    /** The sending server's base URL (README §6.3); empty from older servers. */
+    val server: String = "",
 ) {
     /** The push key (`subscription_request`…), falling back to the type for servers that send only one. */
     val kind: String get() = key.ifBlank { type }
@@ -44,7 +46,7 @@ data class PushMessage(
             fun s(k: String) = o[k]?.jsonPrimitive?.contentOrNull.orEmpty()
             val ids = (o["ids"]?.jsonObject ?: emptyMap()).mapNotNull { (k, v) -> v.jsonPrimitive.contentOrNull?.let { k to it } }.toMap()
             val actions = (o["actions"] as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { it.jsonPrimitive.contentOrNull }
-            PushMessage(s("type"), s("title"), s("body"), ids, s("key"), s("tag"), actions)
+            PushMessage(s("type"), s("title"), s("body"), ids, s("key"), s("tag"), actions, s("server"))
         }.getOrNull()
     }
 }
@@ -58,24 +60,29 @@ sealed interface PushStatus {
     data class Active(val via: String) : PushStatus
 }
 
+/** One account as push registration sees it: its id, preferences (endpoint and server id) and client while signed in. */
+data class PushAccount(val id: String, val prefs: SharedPreferences, val api: KinApi?)
+
 /**
  * Registers this phone for push: UnifiedPush first (no Google dependency), FCM only in builds made with
- * `-Pkinframe.fcm=true`. The endpoint goes to `POST /v1/me/push-endpoints` and is removed again on sign-out.
+ * `-Pkinframe.fcm=true`. Each account gets its own endpoint, registered with `POST /v1/me/push-endpoints` on its own
+ * server (docs/spec/multi-server.md §2.1): one UnifiedPush instance per account (the first account keeps the default
+ * instance), so a push without the `server` field still tells which account it is for. FCM has one token for all.
+ * Endpoints are removed again when signing out of an account.
  */
 class PushRegistrar(
     private val context: Context,
-    private val prefs: SharedPreferences,
     private val scope: CoroutineScope,
-    private val api: () -> KinApi?,
+    private val accounts: () -> List<PushAccount>,
 ) {
     private val _status = MutableStateFlow<PushStatus>(PushStatus.Unavailable)
     val status: StateFlow<PushStatus> = _status.asStateFlow()
 
-    /** Call when signed in (app start, after sign-in). Never asks the person anything. */
+    /** Call when signed in (app start, after sign-in, an account added). Never asks the person anything. */
     fun ensureRegistered() {
         if (BuildConfig.FCM_ENABLED && UnifiedPush.getDistributors(context).isEmpty()) {
             _status.value = PushStatus.Registering
-            FcmPush.start(context) { token -> onEndpoint("fcm", token, null) }
+            FcmPush.start(context) { token -> onEndpoint("fcm", token, null, null) }
             return
         }
         val saved = UnifiedPush.getAckDistributor(context) ?: UnifiedPush.getSavedDistributor(context)
@@ -86,8 +93,10 @@ class PushRegistrar(
             all.size > 1 -> _status.value = PushStatus.NeedsChoice
             else -> _status.value = PushStatus.Unavailable
         }
-        // Re-send a known endpoint in case the server lost it (it is idempotent on kind + endpoint).
-        prefs.getString(KEY_ENDPOINT, null)?.let { onEndpoint(prefs.getString(KEY_KIND, KIND_UP)!!, it, null) }
+        // Re-send known endpoints in case a server lost them (idempotent on kind + endpoint).
+        accounts().forEach { a ->
+            a.prefs.getString(KEY_ENDPOINT, null)?.let { send(a, a.prefs.getString(KEY_KIND, KIND_UP)!!, it, null) }
+        }
     }
 
     /** Lets the person pick the push app (system picker or the default distributor). */
@@ -97,36 +106,46 @@ class PushRegistrar(
 
     private fun register() {
         _status.value = PushStatus.Registering
-        runCatching { UnifiedPush.register(context, messageForDistributor = "kinframe") }
-            .onFailure { Log.w(TAG, "UnifiedPush register failed", it); _status.value = PushStatus.Unavailable }
+        accounts().filter { it.api != null }.forEach { a ->
+            runCatching { UnifiedPush.register(context, instance = instanceOf(a.id), messageForDistributor = "kinframe") }
+                .onFailure { Log.w(TAG, "UnifiedPush register failed", it); _status.value = PushStatus.Unavailable }
+        }
     }
 
-    fun onEndpoint(kind: String, endpoint: String, keys: WebPushKeys?) {
-        prefs.edit { putString(KEY_ENDPOINT, endpoint); putString(KEY_KIND, kind) }
+    /** A new endpoint: for one UnifiedPush [instance], or (FCM, [instance] null) for every account. */
+    fun onEndpoint(kind: String, endpoint: String, keys: WebPushKeys?, instance: String?) {
         _status.value = PushStatus.Active(distributorLabel(kind))
-        val a = api() ?: return
+        val targets = if (instance == null) accounts() else accounts().filter { it.id == accountOf(instance) }
+        targets.forEach { a ->
+            a.prefs.edit { putString(KEY_ENDPOINT, endpoint); putString(KEY_KIND, kind) }
+            send(a, kind, endpoint, keys)
+        }
+    }
+
+    private fun send(a: PushAccount, kind: String, endpoint: String, keys: WebPushKeys?) {
+        val api = a.api ?: return
         scope.launch {
             runCatching {
-                a.registerPush(PushEndpointCreate(kind, endpoint, keys, deviceName = Build.MODEL.take(60), locale = Locale.getDefault().toLanguageTag()))
-            }.onSuccess { prefs.edit { putString(KEY_ID, it.id) } }
+                api.registerPush(PushEndpointCreate(kind, endpoint, keys, deviceName = Build.MODEL.take(60), locale = Locale.getDefault().toLanguageTag()))
+            }.onSuccess { a.prefs.edit { putString(KEY_ID, it.id) } }
                 .onFailure { Log.i(TAG, "push endpoint not registered yet: ${it.message}") }
         }
     }
 
-    fun onUnregistered() {
-        prefs.edit { remove(KEY_ENDPOINT) }
-        _status.value = PushStatus.Unavailable
-        unregisterFromServer()
+    fun onUnregistered(instance: String) {
+        val a = accounts().firstOrNull { it.id == accountOf(instance) } ?: return
+        a.prefs.edit { remove(KEY_ENDPOINT) }
+        if (accounts().none { it.prefs.contains(KEY_ENDPOINT) }) _status.value = PushStatus.Unavailable
+        scope.launch { unregisterFromServerNow(a) }
     }
 
-    /** Before signing out: the server should stop pushing to this phone. */
-    suspend fun unregisterFromServerNow() {
-        val id = prefs.getString(KEY_ID, null) ?: return
-        runCatching { api()?.deletePush(id) }
-        prefs.edit { remove(KEY_ID) }
+    /** Before signing out of an account: its server should stop pushing to this phone. */
+    suspend fun unregisterFromServerNow(a: PushAccount, alsoInstance: Boolean = false) {
+        val id = a.prefs.getString(KEY_ID, null)
+        if (id != null) runCatching { a.api?.deletePush(id) }
+        a.prefs.edit { remove(KEY_ID) }
+        if (alsoInstance && a.id != FIRST_ACCOUNT) runCatching { UnifiedPush.unregister(context, instanceOf(a.id)) }
     }
-
-    private fun unregisterFromServer() = scope.launch { unregisterFromServerNow() }
 
     private fun distributorLabel(kind: String): String {
         if (kind == "fcm") return "Firebase Cloud Messaging"
@@ -143,6 +162,14 @@ class PushRegistrar(
         private const val KEY_KIND = "push_kind"
         private const val KEY_ID = "push_endpoint_id"
         const val KIND_UP = "unifiedpush"
+        /** [app.kinframe.family.accounts.AccountStore.MAIN]: the account of the default UnifiedPush instance. */
+        private const val FIRST_ACCOUNT = "main"
+        private const val DEFAULT_INSTANCE = "default"
+
+        fun instanceOf(accountId: String) = if (accountId == FIRST_ACCOUNT) DEFAULT_INSTANCE else accountId
+
+        /** The account a UnifiedPush instance belongs to (the push endpoint's account, README §6.3). */
+        fun accountOf(instance: String?) = if (instance.isNullOrBlank() || instance == DEFAULT_INSTANCE) FIRST_ACCOUNT else instance
     }
 }
 
@@ -151,12 +178,14 @@ class KinPushService : PushService() {
     private val graph get() = (application as FamilyApp).graph
 
     override fun onNewEndpoint(endpoint: PushEndpoint, instance: String) {
-        graph.push.onEndpoint(PushRegistrar.KIND_UP, endpoint.url, endpoint.pubKeySet?.let { WebPushKeys(it.pubKey, it.auth) })
+        graph.push.onEndpoint(PushRegistrar.KIND_UP, endpoint.url, endpoint.pubKeySet?.let { WebPushKeys(it.pubKey, it.auth) }, instance)
     }
 
     override fun onMessage(message: UpMessage, instance: String) {
         // The server posts plain JSON today (no Web Push encryption), so the content is used whether or not it was decrypted.
         PushMessage.parse(message.content)?.let { msg ->
+            // Several accounts: the payload's `server` picks the account, else this endpoint's account (README §6.3).
+            graph.routePush(msg, PushRegistrar.accountOf(instance))
             Notifications.showPush(this, msg)
             graph.onPush(msg)
         }
@@ -166,5 +195,5 @@ class KinPushService : PushService() {
         Log.w("KinPush", "registration failed: $reason")
     }
 
-    override fun onUnregistered(instance: String) = graph.push.onUnregistered()
+    override fun onUnregistered(instance: String) = graph.push.onUnregistered(instance)
 }

@@ -3,7 +3,7 @@ package app.kinframe.family.social
 import android.net.Uri
 import app.kinframe.core.api.Discovery
 import app.kinframe.core.social.Badge
-import app.kinframe.core.social.HttpSocialApi
+import app.kinframe.core.servers.RoutingSocialApi
 import app.kinframe.core.social.Mention
 import app.kinframe.core.social.ReminderPreferencesUpdate
 import app.kinframe.core.social.SocialApi
@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,21 +36,20 @@ import java.util.UUID
  * badge, chat messages with media through the outbox, and the open conversation (whose pushes are not shown).
  */
 class SocialGraph(private val graph: AppGraph) {
-    private var cache: Pair<String, HttpSocialApi>? = null
-    private val userAgent = "kinframe-family/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
+    private var cache: Pair<Any, RoutingSocialApi>? = null
 
-    /** The client while signed in to a server, else null. */
-    val api: StateFlow<SocialApi?> = combine(graph.servers.current, graph.auth.state) { s, a ->
-        if (s == null || a !is AuthState.SignedIn) null
-        else {
-            val key = s.apiBase.toString()
-            cache?.takeIf { it.first == key }?.second
-                ?: HttpSocialApi(graph.http, s.apiBase, graph.auth, userAgent, graph.appHeader) { Locale.getDefault().toLanguageTag() }
-                    .also { cache = key to it }
-        }
+    /**
+     * The client while the primary account is signed in, else null. Across several accounts it merges Home, Chats
+     * and the badge and sends every post or chat call to its own server (multi-server.md §2.2).
+     */
+    val api: StateFlow<SocialApi?> = graph.api.map { k ->
+        val primary = graph.accounts.primary.value.clients.value
+        if (k == null || primary == null) null
+        else cache?.takeIf { it.first === k }?.second
+            ?: RoutingSocialApi(graph.accounts.routes, primary.social).also { cache = k to it }
     }.stateIn(graph.scope, SharingStarted.Eagerly, null)
 
-    private val discovery: Discovery? get() = graph.servers.current.value?.discovery
+    private val discovery: Discovery? get() = graph.server.value?.discovery
 
     val socialOn: Boolean get() = discovery?.let { it.feeds && it.social } == true
     val chatsOn: Boolean get() = discovery?.chats == true
@@ -67,7 +66,8 @@ class SocialGraph(private val graph: AppGraph) {
         graph.scope.launch {
             graph.live.events.collect { e ->
                 when (e) {
-                    is SocialLive.BadgeUpdated -> setBadge(e.badge)
+                    // One account's badge: with several accounts the app badge is their sum (README §5.22).
+                    is SocialLive.BadgeUpdated -> if (graph.accounts.several) refreshBadge() else setBadge(e.badge)
                     is SocialLive.MessageCreated, is SocialLive.ConversationUpdated, is SocialLive.ThreadRead -> Unit
                     else -> Unit
                 }
@@ -119,7 +119,7 @@ class SocialGraph(private val graph: AppGraph) {
         }
         if (items.isEmpty()) return@withContext null
         enqueue(OutboxSend(
-            id = id, server = graph.servers.current.value?.url?.toString().orEmpty(), frameIds = emptyList(), frameNames = emptyList(),
+            id = id, server = serverOf(conversationId), frameIds = emptyList(), frameNames = emptyList(),
             items = items, createdAt = System.currentTimeMillis(),
             chat = OutboxChat(conversationId, conversationName, body, mentions, replyToId),
         ))
@@ -140,12 +140,15 @@ class SocialGraph(private val graph: AppGraph) {
                 prepState = OutboxItem.PREP_AS_IS,
             )
             enqueue(OutboxSend(
-                id = id, server = graph.servers.current.value?.url?.toString().orEmpty(), frameIds = emptyList(), frameNames = emptyList(),
+                id = id, server = serverOf(conversationId), frameIds = emptyList(), frameNames = emptyList(),
                 items = listOf(item), createdAt = System.currentTimeMillis(),
                 chat = OutboxChat(conversationId, conversationName, replyToId = replyToId, voice = true, voiceDurationMs = durationMs),
             ))
             id
         }
+
+    /** A chat lives on one server: its media upload there. */
+    private fun serverOf(conversationId: String): String = graph.accounts.forKey(conversationId).server?.url?.toString().orEmpty()
 
     private fun enqueue(send: OutboxSend) {
         graph.outbox.add(send)

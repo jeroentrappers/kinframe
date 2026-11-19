@@ -1,6 +1,8 @@
 package app.kinframe.family.ui
 
 import app.kinframe.family.ui.channels.ChannelRoute
+import app.kinframe.family.accounts.AddServerFlow
+import app.kinframe.family.accounts.AddServerOutcome
 import app.kinframe.family.ui.channels.TelegramLinkSettings
 import app.kinframe.family.ui.sources.*
 import app.kinframe.core.api.PhotoSourceLinks
@@ -212,11 +214,22 @@ fun FamilyRoot(graph: AppGraph, app: AppViewModel) {
     switch?.let { link ->
         AlertDialog(
             onDismissRequest = app::dismissSwitch,
-            title = { Text(stringResource(R.string.server_switch_title, link.server.host)) },
-            text = { Text(stringResource(R.string.server_switch_body)) },
-            confirmButton = { TextButton(app::confirmSwitch) { Text(stringResource(R.string.server_switch_confirm)) } },
+            title = { Text(stringResource(R.string.servers_link_title, link.server.host)) },
+            text = { Text(stringResource(R.string.servers_link_body, link.server.host)) },
+            confirmButton = { TextButton(app::confirmSwitch) { Text(stringResource(R.string.servers_link_confirm)) } },
             dismissButton = { TextButton(app::dismissSwitch) { Text(stringResource(R.string.common_cancel)) } },
         )
+    }
+    // Settings → Accounts → "Add a server", or a link of a server the app isn't signed in to (multi-server.md §2.1).
+    val adding by graph.addServer.collectAsStateWithLifecycle()
+    adding?.let { req ->
+        val res = LocalResources.current
+        AddServerFlow(graph, req) { outcome ->
+            graph.addServer.value = null
+            if (outcome is AddServerOutcome.Already) {
+                android.widget.Toast.makeText(context, res.getString(R.string.servers_add_already, outcome.account.label), android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
     }
 }
 
@@ -233,7 +246,7 @@ private fun Onboarding(graph: AppGraph, phase: Phase) {
         ))
     }
     val state by vm.state.collectAsStateWithLifecycle()
-    val expired by graph.auth.expired.collectAsStateWithLifecycle()
+    val expired by graph.authExpired.collectAsStateWithLifecycle()
     val pending by graph.pendingLink.collectAsStateWithLifecycle()
     when {
         phase is Phase.SignedOut -> SignInScreen(
@@ -339,6 +352,8 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         graph.openTarget.value = null
         // Family social pushes (comments, chats, reminders…): ui/SocialRoot.kt.
         if (openSocialTarget(t, nav, ready)) return@LaunchedEffect
+        // Leaving pushes (photos taken away, keep requests): ui/LeavingRoot.kt.
+        if (openLeavingTarget(t, nav)) return@LaunchedEffect
         when (t.target) {
             Notifications.TARGET_PEOPLE -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.People)) }
             Notifications.TARGET_FRAME -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it)) }
@@ -577,6 +592,8 @@ private fun Screen(
                 onPhotoSources = if (ready.server.discovery.sourceProviders.isNotEmpty()) ({ nav.push(Route.PhotoSources) }) else null,
                 telegram = if (ready.server.discovery.telegram) ({ TelegramLinkSettings(graph, ready) }) else null,
                 social = { SocialSettingsSection(ready, nav) },
+                leaving = { LeavingSettingsSlot(graph, nav) },
+                deletionChoice = ready.server.discovery.leaving,
                 ownedFrames = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.role == ApiRole.OWNER }.map { it.name },
                 onDeleteAccount = { removeItems ->
                     deletingAccount = true
@@ -654,6 +671,7 @@ private fun Screen(
         }
         is Route.FeedDetail -> FeedDetailRoute(graph, api, r, nav, frames, feeds, composer, ready)
         is SocialRoute -> SocialRouteScreen(graph, ready, nav, r, composer, frames, feeds, overflow)
+        is LeavingRoute -> LeavingRouteScreen(graph, nav, r)
         Route.PhotoSources -> {
             val vm: PhotoSourcesViewModel = viewModel(key = "my-sources-${System.identityHashCode(api)}") {
                 PhotoSourcesViewModel(api, SourceScope.Mine, graph.live.events)
@@ -772,6 +790,8 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 graph.googleImports.start(SourceTarget.feed(r.feedId, feedName))
             }) else null,
             social = feedSocialSlots(graph, ready, nav, s.feedOrNull, onFeedChanged = { f -> feeds.upsert(f); vm.load() }, setFlag = vm::setFlag, busy = s.busy),
+            leaveSheet = feedLeaveSheet(graph, r.feedId) { feeds.remove(r.feedId); nav.selectTab(Route.Feeds) },
+            leavingSettings = s.feedOrNull?.let { f -> { FeedLeavingSettings(graph, f) { nf -> feeds.upsert(nf) } } },
         ),
     )
 }
@@ -834,6 +854,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         copyInvite = { inv -> scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(frameName, inv.url))); toaster.show(res.getString(R.string.people_copied)) } },
         revokeInvite = vm::revokeInvite,
         transfer = vm::transfer, replaceDevice = vm::replaceDevice, resetReplace = vm::resetReplace,
+        leaveSheet = frameLeaveSheet(graph, r.frameId) { frames.remove(r.frameId); nav.selectTab(Route.Frames) },
     )
     FrameDetailScreen(
         s, r.tab, { t -> nav.replace(r.copy(tab = t)) }, { nav.pop() }, { vm.load() },
@@ -868,8 +889,10 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
             val fs by frames.state.collectAsStateWithLifecycle()
             val canShare = Sharing.targets((fs.frames as? Load.Ready)?.value.orEmpty(), r.frameId).isNotEmpty()
             (s.frame as? Load.Ready)?.value?.let { f ->
+                LaunchedEffect(lib) { graph.live.events.collect { e -> if (isLibraryChange(e, f.id)) lib.load() } }
                 app.kinframe.family.ui.frame.LibraryTab(f, ls, ready.server.limits.trashRetentionDays, lib::setTab, lib::toggle, lib::selectAll, lib::clearSelection,
                     { lib.act(it) }, lib::loadMore, lib::load,
+                    takenAway = { FrameTakenAway(graph, f) },
                     onShare = if (canShare) ({ share.open(ShareSource(r.frameId, ls.selected.toList())) }) else null,
                     albums = app.kinframe.family.ui.frame.LibraryAlbumActions(
                         select = lib::selectAlbum, create = { lib.createAlbum(it) }, rename = lib::renameAlbum, schedule = lib::scheduleAlbum,
@@ -947,7 +970,8 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                 FrameFeedsTab(f, st, ffs, onOpenFeed = { id ->
                     // Only feeds you are in open; a frame can subscribe to a feed you are not a member of.
                     if (st.myFeeds.any { it.id == id }) { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(id)) }
-                }, onEnterCode = { nav.push(Route.AddFrame()) }, birthdays = ready.server.discovery.birthdays)
+                }, onEnterCode = { nav.push(Route.AddFrame()) }, birthdays = ready.server.discovery.birthdays,
+                    remote = if (remoteOn(graph, f.id)) ({ FrameRemoteFollows(graph, f) }) else null)
             }
         }),
     )
@@ -960,7 +984,7 @@ private fun CalendarRoute(graph: AppGraph, api: KinApi, f: app.kinframe.core.api
     val k = System.identityHashCode(api)
     val manage = f.can { it.changeSettings }
     val cal: CalendarViewModel = viewModel(key = "cal-${f.id}-$k") {
-        CalendarViewModel(api, f.id, manage, f.can { it.send }, graph.live.events) { uri, p -> graph.uploadEventPhoto(uri, p) }
+        CalendarViewModel(api, f.id, manage, f.can { it.send }, graph.live.events) { uri, p -> graph.uploadEventPhoto(uri, f.id, p) }
     }
     val st by cal.state.collectAsStateWithLifecycle()
     val form by cal.form.collectAsStateWithLifecycle()
@@ -1040,7 +1064,15 @@ private fun shareInvite(context: Context, res: android.content.res.Resources, in
 }
 
 /** Keeps the picked files readable after the screen closes, then queues the send for the background worker. */
-private suspend fun queueSend(graph: AppGraph, send: app.kinframe.family.send.OutboxSend) = withContext(Dispatchers.IO) {
+private suspend fun queueSend(graph: AppGraph, send: app.kinframe.family.send.OutboxSend) {
+    val primary = graph.accounts.primary.value
+    app.kinframe.family.send.ServerSplit.split(
+        send, primary.id, accountOf = { graph.accounts.index.get(it) },
+        serverOf = { id -> graph.accounts.byId(id)?.server?.url?.toString() ?: send.server },
+    ).forEach { queueOne(graph, it) }
+}
+
+private suspend fun queueOne(graph: AppGraph, send: app.kinframe.family.send.OutboxSend) = withContext(Dispatchers.IO) {
     val ctx = graph.app
     val cr = ctx.contentResolver
     val dir = SendRunner.outboxDir(ctx, send.id)

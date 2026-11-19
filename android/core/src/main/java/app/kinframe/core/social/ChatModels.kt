@@ -95,6 +95,8 @@ data class Conversation(
     val mutedUntil: String? = null,
     val archived: Boolean = false,
     val readOnly: Boolean = false,
+    /** Why [readOnly] ([app.kinframe.core.leaving.ReadOnlyReason]); `no_longer_contacts`: "You can no longer message Lies". */
+    val readOnlyReason: String? = null,
     /** "Seen" is shown here: direct chats and groups of up to 10 people. */
     val readReceipts: Boolean = false,
     val createdAt: String? = null,

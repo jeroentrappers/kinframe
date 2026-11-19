@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="servers_accounts_title">Accounts</string>
+    <string name="servers_accounts_as">als %1$s</string>
+    <string name="servers_accounts_primary">Hoofdaccount</string>
+    <string name="servers_accounts_signed_out">Afgemeld</string>
+    <string name="servers_accounts_make_primary">Maak hoofdaccount</string>
+    <string name="servers_accounts_sign_out">Afmelden</string>
+    <string name="servers_accounts_sign_out_title">Afmelden bij %1$s?</string>
+    <string name="servers_accounts_sign_out_body">Zijn families, kaders en chats verdwijnen uit de app. Je andere servers blijven aangemeld.</string>
+    <string name="servers_accounts_hint">Families op andere kinframe-servers verschijnen samen met de jouwe. Het hoofdaccount opent eerst en krijgt wat je deelt.</string>
+    <string name="servers_add_title">Server toevoegen</string>
+    <string name="servers_add_already">Je bent al aangemeld bij %1$s.</string>
+    <string name="servers_link_title">Deze familie staat op %1$s</string>
+    <string name="servers_link_body">Meld je daar aan om lid te worden. Je andere servers blijven aangemeld.</string>
+    <string name="servers_link_confirm">Daar aanmelden</string>
+    <string name="servers_link_other_server">Deze link is voor %1$s. Meld je daar aan om verder te gaan.</string>
+
+    <string name="servers_follows_title">Families op andere servers</string>
+    <string name="servers_family_on">%1$s (op %2$s)</string>
+    <plurals name="servers_follow_items">
+        <item quantity="one">%d foto op dit kader</item>
+        <item quantity="other">%d foto\'s op dit kader</item>
+    </plurals>
+    <string name="servers_follow_add">Familie van een andere server toevoegen</string>
+    <string name="servers_follow_add_hint">Plak de link die een beheerder van de familie op die server met je deelde.</string>
+    <string name="servers_follow_invite_url">Uitnodigingslink</string>
+    <string name="servers_follow_check">Link controleren</string>
+    <plurals name="servers_preview_frames">
+        <item quantity="one">%d kader volgt deze familie</item>
+        <item quantity="other">%d kaders volgen deze familie</item>
+    </plurals>
+    <string name="servers_preview_copy">Foto\'s van deze familie worden gekopieerd naar deze server (%1$s) en getoond op %2$s.</string>
+    <string name="servers_preview_operator">Wie %1$s beheert, kan de kopieën zien, zoals elke foto daarop.</string>
+    <string name="servers_preview_approval">De beheerders van de familie keuren eerst goed.</string>
+    <string name="servers_history_title">Eerdere foto\'s</string>
+    <string name="servers_history_none">Alleen nieuwe foto\'s</string>
+    <string name="servers_history_last">De laatste %1$d</string>
+    <string name="servers_history_all">Allemaal</string>
+    <string name="servers_on_end_title">Als dit stopt</string>
+    <string name="servers_on_end_remove">Haal de foto\'s van het kader</string>
+    <string name="servers_on_end_keep">Houd de foto\'s die er al staan</string>
+    <string name="servers_follow_confirm">Toon op het kader</string>
+    <string name="servers_follow_active">%1$s verschijnt nu op het kader.</string>
+    <string name="servers_follow_pending">Gevraagd aan de beheerders van %1$s.</string>
+    <string name="servers_follow_removed">%1$s verschijnt niet meer op het kader.</string>
+    <string name="servers_follow_unsubscribe">Deze familie niet meer tonen</string>
+    <string name="servers_follow_unsubscribe_title">%1$s niet meer tonen?</string>
+    <string name="servers_follow_unsubscribe_body">Er komen geen nieuwe foto\'s meer. De foto\'s die er al staan houden of weghalen?</string>
+    <string name="servers_status_pending">Wacht</string>
+    <string name="servers_status_active">Actief</string>
+    <string name="servers_status_rejected">Geweigerd</string>
+    <string name="servers_status_removed">Gestopt</string>
+    <string name="servers_status_error">Niet bereikbaar</string>
+
+    <string name="servers_feed_title">Kaders op andere servers</string>
+    <string name="servers_feed_allow">Kaders op andere servers toestaan</string>
+    <string name="servers_feed_allow_hint">Kaders op andere kinframe-servers mogen deze familie volgen via een link die je deelt. Ze krijgen alleen kopieën van berichten aan de hele familie, nooit kringen, chats of leden.</string>
+    <string name="servers_feed_invite">Deel een link voor kaders op andere servers</string>
+    <string name="servers_feed_invite_hint">Kaders op andere servers mogen deze link gebruiken. Je kunt ze altijd verwijderen.</string>
+    <string name="servers_feed_invite_text">Toon onze familie op je kader: %1$s</string>
+    <string name="servers_blocked_title">Geblokkeerde servers</string>
+    <string name="servers_blocked_none">Er zijn geen servers geblokkeerd.</string>
+    <string name="servers_blocked_host">Adres van de server</string>
+    <string name="servers_blocked_block">Deze server blokkeren</string>
+    <string name="servers_blocked_unblock">Deblokkeren</string>
+    <string name="servers_blocked_done">%1$s is geblokkeerd.</string>
+
+    <string name="servers_problem_already">Dit kader toont die familie al.</string>
+    <string name="servers_problem_invite">Deze link werkt niet (meer).</string>
+    <string name="servers_problem_unreachable">Die server is nu niet bereikbaar.</string>
+    <string name="servers_problem_forbidden">Die server of familie staat dit niet toe.</string>
+</resources>

@@ -325,7 +325,7 @@ fun PlacementViewer(p: Placement, a: ViewerActions, onClose: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(p.item.senderName?.let { stringResource(R.string.library_from, app.kinframe.family.ui.sources.creditName(it, p.item.via)) } ?: stringResource(R.string.library_photo), style = Kin.type.title, color = c.ink, modifier = Modifier.weight(1f))
+                Text(app.kinframe.family.ui.leaving.creditOf(p.item, p.originRemote)?.let { stringResource(R.string.library_from, it) } ?: p.item.senderName?.let { stringResource(R.string.library_from, app.kinframe.family.ui.sources.creditName(it, p.item.via)) } ?: stringResource(R.string.library_photo), style = Kin.type.title, color = c.ink, modifier = Modifier.weight(1f))
                 TextButton(onClose) { Text(stringResource(R.string.common_close)) }
             }
             val model = p.media?.posterUrl.takeIf { video } ?: p.media?.url.takeIf { !video } ?: p.item.thumbUrl

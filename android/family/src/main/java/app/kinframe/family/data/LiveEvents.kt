@@ -135,7 +135,7 @@ sealed interface LiveEvent {
                 "membership.updated" -> MembershipUpdated(s("frame_id")!!)
                 "event_invitation.decided" -> InvitationDecided(s("frame_id")!!, KinJson.decodeFromJsonElement(EventInvitation.serializer(), o["invitation"]!!))
                 // Family social (README §6.2): data/SocialLiveEvents.kt.
-                else -> SocialLive.parse(s("type"), o)
+                else -> SocialLive.parse(s("type"), o) ?: LeavingLive.parse(s("type"), o)
             }
         }.getOrNull()
     }

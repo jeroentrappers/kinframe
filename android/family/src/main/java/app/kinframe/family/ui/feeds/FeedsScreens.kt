@@ -315,6 +315,10 @@ class FeedActions(
     val channels: (@Composable () -> Unit)? = null,
     /** Family social (docs/spec/family-social.md); null when the server doesn't have it. */
     val social: app.kinframe.family.ui.social.FeedSocialSlots? = null,
+    /** Leaving (README §5.21): the leave sheet with the photo choice; null shows the older dialog. */
+    val leaveSheet: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    /** Leaving and other servers in Settings: photos taken away, frames on other servers (owner/admins). */
+    val leavingSettings: (@Composable () -> Unit)? = null,
 )
 
 @Composable
@@ -611,7 +615,8 @@ private fun PeopleTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
         }
     }
     editing?.let { m -> FeedMemberDialog(feed, m, a) { editing = null } }
-    if (leaving) {
+    if (leaving && a.leaveSheet != null) a.leaveSheet.invoke { leaving = false }
+    else if (leaving) {
         var removeMine by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { leaving = false },
@@ -793,7 +798,7 @@ private fun FramesTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
             SectionTitle(stringResource(R.string.feed_sub_requests))
             state.pendingSubscriptions.forEach { s ->
                 Surface(Modifier.fillMaxWidth()) {
-                    Text(s.frame.name, style = Kin.type.bodyStrong, color = c.ink)
+                    Text(app.kinframe.family.ui.servers.remoteName(s.frame.name, s.remote?.host?.ifBlank { null } ?: s.remote?.serverName), style = Kin.type.bodyStrong, color = c.ink)
                     s.requestedByName?.let { Text(stringResource(R.string.feed_sub_requested_by, it), style = Kin.type.caption, color = c.inkSoft) }
                     Text(historyLabel(s.history, s.historyCount), style = Kin.type.caption, color = c.inkSoft)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -811,7 +816,7 @@ private fun FramesTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
             state.endedSubscriptions.forEach { s ->
                 Surface(Modifier.fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(s.frame.name, style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
+                        Text(app.kinframe.family.ui.servers.remoteName(s.frame.name, s.remote?.host?.ifBlank { null } ?: s.remote?.serverName), style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
                         SubscriptionStatusPill(s)
                     }
                     removedReason(s)?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
@@ -930,6 +935,7 @@ private fun SettingsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
                 hint = stringResource(R.string.feed_setting_posters_birthdays_hint), enabled = !state.busy)
         }
         if (feed.isAdmin) a.channels?.invoke()
+        a.leavingSettings?.invoke()
     }
     if (picking) CoverPicker(feed, (state.posts as? Load.Ready)?.value.orEmpty(), { picking = false }) { id -> picking = false; a.vm.setCover(id) }
 }
@@ -1069,6 +1075,8 @@ fun FrameFeedsTab(
     onEnterCode: () -> Unit,
     /** The server has birthdays: per-subscription "Show birthdays" (birthdays.md §3, frame owner). */
     birthdays: Boolean = false,
+    /** Families on other servers (README §5.22); null without discovery `remote_families`. */
+    remote: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val manage = frame.can { it.changeSettings }
@@ -1077,6 +1085,7 @@ fun FrameFeedsTab(
     var removing by remember { mutableStateOf<Subscription?>(null) }
     PageColumn {
         Text(stringResource(R.string.frame_feeds_lede, frame.name), style = Kin.type.body, color = c.inkSoft)
+        remote?.invoke()
         when (val subs = state.subscriptions) {
             Load.Loading -> SkeletonList(2, 96.dp)
             is Load.Error -> ErrorPanel(subs.message, { vm.load() })

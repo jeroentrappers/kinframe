@@ -284,7 +284,11 @@ data class Send(
 data class SendsPage(val sends: List<Send> = emptyList(), val nextCursor: String? = null)
 
 @Serializable
-data class PlacementCounts(val photos: Int = 0, val videos: Int = 0, val hidden: Int = 0, val trashed: Int = 0)
+data class PlacementCounts(
+    val photos: Int = 0, val videos: Int = 0, val hidden: Int = 0, val trashed: Int = 0,
+    /** Managers only: placements taken away by their senders (README §5.21). */
+    val takenAway: Int = 0,
+)
 
 @Serializable
 data class PlacementsPage(

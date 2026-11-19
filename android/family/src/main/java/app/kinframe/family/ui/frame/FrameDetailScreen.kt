@@ -163,6 +163,8 @@ class FrameActions(
     /** Owner only: move the frame to a new device by its code. */
     val replaceDevice: (String) -> Unit = {},
     val resetReplace: () -> Unit = {},
+    /** Leaving (README §5.21): the leave sheet with the photo choice; null shows the older dialog. */
+    val leaveSheet: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
 )
 
 @Composable
@@ -235,7 +237,8 @@ private fun OverviewTab(frame: Frame, state: FrameDetailState, a: FrameActions) 
     if (renaming) RenameDialog(frame, { renaming = false }) { n, l -> renaming = false; a.rename(n, l) }
     transferring?.let { leaving -> TransferDialog(frame, state.members, a.me, leaving, null, { transferring = null }) { m, leave, mine -> transferring = null; a.transfer(m, leave, mine) } }
     if (replacing) ReplaceDeviceDialog(frame, state, { replacing = false; a.resetReplace() }, a.replaceDevice)
-    if (leaving) {
+    if (leaving && a.leaveSheet != null) a.leaveSheet.invoke { leaving = false }
+    else if (leaving) {
         var removeMine by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { leaving = false },

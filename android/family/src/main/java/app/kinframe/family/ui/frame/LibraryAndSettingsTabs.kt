@@ -126,6 +126,8 @@ fun LibraryTab(
     /** "Share to another frame" for the selection; null when there is no other frame you can send to. */
     onShare: (() -> Unit)? = null,
     albums: LibraryAlbumActions? = null,
+    /** The trash's "Taken away by Tom" groups (README §5.21); null without discovery `leaving`. */
+    takenAway: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val grid = rememberLazyGridState()
@@ -186,6 +188,7 @@ fun LibraryTab(
                         }
                         if (!canSee) Note(stringResource(R.string.library_own_only))
                         if (state.tab == LibraryTab.Trash) Note(stringResource(R.string.library_trash_note, trashDays))
+                        if (state.tab == LibraryTab.Trash) takenAway?.invoke()
                         if (state.tab == LibraryTab.Visible && albums != null) MemoriesStrip(state.memories, java.time.LocalDate.now()) { viewing = it }
                     }
                 }

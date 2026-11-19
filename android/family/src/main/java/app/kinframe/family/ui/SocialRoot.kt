@@ -232,6 +232,18 @@ fun SocialRouteScreen(
                 openReminders = { nav.push(RemindersRoute) },
                 post = { nav.selectTab(Route.Send) },
                 topActions = topActions,
+                // "Don't show this memory again" (README §5.21), on the memory's own server.
+                hideMemory = graph.leaving.takeIf { ready.server.discovery.leaving }?.let { l ->
+                    { g: OnThisDayGroup ->
+                        scope.launch {
+                            runCatching { app.kinframe.family.ui.leaving.MemoriesViewModel.hideMemory(l, g.postIds) }
+                                .onSuccess { toaster.show(res.getString(R.string.leaving_memory_hidden)); vm.refresh() }
+                                .onFailure { toaster.show(res.getString(app.kinframe.family.util.Problems.message(it))) }
+                        }
+                    }
+                },
+                // Several servers: a small server chip on each post (multi-server.md §2.2).
+                serverChip = { p -> graph.accounts.chipFor(p.id) },
             ))
         }
         ChatsRoute -> {

@@ -58,6 +58,8 @@ data class Feed(
     val newMembersCanPost: Boolean = true,
     val membersCanCreateCircles: Boolean = true,
     val circleCount: Int = 0,
+    /** Frames on other servers may follow this family through `allow_remote` invites (README §5.22). */
+    val allowRemoteFrames: Boolean = false,
     /** The caller's mute for this family ([app.kinframe.core.social.FeedMute]). */
     val mute: String = app.kinframe.core.social.FeedMute.NONE,
     val freshness: app.kinframe.core.social.Freshness? = null,
@@ -116,6 +118,8 @@ data class FeedInviteCreate(
     val maxUses: Int? = null,
     val expiresInHours: Int = 168,
     val note: String? = null,
+    /** `subscribe` only, in families with `allow_remote_frames`: frames on other servers may use this link. */
+    val allowRemote: Boolean = false,
 )
 
 @Serializable
@@ -132,6 +136,8 @@ data class FeedInvite(
     val uses: Int = 0,
     val note: String? = null,
     val expiresAt: String,
+    /** Frames on other servers may use this link (README §5.22). */
+    val allowRemote: Boolean = false,
 )
 
 @Serializable
@@ -281,6 +287,8 @@ data class Subscription(
     val canManage: Boolean = false,
     /** Feed side: approve, reject, remove. */
     val canDecide: Boolean = false,
+    /** The subscriber is a frame on another server (README §5.22). */
+    val remote: app.kinframe.core.servers.SubscriptionRemote? = null,
 ) {
     val isLive: Boolean get() = SubscriptionStatus.isLive(status)
 }
