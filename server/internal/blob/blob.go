@@ -98,6 +98,8 @@ func ContentType(key string) string {
 		return "image/webp"
 	case ".mp4":
 		return "video/mp4"
+	case ".m4a":
+		return "audio/mp4" // voice messages
 	case ".jpg", ".jpeg":
 		return "image/jpeg"
 	case ".png":

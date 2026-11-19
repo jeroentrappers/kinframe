@@ -413,6 +413,8 @@ func (s *Server) serveBlob(w http.ResponseWriter, r *http.Request, key, contentT
 			contentType = "image/webp"
 		case ".mp4":
 			contentType = "video/mp4"
+		case ".m4a":
+			contentType = "audio/mp4" // voice messages
 		}
 	}
 	if contentType != "" {

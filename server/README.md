@@ -136,6 +136,7 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_TELEGRAM_WEBHOOK_IP_CHECK` | `off` | `on` also requires webhook calls to come from Telegram's published ranges (needs `KINFRAME_TRUST_PROXY` behind a proxy) |
 | `KINFRAME_MAX_TELEGRAM_CHATS_PER_TARGET` / `KINFRAME_MAX_TELEGRAM_CHATS_PER_USER` | `5` / `20` | Connected Telegram chats per frame or feed, and per owner (operator can change them at runtime) |
 | `KINFRAME_MAX_TELEGRAM_ITEMS_PER_CHAT_HOUR` | `300` | Photos and videos accepted per Telegram chat per hour |
+| `KINFRAME_LINK_PREVIEWS` | `off` | `on` lets the server fetch previews of links in chat messages (title, description, image re-encoded to WebP; discovery `link_previews`; API README §5.19). Only public addresses are fetched, whatever `KINFRAME_SOURCES_PRIVATE_NETWORKS` says; 5 s and 1 MiB per page, 5 MiB per image, cached 7 days |
 
 ### Calendars
 
