@@ -11122,8 +11122,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/FederationSubscription'
-                    description: Preview
-                    or an existing subscription: null
+                    description: Preview, or an existing subscription
                 "201":
                     content:
                         application/json:
