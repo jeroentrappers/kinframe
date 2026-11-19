@@ -152,9 +152,12 @@ final class AppModel {
         live.onStatus = { [weak self] in self?.liveStatus = $0 }
         // An import is a send: history shows it.
         googleImport.onFinished = { [weak self] _ in self?.historyVersion += 1 }
-        self.outbox.onSent = { [weak self] send in
-            self?.historyVersion += 1
-            self?.events.post(.sendUpdated(sendId: send.id))
+        // One upload queue for all accounts: the primary model (created first) hears it; history reloads every account.
+        if host == nil {
+            self.outbox.onSent = { [weak self] send in
+                self?.historyVersion += 1
+                self?.events.post(.sendUpdated(sendId: send.id))
+            }
         }
         // A 426 from any request (API, uploads, websocket, wherever it ran): re-read discovery (README §5.15).
         NotificationCenter.default.addObserver(forName: AppUpdateSignal.notification, object: nil, queue: .main) { [weak self] _ in
@@ -342,13 +345,16 @@ final class AppModel {
         framesLoaded = false
         feeds = []
         feedsLoaded = false
-        framesPath = NavigationPath()
-        historyPath = NavigationPath()
-        feedsPath = NavigationPath()
-        homePath = NavigationPath()
-        chatsPath = NavigationPath()
+        // Another account's sign-out leaves the app's navigation alone (it belongs to the primary account).
+        if isPrimary {
+            framesPath = NavigationPath()
+            historyPath = NavigationPath()
+            feedsPath = NavigationPath()
+            homePath = NavigationPath()
+            chatsPath = NavigationPath()
+            tab = .frames
+        }
         social.reset()
-        tab = .frames
         accounts?.syncOutbox()
         if !keepServer {
             server = nil

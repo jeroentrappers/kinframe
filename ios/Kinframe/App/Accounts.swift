@@ -173,6 +173,11 @@ final class Accounts {
         p.homePath = NavigationPath()
         p.chatsPath = NavigationPath()
         if p.phase != .main, p.auth.isSignedIn { p.phase = .main }
+        // The upload queue tells the new primary model about finished sends.
+        outbox.onSent = { [weak p] send in
+            p?.historyVersion += 1
+            p?.events.post(.sendUpdated(sendId: send.id))
+        }
     }
 
     /// A secondary account's session ended: it stays listed with "Sign in again".
