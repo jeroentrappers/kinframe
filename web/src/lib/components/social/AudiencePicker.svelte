@@ -23,7 +23,7 @@
 	import { t } from '$lib/i18n/index.svelte';
 
 	/** "Share with: whole family / The cousins" for one family (README §5.18, at most one circle per family). */
-	let { feedId, feedName, value = $bindable<string | null>(null), disabled = false }: { feedId: string; feedName: string; value?: string | null; disabled?: boolean } = $props();
+	let { feedId, feedName, value = $bindable(), disabled = false }: { feedId: string; feedName: string; value?: string | null; disabled?: boolean } = $props();
 
 	let circles = $state<Circle[]>([]);
 	$effect(() => {

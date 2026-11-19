@@ -104,7 +104,7 @@ test('everything stays hidden when the server has no email inbox', async ({ page
 	await expect(page.getByRole('heading', { name: 'Email photos to this frame' })).toHaveCount(0);
 	await page.goto(`/feeds/${feed.id}?tab=settings`);
 	await expect(page.getByRole('heading', { name: 'Peeters kids' })).toBeVisible();
-	await expect(page.getByRole('heading', { name: 'Email photos to this feed' })).toHaveCount(0);
+	await expect(page.getByRole('heading', { name: 'Email photos to this family' })).toHaveCount(0);
 	expect(st.calls.some((c) => c.path.includes('email-addresses'))).toBe(false);
 });
 
@@ -285,7 +285,7 @@ test('settings: slug change warns, and the feed gets its own address', async ({ 
 
 	await page.goto(`/feeds/${feed.id}?tab=settings`);
 	const section = page.getByTestId('email-inbox');
-	await expect(section.getByRole('heading', { name: 'Email photos to this feed' })).toBeVisible();
+	await expect(section.getByRole('heading', { name: 'Email photos to this family' })).toBeVisible();
 	await section.getByRole('button', { name: 'Create an address' }).click();
 	await expect(page.getByRole('dialog').getByLabel('Start of the address')).toHaveValue('peeters-kids');
 	await page.getByRole('dialog').getByRole('button', { name: 'Create address' }).click();

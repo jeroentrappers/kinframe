@@ -184,7 +184,7 @@ test('a feed syncs from an Immich API key, with the feed defaults and the batchi
 	await dialog.getByRole('button', { name: 'Continue' }).click();
 	await expect(dialog.getByLabel('The newest')).toBeChecked();
 	await expect(dialog.getByLabel('Number of photos')).toHaveValue('20');
-	await expect(dialog.getByLabel('Keep it in the feed')).toBeChecked();
+	await expect(dialog.getByLabel('Keep it in the family')).toBeChecked();
 	await expect(dialog.getByText('New photos are posted in one go once the album has been quiet for a while.')).toBeVisible();
 	await expect(dialog.getByTestId('suggest-album-only')).toHaveCount(0);
 	await dialog.getByRole('button', { name: 'Connect' }).click();

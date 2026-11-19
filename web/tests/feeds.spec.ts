@@ -71,15 +71,15 @@ async function signIn(page: Page, st: MockState) {
 test('feeds stay hidden when the server has none', async ({ page }) => {
 	const { st } = feedState({ feeds: false });
 	await signIn(page, st);
-	await expect(page.getByRole('link', { name: 'Feeds' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: 'Families' })).toHaveCount(0);
 	await page.goto('/feeds');
-	await expect(page.getByText('This server doesn’t offer feeds.')).toBeVisible();
+	await expect(page.getByText('This server doesn’t offer families.')).toBeVisible();
 });
 
 test('feed posts show receipts and reactions only where the viewer may see them', async ({ page }) => {
 	const { st, feed } = feedState();
 	await signIn(page, st);
-	await page.getByRole('link', { name: 'Feeds' }).first().click();
+	await page.getByRole('link', { name: 'Families' }).first().click();
 	await page.getByRole('link', { name: /Peeters kids/ }).click();
 	await expect(page).toHaveURL(new RegExp(`/feeds/${feed.id}$`));
 
@@ -102,7 +102,7 @@ test('approve a frame’s subscription request', async ({ page }) => {
 	await page.goto(`/feeds/${feed.id}?tab=subscriptions`);
 	await expect(page.getByText('asked by Ben', { exact: false })).toBeVisible();
 	await page.getByRole('button', { name: 'Let in' }).click();
-	await expect(page.getByText('Opa’s frame now shows the feed')).toBeVisible();
+	await expect(page.getByText('Opa’s frame now shows the family')).toBeVisible();
 	expect(st.calls.some((c) => c.method === 'POST' && /\/v1\/subscriptions\/.+\/approve$/.test(c.path))).toBe(true);
 });
 
@@ -127,7 +127,7 @@ test('a feed code in "Enter a code" opens the feed invite', async ({ page }) => 
 	await page.getByLabel('Frame code').fill('ab12-cd34');
 	await expect(page).toHaveURL(new RegExp(`/fi/${token}$`));
 	await expect(page.getByRole('heading', { name: 'Join Cousins' })).toBeVisible();
-	await page.getByRole('button', { name: 'Join feed' }).click();
+	await page.getByRole('button', { name: 'Join family' }).click();
 	await expect(page.getByRole('heading', { name: 'You’re in Cousins' })).toBeVisible();
 	expect(st.calls.find((c) => c.path === '/v1/feed-invites:lookup')?.body).toEqual({ code: 'AB12CD34' });
 });
@@ -152,7 +152,7 @@ test('frame side: pause a subscription and play only that feed', async ({ page }
 	await signIn(page, st);
 	await page.goto(`/frames/${oma.id}?tab=feeds`);
 	await expect(page.getByText('Peeters kids')).toBeVisible();
-	await page.getByRole('button', { name: 'Play only this feed' }).click();
+	await page.getByRole('button', { name: 'Play only this family' }).click();
 	await expect.poll(() => st.calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/settings'))).toBe(true);
 	const patch = st.calls.find((c) => c.method === 'PATCH' && c.path.endsWith('/settings'));
 	expect(patch?.body).toEqual({ slideshow: { feed_id: feed.id, album_id: null } });
@@ -181,5 +181,5 @@ test('library credits feed photos "Anna · Peeters kids"', async ({ page }) => {
 	await signIn(page, st);
 	await page.goto(`/frames/${oma.id}?tab=library`);
 	await page.getByRole('button', { name: 'Photo from Anna · Peeters kids' }).click();
-	await expect(page.getByText('From the feed Peeters kids')).toBeVisible();
+	await expect(page.getByText('From the family Peeters kids')).toBeVisible();
 });
