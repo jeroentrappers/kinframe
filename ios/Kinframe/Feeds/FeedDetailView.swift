@@ -155,8 +155,8 @@ final class FeedDetailModel {
         if approve { await loadPeople() }
     }
 
-    func setRole(_ m: FeedMember, admin: Bool) async throws {
-        let updated = try await api.setFeedRole(id, userId: m.userId, admin: admin)
+    func setRole(_ m: FeedMember, role: FeedRole) async throws {
+        let updated = try await api.setFeedMemberRole(id, userId: m.userId, role: role)
         if let i = members.firstIndex(where: { $0.userId == m.userId }) { members[i] = updated }
     }
 
@@ -295,16 +295,20 @@ struct FeedDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         header(feed)
-                        Picker(L("ios.feeds.sections"), selection: $section) {
-                            ForEach(sections(model), id: \.self) { s in Text(s.title).tag(s) }
-                        }
-                        .pickerStyle(.segmented)
+                        FamilySocialHeader(model: model)
+                        FeedSectionPicker(sections: sections(model), section: $section)
                         switch section {
-                        case .posts: FeedPostsSection(model: model, openReceipts: { receipts = FeedPostRoute(feedId: feed.id, postId: $0.id) })
+                        case .posts:
+                            if app.social.features.social {
+                                FamilyTimelineSection(feedId: feed.id)
+                            } else {
+                                FeedPostsSection(model: model, openReceipts: { receipts = FeedPostRoute(feedId: feed.id, postId: $0.id) })
+                            }
                         case .members: FeedMembersSection(model: model)
                         case .frames: FeedFramesSection(model: model)
                         case .birthdays: FeedBirthdaysSection(model: model)
                         case .settings: FeedSettingsSection(model: model)
+                        case .circles: CirclesSection(model: model)
                         }
                     }
                     .padding(16)
@@ -322,7 +326,8 @@ struct FeedDetailView: View {
         .navigationTitle(model?.feed?.name ?? app.feed(route.id)?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if model?.feed != nil {
+            // Members (family social's `member` role) follow along but don't post photos.
+            if model?.feed != nil, model?.abilities?.canPost != false {
                 ToolbarItem(placement: .topBarTrailing) {
                     if PhotoSourceFeatures(app.discovery).googleImport, let feed = model?.feed {
                         // Any member may import into a feed (an import is a send, spec §4.4).
@@ -378,6 +383,7 @@ struct FeedDetailView: View {
     private func sections(_ model: FeedDetailModel) -> [FeedSection] {
         var list: [FeedSection] = [.posts, .members, .frames]
         if model.birthdaysEnabled { list.append(.birthdays) }
+        if app.social.features.social { list.append(.circles) }
         if model.abilities?.canManage == true { list.append(.settings) }
         return list
     }

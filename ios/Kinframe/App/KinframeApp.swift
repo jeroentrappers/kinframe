@@ -29,7 +29,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         Self.styleNavigationBars()
-        MainActor.assumeIsolated { _ = model }
+        MainActor.assumeIsolated {
+            _ = model
+            PushRegistrar.shared.registerCategories()
+        }
         return true
     }
 
@@ -79,7 +82,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     /// (suggestions, decisions, the morning notice, greetings), a frame's feeds, a feed post's receipts, a send
     /// (docs/api/README.md §6.3; payloads carry only ids).
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        guard let route = PushRoute.parse(response.notification.request.content.userInfo) else { return }
+        let payload = UncheckedSendable(response.notification.request.content.userInfo)
+        let action = response.actionIdentifier
+        // Family social: the reminder buttons and the reply from a chat notification run without opening anything.
+        let reply = (response as? UNTextInputNotificationResponse)?.userText
+        if await MainActor.run(body: { PushRegistrar.shared.handleAction(action, payload: payload.value, reply: reply, api: model.api) }) { return }
+        guard let route = PushRoute.parse(payload.value) else { return }
         await MainActor.run { model.open(route) }
     }
 }

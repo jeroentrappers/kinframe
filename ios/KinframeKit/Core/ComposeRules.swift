@@ -24,6 +24,16 @@ public struct Limits: Codable, Equatable, Sendable {
     public var maxEmailSendersPerAddress: Int = 200
     /// Connected Telegram chats per frame or feed (docs/spec/telegram.md §14).
     public var maxTelegramChatsPerTarget: Int = 5
+    /// Family social (README §5.18–§5.19): comment and message length, mentions, items per message, group size,
+    /// circles per family, voice length and the edit window.
+    public var maxCommentChars: Int = 2000
+    public var maxMessageChars: Int = 4000
+    public var maxMentions: Int = 20
+    public var maxMessageItems: Int = 30
+    public var maxGroupMembers: Int = 100
+    public var maxCirclesPerFeed: Int = 20
+    public var maxVoiceSeconds: Int = 300
+    public var messageEditHours: Int = 24
 
     public init(maxItemsPerSend: Int = 200, maxVideoSeconds: Int = 300, maxUploadBytes: Int64 = 2 << 30, trashRetentionDays: Int? = 30) {
         self.maxItemsPerSend = maxItemsPerSend
@@ -50,6 +60,14 @@ public struct Limits: Codable, Equatable, Sendable {
         case maxEmailAddressesPerTarget = "max_email_addresses_per_target"
         case maxEmailSendersPerAddress = "max_email_senders_per_address"
         case maxTelegramChatsPerTarget = "max_telegram_chats_per_target"
+        case maxCommentChars = "max_comment_chars"
+        case maxMessageChars = "max_message_chars"
+        case maxMentions = "max_mentions"
+        case maxMessageItems = "max_message_items"
+        case maxGroupMembers = "max_group_members"
+        case maxCirclesPerFeed = "max_circles_per_feed"
+        case maxVoiceSeconds = "max_voice_seconds"
+        case messageEditHours = "message_edit_hours"
     }
 
     public init(from decoder: Decoder) throws {
@@ -69,6 +87,14 @@ public struct Limits: Codable, Equatable, Sendable {
         maxEmailAddressesPerTarget = (try? c.decodeIfPresent(Int.self, forKey: .maxEmailAddressesPerTarget)) ?? 5
         maxEmailSendersPerAddress = (try? c.decodeIfPresent(Int.self, forKey: .maxEmailSendersPerAddress)) ?? 200
         maxTelegramChatsPerTarget = (try? c.decodeIfPresent(Int.self, forKey: .maxTelegramChatsPerTarget)) ?? 5
+        maxCommentChars = (try? c.decodeIfPresent(Int.self, forKey: .maxCommentChars)) ?? 2000
+        maxMessageChars = (try? c.decodeIfPresent(Int.self, forKey: .maxMessageChars)) ?? 4000
+        maxMentions = (try? c.decodeIfPresent(Int.self, forKey: .maxMentions)) ?? 20
+        maxMessageItems = (try? c.decodeIfPresent(Int.self, forKey: .maxMessageItems)) ?? 30
+        maxGroupMembers = (try? c.decodeIfPresent(Int.self, forKey: .maxGroupMembers)) ?? 100
+        maxCirclesPerFeed = (try? c.decodeIfPresent(Int.self, forKey: .maxCirclesPerFeed)) ?? 20
+        maxVoiceSeconds = (try? c.decodeIfPresent(Int.self, forKey: .maxVoiceSeconds)) ?? 300
+        messageEditHours = (try? c.decodeIfPresent(Int.self, forKey: .messageEditHours)) ?? 24
     }
 }
 

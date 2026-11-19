@@ -16,6 +16,8 @@ struct FeedPostRoute: Hashable, Identifiable {
 
 enum FeedSection: String, Hashable, CaseIterable {
     case posts, members, frames, birthdays, settings
+    /// Family social: the family's circles.
+    case circles
 
     init(_ hint: PushRoute.FeedSectionHint) {
         switch hint {
@@ -34,6 +36,7 @@ enum FeedSection: String, Hashable, CaseIterable {
         case .frames: L("ios.feeds.tabFrames")
         case .birthdays: L("ios.bday.tab")
         case .settings: L("frame.tabSettings")
+        case .circles: L("social.circle.tab")
         }
     }
 }
@@ -169,6 +172,7 @@ struct FeedRoleBadge: View {
         case .owner: Pill(L("role.owner"), foreground: Palette.primarySoftText, background: Palette.primarySoft)
         case .admin: Pill(L("role.admin"), foreground: Palette.accentText, background: Palette.accentSoft)
         case .poster: Pill(L("ios.feeds.rolePoster"))
+        case .member: Pill(L("social.role.member"))
         }
     }
 }
@@ -217,7 +221,11 @@ struct FeedCreateSheet: View {
                         .disabled(trimmed.isEmpty || busy)
                 }
             }
-            .onAppear { focused = true }
+            .onAppear {
+                focused = true
+                // Family social: frames' reactions are social now, on by default for new families.
+                if app.social.features.social { membersSeeReactions = true }
+            }
         }
     }
 

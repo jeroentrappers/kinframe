@@ -42,6 +42,8 @@ struct FrameSettingsSection: View {
                 slideshow
                 display.id("display")
                 sleep
+                // Family social on the frame: comments, "Ask for new photos", prompt cards (Social/FrameSocialSettings).
+                FrameSocialSettingsCard(model: model, frame: frame)
                 weather
                 PluginsSection(api: model.api, frame: frame).id("plugins")
             }

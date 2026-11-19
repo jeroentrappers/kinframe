@@ -54,6 +54,8 @@ public enum LiveEvent: Equatable, Sendable {
     case telegramCodeUpdated(TelegramCode)
     /// Your Telegram account was linked, unlinked (nil) or blocked the bot.
     case telegramLinkUpdated(TelegramLink?)
+    /// Family social: timeline, threads, reactions, circles, chats, badge and encouragement (SocialEvents.swift).
+    case social(SocialEvent)
 
     public struct BirthdayRef: Equatable, Sendable {
         public var feedId: String
@@ -165,7 +167,7 @@ public enum LiveEvent: Equatable, Sendable {
                   let invitation = try? OutboxRunner.decoder.decode(EventInvitation.self, from: raw) else { return nil }
             return .invitationDecided(frameId: f, invitation: invitation)
         default:
-            return nil
+            return SocialEvent.parse(type, obj).map { .social($0) }
         }
     }
 

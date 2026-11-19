@@ -61,7 +61,8 @@ public final class ShareModel {
         async let allFeeds: [FeedSummary]? = feedsOn ? (try? await api.myFeeds()) : nil
         let frameResult = await allFrames
         frames = ((try? frameResult.get()) ?? []).filter { $0.can(\.send) }
-        feeds = (await allFeeds) ?? []
+        // Not the families where you are `member` (family social: you follow along there, you don't post).
+        feeds = ((await allFeeds) ?? []).filter { $0.role != .member }
         await files
         if case .failure(let error) = frameResult, (error as? APIError)?.isAppUpdateRequired == true {
             phase = .updateRequired

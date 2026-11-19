@@ -58,7 +58,8 @@ struct ComposeTab: View {
 
     private var sendable: [FrameSummary] { app.frames.filter { $0.can(\.send) } }
     /// Every feed you're in takes posts (any role), when the server has feeds.
-    private var feeds: [FeedSummary] { app.feedsEnabled ? app.feeds : [] }
+    /// Families you may post to: not those where you are `member` (family social: follow along, no posting).
+    private var feeds: [FeedSummary] { app.feedsEnabled ? app.feeds.filter { $0.role != .member } : [] }
 
     var body: some View {
         NavigationStack {
@@ -348,6 +349,8 @@ struct ComposeTab: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(on ? .isSelected : [])
+                    // Family social: "Share with: whole family / The cousins", and this week's prompt.
+                    if on { ComposeAudience(feed: feed, model: model) }
                 }
             }
             .card(padding: 0)
@@ -399,6 +402,8 @@ struct ComposeTab: View {
             model.feedIds = app.composeFeedIds.filter { id in feeds.contains { $0.id == id } }
             model.frameIds = []
             app.composeFeedIds = []
+            model.promptId = app.composePromptId
+            app.composePromptId = nil
         } else if !app.composeFrameIds.isEmpty {
             model.frameIds = app.composeFrameIds.filter { id in sendable.contains { $0.id == id } }
             model.feedIds = []

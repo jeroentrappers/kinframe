@@ -86,6 +86,10 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
     /// Feeds to post to (`feed_ids`). Optional so jobs saved by an older version still load.
     public var feedIds: [String]?
     public var feedNames: [String]?
+    /// Family social: the audience inside a feed (`circle_ids`, at most one circle per feed) and the weekly prompt
+    /// the posts answer (`prompt_id`). Optional so older jobs still load.
+    public var circleIds: [String]?
+    public var promptId: String?
     public var items: [OutboxItem]
     /// Sent with `POST /v1/sends`, stable across retries so a retry never creates a second send.
     public var idempotencyKey: String
@@ -159,6 +163,8 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
             }
             var frame_ids: [String]
             var feed_ids: [String]?
+            var circle_ids: [String]?
+            var prompt_id: String?
             var items: [Item]
         }
         let iso = ISO8601DateFormatter()
@@ -193,7 +199,10 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         let feeds = feedIds ?? []
-        return try encoder.encode(Body(frame_ids: frameIds, feed_ids: feeds.isEmpty ? nil : feeds, items: items))
+        let circles = (circleIds ?? []).filter { !$0.isEmpty }
+        return try encoder.encode(Body(frame_ids: frameIds, feed_ids: feeds.isEmpty ? nil : feeds,
+                                       circle_ids: circles.isEmpty || feeds.isEmpty ? nil : circles,
+                                       prompt_id: feeds.isEmpty ? nil : promptId, items: items))
     }
 }
 
