@@ -235,6 +235,7 @@ class AppGraph(
             accounts.version.collect {
                 updateLive()
                 if (accounts.accounts.value.any { a -> a.signedIn }) push.ensureRegistered()
+                loadProfiles()
             }
         }
         // A new primary account: its profile loads again.
@@ -247,6 +248,22 @@ class AppGraph(
         outbox.sends.value.filter { it.state != OutboxState.FAILED }.forEach { SendWorker.enqueue(app, it.id) }
     }
 
+    /**
+     * The person's profile on every other signed-in account (`GET /v1/me` there): screens of that account's frames,
+     * families, posts and chats need its user id ("You", own comments and messages) and roles. The primary account's
+     * profile is loaded by the app's root view model.
+     */
+    private fun loadProfiles() {
+        val primary = accounts.primary.value.id
+        accounts.accounts.value.filter { it.id != primary && it.me.value == null }.forEach { a ->
+            val kin = a.clients.value?.kin ?: return@forEach
+            scope.launch { runCatching { kin.me() }.onSuccess { u -> if (a.me.value == null) a.me.value = u } }
+        }
+    }
+
+    /** The API client pinned to [accountId] (a new family there, a frame code typed for that server). */
+    fun kinFor(accountId: String): KinApi? = (api.value as? RoutingKinApi)?.forAccount(accountId) ?: api.value
+
     private fun updateLive() {
         accounts.accounts.value.forEach { a ->
             val c = a.clients.value
@@ -256,13 +273,9 @@ class AppGraph(
 
     /**
      * A push arrived: its account is the payload's `server`, else the endpoint's account ([instanceAccount]), else the
-     * primary one (README §6.3). Its ids are recorded for that account, so the tap opens screens on the right server.
+     * account its ids are already known for, else the primary one (README §6.3); see [AccountManager.accountForPush].
      */
-    fun routePush(msg: PushMessage, instanceAccount: String?): Account {
-        val a = accounts.forServer(msg.server.ifBlank { null }) ?: accounts.byId(instanceAccount) ?: accounts.primary.value
-        accounts.index.putAll(msg.ids.filterKeys { it.endsWith("_id") }.values, a.id)
-        return a
-    }
+    fun routePush(msg: PushMessage, instanceAccount: String?): Account = accounts.accountForPush(msg.server, msg.ids, instanceAccount)
 
     /** The send runner for [server]'s account (an outbox send's `server`), else the primary account's. */
     fun sendRunner(server: String? = null): SendRunner? {
@@ -273,7 +286,7 @@ class AppGraph(
         val preparer = MediaPreparer(app)
         return SendRunner(outbox, c.kin, tus, sourceFor = { ItemSource(app, it) }, hash = { item ->
             runCatching { MediaFiles.sha256(ItemSource(app, item).open(0)) }.getOrNull()
-        }, prepare = { sendId, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, sendId), onProgress) },
+        }, prepare = { filesKey, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, filesKey), onProgress) },
             sendChat = social.chatSender)
     }
 

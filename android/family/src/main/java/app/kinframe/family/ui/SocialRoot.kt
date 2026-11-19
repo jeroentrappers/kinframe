@@ -112,6 +112,13 @@ data class SocialFlags(val social: Boolean, val chats: Boolean, val engagement: 
     companion object {
         fun of(d: app.kinframe.core.api.Discovery) =
             SocialFlags(social = d.feeds && d.social, chats = d.chats, engagement = d.engagement, voice = d.chats && d.voiceMessages, linkPreviews = d.chats && d.linkPreviews)
+
+        val NONE = SocialFlags(social = false, chats = false, engagement = false, voice = false, linkPreviews = false)
+
+        /** What any of the accounts has: the merged tabs (Home, Chats) show when one server has them. */
+        fun any(all: List<app.kinframe.core.api.Discovery>): SocialFlags = all.map(::of).fold(NONE) { a, b ->
+            SocialFlags(a.social || b.social, a.chats || b.chats, a.engagement || b.engagement, a.voice || b.voice, a.linkPreviews || b.linkPreviews)
+        }
     }
 }
 
@@ -120,7 +127,9 @@ private fun k(o: Any?) = System.identityHashCode(o)
 /** The Chats tab's view model, shared by the tab and "Share in chat". */
 @Composable
 fun chatsViewModel(graph: AppGraph, api: SocialApi): ChatsViewModel =
-    viewModel(key = "chats-${k(api)}") { ChatsViewModel(api, { graph.me.value?.id }, graph.live.events, { graph.social.openConversation }) }
+    viewModel(key = "chats-${k(api)}") {
+        ChatsViewModel(api, { graph.me.value?.id }, graph.live.events, { graph.social.openConversation }, isMe = graph.accounts::isMe)
+    }
 
 /** Toasts for "Share in chat" and everything else that only says something. */
 private suspend fun shareInChat(api: SocialApi, conversationId: String, postId: String, line: String) {
@@ -138,7 +147,14 @@ fun ShareInChatHost(graph: AppGraph, api: SocialApi, postId: String?, onDone: ()
     val chats = chatsViewModel(graph, api)
     val st by chats.state.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { chats.refresh() }
-    ShareInChatDialog(st.conversations, onDone) { conv, line ->
+    // A post can only be shared in a chat on its own server (multi-server.md §2.2: a chat lives on one server).
+    val conversations = remember(st.conversations, postId) {
+        when (val l = st.conversations) {
+            is Load.Ready -> Load.Ready(l.value.filter { graph.accounts.sameAccount(it.id, postId) })
+            else -> l
+        }
+    }
+    ShareInChatDialog(conversations, onDone) { conv, line ->
         onDone()
         scope.launch {
             runCatching { shareInChat(api, conv.id, postId, line) }
@@ -158,17 +174,21 @@ private fun ShareAgainHost(graph: AppGraph, ready: Phase.Ready, social: SocialAp
     val res = LocalResources.current
     val toaster = LocalToaster.current
     val scope = rememberCoroutineScope()
-    val me = ready.me.id
+    // The memory's own server: the person's photos there, and only that server's frames and families (the items'
+    // ids are that server's uploads).
+    val acct = graph.accounts.contextFor(group.feedId)
+    val me = acct.meId
     val own = group.items.filter { it.senderId == me }
     var targets by remember { mutableStateOf<PutOnFrameTargets?>(null) }
     var inChat by remember { mutableStateOf(own.isEmpty()) }
     LaunchedEffect(group) {
-        val frames = runCatching { ready.api.frames() }.getOrDefault(emptyList()).filter { it.can { p -> p.send } }
-        val feeds = runCatching { ready.api.feeds() }.getOrDefault(emptyList()).filter { it.canPost }
+        val same = { id: String -> graph.accounts.sameAccount(id, group.feedId) }
+        val frames = runCatching { ready.api.frames() }.getOrDefault(emptyList()).filter { it.can { p -> p.send } && same(it.id) }
+        val feeds = runCatching { ready.api.feeds() }.getOrDefault(emptyList()).filter { it.canPost && same(it.id) }
         targets = PutOnFrameTargets(frames, feeds)
     }
     if (inChat) {
-        if (SocialFlags.of(ready.server.discovery).chats) ShareInChatHost(graph, social, group.postIds.firstOrNull(), onDone)
+        if (acct.discovery?.chats == true) ShareInChatHost(graph, social, group.postIds.firstOrNull(), onDone)
         else LaunchedEffect(Unit) { toaster.show(res.getString(R.string.engagement_share_again_none)); onDone() }
         return
     }
@@ -200,14 +220,19 @@ fun SocialRouteScreen(
     topActions: @Composable () -> Unit,
 ) {
     val social = graph.social.api.collectAsStateWithLifecycle().value ?: return
-    val flags = SocialFlags.of(ready.server.discovery)
-    val limits = ready.server.limits
+    // The account of what this screen shows: its flags, limits and the person's user id there (multi-server.md §2.2).
+    val key = socialRouteKey(r)
+    val acct = rememberAccountContext(graph, key, ready)
+    val flags = if (key == null) graph.social.flags else acct.flags
+    val limits = acct.limits
     val context = LocalContext.current
     val res = LocalResources.current
     val toaster = LocalToaster.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
-    val me = graph.me.collectAsStateWithLifecycle().value?.id ?: ready.me.id
+    val primaryMe = graph.me.collectAsStateWithLifecycle().value?.id ?: ready.me.id
+    val me = if (key == null) primaryMe else acct.meId
+    val meOf: () -> String? = { graph.accounts.meIdFor(key) }
     val api = ready.api
     var sharing by remember { mutableStateOf<String?>(null) }
     var who by remember { mutableStateOf<Triple<String, String, String?>?>(null) }
@@ -215,7 +240,9 @@ fun SocialRouteScreen(
     val openFeed = { id: String -> nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(id)) }
     when (r) {
         HomeRoute -> {
-            val vm: HomeViewModel = viewModel(key = "home-${k(social)}") { HomeViewModel(social, api, { graph.me.value?.id }, graph.live.events, flags.engagement) }
+            val vm: HomeViewModel = viewModel(key = "home-${k(social)}") {
+                HomeViewModel(social, api, { graph.me.value?.id }, graph.live.events, flags.engagement, isMe = graph.accounts::isMe)
+            }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) { vm.events.collect { e -> if (e is HomeNotice.Message) toaster.show(res.getString(e.message)) } }
             HomeScreen(s, HomeActions(
@@ -232,18 +259,21 @@ fun SocialRouteScreen(
                 openReminders = { nav.push(RemindersRoute) },
                 post = { nav.selectTab(Route.Send) },
                 topActions = topActions,
-                // "Don't show this memory again" (README §5.21), on the memory's own server.
-                hideMemory = graph.leaving.takeIf { ready.server.discovery.leaving }?.let { l ->
-                    { g: OnThisDayGroup ->
-                        scope.launch {
-                            runCatching { app.kinframe.family.ui.leaving.MemoriesViewModel.hideMemory(l, g.postIds) }
-                                .onSuccess { toaster.show(res.getString(R.string.leaving_memory_hidden)); vm.refresh() }
-                                .onFailure { toaster.show(res.getString(app.kinframe.family.util.Problems.message(it))) }
-                        }
+                // "Don't show this memory again" (README §5.21), on the memory's own server: hidden memories are per
+                // account, so the group's family names the account whose list it goes on.
+                hideMemory = { g: OnThisDayGroup ->
+                    val l = graph.leavingFor(g.feedId)
+                    if (l != null) scope.launch {
+                        runCatching { app.kinframe.family.ui.leaving.MemoriesViewModel.hideMemory(l, g.postIds) }
+                            .onSuccess { toaster.show(res.getString(R.string.leaving_memory_hidden)); vm.refresh() }
+                            .onFailure { toaster.show(res.getString(app.kinframe.family.util.Problems.message(it))) }
                     }
                 },
+                canHideMemory = { g -> graph.leavingFor(g.feedId) != null },
                 // Several servers: a small server chip on each post (multi-server.md §2.2).
                 serverChip = { p -> graph.accounts.chipFor(p.id) },
+                meFor = { p -> graph.accounts.meIdFor(p.id) ?: primaryMe },
+                stripServer = homeStripServers(graph, s),
             ))
         }
         ChatsRoute -> {
@@ -252,7 +282,9 @@ fun SocialRouteScreen(
             LaunchedEffect(Unit) { vm.refresh() }
             ChatNotices(vm, nav)
             ChatsScreen(s, me, { nav.push(ConversationRoute(it.id)) }, { nav.push(NewChatRoute(false)) }, { nav.push(NewChatRoute(true)) },
-                vm::refresh, vm::toggleArchived, vm::archive, topActions)
+                vm::refresh, vm::toggleArchived, vm::archive, topActions,
+                // Several servers: each chat's own user id ("You: …") and a server chip (multi-server.md §2.2).
+                meFor = { c -> graph.accounts.meIdFor(c.id) ?: primaryMe }, serverChip = { c -> graph.accounts.chipFor(c.id) })
         }
         is NewChatRoute -> {
             val vm = chatsViewModel(graph, social)
@@ -263,7 +295,7 @@ fun SocialRouteScreen(
         }
         is PostRoute -> {
             val vm: PostViewModel = viewModel(key = "post-${r.postId}-${k(social)}") {
-                PostViewModel(social, api, r.postId, { graph.me.value?.id }, graph.live.events, limits.maxCommentChars)
+                PostViewModel(social, api, r.postId, meOf, graph.live.events, limits.maxCommentChars)
             }
             val s by vm.state.collectAsStateWithLifecycle()
             DisposableEffect(r.postId) { SocialNotifications.clearPost(context, r.postId); onDispose { } }
@@ -289,10 +321,10 @@ fun SocialRouteScreen(
                 },
             ))
         }
-        is ConversationRoute -> ConversationRouteScreen(graph, ready, nav, r, social, flags)
+        is ConversationRoute -> ConversationRouteScreen(graph, ready, nav, r, social, flags, acct)
         is ConversationInfoRoute -> {
             val vm: ConversationInfoViewModel = viewModel(key = "conv-info-${r.conversationId}-${k(social)}") {
-                ConversationInfoViewModel(social, r.conversationId, { graph.me.value?.id }, graph.live.events) { uri ->
+                ConversationInfoViewModel(social, r.conversationId, meOf, graph.live.events) { uri ->
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { Avatars.squareJpeg(graph.app, uri) }.getOrNull() }
                 }
             }
@@ -308,7 +340,7 @@ fun SocialRouteScreen(
             val photo = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> if (uri != null) vm.setPhoto(uri) }
             ConversationInfoScreen(s, vm, me, { nav.pop() }, { nav.push(PersonRoute(it)) },
                 { photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                onOpenFamily = if (ready.server.discovery.feeds) openFeed else null)
+                onOpenFamily = if (acct.discovery?.feeds == true) openFeed else null)
         }
         is PersonRoute -> {
             val vm: PersonViewModel = viewModel(key = "person-${r.userId}-${k(social)}") { PersonViewModel(social, r.userId) }
@@ -325,7 +357,7 @@ fun SocialRouteScreen(
         }
         is CirclesRoute, is CircleRoute -> {
             val feedId = (r as? CirclesRoute)?.feedId ?: (r as CircleRoute).feedId
-            val vm: CirclesViewModel = viewModel(key = "circles-$feedId-${k(social)}") { CirclesViewModel(social, api, feedId, { graph.me.value?.id }, graph.live.events) }
+            val vm: CirclesViewModel = viewModel(key = "circles-$feedId-${k(social)}") { CirclesViewModel(social, api, feedId, meOf, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) {
                 vm.events.collect { e ->
@@ -360,7 +392,7 @@ fun SocialRouteScreen(
             RemindersScreen(s, vm, flags.chats, flags.engagement, { nav.pop() },
                 onBlocked = if (flags.chats) ({ nav.push(BlockedPeopleRoute) }) else null,
                 onMilestones = if (flags.engagement) ({ nav.push(MilestonesRoute) }) else null,
-                onReports = if (flags.chats && ready.me.isOperator) ({ nav.push(ReportsRoute(null)) }) else null)
+                onReports = if (flags.chats && acct.isOperator) ({ nav.push(ReportsRoute(null)) }) else null)
         }
         is FeedEngagementRoute -> {
             val vm: FeedEngagementViewModel = viewModel(key = "engagement-${r.feedId}-${k(social)}") { FeedEngagementViewModel(social, api, r.feedId, graph.live.events) }
@@ -388,7 +420,8 @@ fun SocialRouteScreen(
             val vm: FreshFrameViewModel = viewModel(key = "fresh-${r.frameId}-${k(social)}") { FreshFrameViewModel(social, api, r.frameId, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             FreshFrameScreen(s, { nav.pop() },
-                onSend = { composer.preselectFrame(r.frameId); nav.selectTab(Route.Send) },
+                // Not on the frame (it asked through a family): the send preselects the families that reach it.
+                onSend = { composer.preselectFrame(r.frameId, s.requests.firstOrNull { it.isOpen }?.id); nav.selectTab(Route.Send) },
                 onShareAgain = { again = it },
                 onOpenFrame = { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(r.frameId)) })
         }
@@ -422,14 +455,15 @@ private fun SafetyNotices(events: kotlinx.coroutines.flow.Flow<SafetyNotice>) {
 }
 
 @Composable
-private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Navigator, r: ConversationRoute, social: SocialApi, flags: SocialFlags) {
+private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Navigator, r: ConversationRoute, social: SocialApi, flags: SocialFlags, acct: app.kinframe.family.accounts.AccountContext) {
     val context = LocalContext.current
     val res = LocalResources.current
     val toaster = LocalToaster.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
-    val me = graph.me.collectAsStateWithLifecycle().value?.id ?: ready.me.id
-    val limits = ready.server.limits
+    // The conversation's own server: the person's user id there ("You", own messages) and its limits.
+    val me = acct.meId
+    val limits = acct.limits
     val media = remember(graph) {
         object : ChatMedia {
             override suspend fun queueMedia(conversationId: String, name: String, uris: List<android.net.Uri>, body: String?, mentions: List<app.kinframe.core.social.Mention>, replyToId: String?) =
@@ -439,7 +473,7 @@ private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Na
         }
     }
     val vm: ConversationViewModel = viewModel(key = "conv-${r.conversationId}-${k(social)}") {
-        ConversationViewModel(social, ready.api, r.conversationId, { graph.me.value?.id }, graph.live.events, media, graph.outbox.sends,
+        ConversationViewModel(social, ready.api, r.conversationId, { graph.accounts.meIdFor(r.conversationId) }, graph.live.events, media, graph.outbox.sends,
             limits.maxMessageChars, flags.linkPreviews)
     }
     val s by vm.state.collectAsStateWithLifecycle()
@@ -471,7 +505,7 @@ private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Na
         vm, me, onBack = { nav.pop() }, openInfo = { nav.push(ConversationInfoRoute(r.conversationId)) },
         openPost = { nav.push(PostRoute(it)) }, openPerson = { nav.push(PersonRoute(it)) },
         openRecap = { f, m -> nav.push(RecapRoute(f, m)) },
-        invite = if (ready.server.discovery.feeds) ({ feedId -> nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feedId, FeedTab.People)) }) else null,
+        invite = if (acct.discovery?.feeds == true) ({ feedId -> nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feedId, FeedTab.People)) }) else null,
         openUrl = { url -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } },
         openMedia = { item -> scope.launch { runCatching { openMedia(context, social, item) }.onFailure { toaster.show(res.getString(SocialProblems.message(it))) } } },
         voiceUrl = { id -> social.mediaUrl(id, "master") },
@@ -486,15 +520,16 @@ private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Na
 
 /** Family social inside one family's screens, or null when the server doesn't have it. */
 @Composable
-fun feedSocialSlots(graph: AppGraph, ready: Phase.Ready, nav: Navigator, feed: Feed?, onFeedChanged: (Feed) -> Unit, setFlag: (String, Boolean) -> Unit, busy: Boolean): FeedSocialSlots? {
-    val flags = SocialFlags.of(ready.server.discovery)
+fun feedSocialSlots(graph: AppGraph, acct: app.kinframe.family.accounts.AccountContext, ready: Phase.Ready, nav: Navigator, feed: Feed?, onFeedChanged: (Feed) -> Unit, setFlag: (String, Boolean) -> Unit, busy: Boolean): FeedSocialSlots? {
+    // The family's own server: its flags and the person's user id there.
+    val flags = acct.flags
     if (!flags.social || feed == null) return null
     val social = graph.social.api.collectAsStateWithLifecycle().value ?: return null
     val res = LocalResources.current
     val toaster = LocalToaster.current
-    val me = ready.me.id
+    val me = acct.meId
     val vm: FeedSocialViewModel = viewModel(key = "feed-social-${feed.id}-${k(social)}") {
-        FeedSocialViewModel(social, ready.api, feed.id, { graph.me.value?.id }, graph.live.events, feed.isAdmin, flags.chats)
+        FeedSocialViewModel(social, ready.api, feed.id, { graph.accounts.meIdFor(feed.id) }, graph.live.events, feed.isAdmin, flags.chats)
     }
     val s by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(vm) {
@@ -526,8 +561,7 @@ fun feedSocialSlots(graph: AppGraph, ready: Phase.Ready, nav: Navigator, feed: F
 
 /** Frame settings → family social toggles (owner, admins, `change_settings`; README §5.20). */
 @Composable
-fun FrameSocialSettingsSlot(ready: Phase.Ready, fs: app.kinframe.family.ui.frame.FrameSettingsViewModel) {
-    val flags = SocialFlags.of(ready.server.discovery)
+fun FrameSocialSettingsSlot(flags: SocialFlags, fs: app.kinframe.family.ui.frame.FrameSettingsViewModel) {
     if (!flags.social && !flags.engagement) return
     val st by fs.state.collectAsStateWithLifecycle()
     val social = (st.draft?.get("social") as? kotlinx.serialization.json.JsonObject)
@@ -580,42 +614,84 @@ fun SendAudience(s: ComposerState, composer: ComposerViewModel) {
     }
 }
 
+/** The key of a social screen's entity: the routing index tells its account. Null for the merged screens. */
+fun socialRouteKey(r: SocialRoute): String? = when (r) {
+    is PostRoute -> r.postId
+    is ConversationRoute -> r.conversationId
+    is ConversationInfoRoute -> r.conversationId
+    is PersonRoute -> r.userId
+    is CirclesRoute -> r.feedId
+    is CircleRoute -> r.feedId
+    is ReportsRoute -> r.feedId
+    is FeedEngagementRoute -> r.feedId
+    is RecapRoute -> r.feedId
+    is FreshFrameRoute -> r.frameId
+    else -> null
+}
+
+/** Home's strip: the server label of frames and families whose name is used on two servers (multi-server.md §2.2). */
+private fun homeStripServers(graph: AppGraph, s: app.kinframe.family.ui.home.HomeState): (String) -> String? {
+    if (!graph.accounts.several) return { null }
+    val entries = s.frames.map { it.id to it.name } + s.feeds.map { it.id to it.name }
+    val repeated = app.kinframe.family.accounts.ServerChips.repeatedAcrossServers(entries, { it.first }, { it.second }) { graph.accounts.index.get(it) }
+    return { id -> if (id in repeated) graph.accounts.chipFor(id) else null }
+}
+
+/** What a family social notification tap needs besides the navigator. */
+class SocialTargets(
+    /** The merged tabs' flags (any account has it). */
+    val tabs: SocialFlags,
+    /** The account an id of the push belongs to (the push's own account recorded its ids, AppGraph.routePush). */
+    val account: (String?) -> app.kinframe.family.accounts.AccountContext,
+    /** Whether the person can send to this frame themselves; false when they are not on it (it asked through a family). */
+    val canSendTo: suspend (String) -> Boolean,
+    /** The Send tab with the frame, or (not on it) the families that reach it, preselected (README §5.20). */
+    val sendTo: (frameId: String, requestId: String?) -> Unit,
+)
+
 /** Where a family social notification tap goes (README §6.3). Returns false when it isn't one. */
-fun openSocialTarget(t: OpenTarget, nav: Navigator, ready: Phase.Ready): Boolean {
-    val flags = SocialFlags.of(ready.server.discovery)
+suspend fun openSocialTarget(t: OpenTarget, nav: Navigator, c: SocialTargets): Boolean {
     val ids = t.ids
+    val home: Route = if (c.tabs.social) HomeRoute else Route.Frames
     when (t.target) {
         SocialNotifications.TARGET_POST -> {
             val post = t.postId ?: ids["post_id"] ?: return true
-            if (!flags.social) return true
-            nav.selectTab(HomeRoute); nav.push(PostRoute(post, ids["comment_id"]))
+            if (!c.account(post).flags.social) return true
+            nav.selectTab(home); nav.push(PostRoute(post, ids["comment_id"]))
         }
         SocialNotifications.TARGET_CONVERSATION -> {
             val conv = ids["conversation_id"] ?: return true
-            if (!flags.chats) return true
-            nav.selectTab(ChatsRoute); nav.push(ConversationRoute(conv))
+            if (!c.account(conv).flags.chats) return true
+            nav.selectTab(if (c.tabs.chats) ChatsRoute else home); nav.push(ConversationRoute(conv))
         }
         SocialNotifications.TARGET_REPORTS -> {
-            if (!flags.chats) return true
             val feed = t.feedId ?: ids["feed_id"]
-            if (feed == null && !ready.me.isOperator) return true
-            nav.selectTab(if (flags.social) HomeRoute else Route.Settings); nav.push(ReportsRoute(feed))
+            val a = c.account(feed)
+            if (!a.flags.chats) return true
+            if (feed == null && !a.isOperator) return true
+            nav.selectTab(if (c.tabs.social) HomeRoute else Route.Settings); nav.push(ReportsRoute(feed))
         }
         SocialNotifications.TARGET_WEEKLY_SUMMARY -> {
             val week = ids["week_of"] ?: return true
-            if (!flags.engagement) return true
-            nav.selectTab(if (flags.social) HomeRoute else Route.Frames); nav.push(WeeklySummaryRoute(week))
+            if (!c.account(null).flags.engagement) return true
+            nav.selectTab(home); nav.push(WeeklySummaryRoute(week))
         }
+        // "Oma's frame would like new photos" or a quiet-frame reminder: the frame, or, for someone who isn't on it
+        // (it reached them through a family), the Send tab with the families that reach the frame.
         SocialNotifications.TARGET_FRAME_REQUEST -> {
             val frame = t.frameId ?: ids["frame_id"] ?: return true
-            if (flags.engagement) { nav.selectTab(if (flags.social) HomeRoute else Route.Frames); nav.push(FreshFrameRoute(frame)) }
-            else { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(frame)) }
+            val request = ids["request_id"]
+            when {
+                !c.canSendTo(frame) -> c.sendTo(frame, request)
+                c.account(frame).flags.engagement -> { nav.selectTab(home); nav.push(FreshFrameRoute(frame)) }
+                else -> { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(frame)) }
+            }
         }
         SocialNotifications.TARGET_HOME -> {
             val feed = t.feedId ?: ids["feed_id"]
             when {
-                flags.social -> nav.selectTab(HomeRoute)
-                feed != null && ready.server.discovery.feeds -> { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feed)) }
+                c.tabs.social -> nav.selectTab(HomeRoute)
+                feed != null && c.account(feed).discovery?.feeds == true -> { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feed)) }
                 else -> nav.selectTab(Route.Frames)
             }
         }

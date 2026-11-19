@@ -73,8 +73,20 @@ data class ComposerState(
     val prompts: Map<String, app.kinframe.core.social.FeedPrompt> = emptyMap(),
     /** The prompt these photos answer (its feed must be selected). */
     val answering: String? = null,
+    /** Several accounts: each frame's and family's server label (multi-server.md §2.2); empty with one account. */
+    val serverOf: Map<String, String> = emptyMap(),
 ) {
     val sendableFrames: List<Frame> get() = (frames as? Load.Ready)?.value?.filter { it.can { p -> p.send } }.orEmpty()
+
+    /**
+     * Frames and families grouped per server, in list order of first appearance; one group without a name when they
+     * are all on one server.
+     */
+    val recipientGroups: List<RecipientGroup> get() {
+        val labels = (sendableFrames.map { serverOf[it.id] } + feeds.map { serverOf[it.id] }).distinct()
+        if (labels.size <= 1) return listOf(RecipientGroup(null, sendableFrames, feeds))
+        return labels.map { l -> RecipientGroup(l, sendableFrames.filter { serverOf[it.id] == l }, feeds.filter { serverOf[it.id] == l }) }
+    }
 
     /** At least one frame or feed (feeds.md §6.1). */
     val hasRecipients: Boolean get() = Recipients.valid(selected, selectedFeeds)
@@ -93,9 +105,15 @@ data class ComposerState(
     val canSend: Boolean get() = items.isNotEmpty() && issues == 0 && hasRecipients && !preparing
 }
 
+/** One server's recipients in the Send tab; [server] is null when everything is on one server. */
+data class RecipientGroup(val server: String?, val frames: List<Frame>, val feeds: List<Feed>)
+
 /** Who a send goes to: frames and feeds; together they must not be empty (feeds.md §6.1). */
 object Recipients {
     fun valid(frameIds: Collection<String>, feedIds: Collection<String>): Boolean = frameIds.isNotEmpty() || feedIds.isNotEmpty()
+
+    /** The families to preselect for a frame you're not on: those reaching it that you can post to, in your order. */
+    fun familiesToPreselect(reaching: Collection<String>, postable: List<String>): List<String> = postable.filter { it in reaching }
 
     /** Keep only what can still be sent to (a feed you left, a frame whose send permission went). */
     fun keep(selected: Set<String>, available: Collection<String>): Set<String> = selected.filter { it in available }.toSet()
@@ -123,6 +141,8 @@ class ComposerViewModel(
     private val feedsEnabled: () -> Boolean = { false },
     /** Family social: circles as audience and weekly prompts; null without it. */
     private val social: () -> app.kinframe.core.social.SocialApi? = { null },
+    /** A frame's or family's server label when signed in to several servers, else null. */
+    private val serverLabel: (String) -> String? = { null },
 ) : ViewModel() {
     private val _state = MutableStateFlow(ComposerState(limits = limits()))
     val state: StateFlow<ComposerState> = _state.asStateFlow()
@@ -132,12 +152,15 @@ class ComposerViewModel(
 
     private var preselect: String? = null
     private var preselectFeed: String? = null
+    /** The photo request a preselected frame asked with (a frame you're not on: its families are preselected). */
+    private var preselectRequest: String? = null
 
     init { loadFrames() }
 
     fun loadFrames() = viewModelScope.launch {
         val a = api() ?: return@launch
         _state.update { it.copy(limits = limits()) }
+        familiesReady = kotlinx.coroutines.CompletableDeferred()
         if (feedsEnabled()) launch { loadFeeds(a) }
         else _state.update { it.copy(feeds = emptyList(), selectedFeeds = emptySet()) }
         try {
@@ -147,14 +170,20 @@ class ComposerViewModel(
                 val keep = s.selected.filter { id -> sendable.any { it.id == id } }.toSet()
                 val sel = when {
                     preselect != null && sendable.any { it.id == preselect } -> setOf(preselect!!)
+                    // A frame you can't send to: its families are preselected instead (below).
+                    preselect != null -> emptySet()
                     keep.isNotEmpty() -> keep
                     // "Post to this feed": no frame on top of it.
                     preselectFeed != null || s.selectedFeeds.isNotEmpty() -> emptySet()
                     sendable.size == 1 -> setOf(sendable.single().id)
                     else -> emptySet()
                 }
-                s.copy(frames = Load.Ready(frames), selected = sel)
+                s.copy(frames = Load.Ready(frames), selected = sel, serverOf = s.serverOf + labels(frames.map { it.id }))
             }
+            // A frame you're not on asked for photos (or went quiet) and reached you through a family: preselect the
+            // families whose posts reach it (README §5.20).
+            val wanted = preselect
+            if (wanted != null && frames.none { it.id == wanted && it.can { p -> p.send } }) launch { preselectFamiliesOf(a, wanted, preselectRequest) }
         } catch (e: Exception) {
             if (state.value.frames !is Load.Ready) _state.update { it.copy(frames = Load.Error(Problems.message(e))) }
         }
@@ -166,8 +195,39 @@ class ComposerViewModel(
         social()?.let { sa -> viewModelScope.launch { loadSocial(sa, feeds) } }
         _state.update { s ->
             val pre = preselectFeed?.takeIf { id -> feeds.any { it.id == id } }
-            s.copy(feeds = feeds, selectedFeeds = if (pre != null) setOf(pre) else Recipients.keep(s.selectedFeeds, feeds.map { it.id }))
+            s.copy(feeds = feeds, selectedFeeds = if (pre != null) setOf(pre) else Recipients.keep(s.selectedFeeds, feeds.map { it.id }),
+                serverOf = s.serverOf + labels(feeds.map { it.id }))
         }
+        familiesReady?.complete(Unit)
+    }
+
+    private fun labels(ids: List<String>): Map<String, String> = ids.mapNotNull { id -> serverLabel(id)?.let { id to it } }.toMap()
+
+    private var familiesReady: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
+    private suspend fun preselectFamiliesOf(a: KinApi, frameId: String, requestId: String?) {
+        if (!feedsEnabled()) return
+        // The families are loaded alongside the frames: wait for them.
+        if (state.value.feeds.isEmpty()) familiesReady?.let { kotlinx.coroutines.withTimeoutOrNull(10_000) { it.await() } }
+        val postable = state.value.feeds.map { it.id }
+        if (postable.isEmpty()) return
+        var reaching: List<String> = emptyList()
+        if (requestId != null) {
+            reaching = social()?.let { sa -> runCatching { sa.photoRequest(requestId) }.getOrNull() }
+                ?.takeIf { it.frameId == frameId }?.feedIds.orEmpty()
+        }
+        if (reaching.isEmpty()) {
+            reaching = postable.filter { id ->
+                runCatching { a.feedSubscriptions(id, app.kinframe.core.api.SubscriptionStatus.ACTIVE) }.getOrNull()
+                    ?.any { it.frame.id == frameId } == true
+            }
+        }
+        val ids = Recipients.familiesToPreselect(reaching, postable)
+        if (preselect != frameId) return
+        // Done: later visits of the tab keep what the person picks.
+        preselect = null
+        preselectRequest = null
+        _state.update { s -> if (ids.isEmpty() || s.hasRecipients) s else s.copy(selectedFeeds = ids.toSet()) }
     }
 
     private suspend fun loadSocial(sa: app.kinframe.core.social.SocialApi, feeds: List<Feed>) {
@@ -205,12 +265,19 @@ class ComposerViewModel(
         )
     }
 
-    /** "Send to this frame" from a frame card or a fresh join. */
-    fun preselectFrame(frameId: String) {
+    /**
+     * "Send to this frame" from a frame card, a fresh join, a frame request or a quiet-frame reminder. For a frame
+     * you're not on, the families that reach it are preselected instead ([requestId]: the request names them).
+     */
+    fun preselectFrame(frameId: String, requestId: String? = null) {
         preselectFeed = null
+        preselectRequest = requestId
         _state.update { it.copy(selectedFeeds = emptySet()) }
         preselect = frameId
-        _state.update { s -> if ((s.frames as? Load.Ready)?.value?.any { it.id == frameId } == true) s.copy(selected = setOf(frameId)) else s }
+        _state.update { s ->
+            val sendable = s.sendableFrames.any { it.id == frameId }
+            if (sendable) s.copy(selected = setOf(frameId)) else s.copy(selected = emptySet())
+        }
         loadFrames()
     }
 

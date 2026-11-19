@@ -183,6 +183,31 @@ class FeedsTest {
         assertEquals(listOf("fd2"), queued!!.feedIds)
     }
 
+    @Test fun aFrameRequestForAFrameYouAreNotOnPreselectsTheFamiliesThatReachIt() = runTest {
+        val vm = ComposerViewModel(
+            api = {
+                object : FakeApi() {
+                    override suspend fun frames() = listOf(frame("f1", "Oma"))
+                    override suspend fun feeds() = listOf(feed("fd1", "Peeters kids"), feed("fd2", "Opa's club"), feed("fd3", "Cousins"))
+                    override suspend fun feedSubscriptions(feedId: String, status: String?) =
+                        if (feedId == "fd1") emptyList() else listOf(app.kinframe.core.api.Subscription(
+                            id = "s-$feedId", status = "active",
+                            feed = app.kinframe.core.api.SubscriptionFeed(feedId, "F"), frame = app.kinframe.core.api.SubscriptionFrame("fx", "Tante's frame"),
+                        ))
+                }
+            },
+            limits = { Limits() }, server = { "" }, inspect = { null }, enqueue = {}, feedsEnabled = { true },
+        )
+        // A frame you're on: the frame itself.
+        vm.preselectFrame("f1")
+        assertEquals(setOf("f1"), vm.state.value.selected)
+        assertTrue(vm.state.value.selectedFeeds.isEmpty())
+        // Not on it (a quiet-frame reminder or a request that reached you through a family): its families.
+        vm.preselectFrame("fx")
+        assertTrue(vm.state.value.selected.isEmpty())
+        assertEquals(setOf("fd2", "fd3"), vm.state.value.selectedFeeds)
+    }
+
     @Test fun composerHidesFeedsWhenTheServerHasNone() = runTest {
         val vm = ComposerViewModel(
             api = { object : FakeApi() { override suspend fun frames() = listOf(frame("f1", "Oma")) } },

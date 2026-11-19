@@ -218,6 +218,12 @@ fun FeedsScreen(
     onOpen: (Feed) -> Unit,
     onCreate: (String) -> Unit,
     onEnterCode: () -> Unit,
+    /** A family's server chip when signed in to several servers (multi-server.md §2.2), else null. */
+    serverChip: (Feed) -> String? = { null },
+    /** The servers a new family can be made on (more than one account), primary first; empty: no choice. */
+    servers: List<app.kinframe.family.ui.ServerOption> = emptyList(),
+    /** Makes a family on the chosen account (with [servers]). */
+    onCreateOn: (String, String?) -> Unit = { name, _ -> onCreate(name) },
 ) {
     val c = Kin.colors
     var creating by rememberSaveable { mutableStateOf(false) }
@@ -240,15 +246,15 @@ fun FeedsScreen(
                 }
             } else PageColumn(spacing = 10.dp) {
                 Text(stringResource(R.string.feeds_lede), style = Kin.type.body, color = c.inkSoft)
-                f.value.forEach { feed -> FeedCard(feed) { onOpen(feed) } }
+                f.value.forEach { feed -> FeedCard(feed, serverChip(feed)) { onOpen(feed) } }
             }
         }
     }
-    if (creating) CreateFeedDialog(state, { creating = false }) { name -> onCreate(name); creating = false }
+    if (creating) CreateFeedDialog(state, servers, { creating = false }) { name, server -> onCreateOn(name, server); creating = false }
 }
 
 @Composable
-private fun FeedCard(feed: Feed, onClick: () -> Unit) {
+private fun FeedCard(feed: Feed, server: String? = null, onClick: () -> Unit) {
     val c = Kin.colors
     Surface(Modifier.fillMaxWidth(), onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -258,6 +264,7 @@ private fun FeedCard(feed: Feed, onClick: () -> Unit) {
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(feed.name, style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                server?.let { Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
                 Text(
                     pluralStringResource(R.plurals.feed_members_count, feed.memberCount, feed.memberCount) + " · " +
                         pluralStringResource(R.plurals.feed_frames_count, feed.subscriptionCount, feed.subscriptionCount),
@@ -273,8 +280,9 @@ private fun FeedCard(feed: Feed, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CreateFeedDialog(state: FeedsState, onDismiss: () -> Unit, onCreate: (String) -> Unit) {
+private fun CreateFeedDialog(state: FeedsState, servers: List<app.kinframe.family.ui.ServerOption>, onDismiss: () -> Unit, onCreate: (String, String?) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
+    var server by rememberSaveable { mutableStateOf(servers.firstOrNull()?.accountId) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.feeds_new)) },
@@ -285,9 +293,11 @@ private fun CreateFeedDialog(state: FeedsState, onDismiss: () -> Unit, onCreate:
                     placeholder = stringResource(R.string.feed_name_placeholder),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     error = state.createError?.let { stringResource(it) })
+                // Several servers: which one the family lives on (only people there can join it).
+                app.kinframe.family.ui.ServerPicker(servers, server, { server = it }, stringResource(R.string.servers_pick_feed_hint))
             }
         },
-        confirmButton = { TextButton({ onCreate(name) }, enabled = name.isNotBlank() && !state.creating) { Text(stringResource(R.string.feeds_create)) } },
+        confirmButton = { TextButton({ onCreate(name, server) }, enabled = name.isNotBlank() && !state.creating) { Text(stringResource(R.string.feeds_create)) } },
         dismissButton = { TextButton(onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

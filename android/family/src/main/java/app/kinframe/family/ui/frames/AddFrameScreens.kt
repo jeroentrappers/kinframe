@@ -69,20 +69,22 @@ fun AddFrameScreen(
     onDone: () -> Unit,
     /** A feed invite code or link was entered: open it (feeds.md §10). */
     onFeedInvite: (String) -> Unit = {},
+    /** Several accounts: the server a typed code is for. */
+    onServer: (String) -> Unit = {},
 ) {
     LaunchedEffect(state.feedInviteToken) { state.feedInviteToken?.let(onFeedInvite) }
     Column(Modifier.fillMaxSize().background(Kin.colors.paper)) {
         KinTopBar(stringResource(if (state.feeds) R.string.add_title_code else R.string.add_title), onBack = onBack)
         Box(Modifier.weight(1f).imePadding()) {
             val r = state.result
-            if (r == null) CodeEntry(state, onInput, onSubmit)
+            if (r == null) CodeEntry(state, onInput, onSubmit, onServer)
             else RedeemResultContent(r, state, onName, onLocation, onSaveName, onSend, onViewFrame, onDone)
         }
     }
 }
 
 @Composable
-private fun CodeEntry(state: AddFrameState, onInput: (String) -> Unit, onSubmit: () -> Unit) {
+private fun CodeEntry(state: AddFrameState, onInput: (String) -> Unit, onSubmit: () -> Unit, onServer: (String) -> Unit = {}) {
     val c = Kin.colors
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -117,6 +119,7 @@ private fun CodeEntry(state: AddFrameState, onInput: (String) -> Unit, onSubmit:
                 }) { Icon(KinIcons.Clipboard, stringResource(R.string.add_paste), tint = c.inkSoft) }
             },
         )
+        app.kinframe.family.ui.ServerPicker(state.servers, state.server, onServer, stringResource(R.string.servers_pick_code_hint))
         PrimaryButton(
             stringResource(if (state.submitting) R.string.add_checking else R.string.add_submit), onSubmit,
             Modifier.fillMaxWidth(), enabled = state.complete, busy = state.submitting,

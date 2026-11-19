@@ -144,6 +144,10 @@ fun ChatsScreen(
     onToggleArchived: () -> Unit,
     onArchive: (Conversation, Boolean) -> Unit,
     topActions: @Composable () -> Unit = {},
+    /** The person's user id on a chat's server (Chats merges every account's conversations). */
+    meFor: (Conversation) -> String? = { me },
+    /** A chat's server chip when signed in to several servers (multi-server.md §2.2), else null. */
+    serverChip: (Conversation) -> String? = { null },
 ) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
@@ -162,13 +166,13 @@ fun ChatsScreen(
                             PrimaryButton(stringResource(R.string.chat_new), onNew, icon = KinIcons.Plus)
                         }
                     }
-                    items(l.value, key = { it.id }) { conv -> ConversationRow(conv, me, { onOpen(conv) }, { onArchive(conv, true) }) }
+                    items(l.value, key = { it.id }) { conv -> ConversationRow(conv, meFor(conv), { onOpen(conv) }, { onArchive(conv, true) }, server = serverChip(conv)) }
                     item("archived") {
                         TextButton(onToggleArchived, Modifier.padding(horizontal = 12.dp)) {
                             Text(stringResource(if (s.showArchived) R.string.chat_hide_archived else R.string.chat_show_archived), color = c.inkSoft)
                         }
                     }
-                    if (s.showArchived) items(s.archived, key = { "a" + it.id }) { conv -> ConversationRow(conv, me, { onOpen(conv) }, { onArchive(conv, false) }, archived = true) }
+                    if (s.showArchived) items(s.archived, key = { "a" + it.id }) { conv -> ConversationRow(conv, meFor(conv), { onOpen(conv) }, { onArchive(conv, false) }, archived = true, server = serverChip(conv)) }
                     item("note") { Text(stringResource(R.string.chat_operator_note), style = Kin.type.caption, color = c.inkFaint, modifier = Modifier.padding(20.dp)) }
                 }
             }
@@ -177,7 +181,7 @@ fun ChatsScreen(
 }
 
 @Composable
-private fun ConversationRow(conv: Conversation, me: String?, onClick: () -> Unit, onArchive: () -> Unit, archived: Boolean = false) {
+private fun ConversationRow(conv: Conversation, me: String?, onClick: () -> Unit, onArchive: () -> Unit, archived: Boolean = false, server: String? = null) {
     val c = Kin.colors
     var menu by remember { mutableStateOf(false) }
     Box {
@@ -192,6 +196,7 @@ private fun ConversationRow(conv: Conversation, me: String?, onClick: () -> Unit
                     if (conv.isFamily) Pill(stringResource(R.string.chat_kind_family), c.sageSoft, c.onSageSoft)
                     if (conv.isCircle) Pill(stringResource(R.string.chat_kind_circle), c.sageSoft, c.onSageSoft)
                     if (conv.muted) Icon(KinIcons.VolumeOff, stringResource(R.string.chat_muted), Modifier.size(14.dp), tint = c.inkFaint)
+                    server?.let { Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
                 }
                 Text(conv.lastMessage?.let { messagePreview(it, me) } ?: stringResource(R.string.chat_no_messages),
                     style = Kin.type.caption, color = if (conv.unreadCount > 0) c.ink else c.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -41,6 +41,10 @@ data class AddFrameState(
     val feedInviteToken: String? = null,
     /** The server has feeds: the field also takes feed codes. */
     val feeds: Boolean = false,
+    /** Several accounts and a typed code: the servers to check it on (multi-server.md §2.1), primary first. */
+    val servers: List<app.kinframe.family.ui.ServerOption> = emptyList(),
+    /** The chosen account of [servers]. */
+    val server: String? = null,
 ) {
     val isFeed: Boolean get() = feedCode.isNotEmpty()
     /** What the code field shows. */
@@ -52,8 +56,16 @@ data class AddFrameState(
  * Claim or join a frame with the code it shows (README §5.1). With [feeds] on, the same field takes feed invite codes
  * (letters) and links, which are looked up and opened as a feed invite (README §5.12).
  */
-class AddFrameViewModel(private val api: KinApi, initialCode: String? = null, feeds: Boolean = false) : ViewModel() {
-    private val _state = MutableStateFlow(initial(initialCode, feeds))
+class AddFrameViewModel(
+    private val api: KinApi,
+    initialCode: String? = null,
+    feeds: Boolean = false,
+    /** A code typed by hand with several accounts: which server it is for (a link already names its server). */
+    servers: List<app.kinframe.family.ui.ServerOption> = emptyList(),
+    /** The client pinned to a chosen account. */
+    private val apiFor: (String) -> KinApi = { api },
+) : ViewModel() {
+    private val _state = MutableStateFlow(initial(initialCode, feeds).copy(servers = servers, server = servers.firstOrNull()?.accountId))
     val state: StateFlow<AddFrameState> = _state.asStateFlow()
 
     /** One idempotency key per code, so a retry after a dropped connection returns the first result. */
@@ -82,6 +94,12 @@ class AddFrameViewModel(private val api: KinApi, initialCode: String? = null, fe
         if (now.complete && now.fieldText.length - before.length > 1) submit()
     }
 
+    /** The server a typed code is for. */
+    fun chooseServer(accountId: String) = _state.update { it.copy(server = accountId, error = null) }
+
+    /** The chosen account's client, else the routing one (a link's code is recorded for its account). */
+    private val target: KinApi get() = state.value.server?.let(apiFor) ?: api
+
     /** The feed invite screen was opened; a back press returns to an empty field. */
     fun feedInviteOpened() = _state.update { it.copy(feedInviteToken = null, feedCode = "") }
 
@@ -96,7 +114,7 @@ class AddFrameViewModel(private val api: KinApi, initialCode: String? = null, fe
         _state.update { it.copy(submitting = true, error = null) }
         viewModelScope.launch {
             try {
-                val r = api.redeem(s.digits, key)
+                val r = target.redeem(s.digits, key)
                 _state.update { it.copy(submitting = false, result = r, name = r.frame.name, location = r.frame.location.orEmpty()) }
             } catch (e: Exception) {
                 _state.update { it.copy(submitting = false, error = Problems.message(e)) }
@@ -131,7 +149,7 @@ class AddFrameViewModel(private val api: KinApi, initialCode: String? = null, fe
         _state.update { it.copy(submitting = true, error = null) }
         viewModelScope.launch {
             try {
-                val p = api.lookupFeedInvite(code)
+                val p = target.lookupFeedInvite(code)
                 _state.update { it.copy(submitting = false, feedInviteToken = p.token) }
             } catch (e: Exception) {
                 val invalid = e is ApiException && (e.status == 404 || e.status == 410 || e.code == ProblemCode.INVITE_INVALID || e.code == ProblemCode.INVITE_EXPIRED)
@@ -146,7 +164,7 @@ class AddFrameViewModel(private val api: KinApi, initialCode: String? = null, fe
         }
     }
 
-    fun reset() = _state.update { AddFrameState(feeds = it.feeds) }
+    fun reset() = _state.update { AddFrameState(feeds = it.feeds, servers = it.servers, server = it.server) }
 }
 
 data class InviteState(
