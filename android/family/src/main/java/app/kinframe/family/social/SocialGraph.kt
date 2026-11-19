@@ -166,15 +166,25 @@ class SocialGraph(private val graph: AppGraph) {
     /** Where recordings are made before they are queued. */
     fun voiceDir(): File = File(graph.app.cacheDir, "voice").apply { mkdirs() }
 
-    /** The reminder notification buttons (README §6.3): Snooze 1 month, Fewer reminders. */
-    suspend fun reminderAction(action: String): Boolean {
-        val a = api.value ?: return false
-        val update = SocialNotifications.reminderUpdate(action) ?: return false
-        return runCatching { a.updateReminderPreferences(update) }.isSuccess
-    }
+    /**
+     * The reminder notification buttons (README §6.3): Snooze 1 month, Fewer reminders, on the server the push came
+     * from ([accountId]: the push's routed account — its payload `server`, else the endpoint's account).
+     */
+    suspend fun reminderAction(action: String, accountId: String?): Boolean = reminderAction(graph.accounts, action, accountId)
 
     companion object {
         /** For tests: the update a reminder button makes. */
         fun updateFor(action: String): ReminderPreferencesUpdate? = SocialNotifications.reminderUpdate(action)
+
+        /**
+         * A reminder button's change on [accountId]'s server (the primary one for notifications posted before the app
+         * knew a push's account). Never another account's server: reminders are per server.
+         */
+        suspend fun reminderAction(accounts: app.kinframe.family.accounts.AccountManager, action: String, accountId: String?): Boolean {
+            val update = SocialNotifications.reminderUpdate(action) ?: return false
+            val account = accounts.byId(accountId?.ifBlank { null }) ?: accounts.primary.value
+            val social = account.route()?.social ?: return false
+            return runCatching { social.updateReminderPreferences(update) }.isSuccess
+        }
     }
 }

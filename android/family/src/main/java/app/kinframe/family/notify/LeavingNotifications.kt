@@ -33,6 +33,7 @@ object LeavingNotifications {
         val intent = Notifications.openApp(context, (msg.kind + key).hashCode()) {
             putExtra(Notifications.EXTRA_TARGET, TARGET)
             putExtra(EXTRA_KEY, msg.kind)
+            msg.account.takeIf { it.isNotBlank() }?.let { putExtra(Notifications.EXTRA_ACCOUNT, it) }
             msg.ids["request_id"]?.let { putExtra(EXTRA_REQUEST_ID, it) }
             msg.ids["frame_id"]?.let { putExtra(Notifications.EXTRA_FRAME_ID, it) }
             msg.ids["feed_id"]?.let { putExtra(Notifications.EXTRA_FEED_ID, it) }

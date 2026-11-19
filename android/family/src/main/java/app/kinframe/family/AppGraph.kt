@@ -24,6 +24,7 @@ import app.kinframe.family.data.LiveEvents
 import app.kinframe.family.data.SecureStore
 import app.kinframe.family.data.ServerRepository
 import app.kinframe.family.notify.PushMessage
+import app.kinframe.family.notify.Notifications
 import app.kinframe.family.notify.PushRegistrar
 import app.kinframe.family.send.ItemSource
 import app.kinframe.family.send.prep.MediaPreparer
@@ -80,6 +81,8 @@ data class OpenTarget(
     val addressId: String? = null, val chatId: String? = null,
     /** Family social: the push's other ids (`conversation_id`, `comment_id`, `week_of`, …; README §6.3). */
     val ids: Map<String, String> = emptyMap(),
+    /** The local account the push was routed to (screens that name no id of their server, like the weekly summary). */
+    val accountId: String? = null,
 )
 
 
@@ -276,6 +279,16 @@ class AppGraph(
      * account its ids are already known for, else the primary one (README §6.3); see [AccountManager.accountForPush].
      */
     fun routePush(msg: PushMessage, instanceAccount: String?): Account = accounts.accountForPush(msg.server, msg.ids, instanceAccount)
+
+    /**
+     * A push from UnifiedPush ([instanceAccount]: the endpoint's account) or FCM (null): routed to its account, which
+     * the notification then carries, so its buttons and its tap act on that server; then shown and passed on.
+     */
+    fun receivePush(context: Context, msg: PushMessage, instanceAccount: String?) {
+        val routed = msg.copy(account = routePush(msg, instanceAccount).id)
+        Notifications.showPush(context, routed)
+        onPush(routed)
+    }
 
     /** The send runner for [server]'s account (an outbox send's `server`), else the primary account's. */
     fun sendRunner(server: String? = null): SendRunner? {

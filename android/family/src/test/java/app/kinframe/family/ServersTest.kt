@@ -33,6 +33,12 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import okhttp3.OkHttpClient
+import mockwebserver3.MockResponse
+import app.kinframe.family.social.SocialGraph
+import mockwebserver3.MockWebServer
+import app.kinframe.family.notify.SocialNotifications
+import app.kinframe.family.notify.Notifications
+import app.kinframe.core.social.SocialPush
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -233,6 +239,93 @@ class ServersTest {
         assertEquals(listOf("appmire", "Janssens"), g.map { it.server })
         assertEquals(listOf("fb"), g[1].frames.map { it.id })
         assertEquals(listOf("c", "b"), Recipients.familiesToPreselect(setOf("b", "c"), listOf("a", "c", "b")))
+    }
+
+    /** Two signed-in accounts on two fake servers: MAIN on [a], a second one on [b]. Returns the manager and B's id. */
+    private fun twoServers(a: MockWebServer, b: MockWebServer, d: (Discovery) -> Discovery = { it }): Pair<AccountManager, String> {
+        val urlA = a.url("/").toString(); val urlB = b.url("/").toString()
+        seed(AccountStore.MAIN, urlA, d(disco("appmire", "s-a", urlA)))
+        val m0 = manager()
+        val draft = m0.newDraft()
+        draft.servers.choose(ServerChoice(urlB.toHttpUrl(), d(disco("Janssens", "s-b", urlB))))
+        m0.commit(draft)
+        seed(draft.id, urlB, d(disco("Janssens", "s-b", urlB)))
+        val m = manager()
+        assertTrue(m.several)
+        return m to draft.id
+    }
+
+    @Test
+    fun aRealisticFcmPayloadCarriesTheServerAndPicksItsAccount() {
+        // What server/internal/notify/fcm.go sends: every field a string, ids at the top level, actions comma-separated.
+        val data = mapOf(
+            "type" to "reminder_quiet", "key" to "reminder_quiet", "title" to "Oma's frame", "body" to "No new photos for two weeks",
+            "server" to "https://kinframe.janssens.be/", "tag" to "reminder_quiet:f1", "actions" to "snooze_month,fewer_reminders",
+            "badge" to "3", "frame_id" to "f1",
+        )
+        val msg = PushMessage.fromData(data)
+        assertEquals("https://kinframe.janssens.be/", msg.server)
+        assertEquals(mapOf("frame_id" to "f1"), msg.ids)
+        assertEquals(listOf("snooze_month", "fewer_reminders"), msg.actions)
+        assertEquals("reminder_quiet", msg.kind)
+        assertEquals("", msg.account)
+        // Older servers: the notification block's title and body.
+        assertEquals("T", PushMessage.fromData(mapOf("type" to "x"), "T", "B").title)
+
+        seed(AccountStore.MAIN, "https://kinframe.appmire.be/", disco("appmire", "s-b", "https://kinframe.appmire.be/"))
+        val m0 = manager()
+        val d = m0.newDraft()
+        d.servers.choose(ServerChoice("https://kinframe.janssens.be/".toHttpUrl(), disco("Janssens", "s-a", "https://kinframe.janssens.be/")))
+        m0.commit(d)
+        seed(d.id, "https://kinframe.janssens.be/", disco("Janssens", "s-a", "https://kinframe.janssens.be/"))
+        val m = manager()
+        // The index thinks the frame is the primary account's: the payload's `server` wins and corrects it.
+        m.index.put("f1", AccountStore.MAIN)
+        assertEquals(d.id, m.accountForPush(msg.server, msg.ids, null).id)
+        assertEquals(d.id, m.index.get("f1"))
+        // FCM has no instance: without `server` the index answers.
+        m.index.put("f2", AccountStore.MAIN)
+        assertEquals(AccountStore.MAIN, m.accountForPush("", mapOf("frame_id" to "f2"), null).id)
+    }
+
+    @Test
+    fun reminderNotificationsCarryTheirAccountToTheButtonsAndTheTap() {
+        org.robolectric.Shadows.shadowOf(app).grantPermissions(android.Manifest.permission.POST_NOTIFICATIONS)
+        SocialNotifications.createChannels(app)
+        val msg = PushMessage("reminder_streak", "Peeters", "Two photos to go", mapOf("feed_id" to "fd"), key = SocialPush.REMINDER_STREAK, account = "acc-b")
+        SocialNotifications.show(app, msg)
+        val nm = app.getSystemService(android.app.NotificationManager::class.java)
+        val n = org.robolectric.Shadows.shadowOf(nm).activeNotifications.single { it.tag == "reminder_streak:fd" }.notification
+        val button = org.robolectric.Shadows.shadowOf(n.actions.first().actionIntent).savedIntent
+        assertEquals("acc-b", button.getStringExtra(SocialNotifications.EXTRA_ACCOUNT))
+        val tap = org.robolectric.Shadows.shadowOf(n.contentIntent).savedIntent
+        assertEquals("acc-b", tap.getStringExtra(Notifications.EXTRA_ACCOUNT))
+    }
+
+    @Test
+    fun reminderButtonsChangeTheRemindersOnThePushesOwnServer() = kotlinx.coroutines.runBlocking {
+        val a = MockWebServer(); val b = MockWebServer()
+        a.start(); b.start()
+        try {
+            val (m, bId) = twoServers(a, b) { it.copy(engagement = true) }
+            b.enqueue(MockResponse.Builder().body("""{"level":"normal","snoozed_until":"2026-12-19T00:00:00Z"}""").build())
+            // UnifiedPush: B's endpoint got a push without `server`; its account is B.
+            val routed = m.accountForPush("", mapOf("frame_id" to "fx"), PushRegistrar.accountOf(bId))
+            assertEquals(bId, routed.id)
+            assertTrue(SocialGraph.reminderAction(m, SocialPush.ACTION_SNOOZE_MONTH, routed.id))
+            val req = b.takeRequest(5, java.util.concurrent.TimeUnit.SECONDS)!!
+            assertEquals("PATCH", req.method)
+            assertEquals("/v1/me/reminders", req.url.encodedPath)
+            assertTrue(req.body!!.utf8().contains("\"snooze_days\":30"))
+            assertEquals(0, a.requestCount)
+            // A notification from before the account was known: the primary account.
+            a.enqueue(MockResponse.Builder().body("""{"level":"fewer"}""").build())
+            assertTrue(SocialGraph.reminderAction(m, SocialPush.ACTION_FEWER_REMINDERS, null))
+            assertEquals("/v1/me/reminders", a.takeRequest(5, java.util.concurrent.TimeUnit.SECONDS)!!.url.encodedPath)
+            assertEquals(1, b.requestCount)
+        } finally {
+            a.close(); b.close()
+        }
     }
 
     @Test
