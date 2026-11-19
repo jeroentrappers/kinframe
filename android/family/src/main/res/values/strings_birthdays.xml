@@ -19,7 +19,7 @@
     <string name="birthday_suggestions">Suggestions</string>
     <string name="birthday_your_suggestions">Your suggestions</string>
     <string name="birthday_list_title">Coming up</string>
-    <string name="birthday_empty">No birthdays yet. Add Oma, Opa or the new baby: every frame of this feed shows them.</string>
+    <string name="birthday_empty">No birthdays yet. Add Oma, Opa or the new baby: every frame of this family shows them.</string>
     <string name="birthday_declined">Declined</string>
     <string name="birthday_declined_by">Declined by %1$s</string>
     <string name="birthday_notifications_title">Notifications</string>
@@ -45,7 +45,7 @@
     <string name="birthday_show_age">Show age</string>
     <string name="birthday_show_age_hint">Frames say \"Oma is 80 today!\"</string>
     <string name="birthday_show_age_needs_year">Needs the year</string>
-    <string name="birthday_link">Who is it in this feed?</string>
+    <string name="birthday_link">Who is it in this family?</string>
     <string name="birthday_link_none">Not a member</string>
     <string name="birthday_photo_choose">Choose photo</string>
     <string name="birthday_photo_remove">Remove photo</string>
@@ -57,9 +57,9 @@
     <string name="birthday_error_date">Pick a day and month that exist</string>
     <string name="birthday_error_year">The year must be between 1900 and this year</string>
     <string name="birthday_error_leap">29 February only exists in leap years</string>
-    <string name="birthday_limit_reached">This feed has reached its maximum number of birthdays</string>
+    <string name="birthday_limit_reached">This family has reached its maximum number of birthdays</string>
     <string name="birthday_saved">Saved</string>
-    <string name="birthday_added">%1$s added: every frame of this feed will show it</string>
+    <string name="birthday_added">%1$s added: every frame of this family will show it</string>
     <string name="birthday_suggested">%1$s suggested: waiting for an admin</string>
     <string name="birthday_duplicate">%1$s with this birthday is already on the list</string>
     <string name="birthday_duplicate_approve">%1$s is already on the list: decline or edit this suggestion</string>
@@ -70,10 +70,10 @@
     <string name="feed_setting_posters_birthdays">Posters can add birthdays</string>
     <string name="feed_setting_posters_birthdays_hint">Otherwise their additions wait for an admin as suggestions</string>
     <string name="frame_feeds_show_birthdays">Show birthdays</string>
-    <string name="frame_feeds_show_birthdays_hint">The feed\'s birthdays on the frame: a card on the day and countdowns a week ahead</string>
+    <string name="frame_feeds_show_birthdays_hint">The family\'s birthdays on the frame: a card on the day and countdowns a week ahead</string>
     <plurals name="frame_feeds_birthday_count">
-        <item quantity="one">%d birthday from this feed</item>
-        <item quantity="other">%d birthdays from this feed</item>
+        <item quantity="one">%d birthday from this family</item>
+        <item quantity="other">%d birthdays from this family</item>
     </plurals>
     <string name="frame_feeds_birthdays_update_app">Update the app on %1$s to show birthdays</string>
     <string name="frame_feeds_birthdays_on">Birthdays from %1$s are shown</string>

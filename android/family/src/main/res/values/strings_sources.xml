@@ -21,19 +21,19 @@
     <!-- Lists -->
     <string name="source_section_title">Synced from</string>
     <string name="source_section_empty_album">This album doesn\'t sync from anywhere yet. Connect an Immich or iCloud album and new photos arrive by themselves.</string>
-    <string name="source_section_empty_feed">This feed doesn\'t sync from anywhere yet. Connect an Immich or iCloud album and its new photos are posted for you.</string>
+    <string name="source_section_empty_feed">This family doesn\'t sync from anywhere yet. Connect an Immich or iCloud album and its new photos are posted for you.</string>
     <string name="source_add_album">Sync from…</string>
     <string name="source_add_feed">Add a source</string>
-    <string name="source_feed_intro">Photos from these albums are posted to the feed in your name. New photos become one post once the album has been quiet for 30 minutes (at the latest 3 hours after the first new photo), so a busy evening is one post, not ten. Nobody gets a notification for them.</string>
+    <string name="source_feed_intro">Photos from these albums are posted to the family in your name. New photos become one post once the album has been quiet for 30 minutes (at the latest 3 hours after the first new photo), so a busy evening is one post, not ten. Nobody gets a notification for them.</string>
     <string name="source_mine_title">My photo sources</string>
-    <string name="source_mine_intro">The outside albums you connected, on every frame and feed. Photos they bring in are sent in your name.</string>
+    <string name="source_mine_intro">The outside albums you connected, on every frame and family. Photos they bring in are sent in your name.</string>
     <string name="source_mine_empty_title">No photo sources yet</string>
-    <string name="source_mine_empty_body">Open an album in a frame\'s library, or a feed\'s Sources tab, and choose \"Sync from…\".</string>
+    <string name="source_mine_empty_body">Open an album in a frame\'s library, or a family\'s Sources tab, and choose \"Sync from…\".</string>
     <string name="source_settings_title">Photo sources</string>
     <string name="source_settings_open">My photo sources</string>
-    <string name="source_settings_hint">Immich and iCloud albums you sync into albums and feeds.</string>
+    <string name="source_settings_hint">Immich and iCloud albums you sync into albums and families.</string>
     <string name="source_into_album">Into %1$s on %2$s</string>
-    <string name="source_into_feed">Into the feed %1$s</string>
+    <string name="source_into_feed">Into the family %1$s</string>
     <string name="source_owner">Set up by %1$s</string>
     <string name="source_owner_you">Set up by you</string>
     <string name="source_owner_gone">The person who set this up is no longer here</string>
@@ -95,7 +95,7 @@
     <string name="source_err_upstream">%1$s had a problem. We keep trying.</string>
     <string name="source_err_upstream_generic">The server had a problem. We keep trying.</string>
     <string name="source_err_owner_lost_album">%1$s can no longer manage this album, so syncing stopped. Take it over or stop syncing.</string>
-    <string name="source_err_owner_lost_feed">%1$s can no longer manage this feed, so syncing stopped. Take it over or stop syncing.</string>
+    <string name="source_err_owner_lost_feed">%1$s can no longer manage this family, so syncing stopped. Take it over or stop syncing.</string>
     <string name="source_err_credentials">The stored key can\'t be read any more (the server\'s secret key changed). Enter it again.</string>
     <string name="source_err_mass_removal">%1$d photos disappeared from the album. Remove them here too?</string>
     <string name="source_err_unknown">Something went wrong with this source.</string>
@@ -215,9 +215,9 @@
     <string name="share_text_label">Sync with kinframe</string>
     <string name="source_shared_title">Sync this %1$s album to…</string>
     <string name="source_shared_body">New photos in the album will arrive by themselves.</string>
-    <string name="source_shared_none">There is no album or feed you can sync into. Create an album in the library of a frame you manage first.</string>
+    <string name="source_shared_none">There is no album or family you can sync into. Create an album in the library of a frame you manage first.</string>
     <string name="source_shared_album_choice">%1$s on %2$s</string>
-    <string name="source_shared_feed_choice">Feed: %1$s</string>
+    <string name="source_shared_feed_choice">Family: %1$s</string>
     <string name="source_shared_not_supported">That isn\'t an Immich or iCloud shared album link.</string>
 
     <!-- Google Photos -->
@@ -249,7 +249,7 @@
         <item quantity="one">%d couldn\'t be copied</item>
         <item quantity="other">%d couldn\'t be copied</item>
     </plurals>
-    <string name="google_done_feed">They were posted to the feed.</string>
+    <string name="google_done_feed">They were posted to the family.</string>
     <string name="google_undone">Undone: the photos were removed again.</string>
     <string name="google_open_signin">Open Google</string>
     <string name="google_open_picker">Open Google Photos</string>
@@ -258,7 +258,7 @@
     <string name="google_error_disabled">This server doesn\'t offer Google Photos.</string>
     <string name="google_error_consent">You didn\'t allow access.</string>
     <string name="google_error_expired">Google Photos closed before anything was picked. Try again.</string>
-    <string name="google_error_target_gone">The album or feed was deleted meanwhile.</string>
+    <string name="google_error_target_gone">The album or family was deleted meanwhile.</string>
     <string name="google_error_download">None of the photos could be copied.</string>
     <string name="google_error_unavailable">Google Photos isn\'t available right now. Try again later.</string>
     <string name="google_error_auth">Signing in with Google didn\'t work. Try again.</string>
