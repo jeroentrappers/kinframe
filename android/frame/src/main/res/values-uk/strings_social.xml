@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Попросити нові фото</string>
+    <string name="social_asked_today">Уже попросили сьогодні 💛</string>
+    <string name="social_ask_answered">%1$s надсилає нові фото 💛</string>
+    <string name="social_ask_sent">Вашу родину попросили про нові фото 💛</string>
+    <string name="social_ask_offline">Ми попросимо родину, щойно фоторамка знову буде в мережі 💛</string>
+    <string name="social_new_photos_from_one">Нові фото від: %1$s</string>
+    <string name="social_new_photos_from_two">Нові фото від: %1$s і %2$s</string>
+    <string name="social_new_photos_from_more">Нові фото від: %1$s, %2$s та інших</string>
+    <string name="social_prompt_this_week">Цього тижня</string>
+    <string name="social_prompt_this_week_in">Цього тижня · %1$s</string>
+    <string name="social_settings_title">Родина</string>
+    <string name="social_settings_show_comments">Показувати коментарі</string>
+    <string name="social_settings_show_comments_hint">Найновіший коментар з’являється на 8 секунд, коли показується його фото, раз на день</string>
+    <string name="social_settings_ask">Кнопка «Попросити нові фото»</string>
+    <string name="social_settings_prompts">Тема тижня перед її фото</string>
+    <string name="social_settings_new_from">Показувати, хто надіслав нові фото</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Поискай нови снимки</string>
+    <string name="social_asked_today">Поискано днес 💛</string>
+    <string name="social_ask_answered">%1$s изпрати нови снимки 💛</string>
+    <string name="social_ask_sent">Семейството ти беше помолено за нови снимки 💛</string>
+    <string name="social_ask_offline">Семейството ти ще бъде помолено веднага щом рамката отново е онлайн 💛</string>
+    <string name="social_new_photos_from_one">Нови снимки от %1$s</string>
+    <string name="social_new_photos_from_two">Нови снимки от %1$s и %2$s</string>
+    <string name="social_new_photos_from_more">Нови снимки от %1$s, %2$s и други</string>
+    <string name="social_prompt_this_week">Тази седмица</string>
+    <string name="social_prompt_this_week_in">Тази седмица · %1$s</string>
+    <string name="social_settings_title">Семейство</string>
+    <string name="social_settings_show_comments">Показване на коментари</string>
+    <string name="social_settings_show_comments_hint">Най-новият коментар се показва за 8 секунди, когато снимката му се появи, веднъж на ден</string>
+    <string name="social_settings_ask">Бутон за молба за нови снимки</string>
+    <string name="social_settings_prompts">Тема на седмицата преди снимките ѝ</string>
+    <string name="social_settings_new_from">Показване кой е изпратил нови снимки</string>
+</resources>

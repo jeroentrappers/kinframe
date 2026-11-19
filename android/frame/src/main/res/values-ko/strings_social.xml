@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">새 사진 부탁하기</string>
+    <string name="social_asked_today">오늘 부탁했어요 💛</string>
+    <string name="social_ask_answered">%1$s님이 새 사진을 보냈어요 💛</string>
+    <string name="social_ask_sent">가족에게 새 사진을 부탁했어요 💛</string>
+    <string name="social_ask_offline">액자가 다시 온라인이 되면 바로 가족에게 부탁할게요 💛</string>
+    <string name="social_new_photos_from_one">%1$s님의 새 사진</string>
+    <string name="social_new_photos_from_two">%1$s님과 %2$s님의 새 사진</string>
+    <string name="social_new_photos_from_more">%1$s님, %2$s님 외 여러 명의 새 사진</string>
+    <string name="social_prompt_this_week">이번 주</string>
+    <string name="social_prompt_this_week_in">이번 주 · %1$s</string>
+    <string name="social_settings_title">가족</string>
+    <string name="social_settings_show_comments">댓글 보기</string>
+    <string name="social_settings_show_comments_hint">사진이 나올 때 최신 댓글이 8초 동안 표시돼요(하루 한 번)</string>
+    <string name="social_settings_ask">새 사진 부탁 버튼</string>
+    <string name="social_settings_prompts">사진 앞에 이번 주 주제</string>
+    <string name="social_settings_new_from">새 사진을 보낸 사람 알려 주기</string>
+</resources>

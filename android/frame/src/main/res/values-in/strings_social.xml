@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Minta foto baru</string>
+    <string name="social_asked_today">Sudah diminta hari ini 💛</string>
+    <string name="social_ask_answered">%1$s mengirim foto baru 💛</string>
+    <string name="social_ask_sent">Keluargamu sudah diminta mengirim foto baru 💛</string>
+    <string name="social_ask_offline">Keluargamu akan diminta begitu bingkai foto online lagi 💛</string>
+    <string name="social_new_photos_from_one">Foto baru dari %1$s</string>
+    <string name="social_new_photos_from_two">Foto baru dari %1$s dan %2$s</string>
+    <string name="social_new_photos_from_more">Foto baru dari %1$s, %2$s, dan lainnya</string>
+    <string name="social_prompt_this_week">Minggu ini</string>
+    <string name="social_prompt_this_week_in">Minggu ini · %1$s</string>
+    <string name="social_settings_title">Keluarga</string>
+    <string name="social_settings_show_comments">Tampilkan komentar</string>
+    <string name="social_settings_show_comments_hint">Komentar terbaru muncul selama 8 detik saat fotonya tampil, sekali sehari</string>
+    <string name="social_settings_ask">Tombol untuk meminta foto baru</string>
+    <string name="social_settings_prompts">Tema minggu ini sebelum fotonya</string>
+    <string name="social_settings_new_from">Tampilkan siapa yang mengirim foto baru</string>
+</resources>

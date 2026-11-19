@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Poproś o nowe zdjęcia</string>
+    <string name="social_asked_today">Poproszono dziś 💛</string>
+    <string name="social_ask_answered">%1$s wysyła nowe zdjęcia 💛</string>
+    <string name="social_ask_sent">Twoja rodzina dostała prośbę o nowe zdjęcia 💛</string>
+    <string name="social_ask_offline">Poprosimy rodzinę, gdy tylko ramka znów będzie online 💛</string>
+    <string name="social_new_photos_from_one">Nowe zdjęcia od: %1$s</string>
+    <string name="social_new_photos_from_two">Nowe zdjęcia od: %1$s i %2$s</string>
+    <string name="social_new_photos_from_more">Nowe zdjęcia od: %1$s, %2$s i innych</string>
+    <string name="social_prompt_this_week">W tym tygodniu</string>
+    <string name="social_prompt_this_week_in">W tym tygodniu · %1$s</string>
+    <string name="social_settings_title">Rodzina</string>
+    <string name="social_settings_show_comments">Pokazuj komentarze</string>
+    <string name="social_settings_show_comments_hint">Najnowszy komentarz pojawia się na 8 sekund, gdy pokazuje się jego zdjęcie, raz dziennie</string>
+    <string name="social_settings_ask">Przycisk prośby o nowe zdjęcia</string>
+    <string name="social_settings_prompts">Temat tygodnia przed jego zdjęciami</string>
+    <string name="social_settings_new_from">Pokazuj, kto przysłał nowe zdjęcia</string>
+</resources>

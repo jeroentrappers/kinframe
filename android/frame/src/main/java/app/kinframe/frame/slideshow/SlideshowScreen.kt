@@ -575,6 +575,14 @@ fun SlideshowScreen(c: FrameController) {
             }
         }
         if (balloonsUp) key(balloonSeed) { BalloonsLayer(balloonSeed) { balloonsUp = false } }
+        // Family social (family-social.md §8, §9.3): the prompt's title card, the comment card and "New photos from
+        // Ben", plain text at the top centre of the photo, below the "N new" pill when that is up.
+        app.kinframe.frame.social.SocialCardsLayer(
+            c,
+            hidden = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy ||
+                storageOpen || addSomeoneOpen || detailFor != null || greetOpen || paper || splitShown,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = if (newCount > 0) 76.dp else 0.dp),
+        )
         }
         if (bandComposed && band != null) {
             PluginBand(
@@ -667,7 +675,9 @@ fun SlideshowScreen(c: FrameController) {
             notificationCount = joinPending.size,
             onNotifications = { menuOpen = false; notificationsOpen = true },
             onAddSomeone = { menuOpen = false; addSomeoneOpen = true },
+            onAskForPhotos = { menuOpen = false; c.social.askForPhotos() },
         )
+        app.kinframe.frame.social.AskConfirmationLayer(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp))
 
         snack?.let { s ->
             key(s) {
@@ -1090,7 +1100,9 @@ private fun QuickMenu(
     notificationCount: Int,
     onNotifications: () -> Unit,
     onAddSomeone: () -> Unit,
+    onAskForPhotos: () -> Unit,
 ) {
+    val ask by c.social.ask.collectAsState()
     val current by c.slideshow.current.collectAsState()
     val stage by c.slideshow.stage.collectAsState()
     val settings by c.g.settings.settings.collectAsState()
@@ -1126,6 +1138,8 @@ private fun QuickMenu(
         notificationCount = notificationCount,
         onNotifications = onNotifications,
         onAddSomeone = onAddSomeone,
+        ask = ask,
+        onAsk = onAskForPhotos,
     )
 }
 
@@ -1155,6 +1169,9 @@ internal fun QuickMenuContent(
     notificationCount: Int = 0,
     onNotifications: () -> Unit = {},
     onAddSomeone: () -> Unit = {},
+    /** "Ask for new photos" (family social); null hides it. */
+    ask: app.kinframe.frame.social.AskState? = null,
+    onAsk: () -> Unit = {},
 ) {
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(visible, Modifier.align(Alignment.TopCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { -it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { -it / 2 }) {
@@ -1172,6 +1189,10 @@ internal fun QuickMenuContent(
                             style = Kin.type.caption, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.padding(start = 8.dp),
                         )
                     }
+                }
+                if (ask != null) {
+                    app.kinframe.frame.social.AskPhotosAction(ask) { onTouch(); onAsk() }
+                    Spacer(Modifier.size(14.dp))
                 }
                 RoundAction(KinIcons.UserPlus, stringResource(R.string.menu_add_someone)) { onTouch(); onAddSomeone() }
                 Spacer(Modifier.size(14.dp))

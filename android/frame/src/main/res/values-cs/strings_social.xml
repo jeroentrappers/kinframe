@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Požádat o nové fotky</string>
+    <string name="social_asked_today">Dnes požádáno 💛</string>
+    <string name="social_ask_answered">%1$s poslal(a) nové fotky 💛</string>
+    <string name="social_ask_sent">Vaše rodina byla požádána o nové fotky 💛</string>
+    <string name="social_ask_offline">Rodinu požádáme, jakmile bude rámeček znovu online 💛</string>
+    <string name="social_new_photos_from_one">Nové fotky od: %1$s</string>
+    <string name="social_new_photos_from_two">Nové fotky od: %1$s a %2$s</string>
+    <string name="social_new_photos_from_more">Nové fotky od: %1$s, %2$s a dalších</string>
+    <string name="social_prompt_this_week">Tento týden</string>
+    <string name="social_prompt_this_week_in">Tento týden · %1$s</string>
+    <string name="social_settings_title">Rodina</string>
+    <string name="social_settings_show_comments">Zobrazovat komentáře</string>
+    <string name="social_settings_show_comments_hint">Nejnovější komentář se ukáže na 8 sekund, když se objeví jeho fotka, jednou denně</string>
+    <string name="social_settings_ask">Tlačítko pro žádost o nové fotky</string>
+    <string name="social_settings_prompts">Téma týdne před jeho fotkami</string>
+    <string name="social_settings_new_from">Ukázat, kdo poslal nové fotky</string>
+</resources>

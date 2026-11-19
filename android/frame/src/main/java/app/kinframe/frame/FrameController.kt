@@ -114,6 +114,9 @@ class FrameController(val g: FrameGraph) {
     /** Birthdays of the feeds this frame subscribes to: the day's card, countdowns, greetings (docs/spec/birthdays.md). */
     val birthdays by lazy { app.kinframe.frame.birthdays.BirthdayController(this) }
 
+    /** Family social on the frame: "Ask for new photos", "New photos from Ben", comment and prompt cards (family-social.md §8). */
+    val social by lazy { app.kinframe.frame.social.SocialController(this) }
+
     /** Live widgets from devices on the home network (docs/plugins.md, step 1: built-in widgets). */
     val plugins by lazy { app.kinframe.frame.plugins.FramePlugins(this) }
 
@@ -217,6 +220,7 @@ class FrameController(val g: FrameGraph) {
             }
             calendar.start()
             birthdays.start()
+            social.start()
             reportStateChanges()
             app.kinframe.frame.sync.NowShowingReporter(this@FrameController).start()
             update.start()
@@ -389,6 +393,7 @@ class FrameController(val g: FrameGraph) {
         slideshow.reset()
         joins.clear()
         calendar.clear()
+        social.clear()
         frameo.reset()
         withContext(Dispatchers.IO) {
             g.credentials.clear()

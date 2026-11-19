@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">ขอรูปใหม่</string>
+    <string name="social_asked_today">ขอแล้ววันนี้ 💛</string>
+    <string name="social_ask_answered">%1$s ส่งรูปใหม่แล้ว 💛</string>
+    <string name="social_ask_sent">ขอรูปใหม่จากครอบครัวของคุณแล้ว 💛</string>
+    <string name="social_ask_offline">จะส่งคำขอถึงครอบครัวของคุณทันทีที่กรอบรูปกลับมาออนไลน์ 💛</string>
+    <string name="social_new_photos_from_one">รูปใหม่จาก %1$s</string>
+    <string name="social_new_photos_from_two">รูปใหม่จาก %1$s และ %2$s</string>
+    <string name="social_new_photos_from_more">รูปใหม่จาก %1$s, %2$s และคนอื่นๆ</string>
+    <string name="social_prompt_this_week">สัปดาห์นี้</string>
+    <string name="social_prompt_this_week_in">สัปดาห์นี้ · %1$s</string>
+    <string name="social_settings_title">ครอบครัว</string>
+    <string name="social_settings_show_comments">แสดงความคิดเห็น</string>
+    <string name="social_settings_show_comments_hint">ความคิดเห็นล่าสุดจะแสดง 8 วินาทีเมื่อรูปของมันปรากฏ วันละครั้ง</string>
+    <string name="social_settings_ask">ปุ่มขอรูปใหม่</string>
+    <string name="social_settings_prompts">ธีมประจำสัปดาห์ก่อนรูปของธีมนั้น</string>
+    <string name="social_settings_new_from">บอกว่าใครส่งรูปใหม่</string>
+</resources>

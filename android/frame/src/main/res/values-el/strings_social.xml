@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Ζητήστε νέες φωτογραφίες</string>
+    <string name="social_asked_today">Ζητήθηκε σήμερα 💛</string>
+    <string name="social_ask_answered">Ο/Η %1$s έστειλε νέες φωτογραφίες 💛</string>
+    <string name="social_ask_sent">Η οικογένειά σας ενημερώθηκε ότι θέλετε νέες φωτογραφίες 💛</string>
+    <string name="social_ask_offline">Θα ενημερωθεί η οικογένειά σας μόλις η κορνίζα συνδεθεί ξανά 💛</string>
+    <string name="social_new_photos_from_one">Νέες φωτογραφίες από %1$s</string>
+    <string name="social_new_photos_from_two">Νέες φωτογραφίες από %1$s και %2$s</string>
+    <string name="social_new_photos_from_more">Νέες φωτογραφίες από %1$s, %2$s και άλλους</string>
+    <string name="social_prompt_this_week">Αυτή την εβδομάδα</string>
+    <string name="social_prompt_this_week_in">Αυτή την εβδομάδα · %1$s</string>
+    <string name="social_settings_title">Οικογένεια</string>
+    <string name="social_settings_show_comments">Εμφάνιση σχολίων</string>
+    <string name="social_settings_show_comments_hint">Το νεότερο σχόλιο εμφανίζεται για 8 δευτερόλεπτα όταν έρχεται η φωτογραφία του, μία φορά την ημέρα</string>
+    <string name="social_settings_ask">Κουμπί για νέες φωτογραφίες</string>
+    <string name="social_settings_prompts">Θέμα της εβδομάδας πριν από τις φωτογραφίες του</string>
+    <string name="social_settings_new_from">Εμφάνιση του ποιος έστειλε νέες φωτογραφίες</string>
+</resources>

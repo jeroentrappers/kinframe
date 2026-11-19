@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">اطلب صورًا جديدة</string>
+    <string name="social_asked_today">طُلبت اليوم 💛</string>
+    <string name="social_ask_answered">أرسل %1$s صورًا جديدة 💛</string>
+    <string name="social_ask_sent">طُلب من عائلتك إرسال صور جديدة 💛</string>
+    <string name="social_ask_offline">سيُرسل الطلب إلى عائلتك فور عودة الإطار إلى الاتصال 💛</string>
+    <string name="social_new_photos_from_one">صور جديدة من %1$s</string>
+    <string name="social_new_photos_from_two">صور جديدة من %1$s و%2$s</string>
+    <string name="social_new_photos_from_more">صور جديدة من %1$s و%2$s وآخرين</string>
+    <string name="social_prompt_this_week">هذا الأسبوع</string>
+    <string name="social_prompt_this_week_in">هذا الأسبوع · %1$s</string>
+    <string name="social_settings_title">العائلة</string>
+    <string name="social_settings_show_comments">عرض التعليقات</string>
+    <string name="social_settings_show_comments_hint">يظهر أحدث تعليق لمدة 8 ثوانٍ عند ظهور صورته، مرة واحدة في اليوم</string>
+    <string name="social_settings_ask">زر طلب صور جديدة</string>
+    <string name="social_settings_prompts">موضوع الأسبوع قبل صوره</string>
+    <string name="social_settings_new_from">إظهار من أرسل الصور الجديدة</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Family social on the frame (docs/spec/family-social.md §8, §9.3): ask for photos, who sent them, comment and prompt cards. -->
+    <string name="social_ask_photos">Ask for new photos</string>
+    <string name="social_asked_today">Asked today 💛</string>
+    <string name="social_ask_answered">%1$s sent new photos 💛</string>
+    <string name="social_ask_sent">Your family has been asked for new photos 💛</string>
+    <string name="social_ask_offline">Your family will be asked as soon as the frame is back online 💛</string>
+    <string name="social_new_photos_from_one">New photos from %1$s</string>
+    <string name="social_new_photos_from_two">New photos from %1$s and %2$s</string>
+    <string name="social_new_photos_from_more">New photos from %1$s, %2$s and others</string>
+    <string name="social_prompt_this_week">This week</string>
+    <string name="social_prompt_this_week_in">This week · %1$s</string>
+    <string name="social_settings_title">Family</string>
+    <string name="social_settings_show_comments">Show comments</string>
+    <string name="social_settings_show_comments_hint">The newest comment appears for 8 seconds when its photo comes up, once a day</string>
+    <string name="social_settings_ask">Button to ask for new photos</string>
+    <string name="social_settings_prompts">Weekly theme before its photos</string>
+    <string name="social_settings_new_from">Say who sent new photos</string>
+</resources>

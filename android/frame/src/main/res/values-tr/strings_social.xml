@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Yeni fotoğraf iste</string>
+    <string name="social_asked_today">Bugün istendi 💛</string>
+    <string name="social_ask_answered">%1$s yeni fotoğraflar gönderdi 💛</string>
+    <string name="social_ask_sent">Ailenden yeni fotoğraflar istendi 💛</string>
+    <string name="social_ask_offline">Çerçeve yeniden çevrimiçi olur olmaz ailene sorulacak 💛</string>
+    <string name="social_new_photos_from_one">Yeni fotoğraflar: %1$s</string>
+    <string name="social_new_photos_from_two">Yeni fotoğraflar: %1$s ve %2$s</string>
+    <string name="social_new_photos_from_more">Yeni fotoğraflar: %1$s, %2$s ve diğerleri</string>
+    <string name="social_prompt_this_week">Bu hafta</string>
+    <string name="social_prompt_this_week_in">Bu hafta · %1$s</string>
+    <string name="social_settings_title">Aile</string>
+    <string name="social_settings_show_comments">Yorumları göster</string>
+    <string name="social_settings_show_comments_hint">En yeni yorum, fotoğrafı göründüğünde 8 saniye görünür, günde bir kez</string>
+    <string name="social_settings_ask">Yeni fotoğraf isteme düğmesi</string>
+    <string name="social_settings_prompts">Fotoğraflarından önce haftanın teması</string>
+    <string name="social_settings_new_from">Yeni fotoğrafları kimin gönderdiğini göster</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Vraag om nieuwe foto\'s</string>
+    <string name="social_asked_today">Vandaag gevraagd 💛</string>
+    <string name="social_ask_answered">%1$s stuurde nieuwe foto\'s 💛</string>
+    <string name="social_ask_sent">Je familie is gevraagd om nieuwe foto\'s 💛</string>
+    <string name="social_ask_offline">Je familie wordt gevraagd zodra de fotolijst weer online is 💛</string>
+    <string name="social_new_photos_from_one">Nieuwe foto\'s van %1$s</string>
+    <string name="social_new_photos_from_two">Nieuwe foto\'s van %1$s en %2$s</string>
+    <string name="social_new_photos_from_more">Nieuwe foto\'s van %1$s, %2$s en anderen</string>
+    <string name="social_prompt_this_week">Deze week</string>
+    <string name="social_prompt_this_week_in">Deze week · %1$s</string>
+    <string name="social_settings_title">Familie</string>
+    <string name="social_settings_show_comments">Reacties tonen</string>
+    <string name="social_settings_show_comments_hint">De nieuwste reactie verschijnt 8 seconden wanneer de foto in beeld komt, één keer per dag</string>
+    <string name="social_settings_ask">Knop om nieuwe foto\'s te vragen</string>
+    <string name="social_settings_prompts">Thema van de week vóór de foto\'s</string>
+    <string name="social_settings_new_from">Tonen wie nieuwe foto\'s stuurde</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Chiedi nuove foto</string>
+    <string name="social_asked_today">Chiesto oggi 💛</string>
+    <string name="social_ask_answered">%1$s ha inviato nuove foto 💛</string>
+    <string name="social_ask_sent">La tua famiglia ha ricevuto la richiesta di nuove foto 💛</string>
+    <string name="social_ask_offline">Lo chiederemo alla tua famiglia appena la cornice tornerà online 💛</string>
+    <string name="social_new_photos_from_one">Nuove foto da %1$s</string>
+    <string name="social_new_photos_from_two">Nuove foto da %1$s e %2$s</string>
+    <string name="social_new_photos_from_more">Nuove foto da %1$s, %2$s e altri</string>
+    <string name="social_prompt_this_week">Questa settimana</string>
+    <string name="social_prompt_this_week_in">Questa settimana · %1$s</string>
+    <string name="social_settings_title">Famiglia</string>
+    <string name="social_settings_show_comments">Mostra i commenti</string>
+    <string name="social_settings_show_comments_hint">Il commento più recente appare per 8 secondi quando compare la sua foto, una volta al giorno</string>
+    <string name="social_settings_ask">Pulsante per chiedere nuove foto</string>
+    <string name="social_settings_prompts">Tema della settimana prima delle sue foto</string>
+    <string name="social_settings_new_from">Dire chi ha inviato nuove foto</string>
+</resources>

@@ -122,6 +122,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 SleepSection(s) { patch(it) }
                 app.kinframe.frame.plugins.PluginSettingsSection(c)
                 app.kinframe.frame.calendar.CalendarSettingsSection(c, s, onOpen = { onClose(); c.calendar.openCalendar() }) { patch(it) }
+                app.kinframe.frame.social.SocialSettingsSection(c, s, ::section)
                 LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)

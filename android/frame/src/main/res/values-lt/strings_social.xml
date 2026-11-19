@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Paprašyti naujų nuotraukų</string>
+    <string name="social_asked_today">Paprašyta šiandien 💛</string>
+    <string name="social_ask_answered">%1$s atsiuntė naujų nuotraukų 💛</string>
+    <string name="social_ask_sent">Jūsų šeimos paprašyta naujų nuotraukų 💛</string>
+    <string name="social_ask_offline">Šeimos paprašysime, kai tik rėmelis vėl bus prisijungęs 💛</string>
+    <string name="social_new_photos_from_one">Naujos nuotraukos nuo: %1$s</string>
+    <string name="social_new_photos_from_two">Naujos nuotraukos nuo: %1$s ir %2$s</string>
+    <string name="social_new_photos_from_more">Naujos nuotraukos nuo: %1$s, %2$s ir kitų</string>
+    <string name="social_prompt_this_week">Šią savaitę</string>
+    <string name="social_prompt_this_week_in">Šią savaitę · %1$s</string>
+    <string name="social_settings_title">Šeima</string>
+    <string name="social_settings_show_comments">Rodyti komentarus</string>
+    <string name="social_settings_show_comments_hint">Naujausias komentaras rodomas 8 sekundes, kai pasirodo jo nuotrauka, kartą per dieną</string>
+    <string name="social_settings_ask">Mygtukas naujoms nuotraukoms paprašyti</string>
+    <string name="social_settings_prompts">Savaitės tema prieš jos nuotraukas</string>
+    <string name="social_settings_new_from">Rodyti, kas atsiuntė naujų nuotraukų</string>
+</resources>

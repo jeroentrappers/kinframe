@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Pyydä uusia kuvia</string>
+    <string name="social_asked_today">Pyydetty tänään 💛</string>
+    <string name="social_ask_answered">%1$s lähetti uusia kuvia 💛</string>
+    <string name="social_ask_sent">Perheeltäsi on pyydetty uusia kuvia 💛</string>
+    <string name="social_ask_offline">Perheeltäsi pyydetään heti, kun kuvakehys on taas verkossa 💛</string>
+    <string name="social_new_photos_from_one">Uusia kuvia: %1$s</string>
+    <string name="social_new_photos_from_two">Uusia kuvia: %1$s ja %2$s</string>
+    <string name="social_new_photos_from_more">Uusia kuvia: %1$s, %2$s ja muut</string>
+    <string name="social_prompt_this_week">Tällä viikolla</string>
+    <string name="social_prompt_this_week_in">Tällä viikolla · %1$s</string>
+    <string name="social_settings_title">Perhe</string>
+    <string name="social_settings_show_comments">Näytä kommentit</string>
+    <string name="social_settings_show_comments_hint">Uusin kommentti näkyy 8 sekuntia, kun sen kuva tulee esiin, kerran päivässä</string>
+    <string name="social_settings_ask">Painike uusien kuvien pyytämiseen</string>
+    <string name="social_settings_prompts">Viikon teema ennen sen kuvia</string>
+    <string name="social_settings_new_from">Kerro, kuka lähetti uusia kuvia</string>
+</resources>

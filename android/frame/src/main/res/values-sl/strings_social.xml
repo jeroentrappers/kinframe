@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Prosi za nove fotografije</string>
+    <string name="social_asked_today">Danes zaprošeno 💛</string>
+    <string name="social_ask_answered">%1$s je poslal(a) nove fotografije 💛</string>
+    <string name="social_ask_sent">Družina je dobila prošnjo za nove fotografije 💛</string>
+    <string name="social_ask_offline">Družino bomo prosili takoj, ko bo okvir spet povezan 💛</string>
+    <string name="social_new_photos_from_one">Nove fotografije od: %1$s</string>
+    <string name="social_new_photos_from_two">Nove fotografije od: %1$s in %2$s</string>
+    <string name="social_new_photos_from_more">Nove fotografije od: %1$s, %2$s in drugih</string>
+    <string name="social_prompt_this_week">Ta teden</string>
+    <string name="social_prompt_this_week_in">Ta teden · %1$s</string>
+    <string name="social_settings_title">Družina</string>
+    <string name="social_settings_show_comments">Prikaži komentarje</string>
+    <string name="social_settings_show_comments_hint">Najnovejši komentar se prikaže za 8 sekund, ko se pokaže njegova fotografija, enkrat na dan</string>
+    <string name="social_settings_ask">Gumb za prošnjo za nove fotografije</string>
+    <string name="social_settings_prompts">Tema tedna pred njenimi fotografijami</string>
+    <string name="social_settings_new_from">Pokaži, kdo je poslal nove fotografije</string>
+</resources>

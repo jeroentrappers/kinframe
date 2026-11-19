@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">नई फ़ोटो माँगें</string>
+    <string name="social_asked_today">आज माँगी गईं 💛</string>
+    <string name="social_ask_answered">%1$s ने नई फ़ोटो भेजीं 💛</string>
+    <string name="social_ask_sent">आपके परिवार से नई फ़ोटो माँगी गई हैं 💛</string>
+    <string name="social_ask_offline">फ़्रेम के फिर से ऑनलाइन होते ही आपके परिवार से पूछा जाएगा 💛</string>
+    <string name="social_new_photos_from_one">%1$s की नई फ़ोटो</string>
+    <string name="social_new_photos_from_two">%1$s और %2$s की नई फ़ोटो</string>
+    <string name="social_new_photos_from_more">%1$s, %2$s और अन्य लोगों की नई फ़ोटो</string>
+    <string name="social_prompt_this_week">इस हफ़्ते</string>
+    <string name="social_prompt_this_week_in">इस हफ़्ते · %1$s</string>
+    <string name="social_settings_title">परिवार</string>
+    <string name="social_settings_show_comments">टिप्पणियाँ दिखाएँ</string>
+    <string name="social_settings_show_comments_hint">फ़ोटो आने पर उसकी सबसे नई टिप्पणी 8 सेकंड के लिए दिखती है, दिन में एक बार</string>
+    <string name="social_settings_ask">नई फ़ोटो माँगने का बटन</string>
+    <string name="social_settings_prompts">फ़ोटो से पहले हफ़्ते की थीम</string>
+    <string name="social_settings_new_from">बताएँ कि नई फ़ोटो किसने भेजीं</string>
+</resources>

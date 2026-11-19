@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">לבקש תמונות חדשות</string>
+    <string name="social_asked_today">התבקש היום 💛</string>
+    <string name="social_ask_answered">%1$s שלח/ה תמונות חדשות 💛</string>
+    <string name="social_ask_sent">המשפחה שלך התבקשה לשלוח תמונות חדשות 💛</string>
+    <string name="social_ask_offline">המשפחה שלך תתבקש ברגע שהמסגרת תחזור לרשת 💛</string>
+    <string name="social_new_photos_from_one">תמונות חדשות מ־%1$s</string>
+    <string name="social_new_photos_from_two">תמונות חדשות מ־%1$s ומ־%2$s</string>
+    <string name="social_new_photos_from_more">תמונות חדשות מ־%1$s, מ־%2$s ומאחרים</string>
+    <string name="social_prompt_this_week">השבוע</string>
+    <string name="social_prompt_this_week_in">השבוע · %1$s</string>
+    <string name="social_settings_title">משפחה</string>
+    <string name="social_settings_show_comments">הצגת תגובות</string>
+    <string name="social_settings_show_comments_hint">התגובה החדשה ביותר מופיעה ל־8 שניות כשהתמונה שלה מוצגת, פעם ביום</string>
+    <string name="social_settings_ask">כפתור לבקשת תמונות חדשות</string>
+    <string name="social_settings_prompts">נושא השבוע לפני התמונות שלו</string>
+    <string name="social_settings_new_from">להציג מי שלח תמונות חדשות</string>
+</resources>

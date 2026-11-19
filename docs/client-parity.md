@@ -306,7 +306,7 @@ or `engagement` respectively. The Frame column is the Android frame app; the bro
 | Family settings *members see reactions* (on for new families) and *members see receipts* | planned | planned | planned | — | |
 | Mute a family: posts, chat or everything | planned | planned | planned | — | `updateFeedPreferences {mute}`. |
 | Circles: list, create, rename, members, extra frames, delete, leave; circle as audience when sending ("Share with: whole family / The cousins") | planned | planned | planned | — | `circles` tag; `SendCreate.circle_ids`. |
-| Show comments on the frame: a card with the newest comment for 8 s when a photo with comments appears (frame setting *Show comments*, off by default) | planned | planned | planned | planned | App/web: the setting. Frame: the `comments` change, once per photo per day, plain text on the overlay layer. |
+| Show comments on the frame: a card with the newest comment for 8 s when a photo with comments appears (frame setting *Show comments*, off by default) | planned | planned | planned | yes | App/web: the setting. Frame: the `comments` change, once per photo per day, plain text on the overlay layer; the setting is also in the frame's own settings. Browser frame (`/tv/frame`): planned. |
 
 ### Chats (`chats`)
 
@@ -336,21 +336,21 @@ or `engagement` respectively. The Frame column is the Android frame app; the bro
 |---|---|---|---|---|---|
 | Home strip of frames and families with a freshness ring ("Fresh", "4 days", "2 weeks quiet") | planned | planned | planned | — | `FrameSummary.freshness`, `FeedSummary.freshness`. |
 | "Send something to Oma's frame" with suggestions (recent photos on the device, On this day, the prompt) | planned | planned | planned | — | Device photos never leave the phone until picked. Web: On this day and the prompt only. |
-| Ask for new photos (frame quick menu; "Asked today 💛"); setting to hide the button | — | — | — | planned | `deviceRequestPhotos`, `photo_request` change; `settings.social.ask_for_photos`. |
+| Ask for new photos (frame quick menu; "Asked today 💛"); setting to hide the button | — | — | — | yes | `deviceRequestPhotos`, `photo_request` change; `settings.social.ask_for_photos`. Frame: queued offline, then "Asked today 💛" or "Ben sent new photos 💛" until `next_allowed_at`. Browser frame: planned. |
 | "Oma would like new photos" badge and notification; who answered | planned | planned | planned | — | `FrameSummary.photo_request`, push `frame_request`. |
-| "New photos from Ben" on the next wake | — | — | — | planned | `settings.social.new_photos_from`. |
+| "New photos from Ben" on the next wake | — | — | — | yes | `settings.social.new_photos_from`. From new non-backfill placements' senders and the request's `answered_by_name`; kept in Room until the screen is awake. Browser frame: planned. |
 | Reminder settings: normal / fewer / off, frame requests, weekly summary, birthday reminders, snooze, quiet hours; "we sent fewer reminders" notice | planned | planned | planned | — | `getReminderPreferences`, `updateReminderPreferences`. |
 | Reminder notifications with Snooze 1 month and Fewer reminders actions | planned | planned | planned | — | `reminder_quiet`, `reminder_streak`, `reminder_birthday`, `weekly_summary`. |
 | Family streak on the family header ("🔥 12 weeks", who helped this week); admins: goal, on/off | planned | planned | planned | — | Decision E: default 3. |
 | Weekly prompts: this week's prompt, answer with it, "6 answers to …"; admins: turn on, pick, write own, skip | planned | planned | planned | — | |
-| Prompt title card before the answers | — | — | — | planned | `prompts` change, `Placement.prompt_id`, `settings.social.prompt_cards`. |
+| Prompt title card before the answers | — | — | — | yes | `prompts` change, `Placement.prompt_id`, `settings.social.prompt_cards`. Frame: a title card over the first answer of a run (no extra slide). Browser frame: planned. |
 | On this day in Home, share again | planned | planned | planned | — | `getOnThisDay`. |
 | Weekly "seen and loved" summary | planned | planned | planned | — | `getWeeklySummary`. |
 | Monthly family recap card in the family chat | planned | planned | planned | — | `monthly_recap` system message, `getFeedRecap`. |
 | Personal milestones (private, optionally shown on the profile) | planned | planned | planned | — | |
 | Email digest of comments and messages: off / daily / weekly | planned | planned | planned | — | Only with discovery `email_digest`. |
 | Family settings: quiet after N days, monthly recap, time zone | planned | planned | planned | — | `updateFeedEngagement`. |
-| `features: ["comments", "photo_requests", "prompts"]` in the heartbeat | — | — | — | planned | |
+| `features: ["comments", "photo_requests", "prompts"]` in the heartbeat | — | — | — | yes | Android frame app (both flavors). |
 
 ## Account settings
 

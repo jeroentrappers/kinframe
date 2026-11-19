@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Xin ảnh mới</string>
+    <string name="social_asked_today">Đã xin hôm nay 💛</string>
+    <string name="social_ask_answered">%1$s đã gửi ảnh mới 💛</string>
+    <string name="social_ask_sent">Đã gửi lời xin ảnh mới đến gia đình bạn 💛</string>
+    <string name="social_ask_offline">Gia đình bạn sẽ nhận lời xin ngay khi khung ảnh có mạng trở lại 💛</string>
+    <string name="social_new_photos_from_one">Ảnh mới từ %1$s</string>
+    <string name="social_new_photos_from_two">Ảnh mới từ %1$s và %2$s</string>
+    <string name="social_new_photos_from_more">Ảnh mới từ %1$s, %2$s và những người khác</string>
+    <string name="social_prompt_this_week">Tuần này</string>
+    <string name="social_prompt_this_week_in">Tuần này · %1$s</string>
+    <string name="social_settings_title">Gia đình</string>
+    <string name="social_settings_show_comments">Hiện bình luận</string>
+    <string name="social_settings_show_comments_hint">Bình luận mới nhất hiện trong 8 giây khi ảnh của nó xuất hiện, mỗi ngày một lần</string>
+    <string name="social_settings_ask">Nút xin ảnh mới</string>
+    <string name="social_settings_prompts">Chủ đề của tuần trước các ảnh của nó</string>
+    <string name="social_settings_new_from">Cho biết ai đã gửi ảnh mới</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Új fotók kérése</string>
+    <string name="social_asked_today">Ma már kérted 💛</string>
+    <string name="social_ask_answered">%1$s új fotókat küldött 💛</string>
+    <string name="social_ask_sent">A családod megkapta a kérést új fotókért 💛</string>
+    <string name="social_ask_offline">A családodat azonnal megkérjük, amint a képkeret újra online lesz 💛</string>
+    <string name="social_new_photos_from_one">Új fotók tőle: %1$s</string>
+    <string name="social_new_photos_from_two">Új fotók tőlük: %1$s és %2$s</string>
+    <string name="social_new_photos_from_more">Új fotók tőlük: %1$s, %2$s és mások</string>
+    <string name="social_prompt_this_week">Ezen a héten</string>
+    <string name="social_prompt_this_week_in">Ezen a héten · %1$s</string>
+    <string name="social_settings_title">Család</string>
+    <string name="social_settings_show_comments">Hozzászólások megjelenítése</string>
+    <string name="social_settings_show_comments_hint">A legújabb hozzászólás 8 másodpercig látszik, amikor a fotója megjelenik, naponta egyszer</string>
+    <string name="social_settings_ask">Gomb új fotók kéréséhez</string>
+    <string name="social_settings_prompts">A hét témája a fotói előtt</string>
+    <string name="social_settings_new_from">Annak megjelenítése, ki küldött új fotókat</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Be om nye bilder</string>
+    <string name="social_asked_today">Spurt i dag 💛</string>
+    <string name="social_ask_answered">%1$s sendte nye bilder 💛</string>
+    <string name="social_ask_sent">Familien din er bedt om nye bilder 💛</string>
+    <string name="social_ask_offline">Familien din blir spurt så snart fotorammen er på nett igjen 💛</string>
+    <string name="social_new_photos_from_one">Nye bilder fra %1$s</string>
+    <string name="social_new_photos_from_two">Nye bilder fra %1$s og %2$s</string>
+    <string name="social_new_photos_from_more">Nye bilder fra %1$s, %2$s og andre</string>
+    <string name="social_prompt_this_week">Denne uken</string>
+    <string name="social_prompt_this_week_in">Denne uken · %1$s</string>
+    <string name="social_settings_title">Familie</string>
+    <string name="social_settings_show_comments">Vis kommentarer</string>
+    <string name="social_settings_show_comments_hint">Den nyeste kommentaren vises i 8 sekunder når bildet kommer frem, én gang om dagen</string>
+    <string name="social_settings_ask">Knapp for å be om nye bilder</string>
+    <string name="social_settings_prompts">Ukens tema før bildene</string>
+    <string name="social_settings_new_from">Vis hvem som sendte nye bilder</string>
+</resources>

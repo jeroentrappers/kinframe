@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">请家人发新照片</string>
+    <string name="social_asked_today">今天已请求 💛</string>
+    <string name="social_ask_answered">%1$s 发来了新照片 💛</string>
+    <string name="social_ask_sent">已请家人发新照片 💛</string>
+    <string name="social_ask_offline">相框恢复联网后会立即请家人发照片 💛</string>
+    <string name="social_new_photos_from_one">来自 %1$s 的新照片</string>
+    <string name="social_new_photos_from_two">来自 %1$s 和 %2$s 的新照片</string>
+    <string name="social_new_photos_from_more">来自 %1$s、%2$s 等人的新照片</string>
+    <string name="social_prompt_this_week">本周</string>
+    <string name="social_prompt_this_week_in">本周 · %1$s</string>
+    <string name="social_settings_title">家人</string>
+    <string name="social_settings_show_comments">显示评论</string>
+    <string name="social_settings_show_comments_hint">照片出现时显示最新评论 8 秒，每天一次</string>
+    <string name="social_settings_ask">“请家人发新照片”按钮</string>
+    <string name="social_settings_prompts">在照片前显示本周主题</string>
+    <string name="social_settings_new_from">显示谁发来了新照片</string>
+</resources>

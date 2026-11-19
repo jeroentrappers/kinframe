@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">新しい写真をお願いする</string>
+    <string name="social_asked_today">今日お願いしました 💛</string>
+    <string name="social_ask_answered">%1$sさんが新しい写真を送りました 💛</string>
+    <string name="social_ask_sent">ご家族に新しい写真をお願いしました 💛</string>
+    <string name="social_ask_offline">フォトフレームがオンラインに戻りしだい、ご家族にお願いします 💛</string>
+    <string name="social_new_photos_from_one">%1$sさんから新しい写真</string>
+    <string name="social_new_photos_from_two">%1$sさんと%2$sさんから新しい写真</string>
+    <string name="social_new_photos_from_more">%1$sさん、%2$sさんほかから新しい写真</string>
+    <string name="social_prompt_this_week">今週</string>
+    <string name="social_prompt_this_week_in">今週 · %1$s</string>
+    <string name="social_settings_title">家族</string>
+    <string name="social_settings_show_comments">コメントを表示</string>
+    <string name="social_settings_show_comments_hint">写真が表示されたとき、最新のコメントを8秒間表示します（1日1回）</string>
+    <string name="social_settings_ask">新しい写真をお願いするボタン</string>
+    <string name="social_settings_prompts">写真の前に今週のテーマ</string>
+    <string name="social_settings_new_from">新しい写真を送った人を表示</string>
+</resources>

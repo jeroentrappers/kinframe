@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Cere fotografii noi</string>
+    <string name="social_asked_today">Cerut azi 💛</string>
+    <string name="social_ask_answered">%1$s a trimis fotografii noi 💛</string>
+    <string name="social_ask_sent">Familia ta a primit cererea de fotografii noi 💛</string>
+    <string name="social_ask_offline">Familia ta va primi cererea imediat ce rama foto revine online 💛</string>
+    <string name="social_new_photos_from_one">Fotografii noi de la %1$s</string>
+    <string name="social_new_photos_from_two">Fotografii noi de la %1$s și %2$s</string>
+    <string name="social_new_photos_from_more">Fotografii noi de la %1$s, %2$s și alții</string>
+    <string name="social_prompt_this_week">Săptămâna aceasta</string>
+    <string name="social_prompt_this_week_in">Săptămâna aceasta · %1$s</string>
+    <string name="social_settings_title">Familie</string>
+    <string name="social_settings_show_comments">Afișează comentariile</string>
+    <string name="social_settings_show_comments_hint">Cel mai nou comentariu apare 8 secunde când apare fotografia lui, o dată pe zi</string>
+    <string name="social_settings_ask">Buton pentru a cere fotografii noi</string>
+    <string name="social_settings_prompts">Tema săptămânii înaintea fotografiilor ei</string>
+    <string name="social_settings_new_from">Arată cine a trimis fotografii noi</string>
+</resources>

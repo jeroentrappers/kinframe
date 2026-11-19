@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Demander de nouvelles photos</string>
+    <string name="social_asked_today">Demandé aujourd’hui 💛</string>
+    <string name="social_ask_answered">%1$s a envoyé de nouvelles photos 💛</string>
+    <string name="social_ask_sent">Votre famille a reçu votre demande de nouvelles photos 💛</string>
+    <string name="social_ask_offline">Votre famille sera prévenue dès que le cadre photo sera de nouveau en ligne 💛</string>
+    <string name="social_new_photos_from_one">Nouvelles photos de %1$s</string>
+    <string name="social_new_photos_from_two">Nouvelles photos de %1$s et %2$s</string>
+    <string name="social_new_photos_from_more">Nouvelles photos de %1$s, %2$s et d’autres</string>
+    <string name="social_prompt_this_week">Cette semaine</string>
+    <string name="social_prompt_this_week_in">Cette semaine · %1$s</string>
+    <string name="social_settings_title">Famille</string>
+    <string name="social_settings_show_comments">Afficher les commentaires</string>
+    <string name="social_settings_show_comments_hint">Le commentaire le plus récent s’affiche 8 secondes quand sa photo apparaît, une fois par jour</string>
+    <string name="social_settings_ask">Bouton pour demander de nouvelles photos</string>
+    <string name="social_settings_prompts">Thème de la semaine avant ses photos</string>
+    <string name="social_settings_new_from">Indiquer qui a envoyé de nouvelles photos</string>
+</resources>

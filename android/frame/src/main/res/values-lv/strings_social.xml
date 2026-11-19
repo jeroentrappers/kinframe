@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_ask_photos">Lūgt jaunus foto</string>
+    <string name="social_asked_today">Šodien palūgts 💛</string>
+    <string name="social_ask_answered">%1$s atsūtīja jaunus foto 💛</string>
+    <string name="social_ask_sent">Tava ģimene ir palūgta atsūtīt jaunus foto 💛</string>
+    <string name="social_ask_offline">Ģimeni palūgsim, tiklīdz fotorāmis atkal būs tiešsaistē 💛</string>
+    <string name="social_new_photos_from_one">Jauni foto no: %1$s</string>
+    <string name="social_new_photos_from_two">Jauni foto no: %1$s un %2$s</string>
+    <string name="social_new_photos_from_more">Jauni foto no: %1$s, %2$s un citiem</string>
+    <string name="social_prompt_this_week">Šonedēļ</string>
+    <string name="social_prompt_this_week_in">Šonedēļ · %1$s</string>
+    <string name="social_settings_title">Ģimene</string>
+    <string name="social_settings_show_comments">Rādīt komentārus</string>
+    <string name="social_settings_show_comments_hint">Jaunākais komentārs parādās uz 8 sekundēm, kad parādās tā foto, reizi dienā</string>
+    <string name="social_settings_ask">Poga jaunu foto lūgšanai</string>
+    <string name="social_settings_prompts">Nedēļas tēma pirms tās foto</string>
+    <string name="social_settings_new_from">Rādīt, kas atsūtīja jaunus foto</string>
+</resources>
