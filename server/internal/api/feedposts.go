@@ -54,6 +54,10 @@ type feedPostJSON struct {
 	Items     []gen.Item              `json:"items"`
 	Receipts  *feedReceiptSummaryJSON `json:"receipts"`
 	Reactions *[]feedReactionJSON     `json:"reactions"`
+	// Family social (README §5.18): the circle audience and the thread.
+	CircleID   *uuid.UUID         `json:"circle_id"`
+	CircleName *string            `json:"circle_name"`
+	Thread     *gen.ThreadSummary `json:"thread,omitempty"`
 }
 
 type feedItemReceiptJSON struct {
@@ -211,8 +215,13 @@ func (s *Server) receiptsOf(ctx context.Context, postIDs []uuid.UUID) (map[uuid.
 	return out, nil
 }
 
-// canSeeReceipts: own posts, feed owner/admins, or everyone with members_see_reactions.
+// canSeeReceipts: own posts, feed owner/admins, or everyone with members_see_receipts.
 func canSeeReceipts(ctx context.Context, v *store.FeedView, p *store.FeedPost) bool {
+	return v.IsAdmin() || v.MembersSeeReceipts || (p.PosterUserID != nil && *p.PosterUserID == me(ctx).ID)
+}
+
+// canSeeFrameReactions: own posts, feed owner/admins, or everyone with members_see_reactions (README §5.18).
+func canSeeFrameReactions(ctx context.Context, v *store.FeedView, p *store.FeedPost) bool {
 	return v.IsAdmin() || v.MembersSeeReactions || (p.PosterUserID != nil && *p.PosterUserID == me(ctx).ID)
 }
 
@@ -225,6 +234,7 @@ func (s *Server) renderPosts(ctx context.Context, v *store.FeedView, posts []sto
 	ids := make([]uuid.UUID, len(posts))
 	idx := map[uuid.UUID]int{}
 	var visible []uuid.UUID
+	reactionsVisible := map[uuid.UUID]bool{}
 	for i := range posts {
 		p := &posts[i]
 		ids[i], idx[p.ID] = p.ID, i
@@ -236,9 +246,12 @@ func (s *Server) renderPosts(ctx context.Context, v *store.FeedView, posts []sto
 				out[i].SendID = p.SendID
 			}
 		}
-		if canSeeReceipts(ctx, v, p) {
+		out[i].CircleID, out[i].CircleName = p.CircleID, p.CircleName
+		seesReceipts, seesReactions := canSeeReceipts(ctx, v, p), canSeeFrameReactions(ctx, v, p)
+		if seesReceipts || seesReactions {
 			visible = append(visible, p.ID)
 		}
+		reactionsVisible[p.ID] = seesReactions
 	}
 	items, err := s.st.FeedPostItemRows(ctx, s.st.Q(), ids)
 	if err != nil {
@@ -261,7 +274,15 @@ func (s *Server) renderPosts(ctx context.Context, v *store.FeedView, posts []sto
 		if len(reactions) > 50 {
 			reactions = reactions[:50]
 		}
-		out[k].Receipts, out[k].Reactions = &sum, &reactions
+		if canSeeReceipts(ctx, v, &posts[k]) {
+			out[k].Receipts = &sum
+		}
+		if reactionsVisible[id] {
+			out[k].Reactions = &reactions
+		}
+	}
+	if err := s.feedPostThreads(ctx, out); err != nil {
+		return nil, err
 	}
 	return out, nil
 }
@@ -282,7 +303,7 @@ func (s *Server) ListFeedPosts(ctx context.Context, req gen.ListFeedPostsRequest
 		}
 		before = &id
 	}
-	posts, err := s.st.ListFeedPosts(ctx, req.FeedId, req.Params.PosterId, before, limit+1)
+	posts, err := s.st.ListFeedPosts(ctx, me(ctx).ID, req.FeedId, req.Params.PosterId, before, limit+1)
 	if err != nil {
 		return nil, err
 	}
@@ -307,6 +328,9 @@ func (s *Server) feedPost(ctx context.Context, feedID, postID uuid.UUID) (*store
 	p, err := s.st.GetFeedPost(ctx, s.st.Q(), feedID, postID)
 	if err != nil {
 		return nil, nil, notFound(err, "post")
+	}
+	if !s.seesCirclePost(ctx, p) {
+		return nil, nil, problem.New(problem.NotFound, "post not found")
 	}
 	return v, p, nil
 }
@@ -364,9 +388,10 @@ func (s *Server) removePostItems(ctx context.Context, feedID, postID uuid.UUID, 
 		return err
 	}
 	own := p.PosterUserID != nil && *p.PosterUserID == me(ctx).ID
-	if !own && !v.IsAdmin() {
+	if !own && !s.moderatesFeedPost(ctx, v, p) {
 		return problem.New(problem.Forbidden, "only the poster or the feed's owner and admins can remove this post")
 	}
+	audience := s.postAudienceBefore(ctx, postID)
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
 		removed, subs, err := tx.RemovePostItems(ctx, postID, items, &me(ctx).ID)
 		if err != nil {
@@ -383,6 +408,7 @@ func (s *Server) removePostItems(ctx context.Context, feedID, postID uuid.UUID, 
 	if p.SendID != nil && p.PosterUserID != nil {
 		s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{*p.SendID: *p.PosterUserID}, "")
 	}
+	s.publishPostGone(ctx, audience)
 	return nil
 }
 

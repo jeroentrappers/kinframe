@@ -49,6 +49,12 @@ type feedJSON struct {
 	PostCount                int        `json:"post_count"`
 	PendingSubscriptionCount int        `json:"pending_subscription_count"`
 	PendingJoinRequestCount  int        `json:"pending_join_request_count"`
+	// Family social (README §5.18).
+	MembersSeeReceipts      bool   `json:"members_see_receipts"`
+	NewMembersCanPost       bool   `json:"new_members_can_post"`
+	MembersCanCreateCircles bool   `json:"members_can_create_circles"`
+	CircleCount             int    `json:"circle_count"`
+	Mute                    string `json:"mute"`
 }
 
 func (s *Server) feedCoverURL(key *string) *string {
@@ -71,6 +77,8 @@ func (s *Server) feedOut(v *store.FeedView) feedJSON {
 		AutoApproveSubscriptions: v.AutoApproveSubscriptions, InviteRequiresApproval: v.InviteRequiresApproval,
 		MembersSeeReactions: v.MembersSeeReactions, PostersCanInvite: v.PostersCanInvite, PostCount: v.PostCount,
 		PostersCanAddBirthdays: v.PostersCanAddBirthdays, BirthdayNotifications: v.BirthdayNotifications, BirthdayCount: v.BirthdayCount,
+		MembersSeeReceipts: v.MembersSeeReceipts, NewMembersCanPost: v.NewMembersCanPost, MembersCanCreateCircles: v.MembersCanCreateCircles,
+		CircleCount: v.CircleCount, Mute: v.Mute,
 	}
 	if v.OwnerName != nil {
 		out.OwnerName = *v.OwnerName
@@ -153,8 +161,12 @@ func (s *Server) feedTargets(ctx context.Context, feedIDs []uuid.UUID) ([]uuid.U
 			continue
 		}
 		seen[id] = true
-		if _, err := s.feedView(ctx, s.st.Q(), id); err != nil {
+		v, err := s.feedView(ctx, s.st.Q(), id)
+		if err != nil {
 			return nil, err
+		}
+		if v.Role == "member" { // reads, comments and reacts, but does not post photos (README §5.18)
+			return nil, problem.New(problem.MissingPermission, "members of this family can't post photos")
 		}
 		out = append(out, id)
 	}
@@ -200,7 +212,8 @@ func (s *Server) CreateFeed(ctx context.Context, req gen.CreateFeedRequestObject
 	if name == "" {
 		return nil, problem.Validation("name", "minLength", "a feed needs a name")
 	}
-	f := store.Feed{ID: store.NewID(), Name: name, InviteRequiresApproval: true}
+	f := store.Feed{ID: store.NewID(), Name: name, InviteRequiresApproval: true,
+		MembersSeeReactions: true, NewMembersCanPost: true, MembersCanCreateCircles: true}
 	if b.AutoApproveSubscriptions != nil {
 		f.AutoApproveSubscriptions = *b.AutoApproveSubscriptions
 	}
@@ -216,6 +229,7 @@ func (s *Server) CreateFeed(ctx context.Context, req gen.CreateFeedRequestObject
 	if b.PostersCanAddBirthdays != nil {
 		f.PostersCanAddBirthdays = *b.PostersCanAddBirthdays
 	}
+	socialFeedCreate(&f, b)
 	limit := s.Limits(ctx).MaxFeedsPerUser
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
 		// Serialize this user's feed creations so the limit holds.
@@ -271,7 +285,8 @@ func (s *Server) UpdateFeed(ctx context.Context, req gen.UpdateFeedRequestObject
 	}
 	b := req.Body
 	p := store.FeedPatch{AutoApproveSubscriptions: b.AutoApproveSubscriptions, InviteRequiresApproval: b.InviteRequiresApproval,
-		MembersSeeReactions: b.MembersSeeReactions, PostersCanInvite: b.PostersCanInvite, PostersCanAddBirthdays: b.PostersCanAddBirthdays}
+		MembersSeeReactions: b.MembersSeeReactions, PostersCanInvite: b.PostersCanInvite, PostersCanAddBirthdays: b.PostersCanAddBirthdays,
+		MembersSeeReceipts: b.MembersSeeReceipts, NewMembersCanPost: b.NewMembersCanPost, MembersCanCreateCircles: b.MembersCanCreateCircles}
 	renamed := false
 	if b.Name != nil {
 		name := strings.TrimSpace(*b.Name)
@@ -622,7 +637,7 @@ func (s *Server) DecideFeedJoinRequest(ctx context.Context, req gen.DecideFeedJo
 		status := "denied"
 		if approve {
 			status = "approved"
-			if err := tx.AddFeedMember(ctx, req.FeedId, jr.UserID, "poster"); err != nil {
+			if err := tx.AddFeedMember(ctx, req.FeedId, jr.UserID, joinRole(&v.Feed)); err != nil {
 				return err
 			}
 		}
@@ -676,7 +691,7 @@ func (s *Server) ListFeedInvites(ctx context.Context, req gen.ListFeedInvitesReq
 	}
 	var by *uuid.UUID
 	if !v.IsAdmin() {
-		if !v.PostersCanInvite {
+		if !v.PostersCanInvite || v.Role == "member" {
 			return nil, problem.New(problem.Forbidden, "owner or admin only")
 		}
 		by = &me(ctx).ID
@@ -699,7 +714,7 @@ func (s *Server) CreateFeedInvite(ctx context.Context, req gen.CreateFeedInviteR
 	}
 	b := req.Body
 	purpose := string(b.Purpose)
-	if !v.IsAdmin() && (!v.PostersCanInvite || purpose != "join") {
+	if !v.IsAdmin() && (!v.PostersCanInvite || purpose != "join" || v.Role == "member") {
 		return nil, problem.New(problem.Forbidden, "owner or admin only")
 	}
 	u := me(ctx)
@@ -954,7 +969,7 @@ func (s *Server) AcceptFeedInvite(ctx context.Context, req gen.AcceptFeedInviteR
 					jr = r
 				}
 			} else {
-				if err := tx.AddFeedMember(ctx, v.ID, u.ID, "poster"); err != nil {
+				if err := tx.AddFeedMember(ctx, v.ID, u.ID, joinRole(&v.Feed)); err != nil {
 					return err
 				}
 				out.Status = "joined"

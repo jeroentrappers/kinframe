@@ -421,7 +421,10 @@ func (s *Store) UserCanSeeItem(ctx context.Context, userID, itemID uuid.UUID) (b
 			SELECT 1 FROM feed_post_items pi JOIN feed_posts p ON p.id = pi.post_id AND p.removed_at IS NULL
 			JOIN feeds f ON f.id = p.feed_id AND f.deleted_at IS NULL
 			JOIN feed_members fm ON fm.feed_id = p.feed_id AND fm.user_id = $1
-			WHERE pi.item_id = $2 AND pi.removed_at IS NULL)`, userID, itemID).Scan(&ok)
+			WHERE pi.item_id = $2 AND pi.removed_at IS NULL
+			-- circle posts: only for the circle (README §5.18)
+			AND (p.circle_id IS NULL OR p.poster_user_id = $1
+				OR EXISTS (SELECT 1 FROM circle_members cm WHERE cm.circle_id = p.circle_id AND cm.user_id = $1)))`, userID, itemID).Scan(&ok)
 	return ok, err
 }
 

@@ -674,6 +674,7 @@ func (s *Server) DeviceSetReaction(ctx context.Context, req gen.DeviceSetReactio
 		return nil, err
 	}
 	s.TelegramItemReacted(ctx, p.ItemRow.ItemID) // mirrored on the Telegram message (telegram_out.go)
+	s.frameReactionEntries(ctx, f, p)            // frame entries in the posts' threads (social_frames.go)
 	if p.SenderUserID != nil {
 		var push *notify.Push
 		ids := s.placementPushIDs(ctx, p, f)
@@ -709,6 +710,7 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 		return nil, err
 	}
 	s.TelegramItemReplied(ctx, p.ItemRow.ItemID, f, preset) // posted in the Telegram chat when it wants replies
+	s.frameReplyEntries(ctx, f, p, preset)                  // frame entries in the posts' threads (social_frames.go)
 	if p.SenderUserID != nil {
 		ids := s.placementPushIDs(ctx, p, f)
 		ev := notify.Event{"type": "reply", "placement_id": p.Placement.ID, "frame_id": f.ID, "preset": preset}

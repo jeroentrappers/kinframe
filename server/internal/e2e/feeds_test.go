@@ -372,9 +372,17 @@ func TestFeedPostsAndSubscriptions(t *testing.T) {
 	if len(rc["frames"].([]any)) != 2 {
 		t.Fatalf("admin receipts: %v", rc)
 	}
+	// Since docs/spec/family-social.md: members_see_reactions shows frames' reactions, members_see_receipts the receipts.
 	e.expect(req{method: "PATCH", path: "/v1/feeds/" + feed, token: anna.token, body: map[string]any{"members_see_reactions": true}}, 200)
-	if dp := e.get("/v1/feeds/"+feed+"/posts/"+postID, dave.token).m(t); dp["receipts"] == nil {
+	if dp := e.get("/v1/feeds/"+feed+"/posts/"+postID, dave.token).m(t); dp["receipts"] != nil || dp["reactions"] == nil {
 		t.Fatalf("members_see_reactions: %v", dp)
+	}
+	e.expect(req{method: "PATCH", path: "/v1/feeds/" + feed, token: anna.token, body: map[string]any{"members_see_receipts": true}}, 200)
+	if dp := e.get("/v1/feeds/"+feed+"/posts/"+postID, dave.token).m(t); dp["receipts"] == nil {
+		t.Fatalf("members_see_receipts: %v", dp)
+	}
+	if r := e.do(req{method: "GET", path: "/v1/feeds/" + feed + "/posts/" + postID + "/receipts", token: dave.token}); r.StatusCode != 200 {
+		t.Fatalf("receipts with members_see_receipts: %d", r.StatusCode)
 	}
 	// Feed members may see the post's items.
 	itemID := dig(kitPl, "item", "id").(string)
