@@ -16,7 +16,7 @@
     <string name="notif_email_pending_title">Someone wants to email photos</string>
     <string name="notif_telegram_title">Telegram needs your attention</string>
     <string name="email_entry_frame">Email photos to this frame</string>
-    <string name="email_entry_feed">Email photos to this feed</string>
+    <string name="email_entry_feed">Email photos to this family</string>
     <string name="email_entry_frame_hint">An address family can mail photos to, without the app.</string>
     <string name="email_entry_feed_hint">An address that turns mailed photos into posts.</string>
     <string name="email_intro_frame">Family members can mail photos to %1$s from the email address of their kinframe account. Anyone else needs your OK the first time.</string>
@@ -77,7 +77,7 @@
     <string name="email_held_deleted">Deleted</string>
     <string name="email_senders_title">Allowed senders</string>
     <string name="email_senders_members_frame">Members who may send are allowed from their account\'s email address and aren\'t listed.</string>
-    <string name="email_senders_members_feed">Members of the feed are allowed from their account\'s email address and aren\'t listed.</string>
+    <string name="email_senders_members_feed">Members of the family are allowed from their account\'s email address and aren\'t listed.</string>
     <string name="email_sender_add">Add</string>
     <string name="email_sender_add_body">Mail from this address goes straight through.</string>
     <string name="email_sender_email">Email address</string>

@@ -33,8 +33,10 @@ class FcmService : FirebaseMessagingService() {
             type = data["type"].orEmpty(),
             title = data["title"] ?: message.notification?.title.orEmpty(),
             body = data["body"] ?: message.notification?.body.orEmpty(),
-            ids = data.filterKeys { it.endsWith("_id") },
+            ids = data.filterKeys { it.endsWith("_id") || it in SocialNotifications.EXTRA_ID_KEYS },
             key = data["key"].orEmpty(),
+            tag = data["tag"].orEmpty(),
+            actions = SocialNotifications.parseActions(data["actions"]),
         )
         Notifications.showPush(this, msg)
         (application as FamilyApp).graph.onPush(msg)

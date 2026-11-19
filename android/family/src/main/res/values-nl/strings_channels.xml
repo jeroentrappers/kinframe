@@ -15,7 +15,7 @@
     <string name="notif_email_pending_title">Iemand wil foto\'s mailen</string>
     <string name="notif_telegram_title">Telegram vraagt je aandacht</string>
     <string name="email_entry_frame">Foto\'s mailen naar dit fotokader</string>
-    <string name="email_entry_feed">Foto\'s mailen naar deze feed</string>
+    <string name="email_entry_feed">Foto\'s mailen naar deze familie</string>
     <string name="email_entry_frame_hint">Een adres waar familie foto\'s naartoe kan mailen, zonder de app.</string>
     <string name="email_entry_feed_hint">Een adres dat gemailde foto\'s in berichten omzet.</string>
     <string name="email_intro_frame">Familieleden kunnen foto\'s naar %1$s mailen vanaf het e-mailadres van hun kinframe-account. Iedereen anders heeft de eerste keer jouw toestemming nodig.</string>
@@ -76,7 +76,7 @@
     <string name="email_held_deleted">Verwijderd</string>
     <string name="email_senders_title">Toegestane afzenders</string>
     <string name="email_senders_members_frame">Leden die mogen sturen zijn toegestaan vanaf het e-mailadres van hun account en staan hier niet.</string>
-    <string name="email_senders_members_feed">Leden van de feed zijn toegestaan vanaf het e-mailadres van hun account en staan hier niet.</string>
+    <string name="email_senders_members_feed">Leden van de familie zijn toegestaan vanaf het e-mailadres van hun account en staan hier niet.</string>
     <string name="email_sender_add">Toevoegen</string>
     <string name="email_sender_add_body">Mail van dit adres komt meteen door.</string>
     <string name="email_sender_email">E-mailadres</string>

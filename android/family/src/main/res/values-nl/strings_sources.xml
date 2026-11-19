@@ -16,19 +16,19 @@
 
     <string name="source_section_title">Gesynchroniseerd vanuit</string>
     <string name="source_section_empty_album">Dit album synchroniseert nog nergens vandaan. Koppel een Immich- of iCloud-album en nieuwe foto\'s komen vanzelf.</string>
-    <string name="source_section_empty_feed">Deze feed synchroniseert nog nergens vandaan. Koppel een Immich- of iCloud-album en de nieuwe foto\'s worden voor je gepost.</string>
+    <string name="source_section_empty_feed">Deze familie synchroniseert nog nergens vandaan. Koppel een Immich- of iCloud-album en de nieuwe foto\'s worden voor je gepost.</string>
     <string name="source_add_album">Synchroniseren vanuit…</string>
     <string name="source_add_feed">Bron toevoegen</string>
-    <string name="source_feed_intro">Foto\'s uit deze albums worden in jouw naam in de feed gepost. Nieuwe foto\'s worden één bericht zodra het album 30 minuten stil is (uiterlijk 3 uur na de eerste nieuwe foto), dus een drukke avond is één bericht, geen tien. Niemand krijgt er een melding van.</string>
+    <string name="source_feed_intro">Foto\'s uit deze albums worden in jouw naam in de familie gepost. Nieuwe foto\'s worden één bericht zodra het album 30 minuten stil is (uiterlijk 3 uur na de eerste nieuwe foto), dus een drukke avond is één bericht, geen tien. Niemand krijgt er een melding van.</string>
     <string name="source_mine_title">Mijn fotobronnen</string>
-    <string name="source_mine_intro">De externe albums die je gekoppeld hebt, op elke fotolijst en feed. Foto\'s die ze binnenbrengen worden in jouw naam gestuurd.</string>
+    <string name="source_mine_intro">De externe albums die je gekoppeld hebt, op elke fotolijst en familie. Foto\'s die ze binnenbrengen worden in jouw naam gestuurd.</string>
     <string name="source_mine_empty_title">Nog geen fotobronnen</string>
-    <string name="source_mine_empty_body">Open een album in de bibliotheek van een fotolijst, of het tabblad Bronnen van een feed, en kies \"Synchroniseren vanuit…\".</string>
+    <string name="source_mine_empty_body">Open een album in de bibliotheek van een fotolijst, of het tabblad Bronnen van een familie, en kies \"Synchroniseren vanuit…\".</string>
     <string name="source_settings_title">Fotobronnen</string>
     <string name="source_settings_open">Mijn fotobronnen</string>
-    <string name="source_settings_hint">Immich- en iCloud-albums die je synchroniseert naar albums en feeds.</string>
+    <string name="source_settings_hint">Immich- en iCloud-albums die je synchroniseert naar albums en families.</string>
     <string name="source_into_album">Naar %1$s op %2$s</string>
-    <string name="source_into_feed">Naar de feed %1$s</string>
+    <string name="source_into_feed">Naar de familie %1$s</string>
     <string name="source_owner">Ingesteld door %1$s</string>
     <string name="source_owner_you">Ingesteld door jou</string>
     <string name="source_owner_gone">De persoon die dit instelde is er niet meer</string>
@@ -88,7 +88,7 @@
     <string name="source_err_upstream">%1$s had een probleem. We blijven het proberen.</string>
     <string name="source_err_upstream_generic">De server had een probleem. We blijven het proberen.</string>
     <string name="source_err_owner_lost_album">%1$s kan dit album niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren.</string>
-    <string name="source_err_owner_lost_feed">%1$s kan deze feed niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren.</string>
+    <string name="source_err_owner_lost_feed">%1$s kan deze familie niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren.</string>
     <string name="source_err_credentials">De bewaarde sleutel kan niet meer gelezen worden (de geheime sleutel van de server is veranderd). Vul hem opnieuw in.</string>
     <string name="source_err_mass_removal">%1$d foto\'s zijn uit het album verdwenen. Hier ook verwijderen?</string>
     <string name="source_err_unknown">Er ging iets mis met deze bron.</string>
@@ -204,9 +204,9 @@
     <string name="share_text_label">Synchroniseren met kinframe</string>
     <string name="source_shared_title">Dit %1$s-album synchroniseren naar…</string>
     <string name="source_shared_body">Nieuwe foto\'s in het album komen vanzelf.</string>
-    <string name="source_shared_none">Er is geen album of feed waarnaar je kunt synchroniseren. Maak eerst een album in de bibliotheek van een fotolijst die je beheert.</string>
+    <string name="source_shared_none">Er is geen album of familie waarnaar je kunt synchroniseren. Maak eerst een album in de bibliotheek van een fotolijst die je beheert.</string>
     <string name="source_shared_album_choice">%1$s op %2$s</string>
-    <string name="source_shared_feed_choice">Feed: %1$s</string>
+    <string name="source_shared_feed_choice">Familie: %1$s</string>
     <string name="source_shared_not_supported">Dat is geen link van een gedeeld Immich- of iCloud-album.</string>
 
     <string name="google_add">Toevoegen uit Google Foto\'s</string>
@@ -237,7 +237,7 @@
         <item quantity="one">%d kon niet gekopieerd worden</item>
         <item quantity="other">%d konden niet gekopieerd worden</item>
     </plurals>
-    <string name="google_done_feed">Ze zijn in de feed gepost.</string>
+    <string name="google_done_feed">Ze zijn in de familie gepost.</string>
     <string name="google_undone">Ongedaan gemaakt: de foto\'s zijn weer verwijderd.</string>
     <string name="google_open_signin">Google openen</string>
     <string name="google_open_picker">Google Foto\'s openen</string>
@@ -246,7 +246,7 @@
     <string name="google_error_disabled">Deze server biedt Google Foto\'s niet aan.</string>
     <string name="google_error_consent">Je hebt geen toegang gegeven.</string>
     <string name="google_error_expired">Google Foto\'s sloot voordat er iets gekozen was. Probeer het opnieuw.</string>
-    <string name="google_error_target_gone">Het album of de feed is intussen verwijderd.</string>
+    <string name="google_error_target_gone">Het album of de familie is intussen verwijderd.</string>
     <string name="google_error_download">Geen enkele foto kon gekopieerd worden.</string>
     <string name="google_error_unavailable">Google Foto\'s is nu niet beschikbaar. Probeer het later opnieuw.</string>
     <string name="google_error_auth">Aanmelden bij Google lukte niet. Probeer het opnieuw.</string>

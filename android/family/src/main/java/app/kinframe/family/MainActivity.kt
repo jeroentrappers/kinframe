@@ -15,6 +15,7 @@ import app.kinframe.core.design.KinDensity
 import app.kinframe.core.design.KinPalettes
 import app.kinframe.core.design.KinframeTheme
 import app.kinframe.family.notify.Notifications
+import app.kinframe.family.notify.SocialNotifications
 import app.kinframe.family.ui.AppViewModel
 import app.kinframe.family.ui.FamilyRoot
 import app.kinframe.family.util.DeepLinks
@@ -76,6 +77,7 @@ class MainActivity : ComponentActivity() {
                 importId = intent.getStringExtra(Notifications.EXTRA_IMPORT_ID),
                 addressId = intent.getStringExtra(Notifications.EXTRA_ADDRESS_ID),
                 chatId = intent.getStringExtra(Notifications.EXTRA_CHAT_ID),
+                ids = SocialNotifications.idsFrom(intent),
             )
         }
     }

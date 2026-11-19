@@ -31,6 +31,8 @@ class SendRunner(
      * [PreparationFailedException] for a file that can neither be prepared nor go as it is.
      */
     private val prepare: suspend (sendId: String, item: OutboxItem, onProgress: (Float) -> Unit) -> OutboxItem,
+    /** Family social: posts a chat message once its files are uploaded ([OutboxSend.chat]); returns the message id. */
+    private val sendChat: (suspend (OutboxSend) -> String)? = null,
 ) {
     sealed interface Outcome {
         data class Sent(val sendId: String, val frameNames: List<String>) : Outcome
@@ -75,10 +77,18 @@ class SendRunner(
                 }
             }
             val ready = store.get(id) ?: return Outcome.Failed(ProblemCode.NOT_FOUND)
-            val created = api.createSend(SendCreate.of(ready.frameIds, ready.feedIds, ready.items.map { it.toSendItem() }), idempotencyKey = ready.id)
+            val createdId = if (ready.chat != null) {
+                val chat = sendChat ?: return fail(id, ProblemCode.FEATURE_DISABLED)
+                chat(ready)
+            } else {
+                api.createSend(
+                    SendCreate.of(ready.frameIds, ready.feedIds, ready.items.map { it.toSendItem() }, ready.circleIds, ready.promptId),
+                    idempotencyKey = ready.id,
+                ).id
+            }
             cleanup(ready)
             store.remove(id)
-            Outcome.Sent(created.id, ready.recipientNames)
+            Outcome.Sent(createdId, ready.recipientNames)
         } catch (e: CancellationException) {
             store.update(id) { it.copy(state = OutboxState.QUEUED) }
             throw e

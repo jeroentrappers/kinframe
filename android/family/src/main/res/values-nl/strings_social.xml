@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Familie-sociaal (docs/spec/family-social.md): Start, gesprekken, reacties, vermeldingen, kringen, de rol lid. -->
+<resources>
+    <string name="social_nav_home">Start</string>
+    <string name="social_home_title">Start</string>
+    <string name="social_share_photos">Foto’s delen</string>
+    <string name="social_home_empty_title">Nog niets gedeeld</string>
+    <string name="social_home_empty_body">Foto’s die in je families gepost worden, verschijnen hier, de nieuwste eerst, met ieders reacties en wat de kaders ervan vonden.</string>
+    <string name="social_post_title">Bericht</string>
+    <string name="social_post_gone">Dit bericht is niet meer beschikbaar.</string>
+    <string name="social_to_frame">Naar %1$s</string>
+    <string name="social_family_circle">%1$s · %2$s</string>
+    <string name="social_via">via %1$s</string>
+    <string name="social_video">Video</string>
+    <string name="social_you">Jij</string>
+    <string name="social_former_member">Voormalig lid</string>
+    <string name="social_loading">Laden…</string>
+    <string name="social_frame_label">%1$s</string>
+    <string name="social_mentioned_you">Noemde jou</string>
+    <string name="social_this_photo">Deze foto</string>
+    <plurals name="social_seen_on_frames">
+        <item quantity="one">Bekeken op %1$d kader</item>
+        <item quantity="other">Bekeken op %1$d kaders</item>
+    </plurals>
+    <plurals name="social_view_all_comments">
+        <item quantity="one">%1$d reactie bekijken</item>
+        <item quantity="other">Alle %1$d reacties bekijken</item>
+    </plurals>
+
+    <!-- Reactions -->
+    <string name="social_react">Reageren</string>
+    <string name="social_who_reacted">Reacties</string>
+    <string name="social_reaction_love">Liefde</string>
+    <string name="social_reaction_laugh">Lachen</string>
+    <string name="social_reaction_wow">Wow</string>
+    <string name="social_reaction_sad">Verdrietig</string>
+    <string name="social_reaction_thumbs_up">Duim omhoog</string>
+    <string name="social_reaction_pray">Dank je</string>
+    <plurals name="social_reactions_count">
+        <item quantity="one">%1$d reactie</item>
+        <item quantity="other">%1$d reacties</item>
+    </plurals>
+    <plurals name="social_reactions_others">
+        <item quantity="one">%1$s en %2$d ander</item>
+        <item quantity="other">%1$s en %2$d anderen</item>
+    </plurals>
+
+    <!-- Threads -->
+    <string name="social_add_comment">Schrijf een reactie…</string>
+    <string name="social_comment_placeholder">Schrijf een reactie… (@ om iemand te noemen)</string>
+    <string name="social_send_comment">Reactie versturen</string>
+    <string name="social_no_comments">Nog geen reacties. Zeg als eerste iets liefs.</string>
+    <string name="social_comments_closed">Reageren staat uit voor dit bericht.</string>
+    <string name="social_reply">Antwoorden</string>
+    <string name="social_replying_to">Antwoord aan %1$s</string>
+    <string name="social_editing_comment">Je reactie bewerken</string>
+    <string name="social_edited">bewerkt</string>
+    <string name="social_comment_tombstone">Reactie verwijderd</string>
+    <string name="social_removed_by_admin">Verwijderd door een beheerder van de familie</string>
+    <string name="social_comment_remove">Reactie verwijderen</string>
+    <string name="social_comment_delete_title">Je reactie verwijderen?</string>
+    <string name="social_comment_delete_body">Ze verdwijnt voor iedereen uit het gesprek.</string>
+    <string name="social_comment_remove_title">Deze reactie verwijderen?</string>
+    <string name="social_comment_remove_body">Ze verdwijnt met haar antwoorden voor iedereen. De schrijver ziet dat een beheerder ze verwijderde.</string>
+    <string name="social_comment_deleted">Reactie verwijderd</string>
+    <string name="social_comment_removed">Reactie verwijderd</string>
+    <string name="social_comment_too_long">Die reactie is te lang.</string>
+    <string name="social_frame_reacted">%1$s reageerde %2$s</string>
+    <string name="social_frame_replied">%1$s: %2$s</string>
+    <string name="social_thread_mute">Dit bericht dempen</string>
+    <string name="social_thread_unmute">Dit bericht niet meer dempen</string>
+    <string name="social_thread_muted">Je krijgt geen meldingen meer over dit bericht.</string>
+    <string name="social_thread_unmuted">Meldingen over dit bericht staan weer aan.</string>
+    <string name="social_thread_close">Reageren uitzetten</string>
+    <string name="social_thread_open">Reageren aanzetten</string>
+    <string name="social_thread_closed_done">Reageren staat uit</string>
+    <string name="social_thread_opened_done">Reageren staat aan</string>
+    <string name="social_problem_comments_closed">Reageren staat uit voor dit bericht.</string>
+    <string name="social_problem_not_ready">Deze server heeft dit nog niet.</string>
+
+    <!-- Notifications -->
+    <string name="social_channel">Reacties</string>
+    <string name="social_channel_desc">Reacties, antwoorden, vermeldingen en emoji’s op je foto’s.</string>
+    <string name="social_notif_comment">Nieuwe reactie</string>
+    <string name="social_notif_reply">Nieuw antwoord</string>
+    <string name="social_notif_mention">Iemand noemde jou</string>
+    <string name="social_notif_reaction">Nieuwe reactie</string>
+
+    <!-- Roles and family settings -->
+    <string name="social_role_member">Lid</string>
+    <string name="social_role_member_hint">Leden volgen mee: ze lezen, reageren en chatten, maar posten geen foto’s.</string>
+    <string name="social_member_cannot_post">Je volgt deze familie als lid: je kunt reageren en chatten, maar geen foto’s posten.</string>
+    <string name="social_setting_see_reactions_hint">Elk lid ziet hoe de kaders reageerden. Reacties van mensen zijn altijd zichtbaar.</string>
+    <string name="social_setting_see_receipts">Iedereen ziet waar berichten bekeken zijn</string>
+    <string name="social_setting_see_receipts_hint">Elk lid ziet op welke kaders elk bericht aankwam en bekeken werd. Anders alleen wie postte en de beheerders.</string>
+    <string name="social_setting_new_can_post">Nieuwe leden mogen posten</string>
+    <string name="social_setting_new_can_post_hint">Wie erbij komt, wordt poster. Uit: ze komen erbij als lid dat reageert en chat. Bestaande leden houden hun rol.</string>
+    <string name="social_setting_circles">Leden mogen kringen maken</string>
+    <string name="social_setting_circles_hint">Iedereen in de familie kan een kring beginnen. Uit: alleen de eigenaar en de beheerders.</string>
+    <string name="social_family_chat">Familiechat</string>
+    <string name="social_family_mute">Meldingen van deze familie</string>
+    <string name="social_family_mute_hint">Wat gedempt is, zie je nog in de app; je krijgt er alleen geen meldingen van.</string>
+    <string name="social_mute_none">Alles</string>
+    <string name="social_mute_posts">Berichten dempen</string>
+    <string name="social_mute_chat">Chat dempen</string>
+    <string name="social_mute_all">Alles dempen</string>
+    <string name="social_family_muted">Meldingen aangepast</string>
+    <string name="social_family_unmuted">Je krijgt weer alle meldingen van deze familie.</string>
+
+    <!-- Circles -->
+    <string name="social_circles">Kringen</string>
+    <plurals name="social_circles_count">
+        <item quantity="one">%1$d kring</item>
+        <item quantity="other">%1$d kringen</item>
+    </plurals>
+    <string name="social_circles_title">Kringen van %1$s</string>
+    <string name="social_circles_lede">Kleinere groepen binnen de familie, zoals een gezin of de neven en nichten. Een kring heeft een eigen chat en je kunt foto’s alleen met de kring delen.</string>
+    <string name="social_circles_empty_title">Nog geen kringen</string>
+    <string name="social_circles_empty_body">Begin er een voor een gezin of voor de neven en nichten: een eigen chat, en foto’s die alleen zij zien.</string>
+    <string name="social_circle_new">Nieuwe kring</string>
+    <string name="social_circle_name">Naam van de kring</string>
+    <string name="social_circle_name_placeholder">bv. De neven en nichten</string>
+    <string name="social_circle_pick_members">Wie zit erin</string>
+    <string name="social_circle_create">Kring maken</string>
+    <string name="social_circle_created">%1$s gemaakt</string>
+    <string name="social_circle_not_in">Niet in</string>
+    <string name="social_circle_chat">Chat van de kring</string>
+    <string name="social_circle_frames">Kaders</string>
+    <string name="social_circle_frames_hint">Foto’s die met de kring gedeeld worden, gaan naar de kaders van de familie die een lid van de kring beheert, plus de extra kaders die je hier kiest.</string>
+    <string name="social_circle_no_frames">Nog geen enkel kader krijgt de foto’s van deze kring.</string>
+    <string name="social_circle_extra_frames">Extra kaders</string>
+    <string name="social_circle_members_added">Toegevoegd aan de kring</string>
+    <string name="social_circle_member_removed">Uit de kring gehaald</string>
+    <string name="social_circle_leave">Kring verlaten</string>
+    <string name="social_circle_left">Je verliet %1$s</string>
+    <string name="social_circle_delete">Kring verwijderen</string>
+    <string name="social_circle_delete_title">%1$s verwijderen?</string>
+    <string name="social_circle_delete_body">De foto’s ervan verdwijnen van elk kader en de chat sluit. Dit kan niet ongedaan gemaakt worden.</string>
+    <string name="social_circle_deleted">%1$s verwijderd</string>
+    <string name="social_audience_title">Delen met in %1$s</string>
+    <string name="social_audience_whole">Hele familie</string>
+
+    <!-- Frame settings -->
+    <string name="social_frame_show_comments">Reacties tonen</string>
+    <string name="social_frame_show_comments_hint">Als er een foto met reacties verschijnt, staat de nieuwste reactie een paar seconden onderaan.</string>
+</resources>

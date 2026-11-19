@@ -47,8 +47,8 @@ import java.util.UUID
 /** Who may do what in a feed (docs/spec/feeds.md §4.1). The server enforces it; the app only hides what won't work. */
 object FeedRules {
     /** Receipts and reactions: own posts, owner/admins, or everyone with *members see reactions*. */
-    fun canSeeReceipts(feed: Feed, post: FeedPost, me: String?): Boolean =
-        post.poster.userId == me || feed.isAdmin || feed.membersSeeReactions
+    fun canSeeReceipts(feed: Feed, post: FeedPost, me: String?, social: Boolean = false): Boolean =
+        post.poster.userId == me || feed.isAdmin || if (social) feed.membersSeeReceipts else feed.membersSeeReactions
 
     /** Unsend your own post; owner/admins remove anyone's. */
     fun canRemovePost(feed: Feed, post: FeedPost, me: String?): Boolean = post.poster.userId == me || feed.isAdmin
@@ -57,7 +57,7 @@ object FeedRules {
     fun canManageMember(feed: Feed, member: FeedMember, me: String?): Boolean = when {
         member.userId == me || member.role == FeedRole.OWNER -> false
         feed.isOwner -> true
-        feed.role == FeedRole.ADMIN -> member.role == FeedRole.POSTER
+        feed.role == FeedRole.ADMIN -> member.role == FeedRole.POSTER || member.role == FeedRole.MEMBER
         else -> false
     }
 

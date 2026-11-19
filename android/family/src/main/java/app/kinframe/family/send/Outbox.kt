@@ -150,9 +150,16 @@ data class OutboxSend(
     /** Feeds to post to, next to [frameIds] (feeds.md §6.1); at least one of the two is non-empty. */
     val feedIds: List<String> = emptyList(),
     val feedNames: List<String> = emptyList(),
+    // ---- family social (README §5.18–§5.20)
+    /** At most one circle per feed as that feed's audience. */
+    val circleIds: List<String> = emptyList(),
+    /** Tags the feed post as an answer to this weekly prompt. */
+    val promptId: String? = null,
+    /** Set when this is a chat message with photos, videos or a voice recording instead of a send. */
+    val chat: OutboxChat? = null,
 ) {
-    /** Frames and feeds, for "Sending to …". */
-    val recipientNames: List<String> get() = frameNames + feedNames
+    /** Frames and feeds (or the chat), for "Sending to …". */
+    val recipientNames: List<String> get() = frameNames + feedNames + listOfNotNull(chat?.conversationName)
 
     val totalBytes: Long get() = items.sumOf { it.totalUploadSize }
     val uploadedBytes: Long get() = items.sumOf { it.sentBytes() + (it.motion?.sentBytes() ?: 0) }

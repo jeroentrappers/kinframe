@@ -282,6 +282,7 @@ Designed, not built. Hidden when discovery doesn't say `telegram: true`. Chats a
 
 Kinframe as the private social hub of the family (`docs/spec/family-social.md`, API guide §5.18–§5.20, work split in
 `docs/spec/family-social-work.md`). The web has all of it (built against the contract and the mock API while the server areas were in progress); the other cells that apply are **planned**. Feeds are called
+`docs/spec/family-social-work.md`). Designed, being built: cells say **planned** until a client has it. Feeds are called
 **families** in the apps and on the web (the API keeps `feed`). Hidden when discovery doesn't say `social`, `chats`
 or `engagement` respectively. The Frame column is the Android frame app; the browser frame (`/tv/frame`) follows it.
 
@@ -289,67 +290,67 @@ or `engagement` respectively. The Frame column is the Android frame app; the bro
 
 | Feature | Web | Android | iOS | Frame | Notes |
 |---|---|---|---|---|---|
-| "Feeds" renamed "Families" everywhere in the UI | yes | planned | yes | — | Decision A. API names stay. |
-| Home tab: timeline of every family's posts and own frame posts, newest first, photos large, swipe through multi-photo posts, family or "To Oma's frame" label | yes | planned | yes | — | `getTimeline` with `before`. |
-| Reaction row: people and frames together ("❤ Oma's frame, Anna and 3 others"), who-reacted sheet | yes | planned | yes | — | `ReactionSummary`, `listReactions`. |
-| React to a post, one photo of a post, a comment (❤️ 😂 😮 😢 👍 🙏) | yes | planned | yes | — | `setReaction`. iOS: one photo of a post by long-pressing it. |
-| "View all N comments" with the two newest on the timeline | yes | planned | yes | — | `ThreadSummary.latest_comments`. |
-| Thread: comments oldest first, one level of replies, reply to a reply quotes the person | yes | planned | yes | — | `listComments` (flat, nest by `parent_id`). |
-| Write, edit ("edited"), delete own comments; tombstone "Comment deleted"; "Removed by a family admin" for the author | yes | planned | yes | — | |
-| @mentions with a picker of people who can see the post | yes | planned | differs | — | Offsets in UTF-16 code units. iOS: the picker offers the family's (or circle's) members; for frame posts the people already in the thread. |
-| Frame entries in the thread ("Oma's frame loved this", "Oma's frame: Call me!") and "Seen on 4 frames" | yes | planned | yes | — | |
-| Moderators: remove anyone's comment, turn comments off for a post (also the poster) | yes | planned | yes | — | `deleteComment`, `setThreadState`. |
-| Unread state per thread, mark read; mute a post | yes | planned | yes | — | `markThreadRead`, `setThreadMute`. |
-| Notifications: comment (bundled), reply, mention, reactions (first three, then a daily line) | yes | planned | differs | — | Push keys `comment`, `comment_reply`, `mention`, `reaction_person`, `reaction_digest`. iOS: routes for every key; grouping in Notification Center follows the APNs `thread-id`, which the server sets to the key (not the `tag`). |
-| App badge: unread chats + threads with unread mentions or replies | yes | planned | differs | — | `getBadge`, `badge.updated`. iOS: `setBadgeCount` from `getBadge`/`badge.updated` while the app runs; a closed app needs `aps.badge` from the server. |
-| Family role `member` (follows along, comments and chats, no posting); *new members can post* | yes | planned | yes | — | Send screen hides families where you are `member`. |
-| Family settings *members see reactions* (on for new families) and *members see receipts* | yes | planned | yes | — | |
-| Mute a family: posts, chat or everything | yes | planned | yes | — | `updateFeedPreferences {mute}`. |
-| Circles: list, create, rename, members, extra frames, delete, leave; circle as audience when sending ("Share with: whole family / The cousins") | yes | planned | yes | — | `circles` tag; `SendCreate.circle_ids`. |
-| Show comments on the frame: a card with the newest comment for 8 s when a photo with comments appears (frame setting *Show comments*, off by default) | yes | planned | yes | yes | App/web: the setting. Frame: the `comments` change, once per photo per day, plain text on the overlay layer; the setting is also in the frame's own settings. Browser frame (`/tv/frame`): planned. |
+| "Feeds" renamed "Families" everywhere in the UI | yes | yes | yes | — | Decision A. API names stay. |
+| Home tab: timeline of every family's posts and own frame posts, newest first, photos large, swipe through multi-photo posts, family or "To Oma's frame" label | yes | differs | yes | — | `getTimeline` with `before`. Android: with Home and Chats there are seven sections; a phone's bottom bar shows five (Home, Frames, Send, Chats, Families) and History and Settings move to the top bar of Home and Chats; the rail on tablets shows all seven. |
+| Reaction row: people and frames together ("❤ Oma's frame, Anna and 3 others"), who-reacted sheet | yes | yes | yes | — | `ReactionSummary`, `listReactions`. |
+| React to a post, one photo of a post, a comment (❤️ 😂 😮 😢 👍 🙏) | yes | yes | yes | — | `setReaction`. iOS: one photo of a post by long-pressing it. Android: a post item's row comes from `listReactions` for the photo on screen (the post has no per-item summary). |
+| "View all N comments" with the two newest on the timeline | yes | yes | yes | — | `ThreadSummary.latest_comments`. |
+| Thread: comments oldest first, one level of replies, reply to a reply quotes the person | yes | yes | yes | — | `listComments` (flat, nest by `parent_id`). |
+| Write, edit ("edited"), delete own comments; tombstone "Comment deleted"; "Removed by a family admin" for the author | yes | yes | yes | — | |
+| @mentions with a picker of people who can see the post | yes | yes | differs | — | Offsets in UTF-16 code units. iOS: the picker offers the family's (or circle's) members; for frame posts the people already in the thread. |
+| Frame entries in the thread ("Oma's frame loved this", "Oma's frame: Call me!") and "Seen on 4 frames" | yes | yes | yes | — | |
+| Moderators: remove anyone's comment, turn comments off for a post (also the poster) | yes | yes | yes | — | `deleteComment`, `setThreadState`. |
+| Unread state per thread, mark read; mute a post | yes | yes | yes | — | `markThreadRead`, `setThreadMute`. |
+| Notifications: comment (bundled), reply, mention, reactions (first three, then a daily line) | yes | yes | differs | — | Push keys `comment`, `comment_reply`, `mention`, `reaction_person`, `reaction_digest`. iOS: routes for every key; grouping in Notification Center follows the APNs `thread-id`, which the server sets to the key (not the `tag`). Android: the push `tag` is the notification tag, so a newer one replaces the older. |
+| App badge: unread chats + threads with unread mentions or replies | yes | differs | differs | — | `getBadge`, `badge.updated`. iOS: `setBadgeCount` from `getBadge`/`badge.updated` while the app runs; a closed app needs `aps.badge` from the server. Android: counts on the Home (threads) and Chats (conversations) tabs; the launcher shows the notifications' count where it supports one (no numeric app badge API). |
+| Family role `member` (follows along, comments and chats, no posting); *new members can post* | yes | yes | yes | — | Send screen hides families where you are `member`. |
+| Family settings *members see reactions* (on for new families) and *members see receipts* | yes | yes | yes | — | |
+| Mute a family: posts, chat or everything | yes | yes | yes | — | `updateFeedPreferences {mute}`. |
+| Circles: list, create, rename, members, extra frames, delete, leave; circle as audience when sending ("Share with: whole family / The cousins") | yes | yes | yes | — | `circles` tag; `SendCreate.circle_ids`. |
+| Show comments on the frame: a card with the newest comment for 8 s when a photo with comments appears (frame setting *Show comments*, off by default) | yes | yes | yes | yes | App/web: the setting. Frame: the `comments` change, once per photo per day, plain text on the overlay layer; the setting is also in the frame's own settings. Browser frame (`/tv/frame`): planned. |
 
 ### Chats (`chats`)
 
 | Feature | Web | Android | iOS | Frame | Notes |
 |---|---|---|---|---|---|
-| Chats tab: family, circle, group and direct chats by latest message, unread counts, archive | yes | planned | yes | — | `listConversations`. |
-| Start a direct chat or a group with contacts (people you share a family or a frame with) | yes | planned | yes | — | `listContacts`, `createConversation`. Decision C. |
-| Group: name, photo, add people, remove (admins), make admin, leave | yes | planned | yes | — | |
-| Messages: text with mentions, up to 30 photos and videos, replies (quoted), reactions, edit within 24 h, delete ("This message was deleted") | yes | planned | yes | — | Normal tus uploads. iOS: photos and videos prepared like sends (photo-master-v1, video-master-v1) and uploaded with tus in the foreground. |
-| Voice messages (record, up to 5 minutes, waveform, playback) | yes | planned | yes | — | AAC in m4a (iOS, Android, Safari) or Opus in WebM/Ogg (Chrome, Firefox); the server stores AAC. iOS: `AVAudioRecorder`, AAC-LC mono 48 kHz 64 kbit/s in `.m4a`. |
-| Put on a frame from a chat message (frames, families, circles; normal send flow) | yes | planned | differs | — | `putMessageOnFrame`; frame reactions show under the message. iOS: frames and families; no circle as audience yet. |
-| Share in chat from any post (post card) | yes | planned | yes | — | `shared_post_id`. |
-| Read receipts "Seen" (direct and groups up to 10), with the *show read receipts* setting | yes | planned | yes | — | `User.show_read_receipts`. |
-| Typing and recording indicator | yes | planned | yes | — | `sendTyping`, `typing` event. |
-| Mute a chat (1 h, 8 h, 1 week, always) | yes | planned | yes | — | |
-| Link previews in messages (only when the operator turned them on) | yes | planned | yes | — | Discovery `link_previews`. |
-| Invite card in the family chat for relatives without an account (the family's join link) | yes | planned | differs | — | iOS: the card opens the family's Members, where the join invite is made. |
-| Block and unblock people; Settings → Blocked people | yes | planned | yes | — | |
-| Report a comment, message or post; family admins' and operators' report lists, remove or dismiss | yes | planned | yes | — | Operators: web only. iOS also lists the operator's reports (Settings). |
-| Notifications: messages (one per chat, newest replaces older), added to a group, reports | yes | planned | differs | — | `message`, `conversation_added`, `report`. iOS: Reply from the notification is offered for the `kinframe.message` category, which the server doesn't set yet. |
-| Person profile: shared families and frames, start a chat, block, shown milestones | yes | planned | yes | — | `getPerson`. |
-| "The operator of this server could read messages" note | yes | planned | yes | — | Decision B. |
+| Chats tab: family, circle, group and direct chats by latest message, unread counts, archive | yes | yes | yes | — | `listConversations`. |
+| Start a direct chat or a group with contacts (people you share a family or a frame with) | yes | yes | yes | — | `listContacts`, `createConversation`. Decision C. |
+| Group: name, photo, add people, remove (admins), make admin, leave | yes | yes | yes | — | |
+| Messages: text with mentions, up to 30 photos and videos, replies (quoted), reactions, edit within 24 h, delete ("This message was deleted") | yes | yes | yes | — | Normal tus uploads. iOS: photos and videos prepared like sends (photo-master-v1, video-master-v1) and uploaded with tus in the foreground. Android: photos and videos go through the outbox (background upload, prepared like sends). |
+| Voice messages (record, up to 5 minutes, waveform, playback) | yes | yes | yes | — | AAC in m4a (iOS, Android, Safari) or Opus in WebM/Ogg (Chrome, Firefox); the server stores AAC. iOS: `AVAudioRecorder`, AAC-LC mono 48 kHz 64 kbit/s in `.m4a`. Android: `MediaRecorder`, AAC-LC mono 48 kHz 64 kbit/s in `.m4a`, so the server copies the stream. |
+| Put on a frame from a chat message (frames, families, circles; normal send flow) | yes | yes | differs | — | `putMessageOnFrame`; frame reactions show under the message. iOS: frames and families; no circle as audience yet. |
+| Share in chat from any post (post card) | yes | yes | yes | — | `shared_post_id`. |
+| Read receipts "Seen" (direct and groups up to 10), with the *show read receipts* setting | yes | yes | yes | — | `User.show_read_receipts`. |
+| Typing and recording indicator | yes | yes | yes | — | `sendTyping`, `typing` event. |
+| Mute a chat (1 h, 8 h, 1 week, always) | yes | yes | yes | — | |
+| Link previews in messages (only when the operator turned them on) | yes | yes | yes | — | Discovery `link_previews`. |
+| Invite card in the family chat for relatives without an account (the family's join link) | yes | differs | differs | — | iOS: the card opens the family's Members, where the join invite is made. Android: the card opens the family's People tab, where the join link is made and shared. |
+| Block and unblock people; Settings → Blocked people | yes | yes | yes | — | |
+| Report a comment, message or post; family admins' and operators' report lists, remove or dismiss | yes | yes | yes | — | Operators: web only. iOS also lists the operator's reports (Settings). Android also has the operator's list (Settings, operators only). |
+| Notifications: messages (one per chat, newest replaces older), added to a group, reports | yes | yes | differs | — | `message`, `conversation_added`, `report`. iOS: Reply from the notification is offered for the `kinframe.message` category, which the server doesn't set yet. Android: one notification per chat with its recent lines, Reply and Mark as read from the notification. |
+| Person profile: shared families and frames, start a chat, block, shown milestones | yes | yes | yes | — | `getPerson`. |
+| "The operator of this server could read messages" note | yes | yes | yes | — | Decision B. |
 
 ### Encouragement to share (`engagement`)
 
 | Feature | Web | Android | iOS | Frame | Notes |
 |---|---|---|---|---|---|
-| Home strip of frames and families with a freshness ring ("Fresh", "4 days", "2 weeks quiet") | yes | planned | yes | — | `FrameSummary.freshness`, `FeedSummary.freshness`. |
-| "Send something to Oma's frame" with suggestions (recent photos on the device, On this day, the prompt) | yes | planned | differs | — | Device photos never leave the phone until picked. Web: On this day and the prompt only. iOS: the system photo picker (newest first, nothing leaves the phone until picked) instead of scanning the library; On this day and the prompt. |
+| Home strip of frames and families with a freshness ring ("Fresh", "4 days", "2 weeks quiet") | yes | yes | yes | — | `FrameSummary.freshness`, `FeedSummary.freshness`. |
+| "Send something to Oma's frame" with suggestions (recent photos on the device, On this day, the prompt) | yes | differs | differs | — | Device photos never leave the phone until picked. Web: On this day and the prompt only. iOS: the system photo picker (newest first, nothing leaves the phone until picked) instead of scanning the library; On this day and the prompt. Android: no scan of the phone's recent photos (that needs the media permission); "Pick photos" opens the system picker, which lists recent photos first, next to On this day and the prompt. |
 | Ask for new photos (frame quick menu; "Asked today 💛"); setting to hide the button | — | — | — | yes | `deviceRequestPhotos`, `photo_request` change; `settings.social.ask_for_photos`. Frame: queued offline, then "Asked today 💛" or "Ben sent new photos 💛" until `next_allowed_at`. Browser frame: planned. |
-| "Oma would like new photos" badge and notification; who answered | yes | planned | yes | — | `FrameSummary.photo_request`, push `frame_request`. |
+| "Oma would like new photos" badge and notification; who answered | yes | yes | yes | — | `FrameSummary.photo_request`, push `frame_request`. |
 | "New photos from Ben" on the next wake | — | — | — | yes | `settings.social.new_photos_from`. From new non-backfill placements' senders and the request's `answered_by_name`; kept in Room until the screen is awake. Browser frame: planned. |
-| Reminder settings: normal / fewer / off, frame requests, weekly summary, birthday reminders, snooze, quiet hours; "we sent fewer reminders" notice | yes | planned | yes | — | `getReminderPreferences`, `updateReminderPreferences`. |
-| Reminder notifications with Snooze 1 month and Fewer reminders actions | yes | planned | yes | — | `reminder_quiet`, `reminder_streak`, `reminder_birthday`, `weekly_summary`. iOS: category `kinframe.reminder`. |
-| Family streak on the family header ("🔥 12 weeks", who helped this week); admins: goal, on/off | yes | planned | yes | — | Decision E: default 3. |
-| Weekly prompts: this week's prompt, answer with it, "6 answers to …"; admins: turn on, pick, write own, skip | yes | planned | yes | — | |
+| Reminder settings: normal / fewer / off, frame requests, weekly summary, birthday reminders, snooze, quiet hours; "we sent fewer reminders" notice | yes | yes | yes | — | `getReminderPreferences`, `updateReminderPreferences`. Android: quiet hours in whole hours. |
+| Reminder notifications with Snooze 1 month and Fewer reminders actions | yes | yes | yes | — | `reminder_quiet`, `reminder_streak`, `reminder_birthday`, `weekly_summary`. iOS: category `kinframe.reminder`. |
+| Family streak on the family header ("🔥 12 weeks", who helped this week); admins: goal, on/off | yes | yes | yes | — | Decision E: default 3. |
+| Weekly prompts: this week's prompt, answer with it, "6 answers to …"; admins: turn on, pick, write own, skip | yes | yes | yes | — | |
 | Prompt title card before the answers | — | — | — | yes | `prompts` change, `Placement.prompt_id`, `settings.social.prompt_cards`. Frame: a title card over the first answer of a run (no extra slide). Browser frame: planned. |
-| On this day in Home, share again | yes | planned | differs | — | `getOnThisDay`. iOS: opens the post, to share it again in a chat. |
-| Weekly "seen and loved" summary | yes | planned | yes | — | `getWeeklySummary`. |
-| Monthly family recap card in the family chat | yes | planned | yes | — | `monthly_recap` system message, `getFeedRecap`. |
-| Personal milestones (private, optionally shown on the profile) | yes | planned | yes | — | |
-| Email digest of comments and messages: off / daily / weekly | yes | planned | yes | — | Only with discovery `email_digest`. |
-| Family settings: quiet after N days, monthly recap, time zone | yes | planned | yes | — | `updateFeedEngagement`. |
+| On this day in Home, share again | yes | yes | differs | — | `getOnThisDay`. iOS: opens the post, to share it again in a chat. Android: your own photos go out again with `createSend`; someone else's can be shared in a chat. |
+| Weekly "seen and loved" summary | yes | yes | yes | — | `getWeeklySummary`. |
+| Monthly family recap card in the family chat | yes | yes | yes | — | `monthly_recap` system message, `getFeedRecap`. |
+| Personal milestones (private, optionally shown on the profile) | yes | yes | yes | — | |
+| Email digest of comments and messages: off / daily / weekly | yes | yes | yes | — | Only with discovery `email_digest`. |
+| Family settings: quiet after N days, monthly recap, time zone | yes | yes | yes | — | `updateFeedEngagement`. |
 | `features: ["comments", "photo_requests", "prompts"]` in the heartbeat | — | — | — | yes | Android frame app (both flavors). |
 
 ## Account settings
