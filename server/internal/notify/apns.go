@@ -110,6 +110,7 @@ func apnsBody(payload []byte) ([]byte, error) {
 		Tag     string            `json:"tag"`
 		Actions []string          `json:"actions"`
 		Badge   *int              `json:"badge"`
+		Server  string            `json:"server"`
 	}
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return nil, err
@@ -146,6 +147,9 @@ func apnsBody(payload []byte) ([]byte, error) {
 	}
 	if p.Type != nil {
 		m["type"] = fmt.Sprint(p.Type)
+	}
+	if p.Server != "" {
+		m["server"] = p.Server // README §5.22: the account a tap opens
 	}
 	return json.Marshal(m)
 }
