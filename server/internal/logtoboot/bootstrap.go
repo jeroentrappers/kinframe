@@ -604,8 +604,10 @@ func (b *Bootstrapper) signInExperience(socialTargets []string) map[string]any {
 				"identifier": "email", "password": b.cfg.PasswordSignIn, "verificationCode": true, "isPasswordPrimary": false,
 			}},
 		},
-		"languageInfo":        map[string]any{"autoDetect": true, "fallbackLanguage": "en"},
-		"passkeySignIn":       map[string]any{"enabled": true, "showPasskeyButton": true, "allowAutofill": true},
+		"languageInfo": map[string]any{"autoDetect": true, "fallbackLanguage": "en"},
+		// No passkey autofill: browsers then show an account chooser on the email field as the page opens, and picking it
+		// (often meant as "continue with Google") submits the email, fails the passkey check and mails a sign-in code.
+		"passkeySignIn":       map[string]any{"enabled": true, "showPasskeyButton": true, "allowAutofill": false},
 		"signUpProfileFields": []any{map[string]any{"name": nameProfileField}},
 		// Social buttons in this order. A first social sign-in whose provider
 		// reports a verified email that already has an account is linked to
