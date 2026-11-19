@@ -1,8 +1,10 @@
 import { dev } from '$app/environment';
 import { api, call } from './api/client';
 import { discovery } from './discovery.svelte';
-import { i18n } from './i18n/index.svelte';
-import { base64UrlToBytes, sameKey } from './pushPayload';
+import { i18n, t } from './i18n/index.svelte';
+import { actionBody, base64UrlToBytes, PUSH_ACTIONS, sameKey, type KnownPushAction } from './pushPayload';
+import { storePushLabels } from './pushLabels';
+import { toasts } from './toast.svelte';
 
 const ENDPOINT_KEY = 'kinframe.push.endpointId';
 const OFFER_KEY = 'kinframe.push.offerDismissed';
@@ -75,11 +77,14 @@ class PushState {
 			if (d?.type === 'kinframe.navigate' && d.url?.startsWith('/')) {
 				void import('$app/navigation').then(({ goto }) => goto(d.url!));
 			}
+			const a = (d as { action?: string } | null)?.action;
+			if (d?.type === 'kinframe.pushAction' && a && (PUSH_ACTIONS as readonly string[]).includes(a)) void this.applyAction(a as KnownPushAction);
 		});
 		try {
 			const reg = await navigator.serviceWorker.getRegistration('/');
 			const sub = await reg?.pushManager.getSubscription();
 			this.subscribed = Boolean(sub) && this.permission === 'granted';
+			if (this.subscribed) this.storeLabels();
 			if (sub && this.subscribed) await this.#register(sub);
 		} catch {
 			this.subscribed = false;
@@ -125,6 +130,7 @@ class PushState {
 			sub ??= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
 			await this.#register(sub);
 			this.subscribed = true;
+			this.storeLabels();
 			return true;
 		} finally {
 			this.busy = false;
@@ -161,8 +167,27 @@ class PushState {
 		this.subscribed = false;
 	}
 
+	/** A reminder's "Snooze 1 month" or "Fewer reminders" button (README §6.3, §5.20). */
+	async applyAction(a: KnownPushAction): Promise<boolean> {
+		try {
+			await call(api.PATCH('/v1/me/reminders', { body: actionBody(a) }));
+			toasts.success(a === 'snooze_month' ? t('engagement.snoozedToast') : t('engagement.fewerToast'));
+			return true;
+		} catch {
+			toasts.error(t('engagement.actionFailed'));
+			return false;
+		}
+	}
+
+	/** The notification buttons' labels in the current language, for the service worker. */
+	storeLabels() {
+		if (!this.supported) return;
+		void storePushLabels({ snooze_month: t('engagement.pushSnooze'), fewer_reminders: t('engagement.pushFewer') });
+	}
+
 	/** Push texts are localized by the server; tell it when the language changes. */
 	async syncLocale() {
+		this.storeLabels();
 		if (!this.subscribed) return;
 		const reg = await navigator.serviceWorker.getRegistration('/');
 		const sub = await reg?.pushManager.getSubscription();

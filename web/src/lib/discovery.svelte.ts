@@ -136,6 +136,37 @@ class DiscoveryState {
 		return this.telegram && this.doc?.telegram_privacy_mode === true;
 	}
 
+	// Family social (docs/spec/family-social.md, README §5.18–§5.20). Each area is hidden until the server says so.
+	/** Home timeline, threads, people's reactions, mentions, the `member` role and circles: only with feeds. */
+	get social() {
+		return this.feeds && this.doc?.social === true;
+	}
+
+	/** Conversations (direct, group, family, circle), blocks and reports. */
+	get chats() {
+		return this.doc?.chats === true;
+	}
+
+	/** Voice messages in chats (the server has ffmpeg). */
+	get voiceMessages() {
+		return this.chats && this.doc?.voice_messages === true;
+	}
+
+	/** Link previews in chat messages (the operator's opt-in). */
+	get linkPreviews() {
+		return this.chats && this.doc?.link_previews === true;
+	}
+
+	/** Freshness, photo requests, reminders, streaks, prompts, On this day, summaries, recaps and milestones. */
+	get engagement() {
+		return this.doc?.engagement === true;
+	}
+
+	/** The daily or weekly email digest (the server can send mail). */
+	get emailDigest() {
+		return this.doc?.email_digest === true;
+	}
+
 	/** Logto is usable when the server published an issuer and a web client id. */
 	get logtoConfigured() {
 		return Boolean(this.doc?.auth?.issuer && this.doc?.auth?.web_client_id);

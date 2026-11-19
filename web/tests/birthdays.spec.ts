@@ -152,7 +152,7 @@ test('poster suggests instead of adding, and doesn’t see private years', async
 	await expect(dialog.getByLabel('Name')).toHaveValue('Anna');
 	await dialog.getByLabel('Day').selectOption('7');
 	await dialog.getByRole('button', { name: 'Suggest a birthday' }).click();
-	await expect(page.getByText('Suggested. An admin of the feed will check it.')).toBeVisible();
+	await expect(page.getByText('Suggested. An admin of the family will check it.')).toBeVisible();
 	await expect(page.getByText('Waiting for an admin')).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Add my birthday' })).toHaveCount(0);
 	const create = st.calls.find((c) => c.method === 'POST' && c.path === `/v1/feeds/${feed.id}/birthdays`);

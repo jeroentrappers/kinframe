@@ -11,6 +11,8 @@
 	import { feeds } from '$lib/feeds.svelte';
 	import { live } from '$lib/live.svelte';
 	import { push } from '$lib/push.svelte';
+	import { badge, chats } from '$lib/social.svelte';
+	import { personName } from '$lib/social';
 	import { toasts } from '$lib/toast.svelte';
 	import { applyDocumentLocale, hasSavedLocale, i18n, t, tn } from '$lib/i18n/index.svelte';
 	import { watching } from '$lib/googleImport';
@@ -92,6 +94,7 @@
 		applyDocumentLocale(i18n.locale);
 		void boot();
 		const off = live.on((e) => {
+			chats.handle(e);
 			if (e.type === 'frame.status') frames.setStatus(e.frame_id, e.online, e.last_seen_at);
 			else if (e.type === 'membership.updated') void frames.load(true);
 			else if (e.type === 'join_request') {
@@ -147,6 +150,31 @@
 				});
 			} else if (e.type === 'birthday.today') void showBirthdaysToday(e.birthdays);
 			// Google Photos imports (photo-sources.md §10): a dialog that follows the import shows it; otherwise a toast.
+			// Family social (README §6.2): the badge, the chat list, reports, frame requests and milestones.
+			else if (e.type === 'badge.updated') badge.set(e.badge);
+			else if (e.type === 'report.created') {
+				const feedId = e.report.feed_id;
+				toasts.show(t('chat.newReport'), {
+					action: { label: t('common.review'), run: () => goto(feedId ? `/feeds/${feedId}?tab=reports` : '/settings/reports') },
+					duration: 9000
+				});
+			} else if (e.type === 'photo_request.created') {
+				void frames.load(true);
+				const r = e.request;
+				toasts.show(t('engagement.wouldLikeToast', { frame: r.frame_name }), {
+					action: { label: t('engagement.sendPhotos'), run: () => goto(`/send?frame=${r.frame_id}`) },
+					duration: 12000
+				});
+			} else if (e.type === 'photo_request.updated') {
+				void frames.load(true);
+				if (e.request.state === 'answered' && e.request.answered_by && e.request.answered_by.user_id !== auth.me?.id)
+					toasts.show(t('engagement.answeredToast', { name: personName(e.request.answered_by, t('social.formerMember')), frame: e.request.frame_name }));
+			} else if (e.type === 'milestone.achieved') {
+				toasts.success(t(`engagement.milestone.${e.milestone.key}`));
+			} else if (e.type === 'streak.updated') {
+				const f = feeds.get(e.feed_id);
+				if (f) feeds.upsert({ ...f, streak: e.streak });
+			}
 			else if (e.type === 'google_import.updated' && e.import.status === 'done' && !watching.has(e.import.id)) {
 				toasts.show(tn('gimport.added', e.import.progress.imported), {
 					action: { label: t('common.review'), run: () => goto(`/photo-sources?google_import=${e.import.id}`) },
@@ -170,10 +198,15 @@
 			void frames.load();
 			void feeds.load();
 			void push.init();
+			badge.watchTitle();
+			void badge.load();
+			void chats.load();
 		} else if (auth.status === 'signed_out') {
 			live.stop();
 			frames.reset();
 			feeds.reset();
+			chats.reset();
+			badge.reset();
 		}
 	});
 

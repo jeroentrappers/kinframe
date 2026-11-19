@@ -4,23 +4,29 @@
 	import { auth } from '$lib/auth.svelte';
 	import { live } from '$lib/live.svelte';
 	import { discovery } from '$lib/discovery.svelte';
-	import { t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { t, tn, type MessageKey } from '$lib/i18n/index.svelte';
 	import Logo from './Logo.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
 	import Avatar from './Avatar.svelte';
+	import { badge, chats } from '$lib/social.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
-	type Tab = { href: string; label: MessageKey; icon: IconName };
-	const FEEDS: Tab = { href: '/feeds', label: 'nav.feeds', icon: 'feed' };
-	// Feeds sit between History and Settings, only when the server has them (discovery `feeds`).
+	type Tab = { href: string; label: MessageKey; icon: IconName; badge?: number; mobile?: boolean };
+	// Feeds ("Families") sit between History and Settings, only when the server has them (discovery `feeds`).
+	// Family social adds Home first and Chats; on phones History and Settings then move to the top bar.
+	const social = $derived(discovery.social);
 	const tabs = $derived<Tab[]>([
-		{ href: '/frames', label: 'nav.frames', icon: 'frame' },
-		{ href: '/send', label: 'nav.send', icon: 'send' },
-		{ href: '/history', label: 'nav.history', icon: 'history' },
-		...(discovery.feeds ? [FEEDS] : []),
-		{ href: '/settings', label: 'nav.settings', icon: 'settings' }
+		...(social ? [{ href: '/home', label: 'nav.home' as const, icon: 'home' as const, badge: badge.badge.threads, mobile: true }] : []),
+		{ href: '/frames', label: 'nav.frames', icon: 'frame', mobile: true },
+		{ href: '/send', label: 'nav.send', icon: 'send', mobile: true },
+		{ href: '/history', label: 'nav.history', icon: 'history', mobile: !social || !discovery.chats },
+		...(discovery.chats ? [{ href: '/chats', label: 'nav.chats' as const, icon: 'message' as const, badge: chats.loaded ? chats.unread : badge.badge.conversations, mobile: true }] : []),
+		...(discovery.feeds ? [{ href: '/feeds', label: 'nav.feeds' as const, icon: (social ? 'users' : 'feed') as IconName, mobile: true }] : []),
+		{ href: '/settings', label: 'nav.settings', icon: 'settings', mobile: !social }
 	]);
+	const mobileTabs = $derived(tabs.filter((x) => x.mobile));
+	const home = $derived(social ? '/home' : '/frames');
 
 	const isActive = (href: string) => page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 </script>
@@ -29,7 +35,7 @@
 
 <header class="topbar">
 	<div class="container bar">
-		<a href="/frames" class="brand" aria-label="kinframe">
+		<a href={home} class="brand" aria-label="kinframe">
 			<Logo size={30} />
 		</a>
 		<nav class="desktop-nav" aria-label={t('a11y.mainNav')}>
@@ -37,6 +43,7 @@
 				<a href={tab.href} class:active={isActive(tab.href)} aria-current={isActive(tab.href) ? 'page' : undefined}>
 					<Icon name={tab.icon} size={18} />
 					{t(tab.label)}
+					{#if tab.badge}<span class="nav-badge num" aria-label={tn('nav.unread', tab.badge)}>{tab.badge > 99 ? '99+' : tab.badge}</span>{/if}
 				</a>
 			{/each}
 		</nav>
@@ -52,9 +59,13 @@
 				{t('nav.sendPhotos')}
 			</a>
 		{/if}
+		{#if social && !mobileTabs.some((x) => x.href === '/history')}
+			<a href="/history" class="btn btn-ghost btn-icon top-history" class:active={isActive('/history')} aria-label={t('nav.history')}><Icon name="history" size={20} /></a>
+		{/if}
 		<a
 			href="/settings"
 			class="me"
+			class:me-mobile={social}
 			class:active={isActive('/settings')}
 			aria-label={t('nav.settings')}
 			aria-current={isActive('/settings') ? 'page' : undefined}
@@ -68,10 +79,10 @@
 	{@render children()}
 </main>
 
-<nav class="tabbar" aria-label={t('a11y.mainNav')} style="--tabs:{tabs.length}">
-	{#each tabs as tab}
+<nav class="tabbar" aria-label={t('a11y.mainNav')} style="--tabs:{mobileTabs.length}">
+	{#each mobileTabs as tab}
 		<a href={tab.href} class:active={isActive(tab.href)} aria-current={isActive(tab.href) ? 'page' : undefined}>
-			<span class="tab-icon"><Icon name={tab.icon} size={22} stroke={isActive(tab.href) ? 2.3 : 1.8} /></span>
+			<span class="tab-icon"><Icon name={tab.icon} size={22} stroke={isActive(tab.href) ? 2.3 : 1.8} />{#if tab.badge}<span class="tab-badge num" aria-label={tn('nav.unread', tab.badge)}>{tab.badge > 99 ? '99+' : tab.badge}</span>{/if}</span>
 			<span class="tab-label">{t(tab.label)}</span>
 		</a>
 	{/each}
@@ -133,6 +144,35 @@
 		display: none;
 		text-decoration: none;
 	}
+	.me.me-mobile {
+		display: inline-flex;
+	}
+	.top-history.active {
+		color: var(--primary);
+	}
+	.nav-badge,
+	.tab-badge {
+		min-width: 18px;
+		height: 18px;
+		padding: 0 5px;
+		border-radius: var(--r-full);
+		background: var(--primary);
+		color: var(--on-primary);
+		font-size: 0.68rem;
+		font-weight: 800;
+		display: inline-grid;
+		place-items: center;
+		line-height: 1;
+	}
+	.tab-icon {
+		position: relative;
+	}
+	.tab-badge {
+		position: absolute;
+		top: -2px;
+		inset-inline-end: 6px;
+		box-shadow: 0 0 0 2px var(--surface);
+	}
 	.me.active :global(.avatar) {
 		box-shadow: 0 0 0 2px var(--primary);
 	}
@@ -193,6 +233,9 @@
 		background: var(--primary-soft);
 	}
 	@media (min-width: 860px) {
+		.top-history {
+			display: none;
+		}
 		.desktop-nav,
 		.send-cta,
 		.me {

@@ -2,6 +2,7 @@
 // Shapes follow docs/api/openapi.yaml.
 import type { Page, Route, WebSocketRoute } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
+import { socialRoute, type SocialMock } from './mock-social';
 
 type S = components['schemas'];
 type Send = S['Send'];
@@ -96,6 +97,8 @@ export interface MockState {
 	telegramLink: S['TelegramLink'] | null;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
+	/** Family social (README §5.18–§5.20), tests/mock-social.ts; created on first use. */
+	social?: SocialMock;
 }
 
 export function emptyState(): MockState {
@@ -437,6 +440,12 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 
 		if (!req.headers()['authorization']?.startsWith('Bearer ') && !path.startsWith('/v1/uploads/'))
 			return problem(route, 401, 'unauthorized', 'Unauthorized');
+
+		// ---- family social (tests/mock-social.ts)
+		{
+			const handled = await socialRoute(state, route, method, path, url, body);
+			if (handled !== null) return handled;
+		}
 
 		// ---- me
 		if (path === '/v1/me' && method === 'GET') return state.me ? json(route, 200, state.me) : problem(route, 401, 'unauthorized', 'x');
@@ -1127,8 +1136,8 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		// ---- feeds and subscriptions (README §5.12)
 		const feedOf = (id: string) => state.feeds.find((f) => f.id === id);
 		const sumOf = (f: S['Feed']): S['FeedSummary'] => {
-			const { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at } = f;
-			return { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at };
+			const { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at, freshness, streak, conversation_id } = f;
+			return { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at, freshness, streak, conversation_id };
 		};
 		const subById = (id: string) => state.subscriptions.find((x) => x.id === id);
 		if (path === '/v1/feeds' && method === 'GET') return json(route, 200, state.feeds.map(sumOf));

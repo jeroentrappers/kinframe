@@ -73,13 +73,23 @@
 		cast: '<path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 12a9 9 0 0 1 8 8"/><path d="M2 16a5 5 0 0 1 4 4"/><path d="M2 20h.01"/>',
 		mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>',
 		plane: '<path d="M21.5 3.5 2.8 10.7c-.9.4-.9 1.6 0 1.9l4.7 1.6 1.8 5.6c.3.8 1.3 1 1.9.4l2.6-2.5 4.7 3.5c.7.5 1.7.1 1.9-.7L22.9 4.9c.2-.9-.6-1.7-1.4-1.4z"/><path d="m7.5 14.2 10-7.2-7.6 8.6"/>',
+		home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v10a2 2 0 0 0 2 2h3v-6h4v6h3a2 2 0 0 0 2-2V9"/>',
+		smile: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/>',
+		reply: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+		mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+		flag: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
+		ban: '<circle cx="12" cy="12" r="9"/><path d="m5.7 5.7 12.6 12.6"/>',
+		archive: '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+		lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+		paperclip: '<path d="m21 11-8.6 8.6a5 5 0 0 1-7-7l8.5-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L16 7"/>',
+		flame: '<path d="M12 22c4 0 7-2.8 7-7 0-3.5-2.5-6-4-8-.5 2-1.6 3-3 3 .5-3-1-6-4-8 0 4-5 6.5-5 12 0 4.2 3.5 8 9 8z"/>',
 		bellOff: '<path d="M8.7 3.9A6 6 0 0 1 18 9c0 3 .7 5 1.5 6.3"/><path d="M17 17H4s3-2 3-8c0-.6.1-1.2.3-1.8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/><path d="m2 2 20 20"/>'
 	} as const;
 
 	export type IconName = keyof typeof ICONS;
 
 	/** Directional icons that flip in right-to-left languages (Arabic, Hebrew). */
-	const MIRRORED: ReadonlySet<IconName> = new Set<IconName>(['chevronLeft', 'chevronRight', 'logout', 'send', 'prev', 'next']);
+	const MIRRORED: ReadonlySet<IconName> = new Set<IconName>(['chevronLeft', 'chevronRight', 'logout', 'send', 'prev', 'next', 'reply']);
 </script>
 
 <script lang="ts">

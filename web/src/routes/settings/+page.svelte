@@ -16,6 +16,8 @@
 	import Icon from '$components/Icon.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
 	import TelegramLinkSection from '$components/telegram/TelegramLinkSection.svelte';
+	import SocialSettings from '$components/social/SocialSettings.svelte';
+	import { PUSH_ACTIONS, type KnownPushAction } from '$lib/pushPayload';
 
 	// After a first sign-in without a name claim: ask once, then continue where they were going.
 	const welcome = page.url.searchParams.get('welcome') === '1';
@@ -76,6 +78,16 @@
 	}
 
 	const limits = $derived(discovery.limits);
+
+	// A reminder's notification button when no tab was open (README §6.3): the worker opened this page with it.
+	$effect(() => {
+		const a = page.url.searchParams.get('push_action');
+		if (!a || !(PUSH_ACTIONS as readonly string[]).includes(a)) return;
+		const url = new URL(page.url);
+		url.searchParams.delete('push_action');
+		void goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+		void push.applyAction(a as KnownPushAction);
+	});
 
 	async function togglePush(e: Event & { currentTarget: HTMLInputElement }) {
 		const on = e.currentTarget.checked;
@@ -204,6 +216,9 @@
 				{/if}
 			{/if}
 		</section>
+
+		<!-- Family social: reminders, email digest, read receipts, blocked people, milestones -->
+		<SocialSettings />
 
 		{#if discovery.telegram}
 			<TelegramLinkSection />

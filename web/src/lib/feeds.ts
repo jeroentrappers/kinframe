@@ -17,7 +17,12 @@ import type { Reaction } from './logic';
 
 // ---------------------------------------------------------------- roles (feeds.md §4.1)
 
-export const FEED_ROLE_ORDER: FeedRole[] = ['owner', 'admin', 'poster'];
+export const FEED_ROLE_ORDER: FeedRole[] = ['owner', 'admin', 'poster', 'member'];
+
+/** Every role but `member` ("Reader": reads, comments and chats, docs/spec/family-social.md §3) posts photos. */
+export function canPostToFeed(role: FeedRole | undefined | null): boolean {
+	return !!role && role !== 'member';
+}
 
 export function isFeedAdmin(role: FeedRole | undefined | null): boolean {
 	return role === 'owner' || role === 'admin';
@@ -28,11 +33,11 @@ export function canInviteToFeed(feed: { role: FeedRole; posters_can_invite?: boo
 	return isFeedAdmin(feed.role) || feed.posters_can_invite === true;
 }
 
-/** Change role or remove: the owner anyone but themself; admins posters only. */
+/** Change role or remove: the owner anyone but themself; admins posters and members (readers) only. */
 export function canEditFeedMember(actor: { role: FeedRole; userId: string | undefined }, member: Pick<FeedMember, 'user_id' | 'role'>): boolean {
 	if (member.user_id === actor.userId || member.role === 'owner') return false;
 	if (actor.role === 'owner') return true;
-	return actor.role === 'admin' && member.role === 'poster';
+	return actor.role === 'admin' && (member.role === 'poster' || member.role === 'member');
 }
 
 /** The poster unsends; owner and admins remove anyone's post. */

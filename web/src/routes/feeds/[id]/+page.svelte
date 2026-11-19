@@ -21,8 +21,15 @@
 	import PhotoSources from '$components/sources/PhotoSources.svelte';
 	import EmailInbox from '$components/inbox/EmailInbox.svelte';
 	import TelegramSection from '$components/telegram/TelegramSection.svelte';
+	import EngagementSettings from '$components/social/EngagementSettings.svelte';
+	import FeedCircles from '$components/social/FeedCircles.svelte';
+	import FeedSocialBar from '$components/social/FeedSocialBar.svelte';
+	import FeedTimeline from '$components/social/FeedTimeline.svelte';
+	import ReportList from '$components/social/ReportList.svelte';
 
-	type Tab = 'posts' | 'birthdays' | 'members' | 'subscriptions' | 'sources' | 'invites' | 'settings';
+	type Tab = 'posts' | 'birthdays' | 'members' | 'circles' | 'subscriptions' | 'sources' | 'invites' | 'reports' | 'settings';
+	/** Family social: the posts tab is a timeline with threads; the classic list keeps the per-frame details. */
+	let classicPosts = $state(false);
 
 	let feed = $state<Feed | null>(null);
 	let error = $state<unknown>(null);
@@ -66,11 +73,13 @@
 				? [{ id: 'birthdays' as const, label: 'feed.tabBirthdays' as const, icon: 'cake' as const, badge: (isFeedAdmin(feed.role) && feed.pending_birthday_count) || undefined }]
 				: []),
 			{ id: 'members', label: 'feed.tabMembers', icon: 'users', badge: feed.pending_join_request_count || undefined },
+			...(discovery.social ? [{ id: 'circles' as const, label: 'social.tabCircles' as const, icon: 'users' as const }] : []),
 			{ id: 'subscriptions', label: 'feed.tabFrames', icon: 'frame', badge: feed.pending_subscription_count || undefined }
 		];
 		// Photo sources (photo-sources.md §4.2): the feed's owner and admins.
 		if (discovery.photoSources && isFeedAdmin(feed.role)) list.push({ id: 'sources', label: 'feed.tabSources', icon: 'refresh' });
 		if (canInviteToFeed(feed)) list.push({ id: 'invites', label: 'feed.tabInvites', icon: 'link' });
+		if (discovery.chats && isFeedAdmin(feed.role)) list.push({ id: 'reports', label: 'social.tabReports', icon: 'flag' });
 		if (isFeedAdmin(feed.role)) list.push({ id: 'settings', label: 'feed.tabSettings', icon: 'settings' });
 		return list;
 	});
@@ -133,6 +142,10 @@
 			</div>
 		</header>
 
+		{#if discovery.social || discovery.engagement || discovery.chats}
+			<FeedSocialBar {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
+		{/if}
+
 		<div class="tabs segmented" role="tablist" aria-label={t('feed.sections')}>
 			{#each tabs as tb, i (tb.id)}
 				<button
@@ -151,7 +164,16 @@
 
 		<div id="fpanel-{tab}" role="tabpanel" aria-labelledby="ftab-{tab}" class="panel" tabindex="-1">
 			{#if tab === 'posts'}
-				<FeedPosts {feed} />
+				{#if discovery.social && !classicPosts}
+					<FeedTimeline {feed} ondetails={() => (classicPosts = true)} />
+				{:else}
+					{#if discovery.social}<button class="btn btn-ghost btn-sm back-timeline" onclick={() => (classicPosts = false)}><Icon name="chevronLeft" size={16} />{t('social.backToTimeline')}</button>{/if}
+					<FeedPosts {feed} />
+				{/if}
+			{:else if tab === 'circles'}
+				<FeedCircles {feed} />
+			{:else if tab === 'reports'}
+				<ReportList feedId={feed.id} load={() => call(api.GET('/v1/feeds/{feedId}/reports', { params: { path: { feedId: feed!.id } } }))} />
 			{:else if tab === 'birthdays'}
 				<FeedBirthdays {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
 			{:else if tab === 'members'}
@@ -164,6 +186,7 @@
 				<FeedInvites {feed} />
 			{:else if tab === 'settings'}
 				<FeedSettings {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
+				{#if discovery.engagement}<EngagementSettings {feed} />{/if}
 				<!-- Email and Telegram post to the feed (email-inbox.md §4.2, telegram.md §4.2): the owner and admins. -->
 				{#if discovery.emailInbox}
 					<EmailInbox target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('email')} />
@@ -228,5 +251,8 @@
 	}
 	.panel {
 		outline: none;
+	}
+	.back-timeline {
+		margin-bottom: var(--s-3);
 	}
 </style>
