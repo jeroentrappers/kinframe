@@ -126,6 +126,11 @@ func (s *Server) engagementAfterSend(ctx context.Context, sendID uuid.UUID) {
 	}
 }
 
+// AfterPersonalSend runs afterPersonalSend (tests, and sends made outside the API's own handlers).
+func (s *Server) AfterPersonalSend(ctx context.Context, sendID uuid.UUID) {
+	s.afterPersonalSend(ctx, sendID)
+}
+
 // engagementAfterFanout follows a feed post's fanout: placements on subscribed frames answer their photo
 // requests (the post's streak count was made by afterPersonalSend).
 func (s *Server) engagementAfterFanout(ctx context.Context, postID uuid.UUID) {
