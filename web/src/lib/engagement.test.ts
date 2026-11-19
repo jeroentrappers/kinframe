@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { currentPrompt, freshnessWords, lastWeekOf, monthDate, nextMondays, requestOpen, ringStyle, weekOf } from './engagement';
+import { currentPrompt, familiesToPreselect, freshnessWords, lastWeekOf, monthDate, nextMondays, requestOpen, requestSendUrl, ringStyle, weekOf } from './engagement';
 import { actionBody, pushActions, pushTag, pushUrl } from './pushPayload';
+
+describe('frame requests through a family', () => {
+	it('preselects the families reaching the frame that you can post to', () => {
+		expect(familiesToPreselect(['b', 'c'], ['a', 'c', 'b'])).toEqual(['c', 'b']);
+		expect(familiesToPreselect(['x'], ['a'])).toEqual([]);
+		expect(requestSendUrl('f1', 'r1')).toBe('/send?frame=f1&request=r1');
+		expect(requestSendUrl('f1')).toBe('/send?frame=f1');
+	});
+});
 
 describe('freshness', () => {
 	it('uses words, not numbers', () => {
@@ -65,6 +74,8 @@ describe('family social pushes', () => {
 		expect(pushUrl({ key: 'report', ids: { feed_id: FEED } })).toBe(`/feeds/${FEED}?tab=reports`);
 		expect(pushUrl({ key: 'report', ids: {} })).toBe('/settings/reports');
 		expect(pushUrl({ key: 'frame_request', ids: { frame_id: FRAME } })).toBe(`/send?frame=${FRAME}`);
+		// The request id lets the send page find the families of a frame the person isn't on.
+		expect(pushUrl({ key: 'frame_request', ids: { frame_id: FRAME, request_id: POST } })).toBe(`/send?frame=${FRAME}&request=${POST}`);
 		expect(pushUrl({ key: 'reminder_quiet', ids: { frame_id: FRAME } })).toBe(`/send?frame=${FRAME}`);
 		expect(pushUrl({ key: 'reminder_streak', ids: { feed_id: FEED } })).toBe(`/feeds/${FEED}`);
 		expect(pushUrl({ key: 'weekly_summary', ids: { week_of: '2026-11-16' } })).toBe('/home?week=2026-11-16');

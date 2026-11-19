@@ -5715,6 +5715,13 @@ components:
                 expires_at:
                     format: date-time
                     type: string
+                feed_ids:
+                    description: |
+                        The families with an active subscription to the frame. A family member who is not on the frame answers
+                        the request by posting to one of these (the apps preselect it when sending).
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    type: array
                 frame_id:
                     $ref: '#/components/schemas/Id'
                 frame_name:

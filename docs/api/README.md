@@ -896,8 +896,8 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `typing` | `conversation_id`, `user_id`, `display_name`, `activity` (`typing`/`recording`), `expires_at` | Someone is typing; never stored |
 | `badge.updated` | `badge` (`Badge`) | The app badge changed |
 | `report.created` | `report` (`Report`) | A new report to handle (the feed's owner/admins, or operators) |
-| `photo_request.created` | `request` (`PhotoRequest`) | A frame asked for new photos (its recipients, §5.20) |
-| `photo_request.updated` | `request` | Answered or expired |
+| `photo_request.created` | `request` (`PhotoRequest`) | A frame asked for new photos (its recipients, §5.20, with the push; everyone else who can see the request, i.e. the frame's members and its families' members, without one) |
+| `photo_request.updated` | `request` | Answered or expired (the same people) |
 | `streak.updated` | `feed_id`, `streak` (`FeedStreakSummary`) | This week's count, the goal or the streak changed (family members) |
 | `prompt.updated` | `feed_id`, `prompt` (`FeedPrompt`) | The week's prompt started, or an admin changed it |
 | `milestone.achieved` | `milestone` (`Milestone`) | The receiver reached a personal milestone (websocket only) |

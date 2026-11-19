@@ -8506,6 +8506,11 @@ export interface components {
             answered_at?: string | null;
             answered_by?: components["schemas"]["PersonRef"] | null;
             freshness?: components["schemas"]["Freshness"];
+            /**
+             * @description The families with an active subscription to the frame. A family member who is not on the frame answers
+             *     the request by posting to one of these (the apps preselect it when sending).
+             */
+            feed_ids?: components["schemas"]["Id"][];
         };
         /** @description The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change). */
         FramePhotoRequest: {

@@ -46,7 +46,8 @@ export function pushUrl(p: PushPayload): string {
 	}
 	if (p.key === 'reaction_digest') return '/home';
 	if (p.key === 'report') return feed ? `/feeds/${feed}?tab=reports` : '/settings/reports';
-	if ((p.key === 'frame_request' || p.key === 'reminder_quiet') && frame) return `/send?frame=${frame}`;
+	if (p.key === 'frame_request' && frame) return `/send?frame=${frame}${id(p.ids?.request_id) ? `&request=${id(p.ids?.request_id)}` : ''}`;
+	if (p.key === 'reminder_quiet' && frame) return `/send?frame=${frame}`;
 	if (p.key === 'reminder_streak' && feed) return `/feeds/${feed}`;
 	if (p.key === 'reminder_birthday' && feed) return `/send?feed=${feed}`;
 	if (p.key === 'weekly_summary') {
