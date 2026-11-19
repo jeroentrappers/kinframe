@@ -166,6 +166,14 @@ func TestLeavingTakeAwayAndKeep(t *testing.T) {
 	if len(away) != 3 || dig(away[0], "taken_away", "by_name") != "Tom" || dig(away[0], "taken_away", "taking_id") != taking {
 		t.Fatalf("taken away list: %v", away)
 	}
+	// Their thumbnails still load for the frame's managers (the trash and the "Pick photos" grid), not for others.
+	thumb := "/v1/items/" + dig(away[0], "item", "id").(string) + "/media/thumb_256"
+	if r := e.do(req{method: "GET", path: thumb, token: lies.token}); r.StatusCode != 302 {
+		t.Fatalf("thumbnail of a taken-away photo for the frame's owner: %d %s", r.StatusCode, r.body)
+	}
+	if r := e.do(req{method: "GET", path: thumb, token: ben.token}); r.StatusCode != 404 {
+		t.Fatalf("thumbnail of a taken-away photo for a family member: %d", r.StatusCode)
+	}
 	// The frame gets placement.remove for each.
 	_, ch := e.allChanges(dOma, before)
 	if rm := removals(ch); len(rm) != 3 {
