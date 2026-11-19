@@ -136,6 +136,22 @@ OpenAPI 3.1. Afterwards `tools/openapi/split.py` lays the output out as it is ch
 
 ## Architecture
 
+**Several accounts** (`docs/spec/multi-server.md` §2, README §5.22). The app keeps a list of accounts in the App
+Group (`AccountStore`: server address and discovery, the first is primary), one `AppModel` each with its own
+`AuthService`, API client, websocket, push registration, caches and discovery flags (`Kinframe/App/Accounts.swift`).
+The primary model owns navigation; the others forward tabs, paths and preselections to it, and every route carries
+its account so a detail screen gets the right model in the environment. Home, Chats (badge = the sum), Frames,
+Families, History and the composer list every account, with a server chip (discovery `server_name`) when there is
+more than one; Settings → Accounts adds a server (the onboarding screens run with the new account's model), signs out
+of one, makes one primary and opens each account's own Settings. A send to recipients on two servers is one outbox
+job per server (`ComposeModel.makeJobs`); the first prepares the media and the others take its masters
+(`OutboxJob.preparedBy`); the runner holds one session per server. The share extension reads the same list and shows
+recipients grouped per server. A tapped notification opens the account named by the payload's `server`. A link of a
+server without an account asks "This family is on kinframe.janssens.be. Sign in there to join." and adds that server
+after sign-in. An install from before keeps its session: its account is `default`, whose Keychain names are the old
+ones. The Logto SDK keeps one session in its own Keychain service, so each account keeps its tokens under its own
+names and lends them to a Logto client right before using it (`LogtoSlot`).
+
 **Server and sign-in.** Onboarding validates a server by fetching `/.well-known/kinframe` and shows its name and
 version. `ServerConfig` (address plus discovery) lives in the App Group's user defaults. `AuthService` signs in with
 the Logto Swift SDK: Authorization Code with PKCE in `ASWebAuthenticationSession` (ephemeral, so there's no extra
