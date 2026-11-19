@@ -563,17 +563,28 @@ func TestFeedBackfillAndRemovals(t *testing.T) {
 	if len(upsertsByID(old1)) != 1 || benPl == "" {
 		t.Fatalf("new post on the old frame: %v", old1)
 	}
+	// Only history placements count below: Ben's new placement may show up again when a later update of it (media
+	// or freshness bookkeeping) lands after old1 was read.
+	backfillOnly := func(up map[string]map[string]any) map[string]map[string]any {
+		out := map[string]map[string]any{}
+		for id, p := range up {
+			if p["backfill"] == true {
+				out[id] = p
+			}
+		}
+		return out
+	}
 	e.heartbeat(dOld) // still no feature
-	if up := upsertsByID(e.changes(dOld, old1["next_seq"].(float64))); len(up) != 0 {
+	if up := backfillOnly(upsertsByID(e.changes(dOld, old1["next_seq"].(float64)))); len(up) != 0 {
 		t.Fatalf("released without the feature: %v", up)
 	}
 	e.heartbeat(dOld, "feed_backfill")
 	old2 := e.changes(dOld, old1["next_seq"].(float64))
-	if up := upsertsByID(old2); len(up) != 2 {
+	if up := backfillOnly(upsertsByID(old2)); len(up) != 2 {
 		t.Fatalf("released backfill: %v", old2)
 	}
-	for _, p := range upsertsByID(old2) {
-		if p["backfill"] != true {
+	for id, p := range upsertsByID(old2) {
+		if p["backfill"] != true && id != benPl {
 			t.Fatalf("released placement: %v", p)
 		}
 	}
