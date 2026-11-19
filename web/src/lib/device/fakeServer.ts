@@ -9,9 +9,15 @@ export interface FakeCall {
 	auth: string | null;
 }
 
-export function placementChange(id: string, o: Partial<{ caption: string; sender: string; hidden: boolean; kind: 'photo' | 'video'; received: string; albums: string[]; media: boolean }> = {}): NonNullable<Change['placement']> {
+export function placementChange(
+	id: string,
+	o: Partial<{ caption: string; sender: string; hidden: boolean; kind: 'photo' | 'video'; received: string; albums: string[]; media: boolean; origin: 'send' | 'share' | 'feed' | 'import'; backfill: boolean; prompt: string }> = {}
+): NonNullable<Change['placement']> {
 	return {
 		id,
+		...(o.origin ? { origin: o.origin } : {}),
+		...(o.backfill ? { backfill: true } : {}),
+		...(o.prompt ? { prompt_id: o.prompt } : {}),
 		frame_id: 'f1',
 		status: 'ready',
 		hidden: o.hidden ?? false,
@@ -42,6 +48,9 @@ export class FakeServer {
 	expireOnce = false;
 	feed: Change[] = [];
 	frameName = 'TV frame';
+	/** `POST /v1/device/photo-requests`: 201 (asked), 200 (already asked), 403, 404, or 0 for a network failure. */
+	photoRequestStatus = 201;
+	photoRequests = 0;
 
 	fetch = async (input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> => {
 		const url = new URL(String(input), 'https://k.test');
@@ -75,6 +84,13 @@ export class FakeServer {
 				const since = Number(url.searchParams.get('since'));
 				const changes = this.feed.filter((c) => c.seq > since);
 				return json(200, { changes, next_seq: changes.length ? changes[changes.length - 1]!.seq : since, has_more: false });
+			}
+			case 'POST /v1/device/photo-requests': {
+				if (this.photoRequestStatus === 0) throw new TypeError('Failed to fetch');
+				if (this.photoRequestStatus >= 400) return problem(this.photoRequestStatus, this.photoRequestStatus === 403 ? 'forbidden' : 'not_found');
+				this.photoRequests++;
+				const now = Date.now();
+				return json(this.photoRequestStatus, { id: 'r1', state: 'open', created_at: new Date(now).toISOString(), next_allowed_at: new Date(now + 24 * 3600_000).toISOString() });
 			}
 			case 'POST /v1/device/acks':
 			case 'POST /v1/device/heartbeat':

@@ -12,6 +12,7 @@ export type Change = S['Change'];
 export type Heartbeat = S['Heartbeat'];
 export type Reaction = S['Reaction'];
 export type ReplyPreset = S['ReplyPreset'];
+export type FramePhotoRequest = S['FramePhotoRequest'];
 
 export interface ChangesPage {
 	changes: Change[];
@@ -185,6 +186,14 @@ export class DeviceClient {
 
 	reply(placementId: string, preset: ReplyPreset): Promise<null> {
 		return this.call<null>('POST', `/v1/device/placements/${encodeURIComponent(placementId)}/replies`, { preset });
+	}
+
+	/**
+	 * "Ask for new photos" (README §5.20): `201` asked, `200` already asked within 24 hours (the same request, nobody
+	 * notified again), `403` when the owner turned the button off.
+	 */
+	requestPhotos(): Promise<FramePhotoRequest | null> {
+		return this.call<FramePhotoRequest>('POST', '/v1/device/photo-requests');
 	}
 
 	/**

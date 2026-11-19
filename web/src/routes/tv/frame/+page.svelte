@@ -7,6 +7,7 @@
 	import { DeviceClient, type Reaction } from '$lib/device/client';
 	import { enrollInfo, heartbeat } from '$lib/device/browserInfo';
 	import { browserStorage, CredentialStore, credentialsKey } from '$lib/device/credentials';
+	import { noteMessage, SocialStore } from '$lib/device/social';
 	import { FrameEngine, type FrameView } from '$lib/device/engine';
 	import type { FramePlacement } from '$lib/device/feed';
 	import { DeviceSocket } from '$lib/device/socket';
@@ -32,6 +33,7 @@
 	let chrome = $state(false);
 	let chromeTimer: ReturnType<typeof setTimeout> | null = null;
 	let reactButtons: HTMLButtonElement[] = $state([]);
+	let askButton: HTMLButtonElement | null = $state(null);
 	const started = Date.now();
 
 	const settings = $derived(view?.settings ?? null);
@@ -133,6 +135,23 @@
 		engine?.setPaused(false);
 	}
 
+	/** "Ask for new photos" (family-social.md §8): above the reactions, the browser frame's quick menu. */
+	function askForPhotos() {
+		if (engine?.askForPhotos()) closeReactions();
+	}
+
+	const askLabel = $derived.by(() => {
+		const a = view?.ask;
+		if (!a) return '';
+		if (a.kind === 'answered') return t('browserFrame.askAnswered', { name: a.name });
+		return a.kind === 'asked' ? t('browserFrame.askedToday') : t('browserFrame.askPhotos');
+	});
+
+	const noteText = $derived.by(() => {
+		const m = view?.note ? noteMessage(view.note) : null;
+		return m ? t(m.key as Parameters<typeof t>[0], m.values) : '';
+	});
+
 	function onKey(e: KeyboardEvent) {
 		muted = false;
 		poke();
@@ -140,11 +159,15 @@
 		if (view?.status !== 'running' || !view.slide) return;
 		if (reactOpen) {
 			const i = reactButtons.indexOf(document.activeElement as HTMLButtonElement);
-			if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+			if (document.activeElement === askButton && (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) reactButtons[0]?.focus();
+			else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
 				const n = reactButtons.length;
 				const dir = (e.key === 'ArrowRight') !== (i18n.dir === 'rtl') ? 1 : -1;
 				reactButtons[(Math.max(0, i) + dir + n) % n]?.focus();
-			} else if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack' || e.key === 'BrowserBack') closeReactions();
+			} else if (e.key === 'ArrowUp') {
+				if (askButton && !askButton.disabled) askButton.focus();
+			} else if (e.key === 'ArrowDown') reactButtons[Math.max(0, i)]?.focus();
+			else if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack' || e.key === 'BrowserBack') closeReactions();
 			else return; // Enter activates the focused button
 			e.preventDefault();
 			return;
@@ -179,6 +202,7 @@
 		const c = client;
 		engine = new FrameEngine({
 			client: c,
+			social: new SocialStore(browserStorage(), `${credentialsKey(base)}.social`),
 			socket: (events) => new DeviceSocket({ url: () => c.socketUrl(location.origin), events }),
 			enrollInfo: () => enrollInfo(i18n.locale),
 			heartbeat: () => heartbeat(started, view?.screen === 'on' ? 'on' : view?.screen === 'dimmed' ? 'dimmed' : 'sleeping')
@@ -290,14 +314,51 @@
 			{/if}
 		</TvOverlay>
 
+		{#if (view.note || view.cards) && !reactOpen && !view.identify}
+			<!-- Family social: "New photos from Ben", the weekly prompt's title, the newest comment. Plain text. -->
+			<div class="social">
+				{#if view.note}
+					<p class="note" role="status"><Icon name="image" size={22} />{noteText}</p>
+				{/if}
+				{#if view.cards?.prompt}
+					{@const pr = view.cards.prompt}
+					<div class="card prompt" style:animation-delay="{shown?.transitionMs ?? 0}ms">
+						<span class="prompt-label">{pr.feed_name.trim() ? t('browserFrame.promptThisWeekIn', { family: pr.feed_name }) : t('browserFrame.promptThisWeek')}</span>
+						<span class="prompt-title">{pr.title}</span>
+					</div>
+				{/if}
+				{#if view.cards?.comment}
+					{@const cm = view.cards.comment}
+					<p class="card comment" style:animation-delay="{shown?.transitionMs ?? 0}ms">
+						<Icon name="message" size={22} />
+						<span class="comment-text">{#if cm.author_name.trim()}<strong>{cm.author_name.trim()}</strong>{/if}{cm.body.trim().replace(/\s*\n\s*/g, ' ')}</span>
+					</p>
+				{/if}
+			</div>
+		{/if}
+
 		{#if reactOpen && p}
-			<div class="reactions" role="toolbar" aria-label={t('browserFrame.react')}>
-				{#each REACTIONS as r, i (r)}
-					<button bind:this={reactButtons[i]} class:on={(reacted ?? p.reaction) === r} aria-pressed={(reacted ?? p.reaction) === r} onclick={() => react(r)}>
-						<span class="emoji" aria-hidden="true">{EMOJI[r]}</span><span>{t(`reaction.${r}`)}</span>
+			<div class="menu">
+				{#if view.ask}
+					<button bind:this={askButton} class="ask" disabled={view.ask.kind !== 'ready'} onclick={askForPhotos}>
+						{#if view.ask.kind === 'ready'}<Icon name="image" size={22} />{/if}<span>{askLabel}</span>
 					</button>
-				{/each}
-				<button class="close" onclick={closeReactions} aria-label={t('common.close')}><Icon name="x" size={22} /></button>
+				{/if}
+				<div class="reactions" role="toolbar" aria-label={t('browserFrame.react')}>
+					{#each REACTIONS as r, i (r)}
+						<button bind:this={reactButtons[i]} class:on={(reacted ?? p.reaction) === r} aria-pressed={(reacted ?? p.reaction) === r} onclick={() => react(r)}>
+							<span class="emoji" aria-hidden="true">{EMOJI[r]}</span><span>{t(`reaction.${r}`)}</span>
+						</button>
+					{/each}
+					<button class="close" onclick={closeReactions} aria-label={t('common.close')}><Icon name="x" size={22} /></button>
+				</div>
+			</div>
+		{/if}
+		{#if view.askConfirmation && !reactOpen}
+			<div class="confirm" role="status">
+				<button onclick={() => engine?.dismissAskConfirmation()}>
+					{view.askConfirmation === 'asked' ? t('browserFrame.askSent') : t('browserFrame.askOffline')}
+				</button>
 			</div>
 		{/if}
 		{#if reacted}
@@ -401,12 +462,152 @@
 			opacity: 0;
 		}
 	}
-	.reactions {
+	.menu {
 		position: absolute;
 		z-index: 5;
 		left: 50%;
 		bottom: clamp(24px, 8vh, 96px);
 		transform: translateX(-50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+	}
+	.ask {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		max-width: min(90vw, 520px);
+		padding: 14px 24px;
+		border-radius: 999px;
+		border: 2px solid transparent;
+		background: rgb(20 18 16 / 0.8);
+		backdrop-filter: blur(12px);
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		font-size: clamp(1rem, 1.6vw, 1.2rem);
+		cursor: pointer;
+	}
+	.ask span {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.ask:disabled {
+		cursor: default;
+		opacity: 0.85;
+	}
+	.ask:not(:disabled):focus-visible,
+	.ask:not(:disabled):hover {
+		background: rgb(255 255 255 / 0.14);
+		border-color: #fff;
+		outline: none;
+	}
+	.confirm {
+		position: absolute;
+		z-index: 6;
+		left: 50%;
+		bottom: clamp(24px, 6vh, 64px);
+		transform: translateX(-50%);
+		max-width: min(92vw, 760px);
+	}
+	.confirm button {
+		margin: 0;
+		padding: 14px 26px;
+		border: 0;
+		border-radius: 999px;
+		background: rgb(46 38 33 / 0.94);
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		font-size: clamp(1rem, 1.6vw, 1.25rem);
+		cursor: pointer;
+	}
+	.social {
+		position: absolute;
+		z-index: 4;
+		top: clamp(16px, 4vh, 48px);
+		left: 50%;
+		transform: translateX(-50%);
+		width: min(92vw, 640px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 14px;
+		pointer-events: none;
+	}
+	.note,
+	.card {
+		margin: 0;
+		color: #fff;
+		background: rgb(28 23 20 / 0.85);
+		backdrop-filter: blur(10px);
+		animation: fade-in 500ms ease both;
+	}
+	.note {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		max-width: 100%;
+		padding: 12px 24px;
+		border-radius: 999px;
+		font-weight: 600;
+		font-size: clamp(1rem, 1.6vw, 1.25rem);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.card {
+		max-width: 100%;
+		border-radius: 24px;
+		padding: 16px 28px;
+	}
+	.prompt {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+		text-align: center;
+	}
+	.prompt-label {
+		font-weight: 600;
+		font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+		color: #f3c6a8;
+	}
+	.prompt-title {
+		font-family: var(--font-display, Fraunces, serif);
+		font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+		line-height: 1.25;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.comment {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		font-size: clamp(1rem, 1.6vw, 1.25rem);
+	}
+	.comment-text {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.comment strong {
+		color: #f3c6a8;
+		margin-inline-end: 0.6em;
+	}
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+	.reactions {
 		display: flex;
 		gap: 10px;
 		padding: 10px;
