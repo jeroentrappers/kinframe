@@ -55,6 +55,9 @@ type Notifier struct {
 	Store  *store.Store
 	Sender Sender // nil disables push
 	Log    *slog.Logger
+	// Server is this server's public base URL, sent as every payload's "server" so apps signed in to several
+	// servers open the right account (README §5.22, §6.3).
+	Server string
 }
 
 // User sends an event to a user; if they have no open websocket and push is
@@ -118,6 +121,9 @@ func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 		}
 		if p.Badge != nil {
 			msg["badge"] = *p.Badge
+		}
+		if n.Server != "" {
+			msg["server"] = n.Server
 		}
 		payload, _ := json.Marshal(msg)
 		gone, err := n.Sender.Send(ctx, ep, payload)

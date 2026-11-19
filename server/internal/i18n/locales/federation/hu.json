@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "a föderáció ki van kapcsolva ezen a szerveren",
+    "give a host or a server URL": "adj meg egy hosztnevet vagy szerver-URL-t",
+    "not a kinframe family invite link": "ez nem egy kinframe-család meghívólinkje",
+    "only subscribe invites can be used by frames on other servers": "más szervereken lévő keretek csak feliratkozási meghívót használhatnak",
+    "remote subscription not found": "a másik szerverről érkező feliratkozás nem található",
+    "that server is blocked": "az a szerver le van tiltva",
+    "the family does not allow frames on other servers": "a család nem engedi a más szervereken lévő kereteket",
+    "the frame needs an id and a name": "a keretnek azonosító és név kell",
+    "the other server could not be reached": "a másik szerver nem érhető el",
+    "the other server refused the request": "a másik szerver elutasította a kérést",
+    "the request is not signed correctly": "a kérés nincs helyesen aláírva",
+    "this family is on this server: use the invite here": "ez a család ezen a szerveren van: itt használd a meghívót",
+    "this invite is not for frames on other servers": "ez a meghívó nem más szervereken lévő keretekhez szól",
+    "this server does not federate with that server": "ez a szerver nem működik együtt azzal a szerverrel"
+  }
+}

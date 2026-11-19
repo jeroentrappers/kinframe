@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federarea este dezactivată pe acest server",
+    "give a host or a server URL": "introduceți un nume de gazdă sau URL-ul unui server",
+    "not a kinframe family invite link": "nu este un link de invitație într-o familie kinframe",
+    "only subscribe invites can be used by frames on other servers": "ramele de pe alte servere pot folosi doar invitații de abonare",
+    "remote subscription not found": "abonamentul de pe alt server nu a fost găsit",
+    "that server is blocked": "acel server este blocat",
+    "the family does not allow frames on other servers": "familia nu permite rame de pe alte servere",
+    "the frame needs an id and a name": "rama are nevoie de un id și de un nume",
+    "the other server could not be reached": "celălalt server nu poate fi contactat",
+    "the other server refused the request": "celălalt server a refuzat cererea",
+    "the request is not signed correctly": "cererea nu este semnată corect",
+    "this family is on this server: use the invite here": "această familie este pe acest server: folosiți invitația aici",
+    "this invite is not for frames on other servers": "această invitație nu este pentru rame de pe alte servere",
+    "this server does not federate with that server": "acest server nu colaborează cu acel server"
+  }
+}

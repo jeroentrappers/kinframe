@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federatie staat uit op deze server",
+    "give a host or a server URL": "geef een hostnaam of een server-URL",
+    "not a kinframe family invite link": "geen uitnodigingslink voor een kinframe-familie",
+    "only subscribe invites can be used by frames on other servers": "alleen abonneer-uitnodigingen kunnen door fotolijsten op andere servers gebruikt worden",
+    "remote subscription not found": "abonnement op een andere server niet gevonden",
+    "that server is blocked": "die server is geblokkeerd",
+    "the family does not allow frames on other servers": "de familie staat fotolijsten op andere servers niet toe",
+    "the frame needs an id and a name": "de fotolijst heeft een id en een naam nodig",
+    "the other server could not be reached": "de andere server is niet bereikbaar",
+    "the other server refused the request": "de andere server weigerde het verzoek",
+    "the request is not signed correctly": "het verzoek is niet correct ondertekend",
+    "this family is on this server: use the invite here": "deze familie staat op deze server: gebruik de uitnodiging hier",
+    "this invite is not for frames on other servers": "deze uitnodiging is niet voor fotolijsten op andere servers",
+    "this server does not federate with that server": "deze server werkt niet samen met die server"
+  }
+}

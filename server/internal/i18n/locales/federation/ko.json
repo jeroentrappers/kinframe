@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "이 서버에서는 연합 기능이 꺼져 있습니다",
+    "give a host or a server URL": "호스트 이름이나 서버 URL을 입력하세요",
+    "not a kinframe family invite link": "kinframe 가족 초대 링크가 아닙니다",
+    "only subscribe invites can be used by frames on other servers": "다른 서버의 액자는 구독 초대만 사용할 수 있습니다",
+    "remote subscription not found": "다른 서버의 구독을 찾을 수 없습니다",
+    "that server is blocked": "그 서버는 차단되어 있습니다",
+    "the family does not allow frames on other servers": "가족이 다른 서버의 액자를 허용하지 않습니다",
+    "the frame needs an id and a name": "액자에는 ID와 이름이 필요합니다",
+    "the other server could not be reached": "다른 서버에 연결할 수 없습니다",
+    "the other server refused the request": "다른 서버가 요청을 거부했습니다",
+    "the request is not signed correctly": "요청의 서명이 올바르지 않습니다",
+    "this family is on this server: use the invite here": "이 가족은 이 서버에 있습니다: 여기에서 초대를 사용하세요",
+    "this invite is not for frames on other servers": "이 초대는 다른 서버의 액자용이 아닙니다",
+    "this server does not federate with that server": "이 서버는 그 서버와 연동하지 않습니다"
+  }
+}

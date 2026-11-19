@@ -169,6 +169,9 @@ func (s *Server) receiptsOf(ctx context.Context, postIDs []uuid.UUID) (map[uuid.
 			pr.reactions = append(pr.reactions, re)
 		}
 	}
+	if err := s.remoteReceipts(ctx, postIDs, out); err != nil { // frames on other servers (federation_items.go)
+		return nil, err
+	}
 	for _, pr := range out {
 		for _, fr := range pr.frames {
 			if fr.SubscriptionStatus == "paused" {

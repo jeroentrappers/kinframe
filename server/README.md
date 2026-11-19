@@ -137,6 +137,9 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_MAX_TELEGRAM_CHATS_PER_TARGET` / `KINFRAME_MAX_TELEGRAM_CHATS_PER_USER` | `5` / `20` | Connected Telegram chats per frame or feed, and per owner (operator can change them at runtime) |
 | `KINFRAME_MAX_TELEGRAM_ITEMS_PER_CHAT_HOUR` | `300` | Photos and videos accepted per Telegram chat per hour |
 | `KINFRAME_LINK_PREVIEWS` | `off` | `on` lets the server fetch previews of links in chat messages (title, description, image re-encoded to WebP; discovery `link_previews`; API README §5.19). Only public addresses are fetched, whatever `KINFRAME_SOURCES_PRIVATE_NETWORKS` says; 5 s and 1 MiB per page, 5 MiB per image, cached 7 days |
+| `KINFRAME_FEDERATION` | `on` | Families on different servers (API README §5.22): frames here may follow families on other kinframe servers and families here may allow frames on other servers (each family opts in). `off` turns it all off: discovery `federation.enabled: false` and `remote_families: false`, every `/federation/v1/...` call answers `403`. Other servers are reached at public addresses only, with signed requests (Ed25519 key made at first start, stored in the database, sealed with `KINFRAME_SECRETS_KEY` when set, rotated every 180 days with the old key valid 7 more days) |
+| `KINFRAME_FEDERATION_ALLOW` | — | Comma-separated hosts (`kinframe.example.org`, with `:port` when not 443): when set, this server federates with these servers only |
+| `KINFRAME_SERVER_LABEL` | the host of `KINFRAME_PUBLIC_URL` | This server's name for apps signed in to several servers (discovery `server_name`, the server chip) and for other servers ("Oma's frame (Appmire)") |
 
 ### Calendars
 

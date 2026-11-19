@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "федерацията е изключена на този сървър",
+    "give a host or a server URL": "въведете хост или URL адрес на сървър",
+    "not a kinframe family invite link": "това не е покана за семейство в kinframe",
+    "only subscribe invites can be used by frames on other servers": "само покани за абонамент могат да се използват от рамки на други сървъри",
+    "remote subscription not found": "абонаментът от друг сървър не е намерен",
+    "that server is blocked": "този сървър е блокиран",
+    "the family does not allow frames on other servers": "семейството не разрешава рамки на други сървъри",
+    "the frame needs an id and a name": "рамката трябва да има идентификатор и име",
+    "the other server could not be reached": "другият сървър не е достъпен",
+    "the other server refused the request": "другият сървър отказа заявката",
+    "the request is not signed correctly": "заявката не е подписана правилно",
+    "this family is on this server: use the invite here": "това семейство е на този сървър: използвайте поканата тук",
+    "this invite is not for frames on other servers": "тази покана не е за рамки на други сървъри",
+    "this server does not federate with that server": "този сървър не работи заедно с онзи сървър"
+  }
+}

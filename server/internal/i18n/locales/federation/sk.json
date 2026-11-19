@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federácia je na tomto serveri vypnutá",
+    "give a host or a server URL": "zadajte hostiteľa alebo adresu URL servera",
+    "not a kinframe family invite link": "toto nie je pozvánka do rodiny v kinframe",
+    "only subscribe invites can be used by frames on other servers": "rámiky na iných serveroch môžu používať len pozvánky na odber",
+    "remote subscription not found": "odber z iného servera sa nenašiel",
+    "that server is blocked": "tento server je zablokovaný",
+    "the family does not allow frames on other servers": "rodina nepovoľuje rámiky na iných serveroch",
+    "the frame needs an id and a name": "rámik potrebuje id a názov",
+    "the other server could not be reached": "druhý server nie je dostupný",
+    "the other server refused the request": "druhý server požiadavku odmietol",
+    "the request is not signed correctly": "požiadavka nie je správne podpísaná",
+    "this family is on this server: use the invite here": "táto rodina je na tomto serveri: použite pozvánku tu",
+    "this invite is not for frames on other servers": "táto pozvánka nie je pre rámiky na iných serveroch",
+    "this server does not federate with that server": "tento server s tým serverom nespolupracuje"
+  }
+}

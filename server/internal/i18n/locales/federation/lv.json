@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federācija šajā serverī ir izslēgta",
+    "give a host or a server URL": "norādiet resursdatora nosaukumu vai servera URL",
+    "not a kinframe family invite link": "šī nav kinframe ģimenes uzaicinājuma saite",
+    "only subscribe invites can be used by frames on other servers": "citu serveru rāmji var izmantot tikai abonēšanas uzaicinājumus",
+    "remote subscription not found": "abonements no cita servera nav atrasts",
+    "that server is blocked": "šis serveris ir bloķēts",
+    "the family does not allow frames on other servers": "ģimene neatļauj citu serveru rāmjus",
+    "the frame needs an id and a name": "rāmim vajag ID un nosaukumu",
+    "the other server could not be reached": "otru serveri nevar sasniegt",
+    "the other server refused the request": "otrs serveris noraidīja pieprasījumu",
+    "the request is not signed correctly": "pieprasījums nav pareizi parakstīts",
+    "this family is on this server: use the invite here": "šī ģimene ir šajā serverī: izmantojiet uzaicinājumu šeit",
+    "this invite is not for frames on other servers": "šis uzaicinājums nav paredzēts citu serveru rāmjiem",
+    "this server does not federate with that server": "šis serveris nesadarbojas ar to serveri"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federacija šiame serveryje išjungta",
+    "give a host or a server URL": "nurodykite pagrindinio kompiuterio vardą arba serverio URL",
+    "not a kinframe family invite link": "tai ne kinframe šeimos kvietimo nuoroda",
+    "only subscribe invites can be used by frames on other servers": "kitų serverių rėmeliai gali naudoti tik prenumeratos kvietimus",
+    "remote subscription not found": "prenumerata iš kito serverio nerasta",
+    "that server is blocked": "tas serveris užblokuotas",
+    "the family does not allow frames on other servers": "šeima neleidžia kitų serverių rėmelių",
+    "the frame needs an id and a name": "rėmeliui reikia ID ir pavadinimo",
+    "the other server could not be reached": "nepavyko pasiekti kito serverio",
+    "the other server refused the request": "kitas serveris atmetė užklausą",
+    "the request is not signed correctly": "užklausa nepasirašyta teisingai",
+    "this family is on this server: use the invite here": "ši šeima yra šiame serveryje: naudokite kvietimą čia",
+    "this invite is not for frames on other servers": "šis kvietimas ne kitų serverių rėmeliams",
+    "this server does not federate with that server": "šis serveris nebendradarbiauja su tuo serveriu"
+  }
+}

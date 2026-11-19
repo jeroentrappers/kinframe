@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "此服务器已关闭联合功能",
+    "give a host or a server URL": "请输入主机名或服务器 URL",
+    "not a kinframe family invite link": "这不是 kinframe 家庭的邀请链接",
+    "only subscribe invites can be used by frames on other servers": "其他服务器上的相框只能使用订阅邀请",
+    "remote subscription not found": "找不到来自其他服务器的订阅",
+    "that server is blocked": "该服务器已被屏蔽",
+    "the family does not allow frames on other servers": "该家庭不允许其他服务器上的相框",
+    "the frame needs an id and a name": "相框需要 ID 和名称",
+    "the other server could not be reached": "无法连接另一台服务器",
+    "the other server refused the request": "另一台服务器拒绝了请求",
+    "the request is not signed correctly": "请求的签名不正确",
+    "this family is on this server: use the invite here": "此家庭就在本服务器上：请在这里使用邀请",
+    "this invite is not for frames on other servers": "此邀请不适用于其他服务器上的相框",
+    "this server does not federate with that server": "此服务器不与该服务器互通"
+  }
+}

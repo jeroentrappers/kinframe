@@ -174,6 +174,9 @@ type Config struct {
 
 	// Email to frame (docs/spec/email-inbox.md), config/email.go.
 	Email EmailConfig
+
+	// Families on different servers (docs/spec/multi-server.md), config/federation.go.
+	Federation FederationConfig
 }
 
 // AppPlatforms are the family app platforms, as named in `X-Kinframe-App: kinframe-family-<platform>/…`.
@@ -461,6 +464,9 @@ func load(get func(string) string) (*Config, error) {
 		errs = append(errs, err)
 	}
 	if err := loadChat(c, env); err != nil {
+		errs = append(errs, err)
+	}
+	if err := loadFederation(c, env); err != nil { // families on different servers (federation.go)
 		errs = append(errs, err)
 	}
 	if c.WeatherRefresh < 15*time.Minute {

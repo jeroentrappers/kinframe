@@ -138,11 +138,15 @@ func fcmData(payload []byte) (map[string]string, error) {
 		Tag     string            `json:"tag"`
 		Actions []string          `json:"actions"`
 		Badge   *int              `json:"badge"`
+		Server  string            `json:"server"`
 	}
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return nil, err
 	}
 	d := map[string]string{"key": p.Key, "title": p.Title, "body": p.Body}
+	if p.Server != "" {
+		d["server"] = p.Server // README §5.22: the account a tap opens
+	}
 	if p.Type != nil {
 		d["type"] = fmt.Sprint(p.Type)
 	}

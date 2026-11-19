@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "a federação está desativada neste servidor",
+    "give a host or a server URL": "indique um anfitrião ou o URL de um servidor",
+    "not a kinframe family invite link": "não é um link de convite para uma família do kinframe",
+    "only subscribe invites can be used by frames on other servers": "só os convites de subscrição podem ser usados por molduras noutros servidores",
+    "remote subscription not found": "subscrição de outro servidor não encontrada",
+    "that server is blocked": "esse servidor está bloqueado",
+    "the family does not allow frames on other servers": "a família não permite molduras noutros servidores",
+    "the frame needs an id and a name": "a moldura precisa de um id e de um nome",
+    "the other server could not be reached": "não foi possível contactar o outro servidor",
+    "the other server refused the request": "o outro servidor recusou o pedido",
+    "the request is not signed correctly": "o pedido não está assinado corretamente",
+    "this family is on this server: use the invite here": "esta família está neste servidor: use o convite aqui",
+    "this invite is not for frames on other servers": "este convite não é para molduras noutros servidores",
+    "this server does not federate with that server": "este servidor não colabora com esse servidor"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "इस सर्वर पर फ़ेडरेशन बंद है",
+    "give a host or a server URL": "होस्ट या सर्वर URL दें",
+    "not a kinframe family invite link": "यह kinframe परिवार का आमंत्रण लिंक नहीं है",
+    "only subscribe invites can be used by frames on other servers": "दूसरे सर्वरों के फ़्रेम केवल सदस्यता आमंत्रण का उपयोग कर सकते हैं",
+    "remote subscription not found": "दूसरे सर्वर की सदस्यता नहीं मिली",
+    "that server is blocked": "वह सर्वर ब्लॉक है",
+    "the family does not allow frames on other servers": "परिवार दूसरे सर्वरों के फ़्रेम की अनुमति नहीं देता",
+    "the frame needs an id and a name": "फ़्रेम को एक आईडी और नाम चाहिए",
+    "the other server could not be reached": "दूसरे सर्वर से संपर्क नहीं हो सका",
+    "the other server refused the request": "दूसरे सर्वर ने अनुरोध अस्वीकार कर दिया",
+    "the request is not signed correctly": "अनुरोध पर सही ढंग से हस्ताक्षर नहीं है",
+    "this family is on this server: use the invite here": "यह परिवार इसी सर्वर पर है: यहाँ आमंत्रण का उपयोग करें",
+    "this invite is not for frames on other servers": "यह आमंत्रण दूसरे सर्वरों के फ़्रेम के लिए नहीं है",
+    "this server does not federate with that server": "यह सर्वर उस सर्वर के साथ काम नहीं करता"
+  }
+}

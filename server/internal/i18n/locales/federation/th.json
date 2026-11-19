@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "การเชื่อมต่อระหว่างเซิร์ฟเวอร์ปิดอยู่บนเซิร์ฟเวอร์นี้",
+    "give a host or a server URL": "ระบุชื่อโฮสต์หรือ URL ของเซิร์ฟเวอร์",
+    "not a kinframe family invite link": "ไม่ใช่ลิงก์คำเชิญเข้าครอบครัวของ kinframe",
+    "only subscribe invites can be used by frames on other servers": "กรอบรูปบนเซิร์ฟเวอร์อื่นใช้ได้เฉพาะคำเชิญให้ติดตามเท่านั้น",
+    "remote subscription not found": "ไม่พบการติดตามจากเซิร์ฟเวอร์อื่น",
+    "that server is blocked": "เซิร์ฟเวอร์นั้นถูกบล็อก",
+    "the family does not allow frames on other servers": "ครอบครัวนี้ไม่อนุญาตกรอบรูปบนเซิร์ฟเวอร์อื่น",
+    "the frame needs an id and a name": "กรอบรูปต้องมีรหัสและชื่อ",
+    "the other server could not be reached": "ติดต่อเซิร์ฟเวอร์อื่นไม่ได้",
+    "the other server refused the request": "เซิร์ฟเวอร์อื่นปฏิเสธคำขอ",
+    "the request is not signed correctly": "คำขอไม่ได้ลงชื่อกำกับอย่างถูกต้อง",
+    "this family is on this server: use the invite here": "ครอบครัวนี้อยู่บนเซิร์ฟเวอร์นี้: ใช้คำเชิญที่นี่",
+    "this invite is not for frames on other servers": "คำเชิญนี้ไม่ได้มีไว้สำหรับกรอบรูปบนเซิร์ฟเวอร์อื่น",
+    "this server does not federate with that server": "เซิร์ฟเวอร์นี้ไม่ได้ทำงานร่วมกับเซิร์ฟเวอร์นั้น"
+  }
+}

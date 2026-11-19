@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -354,6 +355,9 @@ type ItemRow struct {
 	ViaTelegramChatID *uuid.UUID `db:"via_telegram_chat_id"`
 	// FormerSenderName: handed over at its sender's account deletion (leaving, README §5.21).
 	FormerSenderName *string `db:"former_sender_name"`
+	// Copied from a family on another server (README §5.22): the remote sender and {name, server_name, server_url}.
+	RemoteSenderID *uuid.UUID      `db:"remote_sender_id"`
+	RemoteSender   json.RawMessage `db:"remote_sender"`
 }
 
 // IsLive reports whether the item is a Live/Motion Photo whose clip has not failed.
@@ -362,7 +366,8 @@ func (r *ItemRow) IsLive() bool {
 }
 
 const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_frame_id,
-	COALESCE(i.former_sender_name, su.display_name, sf.name, '') AS sender_name, su.avatar_key AS sender_avatar_key,
+	COALESCE(i.former_sender_name, su.display_name, sf.name, (SELECT rsd.display_name FROM remote_senders rsd WHERE rsd.id = i.remote_sender_id), '') AS sender_name,
+	su.avatar_key AS sender_avatar_key,
 	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.thumb256_key, i.thumb512_key,
 	i.created_at AS item_created_at, i.captured_hint,
 	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio,
@@ -370,7 +375,11 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	m.master_key, m.master_mime, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
 	mm.height AS motion_height, mm.duration_ms AS motion_duration_ms, mm.has_audio AS motion_has_audio,
 	mm.master_key AS motion_master_key, i.origin, i.origin_sender_name, i.via, i.via_source_id, i.via_label, i.via_email_address_id,
-	i.via_telegram_chat_id, i.former_sender_name`
+	i.via_telegram_chat_id, i.former_sender_name, i.remote_sender_id, ` + remoteSenderJSON
+
+// remoteSenderJSON is ItemRow.RemoteSender (federation.go).
+const remoteSenderJSON = `(SELECT json_build_object('name', rsd.display_name, 'server_name', COALESCE(NULLIF(rsv.server_name, ''), rsv.host),
+	'server_url', rsv.base_url) FROM remote_senders rsd JOIN remote_servers rsv ON rsv.id = rsd.server_id WHERE rsd.id = i.remote_sender_id) AS remote_sender`
 
 const itemJoins = ` JOIN media m ON m.id = i.media_id LEFT JOIN media mm ON mm.id = i.motion_media_id
 	LEFT JOIN users su ON su.id = i.sender_user_id LEFT JOIN frames sf ON sf.id = i.sender_frame_id`

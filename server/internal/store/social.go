@@ -283,6 +283,8 @@ type FrameReactionRow struct {
 	ItemID    uuid.UUID `db:"item_id"`
 	Reaction  string    `db:"reaction"`
 	At        time.Time `db:"at"`
+	// ServerName is set for frames on other servers (FrameID is then the remote subscription's id).
+	ServerName *string `db:"server_name"`
 }
 
 // FrameReactions lists frames' current reactions on the items of posts, newest first: feed posts through
@@ -292,17 +294,19 @@ func (s *Store) FrameReactions(ctx context.Context, q db.DBTX, postIDs []uuid.UU
 		return nil, nil
 	}
 	return many[FrameReactionRow](q.Query(ctx, `
-		SELECT d.post_id, f.id AS frame_id, f.name AS frame_name, pl.item_id, pl.reaction, COALESCE(pl.reaction_at, pl.received_at) AS at
+		SELECT d.post_id, f.id AS frame_id, f.name AS frame_name, pl.item_id, pl.reaction, COALESCE(pl.reaction_at, pl.received_at) AS at,
+			NULL::text AS server_name
 		FROM feed_deliveries d JOIN subscriptions s ON s.id = d.subscription_id AND s.status IN ('active', 'paused')
 		JOIN frames f ON f.id = s.frame_id AND f.deleted_at IS NULL
 		JOIN placements pl ON pl.id = d.placement_id AND pl.removed_at IS NULL
 		JOIN feed_post_items pi ON pi.post_id = d.post_id AND pi.item_id = d.item_id AND pi.removed_at IS NULL
 		WHERE d.post_id = ANY($1) AND d.state = 'placed' AND pl.reaction IS NOT NULL
 		UNION ALL
-		SELECT p.id, f.id, f.name, pl.item_id, pl.reaction, COALESCE(pl.reaction_at, pl.received_at)
+		SELECT p.id, f.id, f.name, pl.item_id, pl.reaction, COALESCE(pl.reaction_at, pl.received_at), NULL::text
 		FROM frame_posts p JOIN frames f ON f.id = p.frame_id AND f.deleted_at IS NULL
 		JOIN placements pl ON `+framePostItemsLive+`
 		WHERE p.id = ANY($1) AND pl.reaction IS NOT NULL
+		UNION ALL `+remoteFrameReactionsSQL+`
 		ORDER BY 6 DESC, 2, 4`, postIDs))
 }
 
@@ -435,6 +439,9 @@ type Comment struct {
 	DeletedAt       *time.Time    `db:"deleted_at"`
 	RemovedAt       *time.Time    `db:"removed_at"`
 	ReplyCount      int           `db:"reply_count"`
+	// A frame on another server (README §5.22): the remote subscription and the server's name.
+	RemoteSubscriberID *uuid.UUID `db:"remote_subscriber_id"`
+	FrameServerName    *string    `db:"frame_server_name"`
 }
 
 // Live: a person comment that is neither deleted nor removed.
@@ -449,7 +456,8 @@ const commentCols = `c.id, c.post_id, c.parent_id, c.kind, c.author_user_id,
 	(c.quoted_user_id IS NOT NULL AND qu.deleted_at IS NOT NULL) AS quoted_deleted,
 	c.frame_id, c.frame_name, c.placement_id, c.item_id, c.frame_reaction, c.frame_reply, c.body, c.body_enc, c.mentions,
 	c.created_at, c.edited_at, c.deleted_at, c.removed_at,
-	(SELECT count(*) FROM comments r WHERE r.parent_id = c.id AND r.deleted_at IS NULL AND r.removed_at IS NULL)::int AS reply_count`
+	(SELECT count(*) FROM comments r WHERE r.parent_id = c.id AND r.deleted_at IS NULL AND r.removed_at IS NULL)::int AS reply_count,
+	c.remote_subscriber_id, c.frame_server_name`
 
 const commentJoins = ` LEFT JOIN users au ON au.id = c.author_user_id LEFT JOIN users qu ON qu.id = c.quoted_user_id`
 

@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federointi on poissa käytöstä tällä palvelimella",
+    "give a host or a server URL": "anna isäntänimi tai palvelimen URL-osoite",
+    "not a kinframe family invite link": "tämä ei ole kinframe-perheen kutsulinkki",
+    "only subscribe invites can be used by frames on other servers": "vain tilauskutsuja voivat käyttää muiden palvelimien kehykset",
+    "remote subscription not found": "toisen palvelimen tilausta ei löytynyt",
+    "that server is blocked": "se palvelin on estetty",
+    "the family does not allow frames on other servers": "perhe ei salli muiden palvelimien kehyksiä",
+    "the frame needs an id and a name": "kehys tarvitsee tunnisteen ja nimen",
+    "the other server could not be reached": "toiseen palvelimeen ei saatu yhteyttä",
+    "the other server refused the request": "toinen palvelin hylkäsi pyynnön",
+    "the request is not signed correctly": "pyyntöä ei ole allekirjoitettu oikein",
+    "this family is on this server: use the invite here": "tämä perhe on tällä palvelimella: käytä kutsua täällä",
+    "this invite is not for frames on other servers": "tämä kutsu ei ole muiden palvelimien kehyksille",
+    "this server does not federate with that server": "tämä palvelin ei tee yhteistyötä sen palvelimen kanssa"
+  }
+}

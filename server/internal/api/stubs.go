@@ -14,7 +14,9 @@ func notImplemented() error {
 	return problem.New(problem.FeatureDisabled, "%s", "not implemented yet").WithStatus(http.StatusNotImplemented)
 }
 
-// writeNotImplemented is notImplemented for hand-written handlers.
+// writeNotImplemented is notImplemented for hand-written handlers (none left since the federation endpoints).
+//
+//lint:ignore U1000 kept for the stub files until the last one goes
 func writeNotImplemented(w http.ResponseWriter, r *http.Request) {
 	problem.Write(w, r, problem.New(problem.FeatureDisabled, "%s", "not implemented yet").WithStatus(http.StatusNotImplemented))
 }

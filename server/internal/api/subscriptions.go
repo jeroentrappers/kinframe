@@ -176,7 +176,7 @@ func (s *Server) ListFeedSubscriptions(ctx context.Context, req gen.ListFeedSubs
 	if err != nil {
 		return nil, err
 	}
-	out := []subscriptionJSON{}
+	out := []any{}
 	statuses := statusFilter(req.Params.Status, fv.IsAdmin())
 	if len(statuses) == 0 {
 		return ok(out), nil
@@ -188,6 +188,14 @@ func (s *Server) ListFeedSubscriptions(ctx context.Context, req gen.ListFeedSubs
 	for i := range subs {
 		v := s.viewerOf(ctx, me(ctx).ID, &subs[i])
 		out = append(out, s.subscriptionOut(ctx, &subs[i], v))
+	}
+	// Frames on other servers (README §5.22).
+	remote, err := s.remoteFeedSubscriptions(ctx, req.FeedId, me(ctx).ID, req.Params.Status)
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range remote {
+		out = append(out, r)
 	}
 	return ok(out), nil
 }
@@ -235,6 +243,12 @@ func (s *Server) renderSubscription(ctx context.Context, id uuid.UUID) (subscrip
 }
 
 func (s *Server) GetSubscription(ctx context.Context, req gen.GetSubscriptionRequestObject) (gen.GetSubscriptionResponseObject, error) {
+	if handled, sub, err := s.remoteSubscriptionAction(ctx, me(ctx).ID, req.SubscriptionId, "get"); handled { // a frame on another server
+		if err != nil {
+			return nil, err
+		}
+		return ok(sub), nil
+	}
 	sv, v, err := s.visibleSubscription(ctx, req.SubscriptionId)
 	if err != nil {
 		return nil, err
@@ -386,6 +400,12 @@ func requireFeedSide(v subViewer) error {
 }
 
 func (s *Server) ApproveSubscription(ctx context.Context, req gen.ApproveSubscriptionRequestObject) (gen.ApproveSubscriptionResponseObject, error) {
+	if handled, sub, err := s.remoteSubscriptionAction(ctx, me(ctx).ID, req.SubscriptionId, "approve"); handled { // a frame on another server
+		if err != nil {
+			return nil, err
+		}
+		return ok(sub), nil
+	}
 	sv, v, err := s.visibleSubscription(ctx, req.SubscriptionId)
 	if err != nil {
 		return nil, err
@@ -406,6 +426,12 @@ func (s *Server) ApproveSubscription(ctx context.Context, req gen.ApproveSubscri
 }
 
 func (s *Server) RejectSubscription(ctx context.Context, req gen.RejectSubscriptionRequestObject) (gen.RejectSubscriptionResponseObject, error) {
+	if handled, sub, err := s.remoteSubscriptionAction(ctx, me(ctx).ID, req.SubscriptionId, "reject"); handled { // a frame on another server
+		if err != nil {
+			return nil, err
+		}
+		return ok(sub), nil
+	}
 	sv, v, err := s.visibleSubscription(ctx, req.SubscriptionId)
 	if err != nil {
 		return nil, err
@@ -515,6 +541,12 @@ func eqIntPtr(a, b *int) bool {
 }
 
 func (s *Server) RemoveSubscription(ctx context.Context, req gen.RemoveSubscriptionRequestObject) (gen.RemoveSubscriptionResponseObject, error) {
+	if handled, _, err := s.remoteSubscriptionAction(ctx, me(ctx).ID, req.SubscriptionId, "delete"); handled { // a frame on another server
+		if err != nil {
+			return nil, err
+		}
+		return noContent(), nil
+	}
 	sv, v, err := s.visibleSubscription(ctx, req.SubscriptionId)
 	if err != nil {
 		return nil, err

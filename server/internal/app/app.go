@@ -103,7 +103,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 		log.Warn("DEV AUTH ENABLED: anyone can sign in as anyone via POST /dev/token")
 	}
 
-	n := &notify.Notifier{Hub: hub, Store: st, Log: log}
+	n := &notify.Notifier{Hub: hub, Store: st, Log: log, Server: cfg.PublicURL}
 	if cfg.PushEnabled {
 		senders := notify.MultiSender{"unifiedpush": notify.HTTPSender{}}
 		if cfg.VAPIDPublicKey != "" {

@@ -66,6 +66,8 @@ type PlacementRow struct {
 	// FeedIDs are the feeds whose active subscriptions hold the placement.
 	FeedIDs        []uuid.UUID `db:"feed_ids"`
 	OriginFeedName *string     `db:"origin_feed_name"`
+	// OriginRemote: a copy of a post of a family on another server (Placement.origin_remote, README §5.22).
+	OriginRemote json.RawMessage `db:"origin_remote"`
 }
 
 // placementRowCols omits p.item_id: ItemRow supplies the item_id column for both structs.
@@ -75,7 +77,9 @@ const placementRowCols = `p.id, p.frame_id, p.send_id, p.status, p.hidden, p.tra
 
 const placementRowSelect = `SELECT ` + placementRowCols + `, ` + itemRowCols + `,
 	(SELECT sb.display_name FROM users sb WHERE sb.id = p.shared_by_user_id) AS shared_by_name,
-	(SELECT fd.name FROM feeds fd WHERE fd.id = p.origin_feed_id AND fd.deleted_at IS NULL) AS origin_feed_name,
+	COALESCE((SELECT fd.name FROM feeds fd WHERE fd.id = p.origin_feed_id AND fd.deleted_at IS NULL),
+		(SELECT rf.feed_name FROM remote_follows rf WHERE rf.id = p.origin_remote_follow_id)) AS origin_feed_name,
+	` + placementRemoteJSON + `,
 	COALESCE((SELECT array_agg(DISTINCT s.feed_id ORDER BY s.feed_id) FROM feed_deliveries d
 		JOIN subscriptions s ON s.id = d.subscription_id AND s.status = 'active'
 		WHERE d.placement_id = p.id AND d.state = 'placed'), '{}') AS feed_ids,

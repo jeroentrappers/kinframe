@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "הפדרציה כבויה בשרת הזה",
+    "give a host or a server URL": "יש להזין שם מארח או כתובת URL של שרת",
+    "not a kinframe family invite link": "זה לא קישור הזמנה למשפחה ב-kinframe",
+    "only subscribe invites can be used by frames on other servers": "מסגרות בשרתים אחרים יכולות להשתמש רק בהזמנות מינוי",
+    "remote subscription not found": "המינוי משרת אחר לא נמצא",
+    "that server is blocked": "השרת הזה חסום",
+    "the family does not allow frames on other servers": "המשפחה לא מאפשרת מסגרות בשרתים אחרים",
+    "the frame needs an id and a name": "למסגרת צריכים להיות מזהה ושם",
+    "the other server could not be reached": "לא ניתן להגיע לשרת האחר",
+    "the other server refused the request": "השרת האחר דחה את הבקשה",
+    "the request is not signed correctly": "הבקשה לא חתומה כראוי",
+    "this family is on this server: use the invite here": "המשפחה הזו נמצאת בשרת הזה: השתמשו בהזמנה כאן",
+    "this invite is not for frames on other servers": "ההזמנה הזו אינה מיועדת למסגרות בשרתים אחרים",
+    "this server does not federate with that server": "השרת הזה לא משתף פעולה עם השרת ההוא"
+  }
+}
