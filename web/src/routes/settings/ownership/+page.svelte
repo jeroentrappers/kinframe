@@ -156,7 +156,7 @@
 									{/if}
 								</span>
 								<span class="muted tiny">
-									{formatDateTime(e.at, i18n.tag)}{#if e.operator_name} · {t('leaving.opLogBy', { name: e.operator_name })}{/if}{#if e.reason} · “{e.reason}”{/if}
+									{formatDateTime(e.at, i18n.tag)}{#if e.operator_name}{' · '}{t('leaving.opLogBy', { name: e.operator_name })}{/if}{#if e.reason}{' · '}“{e.reason}”{/if}
 								</span>
 							</li>
 						{/each}

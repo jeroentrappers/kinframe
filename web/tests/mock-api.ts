@@ -3,6 +3,7 @@
 import type { Page, Route, WebSocketRoute } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
 import { socialRoute, type SocialMock } from './mock-social';
+import { leavingRoute, type LeavingMock } from './mock-leaving';
 
 type S = components['schemas'];
 type Send = S['Send'];
@@ -99,6 +100,8 @@ export interface MockState {
 	ws: WebSocketRoute | null;
 	/** Family social (README §5.18–§5.20), tests/mock-social.ts; created on first use. */
 	social?: SocialMock;
+	/** Leaving and remote families (README §5.21, §5.22), tests/mock-leaving.ts; created on first use. */
+	leaving?: LeavingMock;
 }
 
 export function emptyState(): MockState {
@@ -440,6 +443,12 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 
 		if (!req.headers()['authorization']?.startsWith('Bearer ') && !path.startsWith('/v1/uploads/'))
 			return problem(route, 401, 'unauthorized', 'Unauthorized');
+
+		// ---- leaving and remote families (tests/mock-leaving.ts)
+		{
+			const handled = await leavingRoute(state, route, method, path, url, body);
+			if (handled !== null) return handled;
+		}
 
 		// ---- family social (tests/mock-social.ts)
 		{

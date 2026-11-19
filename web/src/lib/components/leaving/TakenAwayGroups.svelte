@@ -141,7 +141,7 @@
 							<span class="small until">{t('leaving.takenUntil', { date: dayMonth(g.until) })}</span>
 							{#if g.keep_request}
 								<span class="tiny muted">
-									{t('leaving.requestStatus', { status: t(`leaving.status.${g.keep_request.status}`) })}{#if g.keep_request.status === 'partly_allowed'} · {t('leaving.allowedOf', { n: g.keep_request.allowed_count ?? 0, total: g.keep_request.item_count })}{/if}
+									{t('leaving.requestStatus', { status: t(`leaving.status.${g.keep_request.status}`) })}{#if g.keep_request.status === 'partly_allowed'}{' · '}{t('leaving.allowedOf', { n: g.keep_request.allowed_count ?? 0, total: g.keep_request.item_count })}{/if}
 								</span>
 							{/if}
 						</div>

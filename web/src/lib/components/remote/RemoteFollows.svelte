@@ -181,7 +181,7 @@
 							<span class="badge" class:badge-owner={s.status === 'active'} class:warn={s.status === 'error'}>{t(`remote.status.${s.status}`)}</span>
 						</div>
 						<p class="small muted meta">
-							{t(`subs.historyShort.${s.history}`, { n: s.history_count ?? 0 })}{#if s.item_count} · {tn('history.photos', s.item_count)}{/if}{#if s.last_sync_at} · {t('remote.lastSync', { when: relativeTime(s.last_sync_at, i18n.tag) })}{/if}
+							{t(`subs.historyShort.${s.history}`, { n: s.history_count ?? 0 })}{#if s.item_count}{' · '}{tn('history.photos', s.item_count)}{/if}{#if s.last_sync_at}{' · '}{t('remote.lastSync', { when: relativeTime(s.last_sync_at, i18n.tag) })}{/if}
 						</p>
 						{#if s.backfill?.state === 'running'}
 							<p class="small" role="status">{t('frameFeeds.backfilling', { placed: s.backfill.placed ?? 0, total: s.backfill.total ?? 0 })}</p>

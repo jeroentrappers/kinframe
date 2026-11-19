@@ -114,7 +114,7 @@
 						<span>{t('leaving.requestLine', { name: r.asked_by_name, photos: tn('history.photos', r.item_count), place: requestPlace(r) })}</span>
 						{#if r.note}<span class="small note">“{r.note}”</span>{/if}
 						<span class="tiny muted">
-							{#if r.status === 'open'}{t('leaving.requestAnswerBy', { date: dayMonth(r.expires_at) })}{:else}{t(`leaving.status.${r.status}`)}{#if r.status === 'partly_allowed'} · {t('leaving.allowedOf', { n: r.allowed_count ?? 0, total: r.item_count })}{/if}{/if}
+							{#if r.status === 'open'}{t('leaving.requestAnswerBy', { date: dayMonth(r.expires_at) })}{:else}{t(`leaving.status.${r.status}`)}{#if r.status === 'partly_allowed'}{' · '}{t('leaving.allowedOf', { n: r.allowed_count ?? 0, total: r.item_count })}{/if}{/if}
 						</span>
 					</div>
 					{#if r.status === 'open'}
@@ -136,7 +136,7 @@
 					<span class="p-icon"><Icon name={p.kind === 'feed' ? 'users' : 'frame'} size={18} /></span>
 					<div class="who">
 						<strong>{p.name}</strong>
-						<span class="muted small">{t('leaving.formerStill', { photos: tn('history.photos', p.photos) })}{#if p.left_at} · {t('leaving.leftOn', { when: relativeTime(p.left_at, i18n.tag) })}{/if}</span>
+						<span class="muted small">{t('leaving.formerStill', { photos: tn('history.photos', p.photos) })}{#if p.left_at}{' · '}{t('leaving.leftOn', { when: relativeTime(p.left_at, i18n.tag) })}{/if}</span>
 					</div>
 					<button class="btn btn-sm btn-danger-ghost" onclick={() => ((take = p), (takeOpen = true))}>{t('leaving.takeAwayFrom', { name: p.name })}</button>
 				</li>

@@ -101,7 +101,7 @@
 					<div class="who">
 						<strong class="mono">{b.host}</strong>
 						<span class="muted tiny">
-							{#if b.server_name}{b.server_name} · {/if}{#if b.reason}{b.reason} · {/if}{relativeTime(b.created_at, i18n.tag)}{#if b.created_by_name} · {t('people.byName', { name: b.created_by_name })}{/if}
+							{#if b.server_name}{b.server_name}{' · '}{/if}{#if b.reason}{b.reason}{' · '}{/if}{relativeTime(b.created_at, i18n.tag)}{#if b.created_by_name}{' · '}{t('people.byName', { name: b.created_by_name })}{/if}
 						</span>
 					</div>
 					<button class="btn btn-sm btn-ghost" onclick={() => unblock(b)}>{t('remote.unblock')}</button>

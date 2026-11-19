@@ -203,7 +203,7 @@
 						<div class="who">
 							<span class="small">
 								<strong>{inv.purpose === 'subscribe' ? t('feedInvites.subscribe') : t('feedInvites.join')}</strong>
-								· <span class="num">{formatFeedCode(inv.code)}</span>{#if inv.note} · {inv.note}{/if}{#if inv.allow_remote} · <span class="badge"><Icon name="globe" size={12} />{t('remote.inviteAllowsRemote')}</span>{/if}
+								· <span class="num">{formatFeedCode(inv.code)}</span>{#if inv.note} · {inv.note}{/if}{#if inv.allow_remote}{' · '}<span class="badge"><Icon name="globe" size={12} />{t('remote.inviteAllowsRemote')}</span>{/if}
 							</span>
 							<span class="muted tiny num">
 								{inv.max_uses ? t('people.usesOf', { n: inv.uses ?? 0, max: inv.max_uses }) : t('people.usesN', { n: inv.uses ?? 0 })} · {t('people.expiresIn', { when: relativeTime(inv.expires_at, i18n.tag) })}{#if inv.created_by_name} · {t('people.byName', { name: inv.created_by_name })}{/if}
