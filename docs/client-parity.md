@@ -365,15 +365,15 @@ Frames need nothing new (remote placements look like feed placements, taken-away
 
 | Feature | Web | Android | iOS | Notes |
 |---|---|---|---|---|
-| Leave a family: your photos stay (default) or go with you, your comments stay or are deleted, "Leave this frame too" per frame | planned | planned | planned | `getLeavePreview`, `leaveFeed {photos, comments, leave_frame_ids}`; result line from `TakeAwayResult`. Decision A: keep by default. |
-| Leave a frame with the same photo question | planned | planned | planned | `leaveFrame {photos}`. |
-| Take my photos away later from a family or frame I left or was removed from (sent history) | planned | planned | planned | `listFormerPlaces`, `takeAwayFromFeed`, `takeAwayFromFrame`. |
-| Frame trash: "Taken away by Tom" groups with the date they go (30 days) | planned | planned | planned | `listFrameTakenAway`, `listPlacements?visibility=taken_away&taking_id=`; push `photos_taken_away`. |
-| Ask Tom to keep them (all or picked photos), "Tom doesn't accept requests" when blocked; family side for owners and admins | planned | planned | planned | `createKeepRequest`, `listFrameKeepRequests`, `listFeedTakenAway`, `listFeedKeepRequests`. One ask per taking (decision C). |
-| Keep requests to me: allow all, allow some, decline | planned | planned | planned | `listMyKeepRequests`, `getKeepRequest`, `answerKeepRequest`; push `keep_request`, `keep_answered`; event `keep_request.updated`. |
-| Delete my account: take my photos (default) or leave them to the families | planned | planned | planned | `deleteMe {photos}` (`take` or `leave`); "Tom (former member)" credit from `Item.former_sender_name`. |
-| Memories: leave people out, "Don't show this memory again" | planned | planned | planned | `getMemoryPreferences`, `updateMemoryPreferences`; private, frames unaffected. |
-| Direct chat read-only when you no longer share a family or frame ("You can no longer message Lies") | planned | planned | planned | `Conversation.read_only_reason: no_longer_contacts`. |
+| Leave a family: your photos stay (default) or go with you, your comments stay or are deleted, "Leave this frame too" per frame | planned | planned | new | `getLeavePreview`, `leaveFeed {photos, comments, leave_frame_ids}`; result line from `TakeAwayResult`. Decision A: keep by default. |
+| Leave a frame with the same photo question | planned | planned | new | `leaveFrame {photos}`. |
+| Take my photos away later from a family or frame I left or was removed from (sent history) | planned | planned | new | `listFormerPlaces`, `takeAwayFromFeed`, `takeAwayFromFrame`. |
+| Frame trash: "Taken away by Tom" groups with the date they go (30 days) | planned | planned | new | `listFrameTakenAway`, `listPlacements?visibility=taken_away&taking_id=`; push `photos_taken_away`. |
+| Ask Tom to keep them (all or picked photos), "Tom doesn't accept requests" when blocked; family side for owners and admins | planned | planned | new | `createKeepRequest`, `listFrameKeepRequests`, `listFeedTakenAway`, `listFeedKeepRequests`. One ask per taking (decision C). |
+| Keep requests to me: allow all, allow some, decline | planned | planned | new | `listMyKeepRequests`, `getKeepRequest`, `answerKeepRequest`; push `keep_request`, `keep_answered`; event `keep_request.updated`. |
+| Delete my account: take my photos (default) or leave them to the families | planned | planned | new | `deleteMe {photos}` (`take` or `leave`); "Tom (former member)" credit from `Item.former_sender_name`. |
+| Memories: leave people out, "Don't show this memory again" | planned | planned | new | `getMemoryPreferences`, `updateMemoryPreferences`; private, frames unaffected. iOS: hidden memories show as a count with "Show them all again" (the preferences carry post ids only). |
+| Direct chat read-only when you no longer share a family or frame ("You can no longer message Lies") | planned | planned | new | `Conversation.read_only_reason: no_longer_contacts`. |
 | Operator: transfer ownership of a frame or family, ownership log | planned | skipped | skipped | `operatorSearchOwnership`, `operatorTransferFrameOwner`, `operatorTransferFeedOwner`, `operatorListOwnershipLog`; push `ownership_changed`. Operator tools are on the web. |
 
 ### Several servers (`remote_families`, multi-account)
