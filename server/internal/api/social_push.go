@@ -301,12 +301,18 @@ func (s *Server) commentPushes(ctx context.Context, postID uuid.UUID, c *store.C
 		ids := postPushIDs(p)
 		ids["comment_id"] = c.ID.String()
 		args := map[string]string{"name": names[author], "text": text}
+		var badge *int
+		if k == "mention" || k == "comment_reply" {
+			if b, err := s.badge(ctx, r); err == nil {
+				badge = &b.Total
+			}
+		}
 		switch k {
 		case "mention":
-			out[r] = &notify.Push{Key: "mention", Text: "mention_comment", Args: args, IDs: ids}
+			out[r] = &notify.Push{Key: "mention", Text: "mention_comment", Args: args, IDs: ids, Badge: badge}
 		case "comment_reply":
 			ids["parent_id"] = c.ParentID.String()
-			out[r] = &notify.Push{Key: "comment_reply", Args: args, IDs: ids, Tag: "comment_reply:" + c.ParentID.String()}
+			out[r] = &notify.Push{Key: "comment_reply", Args: args, IDs: ids, Tag: "comment_reply:" + c.ParentID.String(), Badge: badge}
 		case "comment":
 			if s.hub.UserConnected(r) {
 				continue // in the app: the event is enough, and the bundle stays quiet

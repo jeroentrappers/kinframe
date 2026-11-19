@@ -200,10 +200,14 @@ func (s *Server) messagePush(conv *store.Conversation, members []store.Conversat
 		text = excerpt(strings.Join(strings.Fields(*b), " "), 120)
 	}
 	args["text"] = text
-	if mention {
-		return &notify.Push{Key: "mention", Text: "chat_mention", Args: args, IDs: ids}
+	var badge *int
+	if b, err := s.badge(context.Background(), to); err == nil {
+		badge = &b.Total
 	}
-	p := &notify.Push{Key: "message", Args: args, IDs: ids, Tag: "conversation:" + conv.ID.String()}
+	if mention {
+		return &notify.Push{Key: "mention", Text: "chat_mention", Args: args, IDs: ids, Badge: badge}
+	}
+	p := &notify.Push{Key: "message", Args: args, IDs: ids, Tag: "conversation:" + conv.ID.String(), Badge: badge}
 	n := 0
 	var count int
 	_ = s.st.Q().QueryRow(context.Background(), `SELECT count(*) FROM message_items WHERE message_id = $1`, m.ID).Scan(&count)

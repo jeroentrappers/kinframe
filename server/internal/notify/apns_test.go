@@ -88,3 +88,26 @@ func TestAPNsSender(t *testing.T) {
 		t.Error("token unknown to both environments not reported gone")
 	}
 }
+
+func TestAPNsBodyChatMessage(t *testing.T) {
+	b, err := apnsBody([]byte(`{"key":"message","title":"Peeters","body":"Anna: hi","ids":{"conversation_id":"c1","message_id":"m1"},"badge":3}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m struct {
+		Aps map[string]any `json:"aps"`
+	}
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatal(err)
+	}
+	if m.Aps["category"] != APNsMessageCategory || m.Aps["thread-id"] != "conversation:c1" || m.Aps["badge"] != float64(3) {
+		t.Fatalf("aps: %v", m.Aps)
+	}
+	// A comment push: grouped by post, no chat category, no badge.
+	b, _ = apnsBody([]byte(`{"key":"comment","title":"x","body":"y","ids":{"post_id":"p1"}}`))
+	m.Aps = nil
+	_ = json.Unmarshal(b, &m)
+	if m.Aps["category"] != nil || m.Aps["thread-id"] != "post:p1" || m.Aps["badge"] != nil {
+		t.Fatalf("comment aps: %v", m.Aps)
+	}
+}

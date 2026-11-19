@@ -963,6 +963,10 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   | `weekly_summary` | §5.20 | `week_of` | `weekly_summary` |
 
   The four reminder keys carry `actions: ["snooze_month", "fewer_reminders"]` (APNs category `kinframe.reminder`).
+- Chat `message` and chat `mention` pushes, and comment `mention`/`comment_reply` pushes, carry `badge`: the receiver's
+  unread total (`GET /v1/me/badge`) when the push was made. APNs puts it in `aps.badge`, FCM in the `badge` data value.
+  Chat `message`/`mention` pushes use APNs category `kinframe.message` (the app adds a reply field). APNs `thread-id` is
+  the `tag` when there is one, else `conversation:<id>` or `post:<id>`, so Notification Center groups per chat or post.
   System messages, streak milestones, recaps and milestones never push.
 - `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
   Placements shared from another frame count for the sharer instead: they get `delivered` (event `share.delivered`)

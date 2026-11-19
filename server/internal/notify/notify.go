@@ -39,6 +39,9 @@ type Push struct {
 	// README §6.3). APNs delivery maps a non-empty list to the category
 	// "kinframe.reminder", FCM to a comma-separated "actions" data value.
 	Actions []string
+	// Badge, if set, is the receiver's unread count (chats plus threads, GET /v1/me/badge) at sending time:
+	// APNs sets aps.badge so the app icon is right while the app is closed; FCM sends it as "badge" data.
+	Badge *int
 }
 
 // Sender delivers one push payload to one endpoint. Gone reports the endpoint
@@ -112,6 +115,9 @@ func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 		}
 		if len(p.Actions) > 0 {
 			msg["actions"] = p.Actions
+		}
+		if p.Badge != nil {
+			msg["badge"] = *p.Badge
 		}
 		payload, _ := json.Marshal(msg)
 		gone, err := n.Sender.Send(ctx, ep, payload)

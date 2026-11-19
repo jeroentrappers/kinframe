@@ -109,6 +109,7 @@ func apnsBody(payload []byte) ([]byte, error) {
 		IDs     map[string]string `json:"ids"`
 		Tag     string            `json:"tag"`
 		Actions []string          `json:"actions"`
+		Badge   *int              `json:"badge"`
 	}
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return nil, err
@@ -120,9 +121,23 @@ func apnsBody(payload []byte) ([]byte, error) {
 		"mutable-content": 1,
 	}
 	m := map[string]any{"aps": aps, "key": p.Key, "ids": p.IDs}
+	// Group in Notification Center by conversation or post, not by kind: the tag when there is one, else the
+	// conversation, else the post.
+	if c := p.IDs["conversation_id"]; c != "" {
+		aps["thread-id"] = "conversation:" + c
+	} else if po := p.IDs["post_id"]; po != "" {
+		aps["thread-id"] = "post:" + po
+	}
 	if p.Tag != "" {
 		aps["thread-id"] = p.Tag
 		m["tag"] = p.Tag
+	}
+	if p.Badge != nil {
+		aps["badge"] = *p.Badge
+	}
+	// Chat messages and mentions in chats get the category with the reply field.
+	if (p.Key == "message" || p.Key == "mention") && p.IDs["conversation_id"] != "" && p.IDs["message_id"] != "" {
+		aps["category"] = APNsMessageCategory
 	}
 	if len(p.Actions) > 0 {
 		// The app registers the category with the "Snooze 1 month" and "Fewer reminders" buttons (README §6.3).
@@ -137,6 +152,9 @@ func apnsBody(payload []byte) ([]byte, error) {
 
 // APNsReminderCategory is the notification category of pushes with actions (reminders).
 const APNsReminderCategory = "kinframe.reminder"
+
+// APNsMessageCategory is the category of chat message and chat mention pushes (the app adds a reply field).
+const APNsMessageCategory = "kinframe.message"
 
 // apnsCollapseID is the payload's tag as apns-collapse-id (at most 64 bytes; longer tags are hashed).
 func apnsCollapseID(payload []byte) string {

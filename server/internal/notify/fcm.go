@@ -16,6 +16,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -136,6 +137,7 @@ func fcmData(payload []byte) (map[string]string, error) {
 		IDs     map[string]string `json:"ids"`
 		Tag     string            `json:"tag"`
 		Actions []string          `json:"actions"`
+		Badge   *int              `json:"badge"`
 	}
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return nil, err
@@ -149,6 +151,9 @@ func fcmData(payload []byte) (map[string]string, error) {
 	}
 	if len(p.Actions) > 0 {
 		d["actions"] = strings.Join(p.Actions, ",") // README §6.3: the reminder buttons
+	}
+	if p.Badge != nil {
+		d["badge"] = strconv.Itoa(*p.Badge)
 	}
 	for k, v := range p.IDs {
 		if _, taken := d[k]; !taken {
