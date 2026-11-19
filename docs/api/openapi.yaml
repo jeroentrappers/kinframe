@@ -4717,7 +4717,7 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscribeRequest' } } }
       responses:
-        '200': { description: Preview, or an existing subscription, content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscription' } } } }
+        '200': { description: 'Preview, or an existing subscription', content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscription' } } } }
         '201': { description: Recorded, content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscription' } } } }
         default: { $ref: '#/components/responses/Problem' }
 

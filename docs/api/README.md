@@ -1745,8 +1745,9 @@ each other's document (`remote_servers`), refresh it daily and on a signature fa
    (kinframe.appmire.be) and shown on Oma's frame." with the history option.
 2. `POST /v1/frames/{id}/remote-subscriptions {invite_url, history, history_count, birthdays, on_end}` calls
    `federationSubscribe` for real. A records a `remote_subscribers` row (frame id and name as B reported, B's server,
-   the requester's name): `active` at once for a `subscribe` invite (pre-approved by the admin who made it); A may
-   answer `pending` when its rules require approval, and then A's admins see it in `listFeedSubscriptions` with
+   the requester's name): `active` at once only when the family has *auto-approve subscriptions* on; otherwise
+   `pending`, even with a pre-approved `subscribe` invite (unlike local subscriptions), so the family's admins see
+   which server will get copies before anything is shared. A's admins see it in `listFeedSubscriptions` with
    `remote` set and decide with the usual `approve`/`reject`/`DELETE /v1/subscriptions/{sid}`
    (`subscription.request` / `subscription_request` push as for local requests: "Tom wants to show Janssens on Oma's
    frame (kinframe.appmire.be)"). B keeps a `remote_follows` row (`RemoteSubscription`).
