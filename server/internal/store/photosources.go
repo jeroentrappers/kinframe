@@ -384,12 +384,14 @@ func (s *Store) CreateGoogleImport(ctx context.Context, g *GoogleImport) error {
 	return err
 }
 
-// SaveGoogleImport writes an import's mutable columns back.
+// SaveGoogleImport writes an import's mutable columns back. A cancelled import stays cancelled: a driver that loaded the row before the
+// person cancelled can't write its own state over the cancellation.
 func (s *Store) SaveGoogleImport(ctx context.Context, g *GoogleImport) error {
 	_, err := s.Pool.Exec(ctx, `UPDATE google_imports SET status = $2, state_hash = $3, auth_url_enc = $4, pkce_verifier_enc = $5,
 		access_token_enc = $6, token_expires_at = $7, picker_session_id = $8, picker_uri = $9, picker_expires_at = $10,
 		poll_interval_ms = $11, picked = $12, imported = $13, duplicates = $14, skipped = $15, failed = $16, bytes = $17,
-		done_ids = $18, send_ids = $19, error_code = $20, finished_at = $21, updated_at = now() WHERE id = $1`,
+		done_ids = $18, send_ids = $19, error_code = $20, finished_at = $21, updated_at = now()
+		WHERE id = $1 AND (status <> 'cancelled' OR $2 = 'cancelled')`,
 		g.ID, g.Status, g.StateHash, g.AuthURLEnc, g.PKCEVerifierEnc, g.AccessTokenEnc, g.TokenExpiresAt, g.PickerSessionID,
 		g.PickerURI, g.PickerExpiresAt, g.PollIntervalMS, g.Picked, g.Imported, g.Duplicates, g.Skipped, g.Failed, g.Bytes,
 		nonNil(g.DoneIDs), nonNilIDs(g.SendIDs), g.ErrorCode, g.FinishedAt)
