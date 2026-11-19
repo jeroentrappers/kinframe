@@ -99,7 +99,7 @@ private fun ServersNotices(events: SharedFlow<ServersNotice>) {
 fun LeavingRouteScreen(graph: AppGraph, nav: Navigator, r: LeavingRoute) {
     when (r) {
         is MemoriesRoute -> {
-            val account = graph.accounts.byId(r.accountId) ?: graph.accounts.primary.value
+            val account = graph.accounts.byId(r.accountId) ?: graph.accounts.primary.collectAsStateWithLifecycle().value
             val route = account.route()
             val api = route?.leaving ?: return
             val social = route.social
@@ -111,7 +111,7 @@ fun LeavingRouteScreen(graph: AppGraph, nav: Navigator, r: LeavingRoute) {
             MemoriesScreen(s, vm) { nav.pop() }
         }
         is KeepRequestsRoute -> {
-            val vm: KeepRequestsViewModel = viewModel(key = "keep-requests-${k(graph.api.value)}") { KeepRequestsViewModel(graph.leaving) }
+            val vm: KeepRequestsViewModel = viewModel(key = "keep-requests-${k(graph.api.collectAsStateWithLifecycle().value)}") { KeepRequestsViewModel(graph.leaving) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(r.requestId) { r.requestId?.let(vm::open) }
             LaunchedEffect(vm) { graph.live.events.collect { e -> if (e is LeavingLive.KeepRequestUpdated) vm.onUpdated(e.request) } }
@@ -119,7 +119,7 @@ fun LeavingRouteScreen(graph: AppGraph, nav: Navigator, r: LeavingRoute) {
             KeepRequestsScreen(s, vm) { nav.pop() }
         }
         FormerPlacesRoute -> {
-            val vm: FormerPlacesViewModel = viewModel(key = "former-${k(graph.api.value)}") { FormerPlacesViewModel(graph.leaving) }
+            val vm: FormerPlacesViewModel = viewModel(key = "former-${k(graph.api.collectAsStateWithLifecycle().value)}") { FormerPlacesViewModel(graph.leaving) }
             val s by vm.state.collectAsStateWithLifecycle()
             LeavingNotices(vm.events)
             FormerPlacesScreen(s, vm) { nav.pop() }
@@ -191,7 +191,7 @@ fun frameLeaveSheet(graph: AppGraph, frameId: String, onGone: () -> Unit): (@Com
 @Composable
 fun FrameTakenAway(graph: AppGraph, frame: Frame) {
     if (!leavingOn(graph, frame.id) || !frame.can { it.manageLibrary }) return
-    val vm: TakenAwayViewModel = viewModel(key = "taken-frame-${frame.id}-${k(graph.api.value)}") { TakenAwayViewModel(graph.leaving, frame.id, null) }
+    val vm: TakenAwayViewModel = viewModel(key = "taken-frame-${frame.id}-${k(graph.api.collectAsStateWithLifecycle().value)}") { TakenAwayViewModel(graph.leaving, frame.id, null) }
     val s by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(vm) {
         graph.live.events.collect { e ->
@@ -207,7 +207,7 @@ fun FrameTakenAway(graph: AppGraph, frame: Frame) {
 fun FeedLeavingSettings(graph: AppGraph, feed: Feed, onFeed: (Feed) -> Unit) {
     if (!feed.isAdmin) return
     if (leavingOn(graph, feed.id)) {
-        val vm: TakenAwayViewModel = viewModel(key = "taken-feed-${feed.id}-${k(graph.api.value)}") { TakenAwayViewModel(graph.leaving, null, feed.id) }
+        val vm: TakenAwayViewModel = viewModel(key = "taken-feed-${feed.id}-${k(graph.api.collectAsStateWithLifecycle().value)}") { TakenAwayViewModel(graph.leaving, null, feed.id) }
         val s by vm.state.collectAsStateWithLifecycle()
         LeavingNotices(vm.events)
         TakenAwaySection(s, vm)

@@ -114,6 +114,7 @@
     <string name="leaving_memory_hidden">Deze herinnering verschijnt niet meer.</string>
 
     <string name="leaving_chat_no_longer">Je kunt %1$s geen berichten meer sturen.</string>
+    <string name="leaving_former_member">%1$s (voormalig lid)</string>
 
     <string name="leaving_delete_take">Neem mijn foto\'s mee</string>
     <string name="leaving_delete_take_hint">Ze verdwijnen van elk kader en uit elke familie. Kaders houden ze 30 dagen in hun prullenbak.</string>

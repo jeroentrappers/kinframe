@@ -105,6 +105,21 @@ fun resultText(res: android.content.res.Resources, r: TakeAwayResult?): String {
     return listOf(n, until).filter { it.isNotBlank() }.joinToString(" ") + remote
 }
 
+/**
+ * The credit of a copied or handed-over photo: "Lies · Janssens" for a copy of a family on another server, "Tom
+ * (former member)" after a handover at account deletion; null for every other photo (README §5.21, §5.22).
+ */
+@Composable
+fun creditOf(item: app.kinframe.core.api.Item, remote: app.kinframe.core.servers.PlacementRemote? = null): String? {
+    val rs = item.remoteSender
+    val former = item.formerSenderName
+    return when {
+        rs != null -> "${rs.name} · ${remote?.feedName ?: rs.serverName}"
+        !former.isNullOrBlank() -> stringResource(R.string.leaving_former_member, former)
+        else -> null
+    }
+}
+
 // ------------------------------------------------------------------------------------------------- leave sheets
 
 /**

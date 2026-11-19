@@ -115,6 +115,7 @@
     <string name="leaving_memory_hidden">This memory won\'t show again.</string>
 
     <string name="leaving_chat_no_longer">You can no longer message %1$s.</string>
+    <string name="leaving_former_member">%1$s (former member)</string>
 
     <string name="leaving_delete_take">Take my photos with me</string>
     <string name="leaving_delete_take_hint">They leave every frame and family. Frames keep them in their trash for 30 days.</string>
