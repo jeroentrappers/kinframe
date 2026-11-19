@@ -109,6 +109,10 @@ final class AppModel {
     var feedsEnabled: Bool { discovery?.feeds == true }
     /// Birthdays in feeds: only when discovery says `birthdays` (together with `feeds`).
     var birthdaysEnabled: Bool { feedsEnabled && discovery?.birthdays == true }
+    /// Leaving with a choice, taking away, keep requests, memories (README §5.21): only when discovery says `leaving`.
+    var leavingEnabled: Bool { discovery?.leaving == true }
+    /// Following families on other servers and allowing remote frames (README §5.22): discovery `remote_families`.
+    var remoteFamiliesEnabled: Bool { discovery?.remoteFamilies == true }
     /// Photo sources and Google Photos import, as far as discovery offers them.
     var photoSources: PhotoSourceFeatures { PhotoSourceFeatures(discovery) }
     /// The update page or banner this build gets under the server's `app_versions`.

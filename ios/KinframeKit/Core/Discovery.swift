@@ -77,6 +77,17 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var linkPreviews: Bool = false
     public var engagement: Bool = false
     public var emailDigest: Bool = false
+    /// Several servers (docs/spec/multi-server.md §2.3): the server's stable random id (deduplicates accounts), its
+    /// operator-set label (the server chip) and its public base URL (the `server` of push payloads).
+    public var serverId: String?
+    public var serverName: String?
+    public var baseURL: String?
+    /// Leaving a family with a choice, taking photos away, keep requests, the deletion handover and the memories
+    /// filter (`leaving`, README §5.21). Hidden while off.
+    public var leaving: Bool = false
+    /// Frames here can follow families on other servers, families here can allow frames on other servers
+    /// (`remote_families`, README §5.22). Hidden while off.
+    public var remoteFamilies: Bool = false
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -107,6 +118,11 @@ public struct Discovery: Codable, Equatable, Sendable {
         case voiceMessages = "voice_messages"
         case linkPreviews = "link_previews"
         case emailDigest = "email_digest"
+        case serverId = "server_id"
+        case serverName = "server_name"
+        case baseURL = "base_url"
+        case leaving
+        case remoteFamilies = "remote_families"
     }
 
     public init(from decoder: Decoder) throws {
@@ -139,6 +155,11 @@ public struct Discovery: Codable, Equatable, Sendable {
         linkPreviews = chats && ((try? c.decodeIfPresent(Bool.self, forKey: .linkPreviews)) ?? false)
         engagement = (try? c.decodeIfPresent(Bool.self, forKey: .engagement)) ?? false
         emailDigest = (try? c.decodeIfPresent(Bool.self, forKey: .emailDigest)) ?? false
+        serverId = (try? c.decodeIfPresent(String.self, forKey: .serverId)).flatMap { $0?.isEmpty == false ? $0 : nil }
+        serverName = (try? c.decodeIfPresent(String.self, forKey: .serverName)).flatMap { $0?.isEmpty == false ? $0 : nil }
+        baseURL = (try? c.decodeIfPresent(String.self, forKey: .baseURL)).flatMap { $0?.isEmpty == false ? $0 : nil }
+        leaving = (try? c.decodeIfPresent(Bool.self, forKey: .leaving)) ?? false
+        remoteFamilies = (try? c.decodeIfPresent(Bool.self, forKey: .remoteFamilies)) ?? false
         // The server sends the shop's configuration (an object); we keep only whether there is one.
         if let b = try? c.decode(Bool.self, forKey: .shop) {
             shop = b
