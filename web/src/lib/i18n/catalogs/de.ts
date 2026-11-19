@@ -1388,6 +1388,7 @@ const de: Catalog = {
 	'feedRole.owner': 'Eigentümer',
 	'feedRole.admin': 'Admin',
 	'feedRole.poster': 'Mitglied',
+	'feedRole.member': 'Mitleser',
 	'problem.already_subscribed': 'Dieser Rahmen zeigt diesen Feed schon oder wartet auf Freigabe.',
 	'problem.invalid_transition': 'Das geht gerade nicht. Lade die Seite neu und versuch es noch einmal.',
 	'problem.limit_reached': 'Du hast das Limit auf diesem Server erreicht.',

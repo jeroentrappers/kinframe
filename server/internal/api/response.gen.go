@@ -6,16 +6,22 @@ import "net/http"
 
 func (r Response) VisitAcceptFeedInviteResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitAcceptInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitAddCircleMembersResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitAddConversationMembersResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitAddEmailSenderResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitApproveEmailSenderResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitApproveFeedBirthdayResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitApproveSubscriptionResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitBlockUserResponse(w http.ResponseWriter) error              { return r.write(w) }
 func (r Response) VisitBulkUpdatePlacementsResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitCancelGoogleImportResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitCancelShopReservationResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitClearCountdownResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitCreateAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitCreateCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitCreateCircleResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitCreateCommentResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitCreateConversationResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitCreateFeedResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitCreateFeedBirthdayResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error { return r.write(w) }
@@ -28,7 +34,9 @@ func (r Response) VisitCreateFrameTelegramCodeResponse(w http.ResponseWriter) er
 	return r.write(w)
 }
 func (r Response) VisitCreateInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitCreateLinkPreviewResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitCreateReportResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitCreateSendResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitCreateShopReservationResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitCreateTelegramLinkCodeResponse(w http.ResponseWriter) error { return r.write(w) }
@@ -38,6 +46,11 @@ func (r Response) VisitDecideJoinRequestResponse(w http.ResponseWriter) error   
 func (r Response) VisitDeleteAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitDeleteAvatarResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitDeleteCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitDeleteCircleResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitDeleteCommentResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitDeleteConversationPhotoResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
 func (r Response) VisitDeleteEmailAddressResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitDeleteEmailHeldMessageResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitDeleteFeedResponse(w http.ResponseWriter) error             { return r.write(w) }
@@ -45,6 +58,7 @@ func (r Response) VisitDeleteFeedBirthdayPhotoResponse(w http.ResponseWriter) er
 	return r.write(w)
 }
 func (r Response) VisitDeleteMeResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitDeleteMessageResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitDeletePhotoSourceResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitDeletePushEndpointResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitDeliverEmailHeldMessageResponse(w http.ResponseWriter) error {
@@ -71,6 +85,7 @@ func (r Response) VisitDevicePatchSettingsResponse(w http.ResponseWriter) error 
 func (r Response) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitDeviceRemoveMemberResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitDeviceRequestPhotosResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitDeviceSendReplyResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitDeviceSetReactionResponse(w http.ResponseWriter) error      { return r.write(w) }
@@ -80,13 +95,19 @@ func (r Response) VisitDisconnectTelegramChatResponse(w http.ResponseWriter) err
 func (r Response) VisitEnrollDeviceResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitForwardSendResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitGeocodeResponse(w http.ResponseWriter) error                { return r.write(w) }
+func (r Response) VisitGetBadgeResponse(w http.ResponseWriter) error               { return r.write(w) }
+func (r Response) VisitGetCircleResponse(w http.ResponseWriter) error              { return r.write(w) }
+func (r Response) VisitGetConversationResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetDiscoveryResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitGetEmailAddressResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetEmailHeldMessageResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitGetFeedResponse(w http.ResponseWriter) error                { return r.write(w) }
 func (r Response) VisitGetFeedBirthdayResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitGetFeedEngagementResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitGetFeedPostResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitGetFeedPostReceiptsResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitGetFeedRecapResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitGetFeedStreakResponse(w http.ResponseWriter) error          { return r.write(w) }
 func (r Response) VisitGetFrameResponse(w http.ResponseWriter) error               { return r.write(w) }
 func (r Response) VisitGetFrameCalendarResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetFrameHealthResponse(w http.ResponseWriter) error         { return r.write(w) }
@@ -94,7 +115,13 @@ func (r Response) VisitGetFramePluginsResponse(w http.ResponseWriter) error     
 func (r Response) VisitGetFrameSettingsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetGoogleImportResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetMeResponse(w http.ResponseWriter) error                  { return r.write(w) }
+func (r Response) VisitGetMessageResponse(w http.ResponseWriter) error             { return r.write(w) }
+func (r Response) VisitGetOnThisDayResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitGetPersonResponse(w http.ResponseWriter) error              { return r.write(w) }
+func (r Response) VisitGetPhotoRequestResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetPhotoSourceResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitGetPostResponse(w http.ResponseWriter) error                { return r.write(w) }
+func (r Response) VisitGetReminderPreferencesResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitGetSendResponse(w http.ResponseWriter) error                { return r.write(w) }
 func (r Response) VisitGetShopOrderStatusResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitGetStationLatestResponse(w http.ResponseWriter) error       { return r.write(w) }
@@ -103,12 +130,19 @@ func (r Response) VisitGetSubscriptionResponse(w http.ResponseWriter) error     
 func (r Response) VisitGetTelegramChatResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetTelegramCodeResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetTelegramLinkResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitGetTimelineResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitGetTvSlideshowResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitGetWeeklySummaryResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitLeaveFeedResponse(w http.ResponseWriter) error              { return r.write(w) }
 func (r Response) VisitLeaveFrameResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitListAlbumPhotoSourcesResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitListAlbumsResponse(w http.ResponseWriter) error             { return r.write(w) }
+func (r Response) VisitListBlocksResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitListCalendarsResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitListCirclesResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitListCommentsResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitListContactsResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitListConversationsResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitListEmailMessagesResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitListEmailPendingSendersResponse(w http.ResponseWriter) error {
 	return r.write(w)
@@ -125,31 +159,41 @@ func (r Response) VisitListFeedJoinRequestsResponse(w http.ResponseWriter) error
 func (r Response) VisitListFeedMembersResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitListFeedPhotoSourcesResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitListFeedPostsResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitListFeedPromptsResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitListFeedReportsResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitListFeedSubscriptionsResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitListFeedTelegramChatsResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitListFrameEmailAddressesResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
+func (r Response) VisitListFramePhotoRequestsResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitListFrameSubscriptionsResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitListFrameTelegramChatsResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitListImmichAlbumsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitListInvitesResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitListJoinRequestsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitListMembersResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitListMessagesResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitListMyFeedsResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitListMyFramesResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitListMyGoogleImportsResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitListMyMilestonesResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitListMyPhotoSourcesResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitListMySendsResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitListOperatorReportsResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitListPlacementsResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitListPromptLibraryResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitListPublicStationsResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitListPushEndpointsResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitListReactionsResponse(w http.ResponseWriter) error          { return r.write(w) }
 func (r Response) VisitListTelegramContributorsResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
-func (r Response) VisitListTvLinksResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitLookupFeedInviteResponse(w http.ResponseWriter) error  { return r.write(w) }
-func (r Response) VisitOperatorGetLimitsResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitListTvLinksResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitLookupFeedInviteResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitMarkConversationReadResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitMarkThreadReadResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitOperatorGetLimitsResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
@@ -164,57 +208,88 @@ func (r Response) VisitPauseSubscriptionResponse(w http.ResponseWriter) error   
 func (r Response) VisitPreviewFeedInviteResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitPreviewInviteResponse(w http.ResponseWriter) error          { return r.write(w) }
 func (r Response) VisitPurgePlacementResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitPutMessageOnFrameResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitRedeemFrameCodeResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitRegenerateEmailAddressResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitRegisterPushEndpointResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitRejectEmailSenderResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitRejectFeedBirthdayResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitRejectSubscriptionResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitRemoveEmailSenderResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitRemoveFeedBirthdayResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitRemoveFeedMemberResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitRemoveFeedPostResponse(w http.ResponseWriter) error         { return r.write(w) }
-func (r Response) VisitRemoveFeedPostItemResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitRemoveFrameResponse(w http.ResponseWriter) error            { return r.write(w) }
-func (r Response) VisitRemoveMemberResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitRemoveSubscriptionResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitReplaceDeviceResponse(w http.ResponseWriter) error          { return r.write(w) }
-func (r Response) VisitRequestSubscriptionResponse(w http.ResponseWriter) error    { return r.write(w) }
-func (r Response) VisitResumeSubscriptionResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitRevokeFeedInviteResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitRevokeInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitRevokeTelegramCodeResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitRevokeTvLinkResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitSendEventToFrameResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitSendFrameCommandResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitSetCountdownResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitSharePlacementsResponse(w http.ResponseWriter) error        { return r.write(w) }
-func (r Response) VisitStartGoogleImportResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitSyncCalendarResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error        { return r.write(w) }
-func (r Response) VisitTestCalendarResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitTestPhotoSourceResponse(w http.ResponseWriter) error        { return r.write(w) }
-func (r Response) VisitTransferFeedOwnershipResponse(w http.ResponseWriter) error  { return r.write(w) }
-func (r Response) VisitTransferOwnershipResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitUnlinkTelegramResponse(w http.ResponseWriter) error         { return r.write(w) }
-func (r Response) VisitUnsendResponse(w http.ResponseWriter) error                 { return r.write(w) }
-func (r Response) VisitUpdateAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }
-func (r Response) VisitUpdateCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
-func (r Response) VisitUpdateEmailAddressResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitUpdateEmailSenderResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitUpdateFeedResponse(w http.ResponseWriter) error             { return r.write(w) }
-func (r Response) VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitUpdateFeedMemberResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitUpdateFeedPreferencesResponse(w http.ResponseWriter) error  { return r.write(w) }
-func (r Response) VisitUpdateFrameResponse(w http.ResponseWriter) error            { return r.write(w) }
-func (r Response) VisitUpdateFrameSettingsResponse(w http.ResponseWriter) error    { return r.write(w) }
-func (r Response) VisitUpdateItemResponse(w http.ResponseWriter) error             { return r.write(w) }
-func (r Response) VisitUpdateMeResponse(w http.ResponseWriter) error               { return r.write(w) }
-func (r Response) VisitUpdateMemberResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitUpdatePhotoSourceResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitUpdatePlacementResponse(w http.ResponseWriter) error        { return r.write(w) }
-func (r Response) VisitUpdateSubscriptionResponse(w http.ResponseWriter) error     { return r.write(w) }
-func (r Response) VisitUpdateTelegramChatResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitRemoveCircleMemberResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitRemoveConversationMemberResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitRemoveEmailSenderResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitRemoveFeedBirthdayResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitRemoveFeedMemberResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitRemoveFeedPostResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitRemoveFeedPostItemResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitRemoveFrameResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitRemoveMemberResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitRemoveSubscriptionResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitReplaceDeviceResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitRequestSubscriptionResponse(w http.ResponseWriter) error   { return r.write(w) }
+func (r Response) VisitResetFeedPromptResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitResolveReportResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitResumeSubscriptionResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitRevokeFeedInviteResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitRevokeInviteResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitRevokeTelegramCodeResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitRevokeTvLinkResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitSendEventToFrameResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitSendFrameCommandResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitSendMessageResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitSendTypingResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitSetCountdownResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitSetFeedPromptResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitSetReactionResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitSetThreadMuteResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitSetThreadStateResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitSharePlacementsResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitStartGoogleImportResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitSyncCalendarResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitTagPostPromptResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitTestCalendarResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitTestPhotoSourceResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitTransferFeedOwnershipResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitTransferOwnershipResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitUnblockUserResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitUnlinkTelegramResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitUnsendResponse(w http.ResponseWriter) error                { return r.write(w) }
+func (r Response) VisitUpdateAlbumResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitUpdateCalendarResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitUpdateCircleResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitUpdateCircleMemberResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitUpdateCommentResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitUpdateConversationResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitUpdateConversationMemberResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitUpdateConversationPreferencesResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitUpdateEmailAddressResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitUpdateEmailSenderResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitUpdateFeedResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitUpdateFeedEngagementResponse(w http.ResponseWriter) error  { return r.write(w) }
+func (r Response) VisitUpdateFeedMemberResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitUpdateFeedPreferencesResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitUpdateFrameResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitUpdateFrameSettingsResponse(w http.ResponseWriter) error   { return r.write(w) }
+func (r Response) VisitUpdateItemResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitUpdateMeResponse(w http.ResponseWriter) error              { return r.write(w) }
+func (r Response) VisitUpdateMemberResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitUpdateMessageResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitUpdateMyMilestoneResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitUpdatePhotoSourceResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitUpdatePlacementResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitUpdateReminderPreferencesResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitUpdateSubscriptionResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitUpdateTelegramChatResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitUpdateTelegramContributorResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }

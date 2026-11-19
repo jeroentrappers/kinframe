@@ -1422,6 +1422,7 @@ const lt: Catalog = {
 	'feedRole.owner': 'Savininkas',
 	'feedRole.admin': 'Administratorius',
 	'feedRole.poster': 'Autorius',
+	'feedRole.member': 'Skaitytojas',
 	'problem.already_subscribed': 'Šis rėmelis jau rodo šį kanalą arba laukia patvirtinimo.',
 	'problem.invalid_transition': 'Šiuo metu to padaryti negalima. Įkelkite puslapį iš naujo ir bandykite dar kartą.',
 	'problem.limit_reached': 'Pasiekėte šio serverio ribą.',

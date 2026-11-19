@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Nie możesz wysłać wiadomości do tej osoby",
+    "problem.audio_too_long": "Wiadomość głosowa jest za długa"
+  }
+}

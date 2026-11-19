@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Šai personai nevari nosūtīt ziņu",
+    "problem.audio_too_long": "Balss ziņa ir pārāk gara"
+  }
+}

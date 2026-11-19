@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Tej osebi ne moreš poslati sporočila",
+    "problem.audio_too_long": "Glasovno sporočilo je predolgo"
+  }
+}

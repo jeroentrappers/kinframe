@@ -1422,6 +1422,7 @@ const cs: Catalog = {
 	'feedRole.owner': 'Vlastník',
 	'feedRole.admin': 'Správce',
 	'feedRole.poster': 'Přispěvatel',
+	'feedRole.member': 'Čtenář',
 	'problem.already_subscribed': 'Tento rámeček už tento kanál zobrazuje, nebo čeká na schválení.',
 	'problem.invalid_transition': 'To teď nejde. Načtěte stránku znovu a zkuste to znovu.',
 	'problem.limit_reached': 'Dosáhli jste limitu tohoto serveru.',

@@ -239,7 +239,9 @@ func TestFeedPostsAndSubscriptions(t *testing.T) {
 	requireMedia(t)
 	e := newEnv(t)
 	anna, ben, carla, dave := e.user("anna@x.org", "Anna"), e.user("ben@x.org", "Ben"), e.user("carla@x.org", "Carla"), e.user("dave@x.org", "Dave")
-	feed := e.createFeed(anna, map[string]any{"name": "Peeters kids"})
+	// members_see_reactions defaults to true since docs/spec/family-social.md; this test checks a feed where
+	// other members see neither receipts nor frames' reactions.
+	feed := e.createFeed(anna, map[string]any{"name": "Peeters kids", "members_see_reactions": false})
 	e.joinFeed(anna, ben, feed)
 	e.joinFeed(anna, dave, feed)
 	dO, oma := e.claimSized(ben, 1280, 800)

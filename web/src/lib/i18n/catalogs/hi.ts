@@ -1393,6 +1393,7 @@ const hi: Catalog = {
 	'feedRole.owner': 'मालिक',
 	'feedRole.admin': 'एडमिन',
 	'feedRole.poster': 'पोस्ट करने वाले',
+	'feedRole.member': 'पाठक',
 	'problem.already_subscribed': 'यह फ़्रेम पहले से यह फ़ीड दिखा रहा है, या मंज़ूरी का इंतज़ार कर रहा है।',
 	'problem.invalid_transition': 'अभी यह मुमकिन नहीं है। पेज रीलोड करके फिर से कोशिश करें।',
 	'problem.limit_reached': 'आप इस सर्वर की सीमा तक पहुंच गए हैं।',

@@ -1422,6 +1422,7 @@ const fr: Catalog = {
 	'feedRole.owner': 'Propriétaire',
 	'feedRole.admin': 'Admin',
 	'feedRole.poster': 'Membre',
+	'feedRole.member': 'Lecteur',
 	'problem.already_subscribed': 'Ce cadre affiche déjà ce flux, ou attend une validation.',
 	'problem.invalid_transition': 'Ce n’est pas possible pour le moment. Rechargez la page et réessayez.',
 	'problem.limit_reached': 'Vous avez atteint la limite sur ce serveur.',

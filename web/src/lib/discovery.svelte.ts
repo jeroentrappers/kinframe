@@ -23,7 +23,15 @@ export const DEFAULT_LIMITS: Required<Limits> = {
 	max_email_held_messages: 100,
 	max_telegram_chats_per_target: 5,
 	max_telegram_chats_per_user: 20,
-	max_telegram_items_per_chat_hour: 300
+	max_telegram_items_per_chat_hour: 300,
+	max_comment_chars: 2000,
+	max_message_chars: 4000,
+	max_mentions: 20,
+	max_message_items: 30,
+	max_group_members: 100,
+	max_circles_per_feed: 20,
+	max_voice_seconds: 300,
+	message_edit_hours: 24
 };
 
 /**

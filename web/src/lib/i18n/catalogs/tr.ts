@@ -1381,6 +1381,7 @@ const tr: Catalog = {
 	'feedRole.owner': 'Sahip',
 	'feedRole.admin': 'Yönetici',
 	'feedRole.poster': 'Yazar',
+	'feedRole.member': 'Okuyucu',
 	'problem.already_subscribed': 'Bu çerçeve bu kanalı zaten gösteriyor veya onay bekliyor.',
 	'problem.invalid_transition': 'Bu şu anda mümkün değil. Sayfayı yenileyip tekrar deneyin.',
 	'problem.limit_reached': 'Bu sunucudaki sınıra ulaştınız.',

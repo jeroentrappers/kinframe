@@ -1376,6 +1376,7 @@ const nb: Catalog = {
 	'feedRole.owner': 'Eier',
 	'feedRole.admin': 'Administrator',
 	'feedRole.poster': 'Deltaker',
+	'feedRole.member': 'Leser',
 	'problem.already_subscribed': 'Fotorammen viser allerede denne kanalen, eller venter på godkjenning.',
 	'problem.invalid_transition': 'Det går ikke akkurat nå. Last inn på nytt og prøv igjen.',
 	'problem.limit_reached': 'Du har nådd grensen på denne serveren.',

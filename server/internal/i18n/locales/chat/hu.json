@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Ennek a személynek nem küldhetsz üzenetet",
+    "problem.audio_too_long": "A hangüzenet túl hosszú"
+  }
+}

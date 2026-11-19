@@ -1383,6 +1383,7 @@ const nl: Catalog = {
 	'feedRole.owner': 'Eigenaar',
 	'feedRole.admin': 'Beheerder',
 	'feedRole.poster': 'Lid',
+	'feedRole.member': 'Meelezer',
 	'problem.already_subscribed': 'Dit kader toont deze feed al, of wacht nog op goedkeuring.',
 	'problem.invalid_transition': 'Dat kan nu niet. Laad de pagina opnieuw en probeer het nog eens.',
 	'problem.limit_reached': 'Je hebt de limiet op deze server bereikt.',

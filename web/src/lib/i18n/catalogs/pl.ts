@@ -1451,6 +1451,7 @@ const pl: Catalog = {
 	'feedRole.owner': 'Właściciel',
 	'feedRole.admin': 'Administrator',
 	'feedRole.poster': 'Autor',
+	'feedRole.member': 'Czytelnik',
 	'problem.already_subscribed': 'Ta ramka już pokazuje ten kanał albo czeka na zatwierdzenie.',
 	'problem.invalid_transition': 'To teraz niemożliwe. Odśwież stronę i spróbuj ponownie.',
 	'problem.limit_reached': 'Osiągnięto limit na tym serwerze.',

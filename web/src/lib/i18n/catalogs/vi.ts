@@ -1394,6 +1394,7 @@ const vi: Catalog = {
 	'feedRole.owner': 'Chủ sở hữu',
 	'feedRole.admin': 'Quản trị viên',
 	'feedRole.poster': 'Người đăng',
+	'feedRole.member': 'Người xem',
 	'problem.already_subscribed': 'Khung ảnh này đã hiện kênh này, hoặc đang chờ duyệt.',
 	'problem.invalid_transition': 'Hiện chưa làm được việc này. Hãy tải lại trang và thử lại.',
 	'problem.limit_reached': 'Bạn đã đạt giới hạn trên máy chủ này.',

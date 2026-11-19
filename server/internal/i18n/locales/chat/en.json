@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "You can't message this person",
+    "problem.audio_too_long": "The voice message is too long"
+  }
+}

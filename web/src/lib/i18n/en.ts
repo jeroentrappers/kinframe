@@ -1398,6 +1398,7 @@ export const en = {
 	'feedRole.owner': 'Owner',
 	'feedRole.admin': 'Admin',
 	'feedRole.poster': 'Poster',
+	'feedRole.member': 'Reader',
 	'problem.already_subscribed': 'This frame already shows this feed, or is waiting for approval.',
 	'problem.invalid_transition': 'That isn’t possible right now. Reload and try again.',
 	'problem.limit_reached': 'You’ve reached the limit on this server.',

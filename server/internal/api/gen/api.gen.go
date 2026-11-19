@@ -19,6 +19,21 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for BadgeEventType.
+const (
+	BadgeUpdated BadgeEventType = "badge.updated"
+)
+
+// Valid indicates whether the value is a known member of the BadgeEventType enum.
+func (e BadgeEventType) Valid() bool {
+	switch e {
+	case BadgeUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for BirthdayStatus.
 const (
 	BirthdayStatusApproved BirthdayStatus = "approved"
@@ -238,11 +253,14 @@ const (
 	ChangeTypeAlbumUpsert     ChangeType = "album.upsert"
 	ChangeTypeBirthdays       ChangeType = "birthdays"
 	ChangeTypeCalendar        ChangeType = "calendar"
+	ChangeTypeComments        ChangeType = "comments"
 	ChangeTypeFrame           ChangeType = "frame"
 	ChangeTypeMemberRemove    ChangeType = "member.remove"
 	ChangeTypeMemberUpsert    ChangeType = "member.upsert"
+	ChangeTypePhotoRequest    ChangeType = "photo_request"
 	ChangeTypePlacementRemove ChangeType = "placement.remove"
 	ChangeTypePlacementUpsert ChangeType = "placement.upsert"
+	ChangeTypePrompts         ChangeType = "prompts"
 	ChangeTypeReset           ChangeType = "reset"
 	ChangeTypeSettings        ChangeType = "settings"
 	ChangeTypeWeather         ChangeType = "weather"
@@ -259,21 +277,216 @@ func (e ChangeType) Valid() bool {
 		return true
 	case ChangeTypeCalendar:
 		return true
+	case ChangeTypeComments:
+		return true
 	case ChangeTypeFrame:
 		return true
 	case ChangeTypeMemberRemove:
 		return true
 	case ChangeTypeMemberUpsert:
 		return true
+	case ChangeTypePhotoRequest:
+		return true
 	case ChangeTypePlacementRemove:
 		return true
 	case ChangeTypePlacementUpsert:
+		return true
+	case ChangeTypePrompts:
 		return true
 	case ChangeTypeReset:
 		return true
 	case ChangeTypeSettings:
 		return true
 	case ChangeTypeWeather:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CircleEventType.
+const (
+	CircleUpdated CircleEventType = "circle.updated"
+)
+
+// Valid indicates whether the value is a known member of the CircleEventType enum.
+func (e CircleEventType) Valid() bool {
+	switch e {
+	case CircleUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CircleRemovedEventType.
+const (
+	CircleRemoved CircleRemovedEventType = "circle.removed"
+)
+
+// Valid indicates whether the value is a known member of the CircleRemovedEventType enum.
+func (e CircleRemovedEventType) Valid() bool {
+	switch e {
+	case CircleRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CircleRole.
+const (
+	CircleRoleAdmin  CircleRole = "admin"
+	CircleRoleMember CircleRole = "member"
+)
+
+// Valid indicates whether the value is a known member of the CircleRole enum.
+func (e CircleRole) Valid() bool {
+	switch e {
+	case CircleRoleAdmin:
+		return true
+	case CircleRoleMember:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CommentDeletedEventType.
+const (
+	CommentDeleted CommentDeletedEventType = "comment.deleted"
+)
+
+// Valid indicates whether the value is a known member of the CommentDeletedEventType enum.
+func (e CommentDeletedEventType) Valid() bool {
+	switch e {
+	case CommentDeleted:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CommentEventType.
+const (
+	CommentCreated CommentEventType = "comment.created"
+	CommentUpdated CommentEventType = "comment.updated"
+)
+
+// Valid indicates whether the value is a known member of the CommentEventType enum.
+func (e CommentEventType) Valid() bool {
+	switch e {
+	case CommentCreated:
+		return true
+	case CommentUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CommentKind.
+const (
+	CommentKindFrame  CommentKind = "frame"
+	CommentKindPerson CommentKind = "person"
+)
+
+// Valid indicates whether the value is a known member of the CommentKind enum.
+func (e CommentKind) Valid() bool {
+	switch e {
+	case CommentKindFrame:
+		return true
+	case CommentKindPerson:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConversationCreateKind.
+const (
+	ConversationCreateKindDirect ConversationCreateKind = "direct"
+	ConversationCreateKindGroup  ConversationCreateKind = "group"
+)
+
+// Valid indicates whether the value is a known member of the ConversationCreateKind enum.
+func (e ConversationCreateKind) Valid() bool {
+	switch e {
+	case ConversationCreateKindDirect:
+		return true
+	case ConversationCreateKindGroup:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConversationEventType.
+const (
+	ConversationUpdated ConversationEventType = "conversation.updated"
+)
+
+// Valid indicates whether the value is a known member of the ConversationEventType enum.
+func (e ConversationEventType) Valid() bool {
+	switch e {
+	case ConversationUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConversationKind.
+const (
+	ConversationKindCircle ConversationKind = "circle"
+	ConversationKindDirect ConversationKind = "direct"
+	ConversationKindFamily ConversationKind = "family"
+	ConversationKindGroup  ConversationKind = "group"
+)
+
+// Valid indicates whether the value is a known member of the ConversationKind enum.
+func (e ConversationKind) Valid() bool {
+	switch e {
+	case ConversationKindCircle:
+		return true
+	case ConversationKindDirect:
+		return true
+	case ConversationKindFamily:
+		return true
+	case ConversationKindGroup:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConversationRemovedEventType.
+const (
+	ConversationRemoved ConversationRemovedEventType = "conversation.removed"
+)
+
+// Valid indicates whether the value is a known member of the ConversationRemovedEventType enum.
+func (e ConversationRemovedEventType) Valid() bool {
+	switch e {
+	case ConversationRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConversationRole.
+const (
+	ConversationRoleAdmin  ConversationRole = "admin"
+	ConversationRoleMember ConversationRole = "member"
+)
+
+// Valid indicates whether the value is a known member of the ConversationRole enum.
+func (e ConversationRole) Valid() bool {
+	switch e {
+	case ConversationRoleAdmin:
+		return true
+	case ConversationRoleMember:
 		return true
 	default:
 		return false
@@ -433,6 +646,27 @@ func (e EmailAuthResultSpf) Valid() bool {
 	case EmailAuthResultSpfSoftfail:
 		return true
 	case EmailAuthResultSpfTemperror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailDigest.
+const (
+	EmailDigestDaily  EmailDigest = "daily"
+	EmailDigestOff    EmailDigest = "off"
+	EmailDigestWeekly EmailDigest = "weekly"
+)
+
+// Valid indicates whether the value is a known member of the EmailDigest enum.
+func (e EmailDigest) Valid() bool {
+	switch e {
+	case EmailDigestDaily:
+		return true
+	case EmailDigestOff:
+		return true
+	case EmailDigestWeekly:
 		return true
 	default:
 		return false
@@ -661,6 +895,57 @@ func (e EventPhotoPlacement) Valid() bool {
 	}
 }
 
+// Defines values for FamilySocialPushKey.
+const (
+	FamilySocialPushKeyComment           FamilySocialPushKey = "comment"
+	FamilySocialPushKeyCommentReply      FamilySocialPushKey = "comment_reply"
+	FamilySocialPushKeyConversationAdded FamilySocialPushKey = "conversation_added"
+	FamilySocialPushKeyFrameRequest      FamilySocialPushKey = "frame_request"
+	FamilySocialPushKeyMention           FamilySocialPushKey = "mention"
+	FamilySocialPushKeyMessage           FamilySocialPushKey = "message"
+	FamilySocialPushKeyReactionDigest    FamilySocialPushKey = "reaction_digest"
+	FamilySocialPushKeyReactionPerson    FamilySocialPushKey = "reaction_person"
+	FamilySocialPushKeyReminderBirthday  FamilySocialPushKey = "reminder_birthday"
+	FamilySocialPushKeyReminderQuiet     FamilySocialPushKey = "reminder_quiet"
+	FamilySocialPushKeyReminderStreak    FamilySocialPushKey = "reminder_streak"
+	FamilySocialPushKeyReport            FamilySocialPushKey = "report"
+	FamilySocialPushKeyWeeklySummary     FamilySocialPushKey = "weekly_summary"
+)
+
+// Valid indicates whether the value is a known member of the FamilySocialPushKey enum.
+func (e FamilySocialPushKey) Valid() bool {
+	switch e {
+	case FamilySocialPushKeyComment:
+		return true
+	case FamilySocialPushKeyCommentReply:
+		return true
+	case FamilySocialPushKeyConversationAdded:
+		return true
+	case FamilySocialPushKeyFrameRequest:
+		return true
+	case FamilySocialPushKeyMention:
+		return true
+	case FamilySocialPushKeyMessage:
+		return true
+	case FamilySocialPushKeyReactionDigest:
+		return true
+	case FamilySocialPushKeyReactionPerson:
+		return true
+	case FamilySocialPushKeyReminderBirthday:
+		return true
+	case FamilySocialPushKeyReminderQuiet:
+		return true
+	case FamilySocialPushKeyReminderStreak:
+		return true
+	case FamilySocialPushKeyReport:
+		return true
+	case FamilySocialPushKeyWeeklySummary:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FeedDeliveryStatus.
 const (
 	FeedDeliveryStatusAwaitingApproval FeedDeliveryStatus = "awaiting_approval"
@@ -739,6 +1024,30 @@ func (e FeedInviteResultStatus) Valid() bool {
 	}
 }
 
+// Defines values for FeedMute.
+const (
+	FeedMuteAll   FeedMute = "all"
+	FeedMuteChat  FeedMute = "chat"
+	FeedMuteNone  FeedMute = "none"
+	FeedMutePosts FeedMute = "posts"
+)
+
+// Valid indicates whether the value is a known member of the FeedMute enum.
+func (e FeedMute) Valid() bool {
+	switch e {
+	case FeedMuteAll:
+		return true
+	case FeedMuteChat:
+		return true
+	case FeedMuteNone:
+		return true
+	case FeedMutePosts:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FeedPostReceiptsFramesSubscriptionStatus.
 const (
 	FeedPostReceiptsFramesSubscriptionStatusActive FeedPostReceiptsFramesSubscriptionStatus = "active"
@@ -757,9 +1066,67 @@ func (e FeedPostReceiptsFramesSubscriptionStatus) Valid() bool {
 	}
 }
 
+// Defines values for FeedPromptSource.
+const (
+	Custom FeedPromptSource = "custom"
+	Server FeedPromptSource = "server"
+)
+
+// Valid indicates whether the value is a known member of the FeedPromptSource enum.
+func (e FeedPromptSource) Valid() bool {
+	switch e {
+	case Custom:
+		return true
+	case Server:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedPromptStatus.
+const (
+	Current FeedPromptStatus = "current"
+	Past    FeedPromptStatus = "past"
+	Planned FeedPromptStatus = "planned"
+	Skipped FeedPromptStatus = "skipped"
+)
+
+// Valid indicates whether the value is a known member of the FeedPromptStatus enum.
+func (e FeedPromptStatus) Valid() bool {
+	switch e {
+	case Current:
+		return true
+	case Past:
+		return true
+	case Planned:
+		return true
+	case Skipped:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedPromptSetSkip.
+const (
+	FeedPromptSetSkipTrue FeedPromptSetSkip = true
+)
+
+// Valid indicates whether the value is a known member of the FeedPromptSetSkip enum.
+func (e FeedPromptSetSkip) Valid() bool {
+	switch e {
+	case FeedPromptSetSkipTrue:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FeedRole.
 const (
 	FeedRoleAdmin  FeedRole = "admin"
+	FeedRoleMember FeedRole = "member"
 	FeedRoleOwner  FeedRole = "owner"
 	FeedRolePoster FeedRole = "poster"
 )
@@ -769,9 +1136,32 @@ func (e FeedRole) Valid() bool {
 	switch e {
 	case FeedRoleAdmin:
 		return true
+	case FeedRoleMember:
+		return true
 	case FeedRoleOwner:
 		return true
 	case FeedRolePoster:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedStreakHistoryOutcome.
+const (
+	Frozen FeedStreakHistoryOutcome = "frozen"
+	Met    FeedStreakHistoryOutcome = "met"
+	Missed FeedStreakHistoryOutcome = "missed"
+)
+
+// Valid indicates whether the value is a known member of the FeedStreakHistoryOutcome enum.
+func (e FeedStreakHistoryOutcome) Valid() bool {
+	switch e {
+	case Frozen:
+		return true
+	case Met:
+		return true
+	case Missed:
 		return true
 	default:
 		return false
@@ -1141,6 +1531,30 @@ func (e FrameSettingsVideoPlayback) Valid() bool {
 	}
 }
 
+// Defines values for FreshnessState.
+const (
+	Fresh  FreshnessState = "fresh"
+	Never  FreshnessState = "never"
+	Quiet  FreshnessState = "quiet"
+	Recent FreshnessState = "recent"
+)
+
+// Valid indicates whether the value is a known member of the FreshnessState enum.
+func (e FreshnessState) Valid() bool {
+	switch e {
+	case Fresh:
+		return true
+	case Never:
+		return true
+	case Quiet:
+		return true
+	case Recent:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for GoogleImportErrorCode.
 const (
 	GoogleImportErrorCodeAuthFailed        GoogleImportErrorCode = "auth_failed"
@@ -1366,6 +1780,27 @@ func (e JoinRequestVia) Valid() bool {
 	}
 }
 
+// Defines values for LinkPreviewStatus.
+const (
+	LinkPreviewStatusFailed  LinkPreviewStatus = "failed"
+	LinkPreviewStatusOk      LinkPreviewStatus = "ok"
+	LinkPreviewStatusPending LinkPreviewStatus = "pending"
+)
+
+// Valid indicates whether the value is a known member of the LinkPreviewStatus enum.
+func (e LinkPreviewStatus) Valid() bool {
+	switch e {
+	case LinkPreviewStatusFailed:
+		return true
+	case LinkPreviewStatusOk:
+		return true
+	case LinkPreviewStatusPending:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for MediaKind.
 const (
 	MediaKindLive  MediaKind = "live"
@@ -1381,6 +1816,90 @@ func (e MediaKind) Valid() bool {
 	case MediaKindPhoto:
 		return true
 	case MediaKindVideo:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MessageEventType.
+const (
+	MessageCreated MessageEventType = "message.created"
+	MessageUpdated MessageEventType = "message.updated"
+)
+
+// Valid indicates whether the value is a known member of the MessageEventType enum.
+func (e MessageEventType) Valid() bool {
+	switch e {
+	case MessageCreated:
+		return true
+	case MessageUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MessageKind.
+const (
+	MessageKindPerson MessageKind = "person"
+	MessageKindSystem MessageKind = "system"
+)
+
+// Valid indicates whether the value is a known member of the MessageKind enum.
+func (e MessageKind) Valid() bool {
+	switch e {
+	case MessageKindPerson:
+		return true
+	case MessageKindSystem:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MilestoneEventType.
+const (
+	MilestoneAchieved MilestoneEventType = "milestone.achieved"
+)
+
+// Valid indicates whether the value is a known member of the MilestoneEventType enum.
+func (e MilestoneEventType) Valid() bool {
+	switch e {
+	case MilestoneAchieved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MilestoneKey.
+const (
+	FirstPhoto    MilestoneKey = "first_photo"
+	FirstVideo    MilestoneKey = "first_video"
+	Loves100      MilestoneKey = "loves_100"
+	Photos10      MilestoneKey = "photos_10"
+	Photos100     MilestoneKey = "photos_100"
+	Photos1000    MilestoneKey = "photos_1000"
+	YearOfSharing MilestoneKey = "year_of_sharing"
+)
+
+// Valid indicates whether the value is a known member of the MilestoneKey enum.
+func (e MilestoneKey) Valid() bool {
+	switch e {
+	case FirstPhoto:
+		return true
+	case FirstVideo:
+		return true
+	case Loves100:
+		return true
+	case Photos10:
+		return true
+	case Photos100:
+		return true
+	case Photos1000:
+		return true
+	case YearOfSharing:
 		return true
 	default:
 		return false
@@ -1513,6 +2032,33 @@ func (e MirrorStateType) Valid() bool {
 	}
 }
 
+// Defines values for MuteFor.
+const (
+	MuteForAlways MuteFor = "always"
+	MuteForN1h    MuteFor = "1h"
+	MuteForN1w    MuteFor = "1w"
+	MuteForN8h    MuteFor = "8h"
+	MuteForOff    MuteFor = "off"
+)
+
+// Valid indicates whether the value is a known member of the MuteFor enum.
+func (e MuteFor) Valid() bool {
+	switch e {
+	case MuteForAlways:
+		return true
+	case MuteForN1h:
+		return true
+	case MuteForN1w:
+		return true
+	case MuteForN8h:
+		return true
+	case MuteForOff:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for NowShowingDirection.
 const (
 	NowShowingDirectionMinus1 NowShowingDirection = -1
@@ -1585,6 +2131,75 @@ const (
 func (e NowShowingType) Valid() bool {
 	switch e {
 	case NowShowingTypeNowShowing:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PersonReaction.
+const (
+	PersonReactionLaugh    PersonReaction = "laugh"
+	PersonReactionLove     PersonReaction = "love"
+	PersonReactionPray     PersonReaction = "pray"
+	PersonReactionSad      PersonReaction = "sad"
+	PersonReactionThumbsUp PersonReaction = "thumbs_up"
+	PersonReactionWow      PersonReaction = "wow"
+)
+
+// Valid indicates whether the value is a known member of the PersonReaction enum.
+func (e PersonReaction) Valid() bool {
+	switch e {
+	case PersonReactionLaugh:
+		return true
+	case PersonReactionLove:
+		return true
+	case PersonReactionPray:
+		return true
+	case PersonReactionSad:
+		return true
+	case PersonReactionThumbsUp:
+		return true
+	case PersonReactionWow:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoRequestEventType.
+const (
+	PhotoRequestCreated PhotoRequestEventType = "photo_request.created"
+	PhotoRequestUpdated PhotoRequestEventType = "photo_request.updated"
+)
+
+// Valid indicates whether the value is a known member of the PhotoRequestEventType enum.
+func (e PhotoRequestEventType) Valid() bool {
+	switch e {
+	case PhotoRequestCreated:
+		return true
+	case PhotoRequestUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoRequestState.
+const (
+	PhotoRequestStateAnswered PhotoRequestState = "answered"
+	PhotoRequestStateExpired  PhotoRequestState = "expired"
+	PhotoRequestStateOpen     PhotoRequestState = "open"
+)
+
+// Valid indicates whether the value is a known member of the PhotoRequestState enum.
+func (e PhotoRequestState) Valid() bool {
+	switch e {
+	case PhotoRequestStateAnswered:
+		return true
+	case PhotoRequestStateExpired:
+		return true
+	case PhotoRequestStateOpen:
 		return true
 	default:
 		return false
@@ -1917,19 +2532,67 @@ func (e PluginInstanceSlot) Valid() bool {
 
 // Defines values for PluginInstanceVisibility.
 const (
-	Always   PluginInstanceVisibility = "always"
-	OnChange PluginInstanceVisibility = "on_change"
-	OnTap    PluginInstanceVisibility = "on_tap"
+	PluginInstanceVisibilityAlways   PluginInstanceVisibility = "always"
+	PluginInstanceVisibilityOnChange PluginInstanceVisibility = "on_change"
+	PluginInstanceVisibilityOnTap    PluginInstanceVisibility = "on_tap"
 )
 
 // Valid indicates whether the value is a known member of the PluginInstanceVisibility enum.
 func (e PluginInstanceVisibility) Valid() bool {
 	switch e {
-	case Always:
+	case PluginInstanceVisibilityAlways:
 		return true
-	case OnChange:
+	case PluginInstanceVisibilityOnChange:
 		return true
-	case OnTap:
+	case PluginInstanceVisibilityOnTap:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PostEventType.
+const (
+	PostUpdated PostEventType = "post.updated"
+)
+
+// Valid indicates whether the value is a known member of the PostEventType enum.
+func (e PostEventType) Valid() bool {
+	switch e {
+	case PostUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PostKind.
+const (
+	PostKindFeed  PostKind = "feed"
+	PostKindFrame PostKind = "frame"
+)
+
+// Valid indicates whether the value is a known member of the PostKind enum.
+func (e PostKind) Valid() bool {
+	switch e {
+	case PostKindFeed:
+		return true
+	case PostKindFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PostRemovedEventType.
+const (
+	PostRemoved PostRemovedEventType = "post.removed"
+)
+
+// Valid indicates whether the value is a known member of the PostRemovedEventType enum.
+func (e PostRemovedEventType) Valid() bool {
+	switch e {
+	case PostRemoved:
 		return true
 	default:
 		return false
@@ -1942,9 +2605,12 @@ const (
 	ProblemCodeAlreadyMember         ProblemCode = "already_member"
 	ProblemCodeAlreadySubscribed     ProblemCode = "already_subscribed"
 	ProblemCodeAppUpdateRequired     ProblemCode = "app_update_required"
+	ProblemCodeAudioTooLong          ProblemCode = "audio_too_long"
+	ProblemCodeCannotMessage         ProblemCode = "cannot_message"
 	ProblemCodeCodeExpired           ProblemCode = "code_expired"
 	ProblemCodeCodeInvalid           ProblemCode = "code_invalid"
 	ProblemCodeCommandTimeout        ProblemCode = "command_timeout"
+	ProblemCodeCommentsClosed        ProblemCode = "comments_closed"
 	ProblemCodeCorruptMedia          ProblemCode = "corrupt_media"
 	ProblemCodeDeviceRevoked         ProblemCode = "device_revoked"
 	ProblemCodeDuplicateBirthday     ProblemCode = "duplicate_birthday"
@@ -1988,11 +2654,17 @@ func (e ProblemCode) Valid() bool {
 		return true
 	case ProblemCodeAppUpdateRequired:
 		return true
+	case ProblemCodeAudioTooLong:
+		return true
+	case ProblemCodeCannotMessage:
+		return true
 	case ProblemCodeCodeExpired:
 		return true
 	case ProblemCodeCodeInvalid:
 		return true
 	case ProblemCodeCommandTimeout:
+		return true
+	case ProblemCodeCommentsClosed:
 		return true
 	case ProblemCodeCorruptMedia:
 		return true
@@ -2059,6 +2731,39 @@ func (e ProblemCode) Valid() bool {
 	}
 }
 
+// Defines values for PromptEventType.
+const (
+	PromptUpdated PromptEventType = "prompt.updated"
+)
+
+// Valid indicates whether the value is a known member of the PromptEventType enum.
+func (e PromptEventType) Valid() bool {
+	switch e {
+	case PromptUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PushAction.
+const (
+	FewerReminders PushAction = "fewer_reminders"
+	SnoozeMonth    PushAction = "snooze_month"
+)
+
+// Valid indicates whether the value is a known member of the PushAction enum.
+func (e PushAction) Valid() bool {
+	switch e {
+	case FewerReminders:
+		return true
+	case SnoozeMonth:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PushEndpointKind.
 const (
 	PushEndpointKindApns        PushEndpointKind = "apns"
@@ -2109,22 +2814,76 @@ func (e PushEndpointCreateKind) Valid() bool {
 
 // Defines values for Reaction.
 const (
-	Laugh Reaction = "laugh"
-	Love  Reaction = "love"
-	Sad   Reaction = "sad"
-	Wow   Reaction = "wow"
+	ReactionLaugh Reaction = "laugh"
+	ReactionLove  Reaction = "love"
+	ReactionSad   Reaction = "sad"
+	ReactionWow   Reaction = "wow"
 )
 
 // Valid indicates whether the value is a known member of the Reaction enum.
 func (e Reaction) Valid() bool {
 	switch e {
-	case Laugh:
+	case ReactionLaugh:
 		return true
-	case Love:
+	case ReactionLove:
 		return true
-	case Sad:
+	case ReactionSad:
 		return true
-	case Wow:
+	case ReactionWow:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReactionTargetKind.
+const (
+	ReactionTargetKindComment  ReactionTargetKind = "comment"
+	ReactionTargetKindMessage  ReactionTargetKind = "message"
+	ReactionTargetKindPost     ReactionTargetKind = "post"
+	ReactionTargetKindPostItem ReactionTargetKind = "post_item"
+)
+
+// Valid indicates whether the value is a known member of the ReactionTargetKind enum.
+func (e ReactionTargetKind) Valid() bool {
+	switch e {
+	case ReactionTargetKindComment:
+		return true
+	case ReactionTargetKindMessage:
+		return true
+	case ReactionTargetKindPost:
+		return true
+	case ReactionTargetKindPostItem:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReactionUpdatedEventType.
+const (
+	ReactionUpdated ReactionUpdatedEventType = "reaction.updated"
+)
+
+// Valid indicates whether the value is a known member of the ReactionUpdatedEventType enum.
+func (e ReactionUpdatedEventType) Valid() bool {
+	switch e {
+	case ReactionUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReadUpdatedEventType.
+const (
+	ReadUpdated ReadUpdatedEventType = "read.updated"
+)
+
+// Valid indicates whether the value is a known member of the ReadUpdatedEventType enum.
+func (e ReadUpdatedEventType) Valid() bool {
+	switch e {
+	case ReadUpdated:
 		return true
 	default:
 		return false
@@ -2155,6 +2914,42 @@ func (e RedeemResultStatus) Valid() bool {
 	}
 }
 
+// Defines values for ReminderLevel.
+const (
+	ReminderLevelFewer  ReminderLevel = "fewer"
+	ReminderLevelNormal ReminderLevel = "normal"
+	ReminderLevelOff    ReminderLevel = "off"
+)
+
+// Valid indicates whether the value is a known member of the ReminderLevel enum.
+func (e ReminderLevel) Valid() bool {
+	switch e {
+	case ReminderLevelFewer:
+		return true
+	case ReminderLevelNormal:
+		return true
+	case ReminderLevelOff:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReminderPreferencesUpdateAutoReducedSeen.
+const (
+	ReminderPreferencesUpdateAutoReducedSeenTrue ReminderPreferencesUpdateAutoReducedSeen = true
+)
+
+// Valid indicates whether the value is a known member of the ReminderPreferencesUpdateAutoReducedSeen enum.
+func (e ReminderPreferencesUpdateAutoReducedSeen) Valid() bool {
+	switch e {
+	case ReminderPreferencesUpdateAutoReducedSeenTrue:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ReplyPreset.
 const (
 	Beautiful ReplyPreset = "beautiful"
@@ -2173,6 +2968,87 @@ func (e ReplyPreset) Valid() bool {
 	case MissYou:
 		return true
 	case Thanks:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReportStatus.
+const (
+	ReportStatusDismissed ReportStatus = "dismissed"
+	ReportStatusOpen      ReportStatus = "open"
+	ReportStatusRemoved   ReportStatus = "removed"
+)
+
+// Valid indicates whether the value is a known member of the ReportStatus enum.
+func (e ReportStatus) Valid() bool {
+	switch e {
+	case ReportStatusDismissed:
+		return true
+	case ReportStatusOpen:
+		return true
+	case ReportStatusRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReportEventType.
+const (
+	ReportCreated ReportEventType = "report.created"
+)
+
+// Valid indicates whether the value is a known member of the ReportEventType enum.
+func (e ReportEventType) Valid() bool {
+	switch e {
+	case ReportCreated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReportReason.
+const (
+	Inappropriate ReportReason = "inappropriate"
+	Other         ReportReason = "other"
+	Spam          ReportReason = "spam"
+	Unkind        ReportReason = "unkind"
+)
+
+// Valid indicates whether the value is a known member of the ReportReason enum.
+func (e ReportReason) Valid() bool {
+	switch e {
+	case Inappropriate:
+		return true
+	case Other:
+		return true
+	case Spam:
+		return true
+	case Unkind:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReportTargetKind.
+const (
+	ReportTargetKindComment ReportTargetKind = "comment"
+	ReportTargetKindMessage ReportTargetKind = "message"
+	ReportTargetKindPost    ReportTargetKind = "post"
+)
+
+// Valid indicates whether the value is a known member of the ReportTargetKind enum.
+func (e ReportTargetKind) Valid() bool {
+	switch e {
+	case ReportTargetKindComment:
+		return true
+	case ReportTargetKindMessage:
+		return true
+	case ReportTargetKindPost:
 		return true
 	default:
 		return false
@@ -2344,6 +3220,21 @@ func (e SleepScheduleMode) Valid() bool {
 	}
 }
 
+// Defines values for StreakEventType.
+const (
+	StreakUpdated StreakEventType = "streak.updated"
+)
+
+// Valid indicates whether the value is a known member of the StreakEventType enum.
+func (e StreakEventType) Valid() bool {
+	switch e {
+	case StreakUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SubscriptionBackfillState.
 const (
 	SubscriptionBackfillStateIdle    SubscriptionBackfillState = "idle"
@@ -2440,6 +3331,36 @@ func (e SubscriptionStatus) Valid() bool {
 	}
 }
 
+// Defines values for SystemMessageType.
+const (
+	SystemMessageTypeMemberJoined    SystemMessageType = "member_joined"
+	SystemMessageTypeMemberLeft      SystemMessageType = "member_left"
+	SystemMessageTypeMonthlyRecap    SystemMessageType = "monthly_recap"
+	SystemMessageTypePrompt          SystemMessageType = "prompt"
+	SystemMessageTypePutOnFrame      SystemMessageType = "put_on_frame"
+	SystemMessageTypeStreakMilestone SystemMessageType = "streak_milestone"
+)
+
+// Valid indicates whether the value is a known member of the SystemMessageType enum.
+func (e SystemMessageType) Valid() bool {
+	switch e {
+	case SystemMessageTypeMemberJoined:
+		return true
+	case SystemMessageTypeMemberLeft:
+		return true
+	case SystemMessageTypeMonthlyRecap:
+		return true
+	case SystemMessageTypePrompt:
+		return true
+	case SystemMessageTypePutOnFrame:
+		return true
+	case SystemMessageTypeStreakMilestone:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TelegramChatEndedReason.
 const (
 	TelegramChatEndedReasonBotBlocked    TelegramChatEndedReason = "bot_blocked"
@@ -2490,16 +3411,16 @@ func (e TelegramChatErrorCode) Valid() bool {
 
 // Defines values for TelegramChatKind.
 const (
-	Group   TelegramChatKind = "group"
-	Private TelegramChatKind = "private"
+	TelegramChatKindGroup   TelegramChatKind = "group"
+	TelegramChatKindPrivate TelegramChatKind = "private"
 )
 
 // Valid indicates whether the value is a known member of the TelegramChatKind enum.
 func (e TelegramChatKind) Valid() bool {
 	switch e {
-	case Group:
+	case TelegramChatKindGroup:
 		return true
-	case Private:
+	case TelegramChatKindPrivate:
 		return true
 	default:
 		return false
@@ -2659,6 +3580,39 @@ func (e TelegramContributorsMode) Valid() bool {
 	}
 }
 
+// Defines values for ThreadReadEventType.
+const (
+	ThreadRead ThreadReadEventType = "thread.read"
+)
+
+// Valid indicates whether the value is a known member of the ThreadReadEventType enum.
+func (e ThreadReadEventType) Valid() bool {
+	switch e {
+	case ThreadRead:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ThreadState.
+const (
+	ThreadStateClosed ThreadState = "closed"
+	ThreadStateOpen   ThreadState = "open"
+)
+
+// Valid indicates whether the value is a known member of the ThreadState enum.
+func (e ThreadState) Valid() bool {
+	switch e {
+	case ThreadStateClosed:
+		return true
+	case ThreadStateOpen:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TvLinkPurpose.
 const (
 	TvLinkPurposeCast   TvLinkPurpose = "cast"
@@ -2725,6 +3679,60 @@ func (e TvSlideRotation) Valid() bool {
 	}
 }
 
+// Defines values for TypingEventActivity.
+const (
+	TypingEventActivityRecording TypingEventActivity = "recording"
+	TypingEventActivityTyping    TypingEventActivity = "typing"
+)
+
+// Valid indicates whether the value is a known member of the TypingEventActivity enum.
+func (e TypingEventActivity) Valid() bool {
+	switch e {
+	case TypingEventActivityRecording:
+		return true
+	case TypingEventActivityTyping:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TypingEventType.
+const (
+	TypingEventTypeTyping TypingEventType = "typing"
+)
+
+// Valid indicates whether the value is a known member of the TypingEventType enum.
+func (e TypingEventType) Valid() bool {
+	switch e {
+	case TypingEventTypeTyping:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for VoiceClipStatus.
+const (
+	VoiceClipStatusFailed     VoiceClipStatus = "failed"
+	VoiceClipStatusProcessing VoiceClipStatus = "processing"
+	VoiceClipStatusReady      VoiceClipStatus = "ready"
+)
+
+// Valid indicates whether the value is a known member of the VoiceClipStatus enum.
+func (e VoiceClipStatus) Valid() bool {
+	switch e {
+	case VoiceClipStatusFailed:
+		return true
+	case VoiceClipStatusProcessing:
+		return true
+	case VoiceClipStatusReady:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for WeatherUnitsPrecipitation.
 const (
 	Mm WeatherUnitsPrecipitation = "mm"
@@ -2764,6 +3772,24 @@ const (
 func (e WeatherUnitsWindSpeed) Valid() bool {
 	switch e {
 	case Kmh:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SendTypingJSONBodyActivity.
+const (
+	SendTypingJSONBodyActivityRecording SendTypingJSONBodyActivity = "recording"
+	SendTypingJSONBodyActivityTyping    SendTypingJSONBodyActivity = "typing"
+)
+
+// Valid indicates whether the value is a known member of the SendTypingJSONBodyActivity enum.
+func (e SendTypingJSONBodyActivity) Valid() bool {
+	switch e {
+	case SendTypingJSONBodyActivityRecording:
+		return true
+	case SendTypingJSONBodyActivityTyping:
 		return true
 	default:
 		return false
@@ -2875,6 +3901,7 @@ func (e DecideFeedJoinRequestParamsDecision) Valid() bool {
 // Defines values for UpdateFeedMemberJSONBodyRole.
 const (
 	UpdateFeedMemberJSONBodyRoleAdmin  UpdateFeedMemberJSONBodyRole = "admin"
+	UpdateFeedMemberJSONBodyRoleMember UpdateFeedMemberJSONBodyRole = "member"
 	UpdateFeedMemberJSONBodyRolePoster UpdateFeedMemberJSONBodyRole = "poster"
 )
 
@@ -2882,6 +3909,8 @@ const (
 func (e UpdateFeedMemberJSONBodyRole) Valid() bool {
 	switch e {
 	case UpdateFeedMemberJSONBodyRoleAdmin:
+		return true
+	case UpdateFeedMemberJSONBodyRoleMember:
 		return true
 	case UpdateFeedMemberJSONBodyRolePoster:
 		return true
@@ -3010,6 +4039,60 @@ func (e BulkUpdatePlacementsJSONBodyAction) Valid() bool {
 	}
 }
 
+// Defines values for UpdateMyMilestoneJSONBodySeen.
+const (
+	UpdateMyMilestoneJSONBodySeenTrue UpdateMyMilestoneJSONBodySeen = true
+)
+
+// Valid indicates whether the value is a known member of the UpdateMyMilestoneJSONBodySeen enum.
+func (e UpdateMyMilestoneJSONBodySeen) Valid() bool {
+	switch e {
+	case UpdateMyMilestoneJSONBodySeenTrue:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ListOperatorReportsParamsStatus.
+const (
+	ListOperatorReportsParamsStatusAll      ListOperatorReportsParamsStatus = "all"
+	ListOperatorReportsParamsStatusOpen     ListOperatorReportsParamsStatus = "open"
+	ListOperatorReportsParamsStatusResolved ListOperatorReportsParamsStatus = "resolved"
+)
+
+// Valid indicates whether the value is a known member of the ListOperatorReportsParamsStatus enum.
+func (e ListOperatorReportsParamsStatus) Valid() bool {
+	switch e {
+	case ListOperatorReportsParamsStatusAll:
+		return true
+	case ListOperatorReportsParamsStatusOpen:
+		return true
+	case ListOperatorReportsParamsStatusResolved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ResolveReportJSONBodyAction.
+const (
+	Dismiss ResolveReportJSONBodyAction = "dismiss"
+	Remove  ResolveReportJSONBodyAction = "remove"
+)
+
+// Valid indicates whether the value is a known member of the ResolveReportJSONBodyAction enum.
+func (e ResolveReportJSONBodyAction) Valid() bool {
+	switch e {
+	case Dismiss:
+		return true
+	case Remove:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListMySendsParamsState.
 const (
 	ListMySendsParamsStateAll       ListMySendsParamsState = "all"
@@ -3086,6 +4169,23 @@ type AppVersionPolicy struct {
 	// StoreUrl Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app's own default.
 	StoreUrl *string `json:"store_url,omitempty"`
 }
+
+// Badge The app badge: conversations with unread messages (not muted) plus threads with unread mentions of or replies to the caller (not muted).
+type Badge struct {
+	Conversations int `json:"conversations"`
+	Threads       int `json:"threads"`
+	Total         int `json:"total"`
+}
+
+// BadgeEvent defines model for BadgeEvent.
+type BadgeEvent struct {
+	// Badge The app badge: conversations with unread messages (not muted) plus threads with unread mentions of or replies to the caller (not muted).
+	Badge Badge          `json:"badge"`
+	Type  BadgeEventType `json:"type"`
+}
+
+// BadgeEventType defines model for BadgeEvent.Type.
+type BadgeEventType string
 
 // BirthdayPerson A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
 // a feed member.
@@ -3189,6 +4289,15 @@ type BirthdayPersonUpdate struct {
 // BirthdayStatus `pending`: a poster's suggestion waiting for the feed's owner or an admin. `approved`: on the list and on
 // frames. `rejected`: declined; listed for the suggester and admins for 30 days.
 type BirthdayStatus string
+
+// Block defines model for Block.
+type Block struct {
+	CreatedAt time.Time `json:"created_at"`
+
+	// Person A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+	// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+	Person PersonRef `json:"person"`
+}
 
 // Calendar Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
 // list, deduplicated across sources by UID and start, sorted by start.
@@ -3442,7 +4551,10 @@ type Change struct {
 	// Birthdays The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it.
 	Birthdays *FrameBirthdays `json:"birthdays,omitempty"`
 	Calendar  *Calendar       `json:"calendar,omitempty"`
-	Frame     *struct {
+
+	// Comments `comments` change (entity `id` = the placement): its newest comments, or null = drop them (show comments turned off, comments removed). Only for frames with `settings.social.show_comments`. Old frame apps ignore it.
+	Comments *PlacementComments `json:"comments,omitempty"`
+	Frame    *struct {
 		Location  *string `json:"location,omitempty"`
 		Name      *string `json:"name,omitempty"`
 		OwnerName *string `json:"owner_name,omitempty"`
@@ -3458,7 +4570,10 @@ type Change struct {
 		// UserId UUIDv7
 		UserId *Id `json:"user_id,omitempty"`
 	} `json:"member,omitempty"`
-	Placement *struct {
+
+	// PhotoRequest `photo_request` change (entity `id` = the frame): the frame's latest "Ask for new photos", or null when there is none in the last 7 days.
+	PhotoRequest *FramePhotoRequest `json:"photo_request,omitempty"`
+	Placement    *struct {
 		AlbumIds *[]Id `json:"album_ids,omitempty"`
 
 		// Backfill Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
@@ -3519,11 +4634,14 @@ type Change struct {
 		OriginFeedId *Id `json:"origin_feed_id,omitempty"`
 
 		// OriginFeedName Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
-		OriginFeedName    *string    `json:"origin_feed_name,omitempty"`
-		PendingModeration *bool      `json:"pending_moderation,omitempty"`
-		Reaction          *Reaction  `json:"reaction,omitempty"`
-		ReceivedAt        *time.Time `json:"received_at,omitempty"`
-		Replies           *[]struct {
+		OriginFeedName    *string `json:"origin_feed_name,omitempty"`
+		PendingModeration *bool   `json:"pending_moderation,omitempty"`
+
+		// PromptId Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
+		PromptId   *Id        `json:"prompt_id,omitempty"`
+		Reaction   *Reaction  `json:"reaction,omitempty"`
+		ReceivedAt *time.Time `json:"received_at,omitempty"`
+		Replies    *[]struct {
 			At     *time.Time   `json:"at,omitempty"`
 			Preset *ReplyPreset `json:"preset,omitempty"`
 		} `json:"replies,omitempty"`
@@ -3539,7 +4657,10 @@ type Change struct {
 		Trashed        bool            `json:"trashed"`
 		TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
 	} `json:"placement,omitempty"`
-	Seq int `json:"seq"`
+
+	// Prompts `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.
+	Prompts *FramePrompts `json:"prompts,omitempty"`
+	Seq     int           `json:"seq"`
 
 	// Settings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
 	Settings *FrameSettings `json:"settings,omitempty"`
@@ -3559,10 +4680,327 @@ type ChangePlacementRotation int
 // ChangeType defines model for Change.Type.
 type ChangeType string
 
+// Circle A smaller group inside a family ("Anna's household", "The cousins"): its own chat (`conversation_id`) and an
+// audience for posts. Circle posts reach the family's subscribed frames that have a manager (owner, admin or
+// `change_settings`) in the circle, plus the frames in `frame_ids` (README §5.18).
+type Circle struct {
+	// ConversationId The circle's chat (members only).
+	ConversationId *Id        `json:"conversation_id,omitempty"`
+	CreatedAt      *time.Time `json:"created_at,omitempty"`
+
+	// FeedId UUIDv7
+	FeedId Id `json:"feed_id"`
+
+	// FrameIds Extra frames (subscribed to the family) the circle's posts reach.
+	FrameIds *[]Id `json:"frame_ids,omitempty"`
+
+	// FramesReached Every subscribed frame its posts reach now (managers in the circle, plus `frame_ids`).
+	FramesReached *[]struct {
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+	} `json:"frames_reached,omitempty"`
+
+	// Id UUIDv7
+	Id          Id             `json:"id"`
+	MemberCount int            `json:"member_count"`
+	Members     []CircleMember `json:"members"`
+
+	// MyRole Null when the caller is a feed owner/admin who is not in the circle.
+	MyRole *CircleRole `json:"my_role,omitempty"`
+	Name   string      `json:"name"`
+}
+
+// CircleCreate defines model for CircleCreate.
+type CircleCreate struct {
+	FrameIds *[]Id `json:"frame_ids,omitempty"`
+
+	// MemberIds Feed members besides the caller.
+	MemberIds []Id   `json:"member_ids"`
+	Name      string `json:"name"`
+}
+
+// CircleEvent defines model for CircleEvent.
+type CircleEvent struct {
+	// Circle A smaller group inside a family ("Anna's household", "The cousins"): its own chat (`conversation_id`) and an
+	// audience for posts. Circle posts reach the family's subscribed frames that have a manager (owner, admin or
+	// `change_settings`) in the circle, plus the frames in `frame_ids` (README §5.18).
+	Circle Circle `json:"circle"`
+
+	// FeedId UUIDv7
+	FeedId Id              `json:"feed_id"`
+	Type   CircleEventType `json:"type"`
+}
+
+// CircleEventType defines model for CircleEvent.Type.
+type CircleEventType string
+
+// CircleMember defines model for CircleMember.
+type CircleMember struct {
+	AddedAt     *time.Time `json:"added_at,omitempty"`
+	AvatarUrl   *string    `json:"avatar_url,omitempty"`
+	DisplayName string     `json:"display_name"`
+	Role        CircleRole `json:"role"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// CircleRemovedEvent defines model for CircleRemovedEvent.
+type CircleRemovedEvent struct {
+	// CircleId UUIDv7
+	CircleId Id `json:"circle_id"`
+
+	// FeedId UUIDv7
+	FeedId Id                     `json:"feed_id"`
+	Type   CircleRemovedEventType `json:"type"`
+}
+
+// CircleRemovedEventType defines model for CircleRemovedEvent.Type.
+type CircleRemovedEventType string
+
+// CircleRole defines model for CircleRole.
+type CircleRole string
+
+// CircleUpdate defines model for CircleUpdate.
+type CircleUpdate struct {
+	FrameIds *[]Id   `json:"frame_ids,omitempty"`
+	Name     *string `json:"name,omitempty"`
+}
+
 // CommandResult defines model for CommandResult.
 type CommandResult struct {
 	ErrorCode *string `json:"error_code,omitempty"`
 	Ok        bool    `json:"ok"`
+}
+
+// Comment defines model for Comment.
+type Comment struct {
+	// Author `person` comments; null for frame entries.
+	Author *PersonRef `json:"author,omitempty"`
+
+	// Body Null for frame entries and tombstones.
+	Body      *string   `json:"body,omitempty"`
+	CanDelete *bool     `json:"can_delete,omitempty"`
+	CanEdit   *bool     `json:"can_edit,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+
+	// Deleted Deleted by its author but kept as a tombstone because it has replies ("Comment deleted").
+	Deleted  *bool      `json:"deleted,omitempty"`
+	EditedAt *time.Time `json:"edited_at,omitempty"`
+
+	// Frame Frame entries only.
+	Frame *struct {
+		// FrameId UUIDv7
+		FrameId   Id           `json:"frame_id"`
+		FrameName string       `json:"frame_name"`
+		ItemId    *Id          `json:"item_id,omitempty"`
+		Reaction  *Reaction    `json:"reaction,omitempty"`
+		Reply     *ReplyPreset `json:"reply,omitempty"`
+	} `json:"frame,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `person`: a comment or reply. `frame`: a read-only frame entry ("Oma's frame loved this", "Oma's frame: Call me!").
+	Kind     CommentKind `json:"kind"`
+	Mentions *[]Mention  `json:"mentions,omitempty"`
+
+	// ParentId Replies only: the top-level comment (one level of replies).
+	ParentId *Id `json:"parent_id,omitempty"`
+
+	// PostId UUIDv7
+	PostId Id `json:"post_id"`
+
+	// Quoted A reply to a reply quotes that person ("@Ben"), while hanging under the same top comment.
+	Quoted *PersonRef `json:"quoted,omitempty"`
+
+	// Reactions The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+	// and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+	// `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+	// reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+	// are left out of `people` but counted.
+	Reactions *ReactionSummary `json:"reactions,omitempty"`
+
+	// RemovedByAdmin Only ever true for the author, who still sees it ("Removed by a family admin"); everyone else no longer gets it.
+	RemovedByAdmin *bool `json:"removed_by_admin,omitempty"`
+
+	// ReplyCount Top-level comments only.
+	ReplyCount *int `json:"reply_count,omitempty"`
+}
+
+// CommentCreate defines model for CommentCreate.
+type CommentCreate struct {
+	// Body Trimmed; at most `limits.max_comment_chars` characters (Unicode code points).
+	Body     string     `json:"body"`
+	Mentions *[]Mention `json:"mentions,omitempty"`
+
+	// ParentId UUIDv7
+	ParentId *Id `json:"parent_id,omitempty"`
+
+	// QuotedUserId UUIDv7
+	QuotedUserId *Id `json:"quoted_user_id,omitempty"`
+}
+
+// CommentDeletedEvent `comment.deleted`: gone from the thread for the receiver.
+type CommentDeletedEvent struct {
+	// CommentId UUIDv7
+	CommentId Id `json:"comment_id"`
+
+	// PostId UUIDv7
+	PostId Id                      `json:"post_id"`
+	Type   CommentDeletedEventType `json:"type"`
+}
+
+// CommentDeletedEventType defines model for CommentDeletedEvent.Type.
+type CommentDeletedEventType string
+
+// CommentEvent `comment.created` (new comment, reply or frame entry) and `comment.updated` (edited, or deleted into a tombstone).
+type CommentEvent struct {
+	Comment Comment `json:"comment"`
+
+	// PostId UUIDv7
+	PostId Id               `json:"post_id"`
+	Type   CommentEventType `json:"type"`
+}
+
+// CommentEventType defines model for CommentEvent.Type.
+type CommentEventType string
+
+// CommentKind `person`: a comment or reply. `frame`: a read-only frame entry ("Oma's frame loved this", "Oma's frame: Call me!").
+type CommentKind string
+
+// CommentPage defines model for CommentPage.
+type CommentPage struct {
+	Comments []Comment `json:"comments"`
+
+	// HasMore More comments after the last one; pass its id as `after`.
+	HasMore bool `json:"has_more"`
+}
+
+// CommentUpdate defines model for CommentUpdate.
+type CommentUpdate struct {
+	Body     string     `json:"body"`
+	Mentions *[]Mention `json:"mentions,omitempty"`
+}
+
+// Conversation defines model for Conversation.
+type Conversation struct {
+	// Archived The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).
+	Archived  bool       `json:"archived"`
+	CircleId  *Id        `json:"circle_id,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// FeedId `family` and `circle`.
+	FeedId *Id `json:"feed_id,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `direct`: two people, one per pair. `group`: 3–100 people with a name. `family`: one per feed, its members always the feed's members. `circle`: one per circle, its members the circle's.
+	Kind ConversationKind `json:"kind"`
+
+	// LastActivityAt Last message
+	LastActivityAt time.Time `json:"last_activity_at"`
+	LastMessage    *Message  `json:"last_message,omitempty"`
+	MemberCount    int       `json:"member_count"`
+
+	// Members Every member (conversations are at most 100 people; family chats can be larger and list everyone).
+	Members *[]ConversationMember `json:"members,omitempty"`
+	Muted   bool                  `json:"muted"`
+
+	// MutedUntil Null with `muted: true` means always.
+	MutedUntil *time.Time `json:"muted_until,omitempty"`
+
+	// MyRole Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+	MyRole *ConversationRole `json:"my_role,omitempty"`
+
+	// Name Group name; the family's or circle's name; for `direct`, the other person's display name.
+	Name string `json:"name"`
+
+	// Other `direct` only.
+	Other *PersonRef `json:"other,omitempty"`
+
+	// PhotoUrl Group photo; the family's cover; for `direct`, the other person's avatar.
+	PhotoUrl *string `json:"photo_url,omitempty"`
+
+	// ReadOnly No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.
+	ReadOnly *bool `json:"read_only,omitempty"`
+
+	// ReadReceipts "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.
+	ReadReceipts *bool `json:"read_receipts,omitempty"`
+
+	// ReadUpTo The caller's own read position.
+	ReadUpTo *Id `json:"read_up_to,omitempty"`
+
+	// UnreadCount Messages after the caller's read position
+	UnreadCount    int  `json:"unread_count"`
+	UnreadMentions *int `json:"unread_mentions,omitempty"`
+}
+
+// ConversationCreate defines model for ConversationCreate.
+type ConversationCreate struct {
+	Kind ConversationCreateKind `json:"kind"`
+
+	// MemberIds Other people (not the caller).
+	MemberIds []Id `json:"member_ids"`
+
+	// Name Required for groups.
+	Name *string `json:"name,omitempty"`
+}
+
+// ConversationCreateKind defines model for ConversationCreate.Kind.
+type ConversationCreateKind string
+
+// ConversationEvent defines model for ConversationEvent.
+type ConversationEvent struct {
+	Conversation Conversation          `json:"conversation"`
+	Type         ConversationEventType `json:"type"`
+}
+
+// ConversationEventType defines model for ConversationEvent.Type.
+type ConversationEventType string
+
+// ConversationKind `direct`: two people, one per pair. `group`: 3–100 people with a name. `family`: one per feed, its members always the feed's members. `circle`: one per circle, its members the circle's.
+type ConversationKind string
+
+// ConversationMember defines model for ConversationMember.
+type ConversationMember struct {
+	JoinedAt *time.Time `json:"joined_at,omitempty"`
+
+	// LastReadMessageId Only when read receipts are shown in this conversation (`Conversation.read_receipts`) and this member shows them too; null otherwise.
+	LastReadMessageId *Id `json:"last_read_message_id,omitempty"`
+
+	// Person A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+	// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+	Person PersonRef `json:"person"`
+
+	// Role Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+	Role ConversationRole `json:"role"`
+}
+
+// ConversationPreferencesUpdate defines model for ConversationPreferencesUpdate.
+type ConversationPreferencesUpdate struct {
+	Archived *bool    `json:"archived,omitempty"`
+	Mute     *MuteFor `json:"mute,omitempty"`
+}
+
+// ConversationRemovedEvent defines model for ConversationRemovedEvent.
+type ConversationRemovedEvent struct {
+	// ConversationId UUIDv7
+	ConversationId Id                           `json:"conversation_id"`
+	Type           ConversationRemovedEventType `json:"type"`
+}
+
+// ConversationRemovedEventType defines model for ConversationRemovedEvent.Type.
+type ConversationRemovedEventType string
+
+// ConversationRole Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+type ConversationRole string
+
+// ConversationUpdate defines model for ConversationUpdate.
+type ConversationUpdate struct {
+	Name *string `json:"name,omitempty"`
 }
 
 // Countdown A marked event, even when it lies outside the window.
@@ -3698,8 +5136,14 @@ type Discovery struct {
 	// Calendar True when the server syncs calendars for frames (ICS/webcal and CalDAV).
 	Calendar *bool `json:"calendar,omitempty"`
 
+	// Chats True when the server has conversations (direct, group, family, circle), blocks and reports (README §5.19).
+	Chats *bool `json:"chats,omitempty"`
+
 	// DevAuth True only on development servers running dev auth mode (POST /dev/token). Never true in production.
 	DevAuth *bool `json:"dev_auth,omitempty"`
+
+	// EmailDigest True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
+	EmailDigest *bool `json:"email_digest,omitempty"`
 
 	// EmailInbox True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
 	// (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
@@ -3710,13 +5154,20 @@ type Discovery struct {
 	// Example: in.kinframe.appmire.be
 	EmailInboxDomain *string `json:"email_inbox_domain,omitempty"`
 
+	// Engagement True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
+	Engagement *bool `json:"engagement,omitempty"`
+
 	// Feeds True when the server supports feeds and subscriptions (docs/spec/feeds.md).
 	Feeds *bool `json:"feeds,omitempty"`
 
 	// GooglePhotosImport True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
 	GooglePhotosImport *bool  `json:"google_photos_import,omitempty"`
 	Limits             Limits `json:"limits"`
-	Name               string `json:"name"`
+
+	// LinkPreviews True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
+	// links in messages itself (public addresses only). Off by default; clients then show links without previews.
+	LinkPreviews *bool  `json:"link_previews,omitempty"`
+	Name         string `json:"name"`
 
 	// PhotoSourceProviders The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
 	PhotoSourceProviders *[]PhotoSourceProvider `json:"photo_source_providers,omitempty"`
@@ -3732,6 +5183,9 @@ type Discovery struct {
 	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
 	// to text; `en` is always present and is the fallback.
 	Shop *Shop `json:"shop,omitempty"`
+
+	// Social True when the server has the home timeline, comment threads, people's reactions, mentions, the `member` role and circles (docs/spec/family-social.md, README §5.18). Only with `feeds`.
+	Social *bool `json:"social,omitempty"`
 
 	// Telegram True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
 	// accounts can link Telegram (docs/spec/telegram.md). Clients hide every Telegram section otherwise.
@@ -3749,6 +5203,9 @@ type Discovery struct {
 	// so the connect sheet says so up front (docs/spec/telegram.md §6).
 	TelegramPrivacyMode *bool  `json:"telegram_privacy_mode,omitempty"`
 	Version             string `json:"version"`
+
+	// VoiceMessages True when chats accept voice messages (needs ffmpeg on the server; README §5.19).
+	VoiceMessages *bool `json:"voice_messages,omitempty"`
 
 	// Weather True when the server fetches weather for frames and serves `/v1/geocode`.
 	Weather *bool   `json:"weather,omitempty"`
@@ -3899,6 +5356,9 @@ type EmailAuthResultDmarc string
 
 // EmailAuthResultSpf defines model for EmailAuthResult.Spf.
 type EmailAuthResultSpf string
+
+// EmailDigest defines model for EmailDigest.
+type EmailDigest string
 
 // EmailHeldMessage defines model for EmailHeldMessage.
 type EmailHeldMessage struct {
@@ -4176,6 +5636,10 @@ type EventInvitationCreate struct {
 // EventPhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
 type EventPhotoPlacement string
 
+// FamilySocialPushKey Push `key`s added by family social (README §6.3; the older keys are listed there). Clients ignore keys they
+// don't know.
+type FamilySocialPushKey string
+
 // Feed defines model for Feed.
 type Feed struct {
 	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
@@ -4186,6 +5650,12 @@ type Feed struct {
 	// BirthdayNotifications The caller's own preference (`updateFeedPreferences`): morning and greeting notifications for this feed's birthdays.
 	BirthdayNotifications *bool `json:"birthday_notifications,omitempty"`
 
+	// CircleCount Circles the caller can see.
+	CircleCount *int `json:"circle_count,omitempty"`
+
+	// ConversationId The family chat. Absent without `chats`.
+	ConversationId *Id `json:"conversation_id,omitempty"`
+
 	// CoverItemId An item of a live post of this feed.
 	CoverItemId *Id `json:"cover_item_id,omitempty"`
 
@@ -4193,14 +5663,35 @@ type Feed struct {
 	CoverUrl  *string    `json:"cover_url,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 
+	// Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+	// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+	// "2 weeks quiet", `never` "No photos yet".
+	Freshness *Freshness `json:"freshness,omitempty"`
+
 	// Id UUIDv7
 	Id                     Id         `json:"id"`
 	InviteRequiresApproval *bool      `json:"invite_requires_approval,omitempty"`
 	LastPostAt             *time.Time `json:"last_post_at,omitempty"`
 	MemberCount            int        `json:"member_count"`
-	MembersSeeReactions    *bool      `json:"members_see_reactions,omitempty"`
-	Name                   string     `json:"name"`
-	OwnerName              *string    `json:"owner_name,omitempty"`
+
+	// MembersCanCreateCircles Any member may create circles (default on); otherwise owner and admins only.
+	MembersCanCreateCircles *bool `json:"members_can_create_circles,omitempty"`
+
+	// MembersSeeReactions Every member sees frames' reactions and quick replies in posts' reaction rows and threads (default on for new feeds).
+	MembersSeeReactions *bool `json:"members_see_reactions,omitempty"`
+
+	// MembersSeeReceipts Every member sees per-frame receipts (delivered, seen) of every post (default off).
+	MembersSeeReceipts *bool `json:"members_see_receipts,omitempty"`
+
+	// Mute The caller's mute for one family: `none`; `posts` (no pushes for comments, replies and reactions on its posts;
+	// mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
+	// mentions too). Websocket events still arrive.
+	Mute *FeedMute `json:"mute,omitempty"`
+	Name string    `json:"name"`
+
+	// NewMembersCanPost Joiners become `poster` (default) or, when off, `member`.
+	NewMembersCanPost *bool   `json:"new_members_can_post,omitempty"`
+	OwnerName         *string `json:"owner_name,omitempty"`
 
 	// PendingBirthdayCount Suggestions waiting; owner and admins only (0 for posters).
 	PendingBirthdayCount *int `json:"pending_birthday_count,omitempty"`
@@ -4216,8 +5707,13 @@ type Feed struct {
 	PostersCanAddBirthdays *bool `json:"posters_can_add_birthdays,omitempty"`
 
 	// PostersCanInvite Posters may create `join` invites and revoke their own.
-	PostersCanInvite *bool    `json:"posters_can_invite,omitempty"`
-	Role             FeedRole `json:"role"`
+	PostersCanInvite *bool `json:"posters_can_invite,omitempty"`
+
+	// Role `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
+	Role FeedRole `json:"role"`
+
+	// Streak Null when the family turned streaks off. Absent without `engagement`.
+	Streak *FeedStreakSummary `json:"streak,omitempty"`
 
 	// SubscriptionCount Active and paused subscriptions.
 	SubscriptionCount int `json:"subscription_count"`
@@ -4254,17 +5750,52 @@ type FeedBirthdayGreeting struct {
 
 // FeedCreate defines model for FeedCreate.
 type FeedCreate struct {
-	AutoApproveSubscriptions *bool  `json:"auto_approve_subscriptions,omitempty"`
-	InviteRequiresApproval   *bool  `json:"invite_requires_approval,omitempty"`
-	MembersSeeReactions      *bool  `json:"members_see_reactions,omitempty"`
-	Name                     string `json:"name"`
-	PostersCanAddBirthdays   *bool  `json:"posters_can_add_birthdays,omitempty"`
-	PostersCanInvite         *bool  `json:"posters_can_invite,omitempty"`
+	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
+	InviteRequiresApproval   *bool `json:"invite_requires_approval,omitempty"`
+	MembersCanCreateCircles  *bool `json:"members_can_create_circles,omitempty"`
+
+	// MembersSeeReactions Default changed to true with docs/spec/family-social.md: reactions are social now.
+	MembersSeeReactions    *bool  `json:"members_see_reactions,omitempty"`
+	MembersSeeReceipts     *bool  `json:"members_see_receipts,omitempty"`
+	Name                   string `json:"name"`
+	NewMembersCanPost      *bool  `json:"new_members_can_post,omitempty"`
+	PostersCanAddBirthdays *bool  `json:"posters_can_add_birthdays,omitempty"`
+	PostersCanInvite       *bool  `json:"posters_can_invite,omitempty"`
 }
 
 // FeedDeliveryStatus One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
 // `suspended` (subscription paused) or `removed` (rejected or deleted on that frame).
 type FeedDeliveryStatus string
+
+// FeedEngagement defines model for FeedEngagement.
+type FeedEngagement struct {
+	// FeedId UUIDv7
+	FeedId         Id   `json:"feed_id"`
+	MonthlyRecap   bool `json:"monthly_recap"`
+	PromptsEnabled bool `json:"prompts_enabled"`
+
+	// QuietAfterDays A subscribed frame without new personal photos for this long gets the "getting quiet" reminder.
+	QuietAfterDays int  `json:"quiet_after_days"`
+	StreakEnabled  bool `json:"streak_enabled"`
+
+	// StreakGoal Photos the family together posts per week.
+	StreakGoal int `json:"streak_goal"`
+
+	// Timezone IANA zone for weeks (Monday–Sunday), prompts and recaps; default: the most common `locale.timezone` of its subscribed frames, else the owner's, else Europe/Brussels.
+	//
+	// Example: Europe/Brussels
+	Timezone string `json:"timezone"`
+}
+
+// FeedEngagementUpdate defines model for FeedEngagementUpdate.
+type FeedEngagementUpdate struct {
+	MonthlyRecap   *bool   `json:"monthly_recap,omitempty"`
+	PromptsEnabled *bool   `json:"prompts_enabled,omitempty"`
+	QuietAfterDays *int    `json:"quiet_after_days,omitempty"`
+	StreakEnabled  *bool   `json:"streak_enabled,omitempty"`
+	StreakGoal     *int    `json:"streak_goal,omitempty"`
+	Timezone       *string `json:"timezone,omitempty"`
+}
 
 // FeedInvite defines model for FeedInvite.
 type FeedInvite struct {
@@ -4372,15 +5903,25 @@ type FeedMember struct {
 	DisplayName  string     `json:"display_name"`
 	JoinedAt     *time.Time `json:"joined_at,omitempty"`
 	LastPostedAt *time.Time `json:"last_posted_at,omitempty"`
-	Role         FeedRole   `json:"role"`
+
+	// Role `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
+	Role FeedRole `json:"role"`
 
 	// UserId UUIDv7
 	UserId Id `json:"user_id"`
 }
 
+// FeedMute The caller's mute for one family: `none`; `posts` (no pushes for comments, replies and reactions on its posts;
+// mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
+// mentions too). Websocket events still arrive.
+type FeedMute string
+
 // FeedPost defines model for FeedPost.
 type FeedPost struct {
-	CreatedAt time.Time `json:"created_at"`
+	// CircleId The circle this post was shared with (only its members see it); null for the whole family.
+	CircleId   *Id       `json:"circle_id,omitempty"`
+	CircleName *string   `json:"circle_name,omitempty"`
+	CreatedAt  time.Time `json:"created_at"`
 
 	// FeedId UUIDv7
 	FeedId Id `json:"feed_id"`
@@ -4398,14 +5939,20 @@ type FeedPost struct {
 		UserId Id `json:"user_id"`
 	} `json:"poster"`
 
-	// Reactions Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+	// PromptId The weekly prompt it answers (`tagPostPrompt`).
+	PromptId *Id `json:"prompt_id,omitempty"`
+
+	// Reactions Frames' reactions and replies: own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. Latest first, at most 50 (all in `getFeedPostReceipts`).
 	Reactions *[]FeedReaction `json:"reactions,omitempty"`
 
-	// Receipts Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+	// Receipts Own posts, owner/admins, or everyone with `members_see_receipts`; otherwise null.
 	Receipts *FeedReceiptSummary `json:"receipts,omitempty"`
 
 	// SendId The poster's send (own posts only).
 	SendId *Id `json:"send_id,omitempty"`
+
+	// Thread The thread of a post as shown on the timeline.
+	Thread *ThreadSummary `json:"thread,omitempty"`
 
 	// Via Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos").
 	Via *ItemVia `json:"via,omitempty"`
@@ -4458,7 +6005,51 @@ type FeedPostReceiptsFramesSubscriptionStatus string
 type FeedPreferencesUpdate struct {
 	// BirthdayNotifications Morning notification and greetings for this feed's birthdays.
 	BirthdayNotifications *bool `json:"birthday_notifications,omitempty"`
+
+	// Mute The caller's mute for one family: `none`; `posts` (no pushes for comments, replies and reactions on its posts;
+	// mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
+	// mentions too). Websocket events still arrive.
+	Mute *FeedMute `json:"mute,omitempty"`
 }
+
+// FeedPrompt defines model for FeedPrompt.
+type FeedPrompt struct {
+	AnswerCount *int `json:"answer_count,omitempty"`
+
+	// FeedId UUIDv7
+	FeedId Id `json:"feed_id"`
+
+	// Id UUIDv7
+	Id         Id      `json:"id"`
+	LibraryKey *string `json:"library_key,omitempty"`
+
+	// SetBy The admin who chose or wrote it; null for the server's choice.
+	SetBy  *PersonRef       `json:"set_by,omitempty"`
+	Source FeedPromptSource `json:"source"`
+	Status FeedPromptStatus `json:"status"`
+
+	// Title In the caller's language for server prompts; empty when skipped.
+	Title string `json:"title"`
+
+	// WeekOf The Monday the prompt runs from.
+	WeekOf openapi_types.Date `json:"week_of"`
+}
+
+// FeedPromptSource defines model for FeedPrompt.Source.
+type FeedPromptSource string
+
+// FeedPromptStatus defines model for FeedPrompt.Status.
+type FeedPromptStatus string
+
+// FeedPromptSet defines model for FeedPromptSet.
+type FeedPromptSet struct {
+	LibraryKey *string            `json:"library_key,omitempty"`
+	Skip       *FeedPromptSetSkip `json:"skip,omitempty"`
+	Title      *string            `json:"title,omitempty"`
+}
+
+// FeedPromptSetSkip defines model for FeedPromptSet.Skip.
+type FeedPromptSetSkip bool
 
 // FeedReaction defines model for FeedReaction.
 type FeedReaction struct {
@@ -4490,21 +6081,73 @@ type FeedReceiptSummary struct {
 	Seen    int  `json:"seen"`
 }
 
-// FeedRole defines model for FeedRole.
+// FeedRole `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
 type FeedRole string
+
+// FeedStreak defines model for FeedStreak.
+type FeedStreak struct {
+	BestWeeks int `json:"best_weeks"`
+
+	// CurrentWeeks Weeks in a row the goal was met (frozen weeks keep it
+	CurrentWeeks int  `json:"current_weeks"`
+	Enabled      bool `json:"enabled"`
+	FreezesLeft  int  `json:"freezes_left"`
+	Goal         int  `json:"goal"`
+
+	// History The last 12 closed weeks, newest first.
+	History *[]struct {
+		Outcome FeedStreakHistoryOutcome `json:"outcome"`
+		WeekOf  openapi_types.Date       `json:"week_of"`
+	} `json:"history,omitempty"`
+	Week struct {
+		// Helpers Who posted this week (no counts per person).
+		Helpers []PersonRef `json:"helpers"`
+		Met     bool        `json:"met"`
+		Photos  int         `json:"photos"`
+
+		// WeekOf The Monday.
+		WeekOf openapi_types.Date `json:"week_of"`
+	} `json:"week"`
+}
+
+// FeedStreakHistoryOutcome defines model for FeedStreak.History.Outcome.
+type FeedStreakHistoryOutcome string
+
+// FeedStreakSummary defines model for FeedStreakSummary.
+type FeedStreakSummary struct {
+	CurrentWeeks int `json:"current_weeks"`
+	Goal         int `json:"goal"`
+
+	// Met This week's goal is reached.
+	Met        bool `json:"met"`
+	WeekPhotos int  `json:"week_photos"`
+}
 
 // FeedSummary defines model for FeedSummary.
 type FeedSummary struct {
+	// ConversationId The family chat. Absent without `chats`.
+	ConversationId *Id `json:"conversation_id,omitempty"`
+
 	// CoverUrl Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
 	CoverUrl  *string    `json:"cover_url,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+	// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+	// "2 weeks quiet", `never` "No photos yet".
+	Freshness *Freshness `json:"freshness,omitempty"`
 
 	// Id UUIDv7
 	Id          Id         `json:"id"`
 	LastPostAt  *time.Time `json:"last_post_at,omitempty"`
 	MemberCount int        `json:"member_count"`
 	Name        string     `json:"name"`
-	Role        FeedRole   `json:"role"`
+
+	// Role `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
+	Role FeedRole `json:"role"`
+
+	// Streak Null when the family turned streaks off. Absent without `engagement`.
+	Streak *FeedStreakSummary `json:"streak,omitempty"`
 
 	// SubscriptionCount Active and paused subscriptions.
 	SubscriptionCount int `json:"subscription_count"`
@@ -4519,11 +6162,18 @@ type FeedUpdate struct {
 	CoverItemId *Id `json:"cover_item_id,omitempty"`
 
 	// InviteRequiresApproval Join invites need an admin's approval.
-	InviteRequiresApproval *bool `json:"invite_requires_approval,omitempty"`
+	InviteRequiresApproval  *bool `json:"invite_requires_approval,omitempty"`
+	MembersCanCreateCircles *bool `json:"members_can_create_circles,omitempty"`
 
-	// MembersSeeReactions Every member sees receipts and reactions of every post.
-	MembersSeeReactions *bool   `json:"members_see_reactions,omitempty"`
-	Name                *string `json:"name,omitempty"`
+	// MembersSeeReactions Every member sees frames' reactions and quick replies on every post.
+	MembersSeeReactions *bool `json:"members_see_reactions,omitempty"`
+
+	// MembersSeeReceipts Every member sees per-frame receipts of every post.
+	MembersSeeReceipts *bool   `json:"members_see_receipts,omitempty"`
+	Name               *string `json:"name,omitempty"`
+
+	// NewMembersCanPost Joiners become `poster` (true) or `member` (false). Existing members keep their role.
+	NewMembersCanPost *bool `json:"new_members_can_post,omitempty"`
 
 	// PostersCanAddBirthdays Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
 	PostersCanAddBirthdays *bool `json:"posters_can_add_birthdays,omitempty"`
@@ -4553,6 +6203,11 @@ type Frame struct {
 	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
 	DeviceKind *DeviceKind `json:"device_kind,omitempty"`
 
+	// Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+	// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+	// "2 weeks quiet", `never` "No photos yet".
+	Freshness *Freshness `json:"freshness,omitempty"`
+
 	// Id UUIDv7
 	Id                     Id          `json:"id"`
 	InviteRequiresApproval *bool       `json:"invite_requires_approval,omitempty"`
@@ -4565,9 +6220,12 @@ type Frame struct {
 	Online                 bool        `json:"online"`
 	OwnerName              *string     `json:"owner_name,omitempty"`
 	Permissions            Permissions `json:"permissions"`
-	PlacementCount         *int        `json:"placement_count,omitempty"`
-	Role                   Role        `json:"role"`
-	Screen                 *Screen     `json:"screen,omitempty"`
+
+	// PhotoRequest The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
+	PhotoRequest   *PhotoRequest `json:"photo_request,omitempty"`
+	PlacementCount *int          `json:"placement_count,omitempty"`
+	Role           Role          `json:"role"`
+	Screen         *Screen       `json:"screen,omitempty"`
 }
 
 // FrameBirthday One person on the frame, merged across the frame's birthday subscriptions on normalized name + day + month
@@ -4628,6 +6286,24 @@ type FrameHealth struct {
 	Online                *bool      `json:"online,omitempty"`
 }
 
+// FramePhotoRequest The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change).
+type FramePhotoRequest struct {
+	AnsweredAt *time.Time `json:"answered_at,omitempty"`
+
+	// AnsweredByName First name of whoever answered ("New photos from Ben").
+	AnsweredByName *string   `json:"answered_by_name,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// NextAllowedAt Until then the button shows "Asked today 💛".
+	NextAllowedAt time.Time `json:"next_allowed_at"`
+
+	// State `open`: waiting (7 days at most). `answered`: someone sent a photo that reached the frame. `expired`: nobody did within 7 days.
+	State PhotoRequestState `json:"state"`
+}
+
 // FramePlugins The frame's plugin catalog and their status, for the apps' Plugins section.
 type FramePlugins struct {
 	Catalog []CatalogPlugin `json:"catalog"`
@@ -4637,6 +6313,36 @@ type FramePlugins struct {
 	Instances *[]PluginInstanceStatus         `json:"instances,omitempty"`
 	Services  *map[string][]DiscoveredService `json:"services,omitempty"`
 	StatusAt  *time.Time                      `json:"status_at,omitempty"`
+}
+
+// FramePrompts Payload of the `prompts` change (entity: the frame): current prompts of its families, for the title card before their answers.
+type FramePrompts struct {
+	GeneratedAt time.Time `json:"generated_at"`
+	Prompts     []struct {
+		// FeedId UUIDv7
+		FeedId   Id     `json:"feed_id"`
+		FeedName string `json:"feed_name"`
+
+		// PromptId UUIDv7
+		PromptId Id `json:"prompt_id"`
+
+		// Title In the frame's `locale.language`.
+		Title  string             `json:"title"`
+		WeekOf openapi_types.Date `json:"week_of"`
+	} `json:"prompts"`
+}
+
+// FrameReactionRef defines model for FrameReactionRef.
+type FrameReactionRef struct {
+	At *time.Time `json:"at,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId   Id     `json:"frame_id"`
+	FrameName string `json:"frame_name"`
+
+	// ItemId The item the frame reacted to (posts with several items).
+	ItemId   *Id      `json:"item_id,omitempty"`
+	Reaction Reaction `json:"reaction"`
 }
 
 // FrameSettings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
@@ -4744,6 +6450,21 @@ type FrameSettings struct {
 		Transition    *FrameSettingsSlideshowTransition `json:"transition,omitempty"`
 		TransitionMs  *int                              `json:"transition_ms,omitempty"`
 	} `json:"slideshow,omitempty"`
+
+	// Social Family social on the frame (docs/spec/family-social.md §8, README §5.20). Owner, admins and `change_settings` members.
+	Social *struct {
+		// AskForPhotos Show "Ask for new photos" in the frame's quick menu.
+		AskForPhotos *bool `json:"ask_for_photos,omitempty"`
+
+		// NewPhotosFrom Show "New photos from Ben" on the next wake after new photos arrived (computed by the frame from the new placements' senders).
+		NewPhotosFrom *bool `json:"new_photos_from,omitempty"`
+
+		// PromptCards Show a weekly prompt's title card before its answers.
+		PromptCards *bool `json:"prompt_cards,omitempty"`
+
+		// ShowComments When a photo with comments appears, a card with the newest comment fades in for 8 s (once per photo per day). The server sends the `comments` change only while this is on.
+		ShowComments *bool `json:"show_comments,omitempty"`
+	} `json:"social,omitempty"`
 	Updates *struct {
 		// Channel Frame app release channel (beta program). Beta frames get the newest of beta and stable.
 		Channel *FrameSettingsUpdatesChannel `json:"channel,omitempty"`
@@ -4831,6 +6552,11 @@ type FrameSummary struct {
 	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
 	DeviceKind *DeviceKind `json:"device_kind,omitempty"`
 
+	// Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+	// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+	// "2 weeks quiet", `never` "No photos yet".
+	Freshness *Freshness `json:"freshness,omitempty"`
+
 	// Id UUIDv7
 	Id          Id          `json:"id"`
 	LastSeenAt  *time.Time  `json:"last_seen_at,omitempty"`
@@ -4840,8 +6566,11 @@ type FrameSummary struct {
 	Online      bool        `json:"online"`
 	OwnerName   *string     `json:"owner_name,omitempty"`
 	Permissions Permissions `json:"permissions"`
-	Role        Role        `json:"role"`
-	Screen      *Screen     `json:"screen,omitempty"`
+
+	// PhotoRequest The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
+	PhotoRequest *PhotoRequest `json:"photo_request,omitempty"`
+	Role         Role          `json:"role"`
+	Screen       *Screen       `json:"screen,omitempty"`
 }
 
 // FrameUpdate A frame app release mirrored by the server.
@@ -4867,6 +6596,21 @@ type FrameUpdate struct {
 	// VersionName Example: 0.2.0
 	VersionName string `json:"version_name"`
 }
+
+// Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+// "2 weeks quiet", `never` "No photos yet".
+type Freshness struct {
+	// DaysQuiet Whole days since the last personal photo (null = never).
+	DaysQuiet    *int           `json:"days_quiet,omitempty"`
+	LastSharedAt *time.Time     `json:"last_shared_at,omitempty"`
+	LastSharedBy *PersonRef     `json:"last_shared_by,omitempty"`
+	Level        float32        `json:"level"`
+	State        FreshnessState `json:"state"`
+}
+
+// FreshnessState defines model for Freshness.State.
+type FreshnessState string
 
 // GoogleImport defines model for GoogleImport.
 type GoogleImport struct {
@@ -4944,6 +6688,9 @@ type Heartbeat struct {
 	// the `birthdays` change (informational only: nothing is withheld; apps use it for
 	// `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
 	// (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
+	// `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
+	// has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
+	// app"; nothing is withheld.
 	Features          *[]string `json:"features,omitempty"`
 	LastShutdownClean *bool     `json:"last_shutdown_clean,omitempty"`
 
@@ -5185,6 +6932,10 @@ type JoinRequestVia string
 type Limits struct {
 	// MaxBirthdaysPerFeed Birthday people per feed (pending and approved).
 	MaxBirthdaysPerFeed *int `json:"max_birthdays_per_feed,omitempty"`
+	MaxCirclesPerFeed   *int `json:"max_circles_per_feed,omitempty"`
+
+	// MaxCommentChars Characters (Unicode code points) per comment.
+	MaxCommentChars *int `json:"max_comment_chars,omitempty"`
 
 	// MaxEmailAddressesPerTarget Inbox addresses per frame or feed.
 	MaxEmailAddressesPerTarget *int `json:"max_email_addresses_per_target,omitempty"`
@@ -5209,7 +6960,19 @@ type Limits struct {
 
 	// MaxGoogleImportItems Items per Google Photos import (the picker's own maximum is 2000).
 	MaxGoogleImportItems *int `json:"max_google_import_items,omitempty"`
-	MaxItemsPerSend      int  `json:"max_items_per_send"`
+
+	// MaxGroupMembers People in a group chat
+	MaxGroupMembers *int `json:"max_group_members,omitempty"`
+	MaxItemsPerSend int  `json:"max_items_per_send"`
+
+	// MaxMentions Mentions per comment or message.
+	MaxMentions *int `json:"max_mentions,omitempty"`
+
+	// MaxMessageChars Characters (Unicode code points) per chat message.
+	MaxMessageChars *int `json:"max_message_chars,omitempty"`
+
+	// MaxMessageItems Photos and videos per chat message.
+	MaxMessageItems *int `json:"max_message_items,omitempty"`
 
 	// MaxPhotoSourceItems Live imported items per photo source; newer upstream items beyond it are skipped.
 	MaxPhotoSourceItems *int `json:"max_photo_source_items,omitempty"`
@@ -5234,8 +6997,33 @@ type Limits struct {
 	MaxTelegramItemsPerChatHour *int `json:"max_telegram_items_per_chat_hour,omitempty"`
 	MaxUploadBytes              int  `json:"max_upload_bytes"`
 	MaxVideoSeconds             int  `json:"max_video_seconds"`
-	TrashRetentionDays          *int `json:"trash_retention_days,omitempty"`
+
+	// MaxVoiceSeconds Length of one voice message.
+	MaxVoiceSeconds *int `json:"max_voice_seconds,omitempty"`
+
+	// MessageEditHours How long after sending the author can edit a message.
+	MessageEditHours   *int `json:"message_edit_hours,omitempty"`
+	TrashRetentionDays *int `json:"trash_retention_days,omitempty"`
 }
+
+// LinkPreview defines model for LinkPreview.
+type LinkPreview struct {
+	Description *string `json:"description,omitempty"`
+	ImageHeight *int    `json:"image_height,omitempty"`
+
+	// ImageUrl Fetched and re-encoded by the server (WebP, at most 512 px), served from the server: clients never load remote images.
+	ImageUrl   *string           `json:"image_url,omitempty"`
+	ImageWidth *int              `json:"image_width,omitempty"`
+	SiteName   *string           `json:"site_name,omitempty"`
+	Status     LinkPreviewStatus `json:"status"`
+	Title      *string           `json:"title,omitempty"`
+
+	// Url The link as written.
+	Url string `json:"url"`
+}
+
+// LinkPreviewStatus defines model for LinkPreview.Status.
+type LinkPreviewStatus string
 
 // LocalizedText Language code → text; `en` is the fallback.
 type LocalizedText map[string]string
@@ -5257,6 +7045,193 @@ type Member struct {
 	// UserId UUIDv7
 	UserId Id `json:"user_id"`
 }
+
+// Mention A mention inside a comment or message `body`: `start` and `length` are in UTF-16 code units (what JavaScript,
+// Kotlin and Swift's `utf16` view count), covering the "@Name" text. Spans must lie inside the body and must not
+// overlap; at most `limits.max_mentions` per text.
+type Mention struct {
+	Length int `json:"length"`
+	Start  int `json:"start"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// Message defines model for Message.
+type Message struct {
+	// Author Null for system messages.
+	Author *PersonRef `json:"author,omitempty"`
+	Body   *string    `json:"body,omitempty"`
+
+	// ClientId The author's `client_id` (author only).
+	ClientId *string `json:"client_id,omitempty"`
+
+	// ConversationId UUIDv7
+	ConversationId Id        `json:"conversation_id"`
+	CreatedAt      time.Time `json:"created_at"`
+
+	// Deleted Tombstone: "This message was deleted" (body, items, voice, preview and reactions are gone).
+	Deleted  bool       `json:"deleted"`
+	EditedAt *time.Time `json:"edited_at,omitempty"`
+
+	// FrameActivity Frame reactions and quick replies on placements made from this message by "Put on a frame".
+	FrameActivity *[]struct {
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+
+		// ItemId UUIDv7
+		ItemId   Id             `json:"item_id"`
+		Reaction *Reaction      `json:"reaction,omitempty"`
+		Replies  *[]ReplyPreset `json:"replies,omitempty"`
+	} `json:"frame_activity,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Items Photos and videos. Ordinary items; `GET /v1/items/{id}/media/{variant}` serves them to conversation members.
+	Items []Item `json:"items"`
+
+	// Kind `system`: posted by kinframe (put on a frame, streak milestone, monthly recap, weekly prompt, member changes); no author, can be reacted to, can't be edited.
+	Kind        MessageKind  `json:"kind"`
+	LinkPreview *LinkPreview `json:"link_preview,omitempty"`
+	Mentions    *[]Mention   `json:"mentions,omitempty"`
+
+	// Reactions The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+	// and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+	// `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+	// reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+	// are left out of `people` but counted.
+	Reactions ReactionSummary `json:"reactions"`
+
+	// RemovedByAdmin With `deleted`: removed by a moderator ("This message was removed").
+	RemovedByAdmin *bool          `json:"removed_by_admin,omitempty"`
+	ReplyTo        *MessageQuote  `json:"reply_to,omitempty"`
+	SharedPost     *PostCard      `json:"shared_post,omitempty"`
+	System         *SystemMessage `json:"system,omitempty"`
+	Voice          *VoiceClip     `json:"voice,omitempty"`
+}
+
+// MessageCreate defines model for MessageCreate.
+type MessageCreate struct {
+	Body *string `json:"body,omitempty"`
+
+	// ClientId Client-generated id (e.g. a UUID) for the optimistic bubble; echoed back, and a retry with the same one returns the first message.
+	ClientId *string              `json:"client_id,omitempty"`
+	Items    *[]MessageItemCreate `json:"items,omitempty"`
+
+	// LinkPreview false: don't attach a preview of the body's first link.
+	LinkPreview *bool      `json:"link_preview,omitempty"`
+	Mentions    *[]Mention `json:"mentions,omitempty"`
+
+	// ReplyToId UUIDv7
+	ReplyToId *Id `json:"reply_to_id,omitempty"`
+
+	// SharedPostId UUIDv7
+	SharedPostId *Id `json:"shared_post_id,omitempty"`
+
+	// Voice A voice message (README §5.19); not together with `items`.
+	Voice *struct {
+		// DurationMs What the client recorded; the server measures it itself.
+		DurationMs *int `json:"duration_ms,omitempty"`
+
+		// UploadId The tus upload of the recording: AAC in MP4 (`audio/mp4`, `.m4a`) or Opus in WebM or Ogg.
+		UploadId string `json:"upload_id"`
+	} `json:"voice,omitempty"`
+}
+
+// MessageEvent `message.created`, and `message.updated` (edited, items ready, preview fetched, frame activity, deleted into a tombstone).
+type MessageEvent struct {
+	// ConversationId UUIDv7
+	ConversationId Id               `json:"conversation_id"`
+	Message        Message          `json:"message"`
+	Type           MessageEventType `json:"type"`
+}
+
+// MessageEventType defines model for MessageEvent.Type.
+type MessageEventType string
+
+// MessageItemCreate One photo or video, as in `SendCreate.items`.
+type MessageItemCreate struct {
+	Caption           *string    `json:"caption,omitempty"`
+	CapturedAt        *time.Time `json:"captured_at,omitempty"`
+	DurationMs        *int       `json:"duration_ms,omitempty"`
+	Height            *int       `json:"height,omitempty"`
+	IncludeAudio      *bool      `json:"include_audio,omitempty"`
+	Live              *bool      `json:"live,omitempty"`
+	LiveVideoUploadId *string    `json:"live_video_upload_id,omitempty"`
+	Trim              *struct {
+		EndMs   *int `json:"end_ms,omitempty"`
+		StartMs *int `json:"start_ms,omitempty"`
+	} `json:"trim,omitempty"`
+
+	// UploadId tus upload id (or an existing item id of the caller's when the server reported a duplicate).
+	UploadId string `json:"upload_id"`
+	Width    *int   `json:"width,omitempty"`
+}
+
+// MessageKind `system`: posted by kinframe (put on a frame, streak milestone, monthly recap, weekly prompt, member changes); no author, can be reacted to, can't be edited.
+type MessageKind string
+
+// MessagePage defines model for MessagePage.
+type MessagePage struct {
+	HasMoreAfter  bool `json:"has_more_after"`
+	HasMoreBefore bool `json:"has_more_before"`
+
+	// Messages Oldest first.
+	Messages []Message `json:"messages"`
+}
+
+// MessageQuote The message replied to, as quoted above the reply.
+type MessageQuote struct {
+	Author *PersonRef `json:"author,omitempty"`
+
+	// Deleted The quoted message was deleted or isn't visible to the caller.
+	Deleted bool `json:"deleted"`
+
+	// Excerpt The first 200 characters of the body.
+	Excerpt *string `json:"excerpt,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// MediaKind The first item's kind
+	MediaKind *MediaKind `json:"media_kind,omitempty"`
+	ThumbUrl  *string    `json:"thumb_url,omitempty"`
+
+	// Voice The quoted message is a voice message ("🎤 Voice message").
+	Voice *bool `json:"voice,omitempty"`
+}
+
+// MessageUpdate defines model for MessageUpdate.
+type MessageUpdate struct {
+	Body     string     `json:"body"`
+	Mentions *[]Mention `json:"mentions,omitempty"`
+}
+
+// Milestone defines model for Milestone.
+type Milestone struct {
+	AchievedAt time.Time    `json:"achieved_at"`
+	Key        MilestoneKey `json:"key"`
+
+	// Seen The caller dismissed its card.
+	Seen bool `json:"seen"`
+
+	// Shown Shown on the caller's profile to their contacts (default false).
+	Shown bool `json:"shown"`
+}
+
+// MilestoneEvent defines model for MilestoneEvent.
+type MilestoneEvent struct {
+	Milestone Milestone          `json:"milestone"`
+	Type      MilestoneEventType `json:"type"`
+}
+
+// MilestoneEventType defines model for MilestoneEvent.Type.
+type MilestoneEventType string
+
+// MilestoneKey defines model for MilestoneKey.
+type MilestoneKey string
 
 // MirrorSettings The frame settings a mirroring TV needs to look like the frame.
 type MirrorSettings struct {
@@ -5342,6 +7317,37 @@ type MirrorStateScreen string
 // MirrorStateType defines model for MirrorState.Type.
 type MirrorStateType string
 
+// MonthlyRecap About the family, never ranking individuals.
+type MonthlyRecap struct {
+	// FeedId UUIDv7
+	FeedId         Id `json:"feed_id"`
+	FreshestFrames *[]struct {
+		DaysWithNewPhotos int `json:"days_with_new_photos"`
+
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+	} `json:"freshest_frames,omitempty"`
+	Month     string `json:"month"`
+	MostLoved *struct {
+		Item Item `json:"item"`
+
+		// PostId UUIDv7
+		PostId Id `json:"post_id"`
+
+		// ReactionCount People and frames.
+		ReactionCount *int `json:"reaction_count,omitempty"`
+	} `json:"most_loved,omitempty"`
+	NewMembers   *[]PersonRef `json:"new_members,omitempty"`
+	PhotosShared int          `json:"photos_shared"`
+	SharerCount  int          `json:"sharer_count"`
+	StreakWeeks  *int         `json:"streak_weeks,omitempty"`
+	VideosShared int          `json:"videos_shared"`
+}
+
+// MuteFor defines model for MuteFor.
+type MuteFor string
+
 // NowShowing Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
 // now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
 // video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
@@ -5396,6 +7402,19 @@ type NowShowingTransition string
 // NowShowingType defines model for NowShowing.Type.
 type NowShowingType string
 
+// OnThisDay defines model for OnThisDay.
+type OnThisDay struct {
+	Date   openapi_types.Date `json:"date"`
+	Groups []struct {
+		// FeedId UUIDv7
+		FeedId   Id     `json:"feed_id"`
+		FeedName string `json:"feed_name"`
+		Items    []Item `json:"items"`
+		PostIds  []Id   `json:"post_ids"`
+		YearsAgo int    `json:"years_ago"`
+	} `json:"groups"`
+}
+
 // Permissions defines model for Permissions.
 type Permissions struct {
 	ChangeSettings *bool `json:"change_settings,omitempty"`
@@ -5404,6 +7423,85 @@ type Permissions struct {
 	SeeLibrary     *bool `json:"see_library,omitempty"`
 	Send           *bool `json:"send,omitempty"`
 }
+
+// Person A contact (someone the caller shares a family or a frame with).
+type Person struct {
+	// Blocked The caller blocked this person.
+	Blocked              bool `json:"blocked"`
+	DirectConversationId *Id  `json:"direct_conversation_id,omitempty"`
+
+	// Feeds The families both are in.
+	Feeds []struct {
+		// FeedId UUIDv7
+		FeedId   Id     `json:"feed_id"`
+		FeedName string `json:"feed_name"`
+	} `json:"feeds"`
+
+	// Frames The frames both are members of.
+	Frames []struct {
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+	} `json:"frames"`
+
+	// Milestones The milestones this person chose to show (all of them for the caller's own profile).
+	Milestones *[]MilestoneKey `json:"milestones,omitempty"`
+
+	// Person A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+	// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+	Person PersonRef `json:"person"`
+}
+
+// PersonReaction A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':
+// `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢; people also have `thumbs_up` 👍 and `pray` 🙏.
+type PersonReaction string
+
+// PersonRef A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+type PersonRef struct {
+	AvatarUrl    *string `json:"avatar_url,omitempty"`
+	DisplayName  string  `json:"display_name"`
+	FormerMember *bool   `json:"former_member,omitempty"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// PhotoRequest A frame's "Ask for new photos".
+type PhotoRequest struct {
+	AnsweredAt *time.Time `json:"answered_at,omitempty"`
+	AnsweredBy *PersonRef `json:"answered_by,omitempty"`
+	CreatedAt  time.Time  `json:"created_at"`
+	ExpiresAt  time.Time  `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId   Id     `json:"frame_id"`
+	FrameName string `json:"frame_name"`
+
+	// Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+	// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+	// "2 weeks quiet", `never` "No photos yet".
+	Freshness *Freshness `json:"freshness,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// State `open`: waiting (7 days at most). `answered`: someone sent a photo that reached the frame. `expired`: nobody did within 7 days.
+	State PhotoRequestState `json:"state"`
+}
+
+// PhotoRequestEvent defines model for PhotoRequestEvent.
+type PhotoRequestEvent struct {
+	// Request A frame's "Ask for new photos".
+	Request PhotoRequest          `json:"request"`
+	Type    PhotoRequestEventType `json:"type"`
+}
+
+// PhotoRequestEventType defines model for PhotoRequestEvent.Type.
+type PhotoRequestEventType string
+
+// PhotoRequestState `open`: waiting (7 days at most). `answered`: someone sent a photo that reached the frame. `expired`: nobody did within 7 days.
+type PhotoRequestState string
 
 // PhotoService The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).
 type PhotoService string
@@ -5788,11 +7886,14 @@ type Placement struct {
 	OriginFeedId *Id `json:"origin_feed_id,omitempty"`
 
 	// OriginFeedName Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
-	OriginFeedName    *string    `json:"origin_feed_name,omitempty"`
-	PendingModeration *bool      `json:"pending_moderation,omitempty"`
-	Reaction          *Reaction  `json:"reaction,omitempty"`
-	ReceivedAt        *time.Time `json:"received_at,omitempty"`
-	Replies           *[]struct {
+	OriginFeedName    *string `json:"origin_feed_name,omitempty"`
+	PendingModeration *bool   `json:"pending_moderation,omitempty"`
+
+	// PromptId Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
+	PromptId   *Id        `json:"prompt_id,omitempty"`
+	Reaction   *Reaction  `json:"reaction,omitempty"`
+	ReceivedAt *time.Time `json:"received_at,omitempty"`
+	Replies    *[]struct {
 		At     *time.Time   `json:"at,omitempty"`
 		Preset *ReplyPreset `json:"preset,omitempty"`
 	} `json:"replies,omitempty"`
@@ -5811,6 +7912,26 @@ type Placement struct {
 
 // PlacementRotation defines model for Placement.Rotation.
 type PlacementRotation int
+
+// PlacementComments Payload of the `comments` change (entity: the placement): the three newest person comments of the placement's
+// feed post, for frames with `settings.social.show_comments` on (README §5.20). Plain text, first names only.
+type PlacementComments struct {
+	// Comments Newest first.
+	Comments []struct {
+		// AuthorName Example: Anna
+		AuthorName string `json:"author_name"`
+
+		// Body Cut at 280 characters with "…"; mentions as plain text.
+		Body      string    `json:"body"`
+		CreatedAt time.Time `json:"created_at"`
+
+		// Id UUIDv7
+		Id Id `json:"id"`
+	} `json:"comments"`
+
+	// PlacementId UUIDv7
+	PlacementId Id `json:"placement_id"`
+}
 
 // PlacementOrigin How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
 // frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
@@ -5904,6 +8025,63 @@ type PluginStatusReport struct {
 	Services *map[string][]DiscoveredService `json:"services,omitempty"`
 }
 
+// PostCard A post shared in a chat ("Share in chat").
+type PostCard struct {
+	// Available False when the caller may not see the post (another family, a circle they are not in) or it was removed: show "This post isn't available".
+	Available bool       `json:"available"`
+	Caption   *string    `json:"caption,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	FeedName  *string    `json:"feed_name,omitempty"`
+	FrameName *string    `json:"frame_name,omitempty"`
+	ItemCount *int       `json:"item_count,omitempty"`
+	Kind      *PostKind  `json:"kind,omitempty"`
+
+	// PostId UUIDv7
+	PostId    Id         `json:"post_id"`
+	Poster    *PersonRef `json:"poster,omitempty"`
+	ThumbUrls *[]string  `json:"thumb_urls,omitempty"`
+}
+
+// PostEvent `post.updated`: a post's thread state, comment count or reaction row changed (everyone who sees the post).
+type PostEvent struct {
+	FeedId  *Id `json:"feed_id,omitempty"`
+	FrameId *Id `json:"frame_id,omitempty"`
+
+	// PostId UUIDv7
+	PostId Id `json:"post_id"`
+
+	// Thread The thread of a post as shown on the timeline.
+	Thread ThreadSummary `json:"thread"`
+	Type   PostEventType `json:"type"`
+}
+
+// PostEventType defines model for PostEvent.Type.
+type PostEventType string
+
+// PostKind `feed`: a post in a family (feed). `frame`: a direct send to one frame (one per send and frame).
+type PostKind string
+
+// PostRemovedEvent `post.removed`: removed, or no longer visible to the receiver.
+type PostRemovedEvent struct {
+	FeedId  *Id `json:"feed_id,omitempty"`
+	FrameId *Id `json:"frame_id,omitempty"`
+
+	// PostId UUIDv7
+	PostId Id                   `json:"post_id"`
+	Type   PostRemovedEventType `json:"type"`
+}
+
+// PostRemovedEventType defines model for PostRemovedEvent.Type.
+type PostRemovedEventType string
+
+// PostSeen The line under a post: "Seen on 4 frames · ❤ from Oma's frame". `frames`/`seen` follow the post's receipts
+// (`FeedReceiptSummary`); visible to the poster, the feed's owner/admins, and every member when the feed has
+// `members_see_receipts` (frame posts: everyone who sees the post). Otherwise null on `TimelinePost.seen`.
+type PostSeen struct {
+	Frames int `json:"frames"`
+	Seen   int `json:"seen"`
+}
+
 // Problem defines model for Problem.
 type Problem struct {
 	Code   ProblemCode `json:"code"`
@@ -5921,6 +8099,26 @@ type Problem struct {
 
 // ProblemCode defines model for ProblemCode.
 type ProblemCode string
+
+// PromptEvent defines model for PromptEvent.
+type PromptEvent struct {
+	// FeedId UUIDv7
+	FeedId Id              `json:"feed_id"`
+	Prompt FeedPrompt      `json:"prompt"`
+	Type   PromptEventType `json:"type"`
+}
+
+// PromptEventType defines model for PromptEvent.Type.
+type PromptEventType string
+
+// PromptLibraryEntry defines model for PromptLibraryEntry.
+type PromptLibraryEntry struct {
+	// Key Example: cooked
+	Key string `json:"key"`
+
+	// Title Example: Something you cooked
+	Title string `json:"title"`
+}
 
 // PublicStationList defines model for PublicStationList.
 type PublicStationList struct {
@@ -5940,6 +8138,9 @@ type PublicStationSummary struct {
 	// Temp24h The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
 	Temp24h []*float32 `json:"temp_24h"`
 }
+
+// PushAction Notification buttons in `PushPayload.actions`: `snooze_month` calls `updateReminderPreferences {snooze_days: 30}`, `fewer_reminders` `{level: fewer}`.
+type PushAction string
 
 // PushEndpoint defines model for PushEndpoint.
 type PushEndpoint struct {
@@ -5979,8 +8180,133 @@ type PushEndpointCreate struct {
 // PushEndpointCreateKind defines model for PushEndpointCreate.Kind.
 type PushEndpointCreateKind string
 
+// PushPayload The decrypted WebPush payload and the content of UnifiedPush messages (README §6.3); FCM data and APNs
+// custom keys carry the same fields. `ids` holds only ids (strings), never content.
+type PushPayload struct {
+	Actions *[]PushAction     `json:"actions,omitempty"`
+	Body    string            `json:"body"`
+	Ids     map[string]string `json:"ids"`
+
+	// Key The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+	Key string `json:"key"`
+
+	// Tag A newer push with the same tag replaces the older one.
+	Tag   *string `json:"tag,omitempty"`
+	Title string  `json:"title"`
+
+	// Type The websocket event type this push stands for.
+	Type string `json:"type"`
+}
+
+// PutOnFrameRequest `frame_ids` and `feed_ids` together must not be empty.
+type PutOnFrameRequest struct {
+	// CircleIds As in `SendCreate.circle_ids`.
+	CircleIds *[]Id `json:"circle_ids,omitempty"`
+	FeedIds   *[]Id `json:"feed_ids,omitempty"`
+	FrameIds  []Id  `json:"frame_ids"`
+
+	// ItemIds A subset of the message's photos and videos; default all of them.
+	ItemIds *[]Id `json:"item_ids,omitempty"`
+}
+
+// QuietHours Local times (`User.timezone`) without reminders; they wait until the end. Default 21:00–09:00.
+type QuietHours struct {
+	End   string `json:"end"`
+	Start string `json:"start"`
+}
+
 // Reaction defines model for Reaction.
 type Reaction string
+
+// ReactionList defines model for ReactionList.
+type ReactionList struct {
+	Frames []FrameReactionRef `json:"frames"`
+	People []struct {
+		At time.Time `json:"at"`
+
+		// Emoji A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':
+		// `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢; people also have `thumbs_up` 👍 and `pray` 🙏.
+		Emoji PersonReaction `json:"emoji"`
+
+		// Person A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+		// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+		Person PersonRef `json:"person"`
+	} `json:"people"`
+}
+
+// ReactionSummary The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+// and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+// `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+// reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+// are left out of `people` but counted.
+type ReactionSummary struct {
+	// Counts Per emoji, most frequent first.
+	Counts []struct {
+		Count int `json:"count"`
+
+		// Emoji A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':
+		// `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢; people also have `thumbs_up` 👍 and `pray` 🙏.
+		Emoji PersonReaction `json:"emoji"`
+	} `json:"counts"`
+
+	// Frames Up to 3 frames, newest first.
+	Frames []FrameReactionRef `json:"frames"`
+	Mine   *PersonReaction    `json:"mine,omitempty"`
+
+	// People Up to 3 people, the caller's contacts first, newest first.
+	People []struct {
+		// Emoji A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':
+		// `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢; people also have `thumbs_up` 👍 and `pray` 🙏.
+		Emoji PersonReaction `json:"emoji"`
+
+		// Person A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+		// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+		Person PersonRef `json:"person"`
+	} `json:"people"`
+	Total int `json:"total"`
+}
+
+// ReactionTargetKind `post_item` is one item of a post (the `post_id` query parameter names the post).
+type ReactionTargetKind string
+
+// ReactionUpdatedEvent `reaction.updated`: people's reactions on a target changed; `summary` is computed for the receiver.
+type ReactionUpdatedEvent struct {
+	ConversationId *Id `json:"conversation_id,omitempty"`
+	PostId         *Id `json:"post_id,omitempty"`
+
+	// Summary The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+	// and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+	// `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+	// reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+	// are left out of `people` but counted.
+	Summary ReactionSummary `json:"summary"`
+
+	// TargetId UUIDv7
+	TargetId Id `json:"target_id"`
+
+	// TargetKind `post_item` is one item of a post (the `post_id` query parameter names the post).
+	TargetKind ReactionTargetKind       `json:"target_kind"`
+	Type       ReactionUpdatedEventType `json:"type"`
+}
+
+// ReactionUpdatedEventType defines model for ReactionUpdatedEvent.Type.
+type ReactionUpdatedEventType string
+
+// ReadUpdatedEvent defines model for ReadUpdatedEvent.
+type ReadUpdatedEvent struct {
+	// ConversationId UUIDv7
+	ConversationId Id `json:"conversation_id"`
+
+	// LastReadMessageId UUIDv7
+	LastReadMessageId Id                   `json:"last_read_message_id"`
+	Type              ReadUpdatedEventType `json:"type"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// ReadUpdatedEventType defines model for ReadUpdatedEvent.Type.
+type ReadUpdatedEventType string
 
 // RedeemResult defines model for RedeemResult.
 type RedeemResult struct {
@@ -5994,8 +8320,108 @@ type RedeemResult struct {
 // RedeemResultStatus defines model for RedeemResult.Status.
 type RedeemResultStatus string
 
+// ReminderLevel `fewer`: half the weekly budget and no streak reminders. `off`: no reminders (frame requests follow `frame_requests`).
+type ReminderLevel string
+
+// ReminderPreferences defines model for ReminderPreferences.
+type ReminderPreferences struct {
+	// AutoReduced The server lowered `level` to `fewer` after 4 unanswered reminders in a row; show it once, then send `auto_reduced_seen`.
+	AutoReduced       *bool       `json:"auto_reduced,omitempty"`
+	BirthdayReminders bool        `json:"birthday_reminders"`
+	EmailDigest       EmailDigest `json:"email_digest"`
+
+	// EmailDigestAvailable The server can send mail (discovery `email_digest`).
+	EmailDigestAvailable *bool `json:"email_digest_available,omitempty"`
+
+	// FrameRequests Pushes when a frame asks for new photos.
+	FrameRequests bool `json:"frame_requests"`
+
+	// Level `fewer`: half the weekly budget and no streak reminders. `off`: no reminders (frame requests follow `frame_requests`).
+	Level ReminderLevel `json:"level"`
+
+	// QuietHours Local times (`User.timezone`) without reminders; they wait until the end. Default 21:00–09:00.
+	QuietHours    QuietHours `json:"quiet_hours"`
+	SnoozedUntil  *time.Time `json:"snoozed_until,omitempty"`
+	WeeklySummary bool       `json:"weekly_summary"`
+}
+
+// ReminderPreferencesUpdate defines model for ReminderPreferencesUpdate.
+type ReminderPreferencesUpdate struct {
+	AutoReducedSeen   *ReminderPreferencesUpdateAutoReducedSeen `json:"auto_reduced_seen,omitempty"`
+	BirthdayReminders *bool                                     `json:"birthday_reminders,omitempty"`
+	EmailDigest       *EmailDigest                              `json:"email_digest,omitempty"`
+	FrameRequests     *bool                                     `json:"frame_requests,omitempty"`
+
+	// Level `fewer`: half the weekly budget and no streak reminders. `off`: no reminders (frame requests follow `frame_requests`).
+	Level *ReminderLevel `json:"level,omitempty"`
+
+	// QuietHours Local times (`User.timezone`) without reminders; they wait until the end. Default 21:00–09:00.
+	QuietHours    *QuietHours `json:"quiet_hours,omitempty"`
+	SnoozeDays    *int        `json:"snooze_days,omitempty"`
+	WeeklySummary *bool       `json:"weekly_summary,omitempty"`
+}
+
+// ReminderPreferencesUpdateAutoReducedSeen defines model for ReminderPreferencesUpdate.AutoReducedSeen.
+type ReminderPreferencesUpdateAutoReducedSeen bool
+
 // ReplyPreset defines model for ReplyPreset.
 type ReplyPreset string
+
+// Report The reporter sees their own report (`mine`) without `excerpt`, `author` or `note` of others; handlers see everything except who reported.
+type Report struct {
+	// Author Who wrote the reported content (handlers).
+	Author         *PersonRef `json:"author,omitempty"`
+	ConversationId *Id        `json:"conversation_id,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+
+	// Excerpt The reported text as it was when reported (kept even if it was edited or deleted since), or a description of the media; handlers only.
+	Excerpt *string `json:"excerpt,omitempty"`
+
+	// FeedId Null when the operator handles it.
+	FeedId *Id `json:"feed_id,omitempty"`
+
+	// Id UUIDv7
+	Id         Id           `json:"id"`
+	Mine       *bool        `json:"mine,omitempty"`
+	Note       *string      `json:"note,omitempty"`
+	PostId     *Id          `json:"post_id,omitempty"`
+	Reason     ReportReason `json:"reason"`
+	ResolvedAt *time.Time   `json:"resolved_at,omitempty"`
+	Status     ReportStatus `json:"status"`
+
+	// TargetId UUIDv7
+	TargetId   Id               `json:"target_id"`
+	TargetKind ReportTargetKind `json:"target_kind"`
+}
+
+// ReportStatus defines model for Report.Status.
+type ReportStatus string
+
+// ReportCreate defines model for ReportCreate.
+type ReportCreate struct {
+	Note   *string      `json:"note,omitempty"`
+	Reason ReportReason `json:"reason"`
+
+	// TargetId UUIDv7
+	TargetId   Id               `json:"target_id"`
+	TargetKind ReportTargetKind `json:"target_kind"`
+}
+
+// ReportEvent defines model for ReportEvent.
+type ReportEvent struct {
+	// Report The reporter sees their own report (`mine`) without `excerpt`, `author` or `note` of others; handlers see everything except who reported.
+	Report Report          `json:"report"`
+	Type   ReportEventType `json:"type"`
+}
+
+// ReportEventType defines model for ReportEvent.Type.
+type ReportEventType string
+
+// ReportReason defines model for ReportReason.
+type ReportReason string
+
+// ReportTargetKind defines model for ReportTargetKind.
+type ReportTargetKind string
 
 // Role defines model for Role.
 type Role string
@@ -6065,7 +8491,12 @@ type Send struct {
 // `frame_ids`). Feeds need membership (any role), frames need `send`. A frame that is a direct recipient and
 // also subscribes to a feed in `feed_ids` gets the item once (docs/spec/feeds.md §6.2).
 type SendCreate struct {
-	// FeedIds Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).
+	// CircleIds The audience inside a feed: at most one circle per feed, its feed must be in `feed_ids`, and the caller must
+	// be in the circle (`422 validation_failed`, field `circle_ids`). That feed's post is shared with the circle
+	// only (README §5.18); other feeds get a whole-family post.
+	CircleIds *[]Id `json:"circle_ids,omitempty"`
+
+	// FeedIds Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). Needs role `poster` or above (`403 missing_permission` for `member`).
 	FeedIds *[]Id `json:"feed_ids,omitempty"`
 
 	// FrameIds Frames to send to directly. May be empty when `feed_ids` is not.
@@ -6111,6 +8542,9 @@ type SendCreate struct {
 		// Width Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline.
 		Width *int `json:"width,omitempty"`
 	} `json:"items"`
+
+	// PromptId Tag the feed posts as answers to this weekly prompt (`FeedPrompt.id`, current or previous week); only the post in that prompt's feed is tagged.
+	PromptId *openapi_types.UUID `json:"prompt_id,omitempty"`
 }
 
 // SendFeed One feed a send was posted to.
@@ -6537,6 +8971,17 @@ type StationSeries struct {
 // StationValues defines model for StationValues.
 type StationValues = []*float32
 
+// StreakEvent defines model for StreakEvent.
+type StreakEvent struct {
+	// FeedId UUIDv7
+	FeedId Id                `json:"feed_id"`
+	Streak FeedStreakSummary `json:"streak"`
+	Type   StreakEventType   `json:"type"`
+}
+
+// StreakEventType defines model for StreakEvent.Type.
+type StreakEventType string
+
 // Subscription defines model for Subscription.
 type Subscription struct {
 	// ActivatedAt First activation; the history boundary.
@@ -6659,6 +9104,35 @@ type SubscriptionUpdate struct {
 	// HistoryCount Required with `history: last_n`.
 	HistoryCount *int `json:"history_count,omitempty"`
 }
+
+// SystemMessage The content of a `system` message; clients render it in the viewer's language from these fields.
+type SystemMessage struct {
+	FeedNames  *[]string `json:"feed_names,omitempty"`
+	FrameNames *[]string `json:"frame_names,omitempty"`
+	ItemCount  *int      `json:"item_count,omitempty"`
+
+	// Month `monthly_recap`: YYYY-MM (`getFeedRecap`).
+	Month *string `json:"month,omitempty"`
+
+	// Person Who did it: put on a frame, joined or left.
+	Person      *PersonRef    `json:"person,omitempty"`
+	PromptId    *Id           `json:"prompt_id,omitempty"`
+	PromptTitle *string       `json:"prompt_title,omitempty"`
+	Recap       *MonthlyRecap `json:"recap,omitempty"`
+
+	// SendId `put_on_frame`.
+	SendId *Id `json:"send_id,omitempty"`
+
+	// SourceMessageId `put_on_frame`: the message whose items were sent.
+	SourceMessageId *Id               `json:"source_message_id,omitempty"`
+	Type            SystemMessageType `json:"type"`
+
+	// Weeks `streak_milestone`: 4, 12, 26, 52, then every 52.
+	Weeks *int `json:"weeks,omitempty"`
+}
+
+// SystemMessageType defines model for SystemMessageType.
+type SystemMessageType string
 
 // TelegramChat defines model for TelegramChat.
 type TelegramChat struct {
@@ -6870,6 +9344,110 @@ type TelegramTopic struct {
 	Name string `json:"name"`
 }
 
+// ThreadReadEvent `thread.read`: the receiver read a thread on another device.
+type ThreadReadEvent struct {
+	// PostId UUIDv7
+	PostId Id `json:"post_id"`
+
+	// ReadUpTo UUIDv7
+	ReadUpTo Id                  `json:"read_up_to"`
+	Type     ThreadReadEventType `json:"type"`
+}
+
+// ThreadReadEventType defines model for ThreadReadEvent.Type.
+type ThreadReadEventType string
+
+// ThreadState defines model for ThreadState.
+type ThreadState string
+
+// ThreadSummary The thread of a post as shown on the timeline.
+type ThreadSummary struct {
+	// CanComment False when closed or the caller may only read.
+	CanComment *bool `json:"can_comment,omitempty"`
+
+	// CanModerate May close the thread and remove others' comments.
+	CanModerate *bool `json:"can_moderate,omitempty"`
+
+	// CommentCount Person comments and replies
+	CommentCount int `json:"comment_count"`
+
+	// LatestComments The two newest person comments (replies included), oldest of the two first.
+	LatestComments []Comment `json:"latest_comments"`
+	Muted          *bool     `json:"muted,omitempty"`
+
+	// PostId UUIDv7
+	PostId Id `json:"post_id"`
+
+	// Reactions The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+	// and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+	// `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+	// reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+	// are left out of `people` but counted.
+	Reactions ReactionSummary `json:"reactions"`
+	ReadUpTo  *Id             `json:"read_up_to,omitempty"`
+	State     ThreadState     `json:"state"`
+
+	// UnreadCount Person comments after the caller's `read_up_to` (all of them if never read)
+	UnreadCount *int `json:"unread_count,omitempty"`
+
+	// UnreadMentions Unread comments that mention the caller or reply to them.
+	UnreadMentions *int `json:"unread_mentions,omitempty"`
+}
+
+// TimelinePage defines model for TimelinePage.
+type TimelinePage struct {
+	// NextBefore Pass as `before` for the next (older) page; null at the end.
+	NextBefore *string        `json:"next_before"`
+	Posts      []TimelinePost `json:"posts"`
+}
+
+// TimelinePost defines model for TimelinePost.
+type TimelinePost struct {
+	// CanRemove The poster, or a feed owner/admin (`removeFeedPost`); frame posts: the sender (`unsend` per frame is not offered; it removes the whole send).
+	CanRemove *bool `json:"can_remove,omitempty"`
+
+	// CircleId Feed posts shared with one circle only.
+	CircleId   *Id       `json:"circle_id,omitempty"`
+	CircleName *string   `json:"circle_name,omitempty"`
+	CreatedAt  time.Time `json:"created_at"`
+	FeedId     *Id       `json:"feed_id,omitempty"`
+
+	// FeedName The family
+	FeedName *string `json:"feed_name,omitempty"`
+
+	// FrameId `frame` posts: the frame ("To Oma's frame").
+	FrameId   *Id     `json:"frame_id,omitempty"`
+	FrameName *string `json:"frame_name,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Items Live items in send order (for frame posts
+	Items []Item `json:"items"`
+
+	// Kind `feed`: a post in a family (feed). `frame`: a direct send to one frame (one per send and frame).
+	Kind PostKind `json:"kind"`
+
+	// Poster A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+	// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+	Poster PersonRef `json:"poster"`
+
+	// Prompt The weekly prompt this post answers; clients group consecutive answers ("6 answers to …").
+	Prompt *struct {
+		// Id UUIDv7
+		Id    Id     `json:"id"`
+		Title string `json:"title"`
+	} `json:"prompt,omitempty"`
+	Seen *PostSeen `json:"seen,omitempty"`
+
+	// SendId The poster's send (own posts only).
+	SendId *Id `json:"send_id,omitempty"`
+
+	// Thread The thread of a post as shown on the timeline.
+	Thread ThreadSummary `json:"thread"`
+	Via    *ItemVia      `json:"via,omitempty"`
+}
+
 // TvLink defines model for TvLink.
 type TvLink struct {
 	AlbumId       *openapi_types.UUID `json:"album_id,omitempty"`
@@ -6979,6 +9557,26 @@ type TvSlideshow struct {
 	Slides       []TvSlide `json:"slides"`
 }
 
+// TypingEvent defines model for TypingEvent.
+type TypingEvent struct {
+	Activity TypingEventActivity `json:"activity"`
+
+	// ConversationId UUIDv7
+	ConversationId Id              `json:"conversation_id"`
+	DisplayName    string          `json:"display_name"`
+	ExpiresAt      time.Time       `json:"expires_at"`
+	Type           TypingEventType `json:"type"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// TypingEventActivity defines model for TypingEvent.Activity.
+type TypingEventActivity string
+
+// TypingEventType defines model for TypingEvent.Type.
+type TypingEventType string
+
 // User defines model for User.
 type User struct {
 	AvatarUrl   *string    `json:"avatar_url,omitempty"`
@@ -6992,11 +9590,30 @@ type User struct {
 	Locale             *string `json:"locale,omitempty"`
 	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
 
+	// ShowReadReceipts Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
+	ShowReadReceipts *bool `json:"show_read_receipts,omitempty"`
+
 	// Timezone IANA time zone reported by the user's apps; null until one did.
 	//
 	// Example: Europe/Brussels
 	Timezone *string `json:"timezone,omitempty"`
 }
+
+// VoiceClip A voice message's recording (README §5.19). Stored as an item of its own (never placed on a frame or in a
+// library); `GET /v1/items/{item_id}/media/master` serves the AAC master (`audio/mp4`, Range supported).
+type VoiceClip struct {
+	DurationMs *int `json:"duration_ms,omitempty"`
+
+	// ItemId UUIDv7
+	ItemId Id              `json:"item_id"`
+	Status VoiceClipStatus `json:"status"`
+
+	// Waveform 64 loudness values 0–100 over the recording (empty while processing).
+	Waveform *[]int `json:"waveform,omitempty"`
+}
+
+// VoiceClipStatus defines model for VoiceClip.Status.
+type VoiceClipStatus string
 
 // Weather Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
 // removed, the weather widget was turned off, or the server has weather disabled; the frame drops what it has.
@@ -7073,14 +9690,56 @@ type WeatherUnitsTemperature string
 // WeatherUnitsWindSpeed defines model for Weather.Units.WindSpeed.
 type WeatherUnitsWindSpeed string
 
+// WeeklySummary "Your photos were seen 58 times on 3 frames this week; Oma loved 4".
+type WeeklySummary struct {
+	// CommentCount Comments by others on the caller's posts this week.
+	CommentCount int `json:"comment_count"`
+	FrameCount   int `json:"frame_count"`
+	Frames       []struct {
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+		LoveCount int    `json:"love_count"`
+		SeenCount int    `json:"seen_count"`
+	} `json:"frames"`
+
+	// LoveCount Frame ❤ on the caller's items this week.
+	LoveCount int `json:"love_count"`
+
+	// ReactionCount People's reactions on the caller's posts and items this week.
+	ReactionCount int `json:"reaction_count"`
+
+	// SeenCount Placements of the caller's items first seen this week.
+	SeenCount int `json:"seen_count"`
+
+	// TopItem The item with the most reactions.
+	TopItem *Item              `json:"top_item,omitempty"`
+	WeekOf  openapi_types.Date `json:"week_of"`
+}
+
 // AddressId UUIDv7
 type AddressId = Id
+
+// After UUIDv7
+type After = Id
+
+// Before defines model for Before.
+type Before = string
 
 // BirthdayId UUIDv7
 type BirthdayId = Id
 
 // CalendarId UUIDv7
 type CalendarId = Id
+
+// CircleId UUIDv7
+type CircleId = Id
+
+// CommentId UUIDv7
+type CommentId = Id
+
+// ConversationId UUIDv7
+type ConversationId = Id
 
 // Cursor defines model for Cursor.
 type Cursor = string
@@ -7121,11 +9780,20 @@ type ItemId = Id
 // Limit defines model for Limit.
 type Limit = int
 
+// MessageId UUIDv7
+type MessageId = Id
+
 // PlacementId UUIDv7
 type PlacementId = Id
 
 // PostId UUIDv7
 type PostId = Id
+
+// ReportId UUIDv7
+type ReportId = Id
+
+// RequestId UUIDv7
+type RequestId = Id
 
 // SenderId UUIDv7
 type SenderId = Id
@@ -7136,11 +9804,75 @@ type SourceId = Id
 // SubscriptionId UUIDv7
 type SubscriptionId = Id
 
+// TargetId UUIDv7
+type TargetId = Id
+
+// TargetKind `post_item` is one item of a post (the `post_id` query parameter names the post).
+type TargetKind = ReactionTargetKind
+
 // TelegramChatId UUIDv7
 type TelegramChatId = Id
 
 // UserId UUIDv7
 type UserId = Id
+
+// WeekOf defines model for WeekOf.
+type WeekOf = openapi_types.Date
+
+// ListConversationsParams defines parameters for ListConversations.
+type ListConversationsParams struct {
+	Archived *bool `form:"archived,omitempty" json:"archived,omitempty"`
+}
+
+// CreateConversationParams defines parameters for CreateConversation.
+type CreateConversationParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// AddConversationMembersJSONBody defines parameters for AddConversationMembers.
+type AddConversationMembersJSONBody struct {
+	UserIds []Id `json:"user_ids"`
+}
+
+// UpdateConversationMemberJSONBody defines parameters for UpdateConversationMember.
+type UpdateConversationMemberJSONBody struct {
+	// Role Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+	Role ConversationRole `json:"role"`
+}
+
+// ListMessagesParams defines parameters for ListMessages.
+type ListMessagesParams struct {
+	// Before Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id).
+	Before *Before `form:"before,omitempty" json:"before,omitempty"`
+
+	// After Chronological lists (comments, messages): return what comes after this id.
+	After *After `form:"after,omitempty" json:"after,omitempty"`
+	Limit *int   `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// SendMessageParams defines parameters for SendMessage.
+type SendMessageParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// PutMessageOnFrameParams defines parameters for PutMessageOnFrame.
+type PutMessageOnFrameParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// MarkConversationReadJSONBody defines parameters for MarkConversationRead.
+type MarkConversationReadJSONBody struct {
+	// MessageId UUIDv7
+	MessageId Id `json:"message_id"`
+}
+
+// SendTypingJSONBody defines parameters for SendTyping.
+type SendTypingJSONBody struct {
+	Activity *SendTypingJSONBodyActivity `json:"activity,omitempty"`
+}
+
+// SendTypingJSONBodyActivity defines parameters for SendTyping.
+type SendTypingJSONBodyActivity string
 
 // DeviceAckJSONBody defines parameters for DeviceAck.
 type DeviceAckJSONBody struct {
@@ -7301,6 +10033,21 @@ type ListFeedBirthdaysParams struct {
 // CreateFeedBirthdayParams defines parameters for CreateFeedBirthday.
 type CreateFeedBirthdayParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// CreateCircleParams defines parameters for CreateCircle.
+type CreateCircleParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// AddCircleMembersJSONBody defines parameters for AddCircleMembers.
+type AddCircleMembersJSONBody struct {
+	UserIds []Id `json:"user_ids"`
+}
+
+// UpdateCircleMemberJSONBody defines parameters for UpdateCircleMember.
+type UpdateCircleMemberJSONBody struct {
+	Role CircleRole `json:"role"`
 }
 
 // CreateFeedEmailAddressParams defines parameters for CreateFeedEmailAddress.
@@ -7561,6 +10308,11 @@ type UpdateItemJSONBody struct {
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
 }
 
+// CreateLinkPreviewJSONBody defines parameters for CreateLinkPreview.
+type CreateLinkPreviewJSONBody struct {
+	Url string `json:"url"`
+}
+
 // DeleteMeParams defines parameters for DeleteMe.
 type DeleteMeParams struct {
 	// RemoveItems Also remove everything this user sent from all frames.
@@ -7575,16 +10327,36 @@ type UpdateMeJSONBody struct {
 	Locale             *string `json:"locale,omitempty"`
 	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
 
+	// ShowReadReceipts Read receipts in chats (README §5.19).
+	ShowReadReceipts *bool `json:"show_read_receipts,omitempty"`
+
 	// Timezone IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
 	//
 	// Example: Europe/Brussels
 	Timezone *string `json:"timezone,omitempty"`
 }
 
+// UpdateMyMilestoneJSONBody defines parameters for UpdateMyMilestone.
+type UpdateMyMilestoneJSONBody struct {
+	Seen  *UpdateMyMilestoneJSONBodySeen `json:"seen,omitempty"`
+	Shown *bool                          `json:"shown,omitempty"`
+}
+
+// UpdateMyMilestoneJSONBodySeen defines parameters for UpdateMyMilestone.
+type UpdateMyMilestoneJSONBodySeen bool
+
 // CreateTelegramLinkCodeParams defines parameters for CreateTelegramLinkCode.
 type CreateTelegramLinkCodeParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
+
+// ListOperatorReportsParams defines parameters for ListOperatorReports.
+type ListOperatorReportsParams struct {
+	Status *ListOperatorReportsParamsStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// ListOperatorReportsParamsStatus defines parameters for ListOperatorReports.
+type ListOperatorReportsParamsStatus string
 
 // OperatorListReservationsParams defines parameters for OperatorListReservations.
 type OperatorListReservationsParams struct {
@@ -7623,6 +10395,64 @@ type SyncPhotoSourceJSONBody struct {
 	ConfirmRemovals *bool `json:"confirm_removals,omitempty"`
 }
 
+// ListCommentsParams defines parameters for ListComments.
+type ListCommentsParams struct {
+	// After Chronological lists (comments, messages): return what comes after this id.
+	After *After `form:"after,omitempty" json:"after,omitempty"`
+	Limit *int   `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// CreateCommentParams defines parameters for CreateComment.
+type CreateCommentParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// SetThreadMuteJSONBody defines parameters for SetThreadMute.
+type SetThreadMuteJSONBody struct {
+	Muted bool `json:"muted"`
+}
+
+// TagPostPromptJSONBody defines parameters for TagPostPrompt.
+type TagPostPromptJSONBody struct {
+	PromptId *Id `json:"prompt_id"`
+}
+
+// MarkThreadReadJSONBody defines parameters for MarkThreadRead.
+type MarkThreadReadJSONBody struct {
+	// UpTo UUIDv7
+	UpTo Id `json:"up_to"`
+}
+
+// SetThreadStateJSONBody defines parameters for SetThreadState.
+type SetThreadStateJSONBody struct {
+	State ThreadState `json:"state"`
+}
+
+// ListReactionsParams defines parameters for ListReactions.
+type ListReactionsParams struct {
+	// PostId Required for `post_item` (the item's post; one item can be in several posts). Ignored otherwise.
+	PostId *Id `form:"post_id,omitempty" json:"post_id,omitempty"`
+}
+
+// SetReactionJSONBody defines parameters for SetReaction.
+type SetReactionJSONBody struct {
+	Emoji *PersonReaction `json:"emoji"`
+}
+
+// SetReactionParams defines parameters for SetReaction.
+type SetReactionParams struct {
+	// PostId Required for `post_item` (the item's post; one item can be in several posts). Ignored otherwise.
+	PostId *Id `form:"post_id,omitempty" json:"post_id,omitempty"`
+}
+
+// ResolveReportJSONBody defines parameters for ResolveReport.
+type ResolveReportJSONBody struct {
+	Action ResolveReportJSONBodyAction `json:"action"`
+}
+
+// ResolveReportJSONBodyAction defines parameters for ResolveReport.
+type ResolveReportJSONBodyAction string
+
 // ListMySendsParams defines parameters for ListMySends.
 type ListMySendsParams struct {
 	Cursor *Cursor                 `form:"cursor,omitempty" json:"cursor,omitempty"`
@@ -7640,7 +10470,10 @@ type CreateSendParams struct {
 
 // ForwardSendJSONBody defines parameters for ForwardSend.
 type ForwardSendJSONBody struct {
-	// FeedIds Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped.
+	// CircleIds As in `SendCreate.circle_ids`.
+	CircleIds *[]Id `json:"circle_ids,omitempty"`
+
+	// FeedIds Post the send's items to these feeds (caller must be a poster or above). A feed that already has a live post of this send is skipped.
 	FeedIds  *[]Id `json:"feed_ids,omitempty"`
 	FrameIds []Id  `json:"frame_ids"`
 }
@@ -7660,6 +10493,55 @@ type GetStationLatestParams struct {
 	XStationId  string `json:"X-Station-Id"`
 	XStationKey string `json:"X-Station-Key"`
 }
+
+// GetTimelineParams defines parameters for GetTimeline.
+type GetTimelineParams struct {
+	// Before Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id).
+	Before *Before `form:"before,omitempty" json:"before,omitempty"`
+	Limit  *int    `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// FeedId Only this family's posts (the family screen).
+	FeedId *Id `form:"feed_id,omitempty" json:"feed_id,omitempty"`
+
+	// CircleId Only posts with this circle as audience.
+	CircleId *Id `form:"circle_id,omitempty" json:"circle_id,omitempty"`
+
+	// PromptId Only posts tagged with this weekly prompt (the answers).
+	PromptId *Id `form:"prompt_id,omitempty" json:"prompt_id,omitempty"`
+
+	// FrameId Only frame posts to this frame.
+	FrameId *Id `form:"frame_id,omitempty" json:"frame_id,omitempty"`
+}
+
+// CreateConversationJSONRequestBody defines body for CreateConversation for application/json ContentType.
+type CreateConversationJSONRequestBody = ConversationCreate
+
+// UpdateConversationJSONRequestBody defines body for UpdateConversation for application/json ContentType.
+type UpdateConversationJSONRequestBody = ConversationUpdate
+
+// AddConversationMembersJSONRequestBody defines body for AddConversationMembers for application/json ContentType.
+type AddConversationMembersJSONRequestBody AddConversationMembersJSONBody
+
+// UpdateConversationMemberJSONRequestBody defines body for UpdateConversationMember for application/json ContentType.
+type UpdateConversationMemberJSONRequestBody UpdateConversationMemberJSONBody
+
+// SendMessageJSONRequestBody defines body for SendMessage for application/json ContentType.
+type SendMessageJSONRequestBody = MessageCreate
+
+// UpdateMessageJSONRequestBody defines body for UpdateMessage for application/json ContentType.
+type UpdateMessageJSONRequestBody = MessageUpdate
+
+// PutMessageOnFrameJSONRequestBody defines body for PutMessageOnFrame for application/json ContentType.
+type PutMessageOnFrameJSONRequestBody = PutOnFrameRequest
+
+// UpdateConversationPreferencesJSONRequestBody defines body for UpdateConversationPreferences for application/json ContentType.
+type UpdateConversationPreferencesJSONRequestBody = ConversationPreferencesUpdate
+
+// MarkConversationReadJSONRequestBody defines body for MarkConversationRead for application/json ContentType.
+type MarkConversationReadJSONRequestBody MarkConversationReadJSONBody
+
+// SendTypingJSONRequestBody defines body for SendTyping for application/json ContentType.
+type SendTypingJSONRequestBody SendTypingJSONBody
 
 // DeviceAckJSONRequestBody defines body for DeviceAck for application/json ContentType.
 type DeviceAckJSONRequestBody DeviceAckJSONBody
@@ -7733,8 +10615,23 @@ type CreateFeedBirthdayJSONRequestBody = BirthdayPersonCreate
 // UpdateFeedBirthdayJSONRequestBody defines body for UpdateFeedBirthday for application/json ContentType.
 type UpdateFeedBirthdayJSONRequestBody = BirthdayPersonUpdate
 
+// CreateCircleJSONRequestBody defines body for CreateCircle for application/json ContentType.
+type CreateCircleJSONRequestBody = CircleCreate
+
+// UpdateCircleJSONRequestBody defines body for UpdateCircle for application/json ContentType.
+type UpdateCircleJSONRequestBody = CircleUpdate
+
+// AddCircleMembersJSONRequestBody defines body for AddCircleMembers for application/json ContentType.
+type AddCircleMembersJSONRequestBody AddCircleMembersJSONBody
+
+// UpdateCircleMemberJSONRequestBody defines body for UpdateCircleMember for application/json ContentType.
+type UpdateCircleMemberJSONRequestBody UpdateCircleMemberJSONBody
+
 // CreateFeedEmailAddressJSONRequestBody defines body for CreateFeedEmailAddress for application/json ContentType.
 type CreateFeedEmailAddressJSONRequestBody = EmailAddressCreate
+
+// UpdateFeedEngagementJSONRequestBody defines body for UpdateFeedEngagement for application/json ContentType.
+type UpdateFeedEngagementJSONRequestBody = FeedEngagementUpdate
 
 // CreateFeedInviteJSONRequestBody defines body for CreateFeedInvite for application/json ContentType.
 type CreateFeedInviteJSONRequestBody = FeedInviteCreate
@@ -7747,6 +10644,9 @@ type UpdateFeedMemberJSONRequestBody UpdateFeedMemberJSONBody
 
 // UpdateFeedPreferencesJSONRequestBody defines body for UpdateFeedPreferences for application/json ContentType.
 type UpdateFeedPreferencesJSONRequestBody = FeedPreferencesUpdate
+
+// SetFeedPromptJSONRequestBody defines body for SetFeedPrompt for application/json ContentType.
+type SetFeedPromptJSONRequestBody = FeedPromptSet
 
 // RequestSubscriptionJSONRequestBody defines body for RequestSubscription for application/json ContentType.
 type RequestSubscriptionJSONRequestBody = SubscriptionRequest
@@ -7826,11 +10726,20 @@ type StartGoogleImportJSONRequestBody = GoogleImportCreate
 // UpdateItemJSONRequestBody defines body for UpdateItem for application/json ContentType.
 type UpdateItemJSONRequestBody UpdateItemJSONBody
 
+// CreateLinkPreviewJSONRequestBody defines body for CreateLinkPreview for application/json ContentType.
+type CreateLinkPreviewJSONRequestBody CreateLinkPreviewJSONBody
+
 // UpdateMeJSONRequestBody defines body for UpdateMe for application/json ContentType.
 type UpdateMeJSONRequestBody UpdateMeJSONBody
 
+// UpdateMyMilestoneJSONRequestBody defines body for UpdateMyMilestone for application/json ContentType.
+type UpdateMyMilestoneJSONRequestBody UpdateMyMilestoneJSONBody
+
 // RegisterPushEndpointJSONRequestBody defines body for RegisterPushEndpoint for application/json ContentType.
 type RegisterPushEndpointJSONRequestBody = PushEndpointCreate
+
+// UpdateReminderPreferencesJSONRequestBody defines body for UpdateReminderPreferences for application/json ContentType.
+type UpdateReminderPreferencesJSONRequestBody = ReminderPreferencesUpdate
 
 // OperatorSetLimitsJSONRequestBody defines body for OperatorSetLimits for application/json ContentType.
 type OperatorSetLimitsJSONRequestBody = Limits
@@ -7855,6 +10764,33 @@ type ListImmichAlbumsJSONRequestBody = ImmichConnection
 
 // TestPhotoSourceJSONRequestBody defines body for TestPhotoSource for application/json ContentType.
 type TestPhotoSourceJSONRequestBody = PhotoSourceConnection
+
+// CreateCommentJSONRequestBody defines body for CreateComment for application/json ContentType.
+type CreateCommentJSONRequestBody = CommentCreate
+
+// UpdateCommentJSONRequestBody defines body for UpdateComment for application/json ContentType.
+type UpdateCommentJSONRequestBody = CommentUpdate
+
+// SetThreadMuteJSONRequestBody defines body for SetThreadMute for application/json ContentType.
+type SetThreadMuteJSONRequestBody SetThreadMuteJSONBody
+
+// TagPostPromptJSONRequestBody defines body for TagPostPrompt for application/json ContentType.
+type TagPostPromptJSONRequestBody TagPostPromptJSONBody
+
+// MarkThreadReadJSONRequestBody defines body for MarkThreadRead for application/json ContentType.
+type MarkThreadReadJSONRequestBody MarkThreadReadJSONBody
+
+// SetThreadStateJSONRequestBody defines body for SetThreadState for application/json ContentType.
+type SetThreadStateJSONRequestBody SetThreadStateJSONBody
+
+// SetReactionJSONRequestBody defines body for SetReaction for application/json ContentType.
+type SetReactionJSONRequestBody SetReactionJSONBody
+
+// CreateReportJSONRequestBody defines body for CreateReport for application/json ContentType.
+type CreateReportJSONRequestBody = ReportCreate
+
+// ResolveReportJSONRequestBody defines body for ResolveReport for application/json ContentType.
+type ResolveReportJSONRequestBody ResolveReportJSONBody
 
 // CreateSendJSONRequestBody defines body for CreateSend for application/json ContentType.
 type CreateSendJSONRequestBody = SendCreate
@@ -7885,6 +10821,69 @@ type ServerInterface interface {
 
 	// (GET /.well-known/kinframe)
 	GetDiscovery(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/blocks)
+	ListBlocks(w http.ResponseWriter, r *http.Request)
+
+	// (DELETE /v1/blocks/{userId})
+	UnblockUser(w http.ResponseWriter, r *http.Request, userId UserId)
+
+	// (PUT /v1/blocks/{userId})
+	BlockUser(w http.ResponseWriter, r *http.Request, userId UserId)
+
+	// (GET /v1/contacts)
+	ListContacts(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/conversations)
+	ListConversations(w http.ResponseWriter, r *http.Request, params ListConversationsParams)
+
+	// (POST /v1/conversations)
+	CreateConversation(w http.ResponseWriter, r *http.Request, params CreateConversationParams)
+
+	// (GET /v1/conversations/{conversationId})
+	GetConversation(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
+
+	// (PATCH /v1/conversations/{conversationId})
+	UpdateConversation(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
+
+	// (POST /v1/conversations/{conversationId}/members)
+	AddConversationMembers(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
+
+	// (DELETE /v1/conversations/{conversationId}/members/{userId})
+	RemoveConversationMember(w http.ResponseWriter, r *http.Request, conversationId ConversationId, userId UserId)
+
+	// (PATCH /v1/conversations/{conversationId}/members/{userId})
+	UpdateConversationMember(w http.ResponseWriter, r *http.Request, conversationId ConversationId, userId UserId)
+
+	// (GET /v1/conversations/{conversationId}/messages)
+	ListMessages(w http.ResponseWriter, r *http.Request, conversationId ConversationId, params ListMessagesParams)
+
+	// (POST /v1/conversations/{conversationId}/messages)
+	SendMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, params SendMessageParams)
+
+	// (DELETE /v1/conversations/{conversationId}/messages/{messageId})
+	DeleteMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId)
+
+	// (GET /v1/conversations/{conversationId}/messages/{messageId})
+	GetMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId)
+
+	// (PATCH /v1/conversations/{conversationId}/messages/{messageId})
+	UpdateMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId)
+
+	// (POST /v1/conversations/{conversationId}/messages/{messageId}/send)
+	PutMessageOnFrame(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId, params PutMessageOnFrameParams)
+
+	// (DELETE /v1/conversations/{conversationId}/photo)
+	DeleteConversationPhoto(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
+
+	// (PATCH /v1/conversations/{conversationId}/preferences)
+	UpdateConversationPreferences(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
+
+	// (PUT /v1/conversations/{conversationId}/read)
+	MarkConversationRead(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
+
+	// (POST /v1/conversations/{conversationId}/typing)
+	SendTyping(w http.ResponseWriter, r *http.Request, conversationId ConversationId)
 
 	// (POST /v1/device/acks)
 	DeviceAck(w http.ResponseWriter, r *http.Request)
@@ -7930,6 +10929,9 @@ type ServerInterface interface {
 
 	// (DELETE /v1/device/members/{userId})
 	DeviceRemoveMember(w http.ResponseWriter, r *http.Request, userId UserId, params DeviceRemoveMemberParams)
+
+	// (POST /v1/device/photo-requests)
+	DeviceRequestPhotos(w http.ResponseWriter, r *http.Request)
 
 	// (PATCH /v1/device/placements/{placementId})
 	DevicePatchPlacement(w http.ResponseWriter, r *http.Request, placementId PlacementId)
@@ -8057,11 +11059,41 @@ type ServerInterface interface {
 	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
 	RejectFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
 
+	// (GET /v1/feeds/{feedId}/circles)
+	ListCircles(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/feeds/{feedId}/circles)
+	CreateCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateCircleParams)
+
+	// (DELETE /v1/feeds/{feedId}/circles/{circleId})
+	DeleteCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId)
+
+	// (GET /v1/feeds/{feedId}/circles/{circleId})
+	GetCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId)
+
+	// (PATCH /v1/feeds/{feedId}/circles/{circleId})
+	UpdateCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId)
+
+	// (POST /v1/feeds/{feedId}/circles/{circleId}/members)
+	AddCircleMembers(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId)
+
+	// (DELETE /v1/feeds/{feedId}/circles/{circleId}/members/{userId})
+	RemoveCircleMember(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId, userId UserId)
+
+	// (PATCH /v1/feeds/{feedId}/circles/{circleId}/members/{userId})
+	UpdateCircleMember(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId, userId UserId)
+
 	// (GET /v1/feeds/{feedId}/email-addresses)
 	ListFeedEmailAddresses(w http.ResponseWriter, r *http.Request, feedId FeedId)
 
 	// (POST /v1/feeds/{feedId}/email-addresses)
 	CreateFeedEmailAddress(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedEmailAddressParams)
+
+	// (GET /v1/feeds/{feedId}/engagement)
+	GetFeedEngagement(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (PATCH /v1/feeds/{feedId}/engagement)
+	UpdateFeedEngagement(w http.ResponseWriter, r *http.Request, feedId FeedId)
 
 	// (GET /v1/feeds/{feedId}/invites)
 	ListFeedInvites(w http.ResponseWriter, r *http.Request, feedId FeedId)
@@ -8110,6 +11142,24 @@ type ServerInterface interface {
 
 	// (PATCH /v1/feeds/{feedId}/preferences)
 	UpdateFeedPreferences(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId}/prompts)
+	ListFeedPrompts(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (DELETE /v1/feeds/{feedId}/prompts/{weekOf})
+	ResetFeedPrompt(w http.ResponseWriter, r *http.Request, feedId FeedId, weekOf WeekOf)
+
+	// (PUT /v1/feeds/{feedId}/prompts/{weekOf})
+	SetFeedPrompt(w http.ResponseWriter, r *http.Request, feedId FeedId, weekOf WeekOf)
+
+	// (GET /v1/feeds/{feedId}/recaps/{month})
+	GetFeedRecap(w http.ResponseWriter, r *http.Request, feedId FeedId, month string)
+
+	// (GET /v1/feeds/{feedId}/reports)
+	ListFeedReports(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId}/streak)
+	GetFeedStreak(w http.ResponseWriter, r *http.Request, feedId FeedId)
 
 	// (GET /v1/feeds/{feedId}/subscriptions)
 	ListFeedSubscriptions(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedSubscriptionsParams)
@@ -8231,6 +11281,9 @@ type ServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/members/{userId})
 	UpdateMember(w http.ResponseWriter, r *http.Request, frameId FrameId, userId UserId)
 
+	// (GET /v1/frames/{frameId}/photo-requests)
+	ListFramePhotoRequests(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (GET /v1/frames/{frameId}/placements)
 	ListPlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params ListPlacementsParams)
 
@@ -8303,6 +11356,9 @@ type ServerInterface interface {
 	// (PATCH /v1/items/{itemId})
 	UpdateItem(w http.ResponseWriter, r *http.Request, itemId ItemId)
 
+	// (POST /v1/link-previews)
+	CreateLinkPreview(w http.ResponseWriter, r *http.Request)
+
 	// (DELETE /v1/me)
 	DeleteMe(w http.ResponseWriter, r *http.Request, params DeleteMeParams)
 
@@ -8315,6 +11371,18 @@ type ServerInterface interface {
 	// (DELETE /v1/me/avatar)
 	DeleteAvatar(w http.ResponseWriter, r *http.Request)
 
+	// (GET /v1/me/badge)
+	GetBadge(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/me/milestones)
+	ListMyMilestones(w http.ResponseWriter, r *http.Request)
+
+	// (PATCH /v1/me/milestones/{milestoneKey})
+	UpdateMyMilestone(w http.ResponseWriter, r *http.Request, milestoneKey MilestoneKey)
+
+	// (GET /v1/me/on-this-day)
+	GetOnThisDay(w http.ResponseWriter, r *http.Request)
+
 	// (GET /v1/me/push-endpoints)
 	ListPushEndpoints(w http.ResponseWriter, r *http.Request)
 
@@ -8323,6 +11391,12 @@ type ServerInterface interface {
 
 	// (DELETE /v1/me/push-endpoints/{endpointId})
 	DeletePushEndpoint(w http.ResponseWriter, r *http.Request, endpointId EndpointId)
+
+	// (GET /v1/me/reminders)
+	GetReminderPreferences(w http.ResponseWriter, r *http.Request)
+
+	// (PATCH /v1/me/reminders)
+	UpdateReminderPreferences(w http.ResponseWriter, r *http.Request)
 
 	// (DELETE /v1/me/telegram)
 	UnlinkTelegram(w http.ResponseWriter, r *http.Request)
@@ -8333,11 +11407,17 @@ type ServerInterface interface {
 	// (POST /v1/me/telegram/link-code)
 	CreateTelegramLinkCode(w http.ResponseWriter, r *http.Request, params CreateTelegramLinkCodeParams)
 
+	// (GET /v1/me/weekly-summaries/{weekOf})
+	GetWeeklySummary(w http.ResponseWriter, r *http.Request, weekOf WeekOf)
+
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(w http.ResponseWriter, r *http.Request)
 
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/operator/reports)
+	ListOperatorReports(w http.ResponseWriter, r *http.Request, params ListOperatorReportsParams)
 
 	// (GET /v1/operator/reservations)
 	OperatorListReservations(w http.ResponseWriter, r *http.Request, params OperatorListReservationsParams)
@@ -8353,6 +11433,12 @@ type ServerInterface interface {
 
 	// (GET /v1/operator/stats)
 	OperatorStats(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/people/{userId})
+	GetPerson(w http.ResponseWriter, r *http.Request, userId UserId)
+
+	// (GET /v1/photo-requests/{requestId})
+	GetPhotoRequest(w http.ResponseWriter, r *http.Request, requestId RequestId)
 
 	// (GET /v1/photo-sources)
 	ListMyPhotoSources(w http.ResponseWriter, r *http.Request)
@@ -8377,6 +11463,48 @@ type ServerInterface interface {
 
 	// (POST /v1/photo-sources:test)
 	TestPhotoSource(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/posts/{postId})
+	GetPost(w http.ResponseWriter, r *http.Request, postId PostId)
+
+	// (GET /v1/posts/{postId}/comments)
+	ListComments(w http.ResponseWriter, r *http.Request, postId PostId, params ListCommentsParams)
+
+	// (POST /v1/posts/{postId}/comments)
+	CreateComment(w http.ResponseWriter, r *http.Request, postId PostId, params CreateCommentParams)
+
+	// (DELETE /v1/posts/{postId}/comments/{commentId})
+	DeleteComment(w http.ResponseWriter, r *http.Request, postId PostId, commentId CommentId)
+
+	// (PATCH /v1/posts/{postId}/comments/{commentId})
+	UpdateComment(w http.ResponseWriter, r *http.Request, postId PostId, commentId CommentId)
+
+	// (PUT /v1/posts/{postId}/mute)
+	SetThreadMute(w http.ResponseWriter, r *http.Request, postId PostId)
+
+	// (PUT /v1/posts/{postId}/prompt)
+	TagPostPrompt(w http.ResponseWriter, r *http.Request, postId PostId)
+
+	// (PUT /v1/posts/{postId}/read)
+	MarkThreadRead(w http.ResponseWriter, r *http.Request, postId PostId)
+
+	// (PUT /v1/posts/{postId}/thread)
+	SetThreadState(w http.ResponseWriter, r *http.Request, postId PostId)
+
+	// (GET /v1/prompts)
+	ListPromptLibrary(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/reactions/{targetKind}/{targetId})
+	ListReactions(w http.ResponseWriter, r *http.Request, targetKind TargetKind, targetId TargetId, params ListReactionsParams)
+
+	// (PUT /v1/reactions/{targetKind}/{targetId})
+	SetReaction(w http.ResponseWriter, r *http.Request, targetKind TargetKind, targetId TargetId, params SetReactionParams)
+
+	// (POST /v1/reports)
+	CreateReport(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/reports/{reportId}/resolve)
+	ResolveReport(w http.ResponseWriter, r *http.Request, reportId ReportId)
 
 	// (GET /v1/sends)
 	ListMySends(w http.ResponseWriter, r *http.Request, params ListMySendsParams)
@@ -8453,6 +11581,9 @@ type ServerInterface interface {
 	// (GET /v1/telegram-codes/{codeId})
 	GetTelegramCode(w http.ResponseWriter, r *http.Request, codeId Id)
 
+	// (GET /v1/timeline)
+	GetTimeline(w http.ResponseWriter, r *http.Request, params GetTimelineParams)
+
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
 }
@@ -8471,6 +11602,694 @@ func (siw *ServerInterfaceWrapper) GetDiscovery(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetDiscovery(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListBlocks operation middleware
+func (siw *ServerInterfaceWrapper) ListBlocks(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListBlocks(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UnblockUser operation middleware
+func (siw *ServerInterfaceWrapper) UnblockUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UnblockUser(w, r, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// BlockUser operation middleware
+func (siw *ServerInterfaceWrapper) BlockUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.BlockUser(w, r, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListContacts operation middleware
+func (siw *ServerInterfaceWrapper) ListContacts(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListContacts(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListConversations operation middleware
+func (siw *ServerInterfaceWrapper) ListConversations(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListConversationsParams
+
+	// ------------- Optional query parameter "archived" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "archived", r.URL.Query(), &params.Archived, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "archived"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "archived", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListConversations(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateConversation operation middleware
+func (siw *ServerInterfaceWrapper) CreateConversation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateConversationParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateConversation(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetConversation operation middleware
+func (siw *ServerInterfaceWrapper) GetConversation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetConversation(w, r, conversationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateConversation operation middleware
+func (siw *ServerInterfaceWrapper) UpdateConversation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateConversation(w, r, conversationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AddConversationMembers operation middleware
+func (siw *ServerInterfaceWrapper) AddConversationMembers(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddConversationMembers(w, r, conversationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveConversationMember operation middleware
+func (siw *ServerInterfaceWrapper) RemoveConversationMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveConversationMember(w, r, conversationId, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateConversationMember operation middleware
+func (siw *ServerInterfaceWrapper) UpdateConversationMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateConversationMember(w, r, conversationId, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMessages operation middleware
+func (siw *ServerInterfaceWrapper) ListMessages(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListMessagesParams
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "before", r.URL.Query(), &params.Before, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "before"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "before", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "after", r.URL.Query(), &params.After, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "after"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "after", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMessages(w, r, conversationId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SendMessage operation middleware
+func (siw *ServerInterfaceWrapper) SendMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SendMessageParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SendMessage(w, r, conversationId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteMessage operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId MessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteMessage(w, r, conversationId, messageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMessage operation middleware
+func (siw *ServerInterfaceWrapper) GetMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId MessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMessage(w, r, conversationId, messageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateMessage operation middleware
+func (siw *ServerInterfaceWrapper) UpdateMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId MessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateMessage(w, r, conversationId, messageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutMessageOnFrame operation middleware
+func (siw *ServerInterfaceWrapper) PutMessageOnFrame(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId MessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PutMessageOnFrameParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutMessageOnFrame(w, r, conversationId, messageId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteConversationPhoto operation middleware
+func (siw *ServerInterfaceWrapper) DeleteConversationPhoto(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteConversationPhoto(w, r, conversationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateConversationPreferences operation middleware
+func (siw *ServerInterfaceWrapper) UpdateConversationPreferences(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateConversationPreferences(w, r, conversationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// MarkConversationRead operation middleware
+func (siw *ServerInterfaceWrapper) MarkConversationRead(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.MarkConversationRead(w, r, conversationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SendTyping operation middleware
+func (siw *ServerInterfaceWrapper) SendTyping(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId ConversationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", r.PathValue("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "conversationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SendTyping(w, r, conversationId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -8990,6 +12809,20 @@ func (siw *ServerInterfaceWrapper) DeviceRemoveMember(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceRemoveMember(w, r, userId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceRequestPhotos operation middleware
+func (siw *ServerInterfaceWrapper) DeviceRequestPhotos(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceRequestPhotos(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -10294,6 +14127,310 @@ func (siw *ServerInterfaceWrapper) RejectFeedBirthday(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r)
 }
 
+// ListCircles operation middleware
+func (siw *ServerInterfaceWrapper) ListCircles(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListCircles(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateCircle operation middleware
+func (siw *ServerInterfaceWrapper) CreateCircle(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateCircleParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateCircle(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteCircle operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCircle(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "circleId" -------------
+	var circleId CircleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "circleId", r.PathValue("circleId"), &circleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circleId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCircle(w, r, feedId, circleId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetCircle operation middleware
+func (siw *ServerInterfaceWrapper) GetCircle(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "circleId" -------------
+	var circleId CircleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "circleId", r.PathValue("circleId"), &circleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circleId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCircle(w, r, feedId, circleId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateCircle operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCircle(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "circleId" -------------
+	var circleId CircleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "circleId", r.PathValue("circleId"), &circleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circleId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCircle(w, r, feedId, circleId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AddCircleMembers operation middleware
+func (siw *ServerInterfaceWrapper) AddCircleMembers(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "circleId" -------------
+	var circleId CircleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "circleId", r.PathValue("circleId"), &circleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circleId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddCircleMembers(w, r, feedId, circleId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveCircleMember operation middleware
+func (siw *ServerInterfaceWrapper) RemoveCircleMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "circleId" -------------
+	var circleId CircleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "circleId", r.PathValue("circleId"), &circleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circleId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveCircleMember(w, r, feedId, circleId, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateCircleMember operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCircleMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "circleId" -------------
+	var circleId CircleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "circleId", r.PathValue("circleId"), &circleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circleId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCircleMember(w, r, feedId, circleId, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListFeedEmailAddresses operation middleware
 func (siw *ServerInterfaceWrapper) ListFeedEmailAddresses(w http.ResponseWriter, r *http.Request) {
 
@@ -10361,6 +14498,58 @@ func (siw *ServerInterfaceWrapper) CreateFeedEmailAddress(w http.ResponseWriter,
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateFeedEmailAddress(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeedEngagement operation middleware
+func (siw *ServerInterfaceWrapper) GetFeedEngagement(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeedEngagement(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateFeedEngagement operation middleware
+func (siw *ServerInterfaceWrapper) UpdateFeedEngagement(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateFeedEngagement(w, r, feedId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -10949,6 +15138,189 @@ func (siw *ServerInterfaceWrapper) UpdateFeedPreferences(w http.ResponseWriter, 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateFeedPreferences(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedPrompts operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedPrompts(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedPrompts(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ResetFeedPrompt operation middleware
+func (siw *ServerInterfaceWrapper) ResetFeedPrompt(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "weekOf" -------------
+	var weekOf WeekOf
+
+	err = runtime.BindStyledParameterWithOptions("simple", "weekOf", r.PathValue("weekOf"), &weekOf, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "date", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "weekOf", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResetFeedPrompt(w, r, feedId, weekOf)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetFeedPrompt operation middleware
+func (siw *ServerInterfaceWrapper) SetFeedPrompt(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "weekOf" -------------
+	var weekOf WeekOf
+
+	err = runtime.BindStyledParameterWithOptions("simple", "weekOf", r.PathValue("weekOf"), &weekOf, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "date", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "weekOf", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetFeedPrompt(w, r, feedId, weekOf)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeedRecap operation middleware
+func (siw *ServerInterfaceWrapper) GetFeedRecap(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "month" -------------
+	var month string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "month", r.PathValue("month"), &month, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeedRecap(w, r, feedId, month)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedReports operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedReports(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedReports(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeedStreak operation middleware
+func (siw *ServerInterfaceWrapper) GetFeedStreak(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeedStreak(w, r, feedId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -12347,6 +16719,32 @@ func (siw *ServerInterfaceWrapper) UpdateMember(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
+// ListFramePhotoRequests operation middleware
+func (siw *ServerInterfaceWrapper) ListFramePhotoRequests(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFramePhotoRequests(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListPlacements operation middleware
 func (siw *ServerInterfaceWrapper) ListPlacements(w http.ResponseWriter, r *http.Request) {
 
@@ -13246,6 +17644,20 @@ func (siw *ServerInterfaceWrapper) UpdateItem(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
+// CreateLinkPreview operation middleware
+func (siw *ServerInterfaceWrapper) CreateLinkPreview(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateLinkPreview(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // DeleteMe operation middleware
 func (siw *ServerInterfaceWrapper) DeleteMe(w http.ResponseWriter, r *http.Request) {
 
@@ -13321,6 +17733,74 @@ func (siw *ServerInterfaceWrapper) DeleteAvatar(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
+// GetBadge operation middleware
+func (siw *ServerInterfaceWrapper) GetBadge(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetBadge(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMyMilestones operation middleware
+func (siw *ServerInterfaceWrapper) ListMyMilestones(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMyMilestones(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateMyMilestone operation middleware
+func (siw *ServerInterfaceWrapper) UpdateMyMilestone(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "milestoneKey" -------------
+	var milestoneKey MilestoneKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "milestoneKey", r.PathValue("milestoneKey"), &milestoneKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "milestoneKey", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateMyMilestone(w, r, milestoneKey)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetOnThisDay operation middleware
+func (siw *ServerInterfaceWrapper) GetOnThisDay(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetOnThisDay(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListPushEndpoints operation middleware
 func (siw *ServerInterfaceWrapper) ListPushEndpoints(w http.ResponseWriter, r *http.Request) {
 
@@ -13366,6 +17846,34 @@ func (siw *ServerInterfaceWrapper) DeletePushEndpoint(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeletePushEndpoint(w, r, endpointId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetReminderPreferences operation middleware
+func (siw *ServerInterfaceWrapper) GetReminderPreferences(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetReminderPreferences(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateReminderPreferences operation middleware
+func (siw *ServerInterfaceWrapper) UpdateReminderPreferences(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateReminderPreferences(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -13444,6 +17952,32 @@ func (siw *ServerInterfaceWrapper) CreateTelegramLinkCode(w http.ResponseWriter,
 	handler.ServeHTTP(w, r)
 }
 
+// GetWeeklySummary operation middleware
+func (siw *ServerInterfaceWrapper) GetWeeklySummary(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "weekOf" -------------
+	var weekOf WeekOf
+
+	err = runtime.BindStyledParameterWithOptions("simple", "weekOf", r.PathValue("weekOf"), &weekOf, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "date", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "weekOf", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetWeeklySummary(w, r, weekOf)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // OperatorGetLimits operation middleware
 func (siw *ServerInterfaceWrapper) OperatorGetLimits(w http.ResponseWriter, r *http.Request) {
 
@@ -13463,6 +17997,39 @@ func (siw *ServerInterfaceWrapper) OperatorSetLimits(w http.ResponseWriter, r *h
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OperatorSetLimits(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListOperatorReports operation middleware
+func (siw *ServerInterfaceWrapper) ListOperatorReports(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListOperatorReportsParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListOperatorReports(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -13576,6 +18143,58 @@ func (siw *ServerInterfaceWrapper) OperatorStats(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OperatorStats(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPerson operation middleware
+func (siw *ServerInterfaceWrapper) GetPerson(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPerson(w, r, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPhotoRequest operation middleware
+func (siw *ServerInterfaceWrapper) GetPhotoRequest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "requestId" -------------
+	var requestId RequestId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", r.PathValue("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "requestId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPhotoRequest(w, r, requestId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -13779,6 +18398,467 @@ func (siw *ServerInterfaceWrapper) TestPhotoSource(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.TestPhotoSource(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPost operation middleware
+func (siw *ServerInterfaceWrapper) GetPost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPost(w, r, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListComments operation middleware
+func (siw *ServerInterfaceWrapper) ListComments(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListCommentsParams
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "after", r.URL.Query(), &params.After, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "after"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "after", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListComments(w, r, postId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateComment operation middleware
+func (siw *ServerInterfaceWrapper) CreateComment(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateCommentParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateComment(w, r, postId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteComment operation middleware
+func (siw *ServerInterfaceWrapper) DeleteComment(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "commentId" -------------
+	var commentId CommentId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "commentId", r.PathValue("commentId"), &commentId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "commentId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteComment(w, r, postId, commentId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateComment operation middleware
+func (siw *ServerInterfaceWrapper) UpdateComment(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "commentId" -------------
+	var commentId CommentId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "commentId", r.PathValue("commentId"), &commentId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "commentId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateComment(w, r, postId, commentId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetThreadMute operation middleware
+func (siw *ServerInterfaceWrapper) SetThreadMute(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetThreadMute(w, r, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TagPostPrompt operation middleware
+func (siw *ServerInterfaceWrapper) TagPostPrompt(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TagPostPrompt(w, r, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// MarkThreadRead operation middleware
+func (siw *ServerInterfaceWrapper) MarkThreadRead(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.MarkThreadRead(w, r, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetThreadState operation middleware
+func (siw *ServerInterfaceWrapper) SetThreadState(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetThreadState(w, r, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListPromptLibrary operation middleware
+func (siw *ServerInterfaceWrapper) ListPromptLibrary(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPromptLibrary(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListReactions operation middleware
+func (siw *ServerInterfaceWrapper) ListReactions(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "targetKind" -------------
+	var targetKind TargetKind
+
+	err = runtime.BindStyledParameterWithOptions("simple", "targetKind", r.PathValue("targetKind"), &targetKind, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "targetKind", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "targetId" -------------
+	var targetId TargetId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "targetId", r.PathValue("targetId"), &targetId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "targetId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListReactionsParams
+
+	// ------------- Optional query parameter "post_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "post_id", r.URL.Query(), &params.PostId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "post_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "post_id", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListReactions(w, r, targetKind, targetId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetReaction operation middleware
+func (siw *ServerInterfaceWrapper) SetReaction(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "targetKind" -------------
+	var targetKind TargetKind
+
+	err = runtime.BindStyledParameterWithOptions("simple", "targetKind", r.PathValue("targetKind"), &targetKind, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "targetKind", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "targetId" -------------
+	var targetId TargetId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "targetId", r.PathValue("targetId"), &targetId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "targetId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SetReactionParams
+
+	// ------------- Optional query parameter "post_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "post_id", r.URL.Query(), &params.PostId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "post_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "post_id", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetReaction(w, r, targetKind, targetId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateReport operation middleware
+func (siw *ServerInterfaceWrapper) CreateReport(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateReport(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ResolveReport operation middleware
+func (siw *ServerInterfaceWrapper) ResolveReport(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "reportId" -------------
+	var reportId ReportId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "reportId", r.PathValue("reportId"), &reportId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "reportId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResolveReport(w, r, reportId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -14489,6 +19569,104 @@ func (siw *ServerInterfaceWrapper) GetTelegramCode(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// GetTimeline operation middleware
+func (siw *ServerInterfaceWrapper) GetTimeline(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTimelineParams
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "before", r.URL.Query(), &params.Before, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "before"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "before", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "feed_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "feed_id", r.URL.Query(), &params.FeedId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "feed_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feed_id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "circle_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "circle_id", r.URL.Query(), &params.CircleId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "circle_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "circle_id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "prompt_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "prompt_id", r.URL.Query(), &params.PromptId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "prompt_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "prompt_id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "frame_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "frame_id", r.URL.Query(), &params.FrameId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "frame_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frame_id", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTimeline(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetTvSlideshow operation middleware
 func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
 
@@ -14636,6 +19814,27 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/.well-known/kinframe", wrapper.GetDiscovery)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/blocks", wrapper.ListBlocks)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/blocks/{userId}", wrapper.UnblockUser)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/blocks/{userId}", wrapper.BlockUser)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/contacts", wrapper.ListContacts)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/conversations", wrapper.ListConversations)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/conversations", wrapper.CreateConversation)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/conversations/{conversationId}", wrapper.GetConversation)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/conversations/{conversationId}", wrapper.UpdateConversation)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/conversations/{conversationId}/members", wrapper.AddConversationMembers)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/conversations/{conversationId}/members/{userId}", wrapper.RemoveConversationMember)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/conversations/{conversationId}/members/{userId}", wrapper.UpdateConversationMember)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/conversations/{conversationId}/messages", wrapper.ListMessages)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/conversations/{conversationId}/messages", wrapper.SendMessage)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/conversations/{conversationId}/messages/{messageId}", wrapper.DeleteMessage)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/conversations/{conversationId}/messages/{messageId}", wrapper.GetMessage)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/conversations/{conversationId}/messages/{messageId}", wrapper.UpdateMessage)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/conversations/{conversationId}/messages/{messageId}/send", wrapper.PutMessageOnFrame)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/conversations/{conversationId}/photo", wrapper.DeleteConversationPhoto)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/conversations/{conversationId}/preferences", wrapper.UpdateConversationPreferences)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/conversations/{conversationId}/read", wrapper.MarkConversationRead)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/conversations/{conversationId}/typing", wrapper.SendTyping)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/acks", wrapper.DeviceAck)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/birthdays/{birthdayId}/greetings/{date}", wrapper.DeviceGreetBirthday)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/calendar/sync", wrapper.DeviceSyncCalendars)
@@ -14651,6 +19850,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/join-requests", wrapper.DeviceListJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/join-requests/{requestId}", wrapper.DeviceDecideJoin)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/members/{userId}", wrapper.DeviceRemoveMember)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/photo-requests", wrapper.DeviceRequestPhotos)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/placements/{placementId}", wrapper.DevicePatchPlacement)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/placements/{placementId}/reaction", wrapper.DeviceSetReaction)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/placements/{placementId}/replies", wrapper.DeviceSendReply)
@@ -14693,8 +19893,18 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/approve", wrapper.ApproveFeedBirthday)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/photo", wrapper.DeleteFeedBirthdayPhoto)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/reject", wrapper.RejectFeedBirthday)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/circles", wrapper.ListCircles)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/circles", wrapper.CreateCircle)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}", wrapper.DeleteCircle)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}", wrapper.GetCircle)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}", wrapper.UpdateCircle)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}/members", wrapper.AddCircleMembers)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}/members/{userId}", wrapper.RemoveCircleMember)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}/members/{userId}", wrapper.UpdateCircleMember)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/email-addresses", wrapper.ListFeedEmailAddresses)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/email-addresses", wrapper.CreateFeedEmailAddress)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/engagement", wrapper.GetFeedEngagement)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/engagement", wrapper.UpdateFeedEngagement)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/invites", wrapper.ListFeedInvites)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/invites", wrapper.CreateFeedInvite)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/invites/{inviteId}", wrapper.RevokeFeedInvite)
@@ -14711,6 +19921,12 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/posts/{postId}/items/{itemId}", wrapper.RemoveFeedPostItem)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/posts/{postId}/receipts", wrapper.GetFeedPostReceipts)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/preferences", wrapper.UpdateFeedPreferences)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/prompts", wrapper.ListFeedPrompts)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/prompts/{weekOf}", wrapper.ResetFeedPrompt)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/feeds/{feedId}/prompts/{weekOf}", wrapper.SetFeedPrompt)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/recaps/{month}", wrapper.GetFeedRecap)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/reports", wrapper.ListFeedReports)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/streak", wrapper.GetFeedStreak)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.ListFeedSubscriptions)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.RequestSubscription)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/telegram-chats", wrapper.ListFeedTelegramChats)
@@ -14750,6 +19966,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/members", wrapper.ListMembers)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/members/{userId}", wrapper.RemoveMember)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/members/{userId}", wrapper.UpdateMember)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/photo-requests", wrapper.ListFramePhotoRequests)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/placements", wrapper.ListPlacements)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.PurgePlacement)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.UpdatePlacement)
@@ -14775,23 +19992,34 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/invites/{token}", wrapper.PreviewInvite)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/invites/{token}/accept", wrapper.AcceptInvite)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/items/{itemId}", wrapper.UpdateItem)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/link-previews", wrapper.CreateLinkPreview)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me", wrapper.DeleteMe)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me", wrapper.GetMe)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/me", wrapper.UpdateMe)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/avatar", wrapper.DeleteAvatar)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/badge", wrapper.GetBadge)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/milestones", wrapper.ListMyMilestones)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/me/milestones/{milestoneKey}", wrapper.UpdateMyMilestone)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/on-this-day", wrapper.GetOnThisDay)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/push-endpoints", wrapper.ListPushEndpoints)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/me/push-endpoints", wrapper.RegisterPushEndpoint)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/push-endpoints/{endpointId}", wrapper.DeletePushEndpoint)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/reminders", wrapper.GetReminderPreferences)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/me/reminders", wrapper.UpdateReminderPreferences)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/telegram", wrapper.UnlinkTelegram)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/telegram", wrapper.GetTelegramLink)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/me/telegram/link-code", wrapper.CreateTelegramLinkCode)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/weekly-summaries/{weekOf}", wrapper.GetWeeklySummary)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorGetLimits)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reports", wrapper.ListOperatorReports)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/operator/reservations/{reservationId}", wrapper.OperatorUpdateReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/shop/stock", wrapper.OperatorListShopStock)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/shop/stock/{productId}", wrapper.OperatorSetShopStock)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/stats", wrapper.OperatorStats)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/people/{userId}", wrapper.GetPerson)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/photo-requests/{requestId}", wrapper.GetPhotoRequest)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/photo-sources", wrapper.ListMyPhotoSources)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources", wrapper.CreatePhotoSource)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/photo-sources/{sourceId}", wrapper.DeletePhotoSource)
@@ -14800,6 +20028,20 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources/{sourceId}/sync", wrapper.SyncPhotoSource)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources:immich-albums", wrapper.ListImmichAlbums)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources:test", wrapper.TestPhotoSource)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/posts/{postId}", wrapper.GetPost)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/posts/{postId}/comments", wrapper.ListComments)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/posts/{postId}/comments", wrapper.CreateComment)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/posts/{postId}/comments/{commentId}", wrapper.DeleteComment)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/posts/{postId}/comments/{commentId}", wrapper.UpdateComment)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/posts/{postId}/mute", wrapper.SetThreadMute)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/posts/{postId}/prompt", wrapper.TagPostPrompt)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/posts/{postId}/read", wrapper.MarkThreadRead)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/posts/{postId}/thread", wrapper.SetThreadState)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/prompts", wrapper.ListPromptLibrary)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/reactions/{targetKind}/{targetId}", wrapper.ListReactions)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/reactions/{targetKind}/{targetId}", wrapper.SetReaction)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/reports", wrapper.CreateReport)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/reports/{reportId}/resolve", wrapper.ResolveReport)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends", wrapper.ListMySends)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends", wrapper.CreateSend)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.Unsend)
@@ -14825,6 +20067,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/telegram-chats/{chatId}/contributors/{contributorId}", wrapper.UpdateTelegramContributor)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/telegram-codes/{codeId}", wrapper.RevokeTelegramCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/telegram-codes/{codeId}", wrapper.GetTelegramCode)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/timeline", wrapper.GetTimeline)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
@@ -14849,6 +20092,860 @@ func (response GetDiscovery200JSONResponse) VisitGetDiscoveryResponse(w http.Res
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListBlocksRequestObject struct {
+}
+
+type ListBlocksResponseObject interface {
+	VisitListBlocksResponse(w http.ResponseWriter) error
+}
+
+type ListBlocks200JSONResponse []Block
+
+func (response ListBlocks200JSONResponse) VisitListBlocksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListBlocksdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListBlocksdefaultApplicationProblemPlusJSONResponse) VisitListBlocksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UnblockUserRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type UnblockUserResponseObject interface {
+	VisitUnblockUserResponse(w http.ResponseWriter) error
+}
+
+type UnblockUser204Response struct {
+}
+
+func (response UnblockUser204Response) VisitUnblockUserResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type UnblockUserdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UnblockUserdefaultApplicationProblemPlusJSONResponse) VisitUnblockUserResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type BlockUserRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type BlockUserResponseObject interface {
+	VisitBlockUserResponse(w http.ResponseWriter) error
+}
+
+type BlockUser204Response struct {
+}
+
+func (response BlockUser204Response) VisitBlockUserResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type BlockUserdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response BlockUserdefaultApplicationProblemPlusJSONResponse) VisitBlockUserResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListContactsRequestObject struct {
+}
+
+type ListContactsResponseObject interface {
+	VisitListContactsResponse(w http.ResponseWriter) error
+}
+
+type ListContacts200JSONResponse []Person
+
+func (response ListContacts200JSONResponse) VisitListContactsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListContactsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListContactsdefaultApplicationProblemPlusJSONResponse) VisitListContactsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListConversationsRequestObject struct {
+	Params ListConversationsParams
+}
+
+type ListConversationsResponseObject interface {
+	VisitListConversationsResponse(w http.ResponseWriter) error
+}
+
+type ListConversations200JSONResponse []Conversation
+
+func (response ListConversations200JSONResponse) VisitListConversationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListConversationsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListConversationsdefaultApplicationProblemPlusJSONResponse) VisitListConversationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateConversationRequestObject struct {
+	Params CreateConversationParams
+	Body   *CreateConversationJSONRequestBody
+}
+
+type CreateConversationResponseObject interface {
+	VisitCreateConversationResponse(w http.ResponseWriter) error
+}
+
+type CreateConversation200JSONResponse Conversation
+
+func (response CreateConversation200JSONResponse) VisitCreateConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateConversation201JSONResponse Conversation
+
+func (response CreateConversation201JSONResponse) VisitCreateConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateConversation403ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateConversation403ApplicationProblemPlusJSONResponse) VisitCreateConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateConversationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateConversationdefaultApplicationProblemPlusJSONResponse) VisitCreateConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetConversationRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+}
+
+type GetConversationResponseObject interface {
+	VisitGetConversationResponse(w http.ResponseWriter) error
+}
+
+type GetConversation200JSONResponse Conversation
+
+func (response GetConversation200JSONResponse) VisitGetConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetConversationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetConversationdefaultApplicationProblemPlusJSONResponse) VisitGetConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateConversationRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Body           *UpdateConversationJSONRequestBody
+}
+
+type UpdateConversationResponseObject interface {
+	VisitUpdateConversationResponse(w http.ResponseWriter) error
+}
+
+type UpdateConversation200JSONResponse Conversation
+
+func (response UpdateConversation200JSONResponse) VisitUpdateConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateConversationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateConversationdefaultApplicationProblemPlusJSONResponse) VisitUpdateConversationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddConversationMembersRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Body           *AddConversationMembersJSONRequestBody
+}
+
+type AddConversationMembersResponseObject interface {
+	VisitAddConversationMembersResponse(w http.ResponseWriter) error
+}
+
+type AddConversationMembers200JSONResponse Conversation
+
+func (response AddConversationMembers200JSONResponse) VisitAddConversationMembersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddConversationMembersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response AddConversationMembersdefaultApplicationProblemPlusJSONResponse) VisitAddConversationMembersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveConversationMemberRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	UserId         UserId         `json:"userId"`
+}
+
+type RemoveConversationMemberResponseObject interface {
+	VisitRemoveConversationMemberResponse(w http.ResponseWriter) error
+}
+
+type RemoveConversationMember204Response struct {
+}
+
+func (response RemoveConversationMember204Response) VisitRemoveConversationMemberResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveConversationMemberdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveConversationMemberdefaultApplicationProblemPlusJSONResponse) VisitRemoveConversationMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateConversationMemberRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	UserId         UserId         `json:"userId"`
+	Body           *UpdateConversationMemberJSONRequestBody
+}
+
+type UpdateConversationMemberResponseObject interface {
+	VisitUpdateConversationMemberResponse(w http.ResponseWriter) error
+}
+
+type UpdateConversationMember200JSONResponse Conversation
+
+func (response UpdateConversationMember200JSONResponse) VisitUpdateConversationMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateConversationMemberdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateConversationMemberdefaultApplicationProblemPlusJSONResponse) VisitUpdateConversationMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMessagesRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Params         ListMessagesParams
+}
+
+type ListMessagesResponseObject interface {
+	VisitListMessagesResponse(w http.ResponseWriter) error
+}
+
+type ListMessages200JSONResponse MessagePage
+
+func (response ListMessages200JSONResponse) VisitListMessagesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMessagesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListMessagesdefaultApplicationProblemPlusJSONResponse) VisitListMessagesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendMessageRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Params         SendMessageParams
+	Body           *SendMessageJSONRequestBody
+}
+
+type SendMessageResponseObject interface {
+	VisitSendMessageResponse(w http.ResponseWriter) error
+}
+
+type SendMessage201JSONResponse Message
+
+func (response SendMessage201JSONResponse) VisitSendMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendMessage403ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response SendMessage403ApplicationProblemPlusJSONResponse) VisitSendMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendMessage422ApplicationProblemPlusJSONResponse Problem
+
+func (response SendMessage422ApplicationProblemPlusJSONResponse) VisitSendMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SendMessagedefaultApplicationProblemPlusJSONResponse) VisitSendMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteMessageRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	MessageId      MessageId      `json:"messageId"`
+}
+
+type DeleteMessageResponseObject interface {
+	VisitDeleteMessageResponse(w http.ResponseWriter) error
+}
+
+type DeleteMessage204Response struct {
+}
+
+func (response DeleteMessage204Response) VisitDeleteMessageResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteMessagedefaultApplicationProblemPlusJSONResponse) VisitDeleteMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetMessageRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	MessageId      MessageId      `json:"messageId"`
+}
+
+type GetMessageResponseObject interface {
+	VisitGetMessageResponse(w http.ResponseWriter) error
+}
+
+type GetMessage200JSONResponse Message
+
+func (response GetMessage200JSONResponse) VisitGetMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetMessagedefaultApplicationProblemPlusJSONResponse) VisitGetMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateMessageRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	MessageId      MessageId      `json:"messageId"`
+	Body           *UpdateMessageJSONRequestBody
+}
+
+type UpdateMessageResponseObject interface {
+	VisitUpdateMessageResponse(w http.ResponseWriter) error
+}
+
+type UpdateMessage200JSONResponse Message
+
+func (response UpdateMessage200JSONResponse) VisitUpdateMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateMessagedefaultApplicationProblemPlusJSONResponse) VisitUpdateMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutMessageOnFrameRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	MessageId      MessageId      `json:"messageId"`
+	Params         PutMessageOnFrameParams
+	Body           *PutMessageOnFrameJSONRequestBody
+}
+
+type PutMessageOnFrameResponseObject interface {
+	VisitPutMessageOnFrameResponse(w http.ResponseWriter) error
+}
+
+type PutMessageOnFrame202JSONResponse Send
+
+func (response PutMessageOnFrame202JSONResponse) VisitPutMessageOnFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutMessageOnFramedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response PutMessageOnFramedefaultApplicationProblemPlusJSONResponse) VisitPutMessageOnFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteConversationPhotoRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+}
+
+type DeleteConversationPhotoResponseObject interface {
+	VisitDeleteConversationPhotoResponse(w http.ResponseWriter) error
+}
+
+type DeleteConversationPhoto204Response struct {
+}
+
+func (response DeleteConversationPhoto204Response) VisitDeleteConversationPhotoResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteConversationPhotodefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteConversationPhotodefaultApplicationProblemPlusJSONResponse) VisitDeleteConversationPhotoResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateConversationPreferencesRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Body           *UpdateConversationPreferencesJSONRequestBody
+}
+
+type UpdateConversationPreferencesResponseObject interface {
+	VisitUpdateConversationPreferencesResponse(w http.ResponseWriter) error
+}
+
+type UpdateConversationPreferences200JSONResponse Conversation
+
+func (response UpdateConversationPreferences200JSONResponse) VisitUpdateConversationPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateConversationPreferencesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateConversationPreferencesdefaultApplicationProblemPlusJSONResponse) VisitUpdateConversationPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type MarkConversationReadRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Body           *MarkConversationReadJSONRequestBody
+}
+
+type MarkConversationReadResponseObject interface {
+	VisitMarkConversationReadResponse(w http.ResponseWriter) error
+}
+
+type MarkConversationRead204Response struct {
+}
+
+func (response MarkConversationRead204Response) VisitMarkConversationReadResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type MarkConversationReaddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response MarkConversationReaddefaultApplicationProblemPlusJSONResponse) VisitMarkConversationReadResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendTypingRequestObject struct {
+	ConversationId ConversationId `json:"conversationId"`
+	Body           *SendTypingJSONRequestBody
+}
+
+type SendTypingResponseObject interface {
+	VisitSendTypingResponse(w http.ResponseWriter) error
+}
+
+type SendTyping204Response struct {
+}
+
+func (response SendTyping204Response) VisitSendTypingResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type SendTypingdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SendTypingdefaultApplicationProblemPlusJSONResponse) VisitSendTypingResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -15273,6 +21370,58 @@ func (response DeviceRemoveMember403ApplicationProblemPlusJSONResponse) VisitDev
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceRequestPhotosRequestObject struct {
+}
+
+type DeviceRequestPhotosResponseObject interface {
+	VisitDeviceRequestPhotosResponse(w http.ResponseWriter) error
+}
+
+type DeviceRequestPhotos200JSONResponse FramePhotoRequest
+
+func (response DeviceRequestPhotos200JSONResponse) VisitDeviceRequestPhotosResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceRequestPhotos201JSONResponse FramePhotoRequest
+
+func (response DeviceRequestPhotos201JSONResponse) VisitDeviceRequestPhotosResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceRequestPhotosdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceRequestPhotosdefaultApplicationProblemPlusJSONResponse) VisitDeviceRequestPhotosResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -17074,6 +23223,319 @@ func (response RejectFeedBirthdaydefaultApplicationProblemPlusJSONResponse) Visi
 	return err
 }
 
+type ListCirclesRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListCirclesResponseObject interface {
+	VisitListCirclesResponse(w http.ResponseWriter) error
+}
+
+type ListCircles200JSONResponse []Circle
+
+func (response ListCircles200JSONResponse) VisitListCirclesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCirclesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListCirclesdefaultApplicationProblemPlusJSONResponse) VisitListCirclesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCircleRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params CreateCircleParams
+	Body   *CreateCircleJSONRequestBody
+}
+
+type CreateCircleResponseObject interface {
+	VisitCreateCircleResponse(w http.ResponseWriter) error
+}
+
+type CreateCircle201JSONResponse Circle
+
+func (response CreateCircle201JSONResponse) VisitCreateCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCircledefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateCircledefaultApplicationProblemPlusJSONResponse) VisitCreateCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteCircleRequestObject struct {
+	FeedId   FeedId   `json:"feedId"`
+	CircleId CircleId `json:"circleId"`
+}
+
+type DeleteCircleResponseObject interface {
+	VisitDeleteCircleResponse(w http.ResponseWriter) error
+}
+
+type DeleteCircle204Response struct {
+}
+
+func (response DeleteCircle204Response) VisitDeleteCircleResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteCircledefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteCircledefaultApplicationProblemPlusJSONResponse) VisitDeleteCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetCircleRequestObject struct {
+	FeedId   FeedId   `json:"feedId"`
+	CircleId CircleId `json:"circleId"`
+}
+
+type GetCircleResponseObject interface {
+	VisitGetCircleResponse(w http.ResponseWriter) error
+}
+
+type GetCircle200JSONResponse Circle
+
+func (response GetCircle200JSONResponse) VisitGetCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetCircledefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetCircledefaultApplicationProblemPlusJSONResponse) VisitGetCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCircleRequestObject struct {
+	FeedId   FeedId   `json:"feedId"`
+	CircleId CircleId `json:"circleId"`
+	Body     *UpdateCircleJSONRequestBody
+}
+
+type UpdateCircleResponseObject interface {
+	VisitUpdateCircleResponse(w http.ResponseWriter) error
+}
+
+type UpdateCircle200JSONResponse Circle
+
+func (response UpdateCircle200JSONResponse) VisitUpdateCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCircledefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateCircledefaultApplicationProblemPlusJSONResponse) VisitUpdateCircleResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddCircleMembersRequestObject struct {
+	FeedId   FeedId   `json:"feedId"`
+	CircleId CircleId `json:"circleId"`
+	Body     *AddCircleMembersJSONRequestBody
+}
+
+type AddCircleMembersResponseObject interface {
+	VisitAddCircleMembersResponse(w http.ResponseWriter) error
+}
+
+type AddCircleMembers200JSONResponse Circle
+
+func (response AddCircleMembers200JSONResponse) VisitAddCircleMembersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddCircleMembersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response AddCircleMembersdefaultApplicationProblemPlusJSONResponse) VisitAddCircleMembersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveCircleMemberRequestObject struct {
+	FeedId   FeedId   `json:"feedId"`
+	CircleId CircleId `json:"circleId"`
+	UserId   UserId   `json:"userId"`
+}
+
+type RemoveCircleMemberResponseObject interface {
+	VisitRemoveCircleMemberResponse(w http.ResponseWriter) error
+}
+
+type RemoveCircleMember204Response struct {
+}
+
+func (response RemoveCircleMember204Response) VisitRemoveCircleMemberResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveCircleMemberdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveCircleMemberdefaultApplicationProblemPlusJSONResponse) VisitRemoveCircleMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCircleMemberRequestObject struct {
+	FeedId   FeedId   `json:"feedId"`
+	CircleId CircleId `json:"circleId"`
+	UserId   UserId   `json:"userId"`
+	Body     *UpdateCircleMemberJSONRequestBody
+}
+
+type UpdateCircleMemberResponseObject interface {
+	VisitUpdateCircleMemberResponse(w http.ResponseWriter) error
+}
+
+type UpdateCircleMember200JSONResponse Circle
+
+func (response UpdateCircleMember200JSONResponse) VisitUpdateCircleMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCircleMemberdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateCircleMemberdefaultApplicationProblemPlusJSONResponse) VisitUpdateCircleMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListFeedEmailAddressesRequestObject struct {
 	FeedId FeedId `json:"feedId"`
 }
@@ -17201,6 +23663,85 @@ type CreateFeedEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response CreateFeedEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedEngagementRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type GetFeedEngagementResponseObject interface {
+	VisitGetFeedEngagementResponse(w http.ResponseWriter) error
+}
+
+type GetFeedEngagement200JSONResponse FeedEngagement
+
+func (response GetFeedEngagement200JSONResponse) VisitGetFeedEngagementResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedEngagementdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeedEngagementdefaultApplicationProblemPlusJSONResponse) VisitGetFeedEngagementResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedEngagementRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *UpdateFeedEngagementJSONRequestBody
+}
+
+type UpdateFeedEngagementResponseObject interface {
+	VisitUpdateFeedEngagementResponse(w http.ResponseWriter) error
+}
+
+type UpdateFeedEngagement200JSONResponse FeedEngagement
+
+func (response UpdateFeedEngagement200JSONResponse) VisitUpdateFeedEngagementResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedEngagementdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateFeedEngagementdefaultApplicationProblemPlusJSONResponse) VisitUpdateFeedEngagementResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -17825,6 +24366,238 @@ type UpdateFeedPreferencesdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response UpdateFeedPreferencesdefaultApplicationProblemPlusJSONResponse) VisitUpdateFeedPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedPromptsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedPromptsResponseObject interface {
+	VisitListFeedPromptsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedPrompts200JSONResponse []FeedPrompt
+
+func (response ListFeedPrompts200JSONResponse) VisitListFeedPromptsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedPromptsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedPromptsdefaultApplicationProblemPlusJSONResponse) VisitListFeedPromptsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResetFeedPromptRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	WeekOf WeekOf `json:"weekOf"`
+}
+
+type ResetFeedPromptResponseObject interface {
+	VisitResetFeedPromptResponse(w http.ResponseWriter) error
+}
+
+type ResetFeedPrompt204Response struct {
+}
+
+func (response ResetFeedPrompt204Response) VisitResetFeedPromptResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type ResetFeedPromptdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ResetFeedPromptdefaultApplicationProblemPlusJSONResponse) VisitResetFeedPromptResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetFeedPromptRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	WeekOf WeekOf `json:"weekOf"`
+	Body   *SetFeedPromptJSONRequestBody
+}
+
+type SetFeedPromptResponseObject interface {
+	VisitSetFeedPromptResponse(w http.ResponseWriter) error
+}
+
+type SetFeedPrompt200JSONResponse FeedPrompt
+
+func (response SetFeedPrompt200JSONResponse) VisitSetFeedPromptResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetFeedPromptdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SetFeedPromptdefaultApplicationProblemPlusJSONResponse) VisitSetFeedPromptResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedRecapRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Month  string `json:"month"`
+}
+
+type GetFeedRecapResponseObject interface {
+	VisitGetFeedRecapResponse(w http.ResponseWriter) error
+}
+
+type GetFeedRecap200JSONResponse MonthlyRecap
+
+func (response GetFeedRecap200JSONResponse) VisitGetFeedRecapResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedRecapdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeedRecapdefaultApplicationProblemPlusJSONResponse) VisitGetFeedRecapResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedReportsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedReportsResponseObject interface {
+	VisitListFeedReportsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedReports200JSONResponse []Report
+
+func (response ListFeedReports200JSONResponse) VisitListFeedReportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedReportsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedReportsdefaultApplicationProblemPlusJSONResponse) VisitListFeedReportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedStreakRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type GetFeedStreakResponseObject interface {
+	VisitGetFeedStreakResponse(w http.ResponseWriter) error
+}
+
+type GetFeedStreak200JSONResponse FeedStreak
+
+func (response GetFeedStreak200JSONResponse) VisitGetFeedStreakResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedStreakdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeedStreakdefaultApplicationProblemPlusJSONResponse) VisitGetFeedStreakResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -19441,6 +26214,45 @@ func (response UpdateMemberdefaultApplicationProblemPlusJSONResponse) VisitUpdat
 	return err
 }
 
+type ListFramePhotoRequestsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListFramePhotoRequestsResponseObject interface {
+	VisitListFramePhotoRequestsResponse(w http.ResponseWriter) error
+}
+
+type ListFramePhotoRequests200JSONResponse []PhotoRequest
+
+func (response ListFramePhotoRequests200JSONResponse) VisitListFramePhotoRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFramePhotoRequestsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFramePhotoRequestsdefaultApplicationProblemPlusJSONResponse) VisitListFramePhotoRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListPlacementsRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Params  ListPlacementsParams
@@ -20457,6 +27269,45 @@ func (response UpdateItemdefaultApplicationProblemPlusJSONResponse) VisitUpdateI
 	return err
 }
 
+type CreateLinkPreviewRequestObject struct {
+	Body *CreateLinkPreviewJSONRequestBody
+}
+
+type CreateLinkPreviewResponseObject interface {
+	VisitCreateLinkPreviewResponse(w http.ResponseWriter) error
+}
+
+type CreateLinkPreview200JSONResponse LinkPreview
+
+func (response CreateLinkPreview200JSONResponse) VisitCreateLinkPreviewResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateLinkPreviewdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateLinkPreviewdefaultApplicationProblemPlusJSONResponse) VisitCreateLinkPreviewResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type DeleteMeRequestObject struct {
 	Params DeleteMeParams
 }
@@ -20598,6 +27449,160 @@ func (response DeleteAvatar204Response) VisitDeleteAvatarResponse(w http.Respons
 	return nil
 }
 
+type GetBadgeRequestObject struct {
+}
+
+type GetBadgeResponseObject interface {
+	VisitGetBadgeResponse(w http.ResponseWriter) error
+}
+
+type GetBadge200JSONResponse Badge
+
+func (response GetBadge200JSONResponse) VisitGetBadgeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetBadgedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetBadgedefaultApplicationProblemPlusJSONResponse) VisitGetBadgeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyMilestonesRequestObject struct {
+}
+
+type ListMyMilestonesResponseObject interface {
+	VisitListMyMilestonesResponse(w http.ResponseWriter) error
+}
+
+type ListMyMilestones200JSONResponse []Milestone
+
+func (response ListMyMilestones200JSONResponse) VisitListMyMilestonesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyMilestonesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListMyMilestonesdefaultApplicationProblemPlusJSONResponse) VisitListMyMilestonesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateMyMilestoneRequestObject struct {
+	MilestoneKey MilestoneKey `json:"milestoneKey"`
+	Body         *UpdateMyMilestoneJSONRequestBody
+}
+
+type UpdateMyMilestoneResponseObject interface {
+	VisitUpdateMyMilestoneResponse(w http.ResponseWriter) error
+}
+
+type UpdateMyMilestone200JSONResponse Milestone
+
+func (response UpdateMyMilestone200JSONResponse) VisitUpdateMyMilestoneResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateMyMilestonedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateMyMilestonedefaultApplicationProblemPlusJSONResponse) VisitUpdateMyMilestoneResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetOnThisDayRequestObject struct {
+}
+
+type GetOnThisDayResponseObject interface {
+	VisitGetOnThisDayResponse(w http.ResponseWriter) error
+}
+
+type GetOnThisDay200JSONResponse OnThisDay
+
+func (response GetOnThisDay200JSONResponse) VisitGetOnThisDayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetOnThisDaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetOnThisDaydefaultApplicationProblemPlusJSONResponse) VisitGetOnThisDayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListPushEndpointsRequestObject struct {
 }
 
@@ -20672,6 +27677,83 @@ type DeletePushEndpoint204Response struct {
 func (response DeletePushEndpoint204Response) VisitDeletePushEndpointResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
+}
+
+type GetReminderPreferencesRequestObject struct {
+}
+
+type GetReminderPreferencesResponseObject interface {
+	VisitGetReminderPreferencesResponse(w http.ResponseWriter) error
+}
+
+type GetReminderPreferences200JSONResponse ReminderPreferences
+
+func (response GetReminderPreferences200JSONResponse) VisitGetReminderPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetReminderPreferencesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetReminderPreferencesdefaultApplicationProblemPlusJSONResponse) VisitGetReminderPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateReminderPreferencesRequestObject struct {
+	Body *UpdateReminderPreferencesJSONRequestBody
+}
+
+type UpdateReminderPreferencesResponseObject interface {
+	VisitUpdateReminderPreferencesResponse(w http.ResponseWriter) error
+}
+
+type UpdateReminderPreferences200JSONResponse ReminderPreferences
+
+func (response UpdateReminderPreferences200JSONResponse) VisitUpdateReminderPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateReminderPreferencesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateReminderPreferencesdefaultApplicationProblemPlusJSONResponse) VisitUpdateReminderPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type UnlinkTelegramRequestObject struct {
@@ -20783,6 +27865,45 @@ func (response CreateTelegramLinkCodedefaultApplicationProblemPlusJSONResponse) 
 	return err
 }
 
+type GetWeeklySummaryRequestObject struct {
+	WeekOf WeekOf `json:"weekOf"`
+}
+
+type GetWeeklySummaryResponseObject interface {
+	VisitGetWeeklySummaryResponse(w http.ResponseWriter) error
+}
+
+type GetWeeklySummary200JSONResponse WeeklySummary
+
+func (response GetWeeklySummary200JSONResponse) VisitGetWeeklySummaryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetWeeklySummarydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetWeeklySummarydefaultApplicationProblemPlusJSONResponse) VisitGetWeeklySummaryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type OperatorGetLimitsRequestObject struct {
 }
 
@@ -20822,6 +27943,45 @@ func (response OperatorSetLimits200JSONResponse) VisitOperatorSetLimitsResponse(
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListOperatorReportsRequestObject struct {
+	Params ListOperatorReportsParams
+}
+
+type ListOperatorReportsResponseObject interface {
+	VisitListOperatorReportsResponse(w http.ResponseWriter) error
+}
+
+type ListOperatorReports200JSONResponse []Report
+
+func (response ListOperatorReports200JSONResponse) VisitListOperatorReportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListOperatorReportsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListOperatorReportsdefaultApplicationProblemPlusJSONResponse) VisitListOperatorReportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -21022,6 +28182,84 @@ func (response OperatorStats200JSONResponse) VisitOperatorStatsResponse(w http.R
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPersonRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type GetPersonResponseObject interface {
+	VisitGetPersonResponse(w http.ResponseWriter) error
+}
+
+type GetPerson200JSONResponse Person
+
+func (response GetPerson200JSONResponse) VisitGetPersonResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPersondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetPersondefaultApplicationProblemPlusJSONResponse) VisitGetPersonResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPhotoRequestRequestObject struct {
+	RequestId RequestId `json:"requestId"`
+}
+
+type GetPhotoRequestResponseObject interface {
+	VisitGetPhotoRequestResponse(w http.ResponseWriter) error
+}
+
+type GetPhotoRequest200JSONResponse PhotoRequest
+
+func (response GetPhotoRequest200JSONResponse) VisitGetPhotoRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPhotoRequestdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetPhotoRequestdefaultApplicationProblemPlusJSONResponse) VisitGetPhotoRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -21488,6 +28726,581 @@ type TestPhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response TestPhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitTestPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPostRequestObject struct {
+	PostId PostId `json:"postId"`
+}
+
+type GetPostResponseObject interface {
+	VisitGetPostResponse(w http.ResponseWriter) error
+}
+
+type GetPost200JSONResponse TimelinePost
+
+func (response GetPost200JSONResponse) VisitGetPostResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPostdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetPostdefaultApplicationProblemPlusJSONResponse) VisitGetPostResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCommentsRequestObject struct {
+	PostId PostId `json:"postId"`
+	Params ListCommentsParams
+}
+
+type ListCommentsResponseObject interface {
+	VisitListCommentsResponse(w http.ResponseWriter) error
+}
+
+type ListComments200JSONResponse CommentPage
+
+func (response ListComments200JSONResponse) VisitListCommentsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCommentsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListCommentsdefaultApplicationProblemPlusJSONResponse) VisitListCommentsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCommentRequestObject struct {
+	PostId PostId `json:"postId"`
+	Params CreateCommentParams
+	Body   *CreateCommentJSONRequestBody
+}
+
+type CreateCommentResponseObject interface {
+	VisitCreateCommentResponse(w http.ResponseWriter) error
+}
+
+type CreateComment201JSONResponse Comment
+
+func (response CreateComment201JSONResponse) VisitCreateCommentResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateComment409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateComment409ApplicationProblemPlusJSONResponse) VisitCreateCommentResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCommentdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateCommentdefaultApplicationProblemPlusJSONResponse) VisitCreateCommentResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteCommentRequestObject struct {
+	PostId    PostId    `json:"postId"`
+	CommentId CommentId `json:"commentId"`
+}
+
+type DeleteCommentResponseObject interface {
+	VisitDeleteCommentResponse(w http.ResponseWriter) error
+}
+
+type DeleteComment204Response struct {
+}
+
+func (response DeleteComment204Response) VisitDeleteCommentResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteCommentdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteCommentdefaultApplicationProblemPlusJSONResponse) VisitDeleteCommentResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCommentRequestObject struct {
+	PostId    PostId    `json:"postId"`
+	CommentId CommentId `json:"commentId"`
+	Body      *UpdateCommentJSONRequestBody
+}
+
+type UpdateCommentResponseObject interface {
+	VisitUpdateCommentResponse(w http.ResponseWriter) error
+}
+
+type UpdateComment200JSONResponse Comment
+
+func (response UpdateComment200JSONResponse) VisitUpdateCommentResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCommentdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateCommentdefaultApplicationProblemPlusJSONResponse) VisitUpdateCommentResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetThreadMuteRequestObject struct {
+	PostId PostId `json:"postId"`
+	Body   *SetThreadMuteJSONRequestBody
+}
+
+type SetThreadMuteResponseObject interface {
+	VisitSetThreadMuteResponse(w http.ResponseWriter) error
+}
+
+type SetThreadMute204Response struct {
+}
+
+func (response SetThreadMute204Response) VisitSetThreadMuteResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type SetThreadMutedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SetThreadMutedefaultApplicationProblemPlusJSONResponse) VisitSetThreadMuteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TagPostPromptRequestObject struct {
+	PostId PostId `json:"postId"`
+	Body   *TagPostPromptJSONRequestBody
+}
+
+type TagPostPromptResponseObject interface {
+	VisitTagPostPromptResponse(w http.ResponseWriter) error
+}
+
+type TagPostPrompt200JSONResponse TimelinePost
+
+func (response TagPostPrompt200JSONResponse) VisitTagPostPromptResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TagPostPromptdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TagPostPromptdefaultApplicationProblemPlusJSONResponse) VisitTagPostPromptResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type MarkThreadReadRequestObject struct {
+	PostId PostId `json:"postId"`
+	Body   *MarkThreadReadJSONRequestBody
+}
+
+type MarkThreadReadResponseObject interface {
+	VisitMarkThreadReadResponse(w http.ResponseWriter) error
+}
+
+type MarkThreadRead204Response struct {
+}
+
+func (response MarkThreadRead204Response) VisitMarkThreadReadResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type MarkThreadReaddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response MarkThreadReaddefaultApplicationProblemPlusJSONResponse) VisitMarkThreadReadResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetThreadStateRequestObject struct {
+	PostId PostId `json:"postId"`
+	Body   *SetThreadStateJSONRequestBody
+}
+
+type SetThreadStateResponseObject interface {
+	VisitSetThreadStateResponse(w http.ResponseWriter) error
+}
+
+type SetThreadState200JSONResponse ThreadSummary
+
+func (response SetThreadState200JSONResponse) VisitSetThreadStateResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetThreadStatedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SetThreadStatedefaultApplicationProblemPlusJSONResponse) VisitSetThreadStateResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListPromptLibraryRequestObject struct {
+}
+
+type ListPromptLibraryResponseObject interface {
+	VisitListPromptLibraryResponse(w http.ResponseWriter) error
+}
+
+type ListPromptLibrary200JSONResponse []PromptLibraryEntry
+
+func (response ListPromptLibrary200JSONResponse) VisitListPromptLibraryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListPromptLibrarydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListPromptLibrarydefaultApplicationProblemPlusJSONResponse) VisitListPromptLibraryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListReactionsRequestObject struct {
+	TargetKind TargetKind `json:"targetKind"`
+	TargetId   TargetId   `json:"targetId"`
+	Params     ListReactionsParams
+}
+
+type ListReactionsResponseObject interface {
+	VisitListReactionsResponse(w http.ResponseWriter) error
+}
+
+type ListReactions200JSONResponse ReactionList
+
+func (response ListReactions200JSONResponse) VisitListReactionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListReactionsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListReactionsdefaultApplicationProblemPlusJSONResponse) VisitListReactionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetReactionRequestObject struct {
+	TargetKind TargetKind `json:"targetKind"`
+	TargetId   TargetId   `json:"targetId"`
+	Params     SetReactionParams
+	Body       *SetReactionJSONRequestBody
+}
+
+type SetReactionResponseObject interface {
+	VisitSetReactionResponse(w http.ResponseWriter) error
+}
+
+type SetReaction200JSONResponse ReactionSummary
+
+func (response SetReaction200JSONResponse) VisitSetReactionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetReactiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SetReactiondefaultApplicationProblemPlusJSONResponse) VisitSetReactionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateReportRequestObject struct {
+	Body *CreateReportJSONRequestBody
+}
+
+type CreateReportResponseObject interface {
+	VisitCreateReportResponse(w http.ResponseWriter) error
+}
+
+type CreateReport201JSONResponse Report
+
+func (response CreateReport201JSONResponse) VisitCreateReportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateReportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateReportdefaultApplicationProblemPlusJSONResponse) VisitCreateReportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResolveReportRequestObject struct {
+	ReportId ReportId `json:"reportId"`
+	Body     *ResolveReportJSONRequestBody
+}
+
+type ResolveReportResponseObject interface {
+	VisitResolveReportResponse(w http.ResponseWriter) error
+}
+
+type ResolveReport200JSONResponse Report
+
+func (response ResolveReport200JSONResponse) VisitResolveReportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResolveReport409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ResolveReport409ApplicationProblemPlusJSONResponse) VisitResolveReportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResolveReportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ResolveReportdefaultApplicationProblemPlusJSONResponse) VisitResolveReportResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -22543,6 +30356,45 @@ func (response GetTelegramCodedefaultApplicationProblemPlusJSONResponse) VisitGe
 	return err
 }
 
+type GetTimelineRequestObject struct {
+	Params GetTimelineParams
+}
+
+type GetTimelineResponseObject interface {
+	VisitGetTimelineResponse(w http.ResponseWriter) error
+}
+
+type GetTimeline200JSONResponse TimelinePage
+
+func (response GetTimeline200JSONResponse) VisitGetTimelineResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTimelinedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetTimelinedefaultApplicationProblemPlusJSONResponse) VisitGetTimelineResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetTvSlideshowRequestObject struct {
 	Token string `json:"token"`
 }
@@ -22588,6 +30440,69 @@ type StrictServerInterface interface {
 	// (GET /.well-known/kinframe)
 	GetDiscovery(ctx context.Context, request GetDiscoveryRequestObject) (GetDiscoveryResponseObject, error)
 
+	// (GET /v1/blocks)
+	ListBlocks(ctx context.Context, request ListBlocksRequestObject) (ListBlocksResponseObject, error)
+
+	// (DELETE /v1/blocks/{userId})
+	UnblockUser(ctx context.Context, request UnblockUserRequestObject) (UnblockUserResponseObject, error)
+
+	// (PUT /v1/blocks/{userId})
+	BlockUser(ctx context.Context, request BlockUserRequestObject) (BlockUserResponseObject, error)
+
+	// (GET /v1/contacts)
+	ListContacts(ctx context.Context, request ListContactsRequestObject) (ListContactsResponseObject, error)
+
+	// (GET /v1/conversations)
+	ListConversations(ctx context.Context, request ListConversationsRequestObject) (ListConversationsResponseObject, error)
+
+	// (POST /v1/conversations)
+	CreateConversation(ctx context.Context, request CreateConversationRequestObject) (CreateConversationResponseObject, error)
+
+	// (GET /v1/conversations/{conversationId})
+	GetConversation(ctx context.Context, request GetConversationRequestObject) (GetConversationResponseObject, error)
+
+	// (PATCH /v1/conversations/{conversationId})
+	UpdateConversation(ctx context.Context, request UpdateConversationRequestObject) (UpdateConversationResponseObject, error)
+
+	// (POST /v1/conversations/{conversationId}/members)
+	AddConversationMembers(ctx context.Context, request AddConversationMembersRequestObject) (AddConversationMembersResponseObject, error)
+
+	// (DELETE /v1/conversations/{conversationId}/members/{userId})
+	RemoveConversationMember(ctx context.Context, request RemoveConversationMemberRequestObject) (RemoveConversationMemberResponseObject, error)
+
+	// (PATCH /v1/conversations/{conversationId}/members/{userId})
+	UpdateConversationMember(ctx context.Context, request UpdateConversationMemberRequestObject) (UpdateConversationMemberResponseObject, error)
+
+	// (GET /v1/conversations/{conversationId}/messages)
+	ListMessages(ctx context.Context, request ListMessagesRequestObject) (ListMessagesResponseObject, error)
+
+	// (POST /v1/conversations/{conversationId}/messages)
+	SendMessage(ctx context.Context, request SendMessageRequestObject) (SendMessageResponseObject, error)
+
+	// (DELETE /v1/conversations/{conversationId}/messages/{messageId})
+	DeleteMessage(ctx context.Context, request DeleteMessageRequestObject) (DeleteMessageResponseObject, error)
+
+	// (GET /v1/conversations/{conversationId}/messages/{messageId})
+	GetMessage(ctx context.Context, request GetMessageRequestObject) (GetMessageResponseObject, error)
+
+	// (PATCH /v1/conversations/{conversationId}/messages/{messageId})
+	UpdateMessage(ctx context.Context, request UpdateMessageRequestObject) (UpdateMessageResponseObject, error)
+
+	// (POST /v1/conversations/{conversationId}/messages/{messageId}/send)
+	PutMessageOnFrame(ctx context.Context, request PutMessageOnFrameRequestObject) (PutMessageOnFrameResponseObject, error)
+
+	// (DELETE /v1/conversations/{conversationId}/photo)
+	DeleteConversationPhoto(ctx context.Context, request DeleteConversationPhotoRequestObject) (DeleteConversationPhotoResponseObject, error)
+
+	// (PATCH /v1/conversations/{conversationId}/preferences)
+	UpdateConversationPreferences(ctx context.Context, request UpdateConversationPreferencesRequestObject) (UpdateConversationPreferencesResponseObject, error)
+
+	// (PUT /v1/conversations/{conversationId}/read)
+	MarkConversationRead(ctx context.Context, request MarkConversationReadRequestObject) (MarkConversationReadResponseObject, error)
+
+	// (POST /v1/conversations/{conversationId}/typing)
+	SendTyping(ctx context.Context, request SendTypingRequestObject) (SendTypingResponseObject, error)
+
 	// (POST /v1/device/acks)
 	DeviceAck(ctx context.Context, request DeviceAckRequestObject) (DeviceAckResponseObject, error)
 
@@ -22632,6 +30547,9 @@ type StrictServerInterface interface {
 
 	// (DELETE /v1/device/members/{userId})
 	DeviceRemoveMember(ctx context.Context, request DeviceRemoveMemberRequestObject) (DeviceRemoveMemberResponseObject, error)
+
+	// (POST /v1/device/photo-requests)
+	DeviceRequestPhotos(ctx context.Context, request DeviceRequestPhotosRequestObject) (DeviceRequestPhotosResponseObject, error)
 
 	// (PATCH /v1/device/placements/{placementId})
 	DevicePatchPlacement(ctx context.Context, request DevicePatchPlacementRequestObject) (DevicePatchPlacementResponseObject, error)
@@ -22759,11 +30677,41 @@ type StrictServerInterface interface {
 	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
 	RejectFeedBirthday(ctx context.Context, request RejectFeedBirthdayRequestObject) (RejectFeedBirthdayResponseObject, error)
 
+	// (GET /v1/feeds/{feedId}/circles)
+	ListCircles(ctx context.Context, request ListCirclesRequestObject) (ListCirclesResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/circles)
+	CreateCircle(ctx context.Context, request CreateCircleRequestObject) (CreateCircleResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/circles/{circleId})
+	DeleteCircle(ctx context.Context, request DeleteCircleRequestObject) (DeleteCircleResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/circles/{circleId})
+	GetCircle(ctx context.Context, request GetCircleRequestObject) (GetCircleResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId}/circles/{circleId})
+	UpdateCircle(ctx context.Context, request UpdateCircleRequestObject) (UpdateCircleResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/circles/{circleId}/members)
+	AddCircleMembers(ctx context.Context, request AddCircleMembersRequestObject) (AddCircleMembersResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/circles/{circleId}/members/{userId})
+	RemoveCircleMember(ctx context.Context, request RemoveCircleMemberRequestObject) (RemoveCircleMemberResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId}/circles/{circleId}/members/{userId})
+	UpdateCircleMember(ctx context.Context, request UpdateCircleMemberRequestObject) (UpdateCircleMemberResponseObject, error)
+
 	// (GET /v1/feeds/{feedId}/email-addresses)
 	ListFeedEmailAddresses(ctx context.Context, request ListFeedEmailAddressesRequestObject) (ListFeedEmailAddressesResponseObject, error)
 
 	// (POST /v1/feeds/{feedId}/email-addresses)
 	CreateFeedEmailAddress(ctx context.Context, request CreateFeedEmailAddressRequestObject) (CreateFeedEmailAddressResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/engagement)
+	GetFeedEngagement(ctx context.Context, request GetFeedEngagementRequestObject) (GetFeedEngagementResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId}/engagement)
+	UpdateFeedEngagement(ctx context.Context, request UpdateFeedEngagementRequestObject) (UpdateFeedEngagementResponseObject, error)
 
 	// (GET /v1/feeds/{feedId}/invites)
 	ListFeedInvites(ctx context.Context, request ListFeedInvitesRequestObject) (ListFeedInvitesResponseObject, error)
@@ -22812,6 +30760,24 @@ type StrictServerInterface interface {
 
 	// (PATCH /v1/feeds/{feedId}/preferences)
 	UpdateFeedPreferences(ctx context.Context, request UpdateFeedPreferencesRequestObject) (UpdateFeedPreferencesResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/prompts)
+	ListFeedPrompts(ctx context.Context, request ListFeedPromptsRequestObject) (ListFeedPromptsResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/prompts/{weekOf})
+	ResetFeedPrompt(ctx context.Context, request ResetFeedPromptRequestObject) (ResetFeedPromptResponseObject, error)
+
+	// (PUT /v1/feeds/{feedId}/prompts/{weekOf})
+	SetFeedPrompt(ctx context.Context, request SetFeedPromptRequestObject) (SetFeedPromptResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/recaps/{month})
+	GetFeedRecap(ctx context.Context, request GetFeedRecapRequestObject) (GetFeedRecapResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/reports)
+	ListFeedReports(ctx context.Context, request ListFeedReportsRequestObject) (ListFeedReportsResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/streak)
+	GetFeedStreak(ctx context.Context, request GetFeedStreakRequestObject) (GetFeedStreakResponseObject, error)
 
 	// (GET /v1/feeds/{feedId}/subscriptions)
 	ListFeedSubscriptions(ctx context.Context, request ListFeedSubscriptionsRequestObject) (ListFeedSubscriptionsResponseObject, error)
@@ -22933,6 +30899,9 @@ type StrictServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/members/{userId})
 	UpdateMember(ctx context.Context, request UpdateMemberRequestObject) (UpdateMemberResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/photo-requests)
+	ListFramePhotoRequests(ctx context.Context, request ListFramePhotoRequestsRequestObject) (ListFramePhotoRequestsResponseObject, error)
+
 	// (GET /v1/frames/{frameId}/placements)
 	ListPlacements(ctx context.Context, request ListPlacementsRequestObject) (ListPlacementsResponseObject, error)
 
@@ -23005,6 +30974,9 @@ type StrictServerInterface interface {
 	// (PATCH /v1/items/{itemId})
 	UpdateItem(ctx context.Context, request UpdateItemRequestObject) (UpdateItemResponseObject, error)
 
+	// (POST /v1/link-previews)
+	CreateLinkPreview(ctx context.Context, request CreateLinkPreviewRequestObject) (CreateLinkPreviewResponseObject, error)
+
 	// (DELETE /v1/me)
 	DeleteMe(ctx context.Context, request DeleteMeRequestObject) (DeleteMeResponseObject, error)
 
@@ -23017,6 +30989,18 @@ type StrictServerInterface interface {
 	// (DELETE /v1/me/avatar)
 	DeleteAvatar(ctx context.Context, request DeleteAvatarRequestObject) (DeleteAvatarResponseObject, error)
 
+	// (GET /v1/me/badge)
+	GetBadge(ctx context.Context, request GetBadgeRequestObject) (GetBadgeResponseObject, error)
+
+	// (GET /v1/me/milestones)
+	ListMyMilestones(ctx context.Context, request ListMyMilestonesRequestObject) (ListMyMilestonesResponseObject, error)
+
+	// (PATCH /v1/me/milestones/{milestoneKey})
+	UpdateMyMilestone(ctx context.Context, request UpdateMyMilestoneRequestObject) (UpdateMyMilestoneResponseObject, error)
+
+	// (GET /v1/me/on-this-day)
+	GetOnThisDay(ctx context.Context, request GetOnThisDayRequestObject) (GetOnThisDayResponseObject, error)
+
 	// (GET /v1/me/push-endpoints)
 	ListPushEndpoints(ctx context.Context, request ListPushEndpointsRequestObject) (ListPushEndpointsResponseObject, error)
 
@@ -23025,6 +31009,12 @@ type StrictServerInterface interface {
 
 	// (DELETE /v1/me/push-endpoints/{endpointId})
 	DeletePushEndpoint(ctx context.Context, request DeletePushEndpointRequestObject) (DeletePushEndpointResponseObject, error)
+
+	// (GET /v1/me/reminders)
+	GetReminderPreferences(ctx context.Context, request GetReminderPreferencesRequestObject) (GetReminderPreferencesResponseObject, error)
+
+	// (PATCH /v1/me/reminders)
+	UpdateReminderPreferences(ctx context.Context, request UpdateReminderPreferencesRequestObject) (UpdateReminderPreferencesResponseObject, error)
 
 	// (DELETE /v1/me/telegram)
 	UnlinkTelegram(ctx context.Context, request UnlinkTelegramRequestObject) (UnlinkTelegramResponseObject, error)
@@ -23035,11 +31025,17 @@ type StrictServerInterface interface {
 	// (POST /v1/me/telegram/link-code)
 	CreateTelegramLinkCode(ctx context.Context, request CreateTelegramLinkCodeRequestObject) (CreateTelegramLinkCodeResponseObject, error)
 
+	// (GET /v1/me/weekly-summaries/{weekOf})
+	GetWeeklySummary(ctx context.Context, request GetWeeklySummaryRequestObject) (GetWeeklySummaryResponseObject, error)
+
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(ctx context.Context, request OperatorGetLimitsRequestObject) (OperatorGetLimitsResponseObject, error)
 
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(ctx context.Context, request OperatorSetLimitsRequestObject) (OperatorSetLimitsResponseObject, error)
+
+	// (GET /v1/operator/reports)
+	ListOperatorReports(ctx context.Context, request ListOperatorReportsRequestObject) (ListOperatorReportsResponseObject, error)
 
 	// (GET /v1/operator/reservations)
 	OperatorListReservations(ctx context.Context, request OperatorListReservationsRequestObject) (OperatorListReservationsResponseObject, error)
@@ -23055,6 +31051,12 @@ type StrictServerInterface interface {
 
 	// (GET /v1/operator/stats)
 	OperatorStats(ctx context.Context, request OperatorStatsRequestObject) (OperatorStatsResponseObject, error)
+
+	// (GET /v1/people/{userId})
+	GetPerson(ctx context.Context, request GetPersonRequestObject) (GetPersonResponseObject, error)
+
+	// (GET /v1/photo-requests/{requestId})
+	GetPhotoRequest(ctx context.Context, request GetPhotoRequestRequestObject) (GetPhotoRequestResponseObject, error)
 
 	// (GET /v1/photo-sources)
 	ListMyPhotoSources(ctx context.Context, request ListMyPhotoSourcesRequestObject) (ListMyPhotoSourcesResponseObject, error)
@@ -23079,6 +31081,48 @@ type StrictServerInterface interface {
 
 	// (POST /v1/photo-sources:test)
 	TestPhotoSource(ctx context.Context, request TestPhotoSourceRequestObject) (TestPhotoSourceResponseObject, error)
+
+	// (GET /v1/posts/{postId})
+	GetPost(ctx context.Context, request GetPostRequestObject) (GetPostResponseObject, error)
+
+	// (GET /v1/posts/{postId}/comments)
+	ListComments(ctx context.Context, request ListCommentsRequestObject) (ListCommentsResponseObject, error)
+
+	// (POST /v1/posts/{postId}/comments)
+	CreateComment(ctx context.Context, request CreateCommentRequestObject) (CreateCommentResponseObject, error)
+
+	// (DELETE /v1/posts/{postId}/comments/{commentId})
+	DeleteComment(ctx context.Context, request DeleteCommentRequestObject) (DeleteCommentResponseObject, error)
+
+	// (PATCH /v1/posts/{postId}/comments/{commentId})
+	UpdateComment(ctx context.Context, request UpdateCommentRequestObject) (UpdateCommentResponseObject, error)
+
+	// (PUT /v1/posts/{postId}/mute)
+	SetThreadMute(ctx context.Context, request SetThreadMuteRequestObject) (SetThreadMuteResponseObject, error)
+
+	// (PUT /v1/posts/{postId}/prompt)
+	TagPostPrompt(ctx context.Context, request TagPostPromptRequestObject) (TagPostPromptResponseObject, error)
+
+	// (PUT /v1/posts/{postId}/read)
+	MarkThreadRead(ctx context.Context, request MarkThreadReadRequestObject) (MarkThreadReadResponseObject, error)
+
+	// (PUT /v1/posts/{postId}/thread)
+	SetThreadState(ctx context.Context, request SetThreadStateRequestObject) (SetThreadStateResponseObject, error)
+
+	// (GET /v1/prompts)
+	ListPromptLibrary(ctx context.Context, request ListPromptLibraryRequestObject) (ListPromptLibraryResponseObject, error)
+
+	// (GET /v1/reactions/{targetKind}/{targetId})
+	ListReactions(ctx context.Context, request ListReactionsRequestObject) (ListReactionsResponseObject, error)
+
+	// (PUT /v1/reactions/{targetKind}/{targetId})
+	SetReaction(ctx context.Context, request SetReactionRequestObject) (SetReactionResponseObject, error)
+
+	// (POST /v1/reports)
+	CreateReport(ctx context.Context, request CreateReportRequestObject) (CreateReportResponseObject, error)
+
+	// (POST /v1/reports/{reportId}/resolve)
+	ResolveReport(ctx context.Context, request ResolveReportRequestObject) (ResolveReportResponseObject, error)
 
 	// (GET /v1/sends)
 	ListMySends(ctx context.Context, request ListMySendsRequestObject) (ListMySendsResponseObject, error)
@@ -23155,6 +31199,9 @@ type StrictServerInterface interface {
 	// (GET /v1/telegram-codes/{codeId})
 	GetTelegramCode(ctx context.Context, request GetTelegramCodeRequestObject) (GetTelegramCodeResponseObject, error)
 
+	// (GET /v1/timeline)
+	GetTimeline(ctx context.Context, request GetTimelineRequestObject) (GetTimelineResponseObject, error)
+
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
 }
@@ -23215,6 +31262,630 @@ func (sh *strictHandler) GetDiscovery(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetDiscoveryResponseObject); ok {
 		if err := validResponse.VisitGetDiscoveryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListBlocks operation middleware
+func (sh *strictHandler) ListBlocks(w http.ResponseWriter, r *http.Request) {
+	var request ListBlocksRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListBlocks(ctx, request.(ListBlocksRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListBlocks")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListBlocksResponseObject); ok {
+		if err := validResponse.VisitListBlocksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UnblockUser operation middleware
+func (sh *strictHandler) UnblockUser(w http.ResponseWriter, r *http.Request, userId UserId) {
+	var request UnblockUserRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UnblockUser(ctx, request.(UnblockUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UnblockUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UnblockUserResponseObject); ok {
+		if err := validResponse.VisitUnblockUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// BlockUser operation middleware
+func (sh *strictHandler) BlockUser(w http.ResponseWriter, r *http.Request, userId UserId) {
+	var request BlockUserRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.BlockUser(ctx, request.(BlockUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "BlockUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(BlockUserResponseObject); ok {
+		if err := validResponse.VisitBlockUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListContacts operation middleware
+func (sh *strictHandler) ListContacts(w http.ResponseWriter, r *http.Request) {
+	var request ListContactsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListContacts(ctx, request.(ListContactsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListContacts")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListContactsResponseObject); ok {
+		if err := validResponse.VisitListContactsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListConversations operation middleware
+func (sh *strictHandler) ListConversations(w http.ResponseWriter, r *http.Request, params ListConversationsParams) {
+	var request ListConversationsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListConversations(ctx, request.(ListConversationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListConversations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListConversationsResponseObject); ok {
+		if err := validResponse.VisitListConversationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateConversation operation middleware
+func (sh *strictHandler) CreateConversation(w http.ResponseWriter, r *http.Request, params CreateConversationParams) {
+	var request CreateConversationRequestObject
+
+	request.Params = params
+
+	var body CreateConversationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateConversation(ctx, request.(CreateConversationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateConversation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateConversationResponseObject); ok {
+		if err := validResponse.VisitCreateConversationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetConversation operation middleware
+func (sh *strictHandler) GetConversation(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request GetConversationRequestObject
+
+	request.ConversationId = conversationId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetConversation(ctx, request.(GetConversationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetConversation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetConversationResponseObject); ok {
+		if err := validResponse.VisitGetConversationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateConversation operation middleware
+func (sh *strictHandler) UpdateConversation(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request UpdateConversationRequestObject
+
+	request.ConversationId = conversationId
+
+	var body UpdateConversationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateConversation(ctx, request.(UpdateConversationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateConversation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateConversationResponseObject); ok {
+		if err := validResponse.VisitUpdateConversationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AddConversationMembers operation middleware
+func (sh *strictHandler) AddConversationMembers(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request AddConversationMembersRequestObject
+
+	request.ConversationId = conversationId
+
+	var body AddConversationMembersJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AddConversationMembers(ctx, request.(AddConversationMembersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AddConversationMembers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AddConversationMembersResponseObject); ok {
+		if err := validResponse.VisitAddConversationMembersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveConversationMember operation middleware
+func (sh *strictHandler) RemoveConversationMember(w http.ResponseWriter, r *http.Request, conversationId ConversationId, userId UserId) {
+	var request RemoveConversationMemberRequestObject
+
+	request.ConversationId = conversationId
+	request.UserId = userId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveConversationMember(ctx, request.(RemoveConversationMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveConversationMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveConversationMemberResponseObject); ok {
+		if err := validResponse.VisitRemoveConversationMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateConversationMember operation middleware
+func (sh *strictHandler) UpdateConversationMember(w http.ResponseWriter, r *http.Request, conversationId ConversationId, userId UserId) {
+	var request UpdateConversationMemberRequestObject
+
+	request.ConversationId = conversationId
+	request.UserId = userId
+
+	var body UpdateConversationMemberJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateConversationMember(ctx, request.(UpdateConversationMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateConversationMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateConversationMemberResponseObject); ok {
+		if err := validResponse.VisitUpdateConversationMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListMessages operation middleware
+func (sh *strictHandler) ListMessages(w http.ResponseWriter, r *http.Request, conversationId ConversationId, params ListMessagesParams) {
+	var request ListMessagesRequestObject
+
+	request.ConversationId = conversationId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListMessages(ctx, request.(ListMessagesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListMessages")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListMessagesResponseObject); ok {
+		if err := validResponse.VisitListMessagesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SendMessage operation middleware
+func (sh *strictHandler) SendMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, params SendMessageParams) {
+	var request SendMessageRequestObject
+
+	request.ConversationId = conversationId
+	request.Params = params
+
+	var body SendMessageJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SendMessage(ctx, request.(SendMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SendMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SendMessageResponseObject); ok {
+		if err := validResponse.VisitSendMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteMessage operation middleware
+func (sh *strictHandler) DeleteMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId) {
+	var request DeleteMessageRequestObject
+
+	request.ConversationId = conversationId
+	request.MessageId = messageId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteMessage(ctx, request.(DeleteMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteMessageResponseObject); ok {
+		if err := validResponse.VisitDeleteMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMessage operation middleware
+func (sh *strictHandler) GetMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId) {
+	var request GetMessageRequestObject
+
+	request.ConversationId = conversationId
+	request.MessageId = messageId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMessage(ctx, request.(GetMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMessageResponseObject); ok {
+		if err := validResponse.VisitGetMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateMessage operation middleware
+func (sh *strictHandler) UpdateMessage(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId) {
+	var request UpdateMessageRequestObject
+
+	request.ConversationId = conversationId
+	request.MessageId = messageId
+
+	var body UpdateMessageJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateMessage(ctx, request.(UpdateMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateMessageResponseObject); ok {
+		if err := validResponse.VisitUpdateMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutMessageOnFrame operation middleware
+func (sh *strictHandler) PutMessageOnFrame(w http.ResponseWriter, r *http.Request, conversationId ConversationId, messageId MessageId, params PutMessageOnFrameParams) {
+	var request PutMessageOnFrameRequestObject
+
+	request.ConversationId = conversationId
+	request.MessageId = messageId
+	request.Params = params
+
+	var body PutMessageOnFrameJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutMessageOnFrame(ctx, request.(PutMessageOnFrameRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutMessageOnFrame")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutMessageOnFrameResponseObject); ok {
+		if err := validResponse.VisitPutMessageOnFrameResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteConversationPhoto operation middleware
+func (sh *strictHandler) DeleteConversationPhoto(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request DeleteConversationPhotoRequestObject
+
+	request.ConversationId = conversationId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteConversationPhoto(ctx, request.(DeleteConversationPhotoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteConversationPhoto")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteConversationPhotoResponseObject); ok {
+		if err := validResponse.VisitDeleteConversationPhotoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateConversationPreferences operation middleware
+func (sh *strictHandler) UpdateConversationPreferences(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request UpdateConversationPreferencesRequestObject
+
+	request.ConversationId = conversationId
+
+	var body UpdateConversationPreferencesJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateConversationPreferences(ctx, request.(UpdateConversationPreferencesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateConversationPreferences")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateConversationPreferencesResponseObject); ok {
+		if err := validResponse.VisitUpdateConversationPreferencesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// MarkConversationRead operation middleware
+func (sh *strictHandler) MarkConversationRead(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request MarkConversationReadRequestObject
+
+	request.ConversationId = conversationId
+
+	var body MarkConversationReadJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.MarkConversationRead(ctx, request.(MarkConversationReadRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "MarkConversationRead")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(MarkConversationReadResponseObject); ok {
+		if err := validResponse.VisitMarkConversationReadResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SendTyping operation middleware
+func (sh *strictHandler) SendTyping(w http.ResponseWriter, r *http.Request, conversationId ConversationId) {
+	var request SendTypingRequestObject
+
+	request.ConversationId = conversationId
+
+	var body SendTypingJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SendTyping(ctx, request.(SendTypingRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SendTyping")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SendTypingResponseObject); ok {
+		if err := validResponse.VisitSendTypingResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -23630,6 +32301,30 @@ func (sh *strictHandler) DeviceRemoveMember(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceRemoveMemberResponseObject); ok {
 		if err := validResponse.VisitDeviceRemoveMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceRequestPhotos operation middleware
+func (sh *strictHandler) DeviceRequestPhotos(w http.ResponseWriter, r *http.Request) {
+	var request DeviceRequestPhotosRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceRequestPhotos(ctx, request.(DeviceRequestPhotosRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceRequestPhotos")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceRequestPhotosResponseObject); ok {
+		if err := validResponse.VisitDeviceRequestPhotosResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -24873,6 +33568,251 @@ func (sh *strictHandler) RejectFeedBirthday(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// ListCircles operation middleware
+func (sh *strictHandler) ListCircles(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListCirclesRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListCircles(ctx, request.(ListCirclesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListCircles")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListCirclesResponseObject); ok {
+		if err := validResponse.VisitListCirclesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateCircle operation middleware
+func (sh *strictHandler) CreateCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateCircleParams) {
+	var request CreateCircleRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body CreateCircleJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateCircle(ctx, request.(CreateCircleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateCircle")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateCircleResponseObject); ok {
+		if err := validResponse.VisitCreateCircleResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteCircle operation middleware
+func (sh *strictHandler) DeleteCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId) {
+	var request DeleteCircleRequestObject
+
+	request.FeedId = feedId
+	request.CircleId = circleId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteCircle(ctx, request.(DeleteCircleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteCircle")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteCircleResponseObject); ok {
+		if err := validResponse.VisitDeleteCircleResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetCircle operation middleware
+func (sh *strictHandler) GetCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId) {
+	var request GetCircleRequestObject
+
+	request.FeedId = feedId
+	request.CircleId = circleId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCircle(ctx, request.(GetCircleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCircle")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetCircleResponseObject); ok {
+		if err := validResponse.VisitGetCircleResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateCircle operation middleware
+func (sh *strictHandler) UpdateCircle(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId) {
+	var request UpdateCircleRequestObject
+
+	request.FeedId = feedId
+	request.CircleId = circleId
+
+	var body UpdateCircleJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateCircle(ctx, request.(UpdateCircleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateCircle")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateCircleResponseObject); ok {
+		if err := validResponse.VisitUpdateCircleResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AddCircleMembers operation middleware
+func (sh *strictHandler) AddCircleMembers(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId) {
+	var request AddCircleMembersRequestObject
+
+	request.FeedId = feedId
+	request.CircleId = circleId
+
+	var body AddCircleMembersJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AddCircleMembers(ctx, request.(AddCircleMembersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AddCircleMembers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AddCircleMembersResponseObject); ok {
+		if err := validResponse.VisitAddCircleMembersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveCircleMember operation middleware
+func (sh *strictHandler) RemoveCircleMember(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId, userId UserId) {
+	var request RemoveCircleMemberRequestObject
+
+	request.FeedId = feedId
+	request.CircleId = circleId
+	request.UserId = userId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveCircleMember(ctx, request.(RemoveCircleMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveCircleMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveCircleMemberResponseObject); ok {
+		if err := validResponse.VisitRemoveCircleMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateCircleMember operation middleware
+func (sh *strictHandler) UpdateCircleMember(w http.ResponseWriter, r *http.Request, feedId FeedId, circleId CircleId, userId UserId) {
+	var request UpdateCircleMemberRequestObject
+
+	request.FeedId = feedId
+	request.CircleId = circleId
+	request.UserId = userId
+
+	var body UpdateCircleMemberJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateCircleMember(ctx, request.(UpdateCircleMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateCircleMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateCircleMemberResponseObject); ok {
+		if err := validResponse.VisitUpdateCircleMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListFeedEmailAddresses operation middleware
 func (sh *strictHandler) ListFeedEmailAddresses(w http.ResponseWriter, r *http.Request, feedId FeedId) {
 	var request ListFeedEmailAddressesRequestObject
@@ -24926,6 +33866,65 @@ func (sh *strictHandler) CreateFeedEmailAddress(w http.ResponseWriter, r *http.R
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(CreateFeedEmailAddressResponseObject); ok {
 		if err := validResponse.VisitCreateFeedEmailAddressResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeedEngagement operation middleware
+func (sh *strictHandler) GetFeedEngagement(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request GetFeedEngagementRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeedEngagement(ctx, request.(GetFeedEngagementRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeedEngagement")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedEngagementResponseObject); ok {
+		if err := validResponse.VisitGetFeedEngagementResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateFeedEngagement operation middleware
+func (sh *strictHandler) UpdateFeedEngagement(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request UpdateFeedEngagementRequestObject
+
+	request.FeedId = feedId
+
+	var body UpdateFeedEngagementJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateFeedEngagement(ctx, request.(UpdateFeedEngagementRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateFeedEngagement")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateFeedEngagementResponseObject); ok {
+		if err := validResponse.VisitUpdateFeedEngagementResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -25386,6 +34385,172 @@ func (sh *strictHandler) UpdateFeedPreferences(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(UpdateFeedPreferencesResponseObject); ok {
 		if err := validResponse.VisitUpdateFeedPreferencesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedPrompts operation middleware
+func (sh *strictHandler) ListFeedPrompts(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedPromptsRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedPrompts(ctx, request.(ListFeedPromptsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedPrompts")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedPromptsResponseObject); ok {
+		if err := validResponse.VisitListFeedPromptsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ResetFeedPrompt operation middleware
+func (sh *strictHandler) ResetFeedPrompt(w http.ResponseWriter, r *http.Request, feedId FeedId, weekOf WeekOf) {
+	var request ResetFeedPromptRequestObject
+
+	request.FeedId = feedId
+	request.WeekOf = weekOf
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ResetFeedPrompt(ctx, request.(ResetFeedPromptRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ResetFeedPrompt")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ResetFeedPromptResponseObject); ok {
+		if err := validResponse.VisitResetFeedPromptResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SetFeedPrompt operation middleware
+func (sh *strictHandler) SetFeedPrompt(w http.ResponseWriter, r *http.Request, feedId FeedId, weekOf WeekOf) {
+	var request SetFeedPromptRequestObject
+
+	request.FeedId = feedId
+	request.WeekOf = weekOf
+
+	var body SetFeedPromptJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SetFeedPrompt(ctx, request.(SetFeedPromptRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SetFeedPrompt")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SetFeedPromptResponseObject); ok {
+		if err := validResponse.VisitSetFeedPromptResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeedRecap operation middleware
+func (sh *strictHandler) GetFeedRecap(w http.ResponseWriter, r *http.Request, feedId FeedId, month string) {
+	var request GetFeedRecapRequestObject
+
+	request.FeedId = feedId
+	request.Month = month
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeedRecap(ctx, request.(GetFeedRecapRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeedRecap")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedRecapResponseObject); ok {
+		if err := validResponse.VisitGetFeedRecapResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedReports operation middleware
+func (sh *strictHandler) ListFeedReports(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedReportsRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedReports(ctx, request.(ListFeedReportsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedReports")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedReportsResponseObject); ok {
+		if err := validResponse.VisitListFeedReportsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeedStreak operation middleware
+func (sh *strictHandler) GetFeedStreak(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request GetFeedStreakRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeedStreak(ctx, request.(GetFeedStreakRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeedStreak")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedStreakResponseObject); ok {
+		if err := validResponse.VisitGetFeedStreakResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -26570,6 +35735,32 @@ func (sh *strictHandler) UpdateMember(w http.ResponseWriter, r *http.Request, fr
 	}
 }
 
+// ListFramePhotoRequests operation middleware
+func (sh *strictHandler) ListFramePhotoRequests(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListFramePhotoRequestsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFramePhotoRequests(ctx, request.(ListFramePhotoRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFramePhotoRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFramePhotoRequestsResponseObject); ok {
+		if err := validResponse.VisitListFramePhotoRequestsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListPlacements operation middleware
 func (sh *strictHandler) ListPlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params ListPlacementsParams) {
 	var request ListPlacementsRequestObject
@@ -27270,6 +36461,37 @@ func (sh *strictHandler) UpdateItem(w http.ResponseWriter, r *http.Request, item
 	}
 }
 
+// CreateLinkPreview operation middleware
+func (sh *strictHandler) CreateLinkPreview(w http.ResponseWriter, r *http.Request) {
+	var request CreateLinkPreviewRequestObject
+
+	var body CreateLinkPreviewJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateLinkPreview(ctx, request.(CreateLinkPreviewRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateLinkPreview")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateLinkPreviewResponseObject); ok {
+		if err := validResponse.VisitCreateLinkPreviewResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // DeleteMe operation middleware
 func (sh *strictHandler) DeleteMe(w http.ResponseWriter, r *http.Request, params DeleteMeParams) {
 	var request DeleteMeRequestObject
@@ -27375,6 +36597,111 @@ func (sh *strictHandler) DeleteAvatar(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetBadge operation middleware
+func (sh *strictHandler) GetBadge(w http.ResponseWriter, r *http.Request) {
+	var request GetBadgeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetBadge(ctx, request.(GetBadgeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetBadge")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetBadgeResponseObject); ok {
+		if err := validResponse.VisitGetBadgeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListMyMilestones operation middleware
+func (sh *strictHandler) ListMyMilestones(w http.ResponseWriter, r *http.Request) {
+	var request ListMyMilestonesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListMyMilestones(ctx, request.(ListMyMilestonesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListMyMilestones")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListMyMilestonesResponseObject); ok {
+		if err := validResponse.VisitListMyMilestonesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateMyMilestone operation middleware
+func (sh *strictHandler) UpdateMyMilestone(w http.ResponseWriter, r *http.Request, milestoneKey MilestoneKey) {
+	var request UpdateMyMilestoneRequestObject
+
+	request.MilestoneKey = milestoneKey
+
+	var body UpdateMyMilestoneJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateMyMilestone(ctx, request.(UpdateMyMilestoneRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateMyMilestone")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateMyMilestoneResponseObject); ok {
+		if err := validResponse.VisitUpdateMyMilestoneResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetOnThisDay operation middleware
+func (sh *strictHandler) GetOnThisDay(w http.ResponseWriter, r *http.Request) {
+	var request GetOnThisDayRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetOnThisDay(ctx, request.(GetOnThisDayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetOnThisDay")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetOnThisDayResponseObject); ok {
+		if err := validResponse.VisitGetOnThisDayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListPushEndpoints operation middleware
 func (sh *strictHandler) ListPushEndpoints(w http.ResponseWriter, r *http.Request) {
 	var request ListPushEndpointsRequestObject
@@ -27456,6 +36783,61 @@ func (sh *strictHandler) DeletePushEndpoint(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// GetReminderPreferences operation middleware
+func (sh *strictHandler) GetReminderPreferences(w http.ResponseWriter, r *http.Request) {
+	var request GetReminderPreferencesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetReminderPreferences(ctx, request.(GetReminderPreferencesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetReminderPreferences")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetReminderPreferencesResponseObject); ok {
+		if err := validResponse.VisitGetReminderPreferencesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateReminderPreferences operation middleware
+func (sh *strictHandler) UpdateReminderPreferences(w http.ResponseWriter, r *http.Request) {
+	var request UpdateReminderPreferencesRequestObject
+
+	var body UpdateReminderPreferencesJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateReminderPreferences(ctx, request.(UpdateReminderPreferencesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateReminderPreferences")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateReminderPreferencesResponseObject); ok {
+		if err := validResponse.VisitUpdateReminderPreferencesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // UnlinkTelegram operation middleware
 func (sh *strictHandler) UnlinkTelegram(w http.ResponseWriter, r *http.Request) {
 	var request UnlinkTelegramRequestObject
@@ -27530,6 +36912,32 @@ func (sh *strictHandler) CreateTelegramLinkCode(w http.ResponseWriter, r *http.R
 	}
 }
 
+// GetWeeklySummary operation middleware
+func (sh *strictHandler) GetWeeklySummary(w http.ResponseWriter, r *http.Request, weekOf WeekOf) {
+	var request GetWeeklySummaryRequestObject
+
+	request.WeekOf = weekOf
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetWeeklySummary(ctx, request.(GetWeeklySummaryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetWeeklySummary")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetWeeklySummaryResponseObject); ok {
+		if err := validResponse.VisitGetWeeklySummaryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // OperatorGetLimits operation middleware
 func (sh *strictHandler) OperatorGetLimits(w http.ResponseWriter, r *http.Request) {
 	var request OperatorGetLimitsRequestObject
@@ -27578,6 +36986,32 @@ func (sh *strictHandler) OperatorSetLimits(w http.ResponseWriter, r *http.Reques
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(OperatorSetLimitsResponseObject); ok {
 		if err := validResponse.VisitOperatorSetLimitsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListOperatorReports operation middleware
+func (sh *strictHandler) ListOperatorReports(w http.ResponseWriter, r *http.Request, params ListOperatorReportsParams) {
+	var request ListOperatorReportsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListOperatorReports(ctx, request.(ListOperatorReportsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListOperatorReports")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListOperatorReportsResponseObject); ok {
+		if err := validResponse.VisitListOperatorReportsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -27718,6 +37152,58 @@ func (sh *strictHandler) OperatorStats(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(OperatorStatsResponseObject); ok {
 		if err := validResponse.VisitOperatorStatsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPerson operation middleware
+func (sh *strictHandler) GetPerson(w http.ResponseWriter, r *http.Request, userId UserId) {
+	var request GetPersonRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPerson(ctx, request.(GetPersonRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPerson")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPersonResponseObject); ok {
+		if err := validResponse.VisitGetPersonResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPhotoRequest operation middleware
+func (sh *strictHandler) GetPhotoRequest(w http.ResponseWriter, r *http.Request, requestId RequestId) {
+	var request GetPhotoRequestRequestObject
+
+	request.RequestId = requestId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPhotoRequest(ctx, request.(GetPhotoRequestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPhotoRequest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPhotoRequestResponseObject); ok {
+		if err := validResponse.VisitGetPhotoRequestResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -27959,6 +37445,437 @@ func (sh *strictHandler) TestPhotoSource(w http.ResponseWriter, r *http.Request)
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(TestPhotoSourceResponseObject); ok {
 		if err := validResponse.VisitTestPhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPost operation middleware
+func (sh *strictHandler) GetPost(w http.ResponseWriter, r *http.Request, postId PostId) {
+	var request GetPostRequestObject
+
+	request.PostId = postId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPost(ctx, request.(GetPostRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPost")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPostResponseObject); ok {
+		if err := validResponse.VisitGetPostResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListComments operation middleware
+func (sh *strictHandler) ListComments(w http.ResponseWriter, r *http.Request, postId PostId, params ListCommentsParams) {
+	var request ListCommentsRequestObject
+
+	request.PostId = postId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListComments(ctx, request.(ListCommentsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListComments")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListCommentsResponseObject); ok {
+		if err := validResponse.VisitListCommentsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateComment operation middleware
+func (sh *strictHandler) CreateComment(w http.ResponseWriter, r *http.Request, postId PostId, params CreateCommentParams) {
+	var request CreateCommentRequestObject
+
+	request.PostId = postId
+	request.Params = params
+
+	var body CreateCommentJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateComment(ctx, request.(CreateCommentRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateComment")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateCommentResponseObject); ok {
+		if err := validResponse.VisitCreateCommentResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteComment operation middleware
+func (sh *strictHandler) DeleteComment(w http.ResponseWriter, r *http.Request, postId PostId, commentId CommentId) {
+	var request DeleteCommentRequestObject
+
+	request.PostId = postId
+	request.CommentId = commentId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteComment(ctx, request.(DeleteCommentRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteComment")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteCommentResponseObject); ok {
+		if err := validResponse.VisitDeleteCommentResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateComment operation middleware
+func (sh *strictHandler) UpdateComment(w http.ResponseWriter, r *http.Request, postId PostId, commentId CommentId) {
+	var request UpdateCommentRequestObject
+
+	request.PostId = postId
+	request.CommentId = commentId
+
+	var body UpdateCommentJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateComment(ctx, request.(UpdateCommentRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateComment")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateCommentResponseObject); ok {
+		if err := validResponse.VisitUpdateCommentResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SetThreadMute operation middleware
+func (sh *strictHandler) SetThreadMute(w http.ResponseWriter, r *http.Request, postId PostId) {
+	var request SetThreadMuteRequestObject
+
+	request.PostId = postId
+
+	var body SetThreadMuteJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SetThreadMute(ctx, request.(SetThreadMuteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SetThreadMute")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SetThreadMuteResponseObject); ok {
+		if err := validResponse.VisitSetThreadMuteResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TagPostPrompt operation middleware
+func (sh *strictHandler) TagPostPrompt(w http.ResponseWriter, r *http.Request, postId PostId) {
+	var request TagPostPromptRequestObject
+
+	request.PostId = postId
+
+	var body TagPostPromptJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TagPostPrompt(ctx, request.(TagPostPromptRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TagPostPrompt")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TagPostPromptResponseObject); ok {
+		if err := validResponse.VisitTagPostPromptResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// MarkThreadRead operation middleware
+func (sh *strictHandler) MarkThreadRead(w http.ResponseWriter, r *http.Request, postId PostId) {
+	var request MarkThreadReadRequestObject
+
+	request.PostId = postId
+
+	var body MarkThreadReadJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.MarkThreadRead(ctx, request.(MarkThreadReadRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "MarkThreadRead")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(MarkThreadReadResponseObject); ok {
+		if err := validResponse.VisitMarkThreadReadResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SetThreadState operation middleware
+func (sh *strictHandler) SetThreadState(w http.ResponseWriter, r *http.Request, postId PostId) {
+	var request SetThreadStateRequestObject
+
+	request.PostId = postId
+
+	var body SetThreadStateJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SetThreadState(ctx, request.(SetThreadStateRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SetThreadState")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SetThreadStateResponseObject); ok {
+		if err := validResponse.VisitSetThreadStateResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListPromptLibrary operation middleware
+func (sh *strictHandler) ListPromptLibrary(w http.ResponseWriter, r *http.Request) {
+	var request ListPromptLibraryRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListPromptLibrary(ctx, request.(ListPromptLibraryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListPromptLibrary")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListPromptLibraryResponseObject); ok {
+		if err := validResponse.VisitListPromptLibraryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListReactions operation middleware
+func (sh *strictHandler) ListReactions(w http.ResponseWriter, r *http.Request, targetKind TargetKind, targetId TargetId, params ListReactionsParams) {
+	var request ListReactionsRequestObject
+
+	request.TargetKind = targetKind
+	request.TargetId = targetId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListReactions(ctx, request.(ListReactionsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListReactions")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListReactionsResponseObject); ok {
+		if err := validResponse.VisitListReactionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SetReaction operation middleware
+func (sh *strictHandler) SetReaction(w http.ResponseWriter, r *http.Request, targetKind TargetKind, targetId TargetId, params SetReactionParams) {
+	var request SetReactionRequestObject
+
+	request.TargetKind = targetKind
+	request.TargetId = targetId
+	request.Params = params
+
+	var body SetReactionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SetReaction(ctx, request.(SetReactionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SetReaction")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SetReactionResponseObject); ok {
+		if err := validResponse.VisitSetReactionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateReport operation middleware
+func (sh *strictHandler) CreateReport(w http.ResponseWriter, r *http.Request) {
+	var request CreateReportRequestObject
+
+	var body CreateReportJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateReport(ctx, request.(CreateReportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateReport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateReportResponseObject); ok {
+		if err := validResponse.VisitCreateReportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ResolveReport operation middleware
+func (sh *strictHandler) ResolveReport(w http.ResponseWriter, r *http.Request, reportId ReportId) {
+	var request ResolveReportRequestObject
+
+	request.ReportId = reportId
+
+	var body ResolveReportJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ResolveReport(ctx, request.(ResolveReportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ResolveReport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ResolveReportResponseObject); ok {
+		if err := validResponse.VisitResolveReportResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -28658,6 +38575,32 @@ func (sh *strictHandler) GetTelegramCode(w http.ResponseWriter, r *http.Request,
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetTelegramCodeResponseObject); ok {
 		if err := validResponse.VisitGetTelegramCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetTimeline operation middleware
+func (sh *strictHandler) GetTimeline(w http.ResponseWriter, r *http.Request, params GetTimelineParams) {
+	var request GetTimelineRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTimeline(ctx, request.(GetTimelineRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTimeline")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTimelineResponseObject); ok {
+		if err := validResponse.VisitGetTimelineResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

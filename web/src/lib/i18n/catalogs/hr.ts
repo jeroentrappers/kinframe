@@ -1421,6 +1421,7 @@ const hr: Catalog = {
 	'feedRole.owner': 'Vlasnik',
 	'feedRole.admin': 'Administrator',
 	'feedRole.poster': 'Autor',
+	'feedRole.member': 'Čitatelj',
 	'problem.already_subscribed': 'Ovaj je okvir već pretplaćen na ovaj kanal ili čeka odobrenje.',
 	'problem.invalid_transition': 'To trenutno nije moguće. Ponovno učitajte stranicu i pokušajte ponovno.',
 	'problem.limit_reached': 'Dosegnuli ste ograničenje na ovom poslužitelju.',

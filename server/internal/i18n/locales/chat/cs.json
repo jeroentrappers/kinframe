@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Tomuto člověku nemůžeš poslat zprávu",
+    "problem.audio_too_long": "Hlasová zpráva je příliš dlouhá"
+  }
+}

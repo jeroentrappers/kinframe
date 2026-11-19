@@ -1393,6 +1393,7 @@ const bg: Catalog = {
 	'feedRole.owner': 'Собственик',
 	'feedRole.admin': 'Администратор',
 	'feedRole.poster': 'Автор',
+	'feedRole.member': 'Читател',
 	'problem.already_subscribed': 'Тази рамка вече е абонирана за този канал или чака одобрение.',
 	'problem.invalid_transition': 'Това не е възможно в момента. Презаредете и опитайте отново.',
 	'problem.limit_reached': 'Достигнахте ограничението на този сървър.',

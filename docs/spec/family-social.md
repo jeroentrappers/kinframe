@@ -1,7 +1,11 @@
 # Family social: comments, chats and gentle nudges to share
 
-Status: **draft** (2026-11-19), not built. Extends `feeds.md` (the family space), `birthdays.md` and the API guide
-`docs/api/README.md` (§5.5 reactions, §6 websockets and push). Open decisions are listed in §12.
+Status: **approved, being built** (2026-11-19). Extends `feeds.md` (the family space), `birthdays.md` and the API guide
+`docs/api/README.md` (§5.5 reactions, §6 websockets and push). The contract is in `docs/api/openapi.yaml` (tags
+`social`, `circles`, `chats`, `safety`, `engagement`) and `docs/api/README.md` §5.18–§5.20; the schema is in
+migrations 00022–00024; the work split is `family-social-work.md`. The decisions in §12 were taken by the project
+owner on 2026-11-19 (`product-spec.md` §8, decisions 9–14). Where this spec and the API guide differ in detail, the
+API guide wins.
 
 ## 1. Summary
 
@@ -151,7 +155,11 @@ analytics. You only see people you share a family or a frame with.
 - A frame's own moderation (photos waiting for approval) applies before a post appears on that frame; the thread is
   visible in the app as soon as the post exists.
 
-## 6. Data model (proposed)
+## 6. Data model
+
+As built: migrations 00022_social.sql, 00023_chat.sql and 00024_engagement.sql. The sketch below was the proposal;
+in the schema threads hang off feed posts and frame posts (direct sends to one frame), circles and their chats are
+added, and family and circle chat membership is kept by database triggers.
 
 ```
 Feed ─< Post ─< Comment (parent_id: one level) ─< CommentMention
@@ -182,7 +190,7 @@ FamilyStreak (feed_id, current_weeks, best_weeks, freezes_left, week_of)  -- §9
 - A deleted account's comments and messages become "Former member"; its photos follow the existing rules.
 - Export (account data export) includes your own comments and messages and the photos you sent in chats.
 
-## 7. API (sketch; the contract goes into `openapi.yaml` when built)
+## 7. API (sketch; the contract is `openapi.yaml` and README §5.18–§5.20)
 
 | Endpoint | Purpose |
 |---|---|
@@ -329,21 +337,18 @@ New push keys, same payload rules as §6.3 (IDs plus localized title and body):
 Each phase ships on all clients together (Android, iOS/Mac, web), following `docs/client-parity.md`, and the frame
 parts only where listed.
 
-## 12. Open decisions
+## 12. Decisions
 
-- **A. Call feeds "families" in the apps.** Recommended: yes. "Feed" reads as a broadcast; the social features make
-  it the family's space. One family can still subscribe many frames; a person can be in several families. API names
-  stay.
-- **B. End-to-end encryption for chats.** Decision 1 (`product-spec.md` §8) excludes it for v1, and the server needs
-  the photos anyway (renditions, frames). Recommended: no E2E in phases 1–2, message bodies encrypted at rest, and the
-  apps say plainly who runs the server and that its operator could read messages. MLS-based E2E for text-only
-  direct/group chats can be revisited later without changing the rest of this design.
-- **C. Direct chats across families.** Recommended as written: only with people you share a family or a frame with.
-- **D. Comments on the frame.** Recommended: possible but off by default; the frame stays calm unless the owner wants
-  it.
-- **E. Streak goal default.** Recommended: 3 photos a week per family, so one active member can carry it in a small
-  family and a big family isn't pushed to flood the frames.
-- **F. How to model the extended family.** Recommended: one family per extended family with circles inside it
-  (§3), rather than many small families linked together. It keeps one member list, one set of birthdays and one
-  invite per family, and circles cover households and branches. People with two families (their own and their
-  partner's) are simply in both.
+Decided by the project owner on 2026-11-19, each as recommended (recorded in `product-spec.md` §8, decisions 9–14):
+
+- **A. Feeds are called "families" in the apps and on the web.** API, database and code names stay `feed`. One
+  family can still subscribe many frames; a person can be in several families.
+- **B. No end-to-end encryption for chats** in phases 1–2. Message and comment bodies are encrypted at rest when the
+  operator configured at-rest encryption (`KINFRAME_SECRETS_KEY`), and the apps say plainly who runs the server and
+  that its operator could read messages. MLS-based E2E for text-only direct/group chats can be revisited later.
+- **C. Direct chats only with people you share a family or a frame with.**
+- **D. Comments on the frame: possible, off by default** (*Show comments*).
+- **E. Streak goal default: 3 photos a week per family** (admins pick 1–20).
+- **F. One family per extended family, with circles inside it**, rather than many small families linked together.
+
+All three phases of §11 are being built at the same time; each still ships on all clients together.

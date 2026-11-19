@@ -6,6 +6,19 @@ components:
             required: true
             schema:
                 $ref: '#/components/schemas/Id'
+        After:
+            description: 'Chronological lists (comments, messages): return what comes after this id.'
+            in: query
+            name: after
+            schema:
+                $ref: '#/components/schemas/Id'
+        Before:
+            description: 'Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id).'
+            in: query
+            name: before
+            schema:
+                maxLength: 200
+                type: string
         BirthdayId:
             in: path
             name: birthdayId
@@ -15,6 +28,24 @@ components:
         CalendarId:
             in: path
             name: calendarId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        CircleId:
+            in: path
+            name: circleId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        CommentId:
+            in: path
+            name: commentId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        ConversationId:
+            in: path
+            name: conversationId
             required: true
             schema:
                 $ref: '#/components/schemas/Id'
@@ -100,6 +131,12 @@ components:
                 maximum: 200
                 minimum: 1
                 type: integer
+        MessageId:
+            in: path
+            name: messageId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
         PlacementId:
             in: path
             name: placementId
@@ -109,6 +146,18 @@ components:
         PostId:
             in: path
             name: postId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        ReportId:
+            in: path
+            name: reportId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        RequestId:
+            in: path
+            name: requestId
             required: true
             schema:
                 $ref: '#/components/schemas/Id'
@@ -130,6 +179,18 @@ components:
             required: true
             schema:
                 $ref: '#/components/schemas/Id'
+        TargetId:
+            in: path
+            name: targetId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        TargetKind:
+            in: path
+            name: targetKind
+            required: true
+            schema:
+                $ref: '#/components/schemas/ReactionTargetKind'
         TelegramChatId:
             in: path
             name: chatId
@@ -142,6 +203,14 @@ components:
             required: true
             schema:
                 $ref: '#/components/schemas/Id'
+        WeekOf:
+            description: A Monday (YYYY-MM-DD); other days answer `422 validation_failed`.
+            in: path
+            name: weekOf
+            required: true
+            schema:
+                format: date
+                type: string
     responses:
         Problem:
             content:
@@ -235,6 +304,32 @@ components:
                     format: uri
                     nullable: true
                     type: string
+            type: object
+        Badge:
+            description: 'The app badge: conversations with unread messages (not muted) plus threads with unread mentions of or replies to the caller (not muted).'
+            properties:
+                conversations:
+                    type: integer
+                threads:
+                    type: integer
+                total:
+                    type: integer
+            required:
+                - total
+                - conversations
+                - threads
+            type: object
+        BadgeEvent:
+            properties:
+                badge:
+                    $ref: '#/components/schemas/Badge'
+                type:
+                    enum:
+                        - badge.updated
+                    type: string
+            required:
+                - type
+                - badge
             type: object
         BirthdayPerson:
             description: |
@@ -409,6 +504,17 @@ components:
                 - approved
                 - rejected
             type: string
+        Block:
+            properties:
+                created_at:
+                    format: date-time
+                    type: string
+                person:
+                    $ref: '#/components/schemas/PersonRef'
+            required:
+                - person
+                - created_at
+            type: object
         Calendar:
             description: |
                 Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
@@ -819,6 +925,11 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/Calendar'
                     nullable: true
+                comments:
+                    allOf:
+                        - $ref: '#/components/schemas/PlacementComments'
+                    description: '`comments` change (entity `id` = the placement): its newest comments, or null = drop them (show comments turned off, comments removed). Only for frames with `settings.social.show_comments`. Old frame apps ignore it.'
+                    nullable: true
                 frame:
                     properties:
                         location:
@@ -843,6 +954,11 @@ components:
                         user_id:
                             $ref: '#/components/schemas/Id'
                     type: object
+                photo_request:
+                    allOf:
+                        - $ref: '#/components/schemas/FramePhotoRequest'
+                    description: '`photo_request` change (entity `id` = the frame): the frame''s latest "Ask for new photos", or null when there is none in the last 7 days.'
+                    nullable: true
                 placement:
                     allOf:
                         - $ref: '#/components/schemas/Placement'
@@ -895,6 +1011,11 @@ components:
                                         type: integer
                                 type: object
                           type: object
+                prompts:
+                    allOf:
+                        - $ref: '#/components/schemas/FramePrompts'
+                    description: '`prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.'
+                    nullable: true
                 seq:
                     type: integer
                 settings:
@@ -912,6 +1033,9 @@ components:
                         - weather
                         - calendar
                         - birthdays
+                        - comments
+                        - photo_request
+                        - prompts
                         - reset
                     type: string
                 weather:
@@ -919,6 +1043,150 @@ components:
             required:
                 - seq
                 - type
+            type: object
+        Circle:
+            description: |
+                A smaller group inside a family ("Anna's household", "The cousins"): its own chat (`conversation_id`) and an
+                audience for posts. Circle posts reach the family's subscribed frames that have a manager (owner, admin or
+                `change_settings`) in the circle, plus the frames in `frame_ids` (README §5.18).
+            properties:
+                conversation_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The circle's chat (members only).
+                    nullable: true
+                created_at:
+                    format: date-time
+                    type: string
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                frame_ids:
+                    description: Extra frames (subscribed to the family) the circle's posts reach.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    type: array
+                frames_reached:
+                    description: Every subscribed frame its posts reach now (managers in the circle, plus `frame_ids`).
+                    items:
+                        properties:
+                            frame_id:
+                                $ref: '#/components/schemas/Id'
+                            frame_name:
+                                type: string
+                        required:
+                            - frame_id
+                            - frame_name
+                        type: object
+                    type: array
+                id:
+                    $ref: '#/components/schemas/Id'
+                member_count:
+                    type: integer
+                members:
+                    items:
+                        $ref: '#/components/schemas/CircleMember'
+                    type: array
+                my_role:
+                    allOf:
+                        - $ref: '#/components/schemas/CircleRole'
+                    description: Null when the caller is a feed owner/admin who is not in the circle.
+                    nullable: true
+                name:
+                    type: string
+            required:
+                - id
+                - feed_id
+                - name
+                - members
+                - member_count
+            type: object
+        CircleCreate:
+            properties:
+                frame_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 50
+                    type: array
+                member_ids:
+                    description: Feed members besides the caller.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 200
+                    type: array
+                name:
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+            required:
+                - name
+                - member_ids
+            type: object
+        CircleEvent:
+            properties:
+                circle:
+                    $ref: '#/components/schemas/Circle'
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - circle.updated
+                    type: string
+            required:
+                - type
+                - feed_id
+                - circle
+            type: object
+        CircleMember:
+            properties:
+                added_at:
+                    format: date-time
+                    type: string
+                avatar_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                display_name:
+                    type: string
+                role:
+                    $ref: '#/components/schemas/CircleRole'
+                user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - user_id
+                - display_name
+                - role
+            type: object
+        CircleRemovedEvent:
+            properties:
+                circle_id:
+                    $ref: '#/components/schemas/Id'
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - circle.removed
+                    type: string
+            required:
+                - type
+                - feed_id
+                - circle_id
+            type: object
+        CircleRole:
+            enum:
+                - admin
+                - member
+            type: string
+        CircleUpdate:
+            properties:
+                frame_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 50
+                    type: array
+                name:
+                    maxLength: 40
+                    minLength: 1
+                    type: string
             type: object
         CommandResult:
             properties:
@@ -929,6 +1197,356 @@ components:
                     type: boolean
             required:
                 - ok
+            type: object
+        Comment:
+            properties:
+                author:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: '`person` comments; null for frame entries.'
+                    nullable: true
+                body:
+                    description: Null for frame entries and tombstones.
+                    nullable: true
+                    type: string
+                can_delete:
+                    type: boolean
+                can_edit:
+                    type: boolean
+                created_at:
+                    format: date-time
+                    type: string
+                deleted:
+                    default: false
+                    description: Deleted by its author but kept as a tombstone because it has replies ("Comment deleted").
+                    type: boolean
+                edited_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                frame:
+                    description: Frame entries only.
+                    nullable: true
+                    properties:
+                        frame_id:
+                            $ref: '#/components/schemas/Id'
+                        frame_name:
+                            type: string
+                        item_id:
+                            allOf:
+                                - $ref: '#/components/schemas/Id'
+                            nullable: true
+                        reaction:
+                            allOf:
+                                - $ref: '#/components/schemas/Reaction'
+                            nullable: true
+                        reply:
+                            allOf:
+                                - $ref: '#/components/schemas/ReplyPreset'
+                            nullable: true
+                    required:
+                        - frame_id
+                        - frame_name
+                    type: object
+                id:
+                    $ref: '#/components/schemas/Id'
+                kind:
+                    $ref: '#/components/schemas/CommentKind'
+                mentions:
+                    items:
+                        $ref: '#/components/schemas/Mention'
+                    type: array
+                parent_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: 'Replies only: the top-level comment (one level of replies).'
+                    nullable: true
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                quoted:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: A reply to a reply quotes that person ("@Ben"), while hanging under the same top comment.
+                    nullable: true
+                reactions:
+                    $ref: '#/components/schemas/ReactionSummary'
+                removed_by_admin:
+                    default: false
+                    description: Only ever true for the author, who still sees it ("Removed by a family admin"); everyone else no longer gets it.
+                    type: boolean
+                reply_count:
+                    description: Top-level comments only.
+                    type: integer
+            required:
+                - id
+                - post_id
+                - kind
+                - created_at
+            type: object
+        CommentCreate:
+            properties:
+                body:
+                    description: Trimmed; at most `limits.max_comment_chars` characters (Unicode code points).
+                    maxLength: 2000
+                    minLength: 1
+                    type: string
+                mentions:
+                    items:
+                        $ref: '#/components/schemas/Mention'
+                    maxItems: 20
+                    type: array
+                parent_id:
+                    $ref: '#/components/schemas/Id'
+                quoted_user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - body
+            type: object
+        CommentDeletedEvent:
+            description: '`comment.deleted`: gone from the thread for the receiver.'
+            properties:
+                comment_id:
+                    $ref: '#/components/schemas/Id'
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - comment.deleted
+                    type: string
+            required:
+                - type
+                - post_id
+                - comment_id
+            type: object
+        CommentEvent:
+            description: '`comment.created` (new comment, reply or frame entry) and `comment.updated` (edited, or deleted into a tombstone).'
+            properties:
+                comment:
+                    $ref: '#/components/schemas/Comment'
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - comment.created
+                        - comment.updated
+                    type: string
+            required:
+                - type
+                - post_id
+                - comment
+            type: object
+        CommentKind:
+            description: '`person`: a comment or reply. `frame`: a read-only frame entry ("Oma''s frame loved this", "Oma''s frame: Call me!").'
+            enum:
+                - person
+                - frame
+            type: string
+        CommentPage:
+            properties:
+                comments:
+                    items:
+                        $ref: '#/components/schemas/Comment'
+                    type: array
+                has_more:
+                    description: More comments after the last one; pass its id as `after`.
+                    type: boolean
+            required:
+                - comments
+                - has_more
+            type: object
+        CommentUpdate:
+            properties:
+                body:
+                    maxLength: 2000
+                    minLength: 1
+                    type: string
+                mentions:
+                    items:
+                        $ref: '#/components/schemas/Mention'
+                    maxItems: 20
+                    type: array
+            required:
+                - body
+            type: object
+        Conversation:
+            properties:
+                archived:
+                    description: The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).
+                    type: boolean
+                circle_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                created_at:
+                    format: date-time
+                    type: string
+                feed_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: '`family` and `circle`.'
+                    nullable: true
+                id:
+                    $ref: '#/components/schemas/Id'
+                kind:
+                    $ref: '#/components/schemas/ConversationKind'
+                last_activity_at:
+                    description: Last message
+                    format: date-time
+                    or creation. The list's sort key.: null
+                    type: string
+                last_message:
+                    allOf:
+                        - $ref: '#/components/schemas/Message'
+                    nullable: true
+                member_count:
+                    type: integer
+                members:
+                    description: Every member (conversations are at most 100 people; family chats can be larger and list everyone).
+                    items:
+                        $ref: '#/components/schemas/ConversationMember'
+                    type: array
+                muted:
+                    type: boolean
+                muted_until:
+                    description: 'Null with `muted: true` means always.'
+                    format: date-time
+                    nullable: true
+                    type: string
+                my_role:
+                    $ref: '#/components/schemas/ConversationRole'
+                name:
+                    description: Group name; the family's or circle's name; for `direct`, the other person's display name.
+                    type: string
+                other:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: '`direct` only.'
+                    nullable: true
+                photo_url:
+                    description: Group photo; the family's cover; for `direct`, the other person's avatar.
+                    format: uri
+                    nullable: true
+                    type: string
+                read_only:
+                    description: 'No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.'
+                    type: boolean
+                read_receipts:
+                    description: '"Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.'
+                    type: boolean
+                read_up_to:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The caller's own read position.
+                    nullable: true
+                unread_count:
+                    description: Messages after the caller's read position
+                    not from people they blocked.: null
+                    not their own: null
+                    type: integer
+                unread_mentions:
+                    type: integer
+            required:
+                - id
+                - kind
+                - name
+                - member_count
+                - unread_count
+                - last_activity_at
+                - muted
+                - archived
+            type: object
+        ConversationCreate:
+            properties:
+                kind:
+                    enum:
+                        - direct
+                        - group
+                    type: string
+                member_ids:
+                    description: Other people (not the caller).
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 99
+                    minItems: 1
+                    type: array
+                name:
+                    description: Required for groups.
+                    maxLength: 60
+                    minLength: 1
+                    type: string
+            required:
+                - kind
+                - member_ids
+            type: object
+        ConversationEvent:
+            properties:
+                conversation:
+                    $ref: '#/components/schemas/Conversation'
+                type:
+                    enum:
+                        - conversation.updated
+                    type: string
+            required:
+                - type
+                - conversation
+            type: object
+        ConversationKind:
+            description: '`direct`: two people, one per pair. `group`: 3–100 people with a name. `family`: one per feed, its members always the feed''s members. `circle`: one per circle, its members the circle''s.'
+            enum:
+                - direct
+                - group
+                - family
+                - circle
+            type: string
+        ConversationMember:
+            properties:
+                joined_at:
+                    format: date-time
+                    type: string
+                last_read_message_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: Only when read receipts are shown in this conversation (`Conversation.read_receipts`) and this member shows them too; null otherwise.
+                    nullable: true
+                person:
+                    $ref: '#/components/schemas/PersonRef'
+                role:
+                    $ref: '#/components/schemas/ConversationRole'
+            required:
+                - person
+                - role
+            type: object
+        ConversationPreferencesUpdate:
+            properties:
+                archived:
+                    type: boolean
+                mute:
+                    $ref: '#/components/schemas/MuteFor'
+            type: object
+        ConversationRemovedEvent:
+            properties:
+                conversation_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - conversation.removed
+                    type: string
+            required:
+                - type
+                - conversation_id
+            type: object
+        ConversationRole:
+            description: Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+            enum:
+                - admin
+                - member
+            type: string
+        ConversationUpdate:
+            properties:
+                name:
+                    maxLength: 60
+                    minLength: 1
+                    type: string
             type: object
         Countdown:
             description: A marked event, even when it lies outside the window.
@@ -1146,9 +1764,17 @@ components:
                     default: false
                     description: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
                     type: boolean
+                chats:
+                    default: false
+                    description: True when the server has conversations (direct, group, family, circle), blocks and reports (README §5.19).
+                    type: boolean
                 dev_auth:
                     default: false
                     description: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
+                    type: boolean
+                email_digest:
+                    default: false
+                    description: True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
                     type: boolean
                 email_inbox:
                     default: false
@@ -1161,6 +1787,10 @@ components:
                     example: in.kinframe.appmire.be
                     nullable: true
                     type: string
+                engagement:
+                    default: false
+                    description: True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
+                    type: boolean
                 feeds:
                     default: false
                     description: True when the server supports feeds and subscriptions (docs/spec/feeds.md).
@@ -1171,6 +1801,12 @@ components:
                     type: boolean
                 limits:
                     $ref: '#/components/schemas/Limits'
+                link_previews:
+                    default: false
+                    description: |
+                        True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
+                        links in messages itself (public addresses only). Off by default; clients then show links without previews.
+                    type: boolean
                 name:
                     type: string
                 photo_source_providers:
@@ -1190,6 +1826,10 @@ components:
                     type: boolean
                 shop:
                     $ref: '#/components/schemas/Shop'
+                social:
+                    default: false
+                    description: True when the server has the home timeline, comment threads, people's reactions, mentions, the `member` role and circles (docs/spec/family-social.md, README §5.18). Only with `feeds`.
+                    type: boolean
                 telegram:
                     default: false
                     description: |
@@ -1213,6 +1853,10 @@ components:
                     type: boolean
                 version:
                     type: string
+                voice_messages:
+                    default: false
+                    description: True when chats accept voice messages (needs ffmpeg on the server; README §5.19).
+                    type: boolean
                 weather:
                     default: false
                     description: True when the server fetches weather for frames and serves `/v1/geocode`.
@@ -1470,6 +2114,12 @@ components:
             required:
                 - authenticated
             type: object
+        EmailDigest:
+            enum:
+                - "off"
+                - daily
+                - weekly
+            type: string
         EmailHeldMessage:
             properties:
                 address_id:
@@ -1960,6 +2610,25 @@ components:
                 - top
                 - background
             type: string
+        FamilySocialPushKey:
+            description: |
+                Push `key`s added by family social (README §6.3; the older keys are listed there). Clients ignore keys they
+                don't know.
+            enum:
+                - comment
+                - comment_reply
+                - mention
+                - reaction_person
+                - reaction_digest
+                - message
+                - conversation_added
+                - report
+                - frame_request
+                - reminder_quiet
+                - reminder_streak
+                - reminder_birthday
+                - weekly_summary
+            type: string
         Feed:
             allOf:
                 - $ref: '#/components/schemas/FeedSummary'
@@ -1972,6 +2641,9 @@ components:
                     birthday_notifications:
                         description: 'The caller''s own preference (`updateFeedPreferences`): morning and greeting notifications for this feed''s birthdays.'
                         type: boolean
+                    circle_count:
+                        description: Circles the caller can see.
+                        type: integer
                     cover_item_id:
                         allOf:
                             - $ref: '#/components/schemas/Id'
@@ -1979,7 +2651,19 @@ components:
                         nullable: true
                     invite_requires_approval:
                         type: boolean
+                    members_can_create_circles:
+                        description: Any member may create circles (default on); otherwise owner and admins only.
+                        type: boolean
                     members_see_reactions:
+                        description: Every member sees frames' reactions and quick replies in posts' reaction rows and threads (default on for new feeds).
+                        type: boolean
+                    members_see_receipts:
+                        description: Every member sees per-frame receipts (delivered, seen) of every post (default off).
+                        type: boolean
+                    mute:
+                        $ref: '#/components/schemas/FeedMute'
+                    new_members_can_post:
+                        description: Joiners become `poster` (default) or, when off, `member`.
                         type: boolean
                     owner_name:
                         type: string
@@ -2049,13 +2733,23 @@ components:
                 invite_requires_approval:
                     default: true
                     type: boolean
+                members_can_create_circles:
+                    default: true
+                    type: boolean
                 members_see_reactions:
+                    default: true
+                    description: 'Default changed to true with docs/spec/family-social.md: reactions are social now.'
+                    type: boolean
+                members_see_receipts:
                     default: false
                     type: boolean
                 name:
                     maxLength: 40
                     minLength: 1
                     type: string
+                new_members_can_post:
+                    default: true
+                    type: boolean
                 posters_can_add_birthdays:
                     default: false
                     type: boolean
@@ -2079,6 +2773,64 @@ components:
                 - suspended
                 - removed
             type: string
+        FeedEngagement:
+            properties:
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                monthly_recap:
+                    default: true
+                    type: boolean
+                prompts_enabled:
+                    default: false
+                    type: boolean
+                quiet_after_days:
+                    default: 7
+                    description: A subscribed frame without new personal photos for this long gets the "getting quiet" reminder.
+                    maximum: 30
+                    minimum: 3
+                    type: integer
+                streak_enabled:
+                    default: true
+                    type: boolean
+                streak_goal:
+                    default: 3
+                    description: Photos the family together posts per week.
+                    maximum: 20
+                    minimum: 1
+                    type: integer
+                timezone:
+                    description: 'IANA zone for weeks (Monday–Sunday), prompts and recaps; default: the most common `locale.timezone` of its subscribed frames, else the owner''s, else Europe/Brussels.'
+                    example: Europe/Brussels
+                    type: string
+            required:
+                - feed_id
+                - streak_enabled
+                - streak_goal
+                - prompts_enabled
+                - quiet_after_days
+                - monthly_recap
+                - timezone
+            type: object
+        FeedEngagementUpdate:
+            properties:
+                monthly_recap:
+                    type: boolean
+                prompts_enabled:
+                    type: boolean
+                quiet_after_days:
+                    maximum: 30
+                    minimum: 3
+                    type: integer
+                streak_enabled:
+                    type: boolean
+                streak_goal:
+                    maximum: 20
+                    minimum: 1
+                    type: integer
+                timezone:
+                    maxLength: 64
+                    type: string
+            type: object
         FeedInvite:
             properties:
                 code:
@@ -2260,8 +3012,27 @@ components:
                 - display_name
                 - role
             type: object
+        FeedMute:
+            description: |
+                The caller's mute for one family: `none`; `posts` (no pushes for comments, replies and reactions on its posts;
+                mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
+                mentions too). Websocket events still arrive.
+            enum:
+                - none
+                - posts
+                - chat
+                - all
+            type: string
         FeedPost:
             properties:
+                circle_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The circle this post was shared with (only its members see it); null for the whole family.
+                    nullable: true
+                circle_name:
+                    nullable: true
+                    type: string
                 created_at:
                     format: date-time
                     type: string
@@ -2288,8 +3059,13 @@ components:
                         - user_id
                         - display_name
                     type: object
+                prompt_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The weekly prompt it answers (`tagPostPrompt`).
+                    nullable: true
                 reactions:
-                    description: Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+                    description: 'Frames'' reactions and replies: own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. Latest first, at most 50 (all in `getFeedPostReceipts`).'
                     items:
                         $ref: '#/components/schemas/FeedReaction'
                     nullable: true
@@ -2297,13 +3073,16 @@ components:
                 receipts:
                     allOf:
                         - $ref: '#/components/schemas/FeedReceiptSummary'
-                    description: Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+                    description: Own posts, owner/admins, or everyone with `members_see_receipts`; otherwise null.
                     nullable: true
                 send_id:
                     allOf:
                         - $ref: '#/components/schemas/Id'
                     description: The poster's send (own posts only).
                     nullable: true
+                thread:
+                    $ref: '#/components/schemas/ThreadSummary'
+                    description: The post's comments and people's reactions. Absent without `social`.
                 via:
                     allOf:
                         - $ref: '#/components/schemas/ItemVia'
@@ -2401,6 +3180,65 @@ components:
                 birthday_notifications:
                     description: Morning notification and greetings for this feed's birthdays.
                     type: boolean
+                mute:
+                    $ref: '#/components/schemas/FeedMute'
+            type: object
+        FeedPrompt:
+            properties:
+                answer_count:
+                    type: integer
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                id:
+                    $ref: '#/components/schemas/Id'
+                library_key:
+                    nullable: true
+                    type: string
+                set_by:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: The admin who chose or wrote it; null for the server's choice.
+                    nullable: true
+                source:
+                    enum:
+                        - server
+                        - custom
+                    type: string
+                status:
+                    enum:
+                        - current
+                        - planned
+                        - past
+                        - skipped
+                    type: string
+                title:
+                    description: In the caller's language for server prompts; empty when skipped.
+                    type: string
+                week_of:
+                    description: The Monday the prompt runs from.
+                    format: date
+                    type: string
+            required:
+                - id
+                - feed_id
+                - week_of
+                - status
+                - source
+                - title
+            type: object
+        FeedPromptSet:
+            properties:
+                library_key:
+                    maxLength: 64
+                    type: string
+                skip:
+                    enum:
+                        - true
+                    type: boolean
+                title:
+                    maxLength: 80
+                    minLength: 1
+                    type: string
             type: object
         FeedReaction:
             properties:
@@ -2453,13 +3291,100 @@ components:
                 - seen
             type: object
         FeedRole:
+            description: '`member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed''s `new_members_can_post`.'
             enum:
                 - owner
                 - admin
                 - poster
+                - member
             type: string
+        FeedStreak:
+            properties:
+                best_weeks:
+                    type: integer
+                current_weeks:
+                    description: Weeks in a row the goal was met (frozen weeks keep it
+                    they don't add).: null
+                    type: integer
+                enabled:
+                    type: boolean
+                freezes_left:
+                    maximum: 2
+                    minimum: 0
+                    type: integer
+                goal:
+                    type: integer
+                history:
+                    description: The last 12 closed weeks, newest first.
+                    items:
+                        properties:
+                            outcome:
+                                enum:
+                                    - met
+                                    - frozen
+                                    - missed
+                                type: string
+                            week_of:
+                                format: date
+                                type: string
+                        required:
+                            - week_of
+                            - outcome
+                        type: object
+                    type: array
+                week:
+                    properties:
+                        helpers:
+                            description: Who posted this week (no counts per person).
+                            items:
+                                $ref: '#/components/schemas/PersonRef'
+                            type: array
+                        met:
+                            type: boolean
+                        photos:
+                            type: integer
+                        week_of:
+                            description: The Monday.
+                            format: date
+                            type: string
+                    required:
+                        - week_of
+                        - photos
+                        - met
+                        - helpers
+                    type: object
+            required:
+                - enabled
+                - goal
+                - current_weeks
+                - best_weeks
+                - freezes_left
+                - week
+            type: object
+        FeedStreakSummary:
+            properties:
+                current_weeks:
+                    type: integer
+                goal:
+                    type: integer
+                met:
+                    description: This week's goal is reached.
+                    type: boolean
+                week_photos:
+                    type: integer
+            required:
+                - current_weeks
+                - week_photos
+                - goal
+                - met
+            type: object
         FeedSummary:
             properties:
+                conversation_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The family chat. Absent without `chats`.
+                    nullable: true
                 cover_url:
                     description: Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
                     format: uri
@@ -2468,6 +3393,9 @@ components:
                 created_at:
                     format: date-time
                     type: string
+                freshness:
+                    $ref: '#/components/schemas/Freshness'
+                    description: How recently the family got new posts from people (README §5.20). Absent without `engagement`.
                 id:
                     $ref: '#/components/schemas/Id'
                 last_post_at:
@@ -2480,6 +3408,11 @@ components:
                     type: string
                 role:
                     $ref: '#/components/schemas/FeedRole'
+                streak:
+                    allOf:
+                        - $ref: '#/components/schemas/FeedStreakSummary'
+                    description: Null when the family turned streaks off. Absent without `engagement`.
+                    nullable: true
                 subscription_count:
                     description: Active and paused subscriptions.
                     type: integer
@@ -2503,13 +3436,21 @@ components:
                 invite_requires_approval:
                     description: Join invites need an admin's approval.
                     type: boolean
+                members_can_create_circles:
+                    type: boolean
                 members_see_reactions:
-                    description: Every member sees receipts and reactions of every post.
+                    description: Every member sees frames' reactions and quick replies on every post.
+                    type: boolean
+                members_see_receipts:
+                    description: Every member sees per-frame receipts of every post.
                     type: boolean
                 name:
                     maxLength: 40
                     minLength: 1
                     type: string
+                new_members_can_post:
+                    description: Joiners become `poster` (true) or `member` (false). Existing members keep their role.
+                    type: boolean
                 posters_can_add_birthdays:
                     description: Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
                     type: boolean
@@ -2673,6 +3614,34 @@ components:
                 online:
                     type: boolean
             type: object
+        FramePhotoRequest:
+            description: The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change).
+            properties:
+                answered_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                answered_by_name:
+                    description: First name of whoever answered ("New photos from Ben").
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                next_allowed_at:
+                    description: "Until then the button shows \"Asked today \U0001F49B\"."
+                    format: date-time
+                    type: string
+                state:
+                    $ref: '#/components/schemas/PhotoRequestState'
+            required:
+                - id
+                - state
+                - created_at
+                - next_allowed_at
+            type: object
         FramePlugins:
             description: The frame's plugin catalog and their status, for the apps' Plugins section.
             properties:
@@ -2701,6 +3670,60 @@ components:
                     type: string
             required:
                 - catalog
+            type: object
+        FramePrompts:
+            description: 'Payload of the `prompts` change (entity: the frame): current prompts of its families, for the title card before their answers.'
+            properties:
+                generated_at:
+                    format: date-time
+                    type: string
+                prompts:
+                    items:
+                        properties:
+                            feed_id:
+                                $ref: '#/components/schemas/Id'
+                            feed_name:
+                                type: string
+                            prompt_id:
+                                $ref: '#/components/schemas/Id'
+                            title:
+                                description: In the frame's `locale.language`.
+                                type: string
+                            week_of:
+                                format: date
+                                type: string
+                        required:
+                            - prompt_id
+                            - feed_id
+                            - feed_name
+                            - title
+                            - week_of
+                        type: object
+                    type: array
+            required:
+                - generated_at
+                - prompts
+            type: object
+        FrameReactionRef:
+            properties:
+                at:
+                    format: date-time
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                frame_name:
+                    type: string
+                item_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The item the frame reacted to (posts with several items).
+                    nullable: true
+                reaction:
+                    $ref: '#/components/schemas/Reaction'
+            required:
+                - frame_id
+                - frame_name
+                - reaction
             type: object
         FrameSettings:
             description: Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
@@ -2987,6 +4010,26 @@ components:
                             minimum: 200
                             type: integer
                     type: object
+                social:
+                    description: Family social on the frame (docs/spec/family-social.md §8, README §5.20). Owner, admins and `change_settings` members.
+                    properties:
+                        ask_for_photos:
+                            default: true
+                            description: Show "Ask for new photos" in the frame's quick menu.
+                            type: boolean
+                        new_photos_from:
+                            default: true
+                            description: Show "New photos from Ben" on the next wake after new photos arrived (computed by the frame from the new placements' senders).
+                            type: boolean
+                        prompt_cards:
+                            default: true
+                            description: Show a weekly prompt's title card before its answers.
+                            type: boolean
+                        show_comments:
+                            default: false
+                            description: When a photo with comments appears, a card with the newest comment fades in for 8 s (once per photo per day). The server sends the `comments` change only while this is on.
+                            type: boolean
+                    type: object
                 updates:
                     properties:
                         channel:
@@ -3064,6 +4107,9 @@ components:
                     type: string
                 device_kind:
                     $ref: '#/components/schemas/DeviceKind'
+                freshness:
+                    $ref: '#/components/schemas/Freshness'
+                    description: How recently the frame got new photos from people (README §5.20). Absent on servers without `engagement`.
                 id:
                     $ref: '#/components/schemas/Id'
                 last_seen_at:
@@ -3083,6 +4129,11 @@ components:
                     type: string
                 permissions:
                     $ref: '#/components/schemas/Permissions'
+                photo_request:
+                    allOf:
+                        - $ref: '#/components/schemas/PhotoRequest'
+                    description: 'The frame''s "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.'
+                    nullable: true
                 role:
                     $ref: '#/components/schemas/Role'
                 screen:
@@ -3133,6 +4184,39 @@ components:
                 - sha256
                 - size
                 - published_at
+            type: object
+        Freshness:
+            description: |
+                How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+                today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+                "2 weeks quiet", `never` "No photos yet".
+            properties:
+                days_quiet:
+                    description: Whole days since the last personal photo (null = never).
+                    nullable: true
+                    type: integer
+                last_shared_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                last_shared_by:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    nullable: true
+                level:
+                    maximum: 1
+                    minimum: 0
+                    type: number
+                state:
+                    enum:
+                        - fresh
+                        - recent
+                        - quiet
+                        - never
+                    type: string
+            required:
+                - state
+                - level
             type: object
         GoogleImport:
             properties:
@@ -3262,6 +4346,9 @@ components:
                         the `birthdays` change (informational only: nothing is withheld; apps use it for
                         `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
                         (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
+                        `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
+                        has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
+                        app"; nothing is withheld.
                     items:
                         type: string
                     type: array
@@ -3660,6 +4747,13 @@ components:
                     default: 200
                     description: Birthday people per feed (pending and approved).
                     type: integer
+                max_circles_per_feed:
+                    default: 20
+                    type: integer
+                max_comment_chars:
+                    default: 2000
+                    description: Characters (Unicode code points) per comment.
+                    type: integer
                 max_email_addresses_per_target:
                     default: 5
                     description: Inbox addresses per frame or feed.
@@ -3692,8 +4786,25 @@ components:
                     default: 500
                     description: Items per Google Photos import (the picker's own maximum is 2000).
                     type: integer
+                max_group_members:
+                    default: 100
+                    description: People in a group chat
+                    the creator included.: null
+                    type: integer
                 max_items_per_send:
                     default: 200
+                    type: integer
+                max_mentions:
+                    default: 20
+                    description: Mentions per comment or message.
+                    type: integer
+                max_message_chars:
+                    default: 4000
+                    description: Characters (Unicode code points) per chat message.
+                    type: integer
+                max_message_items:
+                    default: 30
+                    description: Photos and videos per chat message.
                     type: integer
                 max_photo_source_items:
                     default: 10000
@@ -3732,6 +4843,14 @@ components:
                 max_video_seconds:
                     default: 300
                     type: integer
+                max_voice_seconds:
+                    default: 300
+                    description: Length of one voice message.
+                    type: integer
+                message_edit_hours:
+                    default: 24
+                    description: How long after sending the author can edit a message.
+                    type: integer
                 trash_retention_days:
                     default: 30
                     type: integer
@@ -3739,6 +4858,44 @@ components:
                 - max_items_per_send
                 - max_video_seconds
                 - max_upload_bytes
+            type: object
+        LinkPreview:
+            properties:
+                description:
+                    maxLength: 500
+                    nullable: true
+                    type: string
+                image_height:
+                    nullable: true
+                    type: integer
+                image_url:
+                    description: 'Fetched and re-encoded by the server (WebP, at most 512 px), served from the server: clients never load remote images.'
+                    format: uri
+                    nullable: true
+                    type: string
+                image_width:
+                    nullable: true
+                    type: integer
+                site_name:
+                    nullable: true
+                    type: string
+                status:
+                    enum:
+                        - pending
+                        - ok
+                        - failed
+                    type: string
+                title:
+                    maxLength: 300
+                    nullable: true
+                    type: string
+                url:
+                    description: The link as written.
+                    format: uri
+                    type: string
+            required:
+                - url
+                - status
             type: object
         LocalizedText:
             additionalProperties:
@@ -3782,6 +4939,336 @@ components:
                 - role
                 - permissions
             type: object
+        Mention:
+            description: |
+                A mention inside a comment or message `body`: `start` and `length` are in UTF-16 code units (what JavaScript,
+                Kotlin and Swift's `utf16` view count), covering the "@Name" text. Spans must lie inside the body and must not
+                overlap; at most `limits.max_mentions` per text.
+            properties:
+                length:
+                    minimum: 1
+                    type: integer
+                start:
+                    minimum: 0
+                    type: integer
+                user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - user_id
+                - start
+                - length
+            type: object
+        Message:
+            properties:
+                author:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: Null for system messages.
+                    nullable: true
+                body:
+                    nullable: true
+                    type: string
+                client_id:
+                    description: The author's `client_id` (author only).
+                    nullable: true
+                    type: string
+                conversation_id:
+                    $ref: '#/components/schemas/Id'
+                created_at:
+                    format: date-time
+                    type: string
+                deleted:
+                    description: 'Tombstone: "This message was deleted" (body, items, voice, preview and reactions are gone).'
+                    type: boolean
+                edited_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                frame_activity:
+                    description: Frame reactions and quick replies on placements made from this message by "Put on a frame".
+                    items:
+                        properties:
+                            frame_id:
+                                $ref: '#/components/schemas/Id'
+                            frame_name:
+                                type: string
+                            item_id:
+                                $ref: '#/components/schemas/Id'
+                            reaction:
+                                allOf:
+                                    - $ref: '#/components/schemas/Reaction'
+                                nullable: true
+                            replies:
+                                items:
+                                    $ref: '#/components/schemas/ReplyPreset'
+                                type: array
+                        required:
+                            - frame_id
+                            - frame_name
+                            - item_id
+                        type: object
+                    type: array
+                id:
+                    $ref: '#/components/schemas/Id'
+                items:
+                    description: Photos and videos. Ordinary items; `GET /v1/items/{id}/media/{variant}` serves them to conversation members.
+                    items:
+                        $ref: '#/components/schemas/Item'
+                    type: array
+                kind:
+                    $ref: '#/components/schemas/MessageKind'
+                link_preview:
+                    allOf:
+                        - $ref: '#/components/schemas/LinkPreview'
+                    nullable: true
+                mentions:
+                    items:
+                        $ref: '#/components/schemas/Mention'
+                    type: array
+                reactions:
+                    $ref: '#/components/schemas/ReactionSummary'
+                removed_by_admin:
+                    default: false
+                    description: 'With `deleted`: removed by a moderator ("This message was removed").'
+                    type: boolean
+                reply_to:
+                    allOf:
+                        - $ref: '#/components/schemas/MessageQuote'
+                    nullable: true
+                shared_post:
+                    allOf:
+                        - $ref: '#/components/schemas/PostCard'
+                    nullable: true
+                system:
+                    allOf:
+                        - $ref: '#/components/schemas/SystemMessage'
+                    nullable: true
+                voice:
+                    allOf:
+                        - $ref: '#/components/schemas/VoiceClip'
+                    nullable: true
+            required:
+                - id
+                - conversation_id
+                - kind
+                - created_at
+                - items
+                - reactions
+                - deleted
+            type: object
+        MessageCreate:
+            properties:
+                body:
+                    maxLength: 4000
+                    minLength: 1
+                    type: string
+                client_id:
+                    description: Client-generated id (e.g. a UUID) for the optimistic bubble; echoed back, and a retry with the same one returns the first message.
+                    maxLength: 64
+                    type: string
+                items:
+                    items:
+                        $ref: '#/components/schemas/MessageItemCreate'
+                    maxItems: 30
+                    type: array
+                link_preview:
+                    default: true
+                    description: 'false: don''t attach a preview of the body''s first link.'
+                    type: boolean
+                mentions:
+                    items:
+                        $ref: '#/components/schemas/Mention'
+                    maxItems: 20
+                    type: array
+                reply_to_id:
+                    $ref: '#/components/schemas/Id'
+                shared_post_id:
+                    $ref: '#/components/schemas/Id'
+                voice:
+                    description: A voice message (README §5.19); not together with `items`.
+                    properties:
+                        duration_ms:
+                            description: What the client recorded; the server measures it itself.
+                            maximum: 300000
+                            minimum: 1
+                            type: integer
+                        upload_id:
+                            description: 'The tus upload of the recording: AAC in MP4 (`audio/mp4`, `.m4a`) or Opus in WebM or Ogg.'
+                            type: string
+                    required:
+                        - upload_id
+                    type: object
+            type: object
+        MessageEvent:
+            description: '`message.created`, and `message.updated` (edited, items ready, preview fetched, frame activity, deleted into a tombstone).'
+            properties:
+                conversation_id:
+                    $ref: '#/components/schemas/Id'
+                message:
+                    $ref: '#/components/schemas/Message'
+                type:
+                    enum:
+                        - message.created
+                        - message.updated
+                    type: string
+            required:
+                - type
+                - conversation_id
+                - message
+            type: object
+        MessageItemCreate:
+            description: One photo or video, as in `SendCreate.items`.
+            properties:
+                caption:
+                    maxLength: 280
+                    nullable: true
+                    type: string
+                captured_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                duration_ms:
+                    minimum: 1
+                    type: integer
+                height:
+                    minimum: 1
+                    type: integer
+                include_audio:
+                    default: true
+                    type: boolean
+                live:
+                    default: true
+                    type: boolean
+                live_video_upload_id:
+                    type: string
+                trim:
+                    properties:
+                        end_ms:
+                            minimum: 1
+                            type: integer
+                        start_ms:
+                            minimum: 0
+                            type: integer
+                    type: object
+                upload_id:
+                    description: tus upload id (or an existing item id of the caller's when the server reported a duplicate).
+                    type: string
+                width:
+                    minimum: 1
+                    type: integer
+            required:
+                - upload_id
+            type: object
+        MessageKind:
+            description: '`system`: posted by kinframe (put on a frame, streak milestone, monthly recap, weekly prompt, member changes); no author, can be reacted to, can''t be edited.'
+            enum:
+                - person
+                - system
+            type: string
+        MessagePage:
+            properties:
+                has_more_after:
+                    type: boolean
+                has_more_before:
+                    type: boolean
+                messages:
+                    description: Oldest first.
+                    items:
+                        $ref: '#/components/schemas/Message'
+                    type: array
+            required:
+                - messages
+                - has_more_before
+                - has_more_after
+            type: object
+        MessageQuote:
+            description: The message replied to, as quoted above the reply.
+            properties:
+                author:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    nullable: true
+                deleted:
+                    description: The quoted message was deleted or isn't visible to the caller.
+                    type: boolean
+                excerpt:
+                    description: The first 200 characters of the body.
+                    nullable: true
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                media_kind:
+                    allOf:
+                        - $ref: '#/components/schemas/MediaKind'
+                    description: The first item's kind
+                    "for \"\U0001F4F7 Photo\".": null
+                    nullable: true
+                thumb_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                voice:
+                    description: "The quoted message is a voice message (\"\U0001F3A4 Voice message\")."
+                    type: boolean
+            required:
+                - id
+                - deleted
+            type: object
+        MessageUpdate:
+            properties:
+                body:
+                    maxLength: 4000
+                    minLength: 1
+                    type: string
+                mentions:
+                    items:
+                        $ref: '#/components/schemas/Mention'
+                    maxItems: 20
+                    type: array
+            required:
+                - body
+            type: object
+        Milestone:
+            properties:
+                achieved_at:
+                    format: date-time
+                    type: string
+                key:
+                    $ref: '#/components/schemas/MilestoneKey'
+                seen:
+                    description: The caller dismissed its card.
+                    type: boolean
+                shown:
+                    description: Shown on the caller's profile to their contacts (default false).
+                    type: boolean
+            required:
+                - key
+                - achieved_at
+                - shown
+                - seen
+            type: object
+        MilestoneEvent:
+            properties:
+                milestone:
+                    $ref: '#/components/schemas/Milestone'
+                type:
+                    enum:
+                        - milestone.achieved
+                    type: string
+            required:
+                - type
+                - milestone
+            type: object
+        MilestoneKey:
+            enum:
+                - first_photo
+                - photos_10
+                - photos_100
+                - photos_1000
+                - first_video
+                - year_of_sharing
+                - loves_100
+            type: string
         MirrorSettings:
             description: The frame settings a mirroring TV needs to look like the frame.
             properties:
@@ -3931,6 +5418,72 @@ components:
                 - screen
                 - expires_at
             type: object
+        MonthlyRecap:
+            description: About the family, never ranking individuals.
+            properties:
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                freshest_frames:
+                    items:
+                        properties:
+                            days_with_new_photos:
+                                type: integer
+                            frame_id:
+                                $ref: '#/components/schemas/Id'
+                            frame_name:
+                                type: string
+                        required:
+                            - frame_id
+                            - frame_name
+                            - days_with_new_photos
+                        type: object
+                    maxItems: 3
+                    type: array
+                month:
+                    pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+                    type: string
+                most_loved:
+                    nullable: true
+                    properties:
+                        item:
+                            $ref: '#/components/schemas/Item'
+                        post_id:
+                            $ref: '#/components/schemas/Id'
+                        reaction_count:
+                            description: People and frames.
+                            type: integer
+                    required:
+                        - post_id
+                        - item
+                    type: object
+                new_members:
+                    items:
+                        $ref: '#/components/schemas/PersonRef'
+                    type: array
+                photos_shared:
+                    type: integer
+                sharer_count:
+                    type: integer
+                streak_weeks:
+                    nullable: true
+                    type: integer
+                videos_shared:
+                    type: integer
+            required:
+                - feed_id
+                - month
+                - photos_shared
+                - videos_shared
+                - sharer_count
+            type: object
+        MuteFor:
+            enum:
+                - "off"
+                - 1h
+                - 8h
+                - 1w
+                - always
+            type: string
         NowShowing:
             description: |
                 Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
@@ -4016,6 +5569,43 @@ components:
                 - sent_at
                 - screen
             type: object
+        OnThisDay:
+            properties:
+                date:
+                    format: date
+                    type: string
+                groups:
+                    items:
+                        properties:
+                            feed_id:
+                                $ref: '#/components/schemas/Id'
+                            feed_name:
+                                type: string
+                            items:
+                                items:
+                                    $ref: '#/components/schemas/Item'
+                                maxItems: 12
+                                type: array
+                            post_ids:
+                                items:
+                                    $ref: '#/components/schemas/Id'
+                                type: array
+                            years_ago:
+                                minimum: 1
+                                type: integer
+                        required:
+                            - feed_id
+                            - feed_name
+                            - years_ago
+                            - items
+                            - post_ids
+                        type: object
+                    maxItems: 3
+                    type: array
+            required:
+                - date
+                - groups
+            type: object
         Permissions:
             properties:
                 change_settings:
@@ -4029,6 +5619,140 @@ components:
                 send:
                     type: boolean
             type: object
+        Person:
+            description: A contact (someone the caller shares a family or a frame with).
+            properties:
+                blocked:
+                    description: The caller blocked this person.
+                    type: boolean
+                direct_conversation_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                feeds:
+                    description: The families both are in.
+                    items:
+                        properties:
+                            feed_id:
+                                $ref: '#/components/schemas/Id'
+                            feed_name:
+                                type: string
+                        required:
+                            - feed_id
+                            - feed_name
+                        type: object
+                    type: array
+                frames:
+                    description: The frames both are members of.
+                    items:
+                        properties:
+                            frame_id:
+                                $ref: '#/components/schemas/Id'
+                            frame_name:
+                                type: string
+                        required:
+                            - frame_id
+                            - frame_name
+                        type: object
+                    type: array
+                milestones:
+                    description: The milestones this person chose to show (all of them for the caller's own profile).
+                    items:
+                        $ref: '#/components/schemas/MilestoneKey'
+                    type: array
+                person:
+                    $ref: '#/components/schemas/PersonRef'
+            required:
+                - person
+                - feeds
+                - frames
+                - blocked
+            type: object
+        PersonReaction:
+            description: "A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':\n`love` ❤️, `laugh` \U0001F602, `wow` \U0001F62E, `sad` \U0001F622; people also have `thumbs_up` \U0001F44D and `pray` \U0001F64F.\n"
+            enum:
+                - love
+                - laugh
+                - wow
+                - sad
+                - thumbs_up
+                - pray
+            type: string
+        PersonRef:
+            description: |
+                A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+                the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+            properties:
+                avatar_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                display_name:
+                    type: string
+                former_member:
+                    default: false
+                    type: boolean
+                user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - user_id
+                - display_name
+            type: object
+        PhotoRequest:
+            description: A frame's "Ask for new photos".
+            properties:
+                answered_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                answered_by:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    nullable: true
+                created_at:
+                    format: date-time
+                    type: string
+                expires_at:
+                    format: date-time
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                frame_name:
+                    type: string
+                freshness:
+                    $ref: '#/components/schemas/Freshness'
+                id:
+                    $ref: '#/components/schemas/Id'
+                state:
+                    $ref: '#/components/schemas/PhotoRequestState'
+            required:
+                - id
+                - frame_id
+                - frame_name
+                - state
+                - created_at
+                - expires_at
+            type: object
+        PhotoRequestEvent:
+            properties:
+                request:
+                    $ref: '#/components/schemas/PhotoRequest'
+                type:
+                    enum:
+                        - photo_request.created
+                        - photo_request.updated
+                    type: string
+            required:
+                - type
+                - request
+            type: object
+        PhotoRequestState:
+            description: '`open`: waiting (7 days at most). `answered`: someone sent a photo that reached the frame. `expired`: nobody did within 7 days.'
+            enum:
+                - open
+                - answered
+                - expired
+            type: string
         PhotoService:
             description: 'The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).'
             enum:
@@ -4602,6 +6326,11 @@ components:
                     type: string
                 pending_moderation:
                     type: boolean
+                prompt_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: 'Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt''s title card before the first of them.'
+                    nullable: true
                 reaction:
                     allOf:
                         - $ref: '#/components/schemas/Reaction'
@@ -4654,6 +6383,41 @@ components:
                 - status
                 - hidden
                 - trashed
+            type: object
+        PlacementComments:
+            description: |
+                Payload of the `comments` change (entity: the placement): the three newest person comments of the placement's
+                feed post, for frames with `settings.social.show_comments` on (README §5.20). Plain text, first names only.
+            properties:
+                comments:
+                    description: Newest first.
+                    items:
+                        properties:
+                            author_name:
+                                example: Anna
+                                type: string
+                            body:
+                                description: Cut at 280 characters with "…"; mentions as plain text.
+                                maxLength: 280
+                                type: string
+                            created_at:
+                                format: date-time
+                                type: string
+                            id:
+                                $ref: '#/components/schemas/Id'
+                        required:
+                            - id
+                            - author_name
+                            - body
+                            - created_at
+                        type: object
+                    maxItems: 3
+                    type: array
+                placement_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - placement_id
+                - comments
             type: object
         PlacementOrigin:
             description: |
@@ -4827,6 +6591,112 @@ components:
                     description: mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
                     type: object
             type: object
+        PostCard:
+            description: A post shared in a chat ("Share in chat").
+            properties:
+                available:
+                    description: 'False when the caller may not see the post (another family, a circle they are not in) or it was removed: show "This post isn''t available".'
+                    type: boolean
+                caption:
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                feed_name:
+                    nullable: true
+                    type: string
+                frame_name:
+                    nullable: true
+                    type: string
+                item_count:
+                    type: integer
+                kind:
+                    allOf:
+                        - $ref: '#/components/schemas/PostKind'
+                    nullable: true
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                poster:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    nullable: true
+                thumb_urls:
+                    items:
+                        format: uri
+                        type: string
+                    maxItems: 4
+                    type: array
+            required:
+                - post_id
+                - available
+            type: object
+        PostEvent:
+            description: '`post.updated`: a post''s thread state, comment count or reaction row changed (everyone who sees the post).'
+            properties:
+                feed_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                frame_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                thread:
+                    $ref: '#/components/schemas/ThreadSummary'
+                type:
+                    enum:
+                        - post.updated
+                    type: string
+            required:
+                - type
+                - post_id
+                - thread
+            type: object
+        PostKind:
+            description: '`feed`: a post in a family (feed). `frame`: a direct send to one frame (one per send and frame).'
+            enum:
+                - feed
+                - frame
+            type: string
+        PostRemovedEvent:
+            description: '`post.removed`: removed, or no longer visible to the receiver.'
+            properties:
+                feed_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                frame_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - post.removed
+                    type: string
+            required:
+                - type
+                - post_id
+            type: object
+        PostSeen:
+            description: |
+                The line under a post: "Seen on 4 frames · ❤ from Oma's frame". `frames`/`seen` follow the post's receipts
+                (`FeedReceiptSummary`); visible to the poster, the feed's owner/admins, and every member when the feed has
+                `members_see_receipts` (frame posts: everyone who sees the post). Otherwise null on `TimelinePost.seen`.
+            properties:
+                frames:
+                    type: integer
+                seen:
+                    type: integer
+            required:
+                - frames
+                - seen
+            type: object
         Problem:
             properties:
                 code:
@@ -4894,8 +6764,38 @@ components:
                 - source_test_failed
                 - duplicate_sender
                 - telegram_already_linked
+                - cannot_message
+                - comments_closed
+                - audio_too_long
                 - server_error
             type: string
+        PromptEvent:
+            properties:
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                prompt:
+                    $ref: '#/components/schemas/FeedPrompt'
+                type:
+                    enum:
+                        - prompt.updated
+                    type: string
+            required:
+                - type
+                - feed_id
+                - prompt
+            type: object
+        PromptLibraryEntry:
+            properties:
+                key:
+                    example: cooked
+                    type: string
+                title:
+                    example: Something you cooked
+                    type: string
+            required:
+                - key
+                - title
+            type: object
         PublicStationList:
             properties:
                 stations:
@@ -4930,6 +6830,12 @@ components:
                 - reading
                 - temp_24h
             type: object
+        PushAction:
+            description: 'Notification buttons in `PushPayload.actions`: `snooze_month` calls `updateReminderPreferences {snooze_days: 30}`, `fewer_reminders` `{level: fewer}`.'
+            enum:
+                - snooze_month
+                - fewer_reminders
+            type: string
         PushEndpoint:
             allOf:
                 - $ref: '#/components/schemas/PushEndpointCreate'
@@ -4971,6 +6877,79 @@ components:
                 - kind
                 - endpoint
             type: object
+        PushPayload:
+            description: |
+                The decrypted WebPush payload and the content of UnifiedPush messages (README §6.3); FCM data and APNs
+                custom keys carry the same fields. `ids` holds only ids (strings), never content.
+            properties:
+                actions:
+                    items:
+                        $ref: '#/components/schemas/PushAction'
+                    type: array
+                body:
+                    type: string
+                ids:
+                    additionalProperties:
+                        type: string
+                    type: object
+                key:
+                    description: The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+                    type: string
+                tag:
+                    description: A newer push with the same tag replaces the older one.
+                    type: string
+                title:
+                    type: string
+                type:
+                    description: The websocket event type this push stands for.
+                    type: string
+            required:
+                - type
+                - key
+                - title
+                - body
+                - ids
+            type: object
+        PutOnFrameRequest:
+            description: '`frame_ids` and `feed_ids` together must not be empty.'
+            properties:
+                circle_ids:
+                    description: As in `SendCreate.circle_ids`.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 20
+                    type: array
+                feed_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 20
+                    type: array
+                frame_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    type: array
+                item_ids:
+                    description: A subset of the message's photos and videos; default all of them.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 30
+                    type: array
+            required:
+                - frame_ids
+            type: object
+        QuietHours:
+            description: Local times (`User.timezone`) without reminders; they wait until the end. Default 21:00–09:00.
+            properties:
+                end:
+                    pattern: ^[0-2][0-9]:[0-5][0-9]$
+                    type: string
+                start:
+                    pattern: ^[0-2][0-9]:[0-5][0-9]$
+                    type: string
+            required:
+                - start
+                - end
+            type: object
         Reaction:
             enum:
                 - love
@@ -4978,6 +6957,136 @@ components:
                 - wow
                 - sad
             type: string
+        ReactionList:
+            properties:
+                frames:
+                    items:
+                        $ref: '#/components/schemas/FrameReactionRef'
+                    type: array
+                people:
+                    items:
+                        properties:
+                            at:
+                                format: date-time
+                                type: string
+                            emoji:
+                                $ref: '#/components/schemas/PersonReaction'
+                            person:
+                                $ref: '#/components/schemas/PersonRef'
+                        required:
+                            - person
+                            - emoji
+                            - at
+                        type: object
+                    type: array
+            required:
+                - people
+                - frames
+            type: object
+        ReactionSummary:
+            description: |
+                The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+                and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+                `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+                reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+                are left out of `people` but counted.
+            properties:
+                counts:
+                    description: Per emoji, most frequent first.
+                    items:
+                        properties:
+                            count:
+                                type: integer
+                            emoji:
+                                $ref: '#/components/schemas/PersonReaction'
+                        required:
+                            - emoji
+                            - count
+                        type: object
+                    type: array
+                frames:
+                    description: Up to 3 frames, newest first.
+                    items:
+                        $ref: '#/components/schemas/FrameReactionRef'
+                    type: array
+                mine:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonReaction'
+                    nullable: true
+                people:
+                    description: Up to 3 people, the caller's contacts first, newest first.
+                    items:
+                        properties:
+                            emoji:
+                                $ref: '#/components/schemas/PersonReaction'
+                            person:
+                                $ref: '#/components/schemas/PersonRef'
+                        required:
+                            - person
+                            - emoji
+                        type: object
+                    type: array
+                total:
+                    type: integer
+            required:
+                - total
+                - counts
+                - people
+                - frames
+            type: object
+        ReactionTargetKind:
+            description: '`post_item` is one item of a post (the `post_id` query parameter names the post).'
+            enum:
+                - post
+                - post_item
+                - comment
+                - message
+            type: string
+        ReactionUpdatedEvent:
+            description: '`reaction.updated`: people''s reactions on a target changed; `summary` is computed for the receiver.'
+            properties:
+                conversation_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                post_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                summary:
+                    $ref: '#/components/schemas/ReactionSummary'
+                target_id:
+                    $ref: '#/components/schemas/Id'
+                target_kind:
+                    $ref: '#/components/schemas/ReactionTargetKind'
+                type:
+                    enum:
+                        - reaction.updated
+                    type: string
+            required:
+                - type
+                - target_kind
+                - target_id
+                - summary
+            type: object
+        ReadUpdatedEvent:
+            properties:
+                conversation_id:
+                    $ref: '#/components/schemas/Id'
+                last_read_message_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - read.updated
+                    type: string
+                user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - type
+                - conversation_id
+                - user_id
+                - last_read_message_id
+            type: object
         RedeemResult:
             properties:
                 frame:
@@ -4995,12 +7104,178 @@ components:
                 - status
                 - frame
             type: object
+        ReminderLevel:
+            description: '`fewer`: half the weekly budget and no streak reminders. `off`: no reminders (frame requests follow `frame_requests`).'
+            enum:
+                - normal
+                - fewer
+                - "off"
+            type: string
+        ReminderPreferences:
+            properties:
+                auto_reduced:
+                    description: The server lowered `level` to `fewer` after 4 unanswered reminders in a row; show it once, then send `auto_reduced_seen`.
+                    type: boolean
+                birthday_reminders:
+                    default: true
+                    type: boolean
+                email_digest:
+                    $ref: '#/components/schemas/EmailDigest'
+                email_digest_available:
+                    description: The server can send mail (discovery `email_digest`).
+                    type: boolean
+                frame_requests:
+                    default: true
+                    description: Pushes when a frame asks for new photos.
+                    type: boolean
+                level:
+                    $ref: '#/components/schemas/ReminderLevel'
+                quiet_hours:
+                    $ref: '#/components/schemas/QuietHours'
+                snoozed_until:
+                    format: date-time
+                    nullable: true
+                    type: string
+                weekly_summary:
+                    default: true
+                    type: boolean
+            required:
+                - level
+                - frame_requests
+                - weekly_summary
+                - birthday_reminders
+                - quiet_hours
+                - email_digest
+            type: object
+        ReminderPreferencesUpdate:
+            properties:
+                auto_reduced_seen:
+                    enum:
+                        - true
+                    type: boolean
+                birthday_reminders:
+                    type: boolean
+                email_digest:
+                    $ref: '#/components/schemas/EmailDigest'
+                frame_requests:
+                    type: boolean
+                level:
+                    $ref: '#/components/schemas/ReminderLevel'
+                quiet_hours:
+                    $ref: '#/components/schemas/QuietHours'
+                snooze_days:
+                    maximum: 90
+                    minimum: 0
+                    type: integer
+                weekly_summary:
+                    type: boolean
+            type: object
         ReplyPreset:
             enum:
                 - beautiful
                 - call_me
                 - miss_you
                 - thanks
+            type: string
+        Report:
+            description: The reporter sees their own report (`mine`) without `excerpt`, `author` or `note` of others; handlers see everything except who reported.
+            properties:
+                author:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: Who wrote the reported content (handlers).
+                    nullable: true
+                conversation_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                created_at:
+                    format: date-time
+                    type: string
+                excerpt:
+                    description: The reported text as it was when reported (kept even if it was edited or deleted since), or a description of the media; handlers only.
+                    nullable: true
+                    type: string
+                feed_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: Null when the operator handles it.
+                    nullable: true
+                id:
+                    $ref: '#/components/schemas/Id'
+                mine:
+                    type: boolean
+                note:
+                    nullable: true
+                    type: string
+                post_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                reason:
+                    $ref: '#/components/schemas/ReportReason'
+                resolved_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                status:
+                    enum:
+                        - open
+                        - removed
+                        - dismissed
+                    type: string
+                target_id:
+                    $ref: '#/components/schemas/Id'
+                target_kind:
+                    $ref: '#/components/schemas/ReportTargetKind'
+            required:
+                - id
+                - target_kind
+                - target_id
+                - reason
+                - status
+                - created_at
+            type: object
+        ReportCreate:
+            properties:
+                note:
+                    maxLength: 500
+                    type: string
+                reason:
+                    $ref: '#/components/schemas/ReportReason'
+                target_id:
+                    $ref: '#/components/schemas/Id'
+                target_kind:
+                    $ref: '#/components/schemas/ReportTargetKind'
+            required:
+                - target_kind
+                - target_id
+                - reason
+            type: object
+        ReportEvent:
+            properties:
+                report:
+                    $ref: '#/components/schemas/Report'
+                type:
+                    enum:
+                        - report.created
+                    type: string
+            required:
+                - type
+                - report
+            type: object
+        ReportReason:
+            enum:
+                - unkind
+                - spam
+                - inappropriate
+                - other
+            type: string
+        ReportTargetKind:
+            enum:
+                - comment
+                - message
+                - post
             type: string
         Role:
             enum:
@@ -5120,8 +7395,17 @@ components:
                 `frame_ids`). Feeds need membership (any role), frames need `send`. A frame that is a direct recipient and
                 also subscribes to a feed in `feed_ids` gets the item once (docs/spec/feeds.md §6.2).
             properties:
+                circle_ids:
+                    description: |
+                        The audience inside a feed: at most one circle per feed, its feed must be in `feed_ids`, and the caller must
+                        be in the circle (`422 validation_failed`, field `circle_ids`). That feed's post is shared with the circle
+                        only (README §5.18); other feeds get a whole-family post.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 20
+                    type: array
                 feed_ids:
-                    description: 'Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).'
+                    description: 'Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). Needs role `poster` or above (`403 missing_permission` for `member`).'
                     items:
                         $ref: '#/components/schemas/Id'
                     maxItems: 20
@@ -5195,6 +7479,10 @@ components:
                         type: object
                     minItems: 1
                     type: array
+                prompt_id:
+                    description: Tag the feed posts as answers to this weekly prompt (`FeedPrompt.id`, current or previous week); only the post in that prompt's feed is tagged.
+                    format: uuid
+                    type: string
             required:
                 - frame_ids
                 - items
@@ -5943,6 +8231,21 @@ components:
                 nullable: true
                 type: number
             type: array
+        StreakEvent:
+            properties:
+                feed_id:
+                    $ref: '#/components/schemas/Id'
+                streak:
+                    $ref: '#/components/schemas/FeedStreakSummary'
+                type:
+                    enum:
+                        - streak.updated
+                    type: string
+            required:
+                - type
+                - feed_id
+                - streak
+            type: object
         Subscription:
             properties:
                 activated_at:
@@ -6127,6 +8430,68 @@ components:
                     minimum: 1
                     type: integer
             type: object
+        SystemMessage:
+            description: The content of a `system` message; clients render it in the viewer's language from these fields.
+            properties:
+                feed_names:
+                    items:
+                        type: string
+                    type: array
+                frame_names:
+                    items:
+                        type: string
+                    type: array
+                item_count:
+                    nullable: true
+                    type: integer
+                month:
+                    description: '`monthly_recap`: YYYY-MM (`getFeedRecap`).'
+                    nullable: true
+                    type: string
+                person:
+                    allOf:
+                        - $ref: '#/components/schemas/PersonRef'
+                    description: 'Who did it: put on a frame, joined or left.'
+                    nullable: true
+                prompt_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                prompt_title:
+                    nullable: true
+                    type: string
+                recap:
+                    allOf:
+                        - $ref: '#/components/schemas/MonthlyRecap'
+                    nullable: true
+                send_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: '`put_on_frame`.'
+                    nullable: true
+                source_message_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: '`put_on_frame`: the message whose items were sent.'
+                    nullable: true
+                type:
+                    $ref: '#/components/schemas/SystemMessageType'
+                weeks:
+                    description: '`streak_milestone`: 4, 12, 26, 52, then every 52.'
+                    nullable: true
+                    type: integer
+            required:
+                - type
+            type: object
+        SystemMessageType:
+            enum:
+                - put_on_frame
+                - streak_milestone
+                - monthly_recap
+                - prompt
+                - member_joined
+                - member_left
+            type: string
         TelegramChat:
             properties:
                 bot_is_admin:
@@ -6494,6 +8859,166 @@ components:
                 - id
                 - name
             type: object
+        ThreadReadEvent:
+            description: '`thread.read`: the receiver read a thread on another device.'
+            properties:
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                read_up_to:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - thread.read
+                    type: string
+            required:
+                - type
+                - post_id
+                - read_up_to
+            type: object
+        ThreadState:
+            enum:
+                - open
+                - closed
+            type: string
+        ThreadSummary:
+            description: The thread of a post as shown on the timeline.
+            properties:
+                can_comment:
+                    description: False when closed or the caller may only read.
+                    type: boolean
+                can_moderate:
+                    description: May close the thread and remove others' comments.
+                    type: boolean
+                comment_count:
+                    description: Person comments and replies
+                    type: integer
+                    without tombstones and removed ones.: null
+                latest_comments:
+                    description: The two newest person comments (replies included), oldest of the two first.
+                    items:
+                        $ref: '#/components/schemas/Comment'
+                    maxItems: 2
+                    type: array
+                muted:
+                    type: boolean
+                post_id:
+                    $ref: '#/components/schemas/Id'
+                reactions:
+                    $ref: '#/components/schemas/ReactionSummary'
+                read_up_to:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                state:
+                    $ref: '#/components/schemas/ThreadState'
+                unread_count:
+                    description: Person comments after the caller's `read_up_to` (all of them if never read)
+                    not counting their own.: null
+                    type: integer
+                unread_mentions:
+                    description: Unread comments that mention the caller or reply to them.
+                    type: integer
+            required:
+                - post_id
+                - state
+                - comment_count
+                - latest_comments
+                - reactions
+            type: object
+        TimelinePage:
+            properties:
+                next_before:
+                    description: Pass as `before` for the next (older) page; null at the end.
+                    nullable: true
+                    type: string
+                posts:
+                    items:
+                        $ref: '#/components/schemas/TimelinePost'
+                    type: array
+            required:
+                - posts
+                - next_before
+            type: object
+        TimelinePost:
+            properties:
+                can_remove:
+                    description: 'The poster, or a feed owner/admin (`removeFeedPost`); frame posts: the sender (`unsend` per frame is not offered; it removes the whole send).'
+                    type: boolean
+                circle_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: Feed posts shared with one circle only.
+                    nullable: true
+                circle_name:
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                feed_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                feed_name:
+                    description: The family
+                    nullable: true
+                    shown as a label.: null
+                    type: string
+                frame_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: '`frame` posts: the frame ("To Oma''s frame").'
+                    nullable: true
+                frame_name:
+                    nullable: true
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                items:
+                    description: Live items in send order (for frame posts
+                    items:
+                        $ref: '#/components/schemas/Item'
+                    those still on the frame).: null
+                    type: array
+                kind:
+                    $ref: '#/components/schemas/PostKind'
+                poster:
+                    $ref: '#/components/schemas/PersonRef'
+                prompt:
+                    description: The weekly prompt this post answers; clients group consecutive answers ("6 answers to …").
+                    nullable: true
+                    properties:
+                        id:
+                            $ref: '#/components/schemas/Id'
+                        title:
+                            type: string
+                    required:
+                        - id
+                        - title
+                    type: object
+                seen:
+                    allOf:
+                        - $ref: '#/components/schemas/PostSeen'
+                    nullable: true
+                send_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: The poster's send (own posts only).
+                    nullable: true
+                thread:
+                    $ref: '#/components/schemas/ThreadSummary'
+                via:
+                    allOf:
+                        - $ref: '#/components/schemas/ItemVia'
+                    nullable: true
+            required:
+                - id
+                - kind
+                - poster
+                - created_at
+                - items
+                - thread
+            type: object
         TvLink:
             properties:
                 album_id:
@@ -6681,6 +9206,34 @@ components:
                 - refresh_after
                 - slides
             type: object
+        TypingEvent:
+            properties:
+                activity:
+                    enum:
+                        - typing
+                        - recording
+                    type: string
+                conversation_id:
+                    $ref: '#/components/schemas/Id'
+                display_name:
+                    type: string
+                expires_at:
+                    format: date-time
+                    type: string
+                type:
+                    enum:
+                        - typing
+                    type: string
+                user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - type
+                - conversation_id
+                - user_id
+                - display_name
+                - activity
+                - expires_at
+            type: object
         User:
             properties:
                 avatar_url:
@@ -6704,6 +9257,10 @@ components:
                     type: string
                 share_location_names:
                     type: boolean
+                show_read_receipts:
+                    default: true
+                    description: Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
+                    type: boolean
                 timezone:
                     description: IANA time zone reported by the user's apps; null until one did.
                     example: Europe/Brussels
@@ -6712,6 +9269,33 @@ components:
             required:
                 - id
                 - display_name
+            type: object
+        VoiceClip:
+            description: |
+                A voice message's recording (README §5.19). Stored as an item of its own (never placed on a frame or in a
+                library); `GET /v1/items/{item_id}/media/master` serves the AAC master (`audio/mp4`, Range supported).
+            properties:
+                duration_ms:
+                    nullable: true
+                    type: integer
+                item_id:
+                    $ref: '#/components/schemas/Id'
+                status:
+                    enum:
+                        - processing
+                        - ready
+                        - failed
+                    type: string
+                waveform:
+                    description: 64 loudness values 0–100 over the recording (empty while processing).
+                    items:
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                    type: array
+            required:
+                - item_id
+                - status
             type: object
         Weather:
             description: |
@@ -6857,6 +9441,58 @@ components:
                 - current
                 - daily
             type: object
+        WeeklySummary:
+            description: '"Your photos were seen 58 times on 3 frames this week; Oma loved 4".'
+            properties:
+                comment_count:
+                    description: Comments by others on the caller's posts this week.
+                    type: integer
+                frame_count:
+                    type: integer
+                frames:
+                    items:
+                        properties:
+                            frame_id:
+                                $ref: '#/components/schemas/Id'
+                            frame_name:
+                                type: string
+                            love_count:
+                                type: integer
+                            seen_count:
+                                type: integer
+                        required:
+                            - frame_id
+                            - frame_name
+                            - seen_count
+                            - love_count
+                        type: object
+                    type: array
+                love_count:
+                    description: Frame ❤ on the caller's items this week.
+                    type: integer
+                reaction_count:
+                    description: People's reactions on the caller's posts and items this week.
+                    type: integer
+                seen_count:
+                    description: Placements of the caller's items first seen this week.
+                    type: integer
+                top_item:
+                    allOf:
+                        - $ref: '#/components/schemas/Item'
+                    description: The item with the most reactions.
+                    nullable: true
+                week_of:
+                    format: date
+                    type: string
+            required:
+                - week_of
+                - seen_count
+                - frame_count
+                - love_count
+                - reaction_count
+                - comment_count
+                - frames
+            type: object
     securitySchemes:
         deviceAuth:
             bearerFormat: JWT
@@ -6954,6 +9590,501 @@ paths:
             security: []
             tags:
                 - dev
+    /v1/blocks:
+        get:
+            operationId: listBlocks
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Block'
+                                type: array
+                    description: People the caller blocked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - safety
+    /v1/blocks/{userId}:
+        delete:
+            operationId: unblockUser
+            responses:
+                "204":
+                    description: Unblocked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - safety
+        parameters:
+            - $ref: '#/components/parameters/UserId'
+        put:
+            description: |
+                Idempotent. Hides the person's comments, messages and reactions from the caller, stops their direct messages
+                (they get `403 cannot_message`, without being told why) and stops them adding the caller to groups. Shared
+                families, circles and groups stay (removing people is the admins' call). The blocked person is not notified.
+            operationId: blockUser
+            responses:
+                "204":
+                    description: Blocked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - safety
+    /v1/contacts:
+        get:
+            description: |
+                People the caller shares at least one family or frame with: the only people they can start a chat with or add
+                to a group. There is no search beyond this list. Sorted by display name.
+            operationId: listContacts
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Person'
+                                type: array
+                    description: Contacts
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations:
+        get:
+            description: |
+                Every conversation the caller is in (family and circle chats included), most recent activity first, with
+                unread counts and the last message. Family-sized, so not paged. Archived conversations (the caller's own
+                `archived`, or a deleted family or circle) only with `archived=true`.
+            operationId: listConversations
+            parameters:
+                - in: query
+                  name: archived
+                  schema:
+                    default: false
+                    type: boolean
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Conversation'
+                                type: array
+                    description: Conversations
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        post:
+            description: |
+                Start a `direct` or `group` chat (family and circle chats exist with their family or circle). Everyone in
+                `member_ids` must share a family or a frame with the caller and must not have blocked them
+                (`403 cannot_message`, `detail` names nobody). `direct`: exactly one other person; idempotent per pair: the
+                existing conversation is returned with `200`. `group`: 2–99 others (3–100 people with the caller) and a
+                `name`; the caller is its admin.
+            operationId: createConversation
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ConversationCreate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: The existing direct conversation
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Created
+                "403":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}:
+        get:
+            description: Members only; everyone else gets `404 not_found`.
+            operationId: getConversation
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Conversation
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        parameters:
+            - $ref: '#/components/parameters/ConversationId'
+        patch:
+            description: Groups only (`409 invalid_transition` otherwise; family and circle chats take their name from the family or circle). Group admins.
+            operationId: updateConversation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ConversationUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/members:
+        post:
+            description: |
+                Groups only. Any member may add people who share a family or a frame with them and have not blocked them
+                (`403 cannot_message`), up to 100 people. New members see messages from the moment they were added.
+            operationId: addConversationMembers
+            parameters:
+                - $ref: '#/components/parameters/ConversationId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                user_ids:
+                                    items:
+                                        $ref: '#/components/schemas/Id'
+                                    maxItems: 99
+                                    minItems: 1
+                                    type: array
+                            required:
+                                - user_ids
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Conversation
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/members/{userId}:
+        delete:
+            description: |
+                Groups only. Admins remove anyone; anyone removes themself (leave). When the last admin leaves, the
+                longest-standing member becomes admin. Direct, family and circle chats can't be left (`409 invalid_transition`):
+                archive or mute them, or leave the family or circle.
+            operationId: removeConversationMember
+            responses:
+                "204":
+                    description: Removed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        parameters:
+            - $ref: '#/components/parameters/ConversationId'
+            - $ref: '#/components/parameters/UserId'
+        patch:
+            description: Groups only, group admins.
+            operationId: updateConversationMember
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                role:
+                                    $ref: '#/components/schemas/ConversationRole'
+                            required:
+                                - role
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Conversation
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/messages:
+        get:
+            description: |
+                A page of messages, always oldest first within the page. Neither cursor: the newest `limit` messages.
+                `before`: the `limit` messages just before that message (scrolling up). `after`: the `limit` messages just
+                after it (catching up after a reconnect). Both: `422 validation_failed`. Messages before the caller joined a
+                group are not returned; messages from people the caller blocked are left out.
+            operationId: listMessages
+            parameters:
+                - $ref: '#/components/parameters/Before'
+                - $ref: '#/components/parameters/After'
+                - in: query
+                  name: limit
+                  schema:
+                    default: 50
+                    maximum: 200
+                    minimum: 1
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MessagePage'
+                    description: Page of messages
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        parameters:
+            - $ref: '#/components/parameters/ConversationId'
+        post:
+            description: |
+                At least one of `body`, `items`, `voice` and `shared_post_id`. Photos and videos use the normal uploads (tus, prepared
+                uploads) and become ordinary items (`status: processing` until ready; `message.updated` follows). A voice
+                message has `voice` and no `items` (README §5.19). Idempotent on `client_id` per author
+                and conversation as well as on `Idempotency-Key`. Direct chats with someone who blocked the caller, or whose
+                account is gone, answer `403 cannot_message`. Archived conversations are read-only (`409 invalid_transition`).
+            operationId: sendMessage
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MessageCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Message'
+                    description: Sent
+                "403":
+                    $ref: '#/components/responses/Problem'
+                "422":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/messages/{messageId}:
+        delete:
+            description: |
+                The author, any time: the message stays as a tombstone ("This message was deleted"): `deleted: true`, no body,
+                items or preview. Moderators (group admins; the feed's owner/admins in family and circle chats) may remove
+                anyone's message: a tombstone with `removed_by_admin: true`. Items already put on a frame stay there.
+            operationId: deleteMessage
+            responses:
+                "204":
+                    description: Deleted
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        get:
+            operationId: getMessage
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Message'
+                    description: Message
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        parameters:
+            - $ref: '#/components/parameters/ConversationId'
+            - $ref: '#/components/parameters/MessageId'
+        patch:
+            description: The author, within `limits.message_edit_hours` (24) of sending (`409 invalid_transition` after). Text only; items can't change.
+            operationId: updateMessage
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MessageUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Message'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/messages/{messageId}/send:
+        post:
+            description: |
+                "Put on a frame": a normal send of the message's photos and videos (no new upload), to frames the caller may
+                send to and families they may post to, with the usual limits, moderation and receipts. `item_ids` picks some
+                (default: every photo and video; a voice recording is never sent). Items of other people's
+                messages go to frames like `sharePlacements` (credit "Ben · shared by Anna", README §5.3) and can't be posted
+                to families (`403 forbidden` when `feed_ids` is not empty). The conversation gets a `put_on_frame` system
+                message, and frame reactions and quick replies on these placements show under the original message.
+            operationId: putMessageOnFrame
+            parameters:
+                - $ref: '#/components/parameters/ConversationId'
+                - $ref: '#/components/parameters/MessageId'
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PutOnFrameRequest'
+                required: true
+            responses:
+                "202":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Send'
+                    description: Accepted
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/photo:
+        delete:
+            description: Group admins.
+            operationId: deleteConversationPhoto
+            responses:
+                "204":
+                    description: Removed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+        parameters:
+            - $ref: '#/components/parameters/ConversationId'
+        put:
+            description: 'Group admins. Like `putAvatar`: the server crops to a 256x256 WebP at a public, unguessable URL. Groups only.'
+            operationId: putConversationPhoto
+            requestBody:
+                content:
+                    image/jpeg:
+                        schema:
+                            format: binary
+                            type: string
+                    image/png:
+                        schema:
+                            format: binary
+                            type: string
+                    image/webp:
+                        schema:
+                            format: binary
+                            type: string
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Stored
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/preferences:
+        patch:
+            description: The caller's own mute and archive state for this conversation. A new message un-archives it.
+            operationId: updateConversationPreferences
+            parameters:
+                - $ref: '#/components/parameters/ConversationId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ConversationPreferencesUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                    description: Conversation
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/read:
+        put:
+            description: |
+                The caller read up to `message_id`. Never moves backwards. Other members get `read.updated` only when
+                read receipts are shown in this conversation (README §5.19); the caller's other connections always do.
+            operationId: markConversationRead
+            parameters:
+                - $ref: '#/components/parameters/ConversationId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                message_id:
+                                    $ref: '#/components/schemas/Id'
+                            required:
+                                - message_id
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Marked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/conversations/{conversationId}/typing:
+        post:
+            description: |
+                The caller is typing (or recording a voice message). Not stored: the other members who are connected get a
+                `typing` event that expires after 6 s. Clients send it at most every 3 s while typing; more are ignored.
+            operationId: sendTyping
+            parameters:
+                - $ref: '#/components/parameters/ConversationId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                activity:
+                                    default: typing
+                                    enum:
+                                        - typing
+                                        - recording
+                                    type: string
+                            type: object
+            responses:
+                "204":
+                    description: Relayed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
     /v1/device/acks:
         post:
             operationId: deviceAck
@@ -7464,6 +10595,33 @@ paths:
                 "204":
                     description: Removed
                 "403":
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/photo-requests:
+        post:
+            description: |
+                "Ask for new photos" from the frame's quick menu (README §5.20). Creates a request and notifies the family,
+                at most one per frame per 24 hours: within that time the open (or last) request is returned with `200`
+                and nobody is notified again. `403 forbidden` when the owner turned the button off
+                (`settings.social.ask_for_photos`). The frame shows `photo_request` from the change feed afterwards.
+            operationId: deviceRequestPhotos
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FramePhotoRequest'
+                    description: Already asked within 24 hours
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FramePhotoRequest'
+                    description: Asked
+                default:
                     $ref: '#/components/responses/Problem'
             security:
                 - deviceAuth: []
@@ -8559,6 +11717,173 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - feeds
+    /v1/feeds/{feedId}/circles:
+        get:
+            description: The circles of this family the caller is in; the feed's owner and admins see every circle (names and members, not their posts).
+            operationId: listCircles
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Circle'
+                                type: array
+                    description: Circles
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+        parameters:
+            - $ref: '#/components/parameters/FeedId'
+        post:
+            description: |
+                Feed owner/admin, or any member when the feed has `members_can_create_circles` (default on). The creator is a
+                circle admin; `member_ids` must be feed members. At most `limits.max_circles_per_feed` (`409 limit_reached`).
+                Names are unique per family, case-insensitive (`422 validation_failed`, field `name`, code `duplicate`). The
+                circle's chat (kind `circle`) is created with it.
+            operationId: createCircle
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CircleCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Circle'
+                    description: Created
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+    /v1/feeds/{feedId}/circles/{circleId}:
+        delete:
+            description: |
+                Circle admins and the feed's owner/admins. Removes the circle's posts everywhere (like `removeFeedPost`:
+                frames, timeline, threads) and archives its chat. Clients warn first.
+            operationId: deleteCircle
+            responses:
+                "204":
+                    description: Deleted
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+        get:
+            operationId: getCircle
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Circle'
+                    description: Circle
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+        parameters:
+            - $ref: '#/components/parameters/FeedId'
+            - $ref: '#/components/parameters/CircleId'
+        patch:
+            description: Circle admins and the feed's owner/admins. `frame_ids` replaces the extra frames the circle's posts reach.
+            operationId: updateCircle
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CircleUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Circle'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+    /v1/feeds/{feedId}/circles/{circleId}/members:
+        post:
+            description: Circle admins and the feed's owner/admins add feed members (already present ones are ignored). They join the circle's chat.
+            operationId: addCircleMembers
+            parameters:
+                - $ref: '#/components/parameters/FeedId'
+                - $ref: '#/components/parameters/CircleId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                user_ids:
+                                    items:
+                                        $ref: '#/components/schemas/Id'
+                                    maxItems: 100
+                                    minItems: 1
+                                    type: array
+                            required:
+                                - user_ids
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Circle'
+                    description: Circle
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+    /v1/feeds/{feedId}/circles/{circleId}/members/{userId}:
+        delete:
+            description: Circle admins and the feed's owner/admins remove anyone; any member removes themself (leave). Their posts to the circle stay. Leaving the family leaves its circles.
+            operationId: removeCircleMember
+            responses:
+                "204":
+                    description: Removed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
+        parameters:
+            - $ref: '#/components/parameters/FeedId'
+            - $ref: '#/components/parameters/CircleId'
+            - $ref: '#/components/parameters/UserId'
+        patch:
+            description: Circle admins and the feed's owner/admins.
+            operationId: updateCircleMember
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                role:
+                                    $ref: '#/components/schemas/CircleRole'
+                            required:
+                                - role
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Circle'
+                    description: Circle
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - circles
     /v1/feeds/{feedId}/email-addresses:
         get:
             description: The feed's inbox addresses (feed owner and admins; posters get `403 missing_permission`).
@@ -8608,6 +11933,43 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - email-inbox
+    /v1/feeds/{feedId}/engagement:
+        get:
+            description: Any member. The family's streak, prompt, reminder and recap settings.
+            operationId: getFeedEngagement
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FeedEngagement'
+                    description: Settings
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+        parameters:
+            - $ref: '#/components/parameters/FeedId'
+        patch:
+            description: Owner or admin.
+            operationId: updateFeedEngagement
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FeedEngagementUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FeedEngagement'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/feeds/{feedId}/invites:
         get:
             description: |
@@ -8695,7 +12057,7 @@ paths:
                 - feeds
     /v1/feeds/{feedId}/join-requests/{requestId}/{decision}:
         post:
-            description: Owner or admin. Approved requesters become posters.
+            description: Owner or admin. Approved requesters become posters, or members when the feed has `new_members_can_post` off.
             operationId: decideFeedJoinRequest
             parameters:
                 - $ref: '#/components/parameters/FeedId'
@@ -8785,7 +12147,7 @@ paths:
             - $ref: '#/components/parameters/FeedId'
             - $ref: '#/components/parameters/UserId'
         patch:
-            description: Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+            description: Owner or admin. Admins cannot change the owner or other admins, and only change posters and members. Ownership moves with `transferFeedOwnership`.
             operationId: updateFeedMember
             requestBody:
                 content:
@@ -8796,6 +12158,7 @@ paths:
                                     enum:
                                         - admin
                                         - poster
+                                        - member
                                     type: string
                             required:
                                 - role
@@ -8834,9 +12197,10 @@ paths:
     /v1/feeds/{feedId}/posts:
         get:
             description: |
-                Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
-                for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
-                they are null. Post as a feed is done with `createSend` (`feed_ids`).
+                Any feed member, newest first. `receipts` are present on the caller's own posts, on every post for owner and
+                admins, and on every post for everyone when the feed has `members_see_receipts`; `reactions` (frames'
+                reactions and replies) likewise with `members_see_reactions`; otherwise they are null. Circle posts only for
+                circle members. Post as a feed is done with `createSend` (`feed_ids`).
             operationId: listFeedPosts
             parameters:
                 - $ref: '#/components/parameters/FeedId'
@@ -8917,7 +12281,7 @@ paths:
         get:
             description: |
                 Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
-                (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+                (`members_see_receipts`; `403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
                 for direct sends; who moderated is never revealed.
             operationId: getFeedPostReceipts
             parameters:
@@ -8959,6 +12323,125 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - feeds
+    /v1/feeds/{feedId}/prompts:
+        get:
+            description: |
+                Any member. The current week's prompt, the next 4 weeks (as planned: the server's choice unless an admin set
+                one) and the past 12 weeks, newest first. Empty while `prompts_enabled` is off. Titles are in the caller's
+                language for server prompts.
+            operationId: listFeedPrompts
+            parameters:
+                - $ref: '#/components/parameters/FeedId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/FeedPrompt'
+                                type: array
+                    description: Prompts
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/feeds/{feedId}/prompts/{weekOf}:
+        delete:
+            description: Owner or admin. Back to the server's choice for that week (current or future).
+            operationId: resetFeedPrompt
+            responses:
+                "204":
+                    description: Reset
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+        parameters:
+            - $ref: '#/components/parameters/FeedId'
+            - $ref: '#/components/parameters/WeekOf'
+        put:
+            description: |
+                Owner or admin: choose the prompt of the current or a future week: one from the server's list (`library_key`),
+                an own `title`, or `skip: true` (no prompt that week). Exactly one of the three (`422 validation_failed`).
+                Past weeks can't change (`409 invalid_transition`).
+            operationId: setFeedPrompt
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FeedPromptSet'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FeedPrompt'
+                    description: Prompt
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/feeds/{feedId}/recaps/{month}:
+        get:
+            description: Any member. The monthly family recap (also posted as a `monthly_recap` system message in the family chat). `404 not_found` before it was made.
+            operationId: getFeedRecap
+            parameters:
+                - $ref: '#/components/parameters/FeedId'
+                - description: YYYY-MM
+                  in: path
+                  name: month
+                  required: true
+                  schema:
+                    pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MonthlyRecap'
+                    description: Recap
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/feeds/{feedId}/reports:
+        get:
+            description: The feed's owner and admins. Open reports first, then the last 30 days of resolved ones.
+            operationId: listFeedReports
+            parameters:
+                - $ref: '#/components/parameters/FeedId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Report'
+                                type: array
+                    description: Reports
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - safety
+    /v1/feeds/{feedId}/streak:
+        get:
+            description: 'Any member. `404 not_found` is never used for a disabled streak; it reports `enabled: false`.'
+            operationId: getFeedStreak
+            parameters:
+                - $ref: '#/components/parameters/FeedId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FeedStreak'
+                    description: Streak
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/feeds/{feedId}/subscriptions:
         get:
             description: |
@@ -9870,6 +13353,25 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - members
+    /v1/frames/{frameId}/photo-requests:
+        get:
+            description: Frame members. The frame's requests of the last 30 days, newest first.
+            operationId: listFramePhotoRequests
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/PhotoRequest'
+                                type: array
+                    description: Requests
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/frames/{frameId}/placements:
         get:
             description: Everything on the frame (needs see_library), or only the caller's own placements otherwise.
@@ -10717,11 +14219,11 @@ paths:
                 - sends
     /v1/items/{itemId}/media/{variant}:
         get:
-            description: Thumbnails and the master rendition for app/web. Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
+            description: Thumbnails and the master rendition for app/web, for everyone who may see the item (its sender, frames' library viewers, feed and circle members, and members of conversations it was sent in). Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
             operationId: getItemMedia
             parameters:
                 - $ref: '#/components/parameters/ItemId'
-                - description: '`motion` is the master of a Live/Motion Photo clip (`item.kind: live`).'
+                - description: '`motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.'
                   in: path
                   name: variant
                   required: true
@@ -10740,6 +14242,38 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - sends
+    /v1/link-previews:
+        post:
+            description: |
+                Only when discovery has `link_previews: true` (the operator's opt-in; `503 feature_disabled` otherwise). The
+                server fetches the page itself (README §5.19: public addresses only, size and time limits) and returns the
+                cached preview. The composer uses it to show the preview before sending; `sendMessage` attaches the preview
+                of the body's first link by itself.
+            operationId: createLinkPreview
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                url:
+                                    format: uri
+                                    maxLength: 2048
+                                    type: string
+                            required:
+                                - url
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LinkPreview'
+                    description: 'Preview (possibly `status: failed`)'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
     /v1/me:
         delete:
             description: Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
@@ -10788,6 +14322,9 @@ paths:
                                     example: nl-BE
                                     type: string
                                 share_location_names:
+                                    type: boolean
+                                show_read_receipts:
+                                    description: Read receipts in chats (README §5.19).
                                     type: boolean
                                 timezone:
                                     description: IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
@@ -10842,6 +14379,90 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - me
+    /v1/me/badge:
+        get:
+            description: The app badge (README §5.19), also sent as `badge.updated` whenever it changes.
+            operationId: getBadge
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Badge'
+                    description: Badge
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/me/milestones:
+        get:
+            description: The caller's personal milestones (private unless `shown`). Only achieved ones are listed.
+            operationId: listMyMilestones
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Milestone'
+                                type: array
+                    description: Milestones
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/me/milestones/{milestoneKey}:
+        patch:
+            description: Show a milestone on the caller's profile (`getPerson`, to their contacts) or hide it again; `seen` dismisses its card.
+            operationId: updateMyMilestone
+            parameters:
+                - in: path
+                  name: milestoneKey
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/MilestoneKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                seen:
+                                    enum:
+                                        - true
+                                    type: boolean
+                                shown:
+                                    type: boolean
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Milestone'
+                    description: Milestone
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/me/on-this-day:
+        get:
+            description: |
+                "On this day" for Home: posts from today's date in earlier years (in the caller's `timezone`) in the caller's
+                families, newest year first, at most 3 groups of 12 items. Empty when there is nothing (Home then hides the
+                card). Same visibility as the timeline.
+            operationId: getOnThisDay
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OnThisDay'
+                    description: On this day
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/me/push-endpoints:
         get:
             operationId: listPushEndpoints
@@ -10886,6 +14507,42 @@ paths:
                     description: Removed
             tags:
                 - me
+    /v1/me/reminders:
+        get:
+            operationId: getReminderPreferences
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReminderPreferences'
+                    description: Preferences
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+        patch:
+            description: |
+                Also what the push actions call: **Snooze 1 month** sends `{snooze_days: 30}`, **Fewer reminders**
+                `{level: fewer}`. `snooze_days: 0` ends a snooze.
+            operationId: updateReminderPreferences
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ReminderPreferencesUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReminderPreferences'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/me/telegram:
         delete:
             description: Unlinks the caller's Telegram account. Later media from it counts as an outside contributor's.
@@ -10935,6 +14592,23 @@ paths:
             tags:
                 - telegram
                 - me
+    /v1/me/weekly-summaries/{weekOf}:
+        get:
+            description: The caller's "seen and loved" summary of one week (Monday, in the caller's time zone), kept 12 weeks. `404 not_found` for weeks without one.
+            operationId: getWeeklySummary
+            parameters:
+                - $ref: '#/components/parameters/WeekOf'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WeeklySummary'
+                    description: Summary
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/oauth/google/callback:
         get:
             description: |
@@ -11012,6 +14686,33 @@ paths:
             security:
                 - userAuth:
                     - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/reports:
+        get:
+            description: Operator only (`kinframe:operate`). Reports that don't belong to a family.
+            operationId: listOperatorReports
+            parameters:
+                - in: query
+                  name: status
+                  schema:
+                    default: open
+                    enum:
+                        - open
+                        - resolved
+                        - all
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Report'
+                                type: array
+                    description: Reports
+                default:
+                    $ref: '#/components/responses/Problem'
             tags:
                 - operator
     /v1/operator/reservations:
@@ -11217,6 +14918,40 @@ paths:
                     - kinframe:operate
             tags:
                 - operator
+    /v1/people/{userId}:
+        get:
+            description: A contact's profile (`404 not_found` for anyone who isn't a contact). The caller's own id returns their own profile with every milestone.
+            operationId: getPerson
+            parameters:
+                - $ref: '#/components/parameters/UserId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Person'
+                    description: Person
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - chats
+    /v1/photo-requests/{requestId}:
+        get:
+            description: A frame's "Ask for new photos" (push deep link). Members of the frame and of families whose posts reach it.
+            operationId: getPhotoRequest
+            parameters:
+                - $ref: '#/components/parameters/RequestId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PhotoRequest'
+                    description: Request
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
     /v1/photo-sources:
         get:
             description: Sources the caller owns (set up), across all albums and feeds, for Settings → Photo sources.
@@ -11428,6 +15163,358 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - photo-sources
+    /v1/posts/{postId}:
+        get:
+            description: |
+                One feed post or frame post as on the timeline (push deep links, shared post cards). `404 not_found` when the
+                caller may not see it or it was removed.
+            operationId: getPost
+            parameters:
+                - $ref: '#/components/parameters/PostId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TimelinePost'
+                    description: Post
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/posts/{postId}/comments:
+        get:
+            description: |
+                The thread, oldest first, flat: replies carry `parent_id` (always a top-level comment) and come after their
+                parent; clients nest them. Frame entries (`kind: frame`) are in the same list. Comments by people the caller
+                blocked are left out; comments removed by an admin are left out for everyone except their author.
+            operationId: listComments
+            parameters:
+                - $ref: '#/components/parameters/After'
+                - in: query
+                  name: limit
+                  schema:
+                    default: 100
+                    maximum: 200
+                    minimum: 1
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CommentPage'
+                    description: Page of comments
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+        parameters:
+            - $ref: '#/components/parameters/PostId'
+        post:
+            description: |
+                Anyone who may see the post (README §5.18). `409 comments_closed` when the thread is closed. Replies:
+                `parent_id` is a top-level comment of this thread; a reply to a reply is sent with the top comment as
+                `parent_id` and the person replied to as `quoted_user_id`. Mentions must point at people who may see the post
+                (`422 validation_failed`, field `mentions`).
+            operationId: createComment
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CommentCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Comment'
+                    description: Created
+                "409":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/posts/{postId}/comments/{commentId}:
+        delete:
+            description: |
+                The author (a top comment with replies stays as a `deleted` tombstone, otherwise it disappears), or a
+                moderator (feed owner/admin; for frame posts the frame's owner/admin): removed without a tombstone, with its
+                replies; its author still sees it with `removed_by_admin`.
+            operationId: deleteComment
+            responses:
+                "204":
+                    description: Deleted
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+        parameters:
+            - $ref: '#/components/parameters/PostId'
+            - $ref: '#/components/parameters/CommentId'
+        patch:
+            description: The author only, any time (shows "edited"). Frame entries can't be edited (`403 forbidden`).
+            operationId: updateComment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CommentUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Comment'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/posts/{postId}/mute:
+        put:
+            description: Mute or unmute pushes for this thread (comments, replies and mentions in it) for the caller.
+            operationId: setThreadMute
+            parameters:
+                - $ref: '#/components/parameters/PostId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                muted:
+                                    type: boolean
+                            required:
+                                - muted
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Stored
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/posts/{postId}/prompt:
+        put:
+            description: |
+                The poster: tag a feed post as an answer to one of its family's weekly prompts (the current week's or the
+                previous week's), or untag it with null. Frame posts can't be tagged (`422 validation_failed`).
+            operationId: tagPostPrompt
+            parameters:
+                - $ref: '#/components/parameters/PostId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                prompt_id:
+                                    allOf:
+                                        - $ref: '#/components/schemas/Id'
+                                    nullable: true
+                            required:
+                                - prompt_id
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TimelinePost'
+                    description: Post
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/posts/{postId}/read:
+        put:
+            description: Marks the thread read up to `up_to` (a comment id of this thread). Never moves backwards. Sends `thread.read` to the caller's other connections.
+            operationId: markThreadRead
+            parameters:
+                - $ref: '#/components/parameters/PostId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                up_to:
+                                    $ref: '#/components/schemas/Id'
+                            required:
+                                - up_to
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Marked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/posts/{postId}/thread:
+        put:
+            description: The poster, or a moderator (feed owner/admin; frame owner/admin for frame posts). Closing keeps existing comments and reactions; new comments get `409 comments_closed`.
+            operationId: setThreadState
+            parameters:
+                - $ref: '#/components/parameters/PostId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                state:
+                                    $ref: '#/components/schemas/ThreadState'
+                            required:
+                                - state
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ThreadSummary'
+                    description: Thread
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/prompts:
+        get:
+            description: The server's prompt list in the caller's language (`Accept-Language`), for the admin's picker.
+            operationId: listPromptLibrary
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/PromptLibraryEntry'
+                                type: array
+                    description: Prompts
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - engagement
+    /v1/reactions/{targetKind}/{targetId}:
+        get:
+            description: Who reacted (people and, for posts and post items, frames), newest first. Same visibility as the target.
+            operationId: listReactions
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReactionList'
+                    description: Reactions
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+        parameters:
+            - $ref: '#/components/parameters/TargetKind'
+            - $ref: '#/components/parameters/TargetId'
+            - description: Required for `post_item` (the item's post; one item can be in several posts). Ignored otherwise.
+              in: query
+              name: post_id
+              schema:
+                $ref: '#/components/schemas/Id'
+        put:
+            description: |
+                The caller's reaction on a post, one item of a post, a comment or a chat message: one per person and target,
+                the latest wins, null removes it. Allowed on closed threads. Not on frame entries or system messages
+                (`422 validation_failed`).
+            operationId: setReaction
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                emoji:
+                                    allOf:
+                                        - $ref: '#/components/schemas/PersonReaction'
+                                    nullable: true
+                            required:
+                                - emoji
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReactionSummary'
+                    description: The target's new summary
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
+    /v1/reports:
+        post:
+            description: |
+                Report a comment, a message or a post the caller can see. In a family (a feed post, its comments, a family or
+                circle chat) the feed's owner and admins get it; anything else (direct and group chats, frame posts) goes to
+                the server operator. The reporter stays anonymous to the reported person. One open report per reporter and
+                target (repeating returns the existing one).
+            operationId: createReport
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ReportCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Report'
+                    description: Reported
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - safety
+    /v1/reports/{reportId}/resolve:
+        post:
+            description: |
+                Whoever handles the report (feed owner/admin, or the operator). `remove` removes the content like a moderator
+                delete (`deleteComment`, `deleteMessage`, `removeFeedPost`); `dismiss` keeps it. `409 already_decided` when
+                someone else resolved it first.
+            operationId: resolveReport
+            parameters:
+                - $ref: '#/components/parameters/ReportId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                action:
+                                    enum:
+                                        - remove
+                                        - dismiss
+                                    type: string
+                            required:
+                                - action
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Report'
+                    description: Resolved
+                "409":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - safety
     /v1/sends:
         get:
             description: The caller's sent history across all devices, newest first.
@@ -11537,8 +15624,14 @@ paths:
                         schema:
                             description: '`frame_ids` and `feed_ids` together must not be empty.'
                             properties:
+                                circle_ids:
+                                    description: As in `SendCreate.circle_ids`.
+                                    items:
+                                        $ref: '#/components/schemas/Id'
+                                    maxItems: 20
+                                    type: array
                                 feed_ids:
-                                    description: Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped.
+                                    description: Post the send's items to these feeds (caller must be a poster or above). A feed that already has a live post of this send is skipped.
                                     items:
                                         $ref: '#/components/schemas/Id'
                                     maxItems: 20
@@ -12047,6 +16140,53 @@ paths:
                 - telegramWebhook: []
             tags:
                 - telegram
+    /v1/timeline:
+        get:
+            description: |
+                Home: posts from every family (feed) the caller is a member of, with `member` and every other role, plus
+                frame posts (direct sends to frames) the caller may see (README §5.18), newest first. Circle posts only for
+                circle members. Chronological, never ranked. Removed posts are left out.
+            operationId: getTimeline
+            parameters:
+                - $ref: '#/components/parameters/Before'
+                - in: query
+                  name: limit
+                  schema:
+                    default: 20
+                    maximum: 50
+                    minimum: 1
+                    type: integer
+                - description: Only this family's posts (the family screen).
+                  in: query
+                  name: feed_id
+                  schema:
+                    $ref: '#/components/schemas/Id'
+                - description: Only posts with this circle as audience.
+                  in: query
+                  name: circle_id
+                  schema:
+                    $ref: '#/components/schemas/Id'
+                - description: Only posts tagged with this weekly prompt (the answers).
+                  in: query
+                  name: prompt_id
+                  schema:
+                    $ref: '#/components/schemas/Id'
+                - description: Only frame posts to this frame.
+                  in: query
+                  name: frame_id
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TimelinePage'
+                    description: Page of posts
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - social
     /v1/tv/{token}:
         get:
             description: |
@@ -12156,6 +16296,16 @@ tags:
       name: email-inbox
     - description: Telegram groups and private chats connected to a frame or a feed through the server's bot, linked Telegram accounts, and Telegram's webhook (docs/spec/telegram.md).
       name: telegram
+    - description: The home timeline, comment threads with replies and mentions, and people's reactions on posts, post items, comments and messages (docs/spec/family-social.md).
+      name: social
+    - description: Smaller groups inside a family (feed), with their own chat and as an audience for posts (docs/spec/family-social.md §3).
+      name: circles
+    - description: Direct, group, family and circle conversations, messages with photos, videos and voice, read receipts, typing, contacts and link previews (docs/spec/family-social.md §4, §7).
+      name: chats
+    - description: Blocking people and reporting comments, messages and posts.
+      name: safety
+    - description: Gentle encouragement to share - frame freshness, "Ask for new photos", reminders and their budget, family streaks, weekly prompts, On this day, summaries, recaps and milestones (docs/spec/family-social.md §9).
+      name: engagement
     - name: settings
     - description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
       name: tv

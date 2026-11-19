@@ -99,6 +99,10 @@ type Server struct {
 
 	birthdayUser *ratelimit.Limiter // creating and suggesting birthday people
 
+	// Family social (docs/spec/family-social.md, README §5.18–§5.19): comment, message and report excerpt bodies
+	// are sealed with it; nil without KINFRAME_SECRETS_KEY, and then they are stored as plain text.
+	bodies *secrets.Sealer
+
 	// Photo sources and Google imports (docs/spec/photo-sources.md).
 	guard            *netguard.Guard
 	ps               *photoSources
@@ -222,6 +226,11 @@ func New(d Deps) (*Server, error) {
 		return nil, fmt.Errorf("plugin secrets: %w", err)
 	}
 	s.pluginSealer = ps
+	if len(d.Config.SecretsKey) > 0 {
+		if s.bodies, err = secrets.New(d.Config.SecretsKey, nil, "kinframe message bodies v1", ""); err != nil {
+			return nil, fmt.Errorf("message bodies: %w", err)
+		}
+	}
 	if err := s.setupPhotoSources(d.Guard); err != nil {
 		return nil, err
 	}

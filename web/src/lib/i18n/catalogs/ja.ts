@@ -1392,6 +1392,7 @@ const ja: Catalog = {
 	'feedRole.owner': 'オーナー',
 	'feedRole.admin': '管理者',
 	'feedRole.poster': '投稿者',
+	'feedRole.member': '閲覧者',
 	'problem.already_subscribed': 'このフレームはすでにこのフィードを表示しているか、承認待ちです。',
 	'problem.invalid_transition': '今はこの操作ができません。再読み込みして、もう一度お試しください。',
 	'problem.limit_reached': 'このサーバーの上限に達しました。',

@@ -1409,6 +1409,7 @@ const he: Catalog = {
 	'feedRole.owner': 'בעלים',
 	'feedRole.admin': 'מנהל',
 	'feedRole.poster': 'מפרסם',
+	'feedRole.member': 'קורא',
 	'problem.already_subscribed': 'המסגרת הזו כבר מציגה את הפיד, או ממתינה לאישור.',
 	'problem.invalid_transition': 'זה לא אפשרי כרגע. יש לרענן ולנסות שוב.',
 	'problem.limit_reached': 'הגעתם למגבלה בשרת הזה.',

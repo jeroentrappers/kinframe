@@ -54,6 +54,9 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.PhotoSourcesPrivateNetworks = ptr(len(providers) > 0 && s.guard.PrivateAllowed())
 	d.GooglePhotosImport = ptr(s.ps.google.Configured())
 	s.telegramDiscovery(&d)
+	s.socialDiscovery(&d)
+	s.chatDiscovery(&d)
+	s.engagementDiscovery(&d)
 	d.EmailInbox, d.EmailInboxDomain = s.emailDiscovery()
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)

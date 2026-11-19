@@ -223,6 +223,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	go func() { defer wg.Done(); a.API.RunEmailInbox(ctx) }()
 	wg.Add(1)
 	go func() { defer wg.Done(); a.API.RunTelegram(ctx) }()
+	wg.Add(3)
+	go func() { defer wg.Done(); a.API.RunSocial(ctx) }()
+	go func() { defer wg.Done(); a.API.RunChat(ctx) }()
+	go func() { defer wg.Done(); a.API.RunEngagement(ctx) }()
 	if a.Releases != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()

@@ -89,10 +89,22 @@ User ─┬─< Membership >─┬─ Frame ──── Device (current credent
       ├─< Send ─< SendItem ──> Item ─< Rendition (master, frame_<w>x<h>, thumb_<n>)
       │                         └─< Placement (item × frame) ─ status, hidden, trashed, reaction, reply
       ├─< PushEndpoint
-      └─< FeedMembership >─ Feed ─< FeedPost ─< FeedPostItem ──> Item
-          role, prefs         │
-                              ├─< Subscription >── Frame     (status, history, birthdays; delivers placements origin=feed)
-                              └─< BirthdayPerson ─< BirthdayGreeting >── Frame   (birthdays change to frames)
+      ├─< FeedMembership >─ Feed ─< FeedPost ─< FeedPostItem ──> Item
+      │   role, prefs, mute   │        │ circle_id?, prompt_id?
+      │   (owner, admin,      │        └── Thread (post_id) ─< Comment (parent_id: one level) ─< CommentMention
+      │    poster, member)    ├─< Subscription >── Frame     (status, history, birthdays; delivers placements origin=feed)
+      │                       ├─< BirthdayPerson ─< BirthdayGreeting >── Frame   (birthdays change to frames)
+      │                       ├─< Circle ─< CircleMember (feed members only), CircleFrame
+      │                       ├── Conversation kind=family (members = the feed's members, kept by the database)
+      │                       ├── FeedEngagement, FeedStreak ─< StreakWeek, FeedPrompt (weekly), FeedRecap (monthly)
+      │                       └── FeedFreshness
+      ├─< FramePost (send × frame: a direct send as a timeline post) ── Thread
+      ├─< Reaction (target: post | post_item | comment | message; one per person and target)
+      ├─< ConversationMember >─ Conversation (direct | group | family | circle) ─< Message ─< MessageItem ──> Item
+      │   read position, mute                                                       │ reply_to, shared_post, link preview,
+      │                                                                             └ system (put on a frame, recap, …)
+      ├─< Block, Report, ThreadRead, ReminderPreferences, Nudge (reminder log), Milestone, WeeklySummary
+Frame ─< PhotoRequest ("Ask for new photos"), FrameFreshness
 
 PhotoSource (owner: User) ──▶ Album (of one frame) or Feed      (Immich / iCloud sync: one send per run, Item.via)
 GoogleImport (User) ──▶ Album or Feed                           (one-time copy from Google's picker)
@@ -108,6 +120,12 @@ TelegramLink: User ── one Telegram account
   placements. A placement **shared** from another frame's library points at the same item and records who shared it
   (`shared_by_user_id`), so sharing never copies media (§5.3). A placement made by a **feed** the frame subscribes to
   has `origin: feed` (§5.12); a frame never holds two live placements of the same item, whatever the path.
+- **Posts and threads** (§5.18): a **post** is a feed post or a frame post (a direct send to one frame); both
+  share one id space and have a thread of comments, people's reactions, mentions and frame entries. A feed post may
+  have a **circle** (a smaller group inside the family) as its audience.
+- **Conversations** (§5.19): `direct`, `group`, `family` (one per feed) and `circle` (one per circle) chats;
+  message photos, videos and voice recordings are ordinary items. **Engagement** (§5.20): freshness, photo
+  requests, reminders, streaks, prompts, summaries, recaps and milestones.
 - **Permissions** per membership:
 
   | Permission | Allows |
@@ -301,6 +319,9 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `weather` | Current conditions and forecast, when enabled (below), or `weather: null` |
   | `calendar` | The frame's merged calendar (§5.8), or `calendar: null` when it has none |
   | `birthdays` | The frame's birthday people from its feeds (§5.13), or `birthdays: null` when it has none |
+  | `comments` | The newest comments of one placement's post (entity = the placement), with *Show comments* on (§5.20), or `comments: null` |
+  | `photo_request` | The frame's latest "Ask for new photos" (§5.20), or `photo_request: null` |
+  | `prompts` | The current weekly prompts of the frame's families (§5.20), or `prompts: null` |
   | `reset` | The frame must discard local state and re-sync from 0 |
 
 - **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
@@ -339,6 +360,9 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   wins; `null` removes it.
 - Frame: `POST /v1/device/placements/{id}/replies {preset: "beautiful"|"call_me"|"miss_you"|"thanks"}`.
 - The sender sees them in `GET /v1/sends/{id}` and gets websocket and push events.
+- With family social (§5.18) they also appear in the reaction row of the post (`ReactionSummary.frames`) and as
+  frame entries in its thread; on photos put on a frame from a chat, under the chat message (`frame_activity`).
+  People react to posts, items, comments and messages with `PUT /v1/reactions/{target_kind}/{id}`.
 
 ### 5.6 Remote settings and commands
 
@@ -855,6 +879,28 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `telegram_chat.removed` | `chat_id`, `frame_id`?, `feed_id`? | A disconnected chat was deleted after 30 days, or its frame or feed was deleted (the same people) |
 | `telegram_code.updated` | `code` (`TelegramCode`) | The caller's connect or link code was used, or redeeming it failed |
 | `telegram_link.updated` | `link` (`TelegramLink` or null) | The caller's Telegram account was linked, unlinked, or blocked the bot |
+| `post.updated` | `post_id`, `feed_id`?, `frame_id`?, `thread` (`ThreadSummary` for the receiver) | A post's thread state, comment count or reaction row changed (everyone who sees the post; §5.18) |
+| `post.removed` | `post_id`, `feed_id`?, `frame_id`? | A post was removed or is no longer visible to the receiver |
+| `comment.created` | `post_id`, `comment` (`Comment`) | A new comment, reply or frame entry (everyone who sees the post, not people who blocked the author) |
+| `comment.updated` | `post_id`, `comment` | Edited, or deleted into a tombstone |
+| `comment.deleted` | `post_id`, `comment_id` | Gone from the thread (author delete without replies, or moderator removal) |
+| `thread.read` | `post_id`, `read_up_to` | The receiver read the thread on another device |
+| `reaction.updated` | `target_kind`, `target_id`, `post_id`?, `conversation_id`?, `summary` (`ReactionSummary` for the receiver) | People's reactions on a post, item, comment or message changed |
+| `circle.updated` | `feed_id`, `circle` (`Circle`) | Created, renamed, members or frames changed (circle members, the feed's owner/admins, and people just removed) |
+| `circle.removed` | `feed_id`, `circle_id` | A circle was deleted |
+| `conversation.updated` | `conversation` (`Conversation` for the receiver) | Created, renamed, photo, members, mute, archive or read-only changed (the conversation's members) |
+| `conversation.removed` | `conversation_id` | The receiver left or was removed, or the family or circle is gone for them |
+| `message.created` | `conversation_id`, `message` (`Message`) | A new message (members who can see it, not people who blocked the author) |
+| `message.updated` | `conversation_id`, `message` | Edited, items ready, link preview fetched, frame activity, or deleted into a tombstone |
+| `read.updated` | `conversation_id`, `user_id`, `last_read_message_id` | Someone's read position (read receipts rules, §5.19; always for the receiver's own other devices) |
+| `typing` | `conversation_id`, `user_id`, `display_name`, `activity` (`typing`/`recording`), `expires_at` | Someone is typing; never stored |
+| `badge.updated` | `badge` (`Badge`) | The app badge changed |
+| `report.created` | `report` (`Report`) | A new report to handle (the feed's owner/admins, or operators) |
+| `photo_request.created` | `request` (`PhotoRequest`) | A frame asked for new photos (its recipients, §5.20) |
+| `photo_request.updated` | `request` | Answered or expired |
+| `streak.updated` | `feed_id`, `streak` (`FeedStreakSummary`) | This week's count, the goal or the streak changed (family members) |
+| `prompt.updated` | `feed_id`, `prompt` (`FeedPrompt`) | The week's prompt started, or an admin changed it |
+| `milestone.achieved` | `milestone` (`Milestone`) | The receiver reached a personal milestone (websocket only) |
 
 ### 6.3 Push
 
@@ -866,7 +912,10 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   webpush_keys: {p256dh, auth}, locale}`. Messages are encrypted with RFC 8291 (`aes128gcm`). The decrypted payload is
   `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`, `feed_id`,
   `post_id`, `subscription_id`, `birthday_id`, `greeting_id`, `source_id`, `album_id`, `import_id`, `address_id`,
-  `sender_id`, `chat_id`). Endpoints the push service reports as gone (404/410) are deleted by the server.
+  `sender_id`, `chat_id`, and for family social `comment_id`, `parent_id`, `conversation_id`, `message_id`,
+  `target_kind`, `target_id`, `circle_id`, `report_id`, `request_id`, `week_of`, `month`). Payloads may also carry
+  `tag` (a newer push with the same tag replaces the older one) and `actions` (notification buttons). Endpoints the
+  push service reports as gone (404/410) are deleted by the server.
 - Feed keys: `subscription_request` (feed owner/admins), `subscription_decided` (the requester),
   `subscription_removed` (frame owner/admins, when a feed admin removed it or the feed was deleted),
   `feed_join_request` (feed owner/admins), `feed_membership` (the member); reactions and replies on feed placements
@@ -895,6 +944,26 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   the group is gone, or ownership passed to them; at most once per chat and code per 7 days; `ids`: `chat_id`, and
   `frame_id` or `feed_id`). Photos from Telegram are never pushed; sends of outside contributions get no `delivered`
   push. Join requests from Telegram join links use `join_request`/`feed_join_request`.
+- Family social keys (§5.18, §5.19, §5.20), all respecting mutes and blocks as described there:
+
+  | Key | To | `ids` | `tag` |
+  |---|---|---|---|
+  | `comment` | the poster and earlier commenters | `post_id`, `comment_id`, `feed_id` or `frame_id` | `comment:<post_id>` (10-minute bundle) |
+  | `comment_reply` | the top comment's author, the quoted person | `post_id`, `comment_id`, `parent_id`, `feed_id` or `frame_id` | `comment_reply:<parent_id>` |
+  | `mention` | the mentioned person | `post_id` + `comment_id`, or `conversation_id` + `message_id` | — |
+  | `reaction_person` | the target's author (first 3 people per target) | `target_kind`, `target_id`, `post_id`?, `conversation_id`? | `reaction:<target_kind>:<target_id>` |
+  | `reaction_digest` | authors with more reactions that day (19:00 local) | — | `reaction_digest` |
+  | `message` | conversation members | `conversation_id`, `message_id` | `conversation:<conversation_id>` |
+  | `conversation_added` | someone added to a group | `conversation_id` | — |
+  | `report` | the report's handlers | `report_id`, `feed_id`? | — |
+  | `frame_request` | §5.20 | `frame_id`, `request_id` | `frame_request:<frame_id>` |
+  | `reminder_quiet` | §5.20 | `frame_id` | `reminder_quiet:<frame_id>` |
+  | `reminder_streak` | §5.20 | `feed_id`, `week_of` | `reminder_streak:<feed_id>` |
+  | `reminder_birthday` | §5.20 | `feed_id`, `birthday_id`, `date` | `reminder_birthday:<birthday_id>` |
+  | `weekly_summary` | §5.20 | `week_of` | `weekly_summary` |
+
+  The four reminder keys carry `actions: ["snooze_month", "fewer_reminders"]` (APNs category `kinframe.reminder`).
+  System messages, streak milestones, recaps and milestones never push.
 - `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
   Placements shared from another frame count for the sharer instead: they get `delivered` (event `share.delivered`)
   once everything they shared to a frame has arrived.
@@ -1095,6 +1164,390 @@ otherwise.
   `feed_id`. No push for new photos.
 - Reactions and replies on Telegram photos go to the send's sender (`reaction`/`reply`): the linked account, or the
   chat's owner only with `notify_reactions`.
+
+### 5.18 Family social: timeline, threads, reactions, circles
+
+Product spec: `docs/spec/family-social.md` (approved 2026-11-19); the work split and table ownership:
+`docs/spec/family-social-work.md`. Discovery says `social: true` (only with `feeds: true`). The apps and the web call
+feeds **families**; the API keeps `feed` everywhere (decision A).
+
+**Roles and feed settings**
+- `FeedRole` gains `member`: reads, comments, reacts and chats, but does not post photos. `createSend`,
+  `forwardSend` and `putMessageOnFrame` with a feed where the caller is `member` answer `403 missing_permission`.
+  Members suggest birthdays like posters; `posters_can_invite` does not apply to them. Owner and admins change roles
+  with `updateFeedMember` (`admin`, `poster`, `member`; admins only change posters and members).
+- `new_members_can_post` (default true): people joining through a join invite or an approved join request become
+  `poster`, or `member` when it is off. Existing members keep their role.
+- `members_see_reactions` now means: every member sees **frames'** reactions and quick replies (in the reaction
+  row, `FeedPost.reactions` and frame entries in threads). Default **on** for new feeds. People's reactions are
+  always visible to everyone who sees the post.
+- `members_see_receipts` (new, default off): every member sees per-frame receipts (`FeedPost.receipts`,
+  `TimelinePost.seen`, `getFeedPostReceipts`). The migration copies each existing feed's `members_see_reactions` into
+  it, so what members saw before stays the same.
+- `members_can_create_circles` (default on), and the caller's own `mute` (`FeedMute`, via `updateFeedPreferences`).
+
+**Posts**
+- Two kinds, one id space (UUIDv7, so ids sort by time), all reachable as `/v1/posts/{postId}`:
+  - `feed`: a `FeedPost` (one send in one feed), optionally with a circle as audience (`circle_id`).
+  - `frame`: a direct send to one frame, one per send and frame (a forward to another frame adds one). Made for
+    sends by people: `sends.via` null, `email` or `telegram` (from `createSend`, `forwardSend`, `putMessageOnFrame`),
+    never for photo-source syncs, Google imports, shares (`sharePlacements`) or frame imports. Its items are the
+    send's items that are still live on that frame; it is removed when the last one is removed there. Existing
+    direct sends were backfilled by the migration.
+- Who sees a post (the timeline, `getPost`, its thread, its reactions; everyone else gets `404 not_found`):
+
+  | Post | Visible to |
+  |---|---|
+  | `feed`, whole family | every member of the feed, any role |
+  | `feed`, circle audience | the circle's members, and the poster |
+  | `frame` | the sender, and the frame's members with `see_library` (owner and admins always) |
+
+  Removed posts, posts of deleted feeds and posts whose every item was removed are never shown. A frame's moderation
+  does not hide a post in the apps (it only keeps it off that frame).
+- **Moderators** of a post: for whole-family feed posts the feed's owner and admins; for circle posts the circle's
+  admins; for frame posts the frame's owner and admins. Moderators and the poster may close the thread; moderators
+  may remove comments and the post (`removeFeedPost` for feed posts; frame posts are removed with the send).
+
+**Timeline** (`getTimeline`)
+- Every post the caller may see, newest first by id, no ranking, no collapsing: photo-source and Telegram posts are
+  posts like any other and show their `via`. `limit` 20 (max 50); `next_before` is an opaque cursor for `before`.
+- Each `TimelinePost` carries the family label (`feed_name`, `circle_name`) or the frame (`frame_name`, shown as
+  "To Oma's frame"), the items, `seen` (when receipts are visible), the prompt it answers and `thread`
+  (`ThreadSummary`: state, `comment_count`, the two newest comments, unread counts, mute, the reaction row).
+- Clients group consecutive posts that answer the same prompt ("6 answers to *Your view right now*"); the server does
+  not reorder.
+
+**Threads and comments**
+- A thread exists for every visible post; the server creates its row lazily (first comment, reaction, frame entry,
+  read mark, mute or close). `listComments` returns the thread **flat, oldest first**, with `after` (a comment id)
+  and `has_more`; replies carry `parent_id` and come after their parent, and clients nest them. One level of replies:
+  `parent_id` must be a top-level comment of the same post (`422 validation_failed`, field `parent_id`); to answer a
+  reply, send the top comment as `parent_id` and the person as `quoted_user_id` (they must have commented in this
+  thread).
+- Who may comment, reply and react: everyone who may see the post, any feed role (frame posts: the sender and
+  `see_library` members). Closed threads (`setThreadState`) answer `409 comments_closed` to new comments; edits,
+  deletes and reactions still work.
+- Bodies: 1–2000 characters (Unicode code points, trimmed, `limits.max_comment_chars`). Links stay plain text (no
+  previews in comments). The author edits at any time (`edited_at`); mentions are re-checked and newly mentioned
+  people are notified.
+- Delete: the author's own delete removes the comment from the thread, except a top comment that still has live
+  replies, which stays as a tombstone (`deleted: true`, no body). A moderator's delete hides the comment **and its
+  replies** for everyone without a tombstone; only the author still gets it, with `removed_by_admin: true` ("Removed
+  by a family admin").
+- `comment_count` counts live person comments and replies (not tombstones, not removed ones, frame entries never).
+- **Frame entries** (`kind: frame`, read-only, not editable or deletable by anyone): when a frame reacts to a
+  placement that belongs to a post (the frame post of its send on that frame, or a feed post delivered to that frame
+  through `feed_deliveries`), the post's thread gets one entry per frame ("Oma's frame loved this"); a changed
+  reaction updates it, a removed reaction deletes it. Every quick reply adds an entry ("Oma's frame: Call me!").
+  In feed posts they are visible only to people who may see frames' reactions (`members_see_reactions`, the poster,
+  owner/admins). They don't count as comments, don't make a thread unread and never push (the poster still gets
+  `reaction`/`reply` as today, §5.5).
+- **Read state**: `markThreadRead {up_to}` (never moves back). `unread_count` = person comments after `read_up_to`
+  that are not the caller's own and not by people they blocked; a thread never read counts all of them.
+  `unread_mentions` = those that mention the caller or reply to the caller's comments (as `parent_id` author or
+  `quoted_user_id`). The caller's other connections get `thread.read`.
+- **Mute**: `setThreadMute` per thread; `FeedMute` per family (`posts`, `chat`, `all`). A muted thread sends no
+  `comment`, `comment_reply`, `mention` or `reaction_person` pushes; family mute `posts` keeps `mention`, `all` does
+  not.
+
+**Mentions** (comments and messages)
+- `Mention {user_id, start, length}`: offsets in **UTF-16 code units** into the body, covering the "@Name" text the
+  client inserted; spans inside the body, non-overlapping, at most `limits.max_mentions` (20). The server stores them
+  and does not check the text under the span.
+- Only people who may see the post (comments) or are members of the conversation (messages) can be mentioned
+  (`422 validation_failed`, field `mentions`). Mentioning someone the author blocked or who blocked the author is
+  allowed but never notifies.
+
+**Reactions by people** (`setReaction`, `listReactions`)
+- `PersonReaction`: `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢 (the frame's four), `thumbs_up` 👍, `pray` 🙏. One per
+  person and target; the latest wins; `null` removes it. Targets: `post`, `post_item` (`targetId` = the item id,
+  with `?post_id=`), `comment`, `message`. Not on frame entries, system messages or tombstones (`422`).
+- Same visibility as the target (the post, or conversation membership for messages). Frames' reactions stay on
+  placements (§5.5) and join the row in `ReactionSummary.frames` (posts and post items only, when visible).
+- Blocked people's reactions are counted but left out of `people` and `listReactions`.
+
+**Circles** (tag `circles`)
+- A circle is a named group of a feed's members (names 1–40 characters, unique per feed ignoring case; at most
+  `limits.max_circles_per_feed`, 20). Created by owner/admins, or any member with `members_can_create_circles`; the
+  creator is its admin. Circle admins and the feed's owner/admins manage it (rename, members, `frame_ids`, delete,
+  roles); anyone leaves with `removeCircleMember` on themself. Leaving or being removed from the feed leaves its
+  circles (database cascade). `listCircles` shows a member's own circles; the feed's owner/admins see all circles
+  (names and members), but a circle's posts only if they are in it.
+- **Audience**: `SendCreate.circle_ids` / `forwardSend` / `putMessageOnFrame`: at most one circle per feed, its feed
+  must be in `feed_ids`, the caller must be in it (`422 validation_failed`, field `circle_ids`). That feed's post has
+  `circle_id` and is visible only to the circle (and the poster).
+- **Frames**: a circle post is placed only on the feed's `active` subscribed frames that, when posting, either have a
+  manager (owner, admin or `change_settings`) in the circle or are in the circle's `frame_ids` (which must be frames
+  with an active subscription to the feed; `422` otherwise). Later changes to the circle's members or `frame_ids`
+  don't move existing placements; subscription backfills place circle posts only on frames they reach at that time.
+- **Chat**: every circle has a `circle` conversation (`Circle.conversation_id`) whose members are always the circle's
+  members, maintained by the database (§5.19). Deleting a circle removes its posts everywhere (like `removeFeedPost`),
+  then marks it deleted; its chat is archived.
+- Events: `circle.updated {feed_id, circle}` to the circle's members and the feed's owner/admins on create, rename,
+  member and frame changes (also to people just removed); `circle.removed {feed_id, circle_id}` on delete. Clients
+  refresh their chat list on `circle.updated`, `circle.removed` and `feed.membership_updated`.
+
+**Storage and privacy**
+- Comment and message bodies (and report excerpts) are stored sealed with AES-256-GCM (`secrets.Sealer`, HKDF info
+  `kinframe message bodies v1`) when the server has `KINFRAME_SECRETS_KEY`; otherwise as plain text. There is no
+  end-to-end encryption (decision B): the apps say plainly that the server's operator could read messages.
+- A deleted account's comments and messages stay, shown as "Former member" (`PersonRef.former_member`); its photos
+  follow the existing rules. The account export includes the user's own comments, messages and chat photos.
+
+**Pushes** (§6.3 for payloads): one push per recipient and comment, the first that applies of `mention` (the
+mentioned), `comment_reply` (the top comment's author and the quoted person), `comment` (the poster and everyone
+who commented in the thread before). Never to the author, to people who blocked the author, or for muted threads.
+- `comment` is bundled per recipient and post: the first comment in a quiet thread is pushed at once; further ones
+  within 10 minutes are held and sent as one push at the end of the window ("Ben and 2 others commented: …"), with
+  `tag` `comment:<post_id>` so it replaces the earlier one.
+- `comment_reply`: `tag` `comment_reply:<parent_id>`, not bundled. `mention`: no tag, never bundled.
+- `reaction_person` to the target's author (the poster for `post`, the item's sender for `post_item`, the comment's
+  or message's author), never for own reactions: the first three people per target are pushed, each replacing the
+  previous (`tag` `reaction:<target_kind>:<target_id>`, "Anna and 2 others reacted ❤️ to your photo"); later ones are
+  counted and sent once a day at 19:00 local time (`User.timezone`) as `reaction_digest` ("12 more reactions on your
+  photos today"), skipped when there are none. Changing an existing reaction never pushes.
+
+### 5.19 Chats
+
+Discovery says `chats: true` (and `voice_messages`, `link_previews`). Tags `chats`, `safety`.
+
+**Who can talk to whom**
+- **Contacts** (`listContacts`, `getPerson`): people who share at least one family (both in `feed_members` of the same
+  feed that is not deleted, any role) or one frame (both in `memberships` of the same frame that is not deleted) with
+  the caller. There is no search and no other way to reach anyone (decision C).
+- `direct` chats and adding to groups need the other person to be a contact who has not blocked the caller:
+  otherwise `403 cannot_message`, the same answer for "not a contact" and "blocked you" so nobody learns about
+  blocks. A direct chat whose other side is gone or blocked the caller becomes `read_only`.
+
+**Conversations**
+- `direct`: exactly two people, once per pair (`createConversation` returns the existing one with `200`). Can't be
+  left; archive it instead.
+- `group`: 3–100 people (`limits.max_group_members`), a name (1–60) and an optional photo (`putConversationPhoto`).
+  The creator is admin. Any member adds contacts (up to the limit); admins rename, change the photo, remove people and
+  make others admin; anyone leaves. When the last admin leaves, the longest-standing member becomes admin. New
+  members see messages from when they were added (`visible_from`).
+- `family`: exactly one per feed, created with the feed by the database; existing feeds got one in the migration
+  (eager backfill, archived for deleted feeds). Its members are always the feed's members, any role; leaving the
+  family leaves the chat, and the chat can't be left on its own. Name and photo follow the feed (name, cover). Full
+  history for everyone. Moderators: the feed's owner and admins.
+- `circle`: exactly one per circle, the same way (members = the circle's members; moderators: circle admins and the
+  feed's owner/admins).
+- Family and circle membership is written **only** by the database triggers in migration 00023
+  (`chat_feed_member_sync`, `chat_circle_member_sync`, `chat_feed_conversation`, `chat_circle_conversation`); code
+  never inserts or deletes those members. A deleted feed or circle archives its chats (read-only, hidden from the list
+  unless `archived=true`).
+- `listConversations`: all of the caller's conversations, by `last_activity_at` (last message, else creation),
+  newest first, not paged. Archiving is per person and undone by the next message.
+- Mute (`updateConversationPreferences {mute}`): `1h`, `8h`, `1w` from now, `always`, or `off`. Family mute `chat`
+  or `all` (`FeedMute`) also mutes the family's and its circles' chats.
+
+**Messages**
+- `sendMessage`: at least one of `body` (1–4000 characters, `limits.max_message_chars`), `items` (at most 30
+  photos and videos, `limits.max_message_items`; the normal tus uploads and prepared uploads), `voice` and
+  `shared_post_id`.
+  Mentions as for comments. `reply_to_id` must be a message of the same conversation the caller can see.
+- Order is the message id (UUIDv7, server time). `client_id` (and `Idempotency-Key`) make retries safe: the same
+  author, conversation and `client_id` return the first message.
+- Items are ordinary items (`items.conversation_id` set): the message is returned at once with items `processing`,
+  and `message.updated` follows when they are ready or failed. Their media (`getItemMedia`) is served to the
+  conversation's members (in groups: those who can see the message). Chat items are not in sent history or any
+  library until they are put on a frame.
+- **Voice messages**: `MessageCreate.voice {upload_id}` and no `items` (a body is allowed); returned as
+  `Message.voice` (`VoiceClip`: `item_id`, `status`, `duration_ms`, `waveform`). Clients record AAC-LC in MP4
+  (`.m4a`, `audio/mp4`: iOS, Android and Safari) or Opus in WebM or Ogg (`audio/webm`, `audio/ogg`: Chrome,
+  Firefox); the server stores one master: **AAC-LC, mono, 48 kHz, 64 kbit/s in MP4** (`audio/mp4`), copying the
+  stream when it already is AAC mono at most 96 kbit/s, else transcoding with ffmpeg; plus the waveform
+  (64 values 0–100) and `duration_ms`. At most `limits.max_voice_seconds` (300 s; longer: `422 audio_too_long`), at
+  least 1 s (`422 validation_failed`), uploads at most 20 MB. `getItemMedia` `master` with `VoiceClip.item_id`
+  serves it (Range supported); there are no thumbnails. Internally it is an item whose media has kind `audio`
+  (`messages.voice_item_id`); `MediaKind` in the API does not change, and such items are never placed on frames,
+  posted to families, returned in `items` or shown in libraries.
+- **Edit** (`updateMessage`): the author, within `limits.message_edit_hours` (24) of sending; text and mentions
+  only. **Delete**: the author at any time, a tombstone remains (`deleted: true`; body, items, voice, link preview and
+  reactions are cleared). Moderators (group admins; for family and circle chats the moderators above) remove any
+  message: a tombstone with `removed_by_admin: true`. Photos already put on a frame stay there.
+- **Shared posts** ("Share in chat"): `shared_post_id` must be a post the sender may see (`422 validation_failed`,
+  field `shared_post_id`). Members who may not see it get `PostCard.available: false`.
+- **Put on a frame** (`putMessageOnFrame`): a normal send of the message's photos and videos, without uploading
+  again (the `forwardSend` path), to frames the caller may send to and families they may post to. Own items are the
+  caller's send; items of other people's messages are placed like `sharePlacements` (credit "Ben · shared by Anna",
+  `shared_by_user_id`; reactions go to the items' sender as for shares) and can't go to families (`403 forbidden`).
+  The conversation gets a `put_on_frame` system message ("Ben put 12 photos on Oma's frame and in Peeters"), and the
+  frames' reactions and quick replies on those placements are listed in the original message's `frame_activity`
+  (`message.updated` when they change). The send counts for freshness and answers photo requests (§5.20).
+- **System messages** (`kind: system`): `put_on_frame`; `streak_milestone`, `monthly_recap`, `prompt` (posted by the
+  engagement scheduler in family chats); `member_joined`, `member_left` (groups only: added people and leavers; never
+  in family or circle chats). They can be reacted to, never edited, and never push.
+- `listMessages`: pages are always oldest first; no cursor = the newest `limit` (50, max 200), `before=<id>` older,
+  `after=<id>` newer (both: `422`); `has_more_before`/`has_more_after`. Clients catch up after a reconnect with
+  `after` = the last message they have.
+
+**Read state, receipts, typing**
+- `markConversationRead {message_id}` never moves back. `unread_count` counts messages after the caller's position,
+  not their own, not system messages, not from people they blocked; `unread_mentions` those mentioning them.
+- **Read receipts** ("Seen") are shown in `direct` chats and in `group`s of at most 10 people, never in family or
+  circle chats (`Conversation.read_receipts`). A member's `last_read_message_id` is returned only to members who have
+  `show_read_receipts` on, and only for members who have it on too (`User.show_read_receipts`, default on; turning it
+  off hides your own and others'). `read.updated {conversation_id, user_id, last_read_message_id}` goes to the
+  other members under the same rule, and always to the reader's own other connections.
+- **Typing** (`sendTyping`): relayed as `typing {conversation_id, user_id, display_name, activity, expires_at}` to
+  the other connected members (not to people who blocked the typer); `expires_at` = now + 6 s; never stored or
+  pushed; at most one every 3 s per person and conversation.
+
+**Link previews** (operator opt-in)
+- Off unless the operator sets `KINFRAME_LINK_PREVIEWS=1` (discovery `link_previews`). Then `sendMessage` attaches a
+  preview of the body's first `http(s)` link unless `link_preview: false`: the message is returned with `status:
+  pending` and `message.updated` follows. `createLinkPreview` gives the composer the same preview first.
+- The server fetches with `internal/netguard` (public addresses only, re-checked on every redirect, at most 5
+  redirects), 5 s timeout, at most 1 MiB of HTML read, `User-Agent: kinframe-linkpreview/1`; it reads Open Graph,
+  Twitter card, `<title>` and description. The image (at most 5 MiB) is re-encoded to WebP of at most 512 px and
+  served by the server, so clients never load remote content. Cached per normalized URL (`link_previews`): 7 days, a
+  failure 1 day. Failures are `status: failed` (the message shows the plain link).
+
+**Blocks and reports**
+- `blockUser`: the blocked person's comments, messages and reactions are hidden from the blocker (lists, latest
+  comments, previews; counts still include them), their direct messages are refused (`403 cannot_message`), they
+  can't add the blocker to groups, and they get no typing or read events from the blocker. Shared families, circles
+  and groups stay. Nobody is told.
+- `createReport`: comments, messages and posts the reporter can see. Family context (a feed post or its comments, a
+  family or circle chat) goes to the feed's owner and admins (`listFeedReports`, push `report`); everything else
+  (frame posts, direct and group chats) to the operator (`listOperatorReports`). `excerpt` keeps the text as it was
+  when reported. `resolveReport {remove|dismiss}`: `remove` acts as a moderator delete; `409 already_decided` if
+  someone else was first. The reported person never learns who reported.
+
+**Badge** (`getBadge`, `badge.updated {badge}`): conversations with unread messages that are not muted, plus threads
+with `unread_mentions` > 0 that are not muted. Not every comment. Sent whenever it changes for the user.
+
+**Pushes**: `message` to members with no open websocket (as for every push, §6.3), unless the conversation or the
+family's chat is muted; `tag` `conversation:<conversation_id>` so the newest replaces older ones; title the
+conversation's name, body "Anna: Look at this" / "Anna sent 3 photos" / "Anna sent a voice message" / "Anna shared a
+post". Messages that mention the recipient use `mention` instead (also suppressed by mute). `conversation_added`
+when someone adds you to a group. `report` to the handlers of a new report. System messages never push.
+
+### 5.20 Encouragement to share
+
+Product spec: `docs/spec/family-social.md` §9. Discovery says `engagement: true`. Nothing here ranks people.
+
+**Freshness** (`FrameSummary.freshness`, `FeedSummary.freshness`)
+- A frame's **personal** photos are non-backfill placements of sends by people (`sends.via` null, `email` or
+  `telegram`: direct sends, feed posts, chats put on a frame); **source** photos are those of photo sources and Google
+  imports. Frame imports, shares, birthdays and calendars never count. For a family: its posts, the same way.
+  Kept in `frame_freshness` / `feed_freshness` when placements and posts are made.
+- With `d(t)` = days (fractional) since `t` and `L(t) = clamp(1 − d(t)/14, 0, 1)`: `level = max(L(last personal),
+  0.5 × L(last source))`. `days_quiet` = whole days since the last personal photo (null if never). `state`:
+  `never` (no personal or source photo ever), `fresh` (`days_quiet` 0), `recent` (below the quiet threshold),
+  `quiet` (at or above it). The threshold is `quiet_after_days` of the family (`FeedEngagement`, default 7); for a
+  frame, the smallest of its families with an active subscription, else 7.
+- Tapping a pale ring opens "Send something to Oma's frame" with suggestions computed **on the device** (photos taken
+  since the last share, never uploaded until picked), `getOnThisDay` and the current prompt.
+
+**Ask for new photos** (frame requests)
+- Frame: `deviceRequestPhotos` from the quick menu (shown while `settings.social.ask_for_photos`, default on; `403`
+  when off). One per frame per 24 hours: within 24 h of the last one it returns that one with `200` and notifies
+  nobody. The `photo_request` change carries `FramePhotoRequest` (`next_allowed_at`: show "Asked today 💛").
+- Recipients of push `frame_request` ("Oma would like new photos 💛"): the frame's members with `send` and the members
+  (poster or above) of families with an active subscription to it, who sent anything that reached this frame in the
+  last 6 months; if nobody did, all of them. Not to people with `frame_requests: false`. Not counted in the reminder
+  budget and not affected by snooze or `level`; quiet hours do apply (held until they end).
+- **Answered** by the first send by a person that creates a non-backfill placement on that frame after the request
+  (`answered_by`, `answered_at`; `photo_request.updated` to the same people, a new `photo_request` change; the frame
+  shows "New photos from Ben" on its next wake). Open requests expire after 7 days. `FrameSummary.photo_request` is
+  the open one or one answered in the last 24 hours; `getPhotoRequest`, `listFramePhotoRequests` (30 days).
+
+**Reminders and their budget**
+
+| Kind (`nudges.kind`, push key) | To | When | Limit |
+|---|---|---|---|
+| `reminder_quiet` | 1–2 people who sent to that frame in the last 6 months (frame members with `send`, family members whose posts reach it), longest since their last share first, rotating | a frame's freshness reaches `quiet` | per frame once per 7 days; per person once per 7 days |
+| `reminder_streak` | 1 family member who helped most often in the last 8 weeks, not the one reminded last time | Sunday 17:00 (family time zone) while the week's goal isn't met | once per week per family |
+| `reminder_birthday` | up to 3 members who posted to that family in the last 12 months (not the birthday person) | 3 days before a birthday in the family, 10:00 local | once per birthday and person |
+| `weekly_summary` | everyone whose sends were seen that week | Sunday 19:00 local | weekly, skipped when empty |
+| `frame_request` | above | at once | per frame once per 24 h |
+
+- **Budget**: at most 2 budgeted pushes (every kind above except `frame_request`) per person in any 7 days; 1 with
+  `level: fewer` (and no `reminder_streak` at all); none with `off` or while `snoozed_until` is in the future. When
+  over budget the order is birthday, streak, quiet, summary. "Local" is `User.timezone` (Europe/Brussels without one);
+  nothing is sent during `quiet_hours` (default 21:00–09:00), it waits until they end and is dropped if it is no longer
+  true by then.
+- Reminder pushes carry `actions: ["snooze_month", "fewer_reminders"]`: the apps call `updateReminderPreferences`
+  with `{snooze_days: 30}` or `{level: fewer}` (README §6.3).
+- Texts are specific ("Opa's frame has had no new photos for 9 days. You last shared 3 weeks ago."), never generic.
+- **Outcome**: a reminder is `shared` when its recipient makes a personal send within 24 h, else `ignored`. After 4
+  ignored reminders in a row the person drops to `fewer` (`auto_reduced: true`, shown once by the apps). This is the
+  only use of the log; nothing leaves the server.
+- The scheduler runs every 15 minutes (a worker job), idempotent through `nudges.dedupe_key`.
+
+**Family streak** (`getFeedStreak`, `FeedSummary.streak`, settings in `getFeedEngagement`/`updateFeedEngagement`)
+- Weeks run Monday 00:00 to Sunday 24:00 in the family's time zone (`FeedEngagement.timezone`: set by an admin, else
+  the most common `locale.timezone` of its subscribed frames, else the owner's `User.timezone`, else
+  Europe/Brussels). A week counts the live items of personal posts made in it (removed posts don't count when the
+  week closes); the goal is `streak_goal` (default 3, 1–20; decision E).
+- When a week closes: goal met → `current_weeks` + 1 (and `best_weeks`); missed with a freeze left → the freeze is
+  used, the streak stays (`frozen`); missed without → `current_weeks` = 0, quietly ("New streak: 1 week" when the next
+  week is met). One freeze is granted on the 1st of each month, at most 2 held.
+- `helpers`: who posted this week, no counts. Milestones at 4, 12, 26 and 52 weeks, then every 52: a
+  `streak_milestone` system message in the family chat. `streak_enabled: false` hides everything (and stops the
+  streak reminder) but keeps counting so turning it on again shows the truth.
+
+**Weekly prompts** (`listFeedPrompts`, `setFeedPrompt`, `resetFeedPrompt`, `listPromptLibrary`, `tagPostPrompt`)
+- Off by default (`prompts_enabled`). The server's list is localized like everything else (i18n keys
+  `prompt.<key>` in `locales/engagement`, all 37 languages); each week without an admin's choice gets the next key in a
+  fixed rotation the family hasn't had in the last 52 weeks. The week's `feed_prompts` row is made when the week
+  starts (Monday 00:00 family time), so its `id` is stable; a `prompt` system message announces it in the family chat
+  at 09:00.
+- Admins may set the current or a future week (a library key, an own title of 1–80 characters, or skip) and reset it.
+- Posts are tagged by `SendCreate.prompt_id` (the prompt's feed must be in `feed_ids`) or `tagPostPrompt` (the
+  poster), with the current or previous week's prompt (`422` otherwise). `FeedPost.prompt_id`, `TimelinePost.prompt`,
+  `getTimeline?prompt_id=` lists the answers; `FeedPrompt.answer_count`.
+- Frames: `Placement.prompt_id` on the answers' feed placements and the `prompts` change (`FramePrompts`, entity = the
+  frame) with the current prompts of its families in the frame's `locale.language`. With `settings.social.prompt_cards`
+  (default on) the frame shows the title card ("This week: *Your view right now*") before the first answer each time
+  it comes up.
+
+**On this day** (`getOnThisDay`): the caller's visible feed posts from today's month and day in earlier years (in
+`User.timezone`; 29 February shows on 28 February in other years), at most 3 groups (newest year first, then by
+family), 12 items each. One tap re-shares through `createSend` with the items (`upload_id` = the existing item id of
+the caller's own items) or `forwardSend`, or into a chat with `shared_post_id`.
+
+**Weekly summary** (`getWeeklySummary`, push `weekly_summary` with `ids.week_of`): for the week just ended in the
+caller's time zone: placements of their items first seen that week (`seen_count`) and on how many frames, frame ❤ on
+their items, people's reactions and others' comments on their posts, and the item with most reactions. Only made and
+pushed when `seen_count` > 0 and `weekly_summary` is on; kept 12 weeks.
+
+**Monthly recap** (`getFeedRecap`): on the 1st at 10:00 (family time) for the month before, when `monthly_recap` is on
+and the family posted that month: photos and videos shared, how many people shared, the post with most reactions
+(people and frames), the three frames with most days with new photos, new members, the streak. Posted as a
+`monthly_recap` system message in the family chat. About the family, never ranking people.
+
+**Personal milestones** (`listMyMilestones`, `updateMyMilestone`; private unless `shown`, then in `Person.milestones`)
+- `first_photo`, `photos_10`, `photos_100`, `photos_1000` (photos and videos in the user's own sends, not via photo
+  sources or Google imports; chat items count once put on a frame), `first_video`, `year_of_sharing` (365 days after
+  the first send, with a send in the last 30 days), `loves_100` (100 frame `love` reactions on their placements).
+- Checked after sends and reactions; a new one sends `milestone.achieved {milestone}` on the websocket only (no push).
+  Apps show a small card until `seen`.
+
+**Birthday nudges**: `reminder_birthday` (table above), three days before an approved birthday of a family, once per
+birthday and person (`dedupe_key` `reminder_birthday:<birthday_id>:<date>`), only with `birthday_reminders` on and the
+feed's `birthday_notifications` on for that member. The server has no face recognition: "people with photos of her"
+is approximated by members who posted to that family in the last 12 months.
+
+**Email digest** (`ReminderPreferences.email_digest`: `off` default, `daily` 08:00 local, `weekly` Monday 08:00): only
+when discovery has `email_digest` (outgoing mail configured). Unread comments in threads the person follows (their
+posts, threads they commented in, mentions) and unread messages in conversations that are not muted, since the last
+digest; skipped when empty. Each mail links to the app and the web and has a one-click "stop these emails" link.
+
+**The frame**
+- `settings.social.show_comments` (default off; owner, admins, `change_settings`): the server sends a `comments`
+  change (entity = the placement, `PlacementComments`) for each live placement of a feed post that has person comments
+  visible to the whole post audience: the three newest (not tombstones, not removed), first names only, at most 280
+  characters, never chat messages, never comments from families the frame doesn't subscribe to. It is re-emitted when
+  they change (digest in `frame_comment_cards`) and `comments: null` drops them (the setting turned off, the comments
+  removed). The frame shows the newest as a card for 8 s when the photo appears, at most once per photo per day.
+- `settings.social.ask_for_photos` (default on): the quick-menu button and `deviceRequestPhotos`.
+- `settings.social.new_photos_from` (default on): after new (non-backfill) placements arrived, the frame shows "New
+  photos from Ben" (from the placements' senders) on its next wake.
+- `prompts` change and `Placement.prompt_id` as above. Heartbeat `features` may list `comments`, `photo_requests`,
+  `prompts` (informational; nothing is withheld from older apps, which ignore the new change types).
 
 ## 7. Versioning
 

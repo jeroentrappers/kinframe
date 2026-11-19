@@ -1410,6 +1410,7 @@ const ro: Catalog = {
 	'feedRole.owner': 'Proprietar',
 	'feedRole.admin': 'Administrator',
 	'feedRole.poster': 'Participant',
+	'feedRole.member': 'Cititor',
 	'problem.already_subscribed': 'Această ramă afișează deja acest flux sau așteaptă aprobarea.',
 	'problem.invalid_transition': 'Acest lucru nu este posibil acum. Reîncărcați și încercați din nou.',
 	'problem.limit_reached': 'Ați atins limita de pe acest server.',

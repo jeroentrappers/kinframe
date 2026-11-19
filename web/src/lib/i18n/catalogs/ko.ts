@@ -1392,6 +1392,7 @@ const ko: Catalog = {
 	'feedRole.owner': '소유자',
 	'feedRole.admin': '관리자',
 	'feedRole.poster': '게시자',
+	'feedRole.member': '열람자',
 	'problem.already_subscribed': '이 액자에 이미 이 피드가 표시되고 있거나 승인을 기다리고 있어요.',
 	'problem.invalid_transition': '지금은 할 수 없어요. 새로고침한 후 다시 시도하세요.',
 	'problem.limit_reached': '이 서버의 한도에 도달했어요.',

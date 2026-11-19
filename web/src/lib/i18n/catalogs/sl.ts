@@ -1451,6 +1451,7 @@ const sl: Catalog = {
 	'feedRole.owner': 'Lastnik',
 	'feedRole.admin': 'Skrbnik',
 	'feedRole.poster': 'Avtor',
+	'feedRole.member': 'Bralec',
 	'problem.already_subscribed': 'Ta okvir že prikazuje ta kanal ali čaka na odobritev.',
 	'problem.invalid_transition': 'To trenutno ni mogoče. Znova naložite stran in poskusite znova.',
 	'problem.limit_reached': 'Dosegli ste omejitev tega strežnika.',

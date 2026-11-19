@@ -1410,6 +1410,7 @@ const es: Catalog = {
 	'feedRole.owner': 'Propietario',
 	'feedRole.admin': 'Administrador',
 	'feedRole.poster': 'Miembro',
+	'feedRole.member': 'Lector',
 	'problem.already_subscribed': 'Este marco ya muestra este canal o está esperando aprobación.',
 	'problem.invalid_transition': 'Ahora no se puede. Recarga la página y vuelve a intentarlo.',
 	'problem.limit_reached': 'Has llegado al límite de este servidor.',

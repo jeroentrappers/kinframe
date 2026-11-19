@@ -1410,6 +1410,7 @@ const pt: Catalog = {
 	'feedRole.owner': 'Proprietário',
 	'feedRole.admin': 'Administrador',
 	'feedRole.poster': 'Participante',
+	'feedRole.member': 'Leitor',
 	'problem.already_subscribed': 'Este porta-retrato já mostra este feed ou está aguardando aprovação.',
 	'problem.invalid_transition': 'Isso não é possível agora. Recarregue e tente de novo.',
 	'problem.limit_reached': 'Você atingiu o limite deste servidor.',

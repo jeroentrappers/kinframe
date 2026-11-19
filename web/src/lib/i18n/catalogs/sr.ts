@@ -1422,6 +1422,7 @@ const sr: Catalog = {
 	'feedRole.owner': 'Власник',
 	'feedRole.admin': 'Администратор',
 	'feedRole.poster': 'Аутор',
+	'feedRole.member': 'Читалац',
 	'problem.already_subscribed': 'Овај рам је већ претплаћен на овај канал или чека одобрење.',
 	'problem.invalid_transition': 'То тренутно није могуће. Поново учитајте страницу и покушајте поново.',
 	'problem.limit_reached': 'Достигли сте ограничење на овом серверу.',

@@ -1376,6 +1376,7 @@ const fi: Catalog = {
 	'feedRole.owner': 'Omistaja',
 	'feedRole.admin': 'Ylläpitäjä',
 	'feedRole.poster': 'Julkaisija',
+	'feedRole.member': 'Lukija',
 	'problem.already_subscribed': 'Tämä kuvakehys näyttää jo tätä kanavaa tai odottaa hyväksyntää.',
 	'problem.invalid_transition': 'Se ei onnistu juuri nyt. Lataa sivu uudelleen ja yritä uudelleen.',
 	'problem.limit_reached': 'Olet saavuttanut tämän palvelimen rajan.',

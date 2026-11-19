@@ -1388,6 +1388,7 @@ const da: Catalog = {
 	'feedRole.owner': 'Ejer',
 	'feedRole.admin': 'Administrator',
 	'feedRole.poster': 'Deltager',
+	'feedRole.member': 'Læser',
 	'problem.already_subscribed': 'Rammen viser allerede denne kanal eller venter på godkendelse.',
 	'problem.invalid_transition': 'Det er ikke muligt lige nu. Genindlæs, og prøv igen.',
 	'problem.limit_reached': 'Du har nået grænsen på denne server.',

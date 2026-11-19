@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Et voi lähettää viestiä tälle henkilölle",
+    "problem.audio_too_long": "Ääniviesti on liian pitkä"
+  }
+}

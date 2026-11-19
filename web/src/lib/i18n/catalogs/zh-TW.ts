@@ -1392,6 +1392,7 @@ const zhTW: Catalog = {
 	'feedRole.owner': '擁有者',
 	'feedRole.admin': '管理員',
 	'feedRole.poster': '發布者',
+	'feedRole.member': '讀者',
 	'problem.already_subscribed': '這台相框已在顯示這個頻道，或正在等待核准。',
 	'problem.invalid_transition': '目前無法執行這項操作。請重新整理後再試一次。',
 	'problem.limit_reached': '你已達到這台伺服器的上限。',

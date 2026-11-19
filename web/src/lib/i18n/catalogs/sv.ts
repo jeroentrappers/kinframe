@@ -1376,6 +1376,7 @@ const sv: Catalog = {
 	'feedRole.owner': 'Ägare',
 	'feedRole.admin': 'Admin',
 	'feedRole.poster': 'Deltagare',
+	'feedRole.member': 'Läsare',
 	'problem.already_subscribed': 'Fotoramen visar redan det här flödet, eller väntar på godkännande.',
 	'problem.invalid_transition': 'Det går inte just nu. Ladda om och försök igen.',
 	'problem.limit_reached': 'Du har nått gränsen på den här servern.',

@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Ти не можеш написати цій людині",
+    "problem.audio_too_long": "Голосове повідомлення задовге"
+  }
+}

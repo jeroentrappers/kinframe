@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Du kan ikke sende melding til denne personen",
+    "problem.audio_too_long": "Talemeldingen er for lang"
+  }
+}

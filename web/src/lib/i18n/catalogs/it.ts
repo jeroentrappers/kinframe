@@ -1421,6 +1421,7 @@ const it: Catalog = {
 	'feedRole.owner': 'Proprietario',
 	'feedRole.admin': 'Admin',
 	'feedRole.poster': 'Membro',
+	'feedRole.member': 'Lettore',
 	'problem.already_subscribed': 'Questa cornice mostra già questo feed, oppure è in attesa di approvazione.',
 	'problem.invalid_transition': 'Al momento non è possibile. Ricarica la pagina e riprova.',
 	'problem.limit_reached': 'Hai raggiunto il limite su questo server.',

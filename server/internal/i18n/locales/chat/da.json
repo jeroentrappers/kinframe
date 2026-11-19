@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Du kan ikke skrive til denne person",
+    "problem.audio_too_long": "Talebeskeden er for lang"
+  }
+}

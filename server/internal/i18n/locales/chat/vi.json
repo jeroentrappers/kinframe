@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Bạn không thể nhắn tin cho người này",
+    "problem.audio_too_long": "Tin nhắn thoại quá dài"
+  }
+}

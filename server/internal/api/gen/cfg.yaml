@@ -17,6 +17,8 @@ output-options:
     - tusCreateUpload
     - putAvatar
     - putFeedBirthdayPhoto
+    # Hand-written: group chat photos (binary body, like putAvatar).
+    - putConversationPhoto
     - deviceGetMedia
     - getItemMedia
     # Hand-written: 200-or-204 with header parsing, and binary APK downloads with Range.

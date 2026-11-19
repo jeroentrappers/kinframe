@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Nu poți trimite mesaje acestei persoane",
+    "problem.audio_too_long": "Mesajul vocal este prea lung"
+  }
+}

@@ -227,6 +227,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Feeds and subscriptions: private family channels that frames subscribe to (`feeds.md`) | + (8) |
 | Birthdays: a birthday list per feed, shown on every subscribed frame, with greetings and morning notifications (`birthdays.md`) | + (9) |
 | Telegram bridge (`telegram.md`): the server's bot connects a family Telegram group (or a private chat) to a frame or a feed with a one-time deep link; photos, image files, videos and albums become sends or posts credited "Jan via Telegram", linked Telegram accounts send as themselves, the bot confirms with reactions and mirrors the frame's ❤, and its one-time message promotes the app with a join link | + (10) |
+| Family social (`family-social.md`): kinframe as the private social hub of the extended family. Feeds are called **families** in the apps; a home timeline of every family's posts, comment threads with replies, mentions and people's reactions next to the frames' ❤ and quick replies, a `member` role that follows along and talks without posting photos, circles inside a family, direct, group, family and circle chats (photos, videos, voice messages, "Put on a frame", "Share in chat", read receipts, typing, blocks and reports), and gentle, collective encouragement to share: frame freshness, "Ask for new photos" from the frame, capped reminders, family streaks, weekly prompts, On this day, weekly summaries, monthly recaps, private milestones, comments on the frame (off by default) and an email digest | + (11) |
 
 ## 5. Non-functional requirements
 
@@ -381,3 +382,21 @@ Decided by the project owner on 2026-11-19.
    (reactions, rate-limited error replies), and the app is promoted once per person with an approval-required join
    link. Telegram deletions don't unsend; the cloud Bot API's 20 MB download limit applies unless the operator runs
    a local Bot API server.
+
+Decided by the project owner on 2026-11-19 (family social, `family-social.md` §12).
+
+9. **Feeds are called "families" in the apps and on the web**; the API, the database and the code keep `feed`. One
+   family can still subscribe many frames, and a person can be in several families.
+10. **No end-to-end encryption for chats** (phases 1–2): decision 1 stands. Comment and message bodies are encrypted at
+    rest when the operator configured at-rest encryption (`KINFRAME_SECRETS_KEY`), and the apps say plainly who runs
+    the server and that its operator could read messages. MLS-based E2E for text-only direct and group chats may be
+    revisited later without changing the rest of the design.
+11. **Direct chats only between people who share a family or a frame.** No search for people, no messaging
+    strangers; blocking stops direct messages and being added to groups.
+12. **Comments on the frame are possible but off by default** (*Show comments*, a frame setting); the frame stays calm
+    unless its owner wants them. Never chat messages on the frame.
+13. **The family streak's default goal is 3 photos a week** per family (admins pick 1–20), so one active member can
+    carry a small family and a big family isn't pushed to flood the frames.
+14. **One family per extended family, with circles inside it** (households, branches), rather than many small
+    families linked together: one member list, one set of birthdays and one invite per family. People with two
+    families (their own and their partner's) are simply in both.

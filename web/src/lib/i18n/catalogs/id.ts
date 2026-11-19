@@ -1393,6 +1393,7 @@ const id: Catalog = {
 	'feedRole.owner': 'Pemilik',
 	'feedRole.admin': 'Admin',
 	'feedRole.poster': 'Pemosting',
+	'feedRole.member': 'Pembaca',
 	'problem.already_subscribed': 'Bingkai ini sudah menampilkan feed ini, atau sedang menunggu persetujuan.',
 	'problem.invalid_transition': 'Itu tidak bisa dilakukan sekarang. Muat ulang dan coba lagi.',
 	'problem.limit_reached': 'Anda telah mencapai batas di server ini.',

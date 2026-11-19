@@ -1392,6 +1392,7 @@ const hu: Catalog = {
 	'feedRole.owner': 'Tulajdonos',
 	'feedRole.admin': 'Adminisztrátor',
 	'feedRole.poster': 'Szerző',
+	'feedRole.member': 'Olvasó',
 	'problem.already_subscribed': 'Ez a képkeret már megjeleníti ezt a csatornát, vagy jóváhagyásra vár.',
 	'problem.invalid_transition': 'Ez most nem lehetséges. Töltsd újra az oldalt, és próbáld újra.',
 	'problem.limit_reached': 'Elérted a szerver korlátját.',

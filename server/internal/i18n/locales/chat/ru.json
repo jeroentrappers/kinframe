@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Ты не можешь написать этому человеку",
+    "problem.audio_too_long": "Голосовое сообщение слишком длинное"
+  }
+}

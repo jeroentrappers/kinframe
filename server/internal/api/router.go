@@ -59,6 +59,7 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("/v1/uploads/", user(s.tusRoutes()))
 	mux.Handle("PUT /v1/me/avatar", user(http.HandlerFunc(s.putAvatar)))
 	mux.Handle("PUT /v1/feeds/{feedId}/birthdays/{birthdayId}/photo", user(http.HandlerFunc(s.putFeedBirthdayPhoto)))
+	mux.Handle("PUT /v1/conversations/{conversationId}/photo", user(http.HandlerFunc(s.putConversationPhoto)))
 	mux.Handle("GET /v1/items/{itemId}/media/{variant}", user(http.HandlerFunc(s.getItemMedia)))
 	mux.Handle("GET /v1/device/media/{placementId}", s.deviceAuth(http.HandlerFunc(s.deviceGetMedia)))
 	mux.Handle("GET /v1/device/ws", s.deviceAuth(http.HandlerFunc(s.deviceWS)))

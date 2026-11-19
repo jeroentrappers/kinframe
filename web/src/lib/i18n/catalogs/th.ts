@@ -1394,6 +1394,7 @@ const th: Catalog = {
 	'feedRole.owner': 'เจ้าของ',
 	'feedRole.admin': 'ผู้ดูแล',
 	'feedRole.poster': 'ผู้โพสต์',
+	'feedRole.member': 'ผู้อ่าน',
 	'problem.already_subscribed': 'กรอบรูปนี้แสดงฟีดนี้อยู่แล้ว หรือกำลังรอการอนุมัติ',
 	'problem.invalid_transition': 'ทำไม่ได้ในตอนนี้ โหลดหน้าใหม่แล้วลองอีกครั้ง',
 	'problem.limit_reached': 'คุณใช้ถึงขีดจำกัดของเซิร์ฟเวอร์นี้แล้ว',

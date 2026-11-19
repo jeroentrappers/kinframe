@@ -1392,6 +1392,7 @@ const zhCN: Catalog = {
 	'feedRole.owner': '所有者',
 	'feedRole.admin': '管理员',
 	'feedRole.poster': '发布者',
+	'feedRole.member': '读者',
 	'problem.already_subscribed': '这台相框已在显示这个频道，或正在等待批准。',
 	'problem.invalid_transition': '现在无法执行此操作。请刷新后重试。',
 	'problem.limit_reached': '你已达到此服务器的上限。',

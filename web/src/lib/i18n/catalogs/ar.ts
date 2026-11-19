@@ -1510,6 +1510,7 @@ const ar: Catalog = {
 	'feedRole.owner': 'المالك',
 	'feedRole.admin': 'مشرف',
 	'feedRole.poster': 'ناشر',
+	'feedRole.member': 'قارئ',
 	'problem.already_subscribed': 'هذا الإطار مشترك بالفعل في هذه القناة، أو بانتظار الموافقة.',
 	'problem.invalid_transition': 'لا يمكن ذلك الآن. أعد تحميل الصفحة وحاول مرة أخرى.',
 	'problem.limit_reached': 'وصلت إلى الحد المسموح به على هذا الخادم.',

@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Je kunt deze persoon geen bericht sturen",
+    "problem.audio_too_long": "Het spraakbericht is te lang"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "problem.cannot_message": "Šiam žmogui negali parašyti",
+    "problem.audio_too_long": "Balso žinutė per ilga"
+  }
+}

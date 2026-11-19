@@ -1439,6 +1439,7 @@ const uk: Catalog = {
 	'feedRole.owner': 'Власник',
 	'feedRole.admin': 'Адміністратор',
 	'feedRole.poster': 'Автор',
+	'feedRole.member': 'Читач',
 	'problem.already_subscribed': 'Ця рамка вже підписана на цю стрічку або чекає схвалення.',
 	'problem.invalid_transition': 'Зараз це неможливо. Оновіть сторінку й спробуйте знову.',
 	'problem.limit_reached': 'Ви досягли обмеження на цьому сервері.',

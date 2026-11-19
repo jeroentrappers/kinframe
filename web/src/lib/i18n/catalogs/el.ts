@@ -1381,6 +1381,7 @@ const el: Catalog = {
 	'feedRole.owner': 'Κάτοχος',
 	'feedRole.admin': 'Διαχειριστής',
 	'feedRole.poster': 'Συντάκτης',
+	'feedRole.member': 'Αναγνώστης',
 	'problem.already_subscribed': 'Αυτή η κορνίζα εμφανίζει ήδη αυτό το κανάλι ή περιμένει έγκριση.',
 	'problem.invalid_transition': 'Αυτό δεν είναι δυνατό αυτή τη στιγμή. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.',
 	'problem.limit_reached': 'Φτάσατε το όριο αυτού του διακομιστή.',

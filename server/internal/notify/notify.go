@@ -34,6 +34,11 @@ type Push struct {
 	// "birthday:<birthday_id>:<date>"). APNs delivery, once built, must set
 	// apns-collapse-id to it; FCM the notification tag / collapse key.
 	Tag string
+	// Actions, if set, are sent as the payload's "actions": buttons the apps
+	// show on the notification (reminders: "snooze_month", "fewer_reminders";
+	// README §6.3). APNs delivery maps a non-empty list to the category
+	// "kinframe.reminder", FCM to a comma-separated "actions" data value.
+	Actions []string
 }
 
 // Sender delivers one push payload to one endpoint. Gone reports the endpoint
@@ -86,6 +91,9 @@ func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 		msg := map[string]any{"type": ev["type"], "key": p.Key, "title": title, "body": body, "ids": p.IDs}
 		if p.Tag != "" {
 			msg["tag"] = p.Tag
+		}
+		if len(p.Actions) > 0 {
+			msg["actions"] = p.Actions
 		}
 		payload, _ := json.Marshal(msg)
 		gone, err := n.Sender.Send(ctx, ep, payload)

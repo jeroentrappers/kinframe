@@ -490,7 +490,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Thumbnails and the master rendition for app/web. Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags. */
+        /** @description Thumbnails and the master rendition for app/web, for everyone who may see the item (its sender, frames' library viewers, feed and circle members, and members of conversations it was sent in). Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags. */
         get: operations["getItemMedia"];
         put?: never;
         post?: never;
@@ -758,7 +758,7 @@ export interface paths {
         delete: operations["removeFeedMember"];
         options?: never;
         head?: never;
-        /** @description Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`. */
+        /** @description Owner or admin. Admins cannot change the owner or other admins, and only change posters and members. Ownership moves with `transferFeedOwnership`. */
         patch: operations["updateFeedMember"];
         trace?: never;
     };
@@ -788,7 +788,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Owner or admin. Approved requesters become posters. */
+        /** @description Owner or admin. Approved requesters become posters, or members when the feed has `new_members_can_post` off. */
         post: operations["decideFeedJoinRequest"];
         delete?: never;
         options?: never;
@@ -909,9 +909,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
-         *     for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
-         *     they are null. Post as a feed is done with `createSend` (`feed_ids`).
+         * @description Any feed member, newest first. `receipts` are present on the caller's own posts, on every post for owner and
+         *     admins, and on every post for everyone when the feed has `members_see_receipts`; `reactions` (frames'
+         *     reactions and replies) likewise with `members_see_reactions`; otherwise they are null. Circle posts only for
+         *     circle members. Post as a feed is done with `createSend` (`feed_ids`).
          */
         get: operations["listFeedPosts"];
         put?: never;
@@ -972,7 +973,7 @@ export interface paths {
         };
         /**
          * @description Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
-         *     (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+         *     (`members_see_receipts`; `403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
          *     for direct sends; who moderated is never revealed.
          */
         get: operations["getFeedPostReceipts"];
@@ -2084,6 +2085,974 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Home: posts from every family (feed) the caller is a member of, with `member` and every other role, plus
+         *     frame posts (direct sends to frames) the caller may see (README §5.18), newest first. Circle posts only for
+         *     circle members. Chronological, never ranked. Removed posts are left out.
+         */
+        get: operations["getTimeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/posts/{postId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description One feed post or frame post as on the timeline (push deep links, shared post cards). `404 not_found` when the
+         *     caller may not see it or it was removed.
+         */
+        get: operations["getPost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/posts/{postId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description The thread, oldest first, flat: replies carry `parent_id` (always a top-level comment) and come after their
+         *     parent; clients nest them. Frame entries (`kind: frame`) are in the same list. Comments by people the caller
+         *     blocked are left out; comments removed by an admin are left out for everyone except their author.
+         */
+        get: operations["listComments"];
+        put?: never;
+        /**
+         * @description Anyone who may see the post (README §5.18). `409 comments_closed` when the thread is closed. Replies:
+         *     `parent_id` is a top-level comment of this thread; a reply to a reply is sent with the top comment as
+         *     `parent_id` and the person replied to as `quoted_user_id`. Mentions must point at people who may see the post
+         *     (`422 validation_failed`, field `mentions`).
+         */
+        post: operations["createComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/posts/{postId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+                commentId: components["parameters"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description The author (a top comment with replies stays as a `deleted` tombstone, otherwise it disappears), or a
+         *     moderator (feed owner/admin; for frame posts the frame's owner/admin): removed without a tombstone, with its
+         *     replies; its author still sees it with `removed_by_admin`.
+         */
+        delete: operations["deleteComment"];
+        options?: never;
+        head?: never;
+        /** @description The author only, any time (shows "edited"). Frame entries can't be edited (`403 forbidden`). */
+        patch: operations["updateComment"];
+        trace?: never;
+    };
+    "/v1/posts/{postId}/thread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description The poster, or a moderator (feed owner/admin; frame owner/admin for frame posts). Closing keeps existing comments and reactions; new comments get `409 comments_closed`. */
+        put: operations["setThreadState"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/posts/{postId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Marks the thread read up to `up_to` (a comment id of this thread). Never moves backwards. Sends `thread.read` to the caller's other connections. */
+        put: operations["markThreadRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/posts/{postId}/mute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Mute or unmute pushes for this thread (comments, replies and mentions in it) for the caller. */
+        put: operations["setThreadMute"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/posts/{postId}/prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description The poster: tag a feed post as an answer to one of its family's weekly prompts (the current week's or the
+         *     previous week's), or untag it with null. Frame posts can't be tagged (`422 validation_failed`).
+         */
+        put: operations["tagPostPrompt"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reactions/{targetKind}/{targetId}": {
+        parameters: {
+            query?: {
+                /** @description Required for `post_item` (the item's post; one item can be in several posts). Ignored otherwise. */
+                post_id?: components["schemas"]["Id"];
+            };
+            header?: never;
+            path: {
+                targetKind: components["parameters"]["TargetKind"];
+                targetId: components["parameters"]["TargetId"];
+            };
+            cookie?: never;
+        };
+        /** @description Who reacted (people and, for posts and post items, frames), newest first. Same visibility as the target. */
+        get: operations["listReactions"];
+        /**
+         * @description The caller's reaction on a post, one item of a post, a comment or a chat message: one per person and target,
+         *     the latest wins, null removes it. Allowed on closed threads. Not on frame entries or system messages
+         *     (`422 validation_failed`).
+         */
+        put: operations["setReaction"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/circles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /** @description The circles of this family the caller is in; the feed's owner and admins see every circle (names and members, not their posts). */
+        get: operations["listCircles"];
+        put?: never;
+        /**
+         * @description Feed owner/admin, or any member when the feed has `members_can_create_circles` (default on). The creator is a
+         *     circle admin; `member_ids` must be feed members. At most `limits.max_circles_per_feed` (`409 limit_reached`).
+         *     Names are unique per family, case-insensitive (`422 validation_failed`, field `name`, code `duplicate`). The
+         *     circle's chat (kind `circle`) is created with it.
+         */
+        post: operations["createCircle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/circles/{circleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+            };
+            cookie?: never;
+        };
+        get: operations["getCircle"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Circle admins and the feed's owner/admins. Removes the circle's posts everywhere (like `removeFeedPost`:
+         *     frames, timeline, threads) and archives its chat. Clients warn first.
+         */
+        delete: operations["deleteCircle"];
+        options?: never;
+        head?: never;
+        /** @description Circle admins and the feed's owner/admins. `frame_ids` replaces the extra frames the circle's posts reach. */
+        patch: operations["updateCircle"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/circles/{circleId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Circle admins and the feed's owner/admins add feed members (already present ones are ignored). They join the circle's chat. */
+        post: operations["addCircleMembers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/circles/{circleId}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Circle admins and the feed's owner/admins remove anyone; any member removes themself (leave). Their posts to the circle stay. Leaving the family leaves its circles. */
+        delete: operations["removeCircleMember"];
+        options?: never;
+        head?: never;
+        /** @description Circle admins and the feed's owner/admins. */
+        patch: operations["updateCircleMember"];
+        trace?: never;
+    };
+    "/v1/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every conversation the caller is in (family and circle chats included), most recent activity first, with
+         *     unread counts and the last message. Family-sized, so not paged. Archived conversations (the caller's own
+         *     `archived`, or a deleted family or circle) only with `archived=true`.
+         */
+        get: operations["listConversations"];
+        put?: never;
+        /**
+         * @description Start a `direct` or `group` chat (family and circle chats exist with their family or circle). Everyone in
+         *     `member_ids` must share a family or a frame with the caller and must not have blocked them
+         *     (`403 cannot_message`, `detail` names nobody). `direct`: exactly one other person; idempotent per pair: the
+         *     existing conversation is returned with `200`. `group`: 2–99 others (3–100 people with the caller) and a
+         *     `name`; the caller is its admin.
+         */
+        post: operations["createConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        /** @description Members only; everyone else gets `404 not_found`. */
+        get: operations["getConversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Groups only (`409 invalid_transition` otherwise; family and circle chats take their name from the family or circle). Group admins. */
+        patch: operations["updateConversation"];
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Group admins. Like `putAvatar`: the server crops to a 256x256 WebP at a public, unguessable URL. Groups only. */
+        put: operations["putConversationPhoto"];
+        post?: never;
+        /** @description Group admins. */
+        delete: operations["deleteConversationPhoto"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Groups only. Any member may add people who share a family or a frame with them and have not blocked them
+         *     (`403 cannot_message`), up to 100 people. New members see messages from the moment they were added.
+         */
+        post: operations["addConversationMembers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Groups only. Admins remove anyone; anyone removes themself (leave). When the last admin leaves, the
+         *     longest-standing member becomes admin. Direct, family and circle chats can't be left (`409 invalid_transition`):
+         *     archive or mute them, or leave the family or circle.
+         */
+        delete: operations["removeConversationMember"];
+        options?: never;
+        head?: never;
+        /** @description Groups only, group admins. */
+        patch: operations["updateConversationMember"];
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description The caller's own mute and archive state for this conversation. A new message un-archives it. */
+        patch: operations["updateConversationPreferences"];
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description A page of messages, always oldest first within the page. Neither cursor: the newest `limit` messages.
+         *     `before`: the `limit` messages just before that message (scrolling up). `after`: the `limit` messages just
+         *     after it (catching up after a reconnect). Both: `422 validation_failed`. Messages before the caller joined a
+         *     group are not returned; messages from people the caller blocked are left out.
+         */
+        get: operations["listMessages"];
+        put?: never;
+        /**
+         * @description At least one of `body`, `items`, `voice` and `shared_post_id`. Photos and videos use the normal uploads (tus, prepared
+         *     uploads) and become ordinary items (`status: processing` until ready; `message.updated` follows). A voice
+         *     message has `voice` and no `items` (README §5.19). Idempotent on `client_id` per author
+         *     and conversation as well as on `Idempotency-Key`. Direct chats with someone who blocked the caller, or whose
+         *     account is gone, answer `403 cannot_message`. Archived conversations are read-only (`409 invalid_transition`).
+         */
+        post: operations["sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                messageId: components["parameters"]["MessageId"];
+            };
+            cookie?: never;
+        };
+        get: operations["getMessage"];
+        put?: never;
+        post?: never;
+        /**
+         * @description The author, any time: the message stays as a tombstone ("This message was deleted"): `deleted: true`, no body,
+         *     items or preview. Moderators (group admins; the feed's owner/admins in family and circle chats) may remove
+         *     anyone's message: a tombstone with `removed_by_admin: true`. Items already put on a frame stay there.
+         */
+        delete: operations["deleteMessage"];
+        options?: never;
+        head?: never;
+        /** @description The author, within `limits.message_edit_hours` (24) of sending (`409 invalid_transition` after). Text only; items can't change. */
+        patch: operations["updateMessage"];
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/messages/{messageId}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description "Put on a frame": a normal send of the message's photos and videos (no new upload), to frames the caller may
+         *     send to and families they may post to, with the usual limits, moderation and receipts. `item_ids` picks some
+         *     (default: every photo and video; a voice recording is never sent). Items of other people's
+         *     messages go to frames like `sharePlacements` (credit "Ben · shared by Anna", README §5.3) and can't be posted
+         *     to families (`403 forbidden` when `feed_ids` is not empty). The conversation gets a `put_on_frame` system
+         *     message, and frame reactions and quick replies on these placements show under the original message.
+         */
+        post: operations["putMessageOnFrame"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description The caller read up to `message_id`. Never moves backwards. Other members get `read.updated` only when
+         *     read receipts are shown in this conversation (README §5.19); the caller's other connections always do.
+         */
+        put: operations["markConversationRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/conversations/{conversationId}/typing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The caller is typing (or recording a voice message). Not stored: the other members who are connected get a
+         *     `typing` event that expires after 6 s. Clients send it at most every 3 s while typing; more are ignored.
+         */
+        post: operations["sendTyping"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description People the caller shares at least one family or frame with: the only people they can start a chat with or add
+         *     to a group. There is no search beyond this list. Sorted by display name.
+         */
+        get: operations["listContacts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/people/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A contact's profile (`404 not_found` for anyone who isn't a contact). The caller's own id returns their own profile with every milestone. */
+        get: operations["getPerson"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/badge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The app badge (README §5.19), also sent as `badge.updated` whenever it changes. */
+        get: operations["getBadge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/link-previews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Only when discovery has `link_previews: true` (the operator's opt-in; `503 feature_disabled` otherwise). The
+         *     server fetches the page itself (README §5.19: public addresses only, size and time limits) and returns the
+         *     cached preview. The composer uses it to show the preview before sending; `sendMessage` attaches the preview
+         *     of the body's first link by itself.
+         */
+        post: operations["createLinkPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listBlocks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/blocks/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description Idempotent. Hides the person's comments, messages and reactions from the caller, stops their direct messages
+         *     (they get `403 cannot_message`, without being told why) and stops them adding the caller to groups. Shared
+         *     families, circles and groups stay (removing people is the admins' call). The blocked person is not notified.
+         */
+        put: operations["blockUser"];
+        post?: never;
+        delete: operations["unblockUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Report a comment, a message or a post the caller can see. In a family (a feed post, its comments, a family or
+         *     circle chat) the feed's owner and admins get it; anything else (direct and group chats, frame posts) goes to
+         *     the server operator. The reporter stays anonymous to the reported person. One open report per reporter and
+         *     target (repeating returns the existing one).
+         */
+        post: operations["createReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The feed's owner and admins. Open reports first, then the last 30 days of resolved ones. */
+        get: operations["listFeedReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Operator only (`kinframe:operate`). Reports that don't belong to a family. */
+        get: operations["listOperatorReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reports/{reportId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Whoever handles the report (feed owner/admin, or the operator). `remove` removes the content like a moderator
+         *     delete (`deleteComment`, `deleteMessage`, `removeFeedPost`); `dismiss` keeps it. `409 already_decided` when
+         *     someone else resolved it first.
+         */
+        post: operations["resolveReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/engagement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /** @description Any member. The family's streak, prompt, reminder and recap settings. */
+        get: operations["getFeedEngagement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Owner or admin. */
+        patch: operations["updateFeedEngagement"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/streak": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Any member. `404 not_found` is never used for a disabled streak; it reports `enabled: false`. */
+        get: operations["getFeedStreak"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/prompts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Any member. The current week's prompt, the next 4 weeks (as planned: the server's choice unless an admin set
+         *     one) and the past 12 weeks, newest first. Empty while `prompts_enabled` is off. Titles are in the caller's
+         *     language for server prompts.
+         */
+        get: operations["listFeedPrompts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/prompts/{weekOf}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                /** @description A Monday (YYYY-MM-DD); other days answer `422 validation_failed`. */
+                weekOf: components["parameters"]["WeekOf"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description Owner or admin: choose the prompt of the current or a future week: one from the server's list (`library_key`),
+         *     an own `title`, or `skip: true` (no prompt that week). Exactly one of the three (`422 validation_failed`).
+         *     Past weeks can't change (`409 invalid_transition`).
+         */
+        put: operations["setFeedPrompt"];
+        post?: never;
+        /** @description Owner or admin. Back to the server's choice for that week (current or future). */
+        delete: operations["resetFeedPrompt"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/prompts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The server's prompt list in the caller's language (`Accept-Language`), for the admin's picker. */
+        get: operations["listPromptLibrary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/on-this-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description "On this day" for Home: posts from today's date in earlier years (in the caller's `timezone`) in the caller's
+         *     families, newest year first, at most 3 groups of 12 items. Empty when there is nothing (Home then hides the
+         *     card). Same visibility as the timeline.
+         */
+        get: operations["getOnThisDay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/weekly-summaries/{weekOf}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The caller's "seen and loved" summary of one week (Monday, in the caller's time zone), kept 12 weeks. `404 not_found` for weeks without one. */
+        get: operations["getWeeklySummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/recaps/{month}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Any member. The monthly family recap (also posted as a `monthly_recap` system message in the family chat). `404 not_found` before it was made. */
+        get: operations["getFeedRecap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/milestones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The caller's personal milestones (private unless `shown`). Only achieved ones are listed. */
+        get: operations["listMyMilestones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/milestones/{milestoneKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Show a milestone on the caller's profile (`getPerson`, to their contacts) or hide it again; `seen` dismisses its card. */
+        patch: operations["updateMyMilestone"];
+        trace?: never;
+    };
+    "/v1/me/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getReminderPreferences"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description Also what the push actions call: **Snooze 1 month** sends `{snooze_days: 30}`, **Fewer reminders**
+         *     `{level: fewer}`. `snooze_days: 0` ends a snooze.
+         */
+        patch: operations["updateReminderPreferences"];
+        trace?: never;
+    };
+    "/v1/photo-requests/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A frame's "Ask for new photos" (push deep link). Members of the frame and of families whose posts reach it. */
+        get: operations["getPhotoRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/photo-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Frame members. The frame's requests of the last 30 days, newest first. */
+        get: operations["listFramePhotoRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/tv-links": {
         parameters: {
             query?: never;
@@ -2987,6 +3956,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/photo-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description "Ask for new photos" from the frame's quick menu (README §5.20). Creates a request and notifies the family,
+         *     at most one per frame per 24 hours: within that time the open (or last) request is returned with `200`
+         *     and nobody is notified again. `403 forbidden` when the owner turned the button off
+         *     (`settings.social.ask_for_photos`). The frame shows `photo_request` from the change feed afterwards.
+         */
+        post: operations["deviceRequestPhotos"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/device/update": {
         parameters: {
             query?: never;
@@ -3279,7 +4270,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "duplicate_sender" | "telegram_already_linked" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "duplicate_sender" | "telegram_already_linked" | "cannot_message" | "comments_closed" | "audio_too_long" | "server_error";
         /** @description Version policy for one family app platform (README §5.15). */
         AppVersionPolicy: {
             /** @description Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum. */
@@ -3396,6 +4387,37 @@ export interface components {
             telegram_privacy_mode?: boolean;
             /** @description The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`. */
             telegram_max_file_bytes?: number | null;
+            /**
+             * @description True when the server has the home timeline, comment threads, people's reactions, mentions, the `member` role and circles (docs/spec/family-social.md, README §5.18). Only with `feeds`.
+             * @default false
+             */
+            social?: boolean;
+            /**
+             * @description True when the server has conversations (direct, group, family, circle), blocks and reports (README §5.19).
+             * @default false
+             */
+            chats?: boolean;
+            /**
+             * @description True when chats accept voice messages (needs ffmpeg on the server; README §5.19).
+             * @default false
+             */
+            voice_messages?: boolean;
+            /**
+             * @description True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
+             *     links in messages itself (public addresses only). Off by default; clients then show links without previews.
+             * @default false
+             */
+            link_previews?: boolean;
+            /**
+             * @description True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
+             * @default false
+             */
+            engagement?: boolean;
+            /**
+             * @description True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
+             * @default false
+             */
+            email_digest?: boolean;
             /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
@@ -3772,6 +4794,43 @@ export interface components {
              * @default 300
              */
             max_telegram_items_per_chat_hour?: number;
+            /**
+             * @description Characters (Unicode code points) per comment.
+             * @default 2000
+             */
+            max_comment_chars?: number;
+            /**
+             * @description Characters (Unicode code points) per chat message.
+             * @default 4000
+             */
+            max_message_chars?: number;
+            /**
+             * @description Mentions per comment or message.
+             * @default 20
+             */
+            max_mentions?: number;
+            /**
+             * @description Photos and videos per chat message.
+             * @default 30
+             */
+            max_message_items?: number;
+            /**
+             * @description People in a group chat
+             * @default 100
+             */
+            max_group_members?: number;
+            /** @default 20 */
+            max_circles_per_feed?: number;
+            /**
+             * @description Length of one voice message.
+             * @default 300
+             */
+            max_voice_seconds?: number;
+            /**
+             * @description How long after sending the author can edit a message.
+             * @default 24
+             */
+            message_edit_hours?: number;
         };
         /** @description A geocoding result (Open-Meteo geocoding API). */
         Place: {
@@ -3808,6 +4867,11 @@ export interface components {
              */
             timezone?: string | null;
             is_operator?: boolean;
+            /**
+             * @description Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
+             * @default true
+             */
+            show_read_receipts?: boolean;
             /** Format: date-time */
             created_at?: string;
         };
@@ -3851,6 +4915,10 @@ export interface components {
             app_version?: string | null;
             needs_update?: boolean;
             device_kind?: components["schemas"]["DeviceKind"];
+            /** @description How recently the frame got new photos from people (README §5.20). Absent on servers without `engagement`. */
+            freshness?: components["schemas"]["Freshness"];
+            /** @description The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise. */
+            photo_request?: components["schemas"]["PhotoRequest"] | null;
         };
         Frame: components["schemas"]["FrameSummary"] & {
             default_permissions?: components["schemas"]["Permissions"];
@@ -3890,6 +4958,9 @@ export interface components {
              *     the `birthdays` change (informational only: nothing is withheld; apps use it for
              *     `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
              *     (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
+             *     `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
+             *     has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
+             *     app"; nothing is withheld.
              */
             features?: string[];
             uptime_s: number;
@@ -4041,8 +5112,19 @@ export interface components {
         SendCreate: {
             /** @description Frames to send to directly. May be empty when `feed_ids` is not. */
             frame_ids: components["schemas"]["Id"][];
-            /** @description Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). */
+            /** @description Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). Needs role `poster` or above (`403 missing_permission` for `member`). */
             feed_ids?: components["schemas"]["Id"][];
+            /**
+             * @description The audience inside a feed: at most one circle per feed, its feed must be in `feed_ids`, and the caller must
+             *     be in the circle (`422 validation_failed`, field `circle_ids`). That feed's post is shared with the circle
+             *     only (README §5.18); other feeds get a whole-family post.
+             */
+            circle_ids?: components["schemas"]["Id"][];
+            /**
+             * Format: uuid
+             * @description Tag the feed posts as answers to this weekly prompt (`FeedPrompt.id`, current or previous week); only the post in that prompt's feed is tagged.
+             */
+            prompt_id?: string;
             items: {
                 /** @description tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still. */
                 upload_id: string;
@@ -4220,6 +5302,8 @@ export interface components {
              * @default false
              */
             backfill?: boolean;
+            /** @description Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them. */
+            prompt_id?: components["schemas"]["Id"] | null;
         };
         ShareResult: {
             /** @description The placements created on the target frames (empty for a dry run). */
@@ -4298,8 +5382,11 @@ export interface components {
             schedule?: components["schemas"]["Album"]["schedule"];
             only_in_album_mode?: components["schemas"]["Album"]["only_in_album_mode"];
         };
-        /** @enum {string} */
-        FeedRole: "owner" | "admin" | "poster";
+        /**
+         * @description `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
+         * @enum {string}
+         */
+        FeedRole: "owner" | "admin" | "poster" | "member";
         FeedSummary: {
             id: components["schemas"]["Id"];
             name: string;
@@ -4316,6 +5403,12 @@ export interface components {
             last_post_at?: string | null;
             /** Format: date-time */
             created_at?: string;
+            /** @description How recently the family got new posts from people (README §5.20). Absent without `engagement`. */
+            freshness?: components["schemas"]["Freshness"];
+            /** @description Null when the family turned streaks off. Absent without `engagement`. */
+            streak?: components["schemas"]["FeedStreakSummary"] | null;
+            /** @description The family chat. Absent without `chats`. */
+            conversation_id?: components["schemas"]["Id"] | null;
         };
         Feed: components["schemas"]["FeedSummary"] & {
             owner_name?: string;
@@ -4323,7 +5416,17 @@ export interface components {
             cover_item_id?: components["schemas"]["Id"] | null;
             auto_approve_subscriptions?: boolean;
             invite_requires_approval?: boolean;
+            /** @description Every member sees frames' reactions and quick replies in posts' reaction rows and threads (default on for new feeds). */
             members_see_reactions?: boolean;
+            /** @description Every member sees per-frame receipts (delivered, seen) of every post (default off). */
+            members_see_receipts?: boolean;
+            /** @description Joiners become `poster` (default) or, when off, `member`. */
+            new_members_can_post?: boolean;
+            /** @description Any member may create circles (default on); otherwise owner and admins only. */
+            members_can_create_circles?: boolean;
+            /** @description Circles the caller can see. */
+            circle_count?: number;
+            mute?: components["schemas"]["FeedMute"];
             /** @description Posters may create `join` invites and revoke their own. */
             posters_can_invite?: boolean;
             /** @description Posters add birthday people directly instead of suggesting them. */
@@ -4346,8 +5449,17 @@ export interface components {
             auto_approve_subscriptions?: boolean;
             /** @default true */
             invite_requires_approval?: boolean;
-            /** @default false */
+            /**
+             * @description Default changed to true with docs/spec/family-social.md: reactions are social now.
+             * @default true
+             */
             members_see_reactions?: boolean;
+            /** @default false */
+            members_see_receipts?: boolean;
+            /** @default true */
+            new_members_can_post?: boolean;
+            /** @default true */
+            members_can_create_circles?: boolean;
             /** @default false */
             posters_can_invite?: boolean;
             /** @default false */
@@ -4361,8 +5473,13 @@ export interface components {
             auto_approve_subscriptions?: boolean;
             /** @description Join invites need an admin's approval. */
             invite_requires_approval?: boolean;
-            /** @description Every member sees receipts and reactions of every post. */
+            /** @description Every member sees frames' reactions and quick replies on every post. */
             members_see_reactions?: boolean;
+            /** @description Every member sees per-frame receipts of every post. */
+            members_see_receipts?: boolean;
+            /** @description Joiners become `poster` (true) or `member` (false). Existing members keep their role. */
+            new_members_can_post?: boolean;
+            members_can_create_circles?: boolean;
             /** @description Posters may create `join` invites (and list and revoke their own). */
             posters_can_invite?: boolean;
             /** @description Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them. */
@@ -4592,10 +5709,17 @@ export interface components {
             via?: components["schemas"]["ItemVia"] | null;
             /** @description Live items in send order. */
             items: components["schemas"]["Item"][];
-            /** @description Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. */
+            /** @description Own posts, owner/admins, or everyone with `members_see_receipts`; otherwise null. */
             receipts?: components["schemas"]["FeedReceiptSummary"] | null;
-            /** @description Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`). */
+            /** @description Frames' reactions and replies: own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. Latest first, at most 50 (all in `getFeedPostReceipts`). */
             reactions?: components["schemas"]["FeedReaction"][] | null;
+            /** @description The circle this post was shared with (only its members see it); null for the whole family. */
+            circle_id?: components["schemas"]["Id"] | null;
+            circle_name?: string | null;
+            /** @description The weekly prompt it answers (`tagPostPrompt`). */
+            prompt_id?: components["schemas"]["Id"] | null;
+            /** @description The post's comments and people's reactions. Absent without `social`. */
+            thread?: components["schemas"]["ThreadSummary"];
         };
         /**
          * @description One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
@@ -4735,7 +5859,15 @@ export interface components {
         FeedPreferencesUpdate: {
             /** @description Morning notification and greetings for this feed's birthdays. */
             birthday_notifications?: boolean;
+            mute?: components["schemas"]["FeedMute"];
         };
+        /**
+         * @description The caller's mute for one family: `none`; `posts` (no pushes for comments, replies and reactions on its posts;
+         *     mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
+         *     mentions too). Websocket events still arrive.
+         * @enum {string}
+         */
+        FeedMute: "none" | "posts" | "chat" | "all";
         /**
          * @description A frame said happy birthday to a person of this feed on their day. One per person, frame and date; recorded
          *     in every feed that lists the person. Also the payload of the `birthday.greeting` websocket event.
@@ -5998,6 +7130,29 @@ export interface components {
                 /** @default 40 */
                 volume?: number;
             };
+            /** @description Family social on the frame (docs/spec/family-social.md §8, README §5.20). Owner, admins and `change_settings` members. */
+            social?: {
+                /**
+                 * @description When a photo with comments appears, a card with the newest comment fades in for 8 s (once per photo per day). The server sends the `comments` change only while this is on.
+                 * @default false
+                 */
+                show_comments?: boolean;
+                /**
+                 * @description Show "Ask for new photos" in the frame's quick menu.
+                 * @default true
+                 */
+                ask_for_photos?: boolean;
+                /**
+                 * @description Show a weekly prompt's title card before its answers.
+                 * @default true
+                 */
+                prompt_cards?: boolean;
+                /**
+                 * @description Show "New photos from Ben" on the next wake after new photos arrived (computed by the frame from the new placements' senders).
+                 * @default true
+                 */
+                new_photos_from?: boolean;
+            };
             kiosk?: {
                 /** @default true */
                 allow_remove_members_on_frame?: boolean;
@@ -6374,7 +7529,7 @@ export interface components {
         Change: {
             seq: number;
             /** @enum {string} */
-            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "birthdays" | "reset";
+            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "birthdays" | "comments" | "photo_request" | "prompts" | "reset";
             placement?: components["schemas"]["Placement"] & {
                 /** @description Frame rendition to download (present on placement.upsert when status is ready). */
                 media?: {
@@ -6428,6 +7583,12 @@ export interface components {
             calendar?: components["schemas"]["Calendar"] | null;
             /** @description The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it. */
             birthdays?: components["schemas"]["FrameBirthdays"] | null;
+            /** @description `comments` change (entity `id` = the placement): its newest comments, or null = drop them (show comments turned off, comments removed). Only for frames with `settings.social.show_comments`. Old frame apps ignore it. */
+            comments?: components["schemas"]["PlacementComments"] | null;
+            /** @description `photo_request` change (entity `id` = the frame): the frame's latest "Ask for new photos", or null when there is none in the last 7 days. */
+            photo_request?: components["schemas"]["FramePhotoRequest"] | null;
+            /** @description `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none. */
+            prompts?: components["schemas"]["FramePrompts"] | null;
         };
         /**
          * @description Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -6729,6 +7890,1030 @@ export interface components {
             /** Format: date-time */
             decided_at?: string | null;
         };
+        /**
+         * @description A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+         *     the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+         */
+        PersonRef: {
+            user_id: components["schemas"]["Id"];
+            display_name: string;
+            /** Format: uri */
+            avatar_url?: string | null;
+            /** @default false */
+            former_member?: boolean;
+        };
+        /**
+         * @description A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':
+         *     `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢; people also have `thumbs_up` 👍 and `pray` 🙏.
+         * @enum {string}
+         */
+        PersonReaction: "love" | "laugh" | "wow" | "sad" | "thumbs_up" | "pray";
+        /**
+         * @description `post_item` is one item of a post (the `post_id` query parameter names the post).
+         * @enum {string}
+         */
+        ReactionTargetKind: "post" | "post_item" | "comment" | "message";
+        /**
+         * @description The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+         *     and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+         *     `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+         *     reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+         *     are left out of `people` but counted.
+         */
+        ReactionSummary: {
+            total: number;
+            /** @description Per emoji, most frequent first. */
+            counts: {
+                emoji: components["schemas"]["PersonReaction"];
+                count: number;
+            }[];
+            /** @description Up to 3 people, the caller's contacts first, newest first. */
+            people: {
+                person: components["schemas"]["PersonRef"];
+                emoji: components["schemas"]["PersonReaction"];
+            }[];
+            /** @description Up to 3 frames, newest first. */
+            frames: components["schemas"]["FrameReactionRef"][];
+            mine?: components["schemas"]["PersonReaction"] | null;
+        };
+        FrameReactionRef: {
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            reaction: components["schemas"]["Reaction"];
+            /** @description The item the frame reacted to (posts with several items). */
+            item_id?: components["schemas"]["Id"] | null;
+            /** Format: date-time */
+            at?: string;
+        };
+        ReactionList: {
+            people: {
+                person: components["schemas"]["PersonRef"];
+                emoji: components["schemas"]["PersonReaction"];
+                /** Format: date-time */
+                at: string;
+            }[];
+            frames: components["schemas"]["FrameReactionRef"][];
+        };
+        /**
+         * @description A mention inside a comment or message `body`: `start` and `length` are in UTF-16 code units (what JavaScript,
+         *     Kotlin and Swift's `utf16` view count), covering the "@Name" text. Spans must lie inside the body and must not
+         *     overlap; at most `limits.max_mentions` per text.
+         */
+        Mention: {
+            user_id: components["schemas"]["Id"];
+            start: number;
+            length: number;
+        };
+        /** @enum {string} */
+        ThreadState: "open" | "closed";
+        /**
+         * @description `person`: a comment or reply. `frame`: a read-only frame entry ("Oma's frame loved this", "Oma's frame: Call me!").
+         * @enum {string}
+         */
+        CommentKind: "person" | "frame";
+        Comment: {
+            id: components["schemas"]["Id"];
+            post_id: components["schemas"]["Id"];
+            kind: components["schemas"]["CommentKind"];
+            /** @description Replies only: the top-level comment (one level of replies). */
+            parent_id?: components["schemas"]["Id"] | null;
+            /** @description `person` comments; null for frame entries. */
+            author?: components["schemas"]["PersonRef"] | null;
+            /** @description A reply to a reply quotes that person ("@Ben"), while hanging under the same top comment. */
+            quoted?: components["schemas"]["PersonRef"] | null;
+            /** @description Frame entries only. */
+            frame?: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                item_id?: components["schemas"]["Id"] | null;
+                reaction?: components["schemas"]["Reaction"] | null;
+                reply?: components["schemas"]["ReplyPreset"] | null;
+            } | null;
+            /** @description Null for frame entries and tombstones. */
+            body?: string | null;
+            mentions?: components["schemas"]["Mention"][];
+            reactions?: components["schemas"]["ReactionSummary"];
+            /** @description Top-level comments only. */
+            reply_count?: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            edited_at?: string | null;
+            /**
+             * @description Deleted by its author but kept as a tombstone because it has replies ("Comment deleted").
+             * @default false
+             */
+            deleted?: boolean;
+            /**
+             * @description Only ever true for the author, who still sees it ("Removed by a family admin"); everyone else no longer gets it.
+             * @default false
+             */
+            removed_by_admin?: boolean;
+            can_edit?: boolean;
+            can_delete?: boolean;
+        };
+        CommentCreate: {
+            /** @description Trimmed; at most `limits.max_comment_chars` characters (Unicode code points). */
+            body: string;
+            parent_id?: components["schemas"]["Id"];
+            quoted_user_id?: components["schemas"]["Id"];
+            mentions?: components["schemas"]["Mention"][];
+        };
+        CommentUpdate: {
+            body: string;
+            mentions?: components["schemas"]["Mention"][];
+        };
+        CommentPage: {
+            comments: components["schemas"]["Comment"][];
+            /** @description More comments after the last one; pass its id as `after`. */
+            has_more: boolean;
+        };
+        /** @description The thread of a post as shown on the timeline. */
+        ThreadSummary: {
+            post_id: components["schemas"]["Id"];
+            state: components["schemas"]["ThreadState"];
+            /** @description Person comments and replies */
+            comment_count: number;
+            /** @description The two newest person comments (replies included), oldest of the two first. */
+            latest_comments: components["schemas"]["Comment"][];
+            /** @description Person comments after the caller's `read_up_to` (all of them if never read) */
+            unread_count?: number;
+            /** @description Unread comments that mention the caller or reply to them. */
+            unread_mentions?: number;
+            read_up_to?: components["schemas"]["Id"] | null;
+            muted?: boolean;
+            reactions: components["schemas"]["ReactionSummary"];
+            /** @description False when closed or the caller may only read. */
+            can_comment?: boolean;
+            /** @description May close the thread and remove others' comments. */
+            can_moderate?: boolean;
+        };
+        /**
+         * @description `feed`: a post in a family (feed). `frame`: a direct send to one frame (one per send and frame).
+         * @enum {string}
+         */
+        PostKind: "feed" | "frame";
+        /**
+         * @description The line under a post: "Seen on 4 frames · ❤ from Oma's frame". `frames`/`seen` follow the post's receipts
+         *     (`FeedReceiptSummary`); visible to the poster, the feed's owner/admins, and every member when the feed has
+         *     `members_see_receipts` (frame posts: everyone who sees the post). Otherwise null on `TimelinePost.seen`.
+         */
+        PostSeen: {
+            frames: number;
+            seen: number;
+        };
+        TimelinePost: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["PostKind"];
+            feed_id?: components["schemas"]["Id"] | null;
+            /** @description The family */
+            feed_name?: string | null;
+            /** @description Feed posts shared with one circle only. */
+            circle_id?: components["schemas"]["Id"] | null;
+            circle_name?: string | null;
+            /** @description `frame` posts: the frame ("To Oma's frame"). */
+            frame_id?: components["schemas"]["Id"] | null;
+            frame_name?: string | null;
+            poster: components["schemas"]["PersonRef"];
+            /** @description The poster's send (own posts only). */
+            send_id?: components["schemas"]["Id"] | null;
+            /** Format: date-time */
+            created_at: string;
+            via?: components["schemas"]["ItemVia"] | null;
+            /** @description Live items in send order (for frame posts */
+            items: components["schemas"]["Item"][];
+            /** @description The weekly prompt this post answers; clients group consecutive answers ("6 answers to …"). */
+            prompt?: {
+                id: components["schemas"]["Id"];
+                title: string;
+            } | null;
+            seen?: components["schemas"]["PostSeen"] | null;
+            thread: components["schemas"]["ThreadSummary"];
+            /** @description The poster, or a feed owner/admin (`removeFeedPost`); frame posts: the sender (`unsend` per frame is not offered; it removes the whole send). */
+            can_remove?: boolean;
+        };
+        TimelinePage: {
+            posts: components["schemas"]["TimelinePost"][];
+            /** @description Pass as `before` for the next (older) page; null at the end. */
+            next_before: string | null;
+        };
+        /** @enum {string} */
+        CircleRole: "admin" | "member";
+        CircleMember: {
+            user_id: components["schemas"]["Id"];
+            display_name: string;
+            /** Format: uri */
+            avatar_url?: string | null;
+            role: components["schemas"]["CircleRole"];
+            /** Format: date-time */
+            added_at?: string;
+        };
+        /**
+         * @description A smaller group inside a family ("Anna's household", "The cousins"): its own chat (`conversation_id`) and an
+         *     audience for posts. Circle posts reach the family's subscribed frames that have a manager (owner, admin or
+         *     `change_settings`) in the circle, plus the frames in `frame_ids` (README §5.18).
+         */
+        Circle: {
+            id: components["schemas"]["Id"];
+            feed_id: components["schemas"]["Id"];
+            name: string;
+            /** @description Null when the caller is a feed owner/admin who is not in the circle. */
+            my_role?: components["schemas"]["CircleRole"] | null;
+            members: components["schemas"]["CircleMember"][];
+            member_count: number;
+            /** @description Extra frames (subscribed to the family) the circle's posts reach. */
+            frame_ids?: components["schemas"]["Id"][];
+            /** @description Every subscribed frame its posts reach now (managers in the circle, plus `frame_ids`). */
+            frames_reached?: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+            }[];
+            /** @description The circle's chat (members only). */
+            conversation_id?: components["schemas"]["Id"] | null;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        CircleCreate: {
+            name: string;
+            /** @description Feed members besides the caller. */
+            member_ids: components["schemas"]["Id"][];
+            frame_ids?: components["schemas"]["Id"][];
+        };
+        CircleUpdate: {
+            name?: string;
+            frame_ids?: components["schemas"]["Id"][];
+        };
+        /**
+         * @description `direct`: two people, one per pair. `group`: 3–100 people with a name. `family`: one per feed, its members always the feed's members. `circle`: one per circle, its members the circle's.
+         * @enum {string}
+         */
+        ConversationKind: "direct" | "group" | "family" | "circle";
+        /**
+         * @description Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+         * @enum {string}
+         */
+        ConversationRole: "admin" | "member";
+        ConversationMember: {
+            person: components["schemas"]["PersonRef"];
+            role: components["schemas"]["ConversationRole"];
+            /** Format: date-time */
+            joined_at?: string;
+            /** @description Only when read receipts are shown in this conversation (`Conversation.read_receipts`) and this member shows them too; null otherwise. */
+            last_read_message_id?: components["schemas"]["Id"] | null;
+        };
+        /** @enum {string} */
+        MuteFor: "off" | "1h" | "8h" | "1w" | "always";
+        Conversation: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["ConversationKind"];
+            /** @description Group name; the family's or circle's name; for `direct`, the other person's display name. */
+            name: string;
+            /**
+             * Format: uri
+             * @description Group photo; the family's cover; for `direct`, the other person's avatar.
+             */
+            photo_url?: string | null;
+            /** @description `family` and `circle`. */
+            feed_id?: components["schemas"]["Id"] | null;
+            circle_id?: components["schemas"]["Id"] | null;
+            /** @description `direct` only. */
+            other?: components["schemas"]["PersonRef"] | null;
+            /** @description Every member (conversations are at most 100 people; family chats can be larger and list everyone). */
+            members?: components["schemas"]["ConversationMember"][];
+            member_count: number;
+            my_role?: components["schemas"]["ConversationRole"];
+            /** @description Messages after the caller's read position */
+            unread_count: number;
+            unread_mentions?: number;
+            /** @description The caller's own read position. */
+            read_up_to?: components["schemas"]["Id"] | null;
+            last_message?: components["schemas"]["Message"] | null;
+            /**
+             * Format: date-time
+             * @description Last message
+             */
+            last_activity_at: string;
+            muted: boolean;
+            /**
+             * Format: date-time
+             * @description Null with `muted: true` means always.
+             */
+            muted_until?: string | null;
+            /** @description The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only). */
+            archived: boolean;
+            /** @description No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller. */
+            read_only?: boolean;
+            /** @description "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on. */
+            read_receipts?: boolean;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        ConversationCreate: {
+            /** @enum {string} */
+            kind: "direct" | "group";
+            /** @description Other people (not the caller). */
+            member_ids: components["schemas"]["Id"][];
+            /** @description Required for groups. */
+            name?: string;
+        };
+        ConversationUpdate: {
+            name?: string;
+        };
+        ConversationPreferencesUpdate: {
+            mute?: components["schemas"]["MuteFor"];
+            archived?: boolean;
+        };
+        /**
+         * @description `system`: posted by kinframe (put on a frame, streak milestone, monthly recap, weekly prompt, member changes); no author, can be reacted to, can't be edited.
+         * @enum {string}
+         */
+        MessageKind: "person" | "system";
+        /** @description One photo or video, as in `SendCreate.items`. */
+        MessageItemCreate: {
+            /** @description tus upload id (or an existing item id of the caller's when the server reported a duplicate). */
+            upload_id: string;
+            caption?: string | null;
+            /** Format: date-time */
+            captured_at?: string | null;
+            trim?: {
+                start_ms?: number;
+                end_ms?: number;
+            };
+            /** @default true */
+            include_audio?: boolean;
+            width?: number;
+            height?: number;
+            duration_ms?: number;
+            live_video_upload_id?: string;
+            /** @default true */
+            live?: boolean;
+        };
+        MessageCreate: {
+            /** @description Client-generated id (e.g. a UUID) for the optimistic bubble; echoed back, and a retry with the same one returns the first message. */
+            client_id?: string;
+            body?: string;
+            mentions?: components["schemas"]["Mention"][];
+            items?: components["schemas"]["MessageItemCreate"][];
+            /** @description A voice message (README §5.19); not together with `items`. */
+            voice?: {
+                /** @description The tus upload of the recording: AAC in MP4 (`audio/mp4`, `.m4a`) or Opus in WebM or Ogg. */
+                upload_id: string;
+                /** @description What the client recorded; the server measures it itself. */
+                duration_ms?: number;
+            };
+            reply_to_id?: components["schemas"]["Id"];
+            shared_post_id?: components["schemas"]["Id"];
+            /**
+             * @description false: don't attach a preview of the body's first link.
+             * @default true
+             */
+            link_preview?: boolean;
+        };
+        MessageUpdate: {
+            body: string;
+            mentions?: components["schemas"]["Mention"][];
+        };
+        /** @description The message replied to, as quoted above the reply. */
+        MessageQuote: {
+            id: components["schemas"]["Id"];
+            author?: components["schemas"]["PersonRef"] | null;
+            /** @description The first 200 characters of the body. */
+            excerpt?: string | null;
+            /** @description The first item's kind */
+            media_kind?: components["schemas"]["MediaKind"] | null;
+            /** @description The quoted message is a voice message ("🎤 Voice message"). */
+            voice?: boolean;
+            /** Format: uri */
+            thumb_url?: string | null;
+            /** @description The quoted message was deleted or isn't visible to the caller. */
+            deleted: boolean;
+        };
+        /** @description A post shared in a chat ("Share in chat"). */
+        PostCard: {
+            post_id: components["schemas"]["Id"];
+            /** @description False when the caller may not see the post (another family, a circle they are not in) or it was removed: show "This post isn't available". */
+            available: boolean;
+            kind?: components["schemas"]["PostKind"] | null;
+            feed_name?: string | null;
+            frame_name?: string | null;
+            poster?: components["schemas"]["PersonRef"] | null;
+            /** Format: date-time */
+            created_at?: string | null;
+            item_count?: number;
+            thumb_urls?: string[];
+            caption?: string | null;
+        };
+        LinkPreview: {
+            /**
+             * Format: uri
+             * @description The link as written.
+             */
+            url: string;
+            /** @enum {string} */
+            status: "pending" | "ok" | "failed";
+            title?: string | null;
+            description?: string | null;
+            site_name?: string | null;
+            /**
+             * Format: uri
+             * @description Fetched and re-encoded by the server (WebP, at most 512 px), served from the server: clients never load remote images.
+             */
+            image_url?: string | null;
+            image_width?: number | null;
+            image_height?: number | null;
+        };
+        /** @enum {string} */
+        SystemMessageType: "put_on_frame" | "streak_milestone" | "monthly_recap" | "prompt" | "member_joined" | "member_left";
+        /** @description The content of a `system` message; clients render it in the viewer's language from these fields. */
+        SystemMessage: {
+            type: components["schemas"]["SystemMessageType"];
+            /** @description Who did it: put on a frame, joined or left. */
+            person?: components["schemas"]["PersonRef"] | null;
+            /** @description `put_on_frame`. */
+            send_id?: components["schemas"]["Id"] | null;
+            /** @description `put_on_frame`: the message whose items were sent. */
+            source_message_id?: components["schemas"]["Id"] | null;
+            item_count?: number | null;
+            frame_names?: string[];
+            feed_names?: string[];
+            /** @description `streak_milestone`: 4, 12, 26, 52, then every 52. */
+            weeks?: number | null;
+            /** @description `monthly_recap`: YYYY-MM (`getFeedRecap`). */
+            month?: string | null;
+            recap?: components["schemas"]["MonthlyRecap"] | null;
+            prompt_id?: components["schemas"]["Id"] | null;
+            prompt_title?: string | null;
+        };
+        Message: {
+            id: components["schemas"]["Id"];
+            conversation_id: components["schemas"]["Id"];
+            kind: components["schemas"]["MessageKind"];
+            /** @description Null for system messages. */
+            author?: components["schemas"]["PersonRef"] | null;
+            /** @description The author's `client_id` (author only). */
+            client_id?: string | null;
+            body?: string | null;
+            mentions?: components["schemas"]["Mention"][];
+            /** @description Photos and videos. Ordinary items; `GET /v1/items/{id}/media/{variant}` serves them to conversation members. */
+            items: components["schemas"]["Item"][];
+            voice?: components["schemas"]["VoiceClip"] | null;
+            reply_to?: components["schemas"]["MessageQuote"] | null;
+            shared_post?: components["schemas"]["PostCard"] | null;
+            link_preview?: components["schemas"]["LinkPreview"] | null;
+            system?: components["schemas"]["SystemMessage"] | null;
+            reactions: components["schemas"]["ReactionSummary"];
+            /** @description Frame reactions and quick replies on placements made from this message by "Put on a frame". */
+            frame_activity?: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                item_id: components["schemas"]["Id"];
+                reaction?: components["schemas"]["Reaction"] | null;
+                replies?: components["schemas"]["ReplyPreset"][];
+            }[];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            edited_at?: string | null;
+            /** @description Tombstone: "This message was deleted" (body, items, voice, preview and reactions are gone). */
+            deleted: boolean;
+            /**
+             * @description With `deleted`: removed by a moderator ("This message was removed").
+             * @default false
+             */
+            removed_by_admin?: boolean;
+        };
+        /**
+         * @description A voice message's recording (README §5.19). Stored as an item of its own (never placed on a frame or in a
+         *     library); `GET /v1/items/{item_id}/media/master` serves the AAC master (`audio/mp4`, Range supported).
+         */
+        VoiceClip: {
+            item_id: components["schemas"]["Id"];
+            /** @enum {string} */
+            status: "processing" | "ready" | "failed";
+            duration_ms?: number | null;
+            /** @description 64 loudness values 0–100 over the recording (empty while processing). */
+            waveform?: number[];
+        };
+        MessagePage: {
+            /** @description Oldest first. */
+            messages: components["schemas"]["Message"][];
+            has_more_before: boolean;
+            has_more_after: boolean;
+        };
+        /** @description `frame_ids` and `feed_ids` together must not be empty. */
+        PutOnFrameRequest: {
+            frame_ids: components["schemas"]["Id"][];
+            feed_ids?: components["schemas"]["Id"][];
+            /** @description As in `SendCreate.circle_ids`. */
+            circle_ids?: components["schemas"]["Id"][];
+            /** @description A subset of the message's photos and videos; default all of them. */
+            item_ids?: components["schemas"]["Id"][];
+        };
+        /** @description A contact (someone the caller shares a family or a frame with). */
+        Person: {
+            person: components["schemas"]["PersonRef"];
+            /** @description The families both are in. */
+            feeds: {
+                feed_id: components["schemas"]["Id"];
+                feed_name: string;
+            }[];
+            /** @description The frames both are members of. */
+            frames: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+            }[];
+            /** @description The caller blocked this person. */
+            blocked: boolean;
+            direct_conversation_id?: components["schemas"]["Id"] | null;
+            /** @description The milestones this person chose to show (all of them for the caller's own profile). */
+            milestones?: components["schemas"]["MilestoneKey"][];
+        };
+        /** @description The app badge: conversations with unread messages (not muted) plus threads with unread mentions of or replies to the caller (not muted). */
+        Badge: {
+            total: number;
+            conversations: number;
+            threads: number;
+        };
+        Block: {
+            person: components["schemas"]["PersonRef"];
+            /** Format: date-time */
+            created_at: string;
+        };
+        /** @enum {string} */
+        ReportTargetKind: "comment" | "message" | "post";
+        /** @enum {string} */
+        ReportReason: "unkind" | "spam" | "inappropriate" | "other";
+        ReportCreate: {
+            target_kind: components["schemas"]["ReportTargetKind"];
+            target_id: components["schemas"]["Id"];
+            reason: components["schemas"]["ReportReason"];
+            note?: string;
+        };
+        /** @description The reporter sees their own report (`mine`) without `excerpt`, `author` or `note` of others; handlers see everything except who reported. */
+        Report: {
+            id: components["schemas"]["Id"];
+            target_kind: components["schemas"]["ReportTargetKind"];
+            target_id: components["schemas"]["Id"];
+            post_id?: components["schemas"]["Id"] | null;
+            conversation_id?: components["schemas"]["Id"] | null;
+            /** @description Null when the operator handles it. */
+            feed_id?: components["schemas"]["Id"] | null;
+            reason: components["schemas"]["ReportReason"];
+            note?: string | null;
+            /** @description Who wrote the reported content (handlers). */
+            author?: components["schemas"]["PersonRef"] | null;
+            /** @description The reported text as it was when reported (kept even if it was edited or deleted since), or a description of the media; handlers only. */
+            excerpt?: string | null;
+            /** @enum {string} */
+            status: "open" | "removed" | "dismissed";
+            mine?: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            resolved_at?: string | null;
+        };
+        /**
+         * @description How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+         *     today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+         *     "2 weeks quiet", `never` "No photos yet".
+         */
+        Freshness: {
+            /** @enum {string} */
+            state: "fresh" | "recent" | "quiet" | "never";
+            level: number;
+            /** @description Whole days since the last personal photo (null = never). */
+            days_quiet?: number | null;
+            /** Format: date-time */
+            last_shared_at?: string | null;
+            last_shared_by?: components["schemas"]["PersonRef"] | null;
+        };
+        /**
+         * @description `open`: waiting (7 days at most). `answered`: someone sent a photo that reached the frame. `expired`: nobody did within 7 days.
+         * @enum {string}
+         */
+        PhotoRequestState: "open" | "answered" | "expired";
+        /** @description A frame's "Ask for new photos". */
+        PhotoRequest: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            state: components["schemas"]["PhotoRequestState"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            answered_at?: string | null;
+            answered_by?: components["schemas"]["PersonRef"] | null;
+            freshness?: components["schemas"]["Freshness"];
+        };
+        /** @description The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change). */
+        FramePhotoRequest: {
+            id: components["schemas"]["Id"];
+            state: components["schemas"]["PhotoRequestState"];
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Until then the button shows "Asked today 💛".
+             */
+            next_allowed_at: string;
+            /** Format: date-time */
+            answered_at?: string | null;
+            /** @description First name of whoever answered ("New photos from Ben"). */
+            answered_by_name?: string | null;
+        };
+        FeedStreakSummary: {
+            current_weeks: number;
+            week_photos: number;
+            goal: number;
+            /** @description This week's goal is reached. */
+            met: boolean;
+        };
+        FeedEngagement: {
+            feed_id: components["schemas"]["Id"];
+            /** @default true */
+            streak_enabled: boolean;
+            /**
+             * @description Photos the family together posts per week.
+             * @default 3
+             */
+            streak_goal: number;
+            /** @default false */
+            prompts_enabled: boolean;
+            /**
+             * @description A subscribed frame without new personal photos for this long gets the "getting quiet" reminder.
+             * @default 7
+             */
+            quiet_after_days: number;
+            /** @default true */
+            monthly_recap: boolean;
+            /**
+             * @description IANA zone for weeks (Monday–Sunday), prompts and recaps; default: the most common `locale.timezone` of its subscribed frames, else the owner's, else Europe/Brussels.
+             * @example Europe/Brussels
+             */
+            timezone: string;
+        };
+        FeedEngagementUpdate: {
+            streak_enabled?: boolean;
+            streak_goal?: number;
+            prompts_enabled?: boolean;
+            quiet_after_days?: number;
+            monthly_recap?: boolean;
+            timezone?: string;
+        };
+        FeedStreak: {
+            enabled: boolean;
+            goal: number;
+            /** @description Weeks in a row the goal was met (frozen weeks keep it */
+            current_weeks: number;
+            best_weeks: number;
+            freezes_left: number;
+            week: {
+                /**
+                 * Format: date
+                 * @description The Monday.
+                 */
+                week_of: string;
+                photos: number;
+                met: boolean;
+                /** @description Who posted this week (no counts per person). */
+                helpers: components["schemas"]["PersonRef"][];
+            };
+            /** @description The last 12 closed weeks, newest first. */
+            history?: {
+                /** Format: date */
+                week_of: string;
+                /** @enum {string} */
+                outcome: "met" | "frozen" | "missed";
+            }[];
+        };
+        FeedPrompt: {
+            id: components["schemas"]["Id"];
+            feed_id: components["schemas"]["Id"];
+            /**
+             * Format: date
+             * @description The Monday the prompt runs from.
+             */
+            week_of: string;
+            /** @enum {string} */
+            status: "current" | "planned" | "past" | "skipped";
+            /** @enum {string} */
+            source: "server" | "custom";
+            library_key?: string | null;
+            /** @description In the caller's language for server prompts; empty when skipped. */
+            title: string;
+            answer_count?: number;
+            /** @description The admin who chose or wrote it; null for the server's choice. */
+            set_by?: components["schemas"]["PersonRef"] | null;
+        };
+        FeedPromptSet: {
+            library_key?: string;
+            title?: string;
+            /** @enum {boolean} */
+            skip?: true;
+        };
+        PromptLibraryEntry: {
+            /** @example cooked */
+            key: string;
+            /** @example Something you cooked */
+            title: string;
+        };
+        OnThisDay: {
+            /** Format: date */
+            date: string;
+            groups: {
+                feed_id: components["schemas"]["Id"];
+                feed_name: string;
+                years_ago: number;
+                post_ids: components["schemas"]["Id"][];
+                items: components["schemas"]["Item"][];
+            }[];
+        };
+        /** @description "Your photos were seen 58 times on 3 frames this week; Oma loved 4". */
+        WeeklySummary: {
+            /** Format: date */
+            week_of: string;
+            /** @description Placements of the caller's items first seen this week. */
+            seen_count: number;
+            frame_count: number;
+            /** @description Frame ❤ on the caller's items this week. */
+            love_count: number;
+            /** @description People's reactions on the caller's posts and items this week. */
+            reaction_count: number;
+            /** @description Comments by others on the caller's posts this week. */
+            comment_count: number;
+            frames: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                seen_count: number;
+                love_count: number;
+            }[];
+            /** @description The item with the most reactions. */
+            top_item?: components["schemas"]["Item"] | null;
+        };
+        /** @description About the family, never ranking individuals. */
+        MonthlyRecap: {
+            feed_id: components["schemas"]["Id"];
+            month: string;
+            photos_shared: number;
+            videos_shared: number;
+            sharer_count: number;
+            most_loved?: {
+                post_id: components["schemas"]["Id"];
+                item: components["schemas"]["Item"];
+                /** @description People and frames. */
+                reaction_count?: number;
+            } | null;
+            freshest_frames?: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                days_with_new_photos: number;
+            }[];
+            new_members?: components["schemas"]["PersonRef"][];
+            streak_weeks?: number | null;
+        };
+        /** @enum {string} */
+        MilestoneKey: "first_photo" | "photos_10" | "photos_100" | "photos_1000" | "first_video" | "year_of_sharing" | "loves_100";
+        Milestone: {
+            key: components["schemas"]["MilestoneKey"];
+            /** Format: date-time */
+            achieved_at: string;
+            /** @description Shown on the caller's profile to their contacts (default false). */
+            shown: boolean;
+            /** @description The caller dismissed its card. */
+            seen: boolean;
+        };
+        /**
+         * @description `fewer`: half the weekly budget and no streak reminders. `off`: no reminders (frame requests follow `frame_requests`).
+         * @enum {string}
+         */
+        ReminderLevel: "normal" | "fewer" | "off";
+        /** @enum {string} */
+        EmailDigest: "off" | "daily" | "weekly";
+        /** @description Local times (`User.timezone`) without reminders; they wait until the end. Default 21:00–09:00. */
+        QuietHours: {
+            start: string;
+            end: string;
+        };
+        ReminderPreferences: {
+            level: components["schemas"]["ReminderLevel"];
+            /** @description The server lowered `level` to `fewer` after 4 unanswered reminders in a row; show it once, then send `auto_reduced_seen`. */
+            auto_reduced?: boolean;
+            /**
+             * @description Pushes when a frame asks for new photos.
+             * @default true
+             */
+            frame_requests: boolean;
+            /** @default true */
+            weekly_summary: boolean;
+            /** @default true */
+            birthday_reminders: boolean;
+            /** Format: date-time */
+            snoozed_until?: string | null;
+            quiet_hours: components["schemas"]["QuietHours"];
+            email_digest: components["schemas"]["EmailDigest"];
+            /** @description The server can send mail (discovery `email_digest`). */
+            email_digest_available?: boolean;
+        };
+        ReminderPreferencesUpdate: {
+            level?: components["schemas"]["ReminderLevel"];
+            frame_requests?: boolean;
+            weekly_summary?: boolean;
+            birthday_reminders?: boolean;
+            snooze_days?: number;
+            quiet_hours?: components["schemas"]["QuietHours"];
+            email_digest?: components["schemas"]["EmailDigest"];
+            /** @enum {boolean} */
+            auto_reduced_seen?: true;
+        };
+        /**
+         * @description Payload of the `comments` change (entity: the placement): the three newest person comments of the placement's
+         *     feed post, for frames with `settings.social.show_comments` on (README §5.20). Plain text, first names only.
+         */
+        PlacementComments: {
+            placement_id: components["schemas"]["Id"];
+            /** @description Newest first. */
+            comments: {
+                id: components["schemas"]["Id"];
+                /** @example Anna */
+                author_name: string;
+                /** @description Cut at 280 characters with "…"; mentions as plain text. */
+                body: string;
+                /** Format: date-time */
+                created_at: string;
+            }[];
+        };
+        /** @description Payload of the `prompts` change (entity: the frame): current prompts of its families, for the title card before their answers. */
+        FramePrompts: {
+            /** Format: date-time */
+            generated_at: string;
+            prompts: {
+                prompt_id: components["schemas"]["Id"];
+                feed_id: components["schemas"]["Id"];
+                feed_name: string;
+                /** @description In the frame's `locale.language`. */
+                title: string;
+                /** Format: date */
+                week_of: string;
+            }[];
+        };
+        /** @description `post.updated`: a post's thread state, comment count or reaction row changed (everyone who sees the post). */
+        PostEvent: {
+            /** @enum {string} */
+            type: "post.updated";
+            post_id: components["schemas"]["Id"];
+            feed_id?: components["schemas"]["Id"] | null;
+            frame_id?: components["schemas"]["Id"] | null;
+            thread: components["schemas"]["ThreadSummary"];
+        };
+        /** @description `post.removed`: removed, or no longer visible to the receiver. */
+        PostRemovedEvent: {
+            /** @enum {string} */
+            type: "post.removed";
+            post_id: components["schemas"]["Id"];
+            feed_id?: components["schemas"]["Id"] | null;
+            frame_id?: components["schemas"]["Id"] | null;
+        };
+        /** @description `comment.created` (new comment, reply or frame entry) and `comment.updated` (edited, or deleted into a tombstone). */
+        CommentEvent: {
+            /** @enum {string} */
+            type: "comment.created" | "comment.updated";
+            post_id: components["schemas"]["Id"];
+            comment: components["schemas"]["Comment"];
+        };
+        /** @description `comment.deleted`: gone from the thread for the receiver. */
+        CommentDeletedEvent: {
+            /** @enum {string} */
+            type: "comment.deleted";
+            post_id: components["schemas"]["Id"];
+            comment_id: components["schemas"]["Id"];
+        };
+        /** @description `thread.read`: the receiver read a thread on another device. */
+        ThreadReadEvent: {
+            /** @enum {string} */
+            type: "thread.read";
+            post_id: components["schemas"]["Id"];
+            read_up_to: components["schemas"]["Id"];
+        };
+        /** @description `reaction.updated`: people's reactions on a target changed; `summary` is computed for the receiver. */
+        ReactionUpdatedEvent: {
+            /** @enum {string} */
+            type: "reaction.updated";
+            target_kind: components["schemas"]["ReactionTargetKind"];
+            target_id: components["schemas"]["Id"];
+            post_id?: components["schemas"]["Id"] | null;
+            conversation_id?: components["schemas"]["Id"] | null;
+            summary: components["schemas"]["ReactionSummary"];
+        };
+        CircleEvent: {
+            /** @enum {string} */
+            type: "circle.updated";
+            feed_id: components["schemas"]["Id"];
+            circle: components["schemas"]["Circle"];
+        };
+        CircleRemovedEvent: {
+            /** @enum {string} */
+            type: "circle.removed";
+            feed_id: components["schemas"]["Id"];
+            circle_id: components["schemas"]["Id"];
+        };
+        ConversationEvent: {
+            /** @enum {string} */
+            type: "conversation.updated";
+            conversation: components["schemas"]["Conversation"];
+        };
+        ConversationRemovedEvent: {
+            /** @enum {string} */
+            type: "conversation.removed";
+            conversation_id: components["schemas"]["Id"];
+        };
+        /** @description `message.created`, and `message.updated` (edited, items ready, preview fetched, frame activity, deleted into a tombstone). */
+        MessageEvent: {
+            /** @enum {string} */
+            type: "message.created" | "message.updated";
+            conversation_id: components["schemas"]["Id"];
+            message: components["schemas"]["Message"];
+        };
+        ReadUpdatedEvent: {
+            /** @enum {string} */
+            type: "read.updated";
+            conversation_id: components["schemas"]["Id"];
+            user_id: components["schemas"]["Id"];
+            last_read_message_id: components["schemas"]["Id"];
+        };
+        TypingEvent: {
+            /** @enum {string} */
+            type: "typing";
+            conversation_id: components["schemas"]["Id"];
+            user_id: components["schemas"]["Id"];
+            display_name: string;
+            /** @enum {string} */
+            activity: "typing" | "recording";
+            /** Format: date-time */
+            expires_at: string;
+        };
+        BadgeEvent: {
+            /** @enum {string} */
+            type: "badge.updated";
+            badge: components["schemas"]["Badge"];
+        };
+        ReportEvent: {
+            /** @enum {string} */
+            type: "report.created";
+            report: components["schemas"]["Report"];
+        };
+        PhotoRequestEvent: {
+            /** @enum {string} */
+            type: "photo_request.created" | "photo_request.updated";
+            request: components["schemas"]["PhotoRequest"];
+        };
+        StreakEvent: {
+            /** @enum {string} */
+            type: "streak.updated";
+            feed_id: components["schemas"]["Id"];
+            streak: components["schemas"]["FeedStreakSummary"];
+        };
+        PromptEvent: {
+            /** @enum {string} */
+            type: "prompt.updated";
+            feed_id: components["schemas"]["Id"];
+            prompt: components["schemas"]["FeedPrompt"];
+        };
+        MilestoneEvent: {
+            /** @enum {string} */
+            type: "milestone.achieved";
+            milestone: components["schemas"]["Milestone"];
+        };
+        /**
+         * @description Push `key`s added by family social (README §6.3; the older keys are listed there). Clients ignore keys they
+         *     don't know.
+         * @enum {string}
+         */
+        FamilySocialPushKey: "comment" | "comment_reply" | "mention" | "reaction_person" | "reaction_digest" | "message" | "conversation_added" | "report" | "frame_request" | "reminder_quiet" | "reminder_streak" | "reminder_birthday" | "weekly_summary";
+        /**
+         * @description Notification buttons in `PushPayload.actions`: `snooze_month` calls `updateReminderPreferences {snooze_days: 30}`, `fewer_reminders` `{level: fewer}`.
+         * @enum {string}
+         */
+        PushAction: "snooze_month" | "fewer_reminders";
+        /**
+         * @description The decrypted WebPush payload and the content of UnifiedPush messages (README §6.3); FCM data and APNs
+         *     custom keys carry the same fields. `ids` holds only ids (strings), never content.
+         */
+        PushPayload: {
+            /** @description The websocket event type this push stands for. */
+            type: string;
+            /** @description The push key (`FamilySocialPushKey` and the older ones in README §6.3). */
+            key: string;
+            title: string;
+            body: string;
+            ids: {
+                [key: string]: string;
+            };
+            /** @description A newer push with the same tag replaces the older one. */
+            tag?: string;
+            actions?: components["schemas"]["PushAction"][];
+        };
     };
     responses: {
         /** @description Error (RFC 9457) */
@@ -6761,6 +8946,20 @@ export interface components {
         HeldMessageId: components["schemas"]["Id"];
         TelegramChatId: components["schemas"]["Id"];
         InviteToken: string;
+        CommentId: components["schemas"]["Id"];
+        CircleId: components["schemas"]["Id"];
+        ConversationId: components["schemas"]["Id"];
+        MessageId: components["schemas"]["Id"];
+        ReportId: components["schemas"]["Id"];
+        RequestId: components["schemas"]["Id"];
+        TargetKind: components["schemas"]["ReactionTargetKind"];
+        TargetId: components["schemas"]["Id"];
+        /** @description A Monday (YYYY-MM-DD); other days answer `422 validation_failed`. */
+        WeekOf: string;
+        /** @description Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id). */
+        Before: string;
+        /** @description Chronological lists (comments, messages): return what comes after this id. */
+        After: components["schemas"]["Id"];
         Cursor: string;
         Limit: number;
         IdempotencyKey: string;
@@ -6888,6 +9087,8 @@ export interface operations {
                      * @example Europe/Brussels
                      */
                     timezone?: string;
+                    /** @description Read receipts in chats (README §5.19). */
+                    show_read_receipts?: boolean;
                 };
             };
         };
@@ -7664,8 +9865,10 @@ export interface operations {
             content: {
                 "application/json": {
                     frame_ids: components["schemas"]["Id"][];
-                    /** @description Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped. */
+                    /** @description Post the send's items to these feeds (caller must be a poster or above). A feed that already has a live post of this send is skipped. */
                     feed_ids?: components["schemas"]["Id"][];
+                    /** @description As in `SendCreate.circle_ids`. */
+                    circle_ids?: components["schemas"]["Id"][];
                 };
             };
         };
@@ -7718,7 +9921,7 @@ export interface operations {
             header?: never;
             path: {
                 itemId: components["parameters"]["ItemId"];
-                /** @description `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). */
+                /** @description `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails. */
                 variant: "thumb_256" | "thumb_512" | "master" | "poster" | "motion";
             };
             cookie?: never;
@@ -8275,7 +10478,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    role: "admin" | "poster";
+                    role: "admin" | "poster" | "member";
                 };
             };
         };
@@ -10469,6 +12672,1682 @@ export interface operations {
             };
         };
     };
+    getTimeline: {
+        parameters: {
+            query?: {
+                /** @description Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id). */
+                before?: components["parameters"]["Before"];
+                limit?: number;
+                /** @description Only this family's posts (the family screen). */
+                feed_id?: components["schemas"]["Id"];
+                /** @description Only posts with this circle as audience. */
+                circle_id?: components["schemas"]["Id"];
+                /** @description Only posts tagged with this weekly prompt (the answers). */
+                prompt_id?: components["schemas"]["Id"];
+                /** @description Only frame posts to this frame. */
+                frame_id?: components["schemas"]["Id"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page of posts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelinePage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Post */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelinePost"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listComments: {
+        parameters: {
+            query?: {
+                /** @description Chronological lists (comments, messages): return what comes after this id. */
+                after?: components["parameters"]["After"];
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page of comments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createComment: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+                commentId: components["parameters"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+                commentId: components["parameters"]["CommentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    setThreadState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    state: components["schemas"]["ThreadState"];
+                };
+            };
+        };
+        responses: {
+            /** @description Thread */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThreadSummary"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    markThreadRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    up_to: components["schemas"]["Id"];
+                };
+            };
+        };
+        responses: {
+            /** @description Marked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    setThreadMute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    muted: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Stored */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    tagPostPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    prompt_id: components["schemas"]["Id"] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Post */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelinePost"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listReactions: {
+        parameters: {
+            query?: {
+                /** @description Required for `post_item` (the item's post; one item can be in several posts). Ignored otherwise. */
+                post_id?: components["schemas"]["Id"];
+            };
+            header?: never;
+            path: {
+                targetKind: components["parameters"]["TargetKind"];
+                targetId: components["parameters"]["TargetId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reactions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReactionList"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    setReaction: {
+        parameters: {
+            query?: {
+                /** @description Required for `post_item` (the item's post; one item can be in several posts). Ignored otherwise. */
+                post_id?: components["schemas"]["Id"];
+            };
+            header?: never;
+            path: {
+                targetKind: components["parameters"]["TargetKind"];
+                targetId: components["parameters"]["TargetId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    emoji: components["schemas"]["PersonReaction"] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The target's new summary */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReactionSummary"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listCircles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Circles */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Circle"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createCircle: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CircleCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Circle"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getCircle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Circle */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Circle"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteCircle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateCircle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CircleUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Circle"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    addCircleMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    user_ids: components["schemas"]["Id"][];
+                };
+            };
+        };
+        responses: {
+            /** @description Circle */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Circle"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeCircleMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateCircleMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                circleId: components["parameters"]["CircleId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    role: components["schemas"]["CircleRole"];
+                };
+            };
+        };
+        responses: {
+            /** @description Circle */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Circle"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listConversations: {
+        parameters: {
+            query?: {
+                archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Conversations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createConversation: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationCreate"];
+            };
+        };
+        responses: {
+            /** @description The existing direct conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            403: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    putConversationPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+            };
+        };
+        responses: {
+            /** @description Stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteConversationPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    addConversationMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    user_ids: components["schemas"]["Id"][];
+                };
+            };
+        };
+        responses: {
+            /** @description Conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeConversationMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateConversationMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    role: components["schemas"]["ConversationRole"];
+                };
+            };
+        };
+        responses: {
+            /** @description Conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateConversationPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationPreferencesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMessages: {
+        parameters: {
+            query?: {
+                /** @description Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id). */
+                before?: components["parameters"]["Before"];
+                /** @description Chronological lists (comments, messages): return what comes after this id. */
+                after?: components["parameters"]["After"];
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page of messages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessagePage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    sendMessage: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageCreate"];
+            };
+        };
+        responses: {
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
+            };
+            403: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                messageId: components["parameters"]["MessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Message */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                messageId: components["parameters"]["MessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                messageId: components["parameters"]["MessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    putMessageOnFrame: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+                messageId: components["parameters"]["MessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutOnFrameRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Send"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    markConversationRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    message_id: components["schemas"]["Id"];
+                };
+            };
+        };
+        responses: {
+            /** @description Marked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    sendTyping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @default typing
+                     * @enum {string}
+                     */
+                    activity?: "typing" | "recording";
+                };
+            };
+        };
+        responses: {
+            /** @description Relayed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contacts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Person"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getPerson: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Person */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Person"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getBadge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Badge */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Badge"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createLinkPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uri */
+                    url: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Preview (possibly `status: failed`) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkPreview"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listBlocks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description People the caller blocked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Block"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    blockUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Blocked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    unblockUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unblocked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportCreate"];
+            };
+        };
+        responses: {
+            /** @description Reported */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedReports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reports */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listOperatorReports: {
+        parameters: {
+            query?: {
+                status?: "open" | "resolved" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reports */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    resolveReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: components["parameters"]["ReportId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    action: "remove" | "dismiss";
+                };
+            };
+        };
+        responses: {
+            /** @description Resolved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeedEngagement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Settings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedEngagement"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateFeedEngagement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedEngagementUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedEngagement"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeedStreak: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Streak */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedStreak"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedPrompts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Prompts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedPrompt"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    setFeedPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                /** @description A Monday (YYYY-MM-DD); other days answer `422 validation_failed`. */
+                weekOf: components["parameters"]["WeekOf"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedPromptSet"];
+            };
+        };
+        responses: {
+            /** @description Prompt */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedPrompt"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    resetFeedPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                /** @description A Monday (YYYY-MM-DD); other days answer `422 validation_failed`. */
+                weekOf: components["parameters"]["WeekOf"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reset */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listPromptLibrary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Prompts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptLibraryEntry"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getOnThisDay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description On this day */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnThisDay"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getWeeklySummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A Monday (YYYY-MM-DD); other days answer `422 validation_failed`. */
+                weekOf: components["parameters"]["WeekOf"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Summary */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeeklySummary"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeedRecap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                /** @description YYYY-MM */
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recap */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyRecap"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMyMilestones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Milestones */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Milestone"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateMyMilestone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                milestoneKey: components["schemas"]["MilestoneKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    shown?: boolean;
+                    /** @enum {boolean} */
+                    seen?: true;
+                };
+            };
+        };
+        responses: {
+            /** @description Milestone */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Milestone"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getReminderPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Preferences */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderPreferences"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateReminderPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReminderPreferencesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderPreferences"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getPhotoRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: components["parameters"]["RequestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoRequest"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFramePhotoRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoRequest"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     listTvLinks: {
         parameters: {
             query?: never;
@@ -11822,6 +15701,36 @@ export interface operations {
             404: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
+        };
+    };
+    deviceRequestPhotos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Already asked within 24 hours */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FramePhotoRequest"];
+                };
+            };
+            /** @description Asked */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FramePhotoRequest"];
+                };
+            };
+            default: components["responses"]["Problem"];
         };
     };
     deviceCheckUpdate: {

@@ -1439,6 +1439,7 @@ const ru: Catalog = {
 	'feedRole.owner': 'Владелец',
 	'feedRole.admin': 'Администратор',
 	'feedRole.poster': 'Автор',
+	'feedRole.member': 'Читатель',
 	'problem.already_subscribed': 'Эта рамка уже подписана на эту ленту или ждёт одобрения.',
 	'problem.invalid_transition': 'Сейчас это невозможно. Обновите страницу и попробуйте снова.',
 	'problem.limit_reached': 'Вы достигли ограничения на этом сервере.',

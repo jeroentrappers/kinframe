@@ -1423,6 +1423,7 @@ const lv: Catalog = {
 	'feedRole.owner': 'Īpašnieks',
 	'feedRole.admin': 'Administrators',
 	'feedRole.poster': 'Autors',
+	'feedRole.member': 'Lasītājs',
 	'problem.already_subscribed': 'Šis rāmis jau rāda šo kanālu vai gaida apstiprinājumu.',
 	'problem.invalid_transition': 'Pašlaik tas nav iespējams. Pārlādējiet lapu un mēģiniet vēlreiz.',
 	'problem.limit_reached': 'Jūs esat sasniedzis šī servera ierobežojumu.',
