@@ -16,7 +16,8 @@
 	const APP_STORE_URL = 'https://apps.apple.com/app/id6833055734';
 	const PLAY_URL = 'https://play.google.com/store/apps/details?id=app.kinframe.family';
 
-	const next = $derived(safeNext(page.url.searchParams.get('next')));
+	// Home (the timeline) is the landing page for signed-in people once the server has family social.
+	const next = $derived(page.url.searchParams.get('next') ? safeNext(page.url.searchParams.get('next')) : discovery.social ? '/home' : '/frames');
 	const reason = $derived(next.startsWith('/f/') ? 'frame' : next.startsWith('/i/') ? 'invite' : null);
 
 	$effect(() => {

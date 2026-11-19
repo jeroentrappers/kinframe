@@ -16,7 +16,10 @@ import {
 	type TelegramCode,
 	type TelegramLink
 } from './api/client';
+import type { components } from './api/schema';
 import { backoffDelay, type Reaction } from './logic';
+
+type E = components['schemas'];
 
 /** User websocket events (README §6.2). Unknown types are ignored. */
 export type LiveEvent =
@@ -62,7 +65,27 @@ export type LiveEvent =
 	| { type: 'telegram_chat.updated'; chat: TelegramChat }
 	| { type: 'telegram_chat.removed'; chat_id: string; frame_id?: string; feed_id?: string }
 	| { type: 'telegram_code.updated'; code: TelegramCode }
-	| { type: 'telegram_link.updated'; link: TelegramLink | null };
+	| { type: 'telegram_link.updated'; link: TelegramLink | null }
+	// Family social (README §6.2): payloads as in the contract's *Event schemas.
+	| E['PostEvent']
+	| E['PostRemovedEvent']
+	| E['CommentEvent']
+	| E['CommentDeletedEvent']
+	| E['ThreadReadEvent']
+	| E['ReactionUpdatedEvent']
+	| E['CircleEvent']
+	| E['CircleRemovedEvent']
+	| E['ConversationEvent']
+	| E['ConversationRemovedEvent']
+	| E['MessageEvent']
+	| E['ReadUpdatedEvent']
+	| E['TypingEvent']
+	| E['BadgeEvent']
+	| E['ReportEvent']
+	| E['PhotoRequestEvent']
+	| E['StreakEvent']
+	| E['PromptEvent']
+	| E['MilestoneEvent'];
 
 type Handler = (e: LiveEvent) => void;
 

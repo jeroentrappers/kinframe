@@ -20,6 +20,9 @@
 		members_see_reactions: boolean;
 		posters_can_invite: boolean;
 		posters_can_add_birthdays: boolean;
+		members_see_receipts: boolean;
+		new_members_can_post: boolean;
+		members_can_create_circles: boolean;
 	};
 	const fromFeed = (f: Feed): Form => ({
 		name: f.name,
@@ -28,7 +31,10 @@
 		invite_requires_approval: f.invite_requires_approval ?? true,
 		members_see_reactions: f.members_see_reactions ?? false,
 		posters_can_invite: f.posters_can_invite ?? false,
-		posters_can_add_birthdays: f.posters_can_add_birthdays ?? false
+		posters_can_add_birthdays: f.posters_can_add_birthdays ?? false,
+		members_see_receipts: f.members_see_receipts ?? false,
+		new_members_can_post: f.new_members_can_post ?? true,
+		members_can_create_circles: f.members_can_create_circles ?? true
 	});
 
 	const EMPTY: Form = {
@@ -38,7 +44,10 @@
 		invite_requires_approval: true,
 		members_see_reactions: false,
 		posters_can_invite: false,
-		posters_can_add_birthdays: false
+		posters_can_add_birthdays: false,
+		members_see_receipts: false,
+		new_members_can_post: true,
+		members_can_create_circles: true
 	};
 	let form = $state<Form>({ ...EMPTY });
 	let base = $state<Form>({ ...EMPTY });
@@ -58,6 +67,9 @@
 		if (form.cover_item_id !== base.cover_item_id) out.cover_item_id = form.cover_item_id;
 		for (const k of ['auto_approve_subscriptions', 'invite_requires_approval', 'members_see_reactions', 'posters_can_invite', 'posters_can_add_birthdays'] as const)
 			if (form[k] !== base[k]) out[k] = form[k];
+		// Family social (README §5.18): only sent to servers that have it.
+		if (discovery.social)
+			for (const k of ['members_see_receipts', 'new_members_can_post', 'members_can_create_circles'] as const) if (form[k] !== base[k]) out[k] = form[k];
 		return out;
 	});
 	const dirty = $derived(Object.keys(patch).length > 0);
@@ -158,8 +170,22 @@
 		</label>
 		<label class="switch">
 			<input type="checkbox" bind:checked={form.members_see_reactions} />
-			<span><span class="s-label">{t('feedSettings.membersSee')}</span><span class="hint">{t('feedSettings.membersSeeHint')}</span></span>
+			<span><span class="s-label">{discovery.social ? t('social.seeFrameReactions') : t('feedSettings.membersSee')}</span><span class="hint">{discovery.social ? t('social.seeFrameReactionsHint') : t('feedSettings.membersSeeHint')}</span></span>
 		</label>
+		{#if discovery.social}
+			<label class="switch">
+				<input type="checkbox" bind:checked={form.members_see_receipts} />
+				<span><span class="s-label">{t('social.seeReceipts')}</span><span class="hint">{t('social.seeReceiptsHint')}</span></span>
+			</label>
+			<label class="switch">
+				<input type="checkbox" bind:checked={form.new_members_can_post} />
+				<span><span class="s-label">{t('social.newMembersCanPost')}</span><span class="hint">{t('social.newMembersCanPostHint')}</span></span>
+			</label>
+			<label class="switch">
+				<input type="checkbox" bind:checked={form.members_can_create_circles} />
+				<span><span class="s-label">{t('social.membersCreateCircles')}</span><span class="hint">{t('social.membersCreateCirclesHint')}</span></span>
+			</label>
+		{/if}
 	</section>
 
 	{#if discovery.birthdays}

@@ -85,6 +85,10 @@ class Compose {
 	frameIds = $state<string[]>([]);
 	/** Feeds to post to (docs/spec/feeds.md §6.1): one send can go to frames and feeds at once. */
 	feedIds = $state<string[]>([]);
+	/** Family social: a circle as the audience inside a family (README §5.18), per family id. */
+	circleOf = $state<Record<string, string | null>>({});
+	/** The weekly prompt these photos answer, with its family (README §5.20). */
+	prompt = $state<{ id: string; feedId: string; title: string } | null>(null);
 	phase = $state<Phase>('compose');
 	error = $state<unknown>(null);
 
@@ -468,8 +472,12 @@ class Compose {
 		}
 
 		this.phase = 'sending';
+		const circleIds = this.feedIds.map((f) => this.circleOf[f]).filter((c): c is string => !!c);
+		const promptId = this.prompt && this.feedIds.includes(this.prompt.feedId) ? this.prompt.id : null;
 		const body = {
 			...recipientsBody(this.frameIds, this.feedIds),
+			...(circleIds.length ? { circle_ids: circleIds } : {}),
+			...(promptId ? { prompt_id: promptId } : {}),
 			items: this.items.map(
 				(i) =>
 					sendItemBody({
@@ -526,6 +534,7 @@ class Compose {
 		this.items = [];
 		this.phase = 'compose';
 		this.error = null;
+		this.prompt = null;
 		this.#sendKey = null;
 		this.#lastBody = '';
 	}

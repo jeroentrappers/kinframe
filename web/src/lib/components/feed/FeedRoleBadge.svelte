@@ -5,4 +5,4 @@
 	let { role }: { role: FeedRole } = $props();
 </script>
 
-<span class="badge badge-{role === 'poster' ? 'member' : role}">{t(`feedRole.${role}`)}</span>
+<span class="badge badge-{role === 'poster' || role === 'member' ? 'member' : role}">{t(`feedRole.${role}`)}</span>

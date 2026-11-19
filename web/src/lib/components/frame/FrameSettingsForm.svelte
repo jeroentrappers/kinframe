@@ -37,6 +37,8 @@
 		// Older frames may store a region tag (nl-BE) or a code we don't list; show the closest language.
 		c.locale.language = matchLocale(c.locale.language) ?? 'en';
 		c.location ??= null;
+		// Family social on the frame (README §5.20); servers without it ignore the defaults (no diff, no patch).
+		c.social = { show_comments: false, ask_for_photos: true, prompt_cards: true, new_photos_from: true, ...c.social };
 		c.plugins = { ...c.plugins, layout: { mode: 'off', side: 'right', background: 'paper', ...c.plugins?.layout } };
 		return c;
 	}
@@ -286,6 +288,32 @@
 				<label class="switch"><input type="checkbox" bind:checked={form.widgets.caption} /><span>{t('settingsForm.showCaption')}</span></label>
 				<label class="switch"><input type="checkbox" bind:checked={form.widgets.clock} /><span>{t('settingsForm.showClock')}</span></label>
 			</section>
+
+			{#if (discovery.social || discovery.engagement) && form.social}
+				<section class="card card-pad stack" aria-labelledby="soc-title">
+					<h2 id="soc-title">{t('social.frameSettingsTitle')}</h2>
+					{#if discovery.social}
+						<label class="switch">
+							<input type="checkbox" bind:checked={form.social.show_comments} />
+							<span><span class="s-label">{t('social.showComments')}</span><span class="hint">{t('social.showCommentsHint')}</span></span>
+						</label>
+					{/if}
+					{#if discovery.engagement}
+						<label class="switch">
+							<input type="checkbox" bind:checked={form.social.ask_for_photos} />
+							<span><span class="s-label">{t('engagement.askForPhotos')}</span><span class="hint">{t('engagement.askForPhotosHint')}</span></span>
+						</label>
+						<label class="switch">
+							<input type="checkbox" bind:checked={form.social.new_photos_from} />
+							<span><span class="s-label">{t('engagement.newPhotosFrom')}</span><span class="hint">{t('engagement.newPhotosFromHint')}</span></span>
+						</label>
+						<label class="switch">
+							<input type="checkbox" bind:checked={form.social.prompt_cards} />
+							<span><span class="s-label">{t('engagement.promptCards')}</span><span class="hint">{t('engagement.promptCardsHint')}</span></span>
+						</label>
+					{/if}
+				</section>
+			{/if}
 
 			<section class="card card-pad stack" aria-labelledby="disp-title">
 				<h2 id="disp-title">{t('settingsForm.display')}</h2>

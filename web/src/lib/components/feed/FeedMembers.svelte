@@ -15,6 +15,7 @@
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
 	import FeedRoleBadge from './FeedRoleBadge.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 
 	let { feed, onchanged }: { feed: Feed; onchanged?: () => void } = $props();
 
@@ -77,7 +78,7 @@
 	}
 
 	// ---- role
-	async function setRole(m: FeedMember, role: 'admin' | 'poster') {
+	async function setRole(m: FeedMember, role: 'admin' | 'poster' | 'member') {
 		const before = m.role;
 		m.role = role;
 		try {
@@ -230,12 +231,14 @@
 											id="frole-{m.user_id}"
 											class="select"
 											value={m.role}
-											onchange={(e) => setRole(m, e.currentTarget.value as 'admin' | 'poster')}
+											onchange={(e) => setRole(m, e.currentTarget.value as 'admin' | 'poster' | 'member')}
 										>
 											<option value="poster">{t('feedRole.poster')}</option>
+											<!-- Family social: readers follow along, comment and chat, but don't post photos. -->
+											{#if discovery.social}<option value="member">{t('feedRole.member')}</option>{/if}
 											<option value="admin">{t('feedRole.admin')}</option>
 										</select>
-										<span class="hint">{m.role === 'admin' ? t('feedMembers.adminHint') : t('feedMembers.posterHint')}</span>
+										<span class="hint">{m.role === 'admin' ? t('feedMembers.adminHint') : m.role === 'member' ? t('social.readerHint') : t('feedMembers.posterHint')}</span>
 									</div>
 									<div class="row-wrap">
 										{#if feed.role === 'owner'}

@@ -10,6 +10,10 @@
 	import { can, frames } from '$lib/frames.svelte';
 	import { feeds } from '$lib/feeds.svelte';
 	import FeedCover from '$components/feed/FeedCover.svelte';
+	import AudiencePicker from '$components/social/AudiencePicker.svelte';
+	import { canPostToFeed } from '$lib/feeds';
+	import { api, call } from '$lib/api/client';
+	import { currentPrompt } from '$lib/engagement';
 	import { formatBytes, formatDuration } from '$lib/format';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
@@ -29,8 +33,8 @@
 	let editorOpen = $state(false);
 
 	const sendable = $derived(frames.list.filter((f) => can(f, 'send')));
-	/** Every feed role can post (feeds.md §4.1). Hidden when the server has no feeds. */
-	const postable = $derived(discovery.feeds ? feeds.list : []);
+	/** Every feed role but `member` ("Reader", family social) can post (feeds.md §4.1). Hidden without feeds. */
+	const postable = $derived(discovery.feeds ? feeds.list.filter((f) => canPostToFeed(f.role)) : []);
 	const recipientsLoaded = $derived(frames.loaded && (!discovery.feeds || feeds.loaded || feeds.error !== null));
 	const recipientNames = $derived(
 		[...compose.frameIds.map((id) => frames.get(id)?.name), ...compose.feedIds.map((id) => feeds.get(id)?.name)].filter(Boolean).join(', ')
@@ -53,6 +57,37 @@
 		if (wanted && sendable.some((f) => f.id === wanted)) compose.frameIds = [wanted];
 		else if (wantedFeed && postable.some((f) => f.id === wantedFeed)) compose.feedIds = [wantedFeed];
 		else if (!wanted && !wantedFeed && sendable.length === 1 && postable.length === 0) compose.frameIds = [sendable[0]!.id];
+	});
+
+	// Answer a weekly prompt: ?feed=<id>&prompt=<id> from the prompt card (README §5.20).
+	$effect(() => {
+		const pid = page.url.searchParams.get('prompt');
+		const fid = page.url.searchParams.get('feed');
+		if (!discovery.engagement || !pid || !fid || compose.prompt?.id === pid) return;
+		call(api.GET('/v1/feeds/{feedId}/prompts', { params: { path: { feedId: fid } } }))
+			.then((list) => {
+				const p = list.find((x) => x.id === pid && (x.status === 'current' || x.status === 'past'));
+				if (p) {
+					compose.prompt = { id: p.id, feedId: fid, title: p.title };
+					if (!compose.feedIds.includes(fid) && postable.some((f) => f.id === fid)) compose.toggleFeed(fid);
+				}
+			})
+			.catch(() => {});
+	});
+	// Otherwise offer this week's prompt of a chosen family.
+	let offered = $state<{ id: string; feedId: string; title: string } | null>(null);
+	$effect(() => {
+		if (!discovery.engagement || compose.prompt || compose.feedIds.length !== 1) {
+			offered = null;
+			return;
+		}
+		const fid = compose.feedIds[0]!;
+		call(api.GET('/v1/feeds/{feedId}/prompts', { params: { path: { feedId: fid } } }))
+			.then((list) => {
+				const p = currentPrompt(list);
+				offered = p && compose.feedIds[0] === fid ? { id: p.id, feedId: fid, title: p.title } : null;
+			})
+			.catch(() => (offered = null));
 	});
 
 	function addFiles(files: File[]) {
@@ -245,9 +280,21 @@
 									</span>
 									<span class="check" aria-hidden="true"><Icon name="check" size={16} stroke={3} /></span>
 								</label>
+								{#if discovery.social && compose.feedIds.includes(feed.id)}
+									<AudiencePicker feedId={feed.id} feedName={feed.name} bind:value={compose.circleOf[feed.id]} disabled={locked} />
+								{/if}
 							{/each}
 						{/if}
 					</fieldset>
+
+					{#if compose.prompt && compose.feedIds.includes(compose.prompt.feedId)}
+						<p class="prompt-chip small"><span aria-hidden="true">💡</span><span>{t('engagement.answers', { title: compose.prompt.title })}</span><button class="btn btn-ghost btn-icon btn-sm" aria-label={t('engagement.untag')} onclick={() => (compose.prompt = null)} disabled={locked}><Icon name="x" size={14} /></button></p>
+					{:else if offered}
+						<label class="switch prompt-offer">
+							<input type="checkbox" onchange={(e) => e.currentTarget.checked && (compose.prompt = offered)} disabled={locked} />
+							<span><span class="small">{t('engagement.answerThisWeek')}</span><span class="hint">{offered.title}</span></span>
+						</label>
+					{/if}
 
 					{#if compose.issues.length > 0}
 						<p class="callout callout-error small" role="alert">
@@ -319,6 +366,22 @@
 </Dialog>
 
 <style>
+	.prompt-chip {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		padding: 4px 4px 4px 12px;
+		border-radius: var(--r-full);
+		background: var(--warn-soft);
+		font-weight: 600;
+	}
+	.prompt-chip span:nth-child(2) {
+		flex: 1;
+	}
+	.prompt-offer .hint {
+		display: block;
+	}
 	.layout {
 		display: grid;
 		gap: var(--s-5);

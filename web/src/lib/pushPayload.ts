@@ -8,6 +8,21 @@ export interface PushPayload {
 	/** Set by the server when notifications should replace each other (birthday greetings: `birthday:<id>:<date>`). */
 	tag?: string;
 	ids?: Record<string, string>;
+	/** Notification buttons (README §6.3): `snooze_month`, `fewer_reminders` on reminders. */
+	actions?: string[];
+}
+
+/** The notification buttons the app knows (others are ignored). */
+export const PUSH_ACTIONS = ['snooze_month', 'fewer_reminders'] as const;
+export type KnownPushAction = (typeof PUSH_ACTIONS)[number];
+
+export function pushActions(p: PushPayload): KnownPushAction[] {
+	return (p.actions ?? []).filter((a): a is KnownPushAction => (PUSH_ACTIONS as readonly string[]).includes(a));
+}
+
+/** What a notification button changes (`updateReminderPreferences`). */
+export function actionBody(a: KnownPushAction): { snooze_days: number } | { level: 'fewer' } {
+	return a === 'snooze_month' ? { snooze_days: 30 } : { level: 'fewer' };
 }
 
 const ID = /^[0-9a-fA-F-]{8,64}$/;
@@ -20,6 +35,24 @@ export function pushUrl(p: PushPayload): string {
 	const frame = id(p.ids?.frame_id);
 	const feed = id(p.ids?.feed_id);
 	const post = id(p.ids?.post_id);
+	// Family social (README §6.3): threads, chats, reports, frame requests and reminders.
+	const conv = id(p.ids?.conversation_id);
+	const comment = id(p.ids?.comment_id);
+	if ((p.key === 'comment' || p.key === 'comment_reply' || p.key === 'mention') && post) return `/posts/${post}${comment ? `?comment=${comment}` : ''}`;
+	if ((p.key === 'message' || p.key === 'mention' || p.key === 'conversation_added') && conv) return `/chats/${conv}`;
+	if (p.key === 'reaction_person') {
+		if (conv) return `/chats/${conv}`;
+		if (post) return `/posts/${post}`;
+	}
+	if (p.key === 'reaction_digest') return '/home';
+	if (p.key === 'report') return feed ? `/feeds/${feed}?tab=reports` : '/settings/reports';
+	if ((p.key === 'frame_request' || p.key === 'reminder_quiet') && frame) return `/send?frame=${frame}`;
+	if (p.key === 'reminder_streak' && feed) return `/feeds/${feed}`;
+	if (p.key === 'reminder_birthday' && feed) return `/send?feed=${feed}`;
+	if (p.key === 'weekly_summary') {
+		const week = p.ids?.week_of;
+		return week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? `/home?week=${week}` : '/home';
+	}
 	// Feeds (README §6.3).
 	if (p.key === 'subscription_request' && feed) return `/feeds/${feed}?tab=subscriptions`;
 	if (p.key === 'feed_join_request' && feed) return `/feeds/${feed}?tab=members`;
