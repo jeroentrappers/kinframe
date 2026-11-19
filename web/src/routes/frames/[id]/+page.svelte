@@ -20,6 +20,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import EmailInbox from '$components/inbox/EmailInbox.svelte';
 	import TelegramSection from '$components/telegram/TelegramSection.svelte';
+	import FrameFreshness from '$components/social/FrameFreshness.svelte';
 
 	type Tab = 'overview' | 'library' | 'people' | 'feeds' | 'calendar' | 'settings';
 
@@ -137,6 +138,7 @@
 				<a class="btn btn-primary" href="/send?frame={frame.id}"><Icon name="send" size={18} />{t('nav.sendPhotos')}</a>
 			{/if}
 		</header>
+		{#if discovery.engagement}<FrameFreshness {frame} />{/if}
 
 		<div class="tabs segmented" role="tablist" aria-label={t('frame.sections')}>
 			{#each tabs as tb, i (tb.id)}
