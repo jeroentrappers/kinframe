@@ -1,0 +1,9 @@
+Feeds: start a private family feed and let every grandparent's frame subscribe to it. Post once, and the photos reach all subscribed frames, with "seen on 4 of 5 frames" and reactions coming back.
+
+Birthdays: keep the family's birthdays in a feed. On the day, the frames show a birthday card with balloons, and a tap on the frame sends a greeting back to you.
+
+Photo sources: keep an album or feed in step with an Immich album or an iCloud shared album.
+
+Albums can now play only in album mode, so a big archive album doesn't fill the everyday slideshow.
+
+The app now tells you when an update is needed, and many smaller improvements on iPad and Mac.

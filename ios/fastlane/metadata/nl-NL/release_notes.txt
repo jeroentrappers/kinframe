@@ -1,0 +1,9 @@
+Feeds: start een privéfeed voor de familie en laat het kader van elke grootouder erop abonneren. Eén keer posten en de foto's staan op alle geabonneerde kaders, met "bekeken op 4 van 5 kaders" en reacties die bij jou terugkomen.
+
+Verjaardagen: bewaar de verjaardagen van de familie in een feed. Op de dag zelf tonen de kaders een verjaardagskaart met ballonnen, en met één tik op het kader komt er een felicitatie bij jou terug.
+
+Fotobronnen: houd een album of feed gelijk met een Immich-album of een gedeeld iCloud-album.
+
+Albums kunnen nu alleen in albummodus spelen, zodat een groot archiefalbum de gewone diavoorstelling niet overspoelt.
+
+De app laat nu weten wanneer een update nodig is, plus veel kleinere verbeteringen op iPad en Mac.
