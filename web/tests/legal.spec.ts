@@ -1,6 +1,19 @@
 import { expect, test } from '@playwright/test';
 import { emptyState, mockApi } from './mock-api';
 
+test('signed-out pages run without errors on a server with family social', async ({ page }) => {
+	const st = emptyState();
+	Object.assign(st.discovery, { feeds: true, social: true, chats: true, engagement: true });
+	const errors: string[] = [];
+	page.on('pageerror', (e) => errors.push(String(e)));
+	await mockApi(page, st);
+	await page.goto('/privacy');
+	await expect(page.getByRole('heading', { level: 1, name: 'Privacy policy' })).toBeVisible();
+	await page.waitForTimeout(500);
+	// Resetting the chats and the badge when signed out once looped (effect_update_depth_exceeded).
+	expect(errors).toEqual([]);
+});
+
 test.describe('privacy policy and terms', () => {
 	test('linked from the landing page, readable without signing in', async ({ page }) => {
 		await mockApi(page, emptyState());

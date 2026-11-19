@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '@fontsource-variable/fraunces';
 	import '../app.css';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, untrack, type Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, call } from '$lib/api/client';
@@ -206,8 +206,11 @@
 			live.stop();
 			frames.reset();
 			feeds.reset();
-			chats.reset();
-			badge.reset();
+			// These read what they reset (the badge paints the title): untracked, or signed-out pages loop forever.
+			untrack(() => {
+				chats.reset();
+				badge.reset();
+			});
 		}
 	});
 
