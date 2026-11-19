@@ -102,29 +102,55 @@ func (s *APNsSender) resetToken() {
 // as custom keys so the app can open the right screen.
 func apnsBody(payload []byte) ([]byte, error) {
 	var p struct {
-		Type  any               `json:"type"`
-		Key   string            `json:"key"`
-		Title string            `json:"title"`
-		Body  string            `json:"body"`
-		IDs   map[string]string `json:"ids"`
+		Type    any               `json:"type"`
+		Key     string            `json:"key"`
+		Title   string            `json:"title"`
+		Body    string            `json:"body"`
+		IDs     map[string]string `json:"ids"`
+		Tag     string            `json:"tag"`
+		Actions []string          `json:"actions"`
 	}
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return nil, err
 	}
-	m := map[string]any{
-		"aps": map[string]any{
-			"alert":           map[string]string{"title": p.Title, "body": p.Body},
-			"sound":           "default",
-			"thread-id":       p.Key,
-			"mutable-content": 1,
-		},
-		"key": p.Key,
-		"ids": p.IDs,
+	aps := map[string]any{
+		"alert":           map[string]string{"title": p.Title, "body": p.Body},
+		"sound":           "default",
+		"thread-id":       p.Key,
+		"mutable-content": 1,
+	}
+	m := map[string]any{"aps": aps, "key": p.Key, "ids": p.IDs}
+	if p.Tag != "" {
+		aps["thread-id"] = p.Tag
+		m["tag"] = p.Tag
+	}
+	if len(p.Actions) > 0 {
+		// The app registers the category with the "Snooze 1 month" and "Fewer reminders" buttons (README §6.3).
+		aps["category"] = APNsReminderCategory
+		m["actions"] = p.Actions
 	}
 	if p.Type != nil {
 		m["type"] = fmt.Sprint(p.Type)
 	}
 	return json.Marshal(m)
+}
+
+// APNsReminderCategory is the notification category of pushes with actions (reminders).
+const APNsReminderCategory = "kinframe.reminder"
+
+// apnsCollapseID is the payload's tag as apns-collapse-id (at most 64 bytes; longer tags are hashed).
+func apnsCollapseID(payload []byte) string {
+	var p struct {
+		Tag string `json:"tag"`
+	}
+	if json.Unmarshal(payload, &p) != nil || p.Tag == "" {
+		return ""
+	}
+	if len(p.Tag) <= 64 {
+		return p.Tag
+	}
+	sum := sha256.Sum256([]byte(p.Tag))
+	return fmt.Sprintf("%x", sum[:16])
 }
 
 type apnsError struct {
@@ -134,7 +160,7 @@ type apnsError struct {
 
 func (e *apnsError) Error() string { return fmt.Sprintf("apns: %d %s", e.status, e.reason) }
 
-func (s *APNsSender) post(ctx context.Context, host, device string, body []byte) error {
+func (s *APNsSender) post(ctx context.Context, host, device string, body []byte, collapse string) error {
 	tok, err := s.providerToken()
 	if err != nil {
 		return err
@@ -148,6 +174,9 @@ func (s *APNsSender) post(ctx context.Context, host, device string, body []byte)
 	req.Header.Set("apns-push-type", "alert")
 	req.Header.Set("apns-priority", "10")
 	req.Header.Set("apns-expiration", fmt.Sprint(time.Now().Add(24*time.Hour).Unix()))
+	if collapse != "" {
+		req.Header.Set("apns-collapse-id", collapse)
+	}
 	client := s.Client
 	if client == nil {
 		client = &http.Client{Timeout: 15 * time.Second} // HTTP/2 over TLS, as APNs requires
@@ -182,7 +211,7 @@ func (s *APNsSender) Send(ctx context.Context, ep store.PushEndpoint, payload []
 	}
 	var last error
 	for _, h := range hosts {
-		err := s.post(ctx, h, ep.Endpoint, body)
+		err := s.post(ctx, h, ep.Endpoint, body, apnsCollapseID(payload))
 		if err == nil {
 			return false, nil
 		}

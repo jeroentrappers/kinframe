@@ -650,6 +650,7 @@ func (s *Server) tgCloseBatch(ctx context.Context, batchID uuid.UUID) error {
 	if err != nil || sent == 0 {
 		return err
 	}
+	s.afterPersonalSend(ctx, sendID) // engagement
 	s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{sendID: sender}, "")
 	s.publishTelegramChat(ctx, chatID, nil)
 	return nil

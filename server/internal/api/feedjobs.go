@@ -31,6 +31,7 @@ func (s *Server) RunJob(ctx context.Context, job *store.Job) (bool, error) {
 			return true, err
 		}
 		s.publishFeedPost(ctx, p.PostID)
+		s.engagementAfterFanout(ctx, p.PostID) // engagement: photo requests of the frames it reached
 		return true, nil
 	case store.JobFeedReconcile:
 		var p store.ReconcileJob

@@ -129,11 +129,13 @@ func (s *FCMSender) accessToken(ctx context.Context) (string, error) {
 // key, title, body and every id ("frame_id", "send_id", ...).
 func fcmData(payload []byte) (map[string]string, error) {
 	var p struct {
-		Type  any               `json:"type"`
-		Key   string            `json:"key"`
-		Title string            `json:"title"`
-		Body  string            `json:"body"`
-		IDs   map[string]string `json:"ids"`
+		Type    any               `json:"type"`
+		Key     string            `json:"key"`
+		Title   string            `json:"title"`
+		Body    string            `json:"body"`
+		IDs     map[string]string `json:"ids"`
+		Tag     string            `json:"tag"`
+		Actions []string          `json:"actions"`
 	}
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return nil, err
@@ -141,6 +143,12 @@ func fcmData(payload []byte) (map[string]string, error) {
 	d := map[string]string{"key": p.Key, "title": p.Title, "body": p.Body}
 	if p.Type != nil {
 		d["type"] = fmt.Sprint(p.Type)
+	}
+	if p.Tag != "" {
+		d["tag"] = p.Tag
+	}
+	if len(p.Actions) > 0 {
+		d["actions"] = strings.Join(p.Actions, ",") // README §6.3: the reminder buttons
 	}
 	for k, v := range p.IDs {
 		if _, taken := d[k]; !taken {
@@ -159,9 +167,12 @@ func (s *FCMSender) Send(ctx context.Context, ep store.PushEndpoint, payload []b
 	if err != nil {
 		return false, err
 	}
+	android := map[string]any{"priority": "high", "ttl": "86400s"}
+	if t := data["tag"]; t != "" {
+		android["collapse_key"] = t
+	}
 	body, _ := json.Marshal(map[string]any{"message": map[string]any{
-		"token": ep.Endpoint, "data": data,
-		"android": map[string]any{"priority": "high", "ttl": "86400s"},
+		"token": ep.Endpoint, "data": data, "android": android,
 	}})
 	base := s.SendBase
 	if base == "" {

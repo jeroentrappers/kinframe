@@ -56,6 +56,26 @@ func Defaults(language, timezone string) Doc {
 		"notifications": map[string]any{"sound": true, "volume": 40},
 		"kiosk":         map[string]any{"allow_remove_members_on_frame": true, "owner_pin_set": false},
 		"updates":       map[string]any{"channel": "stable"},
+		"social":        SocialDefaults(),
+	}
+}
+
+// SocialDefaults are the defaults of settings.social (family social on the frame, README §5.20).
+func SocialDefaults() map[string]any {
+	return map[string]any{"show_comments": false, "ask_for_photos": true, "prompt_cards": true, "new_photos_from": true}
+}
+
+// FillSocial adds the settings.social defaults a document made before family social does not have.
+func FillSocial(doc Doc) {
+	m, _ := doc["social"].(map[string]any)
+	if m == nil {
+		m = map[string]any{}
+		doc["social"] = m
+	}
+	for k, v := range SocialDefaults() {
+		if _, ok := m[k]; !ok {
+			m[k] = v
+		}
 	}
 }
 
