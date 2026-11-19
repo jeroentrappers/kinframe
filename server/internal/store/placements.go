@@ -318,6 +318,7 @@ type PlacementFilter struct {
 	AlbumID    *uuid.UUID
 	FeedID     *uuid.UUID // only placements held by this feed (Placement.feed_ids)
 	OnThisDay  string     // "MM-DD": captured on this day in an earlier year
+	TakingID   *uuid.UUID // visibility taken_away: only this taking (leaving)
 	Sort       string     // received_desc, received_asc, taken_desc, taken_asc
 	Cursor     string
 	Limit      int
@@ -371,6 +372,11 @@ func (s *Store) ListPlacements(ctx context.Context, f PlacementFilter) ([]Placem
 		where += ` AND p.trashed_at IS NOT NULL`
 	case "pending_moderation":
 		where += ` AND p.pending_moderation AND p.trashed_at IS NULL`
+	case "taken_away": // leaving (README §5.21): removed, waiting in the trash
+		where = `p.frame_id = $1 AND p.taken_away_at IS NOT NULL`
+		if f.TakingID != nil {
+			where += ` AND p.taking_id = ` + arg(*f.TakingID)
+		}
 	}
 	if f.OnlySender != nil {
 		a := arg(*f.OnlySender)
