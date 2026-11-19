@@ -329,7 +329,7 @@ func (s *Server) ResolveReport(ctx context.Context, req gen.ResolveReportRequest
 		return nil, problem.New(problem.AlreadyDecided, "")
 	}
 	status := "dismissed"
-	if req.Body.Action == gen.Remove {
+	if req.Body.Action == gen.ResolveReportJSONBodyActionRemove {
 		status = "removed"
 	}
 	var won bool

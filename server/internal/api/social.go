@@ -21,9 +21,9 @@ import (
 
 // Limits of family social (discovery `limits`).
 const (
-	maxCommentChars   = 2000
-	maxCommentMentions       = 20
-	maxCirclesPerFeed = 20
+	maxCommentChars    = 2000
+	maxCommentMentions = 20
+	maxCirclesPerFeed  = 20
 )
 
 // ---------------------------------------------------------------- access
@@ -192,11 +192,12 @@ func (s *Server) commentOut(v *viewerCtx, p *store.SocialPost, c *store.Comment,
 		EditedAt: c.EditedAt, CanEdit: ptr(false), CanDelete: ptr(false), Deleted: ptr(false), RemovedByAdmin: ptr(false)}
 	if c.Kind == "frame" {
 		f := &struct {
-			FrameId   gen.Id           `json:"frame_id"`
-			FrameName string           `json:"frame_name"`
-			ItemId    *gen.Id          `json:"item_id,omitempty"`
-			Reaction  *gen.Reaction    `json:"reaction,omitempty"`
-			Reply     *gen.ReplyPreset `json:"reply,omitempty"`
+			FrameId    gen.Id           `json:"frame_id"`
+			FrameName  string           `json:"frame_name"`
+			ItemId     *gen.Id          `json:"item_id,omitempty"`
+			Reaction   *gen.Reaction    `json:"reaction,omitempty"`
+			Reply      *gen.ReplyPreset `json:"reply,omitempty"`
+			ServerName *string          `json:"server_name,omitempty"` // frames on other servers (README §5.22)
 		}{ItemId: c.ItemID}
 		if c.FrameID != nil {
 			f.FrameId = *c.FrameID

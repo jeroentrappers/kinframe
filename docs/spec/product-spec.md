@@ -400,3 +400,26 @@ Decided by the project owner on 2026-11-19 (family social, `family-social.md` §
 14. **One family per extended family, with circles inside it** (households, branches), rather than many small
     families linked together: one member list, one set of birthdays and one invite per family. People with two
     families (their own and their partner's) are simply in both.
+
+Decided by the project owner on 2026-11-19 (leaving a family, `leaving.md` §6, and families on different servers,
+`multi-server.md` §6).
+
+15. **The sender decides about their own photos, always**, also after leaving or being removed. Leaving a family or
+    a frame keeps the photos by default (credited as before); "Take them with me" takes them away with **30 days'
+    notice** in each frame's trash, where the frame's owner is told and may **ask once** to keep some or all of them
+    (no reminders). Comments stay unless the leaver deletes them. Removal by admins never deletes photos. Deleting
+    the account takes the photos by default, or hands them over to the families' and frames' owners ("Tom (former
+    member)") as a one-time consent. The operator can transfer ownership of a frame or family. Memories can leave
+    people out, privately; frames are unaffected. Direct chats become read-only when two people no longer share a
+    family or frame. A family role that sees only one circle is not built now.
+16. **The Android and iOS apps sign in to several servers at once** and merge Home, Chats, frames, families and the
+    send flow, with a server label where it matters; the web stays single-server and links to the others. Servers
+    only know their own accounts.
+17. **Frames may follow a family on another server**, with consent on both sides: the family must allow frames on
+    other servers (off by default) and use an invite marked for them. The frame's server pulls the family's
+    whole-family posts (never circle posts, chats, member lists or emails) with a ping from the family's server,
+    signed with Ed25519 HTTP Message Signatures; the frame's reactions, replies and "seen" go back to the family's
+    threads. Federation is on by default and can be turned off or limited to an allow list by the operator; families
+    and operators can block servers. Members, threads and chats spanning servers are out of scope; if ever needed,
+    prefer an existing protocol (Matrix) over inventing one. This refines decision 3: a server still isolates its
+    families, and copies on another server are visible to that server's operator.

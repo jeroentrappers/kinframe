@@ -76,6 +76,12 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.HandleFunc("POST /v1/inbound/email", s.receiveInboundEmail)               // operator webhook, HMAC-signed
 	mux.HandleFunc("POST /v1/inbound/email:check", s.checkInboundEmailRecipients) // the same, recipient pre-check
 	mux.HandleFunc("POST /v1/telegram/webhook", s.telegramWebhook)                // Telegram only: secret header (telegram.go)
+	// Server to server (README §5.22): RFC 9421 signatures, verified by the handlers (federation_stubs.go).
+	mux.HandleFunc("POST /federation/v1/subscriptions", s.federationSubscribe)
+	mux.HandleFunc("DELETE /federation/v1/subscriptions/{subscriptionId}", s.federationUnsubscribe)
+	mux.HandleFunc("GET /federation/v1/subscriptions/{subscriptionId}/changes", s.federationChanges)
+	mux.HandleFunc("POST /federation/v1/subscriptions/{subscriptionId}/activity", s.federationActivity)
+	mux.HandleFunc("POST /federation/v1/ping", s.federationPing)
 	mux.HandleFunc("GET /v1/shop/media/{name}", s.shopMedia)
 	mux.HandleFunc("GET /v1/email-digest/stop", s.digestStop)  // engagement: the digest's stop link (signed, no sign-in)
 	mux.HandleFunc("POST /v1/email-digest/stop", s.digestStop) // its one button

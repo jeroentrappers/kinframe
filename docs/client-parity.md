@@ -353,6 +353,43 @@ or `engagement` respectively. The Frame column is the Android frame app; the bro
 | Family settings: quiet after N days, monthly recap, time zone | yes | yes | yes | — | `updateFeedEngagement`. |
 | `features: ["comments", "photo_requests", "prompts"]` in the heartbeat | — | — | — | yes | Android frame app (both flavors). |
 
+## Leaving and other servers
+
+Leaving a family with your photos (`docs/spec/leaving.md`, API guide §5.21) and families on different servers
+(`docs/spec/multi-server.md`, §5.22); work split in `docs/spec/leaving-servers-work.md`. Designed, being built: cells
+say **planned** until a client has it. Hidden when discovery doesn't say `leaving` or `remote_families`
+respectively; multi-account needs only discovery `server_id`, `server_name`, `base_url` and the push `server` field.
+Frames need nothing new (remote placements look like feed placements, taken-away ones arrive as `placement.remove`).
+
+### Leaving a family (`leaving`)
+
+| Feature | Web | Android | iOS | Notes |
+|---|---|---|---|---|
+| Leave a family: your photos stay (default) or go with you, your comments stay or are deleted, "Leave this frame too" per frame | planned | planned | planned | `getLeavePreview`, `leaveFeed {photos, comments, leave_frame_ids}`; result line from `TakeAwayResult`. Decision A: keep by default. |
+| Leave a frame with the same photo question | planned | planned | planned | `leaveFrame {photos}`. |
+| Take my photos away later from a family or frame I left or was removed from (sent history) | planned | planned | planned | `listFormerPlaces`, `takeAwayFromFeed`, `takeAwayFromFrame`. |
+| Frame trash: "Taken away by Tom" groups with the date they go (30 days) | planned | planned | planned | `listFrameTakenAway`, `listPlacements?visibility=taken_away&taking_id=`; push `photos_taken_away`. |
+| Ask Tom to keep them (all or picked photos), "Tom doesn't accept requests" when blocked; family side for owners and admins | planned | planned | planned | `createKeepRequest`, `listFrameKeepRequests`, `listFeedTakenAway`, `listFeedKeepRequests`. One ask per taking (decision C). |
+| Keep requests to me: allow all, allow some, decline | planned | planned | planned | `listMyKeepRequests`, `getKeepRequest`, `answerKeepRequest`; push `keep_request`, `keep_answered`; event `keep_request.updated`. |
+| Delete my account: take my photos (default) or leave them to the families | planned | planned | planned | `deleteMe {photos}` (`take` or `leave`); "Tom (former member)" credit from `Item.former_sender_name`. |
+| Memories: leave people out, "Don't show this memory again" | planned | planned | planned | `getMemoryPreferences`, `updateMemoryPreferences`; private, frames unaffected. |
+| Direct chat read-only when you no longer share a family or frame ("You can no longer message Lies") | planned | planned | planned | `Conversation.read_only_reason: no_longer_contacts`. |
+| Operator: transfer ownership of a frame or family, ownership log | planned | skipped | skipped | `operatorSearchOwnership`, `operatorTransferFrameOwner`, `operatorTransferFeedOwner`, `operatorListOwnershipLog`; push `ownership_changed`. Operator tools are on the web. |
+
+### Several servers (`remote_families`, multi-account)
+
+| Feature | Web | Android | iOS | Notes |
+|---|---|---|---|---|
+| Accounts on several servers: list, add a server, primary account, sign out of one | differs | planned | planned | Decision A: the web signs in to its own server only; it shows "You also use kinframe on other servers? The apps show them all together." and links to other servers' web apps. |
+| Merged Home, Chats (badge = sum), frames, families and history, with a server chip | differs | planned | planned | Each detail screen talks to its own server. Web: one server. |
+| Send and share to targets on several servers (one upload per server, progress per server) | differs | planned | planned | iOS: the share extension too. |
+| Notifications open the right account (`server` in the payload) | differs | planned | planned | Without `server`: the account the push endpoint belongs to. |
+| Invite and join links of other kinframe servers ("This family is on kinframe.janssens.be. Sign in there to join.") | differs | planned | planned | `/.well-known/kinframe` of the link's host. Web: opens that server's web app. |
+| Frame managers: follow a family on another server (paste or open its invite link, preview, history, on-end choice), list, unsubscribe | planned | planned | planned | `previewRemoteInvite`, `createRemoteSubscription`, `listRemoteSubscriptions`, `updateRemoteSubscription`, `deleteRemoteSubscription`; event `remote_subscription.updated`. |
+| Family admins: "Allow frames on other servers", invite option, remote frames in the subscriptions list with the server's name, approve or remove, block a server | planned | planned | planned | `Feed.allow_remote_frames`, `FeedInvite.allow_remote`, `Subscription.remote`, `listFeedBlockedServers`, `blockFeedServer`, `unblockFeedServer`. |
+| Remote frames in threads and reaction rows ("❤ Oma's frame (kinframe.appmire.be)") and remote photos credited "Lies · Janssens" | planned | planned | planned | `Comment.frame.server_name`, `FrameReactionRef.server_name`, `Placement.origin_remote`, `Item.remote_sender`. |
+| Operator: blocked servers, known servers | planned | skipped | skipped | `operatorListBlockedServers`, `operatorBlockServer`, `operatorUnblockServer`, `operatorListRemoteServers`. |
+
 ## Account settings
 
 | Feature | Web | Android | iOS | Notes |

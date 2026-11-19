@@ -40,3 +40,9 @@ output-options:
     - tvMirror
     # Hand-written: Google's OAuth redirect (302 to a computed return_uri, or an HTML page).
     - googleOAuthCallback
+    # Hand-written: server-to-server federation (RFC 9421 signatures over the raw request; federation_stubs.go).
+    - federationSubscribe
+    - federationUnsubscribe
+    - federationChanges
+    - federationActivity
+    - federationPing

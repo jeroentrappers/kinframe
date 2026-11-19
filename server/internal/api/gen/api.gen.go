@@ -19,6 +19,24 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for AccountDeletionPhotos.
+const (
+	AccountDeletionPhotosLeave AccountDeletionPhotos = "leave"
+	AccountDeletionPhotosTake  AccountDeletionPhotos = "take"
+)
+
+// Valid indicates whether the value is a known member of the AccountDeletionPhotos enum.
+func (e AccountDeletionPhotos) Valid() bool {
+	switch e {
+	case AccountDeletionPhotosLeave:
+		return true
+	case AccountDeletionPhotosTake:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for BadgeEventType.
 const (
 	BadgeUpdated BadgeEventType = "badge.updated"
@@ -397,6 +415,48 @@ func (e CommentKind) Valid() bool {
 	case CommentKindFrame:
 		return true
 	case CommentKindPerson:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CommentsChoice.
+const (
+	CommentsChoiceDelete CommentsChoice = "delete"
+	CommentsChoiceKeep   CommentsChoice = "keep"
+)
+
+// Valid indicates whether the value is a known member of the CommentsChoice enum.
+func (e CommentsChoice) Valid() bool {
+	switch e {
+	case CommentsChoiceDelete:
+		return true
+	case CommentsChoiceKeep:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConversationReadOnlyReason.
+const (
+	ConversationReadOnlyReasonAccountGone      ConversationReadOnlyReason = "account_gone"
+	ConversationReadOnlyReasonArchived         ConversationReadOnlyReason = "archived"
+	ConversationReadOnlyReasonBlocked          ConversationReadOnlyReason = "blocked"
+	ConversationReadOnlyReasonNoLongerContacts ConversationReadOnlyReason = "no_longer_contacts"
+)
+
+// Valid indicates whether the value is a known member of the ConversationReadOnlyReason enum.
+func (e ConversationReadOnlyReason) Valid() bool {
+	switch e {
+	case ConversationReadOnlyReasonAccountGone:
+		return true
+	case ConversationReadOnlyReasonArchived:
+		return true
+	case ConversationReadOnlyReasonBlocked:
+		return true
+	case ConversationReadOnlyReasonNoLongerContacts:
 		return true
 	default:
 		return false
@@ -940,6 +1000,132 @@ func (e FamilySocialPushKey) Valid() bool {
 	case FamilySocialPushKeyReport:
 		return true
 	case FamilySocialPushKeyWeeklySummary:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FederationActivityEventsKind.
+const (
+	FederationActivityEventsKindReaction FederationActivityEventsKind = "reaction"
+	FederationActivityEventsKindReply    FederationActivityEventsKind = "reply"
+	FederationActivityEventsKindSeen     FederationActivityEventsKind = "seen"
+)
+
+// Valid indicates whether the value is a known member of the FederationActivityEventsKind enum.
+func (e FederationActivityEventsKind) Valid() bool {
+	switch e {
+	case FederationActivityEventsKindReaction:
+		return true
+	case FederationActivityEventsKindReply:
+		return true
+	case FederationActivityEventsKindSeen:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FederationChangeStatus.
+const (
+	FederationChangeStatusActive   FederationChangeStatus = "active"
+	FederationChangeStatusPending  FederationChangeStatus = "pending"
+	FederationChangeStatusRejected FederationChangeStatus = "rejected"
+	FederationChangeStatusRemoved  FederationChangeStatus = "removed"
+)
+
+// Valid indicates whether the value is a known member of the FederationChangeStatus enum.
+func (e FederationChangeStatus) Valid() bool {
+	switch e {
+	case FederationChangeStatusActive:
+		return true
+	case FederationChangeStatusPending:
+		return true
+	case FederationChangeStatusRejected:
+		return true
+	case FederationChangeStatusRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FederationChangeType.
+const (
+	FederationChangeTypeBirthdays    FederationChangeType = "birthdays"
+	FederationChangeTypeComments     FederationChangeType = "comments"
+	FederationChangeTypeItemsRemove  FederationChangeType = "items.remove"
+	FederationChangeTypePostRemove   FederationChangeType = "post.remove"
+	FederationChangeTypePostUpsert   FederationChangeType = "post.upsert"
+	FederationChangeTypeSubscription FederationChangeType = "subscription"
+)
+
+// Valid indicates whether the value is a known member of the FederationChangeType enum.
+func (e FederationChangeType) Valid() bool {
+	switch e {
+	case FederationChangeTypeBirthdays:
+		return true
+	case FederationChangeTypeComments:
+		return true
+	case FederationChangeTypeItemsRemove:
+		return true
+	case FederationChangeTypePostRemove:
+		return true
+	case FederationChangeTypePostUpsert:
+		return true
+	case FederationChangeTypeSubscription:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FederationChangePageStatus.
+const (
+	FederationChangePageStatusActive   FederationChangePageStatus = "active"
+	FederationChangePageStatusPending  FederationChangePageStatus = "pending"
+	FederationChangePageStatusRejected FederationChangePageStatus = "rejected"
+	FederationChangePageStatusRemoved  FederationChangePageStatus = "removed"
+)
+
+// Valid indicates whether the value is a known member of the FederationChangePageStatus enum.
+func (e FederationChangePageStatus) Valid() bool {
+	switch e {
+	case FederationChangePageStatusActive:
+		return true
+	case FederationChangePageStatusPending:
+		return true
+	case FederationChangePageStatusRejected:
+		return true
+	case FederationChangePageStatusRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FederationSubscriptionStatus.
+const (
+	FederationSubscriptionStatusActive   FederationSubscriptionStatus = "active"
+	FederationSubscriptionStatusPending  FederationSubscriptionStatus = "pending"
+	FederationSubscriptionStatusPreview  FederationSubscriptionStatus = "preview"
+	FederationSubscriptionStatusRejected FederationSubscriptionStatus = "rejected"
+	FederationSubscriptionStatusRemoved  FederationSubscriptionStatus = "removed"
+)
+
+// Valid indicates whether the value is a known member of the FederationSubscriptionStatus enum.
+func (e FederationSubscriptionStatus) Valid() bool {
+	switch e {
+	case FederationSubscriptionStatusActive:
+		return true
+	case FederationSubscriptionStatusPending:
+		return true
+	case FederationSubscriptionStatusPreview:
+		return true
+	case FederationSubscriptionStatusRejected:
+		return true
+	case FederationSubscriptionStatusRemoved:
 		return true
 	default:
 		return false
@@ -1780,6 +1966,129 @@ func (e JoinRequestVia) Valid() bool {
 	}
 }
 
+// Defines values for KeepRequestScope.
+const (
+	KeepRequestScopeFeed  KeepRequestScope = "feed"
+	KeepRequestScopeFrame KeepRequestScope = "frame"
+)
+
+// Valid indicates whether the value is a known member of the KeepRequestScope enum.
+func (e KeepRequestScope) Valid() bool {
+	switch e {
+	case KeepRequestScopeFeed:
+		return true
+	case KeepRequestScopeFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for KeepRequestAnswerAllow.
+const (
+	KeepRequestAnswerAllowAll  KeepRequestAnswerAllow = "all"
+	KeepRequestAnswerAllowNone KeepRequestAnswerAllow = "none"
+	KeepRequestAnswerAllowSome KeepRequestAnswerAllow = "some"
+)
+
+// Valid indicates whether the value is a known member of the KeepRequestAnswerAllow enum.
+func (e KeepRequestAnswerAllow) Valid() bool {
+	switch e {
+	case KeepRequestAnswerAllowAll:
+		return true
+	case KeepRequestAnswerAllowNone:
+		return true
+	case KeepRequestAnswerAllowSome:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for KeepRequestEventType.
+const (
+	KeepRequestUpdated KeepRequestEventType = "keep_request.updated"
+)
+
+// Valid indicates whether the value is a known member of the KeepRequestEventType enum.
+func (e KeepRequestEventType) Valid() bool {
+	switch e {
+	case KeepRequestUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for KeepRequestStatus.
+const (
+	KeepRequestStatusAllowed       KeepRequestStatus = "allowed"
+	KeepRequestStatusDeclined      KeepRequestStatus = "declined"
+	KeepRequestStatusExpired       KeepRequestStatus = "expired"
+	KeepRequestStatusOpen          KeepRequestStatus = "open"
+	KeepRequestStatusPartlyAllowed KeepRequestStatus = "partly_allowed"
+)
+
+// Valid indicates whether the value is a known member of the KeepRequestStatus enum.
+func (e KeepRequestStatus) Valid() bool {
+	switch e {
+	case KeepRequestStatusAllowed:
+		return true
+	case KeepRequestStatusDeclined:
+		return true
+	case KeepRequestStatusExpired:
+		return true
+	case KeepRequestStatusOpen:
+		return true
+	case KeepRequestStatusPartlyAllowed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LeavePreviewScope.
+const (
+	LeavePreviewScopeFeed  LeavePreviewScope = "feed"
+	LeavePreviewScopeFrame LeavePreviewScope = "frame"
+)
+
+// Valid indicates whether the value is a known member of the LeavePreviewScope enum.
+func (e LeavePreviewScope) Valid() bool {
+	switch e {
+	case LeavePreviewScopeFeed:
+		return true
+	case LeavePreviewScopeFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LeavingPushKey.
+const (
+	LeavingPushKeyKeepAnswered     LeavingPushKey = "keep_answered"
+	LeavingPushKeyKeepRequest      LeavingPushKey = "keep_request"
+	LeavingPushKeyOwnershipChanged LeavingPushKey = "ownership_changed"
+	LeavingPushKeyPhotosTakenAway  LeavingPushKey = "photos_taken_away"
+)
+
+// Valid indicates whether the value is a known member of the LeavingPushKey enum.
+func (e LeavingPushKey) Valid() bool {
+	switch e {
+	case LeavingPushKeyKeepAnswered:
+		return true
+	case LeavingPushKeyKeepRequest:
+		return true
+	case LeavingPushKeyOwnershipChanged:
+		return true
+	case LeavingPushKeyPhotosTakenAway:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for LinkPreviewStatus.
 const (
 	LinkPreviewStatusFailed  LinkPreviewStatus = "failed"
@@ -2137,6 +2446,60 @@ func (e NowShowingType) Valid() bool {
 	}
 }
 
+// Defines values for OperatorScopeKind.
+const (
+	OperatorScopeKindFeed  OperatorScopeKind = "feed"
+	OperatorScopeKindFrame OperatorScopeKind = "frame"
+)
+
+// Valid indicates whether the value is a known member of the OperatorScopeKind enum.
+func (e OperatorScopeKind) Valid() bool {
+	switch e {
+	case OperatorScopeKindFeed:
+		return true
+	case OperatorScopeKindFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OwnershipLogEntryKind.
+const (
+	AccountHandover  OwnershipLogEntryKind = "account_handover"
+	OperatorTransfer OwnershipLogEntryKind = "operator_transfer"
+)
+
+// Valid indicates whether the value is a known member of the OwnershipLogEntryKind enum.
+func (e OwnershipLogEntryKind) Valid() bool {
+	switch e {
+	case AccountHandover:
+		return true
+	case OperatorTransfer:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OwnershipLogEntryScopeKind.
+const (
+	OwnershipLogEntryScopeKindFeed  OwnershipLogEntryScopeKind = "feed"
+	OwnershipLogEntryScopeKindFrame OwnershipLogEntryScopeKind = "frame"
+)
+
+// Valid indicates whether the value is a known member of the OwnershipLogEntryScopeKind enum.
+func (e OwnershipLogEntryScopeKind) Valid() bool {
+	switch e {
+	case OwnershipLogEntryScopeKindFeed:
+		return true
+	case OwnershipLogEntryScopeKindFrame:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PersonReaction.
 const (
 	PersonReactionLaugh    PersonReaction = "laugh"
@@ -2419,6 +2782,24 @@ func (e PhotoSourceWarning) Valid() bool {
 	}
 }
 
+// Defines values for PhotosChoice.
+const (
+	PhotosChoiceKeep PhotosChoice = "keep"
+	PhotosChoiceTake PhotosChoice = "take"
+)
+
+// Valid indicates whether the value is a known member of the PhotosChoice enum.
+func (e PhotosChoice) Valid() bool {
+	switch e {
+	case PhotosChoiceKeep:
+		return true
+	case PhotosChoiceTake:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PinHashAlg.
 const (
 	Pbkdf2Sha256 PinHashAlg = "pbkdf2-sha256"
@@ -2506,6 +2887,42 @@ func (e PlacementStatus) Valid() bool {
 	case PlacementStatusRemoved:
 		return true
 	case PlacementStatusSeen:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PlacementUpdatedEventReason.
+const (
+	PlacementUpdatedEventReasonPurged    PlacementUpdatedEventReason = "purged"
+	PlacementUpdatedEventReasonRestored  PlacementUpdatedEventReason = "restored"
+	PlacementUpdatedEventReasonTakenAway PlacementUpdatedEventReason = "taken_away"
+)
+
+// Valid indicates whether the value is a known member of the PlacementUpdatedEventReason enum.
+func (e PlacementUpdatedEventReason) Valid() bool {
+	switch e {
+	case PlacementUpdatedEventReasonPurged:
+		return true
+	case PlacementUpdatedEventReasonRestored:
+		return true
+	case PlacementUpdatedEventReasonTakenAway:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PlacementUpdatedEventType.
+const (
+	PlacementUpdated PlacementUpdatedEventType = "placement.updated"
+)
+
+// Valid indicates whether the value is a known member of the PlacementUpdatedEventType enum.
+func (e PlacementUpdatedEventType) Valid() bool {
+	switch e {
+	case PlacementUpdated:
 		return true
 	default:
 		return false
@@ -2950,6 +3367,114 @@ func (e ReminderPreferencesUpdateAutoReducedSeen) Valid() bool {
 	}
 }
 
+// Defines values for RemoteEndReason.
+const (
+	RemoteEndReasonFeedDeleted   RemoteEndReason = "feed_deleted"
+	RemoteEndReasonRejected      RemoteEndReason = "rejected"
+	RemoteEndReasonRemovedByFeed RemoteEndReason = "removed_by_feed"
+	RemoteEndReasonServerBlocked RemoteEndReason = "server_blocked"
+	RemoteEndReasonUnsubscribed  RemoteEndReason = "unsubscribed"
+	RemoteEndReasonWithdrawn     RemoteEndReason = "withdrawn"
+)
+
+// Valid indicates whether the value is a known member of the RemoteEndReason enum.
+func (e RemoteEndReason) Valid() bool {
+	switch e {
+	case RemoteEndReasonFeedDeleted:
+		return true
+	case RemoteEndReasonRejected:
+		return true
+	case RemoteEndReasonRemovedByFeed:
+		return true
+	case RemoteEndReasonServerBlocked:
+		return true
+	case RemoteEndReasonUnsubscribed:
+		return true
+	case RemoteEndReasonWithdrawn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteOnEnd.
+const (
+	RemoteOnEndKeep   RemoteOnEnd = "keep"
+	RemoteOnEndRemove RemoteOnEnd = "remove"
+)
+
+// Valid indicates whether the value is a known member of the RemoteOnEnd enum.
+func (e RemoteOnEnd) Valid() bool {
+	switch e {
+	case RemoteOnEndKeep:
+		return true
+	case RemoteOnEndRemove:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteSubscriptionBackfillState.
+const (
+	RemoteSubscriptionBackfillStateIdle    RemoteSubscriptionBackfillState = "idle"
+	RemoteSubscriptionBackfillStateRunning RemoteSubscriptionBackfillState = "running"
+)
+
+// Valid indicates whether the value is a known member of the RemoteSubscriptionBackfillState enum.
+func (e RemoteSubscriptionBackfillState) Valid() bool {
+	switch e {
+	case RemoteSubscriptionBackfillStateIdle:
+		return true
+	case RemoteSubscriptionBackfillStateRunning:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteSubscriptionStatus.
+const (
+	RemoteSubscriptionStatusActive   RemoteSubscriptionStatus = "active"
+	RemoteSubscriptionStatusError    RemoteSubscriptionStatus = "error"
+	RemoteSubscriptionStatusPending  RemoteSubscriptionStatus = "pending"
+	RemoteSubscriptionStatusRejected RemoteSubscriptionStatus = "rejected"
+	RemoteSubscriptionStatusRemoved  RemoteSubscriptionStatus = "removed"
+)
+
+// Valid indicates whether the value is a known member of the RemoteSubscriptionStatus enum.
+func (e RemoteSubscriptionStatus) Valid() bool {
+	switch e {
+	case RemoteSubscriptionStatusActive:
+		return true
+	case RemoteSubscriptionStatusError:
+		return true
+	case RemoteSubscriptionStatusPending:
+		return true
+	case RemoteSubscriptionStatusRejected:
+		return true
+	case RemoteSubscriptionStatusRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteSubscriptionEventType.
+const (
+	RemoteSubscriptionUpdated RemoteSubscriptionEventType = "remote_subscription.updated"
+)
+
+// Valid indicates whether the value is a known member of the RemoteSubscriptionEventType enum.
+func (e RemoteSubscriptionEventType) Valid() bool {
+	switch e {
+	case RemoteSubscriptionUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ReplyPreset.
 const (
 	Beautiful ReplyPreset = "beautiful"
@@ -3355,6 +3880,33 @@ func (e SystemMessageType) Valid() bool {
 	case SystemMessageTypePutOnFrame:
 		return true
 	case SystemMessageTypeStreakMilestone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TakenAwayGroupCannotAskReason.
+const (
+	TakenAwayGroupCannotAskReasonAccountDeleted TakenAwayGroupCannotAskReason = "account_deleted"
+	TakenAwayGroupCannotAskReasonAlreadyAsked   TakenAwayGroupCannotAskReason = "already_asked"
+	TakenAwayGroupCannotAskReasonBlocked        TakenAwayGroupCannotAskReason = "blocked"
+	TakenAwayGroupCannotAskReasonExpired        TakenAwayGroupCannotAskReason = "expired"
+	TakenAwayGroupCannotAskReasonNotAllowed     TakenAwayGroupCannotAskReason = "not_allowed"
+)
+
+// Valid indicates whether the value is a known member of the TakenAwayGroupCannotAskReason enum.
+func (e TakenAwayGroupCannotAskReason) Valid() bool {
+	switch e {
+	case TakenAwayGroupCannotAskReasonAccountDeleted:
+		return true
+	case TakenAwayGroupCannotAskReasonAlreadyAsked:
+		return true
+	case TakenAwayGroupCannotAskReasonBlocked:
+		return true
+	case TakenAwayGroupCannotAskReasonExpired:
+		return true
+	case TakenAwayGroupCannotAskReasonNotAllowed:
 		return true
 	default:
 		return false
@@ -3960,6 +4512,7 @@ const (
 	ListPlacementsParamsVisibilityAll               ListPlacementsParamsVisibility = "all"
 	ListPlacementsParamsVisibilityHidden            ListPlacementsParamsVisibility = "hidden"
 	ListPlacementsParamsVisibilityPendingModeration ListPlacementsParamsVisibility = "pending_moderation"
+	ListPlacementsParamsVisibilityTakenAway         ListPlacementsParamsVisibility = "taken_away"
 	ListPlacementsParamsVisibilityTrashed           ListPlacementsParamsVisibility = "trashed"
 	ListPlacementsParamsVisibilityVisible           ListPlacementsParamsVisibility = "visible"
 )
@@ -3972,6 +4525,8 @@ func (e ListPlacementsParamsVisibility) Valid() bool {
 	case ListPlacementsParamsVisibilityHidden:
 		return true
 	case ListPlacementsParamsVisibilityPendingModeration:
+		return true
+	case ListPlacementsParamsVisibilityTakenAway:
 		return true
 	case ListPlacementsParamsVisibilityTrashed:
 		return true
@@ -4039,6 +4594,24 @@ func (e BulkUpdatePlacementsJSONBodyAction) Valid() bool {
 	}
 }
 
+// Defines values for ListMyKeepRequestsParamsStatus.
+const (
+	ListMyKeepRequestsParamsStatusAll  ListMyKeepRequestsParamsStatus = "all"
+	ListMyKeepRequestsParamsStatusOpen ListMyKeepRequestsParamsStatus = "open"
+)
+
+// Valid indicates whether the value is a known member of the ListMyKeepRequestsParamsStatus enum.
+func (e ListMyKeepRequestsParamsStatus) Valid() bool {
+	switch e {
+	case ListMyKeepRequestsParamsStatusAll:
+		return true
+	case ListMyKeepRequestsParamsStatusOpen:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for UpdateMyMilestoneJSONBodySeen.
 const (
 	UpdateMyMilestoneJSONBodySeenTrue UpdateMyMilestoneJSONBodySeen = true
@@ -4077,16 +4650,16 @@ func (e ListOperatorReportsParamsStatus) Valid() bool {
 
 // Defines values for ResolveReportJSONBodyAction.
 const (
-	Dismiss ResolveReportJSONBodyAction = "dismiss"
-	Remove  ResolveReportJSONBodyAction = "remove"
+	ResolveReportJSONBodyActionDismiss ResolveReportJSONBodyAction = "dismiss"
+	ResolveReportJSONBodyActionRemove  ResolveReportJSONBodyAction = "remove"
 )
 
 // Valid indicates whether the value is a known member of the ResolveReportJSONBodyAction enum.
 func (e ResolveReportJSONBodyAction) Valid() bool {
 	switch e {
-	case Dismiss:
+	case ResolveReportJSONBodyActionDismiss:
 		return true
-	case Remove:
+	case ResolveReportJSONBodyActionRemove:
 		return true
 	default:
 		return false
@@ -4113,6 +4686,19 @@ func (e ListMySendsParamsState) Valid() bool {
 		return false
 	}
 }
+
+// AccountDeletion defines model for AccountDeletion.
+type AccountDeletion struct {
+	// Photos `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+	// still in a family or on a frame is handed over to that family's or frame's owner and stays credited
+	// "<name> (former member)" (README §5.21 "Account deletion").
+	Photos *AccountDeletionPhotos `json:"photos,omitempty"`
+}
+
+// AccountDeletionPhotos `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+// still in a family or on a frame is handed over to that family's or frame's owner and stays credited
+// "<name> (former member)" (README §5.21 "Account deletion").
+type AccountDeletionPhotos string
 
 // Album defines model for Album.
 type Album struct {
@@ -4297,6 +4883,28 @@ type Block struct {
 	// Person A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
 	// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
 	Person PersonRef `json:"person"`
+}
+
+// BlockedServer defines model for BlockedServer.
+type BlockedServer struct {
+	CreatedAt     time.Time `json:"created_at"`
+	CreatedByName *string   `json:"created_by_name,omitempty"`
+
+	// FeedId Null for instance-wide blocks.
+	FeedId *Id    `json:"feed_id,omitempty"`
+	Host   string `json:"host"`
+
+	// Id UUIDv7
+	Id         Id      `json:"id"`
+	Reason     *string `json:"reason,omitempty"`
+	ServerName *string `json:"server_name,omitempty"`
+}
+
+// BlockedServerCreate `host` (e.g. `kinframe.example.org`) or a base URL in `server_url`.
+type BlockedServerCreate struct {
+	Host      *string `json:"host,omitempty"`
+	Reason    *string `json:"reason,omitempty"`
+	ServerUrl *string `json:"server_url,omitempty"`
 }
 
 // Calendar Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
@@ -4634,8 +5242,13 @@ type Change struct {
 		OriginFeedId *Id `json:"origin_feed_id,omitempty"`
 
 		// OriginFeedName Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
-		OriginFeedName    *string `json:"origin_feed_name,omitempty"`
-		PendingModeration *bool   `json:"pending_moderation,omitempty"`
+		OriginFeedName *string `json:"origin_feed_name,omitempty"`
+
+		// OriginRemote Set on copies of posts of a family on another server (README §5.22). `origin` is then `feed`,
+		// `origin_feed_id` null and `origin_feed_name` the remote family's name, so frames show "Lies · Janssens"
+		// without knowing about servers.
+		OriginRemote      *PlacementRemote `json:"origin_remote,omitempty"`
+		PendingModeration *bool            `json:"pending_moderation,omitempty"`
 
 		// PromptId Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
 		PromptId   *Id        `json:"prompt_id,omitempty"`
@@ -4654,8 +5267,11 @@ type Change struct {
 		// SharedByUserId The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
 		SharedByUserId *Id             `json:"shared_by_user_id,omitempty"`
 		Status         PlacementStatus `json:"status"`
-		Trashed        bool            `json:"trashed"`
-		TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
+
+		// TakenAway Set while the sender took it away and it waits in the frame's trash (`visibility: taken_away`, README §5.21). Never in the device change feed (the frame gets `placement.remove`).
+		TakenAway *PlacementTakenAway `json:"taken_away,omitempty"`
+		Trashed   bool                `json:"trashed"`
+		TrashedAt *time.Time          `json:"trashed_at,omitempty"`
 	} `json:"placement,omitempty"`
 
 	// Prompts `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.
@@ -4797,6 +5413,9 @@ type Comment struct {
 		ItemId    *Id          `json:"item_id,omitempty"`
 		Reaction  *Reaction    `json:"reaction,omitempty"`
 		Reply     *ReplyPreset `json:"reply,omitempty"`
+
+		// ServerName A frame on another server (README §5.22): show "Oma's frame (kinframe.appmire.be)". `frame_id` is then the remote subscription's id.
+		ServerName *string `json:"server_name,omitempty"`
 	} `json:"frame,omitempty"`
 
 	// Id UUIDv7
@@ -4884,6 +5503,9 @@ type CommentUpdate struct {
 	Mentions *[]Mention `json:"mentions,omitempty"`
 }
 
+// CommentsChoice `keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").
+type CommentsChoice string
+
 // Conversation defines model for Conversation.
 type Conversation struct {
 	// Archived The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).
@@ -4924,8 +5546,11 @@ type Conversation struct {
 	// PhotoUrl Group photo; the family's cover; for `direct`, the other person's avatar.
 	PhotoUrl *string `json:"photo_url,omitempty"`
 
-	// ReadOnly No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.
+	// ReadOnly No sending: the family or circle was deleted, or (direct) the other account is gone, blocked the caller, or the two no longer share a family or frame (README §5.21).
 	ReadOnly *bool `json:"read_only,omitempty"`
+
+	// ReadOnlyReason Why `read_only`: `no_longer_contacts` shows "You can no longer message Lies".
+	ReadOnlyReason *ConversationReadOnlyReason `json:"read_only_reason,omitempty"`
 
 	// ReadReceipts "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.
 	ReadReceipts *bool `json:"read_receipts,omitempty"`
@@ -4937,6 +5562,9 @@ type Conversation struct {
 	UnreadCount    int  `json:"unread_count"`
 	UnreadMentions *int `json:"unread_mentions,omitempty"`
 }
+
+// ConversationReadOnlyReason defines model for Conversation.ReadOnlyReason.
+type ConversationReadOnlyReason string
 
 // ConversationCreate defines model for ConversationCreate.
 type ConversationCreate struct {
@@ -5105,6 +5733,11 @@ type DiscoveredService struct {
 type Discovery struct {
 	Api string `json:"api"`
 
+	// ApiVersion API major version, `v1`.
+	//
+	// Example: v1
+	ApiVersion *string `json:"api_version,omitempty"`
+
 	// AppVersions Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
 	// for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
 	// (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
@@ -5129,6 +5762,9 @@ type Discovery struct {
 		MobileClientId  string  `json:"mobile_client_id"`
 		WebClientId     string  `json:"web_client_id"`
 	} `json:"auth"`
+
+	// BaseUrl The server's public base URL (the `server` field of push payloads and the `kinframe-server` header of federation requests).
+	BaseUrl *string `json:"base_url,omitempty"`
 
 	// Birthdays True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
 	Birthdays *bool `json:"birthdays,omitempty"`
@@ -5157,12 +5793,18 @@ type Discovery struct {
 	// Engagement True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
 	Engagement *bool `json:"engagement,omitempty"`
 
+	// Federation The server's federation identity in `/.well-known/kinframe` (README §5.22).
+	Federation *FederationInfo `json:"federation,omitempty"`
+
 	// Feeds True when the server supports feeds and subscriptions (docs/spec/feeds.md).
 	Feeds *bool `json:"feeds,omitempty"`
 
 	// GooglePhotosImport True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
-	GooglePhotosImport *bool  `json:"google_photos_import,omitempty"`
-	Limits             Limits `json:"limits"`
+	GooglePhotosImport *bool `json:"google_photos_import,omitempty"`
+
+	// Leaving True when the server has the leaving choices, take-away, keep requests, the account deletion handover and the memories filter (README §5.21).
+	Leaving *bool  `json:"leaving,omitempty"`
+	Limits  Limits `json:"limits"`
 
 	// LinkPreviews True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
 	// links in messages itself (public addresses only). Off by default; clients then show links without previews.
@@ -5178,6 +5820,18 @@ type Discovery struct {
 	// PhotoSourcesPrivateNetworks True when sources may reach private network addresses (a home-network Immich such as
 	// `http://192.168.1.10:2283`). False: the connect sheet asks for a public address (docs/spec/photo-sources.md §12.3).
 	PhotoSourcesPrivateNetworks *bool `json:"photo_sources_private_networks,omitempty"`
+
+	// RemoteFamilies True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
+	RemoteFamilies *bool `json:"remote_families,omitempty"`
+
+	// ServerId Stable random id of this server (generated at first start), so apps signed in to several servers can tell
+	// them apart and deduplicate accounts (docs/spec/multi-server.md §2.3).
+	ServerId *string `json:"server_id,omitempty"`
+
+	// ServerName The operator-set label of this server (`KINFRAME_SERVER_LABEL`, default the public host name), shown as the server chip in apps with several accounts.
+	//
+	// Example: Janssens
+	ServerName *string `json:"server_name,omitempty"`
 
 	// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
 	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
@@ -5640,8 +6294,235 @@ type EventPhotoPlacement string
 // don't know.
 type FamilySocialPushKey string
 
+// FederationActivity defines model for FederationActivity.
+type FederationActivity struct {
+	Events *[]struct {
+		At time.Time `json:"at"`
+
+		// Id UUIDv7
+		Id Id `json:"id"`
+
+		// ItemId UUIDv7
+		ItemId Id                           `json:"item_id"`
+		Kind   FederationActivityEventsKind `json:"kind"`
+
+		// PostId UUIDv7
+		PostId Id `json:"post_id"`
+
+		// Reaction `reaction`: null clears it.
+		Reaction *Reaction    `json:"reaction,omitempty"`
+		Reply    *ReplyPreset `json:"reply,omitempty"`
+	} `json:"events,omitempty"`
+	Frame *struct {
+		Name         *string `json:"name,omitempty"`
+		ShowComments *bool   `json:"show_comments,omitempty"`
+	} `json:"frame,omitempty"`
+}
+
+// FederationActivityEventsKind defines model for FederationActivity.Events.Kind.
+type FederationActivityEventsKind string
+
+// FederationBirthday defines model for FederationBirthday.
+type FederationBirthday struct {
+	Day int `json:"day"`
+
+	// Id UUIDv7
+	Id    Id     `json:"id"`
+	Month int    `json:"month"`
+	Name  string `json:"name"`
+
+	// Year Only with the person's *show age*.
+	Year *int `json:"year,omitempty"`
+}
+
+// FederationChange defines model for FederationChange.
+type FederationChange struct {
+	Birthdays *[]FederationBirthday `json:"birthdays,omitempty"`
+	Comments  *[]FederationComment  `json:"comments,omitempty"`
+	ItemIds   *[]Id                 `json:"item_ids,omitempty"`
+	Post      *FederationPost       `json:"post,omitempty"`
+
+	// PostId UUIDv7
+	PostId *Id                     `json:"post_id,omitempty"`
+	Reason *RemoteEndReason        `json:"reason,omitempty"`
+	Status *FederationChangeStatus `json:"status,omitempty"`
+
+	// Type `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+	// the post is gone (unsend, admin removal, taking away, circle change). `items.remove`: some items of a post
+	// are gone. `birthdays`: the family's birthday people now (replace). `comments`: the newest comments of a
+	// post (only with *show comments*; replace). `subscription`: the subscription's status changed.
+	Type FederationChangeType `json:"type"`
+}
+
+// FederationChangeStatus defines model for FederationChange.Status.
+type FederationChangeStatus string
+
+// FederationChangeType `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+// the post is gone (unsend, admin removal, taking away, circle change). `items.remove`: some items of a post
+// are gone. `birthdays`: the family's birthday people now (replace). `comments`: the newest comments of a
+// post (only with *show comments*; replace). `subscription`: the subscription's status changed.
+type FederationChangeType string
+
+// FederationChangePage defines model for FederationChangePage.
+type FederationChangePage struct {
+	Changes []FederationChange `json:"changes"`
+
+	// Cursor Pass it as `cursor` on the next call; store it only after the page was applied.
+	Cursor string `json:"cursor"`
+
+	// FeedName The family's current name (credit "Lies · Janssens").
+	FeedName *string `json:"feed_name,omitempty"`
+
+	// More More changes are waiting; pull again at once.
+	More bool `json:"more"`
+
+	// Reset The given cursor was too old: this page restarts from a full snapshot (B drops what isn't in it).
+	Reset  *bool                      `json:"reset,omitempty"`
+	Status FederationChangePageStatus `json:"status"`
+}
+
+// FederationChangePageStatus defines model for FederationChangePage.Status.
+type FederationChangePageStatus string
+
+// FederationComment defines model for FederationComment.
+type FederationComment struct {
+	At        time.Time `json:"at"`
+	FirstName string    `json:"first_name"`
+	Text      *string   `json:"text,omitempty"`
+}
+
+// FederationInfo The server's federation identity in `/.well-known/kinframe` (README §5.22).
+type FederationInfo struct {
+	// Enabled False when the operator turned federation off (`KINFRAME_FEDERATION=off`); the rest is then absent.
+	Enabled   bool `json:"enabled"`
+	Endpoints *struct {
+		Ping *string `json:"ping,omitempty"`
+
+		// Subscriptions Example: https://kinframe.janssens.be/federation/v1/subscriptions
+		Subscriptions *string `json:"subscriptions,omitempty"`
+	} `json:"endpoints,omitempty"`
+
+	// KeyId The `keyid` of the current signing key
+	KeyId *string `json:"key_id,omitempty"`
+
+	// Keys Every key a signature may use, the current one first; a rotated key stays here for 7 days.
+	Keys *[]struct {
+		ExpiresAt *time.Time `json:"expires_at,omitempty"`
+		KeyId     string     `json:"key_id"`
+		PublicKey string     `json:"public_key"`
+	} `json:"keys,omitempty"`
+
+	// PublicKey The current Ed25519 public key
+	PublicKey *string `json:"public_key,omitempty"`
+}
+
+// FederationItem defines model for FederationItem.
+type FederationItem struct {
+	Bytes      int        `json:"bytes"`
+	Caption    *string    `json:"caption,omitempty"`
+	CapturedAt *time.Time `json:"captured_at,omitempty"`
+	DurationMs *int       `json:"duration_ms,omitempty"`
+	Fit        *Fit       `json:"fit,omitempty"`
+
+	// FocalPoint Relative to the master rendition, 0..1 from top-left.
+	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+	HasAudio   *bool       `json:"has_audio,omitempty"`
+	Height     *int        `json:"height,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind MediaKind `json:"kind"`
+
+	// MasterUrl Signed
+	MasterUrl          string    `json:"master_url"`
+	MasterUrlExpiresAt time.Time `json:"master_url_expires_at"`
+
+	// Mime Example: image/webp
+	Mime string `json:"mime"`
+
+	// MotionUrl Live items: the motion clip's master, signed like `master_url`.
+	MotionUrl *string `json:"motion_url,omitempty"`
+
+	// Sha256 Of the master
+	Sha256 *string `json:"sha256,omitempty"`
+	Width  *int    `json:"width,omitempty"`
+}
+
+// FederationPing defines model for FederationPing.
+type FederationPing struct {
+	SubscriptionIds []Id `json:"subscription_ids"`
+}
+
+// FederationPost defines model for FederationPost.
+type FederationPost struct {
+	// Backfill History (activation or a history change); B places it quietly.
+	Backfill  *bool     `json:"backfill,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id UUIDv7
+	Id    Id               `json:"id"`
+	Items []FederationItem `json:"items"`
+
+	// PosterKey Stable opaque key of the poster within this subscription (not the user id).
+	PosterKey  string `json:"poster_key"`
+	PosterName string `json:"poster_name"`
+}
+
+// FederationSubscribeRequest defines model for FederationSubscribeRequest.
+type FederationSubscribeRequest struct {
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// FollowId UUIDv7
+	FollowId *Id `json:"follow_id,omitempty"`
+	Frame    struct {
+		// Id UUIDv7
+		Id           Id     `json:"id"`
+		Name         string `json:"name"`
+		ShowComments *bool  `json:"show_comments,omitempty"`
+	} `json:"frame"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History      *SubscriptionHistory `json:"history,omitempty"`
+	HistoryCount *int                 `json:"history_count,omitempty"`
+
+	// InviteToken The token of the `/fi/<token>` invite URL.
+	InviteToken string `json:"invite_token"`
+
+	// Preview Check and describe only; record nothing.
+	Preview *bool `json:"preview,omitempty"`
+
+	// RequestedByName The frame manager on B
+	RequestedByName *string `json:"requested_by_name,omitempty"`
+}
+
+// FederationSubscription defines model for FederationSubscription.
+type FederationSubscription struct {
+	Feed struct {
+		CoverUrl   *string `json:"cover_url,omitempty"`
+		FrameCount *int    `json:"frame_count,omitempty"`
+		Name       string  `json:"name"`
+	} `json:"feed"`
+	RequiresApproval *bool                        `json:"requires_approval,omitempty"`
+	ServerName       *string                      `json:"server_name,omitempty"`
+	Status           FederationSubscriptionStatus `json:"status"`
+
+	// SubscriptionId A's id; null for a preview.
+	SubscriptionId *Id `json:"subscription_id,omitempty"`
+}
+
+// FederationSubscriptionStatus defines model for FederationSubscription.Status.
+type FederationSubscriptionStatus string
+
 // Feed defines model for Feed.
 type Feed struct {
+	// AllowRemoteFrames Frames on other servers may follow this family through `subscribe` invites with `allow_remote` (default off; README §5.22).
+	AllowRemoteFrames        *bool `json:"allow_remote_frames,omitempty"`
 	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
 
 	// BirthdayCount Approved birthday people.
@@ -5750,6 +6631,7 @@ type FeedBirthdayGreeting struct {
 
 // FeedCreate defines model for FeedCreate.
 type FeedCreate struct {
+	AllowRemoteFrames        *bool `json:"allow_remote_frames,omitempty"`
 	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
 	InviteRequiresApproval   *bool `json:"invite_requires_approval,omitempty"`
 	MembersCanCreateCircles  *bool `json:"members_can_create_circles,omitempty"`
@@ -5799,6 +6681,9 @@ type FeedEngagementUpdate struct {
 
 // FeedInvite defines model for FeedInvite.
 type FeedInvite struct {
+	// AllowRemote Frames on other servers may use this link.
+	AllowRemote *bool `json:"allow_remote,omitempty"`
+
 	// Code Short code for "Enter a code", shown as `KF7Q-M2XA`.
 	//
 	// Example: KF7QM2XA
@@ -5839,7 +6724,9 @@ type FeedInviteAccept struct {
 
 // FeedInviteCreate defines model for FeedInviteCreate.
 type FeedInviteCreate struct {
-	ExpiresInHours *int `json:"expires_in_hours,omitempty"`
+	// AllowRemote `subscribe` only, and only when the family has `allow_remote_frames`: frames on other servers may use this link (README §5.22).
+	AllowRemote    *bool `json:"allow_remote,omitempty"`
+	ExpiresInHours *int  `json:"expires_in_hours,omitempty"`
 
 	// MaxUses null = unlimited
 	MaxUses *int `json:"max_uses,omitempty"`
@@ -6155,6 +7042,9 @@ type FeedSummary struct {
 
 // FeedUpdate defines model for FeedUpdate.
 type FeedUpdate struct {
+	// AllowRemoteFrames Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`).
+	AllowRemoteFrames *bool `json:"allow_remote_frames,omitempty"`
+
 	// AutoApproveSubscriptions Requests by non-admin members become active without approval.
 	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
 
@@ -6189,6 +7079,24 @@ type Fit string
 type FocalPoint struct {
 	X float32 `json:"x"`
 	Y float32 `json:"y"`
+}
+
+// FormerPlaces defines model for FormerPlaces.
+type FormerPlaces struct {
+	Feeds []struct {
+		// FeedId UUIDv7
+		FeedId Id         `json:"feed_id"`
+		LeftAt *time.Time `json:"left_at,omitempty"`
+		Name   string     `json:"name"`
+		Photos int        `json:"photos"`
+	} `json:"feeds"`
+	Frames []struct {
+		// FrameId UUIDv7
+		FrameId Id         `json:"frame_id"`
+		LeftAt  *time.Time `json:"left_at,omitempty"`
+		Name    string     `json:"name"`
+		Photos  int        `json:"photos"`
+	} `json:"frames"`
 }
 
 // Frame defines model for Frame.
@@ -6343,6 +7251,9 @@ type FrameReactionRef struct {
 	// ItemId The item the frame reacted to (posts with several items).
 	ItemId   *Id      `json:"item_id,omitempty"`
 	Reaction Reaction `json:"reaction"`
+
+	// ServerName A frame on another server (README §5.22); `frame_id` is then the remote subscription's id.
+	ServerName *string `json:"server_name,omitempty"`
 }
 
 // FrameSettings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
@@ -6805,8 +7716,12 @@ type Item struct {
 
 	// FocalPoint Relative to the master rendition, 0..1 from top-left.
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
-	HasAudio   *bool       `json:"has_audio,omitempty"`
-	Height     *int        `json:"height,omitempty"`
+
+	// FormerSenderName Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
+	// `sender_id` is now the new owner; show "<former_sender_name> (former member)" as the credit.
+	FormerSenderName *string `json:"former_sender_name,omitempty"`
+	HasAudio         *bool   `json:"has_audio,omitempty"`
+	Height           *int    `json:"height,omitempty"`
 
 	// Id UUIDv7
 	Id Id `json:"id"`
@@ -6827,6 +7742,9 @@ type Item struct {
 	// `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
 	Motion    *ItemMotion `json:"motion,omitempty"`
 	PlaceName *string     `json:"place_name,omitempty"`
+
+	// RemoteSender Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.
+	RemoteSender *ItemRemoteSender `json:"remote_sender,omitempty"`
 
 	// SenderId UUIDv7
 	SenderId   Id         `json:"sender_id"`
@@ -6863,6 +7781,13 @@ type ItemMotionStatus string
 
 // ItemOrigin An app a frame can import leftover photos from.
 type ItemOrigin string
+
+// ItemRemoteSender `Item.remote_sender`: copied from another server; `sender_id` is then the remote sender record's id.
+type ItemRemoteSender struct {
+	Name       string `json:"name"`
+	ServerName string `json:"server_name"`
+	ServerUrl  string `json:"server_url"`
+}
 
 // ItemVia defines model for ItemVia.
 type ItemVia struct {
@@ -6927,6 +7852,170 @@ type JoinRequest struct {
 // (docs/spec/email-inbox.md §10.4); `telegram`, from the join link the bot gave a Telegram group member in a
 // private chat (docs/spec/telegram.md §10.3). Channel requests always need approval.
 type JoinRequestVia string
+
+// KeepRequest defines model for KeepRequest.
+type KeepRequest struct {
+	AllowedCount *int       `json:"allowed_count,omitempty"`
+	AnsweredAt   *time.Time `json:"answered_at,omitempty"`
+	AskedAt      time.Time  `json:"asked_at"`
+	AskedBy      *PersonRef `json:"asked_by,omitempty"`
+	AskedByName  string     `json:"asked_by_name"`
+	ExpiresAt    time.Time  `json:"expires_at"`
+	FeedId       *Id        `json:"feed_id,omitempty"`
+	FeedName     *string    `json:"feed_name,omitempty"`
+	FrameId      *Id        `json:"frame_id,omitempty"`
+	FrameName    *string    `json:"frame_name,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// ItemCount Items asked for.
+	ItemCount int `json:"item_count"`
+
+	// Items `getKeepRequest` only: the items asked for, with `allowed` once answered.
+	Items *[]struct {
+		Allowed *bool `json:"allowed,omitempty"`
+		Item    Item  `json:"item"`
+	} `json:"items,omitempty"`
+	Note *string `json:"note,omitempty"`
+
+	// Person The person asked (who took the photos away).
+	Person *PersonRef       `json:"person,omitempty"`
+	Scope  KeepRequestScope `json:"scope"`
+
+	// Status `open` until answered or the 30 days end; `allowed` (all), `partly_allowed` (some), `declined`, `expired`.
+	Status KeepRequestStatus `json:"status"`
+
+	// TakingId UUIDv7
+	TakingId Id `json:"taking_id"`
+}
+
+// KeepRequestScope defines model for KeepRequest.Scope.
+type KeepRequestScope string
+
+// KeepRequestAnswer defines model for KeepRequestAnswer.
+type KeepRequestAnswer struct {
+	Allow KeepRequestAnswerAllow `json:"allow"`
+
+	// ItemIds `some` only: the allowed items (a subset of the request's).
+	ItemIds *[]Id `json:"item_ids,omitempty"`
+}
+
+// KeepRequestAnswerAllow defines model for KeepRequestAnswer.Allow.
+type KeepRequestAnswerAllow string
+
+// KeepRequestCreate defines model for KeepRequestCreate.
+type KeepRequestCreate struct {
+	// FeedId UUIDv7
+	FeedId *Id `json:"feed_id,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId *Id `json:"frame_id,omitempty"`
+
+	// ItemIds The photos to ask for; absent means every item of the taking in this scope.
+	ItemIds *[]Id `json:"item_ids,omitempty"`
+
+	// Note Optional words for the person ("The ones with the children
+	Note *string `json:"note,omitempty"`
+
+	// TakingId UUIDv7
+	TakingId Id `json:"taking_id"`
+}
+
+// KeepRequestEvent `keep_request.updated`: a keep request was made, answered or expired (the person asked and the scope's managers).
+type KeepRequestEvent struct {
+	Request KeepRequest          `json:"request"`
+	Type    KeepRequestEventType `json:"type"`
+}
+
+// KeepRequestEventType defines model for KeepRequestEvent.Type.
+type KeepRequestEventType string
+
+// KeepRequestList defines model for KeepRequestList.
+type KeepRequestList struct {
+	Requests []KeepRequest `json:"requests"`
+}
+
+// KeepRequestStatus `open` until answered or the 30 days end; `allowed` (all), `partly_allowed` (some), `declined`, `expired`.
+type KeepRequestStatus string
+
+// LeaveFeedRequest defines model for LeaveFeedRequest.
+type LeaveFeedRequest struct {
+	// Comments `keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").
+	Comments *CommentsChoice `json:"comments,omitempty"`
+
+	// LeaveFrameIds Frames to leave in the same request (frames the caller is a member of, not owner, that subscribe to this
+	// family; others answer `422 validation_failed`). The same `photos` choice applies to the caller's direct
+	// placements on them.
+	LeaveFrameIds *[]Id `json:"leave_frame_ids,omitempty"`
+
+	// Photos `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
+	Photos *PhotosChoice `json:"photos,omitempty"`
+
+	// RemoveMyPosts Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	RemoveMyPosts *bool `json:"remove_my_posts,omitempty"`
+}
+
+// LeaveFrameRequest defines model for LeaveFrameRequest.
+type LeaveFrameRequest struct {
+	// Photos `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
+	Photos *PhotosChoice `json:"photos,omitempty"`
+
+	// RemoveMyItems Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	RemoveMyItems *bool `json:"remove_my_items,omitempty"`
+}
+
+// LeavePreview defines model for LeavePreview.
+type LeavePreview struct {
+	// AlreadyTakenAway The caller's items in this scope still in a frame's trash from an earlier taking.
+	AlreadyTakenAway *int `json:"already_taken_away,omitempty"`
+
+	// Comments Families: the caller's live comments in the family.
+	Comments *int `json:"comments,omitempty"`
+	FeedId   *Id  `json:"feed_id,omitempty"`
+	FrameId  *Id  `json:"frame_id,omitempty"`
+
+	// Frames Families: frames the caller is a member of that subscribe to the family (the "Leave this frame too" checkboxes).
+	Frames *[]struct {
+		// CanLeave False for frames the caller owns (transfer first).
+		CanLeave *bool `json:"can_leave,omitempty"`
+
+		// DirectPhotos The caller's own direct placements on that frame.
+		DirectPhotos *int `json:"direct_photos,omitempty"`
+
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+		Role      Role   `json:"role"`
+
+		// Suggested Checked by default (the frame gets this family's photos and the caller is not its owner).
+		Suggested bool `json:"suggested"`
+	} `json:"frames,omitempty"`
+
+	// Member The caller is still a member (false for the take-away sheet of people who left or were removed).
+	Member bool `json:"member"`
+
+	// Name The family's or frame's name.
+	Name string `json:"name"`
+
+	// Owner The caller owns it (must transfer ownership before leaving).
+	Owner *bool `json:"owner,omitempty"`
+
+	// Photos The caller's own live items in this scope (family posts; or direct placements on the frame).
+	Photos int               `json:"photos"`
+	Scope  LeavePreviewScope `json:"scope"`
+}
+
+// LeavePreviewScope defines model for LeavePreview.Scope.
+type LeavePreviewScope string
+
+// LeavingPushKey Push `key`s added by leaving (README §6.3). `photos_taken_away`: frame owner/admins and family owner/admins
+// (`ids`: `taking_id`, `frame_id` or `feed_id`). `keep_request`: the person asked (`request_id`).
+// `keep_answered`: the asker (`request_id`). `ownership_changed`: the old and the new owner (`frame_id` or
+// `feed_id`).
+type LeavingPushKey string
 
 // Limits defines model for Limits.
 type Limits struct {
@@ -7044,6 +8133,21 @@ type Member struct {
 
 	// UserId UUIDv7
 	UserId Id `json:"user_id"`
+}
+
+// MemoryPreferences defines model for MemoryPreferences.
+type MemoryPreferences struct {
+	// HiddenMemories Posts (feed or frame posts) never shown again as a memory.
+	HiddenMemories []Id `json:"hidden_memories"`
+
+	// HiddenPeople People left out of the caller's memories.
+	HiddenPeople []PersonRef `json:"hidden_people"`
+}
+
+// MemoryPreferencesUpdate defines model for MemoryPreferencesUpdate.
+type MemoryPreferencesUpdate struct {
+	HiddenMemories *[]Id `json:"hidden_memories,omitempty"`
+	HiddenPeople   *[]Id `json:"hidden_people,omitempty"`
 }
 
 // Mention A mention inside a comment or message `body`: `start` and `length` are in UTF-16 code units (what JavaScript,
@@ -7413,6 +8517,84 @@ type OnThisDay struct {
 		PostIds  []Id   `json:"post_ids"`
 		YearsAgo int    `json:"years_ago"`
 	} `json:"groups"`
+}
+
+// OperatorOwnerTransfer defines model for OperatorOwnerTransfer.
+type OperatorOwnerTransfer struct {
+	// Reason Kept in the ownership log; not shown to the people.
+	Reason string `json:"reason"`
+
+	// RemovePrevious Remove the previous owner instead of making them admin.
+	RemovePrevious *bool `json:"remove_previous,omitempty"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// OperatorOwnershipMatches defines model for OperatorOwnershipMatches.
+type OperatorOwnershipMatches struct {
+	Feeds  []OperatorScope `json:"feeds"`
+	Frames []OperatorScope `json:"frames"`
+}
+
+// OperatorScope defines model for OperatorScope.
+type OperatorScope struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Id UUIDv7
+	Id      Id                    `json:"id"`
+	Kind    OperatorScopeKind     `json:"kind"`
+	Members []OperatorScopeMember `json:"members"`
+	Name    string                `json:"name"`
+}
+
+// OperatorScopeKind defines model for OperatorScope.Kind.
+type OperatorScopeKind string
+
+// OperatorScopeMember defines model for OperatorScopeMember.
+type OperatorScopeMember struct {
+	DisplayName string  `json:"display_name"`
+	Email       *string `json:"email,omitempty"`
+
+	// Role Frame role (`Role`) or family role (`FeedRole`).
+	Role string `json:"role"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// OwnershipLogEntry defines model for OwnershipLogEntry.
+type OwnershipLogEntry struct {
+	At time.Time `json:"at"`
+
+	// FromName Previous owner; for handovers the deleted account's name.
+	FromName *string `json:"from_name,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// ItemCount Handovers only.
+	ItemCount       *int                        `json:"item_count,omitempty"`
+	Kind            OwnershipLogEntryKind       `json:"kind"`
+	OperatorName    *string                     `json:"operator_name,omitempty"`
+	Reason          *string                     `json:"reason,omitempty"`
+	RemovedPrevious *bool                       `json:"removed_previous,omitempty"`
+	ScopeId         *Id                         `json:"scope_id,omitempty"`
+	ScopeKind       *OwnershipLogEntryScopeKind `json:"scope_kind,omitempty"`
+	ScopeName       *string                     `json:"scope_name,omitempty"`
+	ToName          *string                     `json:"to_name,omitempty"`
+}
+
+// OwnershipLogEntryKind defines model for OwnershipLogEntry.Kind.
+type OwnershipLogEntryKind string
+
+// OwnershipLogEntryScopeKind defines model for OwnershipLogEntry.ScopeKind.
+type OwnershipLogEntryScopeKind string
+
+// OwnershipLogPage defines model for OwnershipLogPage.
+type OwnershipLogPage struct {
+	Entries    []OwnershipLogEntry `json:"entries"`
+	NextCursor *string             `json:"next_cursor"`
 }
 
 // Permissions defines model for Permissions.
@@ -7812,6 +8994,9 @@ type PhotoSourceUpdate struct {
 // `item_limit_reached`: `limits.max_photo_source_items` is reached; newer upstream items are skipped.
 type PhotoSourceWarning string
 
+// PhotosChoice `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
+type PhotosChoice string
+
 // PinHash PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
 type PinHash struct {
 	Alg PinHashAlg `json:"alg"`
@@ -7886,8 +9071,13 @@ type Placement struct {
 	OriginFeedId *Id `json:"origin_feed_id,omitempty"`
 
 	// OriginFeedName Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
-	OriginFeedName    *string `json:"origin_feed_name,omitempty"`
-	PendingModeration *bool   `json:"pending_moderation,omitempty"`
+	OriginFeedName *string `json:"origin_feed_name,omitempty"`
+
+	// OriginRemote Set on copies of posts of a family on another server (README §5.22). `origin` is then `feed`,
+	// `origin_feed_id` null and `origin_feed_name` the remote family's name, so frames show "Lies · Janssens"
+	// without knowing about servers.
+	OriginRemote      *PlacementRemote `json:"origin_remote,omitempty"`
+	PendingModeration *bool            `json:"pending_moderation,omitempty"`
 
 	// PromptId Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
 	PromptId   *Id        `json:"prompt_id,omitempty"`
@@ -7906,8 +9096,11 @@ type Placement struct {
 	// SharedByUserId The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
 	SharedByUserId *Id             `json:"shared_by_user_id,omitempty"`
 	Status         PlacementStatus `json:"status"`
-	Trashed        bool            `json:"trashed"`
-	TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
+
+	// TakenAway Set while the sender took it away and it waits in the frame's trash (`visibility: taken_away`, README §5.21). Never in the device change feed (the frame gets `placement.remove`).
+	TakenAway *PlacementTakenAway `json:"taken_away,omitempty"`
+	Trashed   bool                `json:"trashed"`
+	TrashedAt *time.Time          `json:"trashed_at,omitempty"`
 }
 
 // PlacementRotation defines model for Placement.Rotation.
@@ -7938,8 +9131,51 @@ type PlacementComments struct {
 // `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
 type PlacementOrigin string
 
+// PlacementRemote `Placement.origin_remote`: the placement is a copy of a post of a family on another server (B's side).
+type PlacementRemote struct {
+	FeedName string `json:"feed_name"`
+
+	// RemoteSubscriptionId UUIDv7
+	RemoteSubscriptionId Id `json:"remote_subscription_id"`
+
+	// SenderName The poster's display name on A ("Lies").
+	SenderName *string `json:"sender_name,omitempty"`
+	ServerName string  `json:"server_name"`
+	ServerUrl  string  `json:"server_url"`
+}
+
 // PlacementStatus defines model for PlacementStatus.
 type PlacementStatus string
+
+// PlacementTakenAway A placement taken away by its sender (README §5.21). It is off the frame and listed in the trash under "Taken away by …".
+type PlacementTakenAway struct {
+	At     time.Time `json:"at"`
+	ByName string    `json:"by_name"`
+
+	// ByUserId Null for deleted accounts.
+	ByUserId          *Id                `json:"by_user_id,omitempty"`
+	KeepRequestStatus *KeepRequestStatus `json:"keep_request_status,omitempty"`
+
+	// TakingId UUIDv7
+	TakingId Id        `json:"taking_id"`
+	Until    time.Time `json:"until"`
+}
+
+// PlacementUpdatedEvent `placement.updated`: placements were taken away or came back (the frame's library viewers and the sender).
+type PlacementUpdatedEvent struct {
+	// FrameId UUIDv7
+	FrameId      Id                          `json:"frame_id"`
+	PlacementIds []Id                        `json:"placement_ids"`
+	Reason       PlacementUpdatedEventReason `json:"reason"`
+	TakingId     *Id                         `json:"taking_id,omitempty"`
+	Type         PlacementUpdatedEventType   `json:"type"`
+}
+
+// PlacementUpdatedEventReason defines model for PlacementUpdatedEvent.Reason.
+type PlacementUpdatedEventReason string
+
+// PlacementUpdatedEventType defines model for PlacementUpdatedEvent.Type.
+type PlacementUpdatedEventType string
 
 // PluginCatalog defines model for PluginCatalog.
 type PluginCatalog struct {
@@ -8187,8 +9423,11 @@ type PushPayload struct {
 	Body    string            `json:"body"`
 	Ids     map[string]string `json:"ids"`
 
-	// Key The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+	// Key The push key (`FamilySocialPushKey`, `LeavingPushKey` and the older ones in README §6.3).
 	Key string `json:"key"`
+
+	// Server The sending server's base URL (discovery `base_url`), so apps with several accounts open the right one (README §6.3). Absent from older servers: use the account the push endpoint belongs to.
+	Server *string `json:"server,omitempty"`
 
 	// Tag A newer push with the same tag replaces the older one.
 	Tag   *string `json:"tag,omitempty"`
@@ -8363,6 +9602,150 @@ type ReminderPreferencesUpdate struct {
 
 // ReminderPreferencesUpdateAutoReducedSeen defines model for ReminderPreferencesUpdate.AutoReducedSeen.
 type ReminderPreferencesUpdateAutoReducedSeen bool
+
+// RemoteEndReason defines model for RemoteEndReason.
+type RemoteEndReason string
+
+// RemoteInvitePreview defines model for RemoteInvitePreview.
+type RemoteInvitePreview struct {
+	// CoverUrl A signed thumbnail on A, valid for an hour.
+	CoverUrl *string `json:"cover_url,omitempty"`
+	FeedName string  `json:"feed_name"`
+
+	// FrameCount Frames that follow the family (local and remote).
+	FrameCount *int `json:"frame_count,omitempty"`
+
+	// RequiresApproval The family's admins must approve first.
+	RequiresApproval *bool `json:"requires_approval,omitempty"`
+
+	// Server Another kinframe server as this one knows it.
+	Server         RemoteServer `json:"server"`
+	ThisServerHost *string      `json:"this_server_host,omitempty"`
+
+	// ThisServerName This server's name
+	ThisServerName string `json:"this_server_name"`
+}
+
+// RemoteInviteRef defines model for RemoteInviteRef.
+type RemoteInviteRef struct {
+	// InviteUrl Example: https://kinframe.janssens.be/fi/9cQ2xV0kFq7Lm3Zt8bW1rA
+	InviteUrl string `json:"invite_url"`
+}
+
+// RemoteOnEnd When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.
+type RemoteOnEnd string
+
+// RemoteServer Another kinframe server as this one knows it.
+type RemoteServer struct {
+	Blocked *bool `json:"blocked,omitempty"`
+
+	// Follows Operator listing: frames here following families there.
+	Follows *int `json:"follows,omitempty"`
+
+	// Host Example: kinframe.janssens.be
+	Host          *string    `json:"host,omitempty"`
+	LastContactAt *time.Time `json:"last_contact_at,omitempty"`
+	LastError     *string    `json:"last_error,omitempty"`
+
+	// ServerId Its stable `server_id` (from its well-known document).
+	ServerId *string `json:"server_id,omitempty"`
+
+	// ServerName Example: Janssens
+	ServerName string `json:"server_name"`
+
+	// ServerUrl Its base URL.
+	ServerUrl string `json:"server_url"`
+
+	// Subscribers Operator listing: frames there following families here.
+	Subscribers *int `json:"subscribers,omitempty"`
+}
+
+// RemoteSubscription A frame on this server following a family on another server (B's side).
+type RemoteSubscription struct {
+	ActivatedAt *time.Time `json:"activated_at,omitempty"`
+	Backfill    *struct {
+		Placed *int                             `json:"placed,omitempty"`
+		State  *RemoteSubscriptionBackfillState `json:"state,omitempty"`
+		Total  *int                             `json:"total,omitempty"`
+	} `json:"backfill,omitempty"`
+	Birthdays *bool      `json:"birthdays,omitempty"`
+	CoverUrl  *string    `json:"cover_url,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
+	EndedAt   *time.Time `json:"ended_at,omitempty"`
+	FeedName  string     `json:"feed_name"`
+
+	// FrameId UUIDv7
+	FrameId Id `json:"frame_id"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History      SubscriptionHistory `json:"history"`
+	HistoryCount *int                `json:"history_count,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// ItemCount Photos copied to this server and on the frame.
+	ItemCount  *int       `json:"item_count,omitempty"`
+	LastError  *string    `json:"last_error,omitempty"`
+	LastSyncAt *time.Time `json:"last_sync_at,omitempty"`
+
+	// OnEnd When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.
+	OnEnd           RemoteOnEnd      `json:"on_end"`
+	RemovedReason   *RemoteEndReason `json:"removed_reason,omitempty"`
+	RequestedByName *string          `json:"requested_by_name,omitempty"`
+
+	// Server Another kinframe server as this one knows it.
+	Server RemoteServer `json:"server"`
+
+	// Status `pending` (A's admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).
+	Status RemoteSubscriptionStatus `json:"status"`
+}
+
+// RemoteSubscriptionBackfillState defines model for RemoteSubscription.Backfill.State.
+type RemoteSubscriptionBackfillState string
+
+// RemoteSubscriptionStatus `pending` (A's admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).
+type RemoteSubscriptionStatus string
+
+// RemoteSubscriptionCreate defines model for RemoteSubscriptionCreate.
+type RemoteSubscriptionCreate struct {
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History *SubscriptionHistory `json:"history,omitempty"`
+
+	// HistoryCount Required with `history: last_n`.
+	HistoryCount *int   `json:"history_count,omitempty"`
+	InviteUrl    string `json:"invite_url"`
+
+	// OnEnd When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.
+	OnEnd *RemoteOnEnd `json:"on_end,omitempty"`
+}
+
+// RemoteSubscriptionEvent `remote_subscription.updated`: a frame's follow of a family on another server changed status, synced or failed (the frame's managers; README §5.22).
+type RemoteSubscriptionEvent struct {
+	// FrameId UUIDv7
+	FrameId Id `json:"frame_id"`
+
+	// RemoteSubscription A frame on this server following a family on another server (B's side).
+	RemoteSubscription RemoteSubscription          `json:"remote_subscription"`
+	Type               RemoteSubscriptionEventType `json:"type"`
+}
+
+// RemoteSubscriptionEventType defines model for RemoteSubscriptionEvent.Type.
+type RemoteSubscriptionEventType string
+
+// RemoteSubscriptionUpdate defines model for RemoteSubscriptionUpdate.
+type RemoteSubscriptionUpdate struct {
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// OnEnd When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.
+	OnEnd *RemoteOnEnd `json:"on_end,omitempty"`
+}
 
 // ReplyPreset defines model for ReplyPreset.
 type ReplyPreset string
@@ -9042,8 +10425,13 @@ type Subscription struct {
 	HistoryCount *int                `json:"history_count,omitempty"`
 
 	// Id UUIDv7
-	Id            Id                         `json:"id"`
-	PausedAt      *time.Time                 `json:"paused_at,omitempty"`
+	Id       Id         `json:"id"`
+	PausedAt *time.Time `json:"paused_at,omitempty"`
+
+	// Remote Set for a frame on another server (README §5.22; only in `listFeedSubscriptions`). `frame.id` is then the
+	// id that server gave its frame, `frame.online` is absent, and approve, reject and delete work as for local
+	// ones; pause, resume and history changes are the other server's.
+	Remote        *SubscriptionRemote        `json:"remote,omitempty"`
 	RemovedReason *SubscriptionRemovedReason `json:"removed_reason,omitempty"`
 
 	// RequestedByName Feed owner/admins and frame managers only.
@@ -9068,6 +10456,20 @@ type SubscriptionRemovedReason string
 // `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
 // or trims.
 type SubscriptionHistory string
+
+// SubscriptionRemote `Subscription.remote`: the subscriber is a frame on another server (A's side).
+type SubscriptionRemote struct {
+	Host *string `json:"host,omitempty"`
+
+	// RequestedByName The frame manager on that server, as it reported.
+	RequestedByName *string `json:"requested_by_name,omitempty"`
+	ServerId        *string `json:"server_id,omitempty"`
+	ServerName      string  `json:"server_name"`
+	ServerUrl       string  `json:"server_url"`
+
+	// ShowComments The remote frame shows comment cards (it then receives comment summaries).
+	ShowComments *bool `json:"show_comments,omitempty"`
+}
 
 // SubscriptionRequest defines model for SubscriptionRequest.
 type SubscriptionRequest struct {
@@ -9133,6 +10535,71 @@ type SystemMessage struct {
 
 // SystemMessageType defines model for SystemMessageType.
 type SystemMessageType string
+
+// TakeAwayRequest defines model for TakeAwayRequest.
+type TakeAwayRequest struct {
+	// Comments `keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").
+	Comments *CommentsChoice `json:"comments,omitempty"`
+}
+
+// TakeAwayResult The answer of leaving with `photos` and of the take-away endpoints. `taking_id` is null when nothing was taken
+// away (`photos: keep`, or nothing live).
+type TakeAwayResult struct {
+	CommentsDeleted int `json:"comments_deleted"`
+
+	// Frames Frames that lost photos (local ones; frames on other servers are counted in `remote_frames`).
+	Frames []struct {
+		// FrameId UUIDv7
+		FrameId   Id     `json:"frame_id"`
+		FrameName string `json:"frame_name"`
+		Photos    int    `json:"photos"`
+	} `json:"frames"`
+
+	// LeftFrameIds `leaveFeed` with `leave_frame_ids`: the frames actually left.
+	LeftFrameIds *[]Id `json:"left_frame_ids,omitempty"`
+
+	// PhotosTakenAway Items taken away (each counted once
+	PhotosTakenAway int `json:"photos_taken_away"`
+
+	// RemoteFrames Frames on other servers following the family that were told to remove the photos.
+	RemoteFrames *int `json:"remote_frames,omitempty"`
+	TakingId     *Id  `json:"taking_id,omitempty"`
+
+	// Until When the frames' trash deletes what nobody asked to keep.
+	Until *time.Time `json:"until,omitempty"`
+}
+
+// TakenAwayGroup One taking as a frame's or family's managers see it.
+type TakenAwayGroup struct {
+	By     *PersonRef `json:"by,omitempty"`
+	ByName string     `json:"by_name"`
+
+	// CanAsk The caller may ask to keep now.
+	CanAsk bool `json:"can_ask"`
+
+	// CannotAskReason `blocked`: show "Tom doesn't accept requests".
+	CannotAskReason *TakenAwayGroupCannotAskReason `json:"cannot_ask_reason,omitempty"`
+
+	// Count Items still taken away in this scope.
+	Count       int          `json:"count"`
+	KeepRequest *KeepRequest `json:"keep_request,omitempty"`
+
+	// PreviewThumbUrls Short-lived signed thumbnails of the first few.
+	PreviewThumbUrls *[]string `json:"preview_thumb_urls,omitempty"`
+	TakenAt          time.Time `json:"taken_at"`
+
+	// TakingId UUIDv7
+	TakingId Id        `json:"taking_id"`
+	Until    time.Time `json:"until"`
+}
+
+// TakenAwayGroupCannotAskReason defines model for TakenAwayGroup.CannotAskReason.
+type TakenAwayGroupCannotAskReason string
+
+// TakenAwayGroupList defines model for TakenAwayGroupList.
+type TakenAwayGroupList struct {
+	Groups []TakenAwayGroup `json:"groups"`
+}
 
 // TelegramChat defines model for TelegramChat.
 type TelegramChat struct {
@@ -9729,6 +11196,9 @@ type Before = string
 // BirthdayId UUIDv7
 type BirthdayId = Id
 
+// BlockedServerId UUIDv7
+type BlockedServerId = Id
+
 // CalendarId UUIDv7
 type CalendarId = Id
 
@@ -9788,6 +11258,9 @@ type PlacementId = Id
 
 // PostId UUIDv7
 type PostId = Id
+
+// RemoteSubscriptionId UUIDv7
+type RemoteSubscriptionId = Id
 
 // ReportId UUIDv7
 type ReportId = Id
@@ -10063,12 +11536,6 @@ type CreateFeedInviteParams struct {
 // DecideFeedJoinRequestParamsDecision defines parameters for DecideFeedJoinRequest.
 type DecideFeedJoinRequestParamsDecision string
 
-// LeaveFeedJSONBody defines parameters for LeaveFeed.
-type LeaveFeedJSONBody struct {
-	// RemoveMyPosts Also remove your posts from the feed and every subscribed frame.
-	RemoveMyPosts *bool `json:"remove_my_posts,omitempty"`
-}
-
 // RemoveFeedMemberParams defines parameters for RemoveFeedMember.
 type RemoveFeedMemberParams struct {
 	// RemovePosts Also remove the member's posts from the feed and every subscribed frame.
@@ -10098,6 +11565,11 @@ type ListFeedSubscriptionsParams struct {
 
 // RequestSubscriptionParams defines parameters for RequestSubscription.
 type RequestSubscriptionParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// TakeAwayFromFeedParams defines parameters for TakeAwayFromFeed.
+type TakeAwayFromFeedParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
@@ -10180,11 +11652,6 @@ type CreateInviteParams struct {
 // DecideJoinRequestParamsDecision defines parameters for DecideJoinRequest.
 type DecideJoinRequestParamsDecision string
 
-// LeaveFrameJSONBody defines parameters for LeaveFrame.
-type LeaveFrameJSONBody struct {
-	RemoveMyItems *bool `json:"remove_my_items,omitempty"`
-}
-
 // RemoveMemberParams defines parameters for RemoveMember.
 type RemoveMemberParams struct {
 	RemoveItems *bool `form:"remove_items,omitempty" json:"remove_items,omitempty"`
@@ -10201,12 +11668,17 @@ type UpdateMemberJSONBodyRole string
 
 // ListPlacementsParams defines parameters for ListPlacements.
 type ListPlacementsParams struct {
-	Cursor     *Cursor                         `form:"cursor,omitempty" json:"cursor,omitempty"`
-	Limit      *Limit                          `form:"limit,omitempty" json:"limit,omitempty"`
+	Cursor *Cursor `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Limit  *Limit  `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Visibility `taken_away` (managers only): placements their senders took away, still in the 30-day trash (README §5.21); never part of `all`.
 	Visibility *ListPlacementsParamsVisibility `form:"visibility,omitempty" json:"visibility,omitempty"`
-	SenderId   *Id                             `form:"sender_id,omitempty" json:"sender_id,omitempty"`
-	Kind       *MediaKind                      `form:"kind,omitempty" json:"kind,omitempty"`
-	AlbumId    *Id                             `form:"album_id,omitempty" json:"album_id,omitempty"`
+
+	// TakingId With `visibility: taken_away`: only this taking.
+	TakingId *Id        `form:"taking_id,omitempty" json:"taking_id,omitempty"`
+	SenderId *Id        `form:"sender_id,omitempty" json:"sender_id,omitempty"`
+	Kind     *MediaKind `form:"kind,omitempty" json:"kind,omitempty"`
+	AlbumId  *Id        `form:"album_id,omitempty" json:"album_id,omitempty"`
 
 	// FeedId Only placements held by this feed (`feed_ids`).
 	FeedId *Id `form:"feed_id,omitempty" json:"feed_id,omitempty"`
@@ -10257,6 +11729,16 @@ type SharePlacementsParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
+// CreateRemoteSubscriptionParams defines parameters for CreateRemoteSubscription.
+type CreateRemoteSubscriptionParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// DeleteRemoteSubscriptionParams defines parameters for DeleteRemoteSubscription.
+type DeleteRemoteSubscriptionParams struct {
+	Placements *RemoteOnEnd `form:"placements,omitempty" json:"placements,omitempty"`
+}
+
 // ReplaceDeviceJSONBody defines parameters for ReplaceDevice.
 type ReplaceDeviceJSONBody struct {
 	Code string `json:"code"`
@@ -10272,6 +11754,11 @@ type UpdateFrameSettingsParams struct {
 type ListFrameSubscriptionsParams struct {
 	// Status Only this status (default all the caller may see).
 	Status *SubscriptionStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// TakeAwayFromFrameParams defines parameters for TakeAwayFromFrame.
+type TakeAwayFromFrameParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
 // CreateFrameTelegramCodeParams defines parameters for CreateFrameTelegramCode.
@@ -10308,6 +11795,11 @@ type UpdateItemJSONBody struct {
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
 }
 
+// CreateKeepRequestParams defines parameters for CreateKeepRequest.
+type CreateKeepRequestParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
 // CreateLinkPreviewJSONBody defines parameters for CreateLinkPreview.
 type CreateLinkPreviewJSONBody struct {
 	Url string `json:"url"`
@@ -10315,8 +11807,9 @@ type CreateLinkPreviewJSONBody struct {
 
 // DeleteMeParams defines parameters for DeleteMe.
 type DeleteMeParams struct {
-	// RemoveItems Also remove everything this user sent from all frames.
-	RemoveItems bool `form:"remove_items" json:"remove_items"`
+	// RemoveItems Older clients: `true` means `photos: take`, `false` means `photos: leave`.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	RemoveItems *bool `form:"remove_items,omitempty" json:"remove_items,omitempty"`
 }
 
 // UpdateMeJSONBody defines parameters for UpdateMe.
@@ -10336,6 +11829,20 @@ type UpdateMeJSONBody struct {
 	Timezone *string `json:"timezone,omitempty"`
 }
 
+// ListMyKeepRequestsParams defines parameters for ListMyKeepRequests.
+type ListMyKeepRequestsParams struct {
+	Status *ListMyKeepRequestsParamsStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// ListMyKeepRequestsParamsStatus defines parameters for ListMyKeepRequests.
+type ListMyKeepRequestsParamsStatus string
+
+// GetLeavePreviewParams defines parameters for GetLeavePreview.
+type GetLeavePreviewParams struct {
+	FeedId  *Id `form:"feed_id,omitempty" json:"feed_id,omitempty"`
+	FrameId *Id `form:"frame_id,omitempty" json:"frame_id,omitempty"`
+}
+
 // UpdateMyMilestoneJSONBody defines parameters for UpdateMyMilestone.
 type UpdateMyMilestoneJSONBody struct {
 	Seen  *UpdateMyMilestoneJSONBodySeen `json:"seen,omitempty"`
@@ -10348,6 +11855,17 @@ type UpdateMyMilestoneJSONBodySeen bool
 // CreateTelegramLinkCodeParams defines parameters for CreateTelegramLinkCode.
 type CreateTelegramLinkCodeParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// OperatorListOwnershipLogParams defines parameters for OperatorListOwnershipLog.
+type OperatorListOwnershipLogParams struct {
+	Cursor *Cursor `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Limit  *Limit  `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// OperatorSearchOwnershipParams defines parameters for OperatorSearchOwnership.
+type OperatorSearchOwnershipParams struct {
+	Q string `form:"q" json:"q"`
 }
 
 // ListOperatorReportsParams defines parameters for ListOperatorReports.
@@ -10615,6 +12133,9 @@ type CreateFeedBirthdayJSONRequestBody = BirthdayPersonCreate
 // UpdateFeedBirthdayJSONRequestBody defines body for UpdateFeedBirthday for application/json ContentType.
 type UpdateFeedBirthdayJSONRequestBody = BirthdayPersonUpdate
 
+// BlockFeedServerJSONRequestBody defines body for BlockFeedServer for application/json ContentType.
+type BlockFeedServerJSONRequestBody = BlockedServerCreate
+
 // CreateCircleJSONRequestBody defines body for CreateCircle for application/json ContentType.
 type CreateCircleJSONRequestBody = CircleCreate
 
@@ -10637,7 +12158,7 @@ type UpdateFeedEngagementJSONRequestBody = FeedEngagementUpdate
 type CreateFeedInviteJSONRequestBody = FeedInviteCreate
 
 // LeaveFeedJSONRequestBody defines body for LeaveFeed for application/json ContentType.
-type LeaveFeedJSONRequestBody LeaveFeedJSONBody
+type LeaveFeedJSONRequestBody = LeaveFeedRequest
 
 // UpdateFeedMemberJSONRequestBody defines body for UpdateFeedMember for application/json ContentType.
 type UpdateFeedMemberJSONRequestBody UpdateFeedMemberJSONBody
@@ -10650,6 +12171,9 @@ type SetFeedPromptJSONRequestBody = FeedPromptSet
 
 // RequestSubscriptionJSONRequestBody defines body for RequestSubscription for application/json ContentType.
 type RequestSubscriptionJSONRequestBody = SubscriptionRequest
+
+// TakeAwayFromFeedJSONRequestBody defines body for TakeAwayFromFeed for application/json ContentType.
+type TakeAwayFromFeedJSONRequestBody = TakeAwayRequest
 
 // CreateFeedTelegramCodeJSONRequestBody defines body for CreateFeedTelegramCode for application/json ContentType.
 type CreateFeedTelegramCodeJSONRequestBody = TelegramConnectCodeCreate
@@ -10691,7 +12215,7 @@ type SendEventToFrameJSONRequestBody = EventInvitationCreate
 type CreateInviteJSONRequestBody CreateInviteJSONBody
 
 // LeaveFrameJSONRequestBody defines body for LeaveFrame for application/json ContentType.
-type LeaveFrameJSONRequestBody LeaveFrameJSONBody
+type LeaveFrameJSONRequestBody = LeaveFrameRequest
 
 // UpdateMemberJSONRequestBody defines body for UpdateMember for application/json ContentType.
 type UpdateMemberJSONRequestBody UpdateMemberJSONBody
@@ -10704,6 +12228,12 @@ type BulkUpdatePlacementsJSONRequestBody BulkUpdatePlacementsJSONBody
 
 // SharePlacementsJSONRequestBody defines body for SharePlacements for application/json ContentType.
 type SharePlacementsJSONRequestBody SharePlacementsJSONBody
+
+// CreateRemoteSubscriptionJSONRequestBody defines body for CreateRemoteSubscription for application/json ContentType.
+type CreateRemoteSubscriptionJSONRequestBody = RemoteSubscriptionCreate
+
+// UpdateRemoteSubscriptionJSONRequestBody defines body for UpdateRemoteSubscription for application/json ContentType.
+type UpdateRemoteSubscriptionJSONRequestBody = RemoteSubscriptionUpdate
 
 // ReplaceDeviceJSONRequestBody defines body for ReplaceDevice for application/json ContentType.
 type ReplaceDeviceJSONRequestBody ReplaceDeviceJSONBody
@@ -10726,11 +12256,23 @@ type StartGoogleImportJSONRequestBody = GoogleImportCreate
 // UpdateItemJSONRequestBody defines body for UpdateItem for application/json ContentType.
 type UpdateItemJSONRequestBody UpdateItemJSONBody
 
+// CreateKeepRequestJSONRequestBody defines body for CreateKeepRequest for application/json ContentType.
+type CreateKeepRequestJSONRequestBody = KeepRequestCreate
+
+// AnswerKeepRequestJSONRequestBody defines body for AnswerKeepRequest for application/json ContentType.
+type AnswerKeepRequestJSONRequestBody = KeepRequestAnswer
+
 // CreateLinkPreviewJSONRequestBody defines body for CreateLinkPreview for application/json ContentType.
 type CreateLinkPreviewJSONRequestBody CreateLinkPreviewJSONBody
 
+// DeleteMeJSONRequestBody defines body for DeleteMe for application/json ContentType.
+type DeleteMeJSONRequestBody = AccountDeletion
+
 // UpdateMeJSONRequestBody defines body for UpdateMe for application/json ContentType.
 type UpdateMeJSONRequestBody UpdateMeJSONBody
+
+// UpdateMemoryPreferencesJSONRequestBody defines body for UpdateMemoryPreferences for application/json ContentType.
+type UpdateMemoryPreferencesJSONRequestBody = MemoryPreferencesUpdate
 
 // UpdateMyMilestoneJSONRequestBody defines body for UpdateMyMilestone for application/json ContentType.
 type UpdateMyMilestoneJSONRequestBody UpdateMyMilestoneJSONBody
@@ -10740,6 +12282,15 @@ type RegisterPushEndpointJSONRequestBody = PushEndpointCreate
 
 // UpdateReminderPreferencesJSONRequestBody defines body for UpdateReminderPreferences for application/json ContentType.
 type UpdateReminderPreferencesJSONRequestBody = ReminderPreferencesUpdate
+
+// OperatorBlockServerJSONRequestBody defines body for OperatorBlockServer for application/json ContentType.
+type OperatorBlockServerJSONRequestBody = BlockedServerCreate
+
+// OperatorTransferFeedOwnerJSONRequestBody defines body for OperatorTransferFeedOwner for application/json ContentType.
+type OperatorTransferFeedOwnerJSONRequestBody = OperatorOwnerTransfer
+
+// OperatorTransferFrameOwnerJSONRequestBody defines body for OperatorTransferFrameOwner for application/json ContentType.
+type OperatorTransferFrameOwnerJSONRequestBody = OperatorOwnerTransfer
 
 // OperatorSetLimitsJSONRequestBody defines body for OperatorSetLimits for application/json ContentType.
 type OperatorSetLimitsJSONRequestBody = Limits
@@ -10785,6 +12336,9 @@ type SetThreadStateJSONRequestBody SetThreadStateJSONBody
 
 // SetReactionJSONRequestBody defines body for SetReaction for application/json ContentType.
 type SetReactionJSONRequestBody SetReactionJSONBody
+
+// PreviewRemoteInviteJSONRequestBody defines body for PreviewRemoteInvite for application/json ContentType.
+type PreviewRemoteInviteJSONRequestBody = RemoteInviteRef
 
 // CreateReportJSONRequestBody defines body for CreateReport for application/json ContentType.
 type CreateReportJSONRequestBody = ReportCreate
@@ -11059,6 +12613,15 @@ type ServerInterface interface {
 	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
 	RejectFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
 
+	// (GET /v1/feeds/{feedId}/blocked-servers)
+	ListFeedBlockedServers(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/feeds/{feedId}/blocked-servers)
+	BlockFeedServer(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (DELETE /v1/feeds/{feedId}/blocked-servers/{blockedServerId})
+	UnblockFeedServer(w http.ResponseWriter, r *http.Request, feedId FeedId, blockedServerId BlockedServerId)
+
 	// (GET /v1/feeds/{feedId}/circles)
 	ListCircles(w http.ResponseWriter, r *http.Request, feedId FeedId)
 
@@ -11109,6 +12672,9 @@ type ServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision})
 	DecideFeedJoinRequest(w http.ResponseWriter, r *http.Request, feedId FeedId, requestId Id, decision DecideFeedJoinRequestParamsDecision)
+
+	// (GET /v1/feeds/{feedId}/keep-requests)
+	ListFeedKeepRequests(w http.ResponseWriter, r *http.Request, feedId FeedId)
 
 	// (POST /v1/feeds/{feedId}/leave)
 	LeaveFeed(w http.ResponseWriter, r *http.Request, feedId FeedId)
@@ -11166,6 +12732,12 @@ type ServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/subscriptions)
 	RequestSubscription(w http.ResponseWriter, r *http.Request, feedId FeedId, params RequestSubscriptionParams)
+
+	// (POST /v1/feeds/{feedId}/take-away)
+	TakeAwayFromFeed(w http.ResponseWriter, r *http.Request, feedId FeedId, params TakeAwayFromFeedParams)
+
+	// (GET /v1/feeds/{feedId}/taken-away)
+	ListFeedTakenAway(w http.ResponseWriter, r *http.Request, feedId FeedId)
 
 	// (GET /v1/feeds/{feedId}/telegram-chats)
 	ListFeedTelegramChats(w http.ResponseWriter, r *http.Request, feedId FeedId)
@@ -11269,6 +12841,9 @@ type ServerInterface interface {
 	// (POST /v1/frames/{frameId}/join-requests/{requestId}/{decision})
 	DecideJoinRequest(w http.ResponseWriter, r *http.Request, frameId FrameId, requestId Id, decision DecideJoinRequestParamsDecision)
 
+	// (GET /v1/frames/{frameId}/keep-requests)
+	ListFrameKeepRequests(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (POST /v1/frames/{frameId}/leave)
 	LeaveFrame(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
@@ -11302,6 +12877,18 @@ type ServerInterface interface {
 	// (GET /v1/frames/{frameId}/plugins)
 	GetFramePlugins(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
+	// (GET /v1/frames/{frameId}/remote-subscriptions)
+	ListRemoteSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/remote-subscriptions)
+	CreateRemoteSubscription(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateRemoteSubscriptionParams)
+
+	// (DELETE /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId})
+	DeleteRemoteSubscription(w http.ResponseWriter, r *http.Request, frameId FrameId, remoteSubscriptionId RemoteSubscriptionId, params DeleteRemoteSubscriptionParams)
+
+	// (PATCH /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId})
+	UpdateRemoteSubscription(w http.ResponseWriter, r *http.Request, frameId FrameId, remoteSubscriptionId RemoteSubscriptionId)
+
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
@@ -11313,6 +12900,12 @@ type ServerInterface interface {
 
 	// (GET /v1/frames/{frameId}/subscriptions)
 	ListFrameSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId, params ListFrameSubscriptionsParams)
+
+	// (POST /v1/frames/{frameId}/take-away)
+	TakeAwayFromFrame(w http.ResponseWriter, r *http.Request, frameId FrameId, params TakeAwayFromFrameParams)
+
+	// (GET /v1/frames/{frameId}/taken-away)
+	ListFrameTakenAway(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
 	// (GET /v1/frames/{frameId}/telegram-chats)
 	ListFrameTelegramChats(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -11356,6 +12949,15 @@ type ServerInterface interface {
 	// (PATCH /v1/items/{itemId})
 	UpdateItem(w http.ResponseWriter, r *http.Request, itemId ItemId)
 
+	// (POST /v1/keep-requests)
+	CreateKeepRequest(w http.ResponseWriter, r *http.Request, params CreateKeepRequestParams)
+
+	// (GET /v1/keep-requests/{requestId})
+	GetKeepRequest(w http.ResponseWriter, r *http.Request, requestId RequestId)
+
+	// (POST /v1/keep-requests/{requestId}/answer)
+	AnswerKeepRequest(w http.ResponseWriter, r *http.Request, requestId RequestId)
+
 	// (POST /v1/link-previews)
 	CreateLinkPreview(w http.ResponseWriter, r *http.Request)
 
@@ -11373,6 +12975,21 @@ type ServerInterface interface {
 
 	// (GET /v1/me/badge)
 	GetBadge(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/me/former-places)
+	ListFormerPlaces(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/me/keep-requests)
+	ListMyKeepRequests(w http.ResponseWriter, r *http.Request, params ListMyKeepRequestsParams)
+
+	// (GET /v1/me/leave-preview)
+	GetLeavePreview(w http.ResponseWriter, r *http.Request, params GetLeavePreviewParams)
+
+	// (GET /v1/me/memories)
+	GetMemoryPreferences(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /v1/me/memories)
+	UpdateMemoryPreferences(w http.ResponseWriter, r *http.Request)
 
 	// (GET /v1/me/milestones)
 	ListMyMilestones(w http.ResponseWriter, r *http.Request)
@@ -11410,11 +13027,35 @@ type ServerInterface interface {
 	// (GET /v1/me/weekly-summaries/{weekOf})
 	GetWeeklySummary(w http.ResponseWriter, r *http.Request, weekOf WeekOf)
 
+	// (GET /v1/operator/blocked-servers)
+	OperatorListBlockedServers(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/operator/blocked-servers)
+	OperatorBlockServer(w http.ResponseWriter, r *http.Request)
+
+	// (DELETE /v1/operator/blocked-servers/{blockedServerId})
+	OperatorUnblockServer(w http.ResponseWriter, r *http.Request, blockedServerId BlockedServerId)
+
+	// (POST /v1/operator/feeds/{feedId}/owner)
+	OperatorTransferFeedOwner(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/operator/frames/{frameId}/owner)
+	OperatorTransferFrameOwner(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(w http.ResponseWriter, r *http.Request)
 
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/operator/ownership-log)
+	OperatorListOwnershipLog(w http.ResponseWriter, r *http.Request, params OperatorListOwnershipLogParams)
+
+	// (GET /v1/operator/ownership/search)
+	OperatorSearchOwnership(w http.ResponseWriter, r *http.Request, params OperatorSearchOwnershipParams)
+
+	// (GET /v1/operator/remote-servers)
+	OperatorListRemoteServers(w http.ResponseWriter, r *http.Request)
 
 	// (GET /v1/operator/reports)
 	ListOperatorReports(w http.ResponseWriter, r *http.Request, params ListOperatorReportsParams)
@@ -11499,6 +13140,9 @@ type ServerInterface interface {
 
 	// (PUT /v1/reactions/{targetKind}/{targetId})
 	SetReaction(w http.ResponseWriter, r *http.Request, targetKind TargetKind, targetId TargetId, params SetReactionParams)
+
+	// (POST /v1/remote-invites:preview)
+	PreviewRemoteInvite(w http.ResponseWriter, r *http.Request)
 
 	// (POST /v1/reports)
 	CreateReport(w http.ResponseWriter, r *http.Request)
@@ -14127,6 +15771,93 @@ func (siw *ServerInterfaceWrapper) RejectFeedBirthday(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r)
 }
 
+// ListFeedBlockedServers operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedBlockedServers(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedBlockedServers(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// BlockFeedServer operation middleware
+func (siw *ServerInterfaceWrapper) BlockFeedServer(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.BlockFeedServer(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UnblockFeedServer operation middleware
+func (siw *ServerInterfaceWrapper) UnblockFeedServer(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "blockedServerId" -------------
+	var blockedServerId BlockedServerId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "blockedServerId", r.PathValue("blockedServerId"), &blockedServerId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "blockedServerId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UnblockFeedServer(w, r, feedId, blockedServerId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListCircles operation middleware
 func (siw *ServerInterfaceWrapper) ListCircles(w http.ResponseWriter, r *http.Request) {
 
@@ -14731,6 +16462,32 @@ func (siw *ServerInterfaceWrapper) DecideFeedJoinRequest(w http.ResponseWriter, 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DecideFeedJoinRequest(w, r, feedId, requestId, decision)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedKeepRequests operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedKeepRequests(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedKeepRequests(w, r, feedId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -15413,6 +17170,82 @@ func (siw *ServerInterfaceWrapper) RequestSubscription(w http.ResponseWriter, r 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RequestSubscription(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TakeAwayFromFeed operation middleware
+func (siw *ServerInterfaceWrapper) TakeAwayFromFeed(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params TakeAwayFromFeedParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TakeAwayFromFeed(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedTakenAway operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedTakenAway(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedTakenAway(w, r, feedId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -16581,6 +18414,32 @@ func (siw *ServerInterfaceWrapper) DecideJoinRequest(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r)
 }
 
+// ListFrameKeepRequests operation middleware
+func (siw *ServerInterfaceWrapper) ListFrameKeepRequests(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFrameKeepRequests(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // LeaveFrame operation middleware
 func (siw *ServerInterfaceWrapper) LeaveFrame(w http.ResponseWriter, r *http.Request) {
 
@@ -16798,6 +18657,19 @@ func (siw *ServerInterfaceWrapper) ListPlacements(w http.ResponseWriter, r *http
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "visibility"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "visibility", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "taking_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "taking_id", r.URL.Query(), &params.TakingId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "taking_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "taking_id", Err: err})
 		}
 		return
 	}
@@ -17063,6 +18935,168 @@ func (siw *ServerInterfaceWrapper) GetFramePlugins(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// ListRemoteSubscriptions operation middleware
+func (siw *ServerInterfaceWrapper) ListRemoteSubscriptions(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListRemoteSubscriptions(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateRemoteSubscription operation middleware
+func (siw *ServerInterfaceWrapper) CreateRemoteSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateRemoteSubscriptionParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateRemoteSubscription(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteRemoteSubscription operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRemoteSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "remoteSubscriptionId" -------------
+	var remoteSubscriptionId RemoteSubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "remoteSubscriptionId", r.PathValue("remoteSubscriptionId"), &remoteSubscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "remoteSubscriptionId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params DeleteRemoteSubscriptionParams
+
+	// ------------- Optional query parameter "placements" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "placements", r.URL.Query(), &params.Placements, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "placements"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "placements", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRemoteSubscription(w, r, frameId, remoteSubscriptionId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateRemoteSubscription operation middleware
+func (siw *ServerInterfaceWrapper) UpdateRemoteSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "remoteSubscriptionId" -------------
+	var remoteSubscriptionId RemoteSubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "remoteSubscriptionId", r.PathValue("remoteSubscriptionId"), &remoteSubscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "remoteSubscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateRemoteSubscription(w, r, frameId, remoteSubscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ReplaceDevice operation middleware
 func (siw *ServerInterfaceWrapper) ReplaceDevice(w http.ResponseWriter, r *http.Request) {
 
@@ -17202,6 +19236,82 @@ func (siw *ServerInterfaceWrapper) ListFrameSubscriptions(w http.ResponseWriter,
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListFrameSubscriptions(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TakeAwayFromFrame operation middleware
+func (siw *ServerInterfaceWrapper) TakeAwayFromFrame(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params TakeAwayFromFrameParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TakeAwayFromFrame(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFrameTakenAway operation middleware
+func (siw *ServerInterfaceWrapper) ListFrameTakenAway(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFrameTakenAway(w, r, frameId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -17644,6 +19754,99 @@ func (siw *ServerInterfaceWrapper) UpdateItem(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
+// CreateKeepRequest operation middleware
+func (siw *ServerInterfaceWrapper) CreateKeepRequest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateKeepRequestParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateKeepRequest(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetKeepRequest operation middleware
+func (siw *ServerInterfaceWrapper) GetKeepRequest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "requestId" -------------
+	var requestId RequestId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", r.PathValue("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "requestId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetKeepRequest(w, r, requestId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AnswerKeepRequest operation middleware
+func (siw *ServerInterfaceWrapper) AnswerKeepRequest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "requestId" -------------
+	var requestId RequestId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", r.PathValue("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "requestId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AnswerKeepRequest(w, r, requestId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // CreateLinkPreview operation middleware
 func (siw *ServerInterfaceWrapper) CreateLinkPreview(w http.ResponseWriter, r *http.Request) {
 
@@ -17667,9 +19870,9 @@ func (siw *ServerInterfaceWrapper) DeleteMe(w http.ResponseWriter, r *http.Reque
 	// Parameter object where we will unmarshal all parameters from the context
 	var params DeleteMeParams
 
-	// ------------- Required query parameter "remove_items" -------------
+	// ------------- Optional query parameter "remove_items" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", true, true, "remove_items", r.URL.Query(), &params.RemoveItems, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "remove_items", r.URL.Query(), &params.RemoveItems, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
 	if err != nil {
 		var requiredError *runtime.RequiredParameterError
 		if errors.As(err, &requiredError) {
@@ -17738,6 +19941,127 @@ func (siw *ServerInterfaceWrapper) GetBadge(w http.ResponseWriter, r *http.Reque
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetBadge(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFormerPlaces operation middleware
+func (siw *ServerInterfaceWrapper) ListFormerPlaces(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFormerPlaces(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMyKeepRequests operation middleware
+func (siw *ServerInterfaceWrapper) ListMyKeepRequests(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListMyKeepRequestsParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMyKeepRequests(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetLeavePreview operation middleware
+func (siw *ServerInterfaceWrapper) GetLeavePreview(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetLeavePreviewParams
+
+	// ------------- Optional query parameter "feed_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "feed_id", r.URL.Query(), &params.FeedId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "feed_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feed_id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "frame_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "frame_id", r.URL.Query(), &params.FrameId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "frame_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frame_id", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetLeavePreview(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMemoryPreferences operation middleware
+func (siw *ServerInterfaceWrapper) GetMemoryPreferences(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMemoryPreferences(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateMemoryPreferences operation middleware
+func (siw *ServerInterfaceWrapper) UpdateMemoryPreferences(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateMemoryPreferences(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -17978,6 +20302,112 @@ func (siw *ServerInterfaceWrapper) GetWeeklySummary(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// OperatorListBlockedServers operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListBlockedServers(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListBlockedServers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorBlockServer operation middleware
+func (siw *ServerInterfaceWrapper) OperatorBlockServer(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorBlockServer(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorUnblockServer operation middleware
+func (siw *ServerInterfaceWrapper) OperatorUnblockServer(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "blockedServerId" -------------
+	var blockedServerId BlockedServerId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "blockedServerId", r.PathValue("blockedServerId"), &blockedServerId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "blockedServerId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorUnblockServer(w, r, blockedServerId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorTransferFeedOwner operation middleware
+func (siw *ServerInterfaceWrapper) OperatorTransferFeedOwner(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorTransferFeedOwner(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorTransferFrameOwner operation middleware
+func (siw *ServerInterfaceWrapper) OperatorTransferFrameOwner(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorTransferFrameOwner(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // OperatorGetLimits operation middleware
 func (siw *ServerInterfaceWrapper) OperatorGetLimits(w http.ResponseWriter, r *http.Request) {
 
@@ -17997,6 +20427,99 @@ func (siw *ServerInterfaceWrapper) OperatorSetLimits(w http.ResponseWriter, r *h
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OperatorSetLimits(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorListOwnershipLog operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListOwnershipLog(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params OperatorListOwnershipLogParams
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "cursor", r.URL.Query(), &params.Cursor, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "cursor"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListOwnershipLog(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorSearchOwnership operation middleware
+func (siw *ServerInterfaceWrapper) OperatorSearchOwnership(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params OperatorSearchOwnershipParams
+
+	// ------------- Required query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "q", r.URL.Query(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "q"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "q", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorSearchOwnership(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorListRemoteServers operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListRemoteServers(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListRemoteServers(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -18819,6 +21342,20 @@ func (siw *ServerInterfaceWrapper) SetReaction(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.SetReaction(w, r, targetKind, targetId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PreviewRemoteInvite operation middleware
+func (siw *ServerInterfaceWrapper) PreviewRemoteInvite(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PreviewRemoteInvite(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -19893,6 +22430,9 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/approve", wrapper.ApproveFeedBirthday)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/photo", wrapper.DeleteFeedBirthdayPhoto)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/reject", wrapper.RejectFeedBirthday)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/blocked-servers", wrapper.ListFeedBlockedServers)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/blocked-servers", wrapper.BlockFeedServer)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/blocked-servers/{blockedServerId}", wrapper.UnblockFeedServer)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/circles", wrapper.ListCircles)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/circles", wrapper.CreateCircle)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/circles/{circleId}", wrapper.DeleteCircle)
@@ -19910,6 +22450,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/invites/{inviteId}", wrapper.RevokeFeedInvite)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/join-requests", wrapper.ListFeedJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/join-requests/{requestId}/{decision}", wrapper.DecideFeedJoinRequest)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/keep-requests", wrapper.ListFeedKeepRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/leave", wrapper.LeaveFeed)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/members", wrapper.ListFeedMembers)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/members/{userId}", wrapper.RemoveFeedMember)
@@ -19929,6 +22470,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/streak", wrapper.GetFeedStreak)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.ListFeedSubscriptions)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.RequestSubscription)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/take-away", wrapper.TakeAwayFromFeed)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/taken-away", wrapper.ListFeedTakenAway)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/telegram-chats", wrapper.ListFeedTelegramChats)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/telegram-codes", wrapper.CreateFeedTelegramCode)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/transfer", wrapper.TransferFeedOwnership)
@@ -19962,6 +22505,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/invites/{inviteId}", wrapper.RevokeInvite)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/join-requests", wrapper.ListJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/join-requests/{requestId}/{decision}", wrapper.DecideJoinRequest)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/keep-requests", wrapper.ListFrameKeepRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/leave", wrapper.LeaveFrame)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/members", wrapper.ListMembers)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/members/{userId}", wrapper.RemoveMember)
@@ -19973,10 +22517,16 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:bulk", wrapper.BulkUpdatePlacements)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:share", wrapper.SharePlacements)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/plugins", wrapper.GetFramePlugins)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions", wrapper.ListRemoteSubscriptions)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions", wrapper.CreateRemoteSubscription)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}", wrapper.DeleteRemoteSubscription)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}", wrapper.UpdateRemoteSubscription)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/replace-device", wrapper.ReplaceDevice)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/subscriptions", wrapper.ListFrameSubscriptions)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/take-away", wrapper.TakeAwayFromFrame)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/taken-away", wrapper.ListFrameTakenAway)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/telegram-chats", wrapper.ListFrameTelegramChats)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/telegram-codes", wrapper.CreateFrameTelegramCode)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/transfer", wrapper.TransferOwnership)
@@ -19992,12 +22542,20 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/invites/{token}", wrapper.PreviewInvite)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/invites/{token}/accept", wrapper.AcceptInvite)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/items/{itemId}", wrapper.UpdateItem)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/keep-requests", wrapper.CreateKeepRequest)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/keep-requests/{requestId}", wrapper.GetKeepRequest)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/keep-requests/{requestId}/answer", wrapper.AnswerKeepRequest)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/link-previews", wrapper.CreateLinkPreview)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me", wrapper.DeleteMe)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me", wrapper.GetMe)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/me", wrapper.UpdateMe)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/avatar", wrapper.DeleteAvatar)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/badge", wrapper.GetBadge)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/former-places", wrapper.ListFormerPlaces)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/keep-requests", wrapper.ListMyKeepRequests)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/leave-preview", wrapper.GetLeavePreview)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/memories", wrapper.GetMemoryPreferences)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/me/memories", wrapper.UpdateMemoryPreferences)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/milestones", wrapper.ListMyMilestones)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/me/milestones/{milestoneKey}", wrapper.UpdateMyMilestone)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/on-this-day", wrapper.GetOnThisDay)
@@ -20010,8 +22568,16 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/telegram", wrapper.GetTelegramLink)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/me/telegram/link-code", wrapper.CreateTelegramLinkCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/weekly-summaries/{weekOf}", wrapper.GetWeeklySummary)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/blocked-servers", wrapper.OperatorListBlockedServers)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/operator/blocked-servers", wrapper.OperatorBlockServer)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/operator/blocked-servers/{blockedServerId}", wrapper.OperatorUnblockServer)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/operator/feeds/{feedId}/owner", wrapper.OperatorTransferFeedOwner)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/operator/frames/{frameId}/owner", wrapper.OperatorTransferFrameOwner)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorGetLimits)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/ownership-log", wrapper.OperatorListOwnershipLog)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/ownership/search", wrapper.OperatorSearchOwnership)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/remote-servers", wrapper.OperatorListRemoteServers)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reports", wrapper.ListOperatorReports)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/operator/reservations/{reservationId}", wrapper.OperatorUpdateReservation)
@@ -20040,6 +22606,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/prompts", wrapper.ListPromptLibrary)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/reactions/{targetKind}/{targetId}", wrapper.ListReactions)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/reactions/{targetKind}/{targetId}", wrapper.SetReaction)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/remote-invites:preview", wrapper.PreviewRemoteInvite)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/reports", wrapper.CreateReport)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/reports/{reportId}/resolve", wrapper.ResolveReport)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends", wrapper.ListMySends)
@@ -23223,6 +25790,119 @@ func (response RejectFeedBirthdaydefaultApplicationProblemPlusJSONResponse) Visi
 	return err
 }
 
+type ListFeedBlockedServersRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedBlockedServersResponseObject interface {
+	VisitListFeedBlockedServersResponse(w http.ResponseWriter) error
+}
+
+type ListFeedBlockedServers200JSONResponse []BlockedServer
+
+func (response ListFeedBlockedServers200JSONResponse) VisitListFeedBlockedServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedBlockedServersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedBlockedServersdefaultApplicationProblemPlusJSONResponse) VisitListFeedBlockedServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type BlockFeedServerRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *BlockFeedServerJSONRequestBody
+}
+
+type BlockFeedServerResponseObject interface {
+	VisitBlockFeedServerResponse(w http.ResponseWriter) error
+}
+
+type BlockFeedServer201JSONResponse BlockedServer
+
+func (response BlockFeedServer201JSONResponse) VisitBlockFeedServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type BlockFeedServerdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response BlockFeedServerdefaultApplicationProblemPlusJSONResponse) VisitBlockFeedServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UnblockFeedServerRequestObject struct {
+	FeedId          FeedId          `json:"feedId"`
+	BlockedServerId BlockedServerId `json:"blockedServerId"`
+}
+
+type UnblockFeedServerResponseObject interface {
+	VisitUnblockFeedServerResponse(w http.ResponseWriter) error
+}
+
+type UnblockFeedServer204Response struct {
+}
+
+func (response UnblockFeedServer204Response) VisitUnblockFeedServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type UnblockFeedServerdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UnblockFeedServerdefaultApplicationProblemPlusJSONResponse) VisitUnblockFeedServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListCirclesRequestObject struct {
 	FeedId FeedId `json:"feedId"`
 }
@@ -23957,6 +26637,45 @@ func (response DecideFeedJoinRequestdefaultApplicationProblemPlusJSONResponse) V
 	return err
 }
 
+type ListFeedKeepRequestsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedKeepRequestsResponseObject interface {
+	VisitListFeedKeepRequestsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedKeepRequests200JSONResponse KeepRequestList
+
+func (response ListFeedKeepRequests200JSONResponse) VisitListFeedKeepRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedKeepRequestsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedKeepRequestsdefaultApplicationProblemPlusJSONResponse) VisitListFeedKeepRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type LeaveFeedRequestObject struct {
 	FeedId FeedId `json:"feedId"`
 	Body   *LeaveFeedJSONRequestBody
@@ -23964,6 +26683,20 @@ type LeaveFeedRequestObject struct {
 
 type LeaveFeedResponseObject interface {
 	VisitLeaveFeedResponse(w http.ResponseWriter) error
+}
+
+type LeaveFeed200JSONResponse TakeAwayResult
+
+func (response LeaveFeed200JSONResponse) VisitLeaveFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type LeaveFeed204Response struct {
@@ -24709,6 +27442,86 @@ type RequestSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response RequestSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitRequestSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TakeAwayFromFeedRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params TakeAwayFromFeedParams
+	Body   *TakeAwayFromFeedJSONRequestBody
+}
+
+type TakeAwayFromFeedResponseObject interface {
+	VisitTakeAwayFromFeedResponse(w http.ResponseWriter) error
+}
+
+type TakeAwayFromFeed200JSONResponse TakeAwayResult
+
+func (response TakeAwayFromFeed200JSONResponse) VisitTakeAwayFromFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TakeAwayFromFeeddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TakeAwayFromFeeddefaultApplicationProblemPlusJSONResponse) VisitTakeAwayFromFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedTakenAwayRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedTakenAwayResponseObject interface {
+	VisitListFeedTakenAwayResponse(w http.ResponseWriter) error
+}
+
+type ListFeedTakenAway200JSONResponse TakenAwayGroupList
+
+func (response ListFeedTakenAway200JSONResponse) VisitListFeedTakenAwayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedTakenAwaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedTakenAwaydefaultApplicationProblemPlusJSONResponse) VisitListFeedTakenAwayResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -26082,6 +28895,45 @@ func (response DecideJoinRequestdefaultApplicationProblemPlusJSONResponse) Visit
 	return err
 }
 
+type ListFrameKeepRequestsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListFrameKeepRequestsResponseObject interface {
+	VisitListFrameKeepRequestsResponse(w http.ResponseWriter) error
+}
+
+type ListFrameKeepRequests200JSONResponse KeepRequestList
+
+func (response ListFrameKeepRequests200JSONResponse) VisitListFrameKeepRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameKeepRequestsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFrameKeepRequestsdefaultApplicationProblemPlusJSONResponse) VisitListFrameKeepRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type LeaveFrameRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *LeaveFrameJSONRequestBody
@@ -26089,6 +28941,20 @@ type LeaveFrameRequestObject struct {
 
 type LeaveFrameResponseObject interface {
 	VisitLeaveFrameResponse(w http.ResponseWriter) error
+}
+
+type LeaveFrame200JSONResponse TakeAwayResult
+
+func (response LeaveFrame200JSONResponse) VisitLeaveFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type LeaveFrame204Response struct {
@@ -26264,10 +29130,13 @@ type ListPlacementsResponseObject interface {
 
 type ListPlacements200JSONResponse struct {
 	Counts struct {
-		Hidden  *int `json:"hidden,omitempty"`
-		Photos  *int `json:"photos,omitempty"`
-		Trashed *int `json:"trashed,omitempty"`
-		Videos  *int `json:"videos,omitempty"`
+		Hidden *int `json:"hidden,omitempty"`
+		Photos *int `json:"photos,omitempty"`
+
+		// TakenAway Managers only: placements taken away by their senders (README §5.21).
+		TakenAway *int `json:"taken_away,omitempty"`
+		Trashed   *int `json:"trashed,omitempty"`
+		Videos    *int `json:"videos,omitempty"`
 	} `json:"counts"`
 	NextCursor *string     `json:"next_cursor"`
 	Placements []Placement `json:"placements"`
@@ -26481,6 +29350,162 @@ func (response GetFramePluginsdefaultApplicationProblemPlusJSONResponse) VisitGe
 	return err
 }
 
+type ListRemoteSubscriptionsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListRemoteSubscriptionsResponseObject interface {
+	VisitListRemoteSubscriptionsResponse(w http.ResponseWriter) error
+}
+
+type ListRemoteSubscriptions200JSONResponse []RemoteSubscription
+
+func (response ListRemoteSubscriptions200JSONResponse) VisitListRemoteSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListRemoteSubscriptionsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListRemoteSubscriptionsdefaultApplicationProblemPlusJSONResponse) VisitListRemoteSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateRemoteSubscriptionRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  CreateRemoteSubscriptionParams
+	Body    *CreateRemoteSubscriptionJSONRequestBody
+}
+
+type CreateRemoteSubscriptionResponseObject interface {
+	VisitCreateRemoteSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type CreateRemoteSubscription201JSONResponse RemoteSubscription
+
+func (response CreateRemoteSubscription201JSONResponse) VisitCreateRemoteSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateRemoteSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateRemoteSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitCreateRemoteSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteRemoteSubscriptionRequestObject struct {
+	FrameId              FrameId              `json:"frameId"`
+	RemoteSubscriptionId RemoteSubscriptionId `json:"remoteSubscriptionId"`
+	Params               DeleteRemoteSubscriptionParams
+}
+
+type DeleteRemoteSubscriptionResponseObject interface {
+	VisitDeleteRemoteSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type DeleteRemoteSubscription204Response struct {
+}
+
+func (response DeleteRemoteSubscription204Response) VisitDeleteRemoteSubscriptionResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteRemoteSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteRemoteSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitDeleteRemoteSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateRemoteSubscriptionRequestObject struct {
+	FrameId              FrameId              `json:"frameId"`
+	RemoteSubscriptionId RemoteSubscriptionId `json:"remoteSubscriptionId"`
+	Body                 *UpdateRemoteSubscriptionJSONRequestBody
+}
+
+type UpdateRemoteSubscriptionResponseObject interface {
+	VisitUpdateRemoteSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type UpdateRemoteSubscription200JSONResponse RemoteSubscription
+
+func (response UpdateRemoteSubscription200JSONResponse) VisitUpdateRemoteSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateRemoteSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateRemoteSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitUpdateRemoteSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ReplaceDeviceRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *ReplaceDeviceJSONRequestBody
@@ -26629,6 +29654,85 @@ type ListFrameSubscriptionsdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response ListFrameSubscriptionsdefaultApplicationProblemPlusJSONResponse) VisitListFrameSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TakeAwayFromFrameRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  TakeAwayFromFrameParams
+}
+
+type TakeAwayFromFrameResponseObject interface {
+	VisitTakeAwayFromFrameResponse(w http.ResponseWriter) error
+}
+
+type TakeAwayFromFrame200JSONResponse TakeAwayResult
+
+func (response TakeAwayFromFrame200JSONResponse) VisitTakeAwayFromFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TakeAwayFromFramedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TakeAwayFromFramedefaultApplicationProblemPlusJSONResponse) VisitTakeAwayFromFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameTakenAwayRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListFrameTakenAwayResponseObject interface {
+	VisitListFrameTakenAwayResponse(w http.ResponseWriter) error
+}
+
+type ListFrameTakenAway200JSONResponse TakenAwayGroupList
+
+func (response ListFrameTakenAway200JSONResponse) VisitListFrameTakenAwayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameTakenAwaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFrameTakenAwaydefaultApplicationProblemPlusJSONResponse) VisitListFrameTakenAwayResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -27269,6 +30373,125 @@ func (response UpdateItemdefaultApplicationProblemPlusJSONResponse) VisitUpdateI
 	return err
 }
 
+type CreateKeepRequestRequestObject struct {
+	Params CreateKeepRequestParams
+	Body   *CreateKeepRequestJSONRequestBody
+}
+
+type CreateKeepRequestResponseObject interface {
+	VisitCreateKeepRequestResponse(w http.ResponseWriter) error
+}
+
+type CreateKeepRequest201JSONResponse KeepRequest
+
+func (response CreateKeepRequest201JSONResponse) VisitCreateKeepRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateKeepRequestdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateKeepRequestdefaultApplicationProblemPlusJSONResponse) VisitCreateKeepRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetKeepRequestRequestObject struct {
+	RequestId RequestId `json:"requestId"`
+}
+
+type GetKeepRequestResponseObject interface {
+	VisitGetKeepRequestResponse(w http.ResponseWriter) error
+}
+
+type GetKeepRequest200JSONResponse KeepRequest
+
+func (response GetKeepRequest200JSONResponse) VisitGetKeepRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetKeepRequestdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetKeepRequestdefaultApplicationProblemPlusJSONResponse) VisitGetKeepRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AnswerKeepRequestRequestObject struct {
+	RequestId RequestId `json:"requestId"`
+	Body      *AnswerKeepRequestJSONRequestBody
+}
+
+type AnswerKeepRequestResponseObject interface {
+	VisitAnswerKeepRequestResponse(w http.ResponseWriter) error
+}
+
+type AnswerKeepRequest200JSONResponse KeepRequest
+
+func (response AnswerKeepRequest200JSONResponse) VisitAnswerKeepRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AnswerKeepRequestdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response AnswerKeepRequestdefaultApplicationProblemPlusJSONResponse) VisitAnswerKeepRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type CreateLinkPreviewRequestObject struct {
 	Body *CreateLinkPreviewJSONRequestBody
 }
@@ -27310,6 +30533,7 @@ func (response CreateLinkPreviewdefaultApplicationProblemPlusJSONResponse) Visit
 
 type DeleteMeRequestObject struct {
 	Params DeleteMeParams
+	Body   *DeleteMeJSONRequestBody
 }
 
 type DeleteMeResponseObject interface {
@@ -27476,6 +30700,199 @@ type GetBadgedefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response GetBadgedefaultApplicationProblemPlusJSONResponse) VisitGetBadgeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFormerPlacesRequestObject struct {
+}
+
+type ListFormerPlacesResponseObject interface {
+	VisitListFormerPlacesResponse(w http.ResponseWriter) error
+}
+
+type ListFormerPlaces200JSONResponse FormerPlaces
+
+func (response ListFormerPlaces200JSONResponse) VisitListFormerPlacesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFormerPlacesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFormerPlacesdefaultApplicationProblemPlusJSONResponse) VisitListFormerPlacesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyKeepRequestsRequestObject struct {
+	Params ListMyKeepRequestsParams
+}
+
+type ListMyKeepRequestsResponseObject interface {
+	VisitListMyKeepRequestsResponse(w http.ResponseWriter) error
+}
+
+type ListMyKeepRequests200JSONResponse KeepRequestList
+
+func (response ListMyKeepRequests200JSONResponse) VisitListMyKeepRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyKeepRequestsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListMyKeepRequestsdefaultApplicationProblemPlusJSONResponse) VisitListMyKeepRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetLeavePreviewRequestObject struct {
+	Params GetLeavePreviewParams
+}
+
+type GetLeavePreviewResponseObject interface {
+	VisitGetLeavePreviewResponse(w http.ResponseWriter) error
+}
+
+type GetLeavePreview200JSONResponse LeavePreview
+
+func (response GetLeavePreview200JSONResponse) VisitGetLeavePreviewResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetLeavePreviewdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetLeavePreviewdefaultApplicationProblemPlusJSONResponse) VisitGetLeavePreviewResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetMemoryPreferencesRequestObject struct {
+}
+
+type GetMemoryPreferencesResponseObject interface {
+	VisitGetMemoryPreferencesResponse(w http.ResponseWriter) error
+}
+
+type GetMemoryPreferences200JSONResponse MemoryPreferences
+
+func (response GetMemoryPreferences200JSONResponse) VisitGetMemoryPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetMemoryPreferencesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetMemoryPreferencesdefaultApplicationProblemPlusJSONResponse) VisitGetMemoryPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateMemoryPreferencesRequestObject struct {
+	Body *UpdateMemoryPreferencesJSONRequestBody
+}
+
+type UpdateMemoryPreferencesResponseObject interface {
+	VisitUpdateMemoryPreferencesResponse(w http.ResponseWriter) error
+}
+
+type UpdateMemoryPreferences200JSONResponse MemoryPreferences
+
+func (response UpdateMemoryPreferences200JSONResponse) VisitUpdateMemoryPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateMemoryPreferencesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateMemoryPreferencesdefaultApplicationProblemPlusJSONResponse) VisitUpdateMemoryPreferencesResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -27904,6 +31321,184 @@ func (response GetWeeklySummarydefaultApplicationProblemPlusJSONResponse) VisitG
 	return err
 }
 
+type OperatorListBlockedServersRequestObject struct {
+}
+
+type OperatorListBlockedServersResponseObject interface {
+	VisitOperatorListBlockedServersResponse(w http.ResponseWriter) error
+}
+
+type OperatorListBlockedServers200JSONResponse []BlockedServer
+
+func (response OperatorListBlockedServers200JSONResponse) VisitOperatorListBlockedServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListBlockedServersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListBlockedServersdefaultApplicationProblemPlusJSONResponse) VisitOperatorListBlockedServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorBlockServerRequestObject struct {
+	Body *OperatorBlockServerJSONRequestBody
+}
+
+type OperatorBlockServerResponseObject interface {
+	VisitOperatorBlockServerResponse(w http.ResponseWriter) error
+}
+
+type OperatorBlockServer201JSONResponse BlockedServer
+
+func (response OperatorBlockServer201JSONResponse) VisitOperatorBlockServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorBlockServerdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorBlockServerdefaultApplicationProblemPlusJSONResponse) VisitOperatorBlockServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorUnblockServerRequestObject struct {
+	BlockedServerId BlockedServerId `json:"blockedServerId"`
+}
+
+type OperatorUnblockServerResponseObject interface {
+	VisitOperatorUnblockServerResponse(w http.ResponseWriter) error
+}
+
+type OperatorUnblockServer204Response struct {
+}
+
+func (response OperatorUnblockServer204Response) VisitOperatorUnblockServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type OperatorUnblockServerdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorUnblockServerdefaultApplicationProblemPlusJSONResponse) VisitOperatorUnblockServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorTransferFeedOwnerRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *OperatorTransferFeedOwnerJSONRequestBody
+}
+
+type OperatorTransferFeedOwnerResponseObject interface {
+	VisitOperatorTransferFeedOwnerResponse(w http.ResponseWriter) error
+}
+
+type OperatorTransferFeedOwner204Response struct {
+}
+
+func (response OperatorTransferFeedOwner204Response) VisitOperatorTransferFeedOwnerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type OperatorTransferFeedOwnerdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorTransferFeedOwnerdefaultApplicationProblemPlusJSONResponse) VisitOperatorTransferFeedOwnerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorTransferFrameOwnerRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Body    *OperatorTransferFrameOwnerJSONRequestBody
+}
+
+type OperatorTransferFrameOwnerResponseObject interface {
+	VisitOperatorTransferFrameOwnerResponse(w http.ResponseWriter) error
+}
+
+type OperatorTransferFrameOwner204Response struct {
+}
+
+func (response OperatorTransferFrameOwner204Response) VisitOperatorTransferFrameOwnerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type OperatorTransferFrameOwnerdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorTransferFrameOwnerdefaultApplicationProblemPlusJSONResponse) VisitOperatorTransferFrameOwnerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type OperatorGetLimitsRequestObject struct {
 }
 
@@ -27943,6 +31538,122 @@ func (response OperatorSetLimits200JSONResponse) VisitOperatorSetLimitsResponse(
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListOwnershipLogRequestObject struct {
+	Params OperatorListOwnershipLogParams
+}
+
+type OperatorListOwnershipLogResponseObject interface {
+	VisitOperatorListOwnershipLogResponse(w http.ResponseWriter) error
+}
+
+type OperatorListOwnershipLog200JSONResponse OwnershipLogPage
+
+func (response OperatorListOwnershipLog200JSONResponse) VisitOperatorListOwnershipLogResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListOwnershipLogdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListOwnershipLogdefaultApplicationProblemPlusJSONResponse) VisitOperatorListOwnershipLogResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorSearchOwnershipRequestObject struct {
+	Params OperatorSearchOwnershipParams
+}
+
+type OperatorSearchOwnershipResponseObject interface {
+	VisitOperatorSearchOwnershipResponse(w http.ResponseWriter) error
+}
+
+type OperatorSearchOwnership200JSONResponse OperatorOwnershipMatches
+
+func (response OperatorSearchOwnership200JSONResponse) VisitOperatorSearchOwnershipResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorSearchOwnershipdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorSearchOwnershipdefaultApplicationProblemPlusJSONResponse) VisitOperatorSearchOwnershipResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListRemoteServersRequestObject struct {
+}
+
+type OperatorListRemoteServersResponseObject interface {
+	VisitOperatorListRemoteServersResponse(w http.ResponseWriter) error
+}
+
+type OperatorListRemoteServers200JSONResponse []RemoteServer
+
+func (response OperatorListRemoteServers200JSONResponse) VisitOperatorListRemoteServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListRemoteServersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListRemoteServersdefaultApplicationProblemPlusJSONResponse) VisitOperatorListRemoteServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -29206,6 +32917,45 @@ type SetReactiondefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response SetReactiondefaultApplicationProblemPlusJSONResponse) VisitSetReactionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PreviewRemoteInviteRequestObject struct {
+	Body *PreviewRemoteInviteJSONRequestBody
+}
+
+type PreviewRemoteInviteResponseObject interface {
+	VisitPreviewRemoteInviteResponse(w http.ResponseWriter) error
+}
+
+type PreviewRemoteInvite200JSONResponse RemoteInvitePreview
+
+func (response PreviewRemoteInvite200JSONResponse) VisitPreviewRemoteInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PreviewRemoteInvitedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response PreviewRemoteInvitedefaultApplicationProblemPlusJSONResponse) VisitPreviewRemoteInviteResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -30677,6 +34427,15 @@ type StrictServerInterface interface {
 	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
 	RejectFeedBirthday(ctx context.Context, request RejectFeedBirthdayRequestObject) (RejectFeedBirthdayResponseObject, error)
 
+	// (GET /v1/feeds/{feedId}/blocked-servers)
+	ListFeedBlockedServers(ctx context.Context, request ListFeedBlockedServersRequestObject) (ListFeedBlockedServersResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/blocked-servers)
+	BlockFeedServer(ctx context.Context, request BlockFeedServerRequestObject) (BlockFeedServerResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/blocked-servers/{blockedServerId})
+	UnblockFeedServer(ctx context.Context, request UnblockFeedServerRequestObject) (UnblockFeedServerResponseObject, error)
+
 	// (GET /v1/feeds/{feedId}/circles)
 	ListCircles(ctx context.Context, request ListCirclesRequestObject) (ListCirclesResponseObject, error)
 
@@ -30727,6 +34486,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision})
 	DecideFeedJoinRequest(ctx context.Context, request DecideFeedJoinRequestRequestObject) (DecideFeedJoinRequestResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/keep-requests)
+	ListFeedKeepRequests(ctx context.Context, request ListFeedKeepRequestsRequestObject) (ListFeedKeepRequestsResponseObject, error)
 
 	// (POST /v1/feeds/{feedId}/leave)
 	LeaveFeed(ctx context.Context, request LeaveFeedRequestObject) (LeaveFeedResponseObject, error)
@@ -30784,6 +34546,12 @@ type StrictServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/subscriptions)
 	RequestSubscription(ctx context.Context, request RequestSubscriptionRequestObject) (RequestSubscriptionResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/take-away)
+	TakeAwayFromFeed(ctx context.Context, request TakeAwayFromFeedRequestObject) (TakeAwayFromFeedResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/taken-away)
+	ListFeedTakenAway(ctx context.Context, request ListFeedTakenAwayRequestObject) (ListFeedTakenAwayResponseObject, error)
 
 	// (GET /v1/feeds/{feedId}/telegram-chats)
 	ListFeedTelegramChats(ctx context.Context, request ListFeedTelegramChatsRequestObject) (ListFeedTelegramChatsResponseObject, error)
@@ -30887,6 +34655,9 @@ type StrictServerInterface interface {
 	// (POST /v1/frames/{frameId}/join-requests/{requestId}/{decision})
 	DecideJoinRequest(ctx context.Context, request DecideJoinRequestRequestObject) (DecideJoinRequestResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/keep-requests)
+	ListFrameKeepRequests(ctx context.Context, request ListFrameKeepRequestsRequestObject) (ListFrameKeepRequestsResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/leave)
 	LeaveFrame(ctx context.Context, request LeaveFrameRequestObject) (LeaveFrameResponseObject, error)
 
@@ -30920,6 +34691,18 @@ type StrictServerInterface interface {
 	// (GET /v1/frames/{frameId}/plugins)
 	GetFramePlugins(ctx context.Context, request GetFramePluginsRequestObject) (GetFramePluginsResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/remote-subscriptions)
+	ListRemoteSubscriptions(ctx context.Context, request ListRemoteSubscriptionsRequestObject) (ListRemoteSubscriptionsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/remote-subscriptions)
+	CreateRemoteSubscription(ctx context.Context, request CreateRemoteSubscriptionRequestObject) (CreateRemoteSubscriptionResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId})
+	DeleteRemoteSubscription(ctx context.Context, request DeleteRemoteSubscriptionRequestObject) (DeleteRemoteSubscriptionResponseObject, error)
+
+	// (PATCH /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId})
+	UpdateRemoteSubscription(ctx context.Context, request UpdateRemoteSubscriptionRequestObject) (UpdateRemoteSubscriptionResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(ctx context.Context, request ReplaceDeviceRequestObject) (ReplaceDeviceResponseObject, error)
 
@@ -30931,6 +34714,12 @@ type StrictServerInterface interface {
 
 	// (GET /v1/frames/{frameId}/subscriptions)
 	ListFrameSubscriptions(ctx context.Context, request ListFrameSubscriptionsRequestObject) (ListFrameSubscriptionsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/take-away)
+	TakeAwayFromFrame(ctx context.Context, request TakeAwayFromFrameRequestObject) (TakeAwayFromFrameResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/taken-away)
+	ListFrameTakenAway(ctx context.Context, request ListFrameTakenAwayRequestObject) (ListFrameTakenAwayResponseObject, error)
 
 	// (GET /v1/frames/{frameId}/telegram-chats)
 	ListFrameTelegramChats(ctx context.Context, request ListFrameTelegramChatsRequestObject) (ListFrameTelegramChatsResponseObject, error)
@@ -30974,6 +34763,15 @@ type StrictServerInterface interface {
 	// (PATCH /v1/items/{itemId})
 	UpdateItem(ctx context.Context, request UpdateItemRequestObject) (UpdateItemResponseObject, error)
 
+	// (POST /v1/keep-requests)
+	CreateKeepRequest(ctx context.Context, request CreateKeepRequestRequestObject) (CreateKeepRequestResponseObject, error)
+
+	// (GET /v1/keep-requests/{requestId})
+	GetKeepRequest(ctx context.Context, request GetKeepRequestRequestObject) (GetKeepRequestResponseObject, error)
+
+	// (POST /v1/keep-requests/{requestId}/answer)
+	AnswerKeepRequest(ctx context.Context, request AnswerKeepRequestRequestObject) (AnswerKeepRequestResponseObject, error)
+
 	// (POST /v1/link-previews)
 	CreateLinkPreview(ctx context.Context, request CreateLinkPreviewRequestObject) (CreateLinkPreviewResponseObject, error)
 
@@ -30991,6 +34789,21 @@ type StrictServerInterface interface {
 
 	// (GET /v1/me/badge)
 	GetBadge(ctx context.Context, request GetBadgeRequestObject) (GetBadgeResponseObject, error)
+
+	// (GET /v1/me/former-places)
+	ListFormerPlaces(ctx context.Context, request ListFormerPlacesRequestObject) (ListFormerPlacesResponseObject, error)
+
+	// (GET /v1/me/keep-requests)
+	ListMyKeepRequests(ctx context.Context, request ListMyKeepRequestsRequestObject) (ListMyKeepRequestsResponseObject, error)
+
+	// (GET /v1/me/leave-preview)
+	GetLeavePreview(ctx context.Context, request GetLeavePreviewRequestObject) (GetLeavePreviewResponseObject, error)
+
+	// (GET /v1/me/memories)
+	GetMemoryPreferences(ctx context.Context, request GetMemoryPreferencesRequestObject) (GetMemoryPreferencesResponseObject, error)
+
+	// (PUT /v1/me/memories)
+	UpdateMemoryPreferences(ctx context.Context, request UpdateMemoryPreferencesRequestObject) (UpdateMemoryPreferencesResponseObject, error)
 
 	// (GET /v1/me/milestones)
 	ListMyMilestones(ctx context.Context, request ListMyMilestonesRequestObject) (ListMyMilestonesResponseObject, error)
@@ -31028,11 +34841,35 @@ type StrictServerInterface interface {
 	// (GET /v1/me/weekly-summaries/{weekOf})
 	GetWeeklySummary(ctx context.Context, request GetWeeklySummaryRequestObject) (GetWeeklySummaryResponseObject, error)
 
+	// (GET /v1/operator/blocked-servers)
+	OperatorListBlockedServers(ctx context.Context, request OperatorListBlockedServersRequestObject) (OperatorListBlockedServersResponseObject, error)
+
+	// (POST /v1/operator/blocked-servers)
+	OperatorBlockServer(ctx context.Context, request OperatorBlockServerRequestObject) (OperatorBlockServerResponseObject, error)
+
+	// (DELETE /v1/operator/blocked-servers/{blockedServerId})
+	OperatorUnblockServer(ctx context.Context, request OperatorUnblockServerRequestObject) (OperatorUnblockServerResponseObject, error)
+
+	// (POST /v1/operator/feeds/{feedId}/owner)
+	OperatorTransferFeedOwner(ctx context.Context, request OperatorTransferFeedOwnerRequestObject) (OperatorTransferFeedOwnerResponseObject, error)
+
+	// (POST /v1/operator/frames/{frameId}/owner)
+	OperatorTransferFrameOwner(ctx context.Context, request OperatorTransferFrameOwnerRequestObject) (OperatorTransferFrameOwnerResponseObject, error)
+
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(ctx context.Context, request OperatorGetLimitsRequestObject) (OperatorGetLimitsResponseObject, error)
 
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(ctx context.Context, request OperatorSetLimitsRequestObject) (OperatorSetLimitsResponseObject, error)
+
+	// (GET /v1/operator/ownership-log)
+	OperatorListOwnershipLog(ctx context.Context, request OperatorListOwnershipLogRequestObject) (OperatorListOwnershipLogResponseObject, error)
+
+	// (GET /v1/operator/ownership/search)
+	OperatorSearchOwnership(ctx context.Context, request OperatorSearchOwnershipRequestObject) (OperatorSearchOwnershipResponseObject, error)
+
+	// (GET /v1/operator/remote-servers)
+	OperatorListRemoteServers(ctx context.Context, request OperatorListRemoteServersRequestObject) (OperatorListRemoteServersResponseObject, error)
 
 	// (GET /v1/operator/reports)
 	ListOperatorReports(ctx context.Context, request ListOperatorReportsRequestObject) (ListOperatorReportsResponseObject, error)
@@ -31117,6 +34954,9 @@ type StrictServerInterface interface {
 
 	// (PUT /v1/reactions/{targetKind}/{targetId})
 	SetReaction(ctx context.Context, request SetReactionRequestObject) (SetReactionResponseObject, error)
+
+	// (POST /v1/remote-invites:preview)
+	PreviewRemoteInvite(ctx context.Context, request PreviewRemoteInviteRequestObject) (PreviewRemoteInviteResponseObject, error)
 
 	// (POST /v1/reports)
 	CreateReport(ctx context.Context, request CreateReportRequestObject) (CreateReportResponseObject, error)
@@ -33568,6 +37408,92 @@ func (sh *strictHandler) RejectFeedBirthday(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// ListFeedBlockedServers operation middleware
+func (sh *strictHandler) ListFeedBlockedServers(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedBlockedServersRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedBlockedServers(ctx, request.(ListFeedBlockedServersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedBlockedServers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedBlockedServersResponseObject); ok {
+		if err := validResponse.VisitListFeedBlockedServersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// BlockFeedServer operation middleware
+func (sh *strictHandler) BlockFeedServer(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request BlockFeedServerRequestObject
+
+	request.FeedId = feedId
+
+	var body BlockFeedServerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.BlockFeedServer(ctx, request.(BlockFeedServerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "BlockFeedServer")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(BlockFeedServerResponseObject); ok {
+		if err := validResponse.VisitBlockFeedServerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UnblockFeedServer operation middleware
+func (sh *strictHandler) UnblockFeedServer(w http.ResponseWriter, r *http.Request, feedId FeedId, blockedServerId BlockedServerId) {
+	var request UnblockFeedServerRequestObject
+
+	request.FeedId = feedId
+	request.BlockedServerId = blockedServerId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UnblockFeedServer(ctx, request.(UnblockFeedServerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UnblockFeedServer")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UnblockFeedServerResponseObject); ok {
+		if err := validResponse.VisitUnblockFeedServerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListCircles operation middleware
 func (sh *strictHandler) ListCircles(w http.ResponseWriter, r *http.Request, feedId FeedId) {
 	var request ListCirclesRequestObject
@@ -34066,6 +37992,32 @@ func (sh *strictHandler) DecideFeedJoinRequest(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DecideFeedJoinRequestResponseObject); ok {
 		if err := validResponse.VisitDecideFeedJoinRequestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedKeepRequests operation middleware
+func (sh *strictHandler) ListFeedKeepRequests(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedKeepRequestsRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedKeepRequests(ctx, request.(ListFeedKeepRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedKeepRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedKeepRequestsResponseObject); ok {
+		if err := validResponse.VisitListFeedKeepRequestsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -34612,6 +38564,69 @@ func (sh *strictHandler) RequestSubscription(w http.ResponseWriter, r *http.Requ
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(RequestSubscriptionResponseObject); ok {
 		if err := validResponse.VisitRequestSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TakeAwayFromFeed operation middleware
+func (sh *strictHandler) TakeAwayFromFeed(w http.ResponseWriter, r *http.Request, feedId FeedId, params TakeAwayFromFeedParams) {
+	var request TakeAwayFromFeedRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body TakeAwayFromFeedJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TakeAwayFromFeed(ctx, request.(TakeAwayFromFeedRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TakeAwayFromFeed")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TakeAwayFromFeedResponseObject); ok {
+		if err := validResponse.VisitTakeAwayFromFeedResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedTakenAway operation middleware
+func (sh *strictHandler) ListFeedTakenAway(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedTakenAwayRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedTakenAway(ctx, request.(ListFeedTakenAwayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedTakenAway")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedTakenAwayResponseObject); ok {
+		if err := validResponse.VisitListFeedTakenAwayResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -35611,6 +39626,32 @@ func (sh *strictHandler) DecideJoinRequest(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// ListFrameKeepRequests operation middleware
+func (sh *strictHandler) ListFrameKeepRequests(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListFrameKeepRequestsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFrameKeepRequests(ctx, request.(ListFrameKeepRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFrameKeepRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFrameKeepRequestsResponseObject); ok {
+		if err := validResponse.VisitListFrameKeepRequestsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // LeaveFrame operation middleware
 func (sh *strictHandler) LeaveFrame(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request LeaveFrameRequestObject
@@ -35942,6 +39983,128 @@ func (sh *strictHandler) GetFramePlugins(w http.ResponseWriter, r *http.Request,
 	}
 }
 
+// ListRemoteSubscriptions operation middleware
+func (sh *strictHandler) ListRemoteSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListRemoteSubscriptionsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListRemoteSubscriptions(ctx, request.(ListRemoteSubscriptionsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListRemoteSubscriptions")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListRemoteSubscriptionsResponseObject); ok {
+		if err := validResponse.VisitListRemoteSubscriptionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateRemoteSubscription operation middleware
+func (sh *strictHandler) CreateRemoteSubscription(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateRemoteSubscriptionParams) {
+	var request CreateRemoteSubscriptionRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body CreateRemoteSubscriptionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateRemoteSubscription(ctx, request.(CreateRemoteSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateRemoteSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateRemoteSubscriptionResponseObject); ok {
+		if err := validResponse.VisitCreateRemoteSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteRemoteSubscription operation middleware
+func (sh *strictHandler) DeleteRemoteSubscription(w http.ResponseWriter, r *http.Request, frameId FrameId, remoteSubscriptionId RemoteSubscriptionId, params DeleteRemoteSubscriptionParams) {
+	var request DeleteRemoteSubscriptionRequestObject
+
+	request.FrameId = frameId
+	request.RemoteSubscriptionId = remoteSubscriptionId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteRemoteSubscription(ctx, request.(DeleteRemoteSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteRemoteSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteRemoteSubscriptionResponseObject); ok {
+		if err := validResponse.VisitDeleteRemoteSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateRemoteSubscription operation middleware
+func (sh *strictHandler) UpdateRemoteSubscription(w http.ResponseWriter, r *http.Request, frameId FrameId, remoteSubscriptionId RemoteSubscriptionId) {
+	var request UpdateRemoteSubscriptionRequestObject
+
+	request.FrameId = frameId
+	request.RemoteSubscriptionId = remoteSubscriptionId
+
+	var body UpdateRemoteSubscriptionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateRemoteSubscription(ctx, request.(UpdateRemoteSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateRemoteSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateRemoteSubscriptionResponseObject); ok {
+		if err := validResponse.VisitUpdateRemoteSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ReplaceDevice operation middleware
 func (sh *strictHandler) ReplaceDevice(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request ReplaceDeviceRequestObject
@@ -36055,6 +40218,59 @@ func (sh *strictHandler) ListFrameSubscriptions(w http.ResponseWriter, r *http.R
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ListFrameSubscriptionsResponseObject); ok {
 		if err := validResponse.VisitListFrameSubscriptionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TakeAwayFromFrame operation middleware
+func (sh *strictHandler) TakeAwayFromFrame(w http.ResponseWriter, r *http.Request, frameId FrameId, params TakeAwayFromFrameParams) {
+	var request TakeAwayFromFrameRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TakeAwayFromFrame(ctx, request.(TakeAwayFromFrameRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TakeAwayFromFrame")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TakeAwayFromFrameResponseObject); ok {
+		if err := validResponse.VisitTakeAwayFromFrameResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFrameTakenAway operation middleware
+func (sh *strictHandler) ListFrameTakenAway(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListFrameTakenAwayRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFrameTakenAway(ctx, request.(ListFrameTakenAwayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFrameTakenAway")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFrameTakenAwayResponseObject); ok {
+		if err := validResponse.VisitListFrameTakenAwayResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -36461,6 +40677,98 @@ func (sh *strictHandler) UpdateItem(w http.ResponseWriter, r *http.Request, item
 	}
 }
 
+// CreateKeepRequest operation middleware
+func (sh *strictHandler) CreateKeepRequest(w http.ResponseWriter, r *http.Request, params CreateKeepRequestParams) {
+	var request CreateKeepRequestRequestObject
+
+	request.Params = params
+
+	var body CreateKeepRequestJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateKeepRequest(ctx, request.(CreateKeepRequestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateKeepRequest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateKeepRequestResponseObject); ok {
+		if err := validResponse.VisitCreateKeepRequestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetKeepRequest operation middleware
+func (sh *strictHandler) GetKeepRequest(w http.ResponseWriter, r *http.Request, requestId RequestId) {
+	var request GetKeepRequestRequestObject
+
+	request.RequestId = requestId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetKeepRequest(ctx, request.(GetKeepRequestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetKeepRequest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetKeepRequestResponseObject); ok {
+		if err := validResponse.VisitGetKeepRequestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AnswerKeepRequest operation middleware
+func (sh *strictHandler) AnswerKeepRequest(w http.ResponseWriter, r *http.Request, requestId RequestId) {
+	var request AnswerKeepRequestRequestObject
+
+	request.RequestId = requestId
+
+	var body AnswerKeepRequestJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AnswerKeepRequest(ctx, request.(AnswerKeepRequestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AnswerKeepRequest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AnswerKeepRequestResponseObject); ok {
+		if err := validResponse.VisitAnswerKeepRequestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // CreateLinkPreview operation middleware
 func (sh *strictHandler) CreateLinkPreview(w http.ResponseWriter, r *http.Request) {
 	var request CreateLinkPreviewRequestObject
@@ -36497,6 +40805,16 @@ func (sh *strictHandler) DeleteMe(w http.ResponseWriter, r *http.Request, params
 	var request DeleteMeRequestObject
 
 	request.Params = params
+
+	var body DeleteMeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeleteMe(ctx, request.(DeleteMeRequestObject))
@@ -36614,6 +40932,137 @@ func (sh *strictHandler) GetBadge(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetBadgeResponseObject); ok {
 		if err := validResponse.VisitGetBadgeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFormerPlaces operation middleware
+func (sh *strictHandler) ListFormerPlaces(w http.ResponseWriter, r *http.Request) {
+	var request ListFormerPlacesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFormerPlaces(ctx, request.(ListFormerPlacesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFormerPlaces")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFormerPlacesResponseObject); ok {
+		if err := validResponse.VisitListFormerPlacesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListMyKeepRequests operation middleware
+func (sh *strictHandler) ListMyKeepRequests(w http.ResponseWriter, r *http.Request, params ListMyKeepRequestsParams) {
+	var request ListMyKeepRequestsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListMyKeepRequests(ctx, request.(ListMyKeepRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListMyKeepRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListMyKeepRequestsResponseObject); ok {
+		if err := validResponse.VisitListMyKeepRequestsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetLeavePreview operation middleware
+func (sh *strictHandler) GetLeavePreview(w http.ResponseWriter, r *http.Request, params GetLeavePreviewParams) {
+	var request GetLeavePreviewRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetLeavePreview(ctx, request.(GetLeavePreviewRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetLeavePreview")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetLeavePreviewResponseObject); ok {
+		if err := validResponse.VisitGetLeavePreviewResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMemoryPreferences operation middleware
+func (sh *strictHandler) GetMemoryPreferences(w http.ResponseWriter, r *http.Request) {
+	var request GetMemoryPreferencesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMemoryPreferences(ctx, request.(GetMemoryPreferencesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMemoryPreferences")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMemoryPreferencesResponseObject); ok {
+		if err := validResponse.VisitGetMemoryPreferencesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateMemoryPreferences operation middleware
+func (sh *strictHandler) UpdateMemoryPreferences(w http.ResponseWriter, r *http.Request) {
+	var request UpdateMemoryPreferencesRequestObject
+
+	var body UpdateMemoryPreferencesJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateMemoryPreferences(ctx, request.(UpdateMemoryPreferencesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateMemoryPreferences")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateMemoryPreferencesResponseObject); ok {
+		if err := validResponse.VisitUpdateMemoryPreferencesResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -36938,6 +41387,153 @@ func (sh *strictHandler) GetWeeklySummary(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// OperatorListBlockedServers operation middleware
+func (sh *strictHandler) OperatorListBlockedServers(w http.ResponseWriter, r *http.Request) {
+	var request OperatorListBlockedServersRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListBlockedServers(ctx, request.(OperatorListBlockedServersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListBlockedServers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListBlockedServersResponseObject); ok {
+		if err := validResponse.VisitOperatorListBlockedServersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorBlockServer operation middleware
+func (sh *strictHandler) OperatorBlockServer(w http.ResponseWriter, r *http.Request) {
+	var request OperatorBlockServerRequestObject
+
+	var body OperatorBlockServerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorBlockServer(ctx, request.(OperatorBlockServerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorBlockServer")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorBlockServerResponseObject); ok {
+		if err := validResponse.VisitOperatorBlockServerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorUnblockServer operation middleware
+func (sh *strictHandler) OperatorUnblockServer(w http.ResponseWriter, r *http.Request, blockedServerId BlockedServerId) {
+	var request OperatorUnblockServerRequestObject
+
+	request.BlockedServerId = blockedServerId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorUnblockServer(ctx, request.(OperatorUnblockServerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorUnblockServer")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorUnblockServerResponseObject); ok {
+		if err := validResponse.VisitOperatorUnblockServerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorTransferFeedOwner operation middleware
+func (sh *strictHandler) OperatorTransferFeedOwner(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request OperatorTransferFeedOwnerRequestObject
+
+	request.FeedId = feedId
+
+	var body OperatorTransferFeedOwnerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorTransferFeedOwner(ctx, request.(OperatorTransferFeedOwnerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorTransferFeedOwner")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorTransferFeedOwnerResponseObject); ok {
+		if err := validResponse.VisitOperatorTransferFeedOwnerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorTransferFrameOwner operation middleware
+func (sh *strictHandler) OperatorTransferFrameOwner(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request OperatorTransferFrameOwnerRequestObject
+
+	request.FrameId = frameId
+
+	var body OperatorTransferFrameOwnerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorTransferFrameOwner(ctx, request.(OperatorTransferFrameOwnerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorTransferFrameOwner")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorTransferFrameOwnerResponseObject); ok {
+		if err := validResponse.VisitOperatorTransferFrameOwnerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // OperatorGetLimits operation middleware
 func (sh *strictHandler) OperatorGetLimits(w http.ResponseWriter, r *http.Request) {
 	var request OperatorGetLimitsRequestObject
@@ -36986,6 +41582,82 @@ func (sh *strictHandler) OperatorSetLimits(w http.ResponseWriter, r *http.Reques
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(OperatorSetLimitsResponseObject); ok {
 		if err := validResponse.VisitOperatorSetLimitsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorListOwnershipLog operation middleware
+func (sh *strictHandler) OperatorListOwnershipLog(w http.ResponseWriter, r *http.Request, params OperatorListOwnershipLogParams) {
+	var request OperatorListOwnershipLogRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListOwnershipLog(ctx, request.(OperatorListOwnershipLogRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListOwnershipLog")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListOwnershipLogResponseObject); ok {
+		if err := validResponse.VisitOperatorListOwnershipLogResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorSearchOwnership operation middleware
+func (sh *strictHandler) OperatorSearchOwnership(w http.ResponseWriter, r *http.Request, params OperatorSearchOwnershipParams) {
+	var request OperatorSearchOwnershipRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorSearchOwnership(ctx, request.(OperatorSearchOwnershipRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorSearchOwnership")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorSearchOwnershipResponseObject); ok {
+		if err := validResponse.VisitOperatorSearchOwnershipResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorListRemoteServers operation middleware
+func (sh *strictHandler) OperatorListRemoteServers(w http.ResponseWriter, r *http.Request) {
+	var request OperatorListRemoteServersRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListRemoteServers(ctx, request.(OperatorListRemoteServersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListRemoteServers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListRemoteServersResponseObject); ok {
+		if err := validResponse.VisitOperatorListRemoteServersResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -37812,6 +42484,37 @@ func (sh *strictHandler) SetReaction(w http.ResponseWriter, r *http.Request, tar
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(SetReactionResponseObject); ok {
 		if err := validResponse.VisitSetReactionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PreviewRemoteInvite operation middleware
+func (sh *strictHandler) PreviewRemoteInvite(w http.ResponseWriter, r *http.Request) {
+	var request PreviewRemoteInviteRequestObject
+
+	var body PreviewRemoteInviteJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PreviewRemoteInvite(ctx, request.(PreviewRemoteInviteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PreviewRemoteInvite")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PreviewRemoteInviteResponseObject); ok {
+		if err := validResponse.VisitPreviewRemoteInviteResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

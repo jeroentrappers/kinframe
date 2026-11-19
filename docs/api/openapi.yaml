@@ -47,6 +47,12 @@ tags:
     description: Blocking people and reporting comments, messages and posts.
   - name: engagement
     description: Gentle encouragement to share - frame freshness, "Ask for new photos", reminders and their budget, family streaks, weekly prompts, On this day, summaries, recaps and milestones (docs/spec/family-social.md §9).
+  - name: leaving
+    description: Leaving a family or frame with your photos (they stay, or are taken away with 30 days' notice), asking to keep, account deletion handover, the memories filter and operator ownership transfers (docs/spec/leaving.md).
+  - name: remote
+    description: Frames following a family on another kinframe server, as frame managers and family admins see it (docs/spec/multi-server.md §3).
+  - name: federation
+    description: Server-to-server calls between kinframe servers, signed with HTTP Message Signatures (RFC 9421, Ed25519). Not for apps (README §5.22).
   - name: settings
   - name: tv
     description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
@@ -143,13 +149,20 @@ paths:
     delete:
       tags: [me]
       operationId: deleteMe
-      description: Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
+      description: |
+        Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
+        The body's `photos` (README §5.21 "Account deletion") says what happens to the photos: `take` (default) or
+        `leave` (handed over to the families' and frames' owners). Older clients send only `remove_items`: `true`
+        means `take`, `false` means `leave`. `photos` wins when both are sent.
       parameters:
         - name: remove_items
           in: query
-          required: true
-          description: Also remove everything this user sent from all frames.
+          required: false
+          deprecated: true
+          description: "Older clients: `true` means `photos: take`, `false` means `photos: leave`."
           schema: { type: boolean }
+      requestBody:
+        content: { application/json: { schema: { $ref: '#/components/schemas/AccountDeletion' } } }
       responses:
         '204': { description: Deleted }
         '409': { $ref: '#/components/responses/Problem' }
@@ -279,16 +292,17 @@ paths:
     post:
       tags: [frames]
       operationId: leaveFrame
-      description: Remove your own membership. The owner must transfer ownership first.
+      description: |
+        Remove your own membership. The owner must transfer ownership first. `photos` (README §5.21): `keep` (default)
+        leaves your direct placements on the frame; `take` takes them away with the 30-day notice. Requests with
+        `photos` get `200` with the result; requests without it (older clients) get `204`.
       parameters: [ { $ref: '#/components/parameters/FrameId' } ]
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                remove_my_items: { type: boolean, default: false }
+            schema: { $ref: '#/components/schemas/LeaveFrameRequest' }
       responses:
+        '200': { description: Left, content: { application/json: { schema: { $ref: '#/components/schemas/TakeAwayResult' } } } }
         '204': { description: Left }
         default: { $ref: '#/components/responses/Problem' }
 
@@ -627,7 +641,11 @@ paths:
         - { $ref: '#/components/parameters/FrameId' }
         - { $ref: '#/components/parameters/Cursor' }
         - { $ref: '#/components/parameters/Limit' }
-        - { name: visibility, in: query, schema: { type: string, enum: [visible, hidden, trashed, pending_moderation, all], default: visible } }
+        - name: visibility
+          in: query
+          description: '`taken_away` (managers only): placements their senders took away, still in the 30-day trash (README §5.21); never part of `all`.'
+          schema: { type: string, enum: [visible, hidden, trashed, pending_moderation, all, taken_away], default: visible }
+        - { name: taking_id, in: query, description: 'With `visibility: taken_away`: only this taking.', schema: { $ref: '#/components/schemas/Id' } }
         - { name: sender_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
         - { name: kind, in: query, schema: { $ref: '#/components/schemas/MediaKind' } }
         - { name: album_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
@@ -657,6 +675,7 @@ paths:
                       videos: { type: integer }
                       hidden: { type: integer }
                       trashed: { type: integer }
+                      taken_away: { type: integer, description: 'Managers only: placements taken away by their senders (README §5.21).' }
 
   /v1/frames/{frameId}/placements/{placementId}:
     parameters:
@@ -882,16 +901,18 @@ paths:
     post:
       tags: [feeds]
       operationId: leaveFeed
-      description: Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+      description: |
+        Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+        README §5.21: `photos` `keep` (default) or `take`, `comments` `keep` (default) or `delete`, and
+        `leave_frame_ids` to leave frames in the same request. Requests with `photos` get `200` with the result;
+        requests without it (older clients) get `204`.
       parameters: [ { $ref: '#/components/parameters/FeedId' } ]
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                remove_my_posts: { type: boolean, default: false, description: Also remove your posts from the feed and every subscribed frame. }
+            schema: { $ref: '#/components/schemas/LeaveFeedRequest' }
       responses:
+        '200': { description: Left, content: { application/json: { schema: { $ref: '#/components/schemas/TakeAwayResult' } } } }
         '204': { description: Left }
         default: { $ref: '#/components/responses/Problem' }
 
@@ -3096,6 +3117,304 @@ paths:
         '200': { description: Requests, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/PhotoRequest' } } } } }
         default: { $ref: '#/components/responses/Problem' }
 
+  # ---------------------------------------------------------------- leaving (docs/spec/leaving.md, README §5.21)
+  /v1/me/leave-preview:
+    get:
+      tags: [leaving]
+      operationId: getLeavePreview
+      description: |
+        What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
+        caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
+        subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
+        current members and for people who already left or were removed and still have photos there (the take-away
+        sheet); `404 not_found` for scopes the caller has nothing in.
+      parameters:
+        - { name: feed_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: frame_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '200': { description: Preview, content: { application/json: { schema: { $ref: '#/components/schemas/LeavePreview' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/former-places:
+    get:
+      tags: [leaving]
+      operationId: listFormerPlaces
+      description: |
+        Families and frames the caller no longer belongs to (left or removed) where photos they sent are still live,
+        for "Take my photos away from Janssens" in the sent history (README §5.21).
+      responses:
+        '200': { description: Places, content: { application/json: { schema: { $ref: '#/components/schemas/FormerPlaces' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/take-away:
+    post:
+      tags: [leaving]
+      operationId: takeAwayFromFeed
+      description: |
+        Take the caller's own photos away from this family (README §5.21 "Taking away"): their live posts leave the
+        family, and the posts' placements on every subscribed frame (local and on other servers) are taken away with
+        the 30-day notice. Works for current members, people who left and people who were removed. Idempotent: a
+        second call takes away only what came back or was posted since. `404 not_found` when the caller has nothing
+        live in the family.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody:
+        content: { application/json: { schema: { $ref: '#/components/schemas/TakeAwayRequest' } } }
+      responses:
+        '200': { description: Taken away, content: { application/json: { schema: { $ref: '#/components/schemas/TakeAwayResult' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/take-away:
+    post:
+      tags: [leaving]
+      operationId: takeAwayFromFrame
+      description: |
+        Take the caller's own direct placements (sends, forwards, shares) away from this frame with the 30-day notice.
+        Placements that reached the frame through a family are not touched (take them away from the family). Works
+        for current members, people who left and people who were removed. `404 not_found` when the caller has nothing
+        live on the frame.
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      responses:
+        '200': { description: Taken away, content: { application/json: { schema: { $ref: '#/components/schemas/TakeAwayResult' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/taken-away:
+    get:
+      tags: [leaving]
+      operationId: listFrameTakenAway
+      description: |
+        Frame owner, admins and `manage_library` members. The frame's "Taken away" groups (one per taking: person,
+        date, count, until), newest first, while their 30 days run; the placements themselves are listed with
+        `listPlacements?visibility=taken_away&taking_id=`.
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      responses:
+        '200': { description: Groups, content: { application/json: { schema: { $ref: '#/components/schemas/TakenAwayGroupList' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/taken-away:
+    get:
+      tags: [leaving]
+      operationId: listFeedTakenAway
+      description: |
+        Family owner and admins. Posts taken away from the family, grouped per taking, while their 30 days run (for
+        "Ask to keep" on the family side).
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      responses:
+        '200': { description: Groups, content: { application/json: { schema: { $ref: '#/components/schemas/TakenAwayGroupList' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/keep-requests:
+    post:
+      tags: [leaving]
+      operationId: createKeepRequest
+      description: |
+        Ask the person who took photos away to let them stay (README §5.21 "Ask to keep"). Exactly one of `frame_id`
+        (frame owner, admins, `manage_library`) and `feed_id` (family owner and admins). One request per scope and
+        taking: a second answers `409 limit_reached`. `403 forbidden` when the person blocked the caller (the group's
+        `can_ask` is then false with `cannot_ask_reason: blocked`), `409 invalid_transition` when the 30 days are over.
+        `item_ids` picks photos (items of the taking in that scope); absent means all of them.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequestCreate' } } }
+      responses:
+        '201': { description: Asked, content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequest' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/keep-requests:
+    get:
+      tags: [leaving]
+      operationId: listMyKeepRequests
+      description: Requests sent to the caller (the person who took photos away), newest first. Default `open` only.
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [open, all], default: open } }
+      responses:
+        '200': { description: Requests, content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequestList' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/keep-requests:
+    get:
+      tags: [leaving]
+      operationId: listFrameKeepRequests
+      description: Frame owner, admins and `manage_library` members. Requests made for this frame, newest first (all states, 60 days).
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      responses:
+        '200': { description: Requests, content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequestList' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/keep-requests:
+    get:
+      tags: [leaving]
+      operationId: listFeedKeepRequests
+      description: Family owner and admins. Requests made for this family, newest first (all states, 60 days).
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      responses:
+        '200': { description: Requests, content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequestList' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/keep-requests/{requestId}:
+    get:
+      tags: [leaving]
+      operationId: getKeepRequest
+      description: |
+        The person asked and the askers (the scope's managers). Includes the photos asked for (`items`, with thumbnails)
+        so the person can pick which to allow.
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200': { description: Request, content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequest' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/keep-requests/{requestId}/answer:
+    post:
+      tags: [leaving]
+      operationId: answerKeepRequest
+      description: |
+        The person asked only. `all` and `none` need no `item_ids`; `some` needs at least one of the requested items.
+        Allowed photos come back (placement and post as before, credited as before); the rest are deleted when the 30
+        days end. The answer is final: `409 already_decided` for a second answer, `409 invalid_transition` after expiry.
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequestAnswer' } } }
+      responses:
+        '200': { description: Answered, content: { application/json: { schema: { $ref: '#/components/schemas/KeepRequest' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/memories:
+    get:
+      tags: [leaving]
+      operationId: getMemoryPreferences
+      description: The caller's private memories filter (README §5.21 "Memories"). Nobody else ever sees it.
+      responses:
+        '200': { description: Preferences, content: { application/json: { schema: { $ref: '#/components/schemas/MemoryPreferences' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    put:
+      tags: [leaving]
+      operationId: updateMemoryPreferences
+      description: |
+        Replaces the lists that are present (an absent field is left unchanged). People must be people the caller
+        shares or shared a family, frame or chat with; unknown ids are dropped. Hiding someone does not block them.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/MemoryPreferencesUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/MemoryPreferences' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- remote families (docs/spec/multi-server.md, README §5.22)
+  /v1/remote-invites:preview:
+    post:
+      tags: [remote]
+      operationId: previewRemoteInvite
+      description: |
+        Frame managers on this server (B), before following a family on another server (A). The server fetches A's
+        `/.well-known/kinframe`, checks the invite with A (`federationSubscribe` with `preview: true`, signed) and
+        returns what the confirmation shows. `422 validation_failed` for a URL that isn't a kinframe subscribe invite,
+        `404 invite_invalid` / `410 invite_expired` as A answers, `403 forbidden` when A or this server refuses
+        (federation off, not on the allow list, blocked, or the family doesn't allow frames on other servers),
+        `502 upstream_unavailable` when A can't be reached. `503 feature_disabled` when federation is off here.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RemoteInviteRef' } } }
+      responses:
+        '200': { description: Preview, content: { application/json: { schema: { $ref: '#/components/schemas/RemoteInvitePreview' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/remote-subscriptions:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [remote]
+      operationId: listRemoteSubscriptions
+      description: |
+        Families on other servers this frame follows. Frame managers (owner, admin, `change_settings`) see every
+        status; other members see `active` ones. Ended ones are listed for 30 days.
+      responses:
+        '200':
+          description: Remote subscriptions
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/RemoteSubscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [remote]
+      operationId: createRemoteSubscription
+      description: |
+        Frame managers. Follow a family on another server with its subscribe invite URL (the family must allow frames
+        on other servers and the invite must have `allow_remote`). The server asks A (`federationSubscribe`, signed);
+        the result is `active` for pre-approved invites, else `pending` until A's admins decide. Errors as for
+        `previewRemoteInvite`; `409 already_subscribed` when the frame already follows that family.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RemoteSubscriptionCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/RemoteSubscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}:
+    parameters:
+      - { $ref: '#/components/parameters/FrameId' }
+      - { $ref: '#/components/parameters/RemoteSubscriptionId' }
+    patch:
+      tags: [remote]
+      operationId: updateRemoteSubscription
+      description: Frame managers. What happens to the copied photos when the subscription ends (`on_end`).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RemoteSubscriptionUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/RemoteSubscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [remote]
+      operationId: deleteRemoteSubscription
+      description: |
+        Frame managers. Unsubscribe (or withdraw a pending request): tells A (`federationUnsubscribe`, signed, retried
+        in the background when A is down) and keeps or removes the copied photos (`placements`, default the
+        subscription's `on_end`).
+      parameters:
+        - { name: placements, in: query, schema: { $ref: '#/components/schemas/RemoteOnEnd' } }
+      responses:
+        '204': { description: Unsubscribed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/blocked-servers:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [remote]
+      operationId: listFeedBlockedServers
+      description: Family owner and admins. Servers whose frames may not follow this family.
+      responses:
+        '200':
+          description: Blocked servers
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/BlockedServer' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [remote]
+      operationId: blockFeedServer
+      description: |
+        Family owner and admins. Blocks a server for this family: its remote subscriptions to the family end
+        (`removed_reason: server_blocked`) and new requests from it are refused. Idempotent per host.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/BlockedServerCreate' } } }
+      responses:
+        '201': { description: Blocked, content: { application/json: { schema: { $ref: '#/components/schemas/BlockedServer' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/blocked-servers/{blockedServerId}:
+    delete:
+      tags: [remote]
+      operationId: unblockFeedServer
+      description: Family owner and admins. Ended subscriptions stay ended.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/BlockedServerId' }
+      responses:
+        '204': { description: Unblocked }
+        default: { $ref: '#/components/responses/Problem' }
+
   # ---------------------------------------------------------------- settings
   # ---------------------------------------------------------------- tv
   /v1/frames/{frameId}/tv-links:
@@ -4274,6 +4593,198 @@ paths:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservation' } } } }
         default: { $ref: '#/components/responses/Problem' }
 
+  /v1/operator/ownership/search:
+    get:
+      tags: [operator]
+      operationId: operatorSearchOwnership
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: |
+        Find frames and families for an ownership transfer (README §5.21 "Ownership by the operator"): by id, name, or a
+        member's email or display name (`q`, at least 2 characters). At most 20 of each, with their members.
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 2, maxLength: 200 } }
+      responses:
+        '200': { description: Matches, content: { application/json: { schema: { $ref: '#/components/schemas/OperatorOwnershipMatches' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/frames/{frameId}/owner:
+    post:
+      tags: [operator]
+      operationId: operatorTransferFrameOwner
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: |
+        Move ownership of a frame to an existing member (`422 validation_failed` otherwise). The previous owner
+        becomes admin, or is removed with `remove_previous: true`. Both get `ownership_changed`; the change is logged
+        with the reason (`operatorListOwnershipLog`).
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/OperatorOwnerTransfer' } } }
+      responses:
+        '204': { description: Transferred }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/feeds/{feedId}/owner:
+    post:
+      tags: [operator]
+      operationId: operatorTransferFeedOwner
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: The same for a family (feed). The new owner must be a member of the family.
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/OperatorOwnerTransfer' } } }
+      responses:
+        '204': { description: Transferred }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/ownership-log:
+    get:
+      tags: [operator]
+      operationId: operatorListOwnershipLog
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: Operator ownership transfers and account-deletion handovers (README §5.21), newest first, kept 2 years.
+      parameters:
+        - { $ref: '#/components/parameters/Cursor' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { description: Log, content: { application/json: { schema: { $ref: '#/components/schemas/OwnershipLogPage' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/blocked-servers:
+    get:
+      tags: [operator]
+      operationId: operatorListBlockedServers
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: Servers blocked for the whole instance (README §5.22 "Trust").
+      responses:
+        '200':
+          description: Blocked servers
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/BlockedServer' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [operator]
+      operationId: operatorBlockServer
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: |
+        Block a server instance-wide: every remote subscription with it ends on both sides (`server_blocked`), its
+        federation requests answer `403 forbidden`, and this server stops calling it. Idempotent per host.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/BlockedServerCreate' } } }
+      responses:
+        '201': { description: Blocked, content: { application/json: { schema: { $ref: '#/components/schemas/BlockedServer' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/blocked-servers/{blockedServerId}:
+    delete:
+      tags: [operator]
+      operationId: operatorUnblockServer
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      parameters: [ { $ref: '#/components/parameters/BlockedServerId' } ]
+      responses:
+        '204': { description: Unblocked }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/remote-servers:
+    get:
+      tags: [operator]
+      operationId: operatorListRemoteServers
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: Servers this one federates with (either direction), with counts and their last contact.
+      responses:
+        '200':
+          description: Remote servers
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/RemoteServer' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- federation (server to server, README §5.22)
+  # Hand-written in server/internal/api (the signature covers the raw request): excluded in gen/cfg.yaml.
+  /federation/v1/subscriptions:
+    post:
+      tags: [federation]
+      operationId: federationSubscribe
+      security: [ { serverSignature: [] } ]
+      description: |
+        Called by B on A. Checks a `subscribe` invite (token from the invite URL) that has `allow_remote`, in a family
+        with `allow_remote_frames`, and records a remote subscription for B's frame: `active` at once (the invite is
+        pre-approved), otherwise `pending`. With `preview: true` nothing is recorded and the answer describes the
+        family for B's confirmation sheet. A repeat for the same B frame and family returns the live subscription.
+        Errors: `401 unauthorized` (bad or missing signature), `403 forbidden` (federation off, not allowed, server
+        blocked, family doesn't allow remote frames, invite without `allow_remote`), `404 invite_invalid`,
+        `410 invite_expired`, `409 limit_reached` (`limits.max_subscriptions_per_feed` counts remote ones too).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscribeRequest' } } }
+      responses:
+        '200': { description: Preview, or an existing subscription, content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscription' } } } }
+        '201': { description: Recorded, content: { application/json: { schema: { $ref: '#/components/schemas/FederationSubscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /federation/v1/subscriptions/{subscriptionId}:
+    delete:
+      tags: [federation]
+      operationId: federationUnsubscribe
+      security: [ { serverSignature: [] } ]
+      description: |
+        Either side ends a remote subscription; `subscriptionId` is always A's id. Called by B on A (B's frame
+        unsubscribed) or by A on B (A's admins removed it, the family was deleted, or B was blocked). Idempotent.
+      parameters:
+        - { $ref: '#/components/parameters/SubscriptionId' }
+        - { name: reason, in: query, schema: { $ref: '#/components/schemas/RemoteEndReason' } }
+      responses:
+        '204': { description: Ended }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /federation/v1/subscriptions/{subscriptionId}/changes:
+    get:
+      tags: [federation]
+      operationId: federationChanges
+      security: [ { serverSignature: [] } ]
+      description: |
+        Called by B on A, signed by the server the subscription belongs to (`404 not_found` for anyone else). The
+        family's changes for this subscription after `cursor`, in order (README §5.22 "Cursor"). Without a cursor:
+        the history backfill first, then live changes. While `pending` the page is empty with `status: pending`.
+      parameters:
+        - { $ref: '#/components/parameters/SubscriptionId' }
+        - { name: cursor, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 100 } }
+      responses:
+        '200': { description: Changes, content: { application/json: { schema: { $ref: '#/components/schemas/FederationChangePage' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /federation/v1/subscriptions/{subscriptionId}/activity:
+    post:
+      tags: [federation]
+      operationId: federationActivity
+      security: [ { serverSignature: [] } ]
+      description: |
+        Called by B on A: the frame's reactions, quick replies and "seen" on placements of this subscription, in
+        batches, and the frame's name and *show comments* when they change (`frame`, also with no events). Events for
+        posts that are gone are ignored. Idempotent per event (`id`).
+      parameters: [ { $ref: '#/components/parameters/SubscriptionId' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FederationActivity' } } }
+      responses:
+        '202': { description: Accepted }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /federation/v1/ping:
+    post:
+      tags: [federation]
+      operationId: federationPing
+      security: [ { serverSignature: [] } ]
+      description: |
+        Called by A on B after new changes (debounced 10 s): B pulls those subscriptions soon. Unknown ids are ignored.
+        Always `202` for a valid signature; a ping never carries data.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FederationPing' } } }
+      responses:
+        '202': { description: Accepted }
+        default: { $ref: '#/components/responses/Problem' }
+
 components:
   securitySchemes:
     userAuth:
@@ -4307,6 +4818,16 @@ components:
         Telegram only (docs/spec/telegram.md §7): the `secret_token` the server passed to `setWebhook`, derived from
         its secrets key (HKDF-SHA256, info `kinframe telegram webhook v1`). Compared in constant time.
 
+    serverSignature:
+      type: apiKey
+      in: header
+      name: Signature
+      description: |
+        Federation only (README §5.22 "Signatures"): an HTTP Message Signature (RFC 9421) by the calling server's
+        Ed25519 key (`alg="ed25519"`, `keyid` from its `/.well-known/kinframe`), over `"@method" "@path" "@query"
+        "content-digest" "date" "kinframe-server"` with `created` within 5 minutes; `Content-Digest` (RFC 9530,
+        sha-256, also for empty bodies) and `Kinframe-Server: <caller base URL>` are required headers.
+
   parameters:
     FrameId: { name: frameId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     UserId: { name: userId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
@@ -4333,6 +4854,8 @@ components:
     MessageId: { name: messageId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     ReportId: { name: reportId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     RequestId: { name: requestId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    RemoteSubscriptionId: { name: remoteSubscriptionId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    BlockedServerId: { name: blockedServerId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     TargetKind: { name: targetKind, in: path, required: true, schema: { $ref: '#/components/schemas/ReactionTargetKind' } }
     TargetId: { name: targetId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     WeekOf: { name: weekOf, in: path, required: true, description: 'A Monday (YYYY-MM-DD); other days answer `422 validation_failed`.', schema: { type: string, format: date } }
@@ -4567,6 +5090,29 @@ components:
           type: boolean
           default: false
           description: True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
+        server_id:
+          type: string
+          description: |
+            Stable random id of this server (generated at first start), so apps signed in to several servers can tell
+            them apart and deduplicate accounts (docs/spec/multi-server.md §2.3).
+        server_name:
+          type: string
+          description: The operator-set label of this server (`KINFRAME_SERVER_LABEL`, default the public host name), shown as the server chip in apps with several accounts.
+          examples: [Janssens]
+        base_url:
+          type: string
+          format: uri
+          description: The server's public base URL (the `server` field of push payloads and the `kinframe-server` header of federation requests).
+        api_version: { type: string, description: 'API major version, `v1`.', examples: [v1] }
+        federation: { $ref: '#/components/schemas/FederationInfo' }
+        leaving:
+          type: boolean
+          default: false
+          description: True when the server has the leaving choices, take-away, keep requests, the account deletion handover and the memories filter (README §5.21).
+        remote_families:
+          type: boolean
+          default: false
+          description: True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
         webpush_public_key:
           type: [string, 'null']
           description: |
@@ -5286,6 +5832,14 @@ components:
           type: [string, 'null']
           format: uri
           description: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+        remote_sender:
+          oneOf: [ { $ref: '#/components/schemas/ItemRemoteSender' }, { type: 'null' } ]
+          description: Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.
+        former_sender_name:
+          type: [string, 'null']
+          description: |
+            Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
+            `sender_id` is now the new owner; show "<former_sender_name> (former member)" as the credit.
 
     ItemOrigin:
       type: string
@@ -5391,6 +5945,15 @@ components:
         prompt_id:
           oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
           description: 'Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt''s title card before the first of them.'
+        taken_away:
+          oneOf: [ { $ref: '#/components/schemas/PlacementTakenAway' }, { type: 'null' } ]
+          description: 'Set while the sender took it away and it waits in the frame''s trash (`visibility: taken_away`, README §5.21). Never in the device change feed (the frame gets `placement.remove`).'
+        origin_remote:
+          oneOf: [ { $ref: '#/components/schemas/PlacementRemote' }, { type: 'null' } ]
+          description: |
+            Set on copies of posts of a family on another server (README §5.22). `origin` is then `feed`,
+            `origin_feed_id` null and `origin_feed_name` the remote family's name, so frames show "Lies · Janssens"
+            without knowing about servers.
 
     ShareResult:
       type: object
@@ -5551,6 +6114,7 @@ components:
             post_count: { type: integer }
             pending_subscription_count: { type: integer, description: Owner and admins only (0 for posters). }
             pending_join_request_count: { type: integer, description: Owner and admins only (0 for posters). }
+            allow_remote_frames: { type: boolean, description: 'Frames on other servers may follow this family through `subscribe` invites with `allow_remote` (default off; README §5.22).' }
 
     FeedCreate:
       type: object
@@ -5565,6 +6129,7 @@ components:
         members_can_create_circles: { type: boolean, default: true }
         posters_can_invite: { type: boolean, default: false }
         posters_can_add_birthdays: { type: boolean, default: false }
+        allow_remote_frames: { type: boolean, default: false }
 
     FeedUpdate:
       type: object
@@ -5581,6 +6146,7 @@ components:
         members_can_create_circles: { type: boolean }
         posters_can_invite: { type: boolean, description: 'Posters may create `join` invites (and list and revoke their own).' }
         posters_can_add_birthdays: { type: boolean, description: Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them. }
+        allow_remote_frames: { type: boolean, description: 'Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`).' }
 
     FeedMember:
       type: object
@@ -5606,6 +6172,7 @@ components:
         max_uses: { type: [integer, 'null'], minimum: 1, description: null = unlimited }
         expires_in_hours: { type: integer, minimum: 1, maximum: 720, default: 168 }
         note: { type: string, maxLength: 80, description: Shown to admins when approving a join request. }
+        allow_remote: { type: boolean, default: false, description: '`subscribe` only, and only when the family has `allow_remote_frames`: frames on other servers may use this link (README §5.22).' }
 
     FeedInvite:
       type: object
@@ -5621,6 +6188,7 @@ components:
         uses: { type: integer }
         note: { type: [string, 'null'] }
         expires_at: { type: string, format: date-time }
+        allow_remote: { type: boolean, description: Frames on other servers may use this link. }
 
     FeedInvitePreview:
       type: object
@@ -5761,6 +6329,12 @@ components:
             bytes: { type: integer }
         can_manage: { type: boolean, description: 'The caller may pause, resume, change history and unsubscribe (frame side).' }
         can_decide: { type: boolean, description: 'The caller may approve, reject and remove (feed side).' }
+        remote:
+          oneOf: [ { $ref: '#/components/schemas/SubscriptionRemote' }, { type: 'null' } ]
+          description: |
+            Set for a frame on another server (README §5.22; only in `listFeedSubscriptions`). `frame.id` is then the
+            id that server gave its frame, `frame.online` is absent, and approve, reject and delete work as for local
+            ones; pause, resume and history changes are the other server's.
 
     FeedReceiptSummary:
       type: object
@@ -7959,6 +8533,7 @@ components:
         reaction: { $ref: '#/components/schemas/Reaction' }
         item_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ], description: The item the frame reacted to (posts with several items). }
         at: { type: string, format: date-time }
+        server_name: { type: [string, 'null'], description: A frame on another server (README §5.22); `frame_id` is then the remote subscription's id. }
 
     ReactionList:
       type: object
@@ -8022,6 +8597,7 @@ components:
             item_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
             reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
             reply: { oneOf: [ { $ref: '#/components/schemas/ReplyPreset' }, { type: 'null' } ] }
+            server_name: { type: [string, 'null'], description: 'A frame on another server (README §5.22): show "Oma''s frame (kinframe.appmire.be)". `frame_id` is then the remote subscription''s id.' }
         body: { type: [string, 'null'], description: Null for frame entries and tombstones. }
         mentions: { type: array, items: { $ref: '#/components/schemas/Mention' } }
         reactions: { $ref: '#/components/schemas/ReactionSummary' }
@@ -8245,7 +8821,12 @@ components:
         muted: { type: boolean }
         muted_until: { type: [string, 'null'], format: date-time, description: 'Null with `muted: true` means always.' }
         archived: { type: boolean, description: 'The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).' }
-        read_only: { type: boolean, description: 'No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.' }
+        read_only: { type: boolean, description: 'No sending: the family or circle was deleted, or (direct) the other account is gone, blocked the caller, or the two no longer share a family or frame (README §5.21).' }
+        read_only_reason:
+          oneOf:
+            - { type: string, enum: [archived, account_gone, blocked, no_longer_contacts] }
+            - { type: 'null' }
+          description: 'Why `read_only`: `no_longer_contacts` shows "You can no longer message Lies".'
         read_receipts: { type: boolean, description: '"Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.' }
         created_at: { type: string, format: date-time }
 
@@ -9025,9 +9606,683 @@ components:
       required: [type, key, title, body, ids]
       properties:
         type: { type: string, description: The websocket event type this push stands for. }
-        key: { type: string, description: 'The push key (`FamilySocialPushKey` and the older ones in README §6.3).' }
+        key: { type: string, description: 'The push key (`FamilySocialPushKey`, `LeavingPushKey` and the older ones in README §6.3).' }
         title: { type: string }
         body: { type: string }
         ids: { type: object, additionalProperties: { type: string } }
         tag: { type: string, description: A newer push with the same tag replaces the older one. }
         actions: { type: array, items: { $ref: '#/components/schemas/PushAction' } }
+        server: { type: string, format: uri, description: 'The sending server''s base URL (discovery `base_url`), so apps with several accounts open the right one (README §6.3). Absent from older servers: use the account the push endpoint belongs to.' }
+
+    # ---------------------------------------------------------------- leaving (docs/spec/leaving.md, README §5.21)
+    PhotosChoice:
+      type: string
+      description: '`keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).'
+      enum: [keep, take]
+
+    CommentsChoice:
+      type: string
+      description: '`keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").'
+      enum: [keep, delete]
+
+    LeaveFeedRequest:
+      type: object
+      properties:
+        photos: { $ref: '#/components/schemas/PhotosChoice' }
+        comments: { $ref: '#/components/schemas/CommentsChoice' }
+        leave_frame_ids:
+          type: array
+          maxItems: 50
+          description: |
+            Frames to leave in the same request (frames the caller is a member of, not owner, that subscribe to this
+            family; others answer `422 validation_failed`). The same `photos` choice applies to the caller's direct
+            placements on them.
+          items: { $ref: '#/components/schemas/Id' }
+        remove_my_posts:
+          type: boolean
+          deprecated: true
+          description: 'Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.'
+
+    LeaveFrameRequest:
+      type: object
+      properties:
+        photos: { $ref: '#/components/schemas/PhotosChoice' }
+        remove_my_items:
+          type: boolean
+          deprecated: true
+          description: 'Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.'
+
+    TakeAwayRequest:
+      type: object
+      properties:
+        comments: { $ref: '#/components/schemas/CommentsChoice' }
+
+    TakeAwayResult:
+      type: object
+      description: |
+        The answer of leaving with `photos` and of the take-away endpoints. `taking_id` is null when nothing was taken
+        away (`photos: keep`, or nothing live).
+      required: [photos_taken_away, comments_deleted, frames]
+      properties:
+        taking_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        photos_taken_away: { type: integer, description: Items taken away (each counted once, whatever the number of frames). }
+        comments_deleted: { type: integer }
+        until: { type: [string, 'null'], format: date-time, description: When the frames' trash deletes what nobody asked to keep. }
+        frames:
+          type: array
+          description: Frames that lost photos (local ones; frames on other servers are counted in `remote_frames`).
+          items:
+            type: object
+            required: [frame_id, frame_name, photos]
+            properties:
+              frame_id: { $ref: '#/components/schemas/Id' }
+              frame_name: { type: string }
+              photos: { type: integer }
+        remote_frames: { type: integer, description: Frames on other servers following the family that were told to remove the photos. }
+        left_frame_ids:
+          type: array
+          description: '`leaveFeed` with `leave_frame_ids`: the frames actually left.'
+          items: { $ref: '#/components/schemas/Id' }
+
+    LeavePreview:
+      type: object
+      required: [scope, name, photos, member]
+      properties:
+        scope: { type: string, enum: [feed, frame] }
+        feed_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        frame_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        name: { type: string, description: The family's or frame's name. }
+        member: { type: boolean, description: The caller is still a member (false for the take-away sheet of people who left or were removed). }
+        owner: { type: boolean, description: The caller owns it (must transfer ownership before leaving). }
+        photos: { type: integer, description: The caller's own live items in this scope (family posts; or direct placements on the frame). }
+        comments: { type: integer, description: 'Families: the caller''s live comments in the family.' }
+        already_taken_away: { type: integer, description: The caller's items in this scope still in a frame's trash from an earlier taking. }
+        frames:
+          type: array
+          description: 'Families: frames the caller is a member of that subscribe to the family (the "Leave this frame too" checkboxes).'
+          items:
+            type: object
+            required: [frame_id, frame_name, role, suggested]
+            properties:
+              frame_id: { $ref: '#/components/schemas/Id' }
+              frame_name: { type: string }
+              role: { $ref: '#/components/schemas/Role' }
+              can_leave: { type: boolean, description: False for frames the caller owns (transfer first). }
+              suggested: { type: boolean, description: Checked by default (the frame gets this family's photos and the caller is not its owner). }
+              direct_photos: { type: integer, description: The caller's own direct placements on that frame. }
+
+    FormerPlaces:
+      type: object
+      required: [feeds, frames]
+      properties:
+        feeds:
+          type: array
+          items:
+            type: object
+            required: [feed_id, name, photos]
+            properties:
+              feed_id: { $ref: '#/components/schemas/Id' }
+              name: { type: string }
+              photos: { type: integer }
+              left_at: { type: [string, 'null'], format: date-time }
+        frames:
+          type: array
+          items:
+            type: object
+            required: [frame_id, name, photos]
+            properties:
+              frame_id: { $ref: '#/components/schemas/Id' }
+              name: { type: string }
+              photos: { type: integer }
+              left_at: { type: [string, 'null'], format: date-time }
+
+    PlacementTakenAway:
+      type: object
+      description: A placement taken away by its sender (README §5.21). It is off the frame and listed in the trash under "Taken away by …".
+      required: [taking_id, by_name, at, until]
+      properties:
+        taking_id: { $ref: '#/components/schemas/Id' }
+        by_user_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ], description: Null for deleted accounts. }
+        by_name: { type: string }
+        at: { type: string, format: date-time }
+        until: { type: string, format: date-time }
+        keep_request_status: { oneOf: [ { $ref: '#/components/schemas/KeepRequestStatus' }, { type: 'null' } ] }
+
+    TakenAwayGroup:
+      type: object
+      description: One taking as a frame's or family's managers see it.
+      required: [taking_id, by_name, taken_at, until, count, can_ask]
+      properties:
+        taking_id: { $ref: '#/components/schemas/Id' }
+        by: { oneOf: [ { $ref: '#/components/schemas/PersonRef' }, { type: 'null' } ] }
+        by_name: { type: string }
+        taken_at: { type: string, format: date-time }
+        until: { type: string, format: date-time }
+        count: { type: integer, description: Items still taken away in this scope. }
+        preview_thumb_urls:
+          type: array
+          maxItems: 6
+          description: Short-lived signed thumbnails of the first few.
+          items: { type: string, format: uri }
+        keep_request: { oneOf: [ { $ref: '#/components/schemas/KeepRequest' }, { type: 'null' } ] }
+        can_ask: { type: boolean, description: The caller may ask to keep now. }
+        cannot_ask_reason:
+          oneOf:
+            - { type: string, enum: [blocked, already_asked, expired, account_deleted, not_allowed] }
+            - { type: 'null' }
+          description: '`blocked`: show "Tom doesn''t accept requests".'
+
+    TakenAwayGroupList:
+      type: object
+      required: [groups]
+      properties:
+        groups: { type: array, items: { $ref: '#/components/schemas/TakenAwayGroup' } }
+
+    KeepRequestStatus:
+      type: string
+      description: '`open` until answered or the 30 days end; `allowed` (all), `partly_allowed` (some), `declined`, `expired`.'
+      enum: [open, allowed, partly_allowed, declined, expired]
+
+    KeepRequestCreate:
+      type: object
+      required: [taking_id]
+      properties:
+        taking_id: { $ref: '#/components/schemas/Id' }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        feed_id: { $ref: '#/components/schemas/Id' }
+        item_ids:
+          type: array
+          minItems: 1
+          maxItems: 2000
+          description: The photos to ask for; absent means every item of the taking in this scope.
+          items: { $ref: '#/components/schemas/Id' }
+        note: { type: string, maxLength: 300, description: Optional words for the person ("The ones with the children, for Oma"). }
+
+    KeepRequestAnswer:
+      type: object
+      required: [allow]
+      properties:
+        allow: { type: string, enum: [all, some, none] }
+        item_ids:
+          type: array
+          minItems: 1
+          maxItems: 2000
+          description: '`some` only: the allowed items (a subset of the request''s).'
+          items: { $ref: '#/components/schemas/Id' }
+
+    KeepRequest:
+      type: object
+      required: [id, status, scope, taking_id, asked_by_name, asked_at, expires_at, item_count]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        status: { $ref: '#/components/schemas/KeepRequestStatus' }
+        scope: { type: string, enum: [frame, feed] }
+        frame_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        frame_name: { type: [string, 'null'] }
+        feed_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        feed_name: { type: [string, 'null'] }
+        taking_id: { $ref: '#/components/schemas/Id' }
+        person: { oneOf: [ { $ref: '#/components/schemas/PersonRef' }, { type: 'null' } ], description: The person asked (who took the photos away). }
+        asked_by: { oneOf: [ { $ref: '#/components/schemas/PersonRef' }, { type: 'null' } ] }
+        asked_by_name: { type: string }
+        note: { type: [string, 'null'] }
+        asked_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        answered_at: { type: [string, 'null'], format: date-time }
+        item_count: { type: integer, description: Items asked for. }
+        allowed_count: { type: integer }
+        items:
+          type: array
+          description: '`getKeepRequest` only: the items asked for, with `allowed` once answered.'
+          items:
+            type: object
+            required: [item]
+            properties:
+              item: { $ref: '#/components/schemas/Item' }
+              allowed: { type: [boolean, 'null'] }
+
+    KeepRequestList:
+      type: object
+      required: [requests]
+      properties:
+        requests: { type: array, items: { $ref: '#/components/schemas/KeepRequest' } }
+
+    AccountDeletion:
+      type: object
+      properties:
+        photos:
+          type: string
+          enum: [take, leave]
+          default: take
+          description: |
+            `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+            still in a family or on a frame is handed over to that family's or frame's owner and stays credited
+            "<name> (former member)" (README §5.21 "Account deletion").
+
+    MemoryPreferences:
+      type: object
+      required: [hidden_people, hidden_memories]
+      properties:
+        hidden_people:
+          type: array
+          description: People left out of the caller's memories.
+          items: { $ref: '#/components/schemas/PersonRef' }
+        hidden_memories:
+          type: array
+          description: Posts (feed or frame posts) never shown again as a memory.
+          items: { $ref: '#/components/schemas/Id' }
+
+    MemoryPreferencesUpdate:
+      type: object
+      properties:
+        hidden_people: { type: array, maxItems: 200, items: { $ref: '#/components/schemas/Id' } }
+        hidden_memories: { type: array, maxItems: 5000, items: { $ref: '#/components/schemas/Id' } }
+
+    OperatorOwnerTransfer:
+      type: object
+      required: [user_id, reason]
+      properties:
+        user_id: { $ref: '#/components/schemas/Id' }
+        reason: { type: string, minLength: 1, maxLength: 500, description: Kept in the ownership log; not shown to the people. }
+        remove_previous: { type: boolean, default: false, description: Remove the previous owner instead of making them admin. }
+
+    OperatorScopeMember:
+      type: object
+      required: [user_id, display_name, role]
+      properties:
+        user_id: { $ref: '#/components/schemas/Id' }
+        display_name: { type: string }
+        email: { type: [string, 'null'] }
+        role: { type: string, description: 'Frame role (`Role`) or family role (`FeedRole`).' }
+
+    OperatorScope:
+      type: object
+      required: [kind, id, name, members]
+      properties:
+        kind: { type: string, enum: [frame, feed] }
+        id: { $ref: '#/components/schemas/Id' }
+        name: { type: string }
+        created_at: { type: string, format: date-time }
+        members: { type: array, items: { $ref: '#/components/schemas/OperatorScopeMember' } }
+
+    OperatorOwnershipMatches:
+      type: object
+      required: [frames, feeds]
+      properties:
+        frames: { type: array, items: { $ref: '#/components/schemas/OperatorScope' } }
+        feeds: { type: array, items: { $ref: '#/components/schemas/OperatorScope' } }
+
+    OwnershipLogEntry:
+      type: object
+      required: [id, kind, at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        kind: { type: string, enum: [operator_transfer, account_handover] }
+        at: { type: string, format: date-time }
+        scope_kind: { oneOf: [ { type: string, enum: [frame, feed] }, { type: 'null' } ] }
+        scope_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        scope_name: { type: [string, 'null'] }
+        from_name: { type: [string, 'null'], description: 'Previous owner; for handovers the deleted account''s name.' }
+        to_name: { type: [string, 'null'] }
+        operator_name: { type: [string, 'null'] }
+        reason: { type: [string, 'null'] }
+        removed_previous: { type: [boolean, 'null'] }
+        item_count: { type: [integer, 'null'], description: Handovers only. }
+
+    OwnershipLogPage:
+      type: object
+      required: [entries, next_cursor]
+      properties:
+        entries: { type: array, items: { $ref: '#/components/schemas/OwnershipLogEntry' } }
+        next_cursor: { type: [string, 'null'] }
+
+    KeepRequestEvent:
+      type: object
+      description: '`keep_request.updated`: a keep request was made, answered or expired (the person asked and the scope''s managers).'
+      required: [type, request]
+      properties:
+        type: { type: string, enum: [keep_request.updated] }
+        request: { $ref: '#/components/schemas/KeepRequest' }
+
+    PlacementUpdatedEvent:
+      type: object
+      description: '`placement.updated`: placements were taken away or came back (the frame''s library viewers and the sender).'
+      required: [type, frame_id, placement_ids, reason]
+      properties:
+        type: { type: string, enum: [placement.updated] }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        placement_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+        reason: { type: string, enum: [taken_away, restored, purged] }
+        taking_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+
+    RemoteSubscriptionEvent:
+      type: object
+      description: '`remote_subscription.updated`: a frame''s follow of a family on another server changed status, synced or failed (the frame''s managers; README §5.22).'
+      required: [type, frame_id, remote_subscription]
+      properties:
+        type: { type: string, enum: [remote_subscription.updated] }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        remote_subscription: { $ref: '#/components/schemas/RemoteSubscription' }
+
+    LeavingPushKey:
+      type: string
+      description: |
+        Push `key`s added by leaving (README §6.3). `photos_taken_away`: frame owner/admins and family owner/admins
+        (`ids`: `taking_id`, `frame_id` or `feed_id`). `keep_request`: the person asked (`request_id`).
+        `keep_answered`: the asker (`request_id`). `ownership_changed`: the old and the new owner (`frame_id` or
+        `feed_id`).
+      enum: [photos_taken_away, keep_request, keep_answered, ownership_changed]
+
+    # ---------------------------------------------------------------- multi-server (docs/spec/multi-server.md, README §5.22)
+    FederationInfo:
+      type: object
+      description: The server's federation identity in `/.well-known/kinframe` (README §5.22).
+      required: [enabled]
+      properties:
+        enabled: { type: boolean, description: 'False when the operator turned federation off (`KINFRAME_FEDERATION=off`); the rest is then absent.' }
+        key_id: { type: string, description: The `keyid` of the current signing key, used in `Signature-Input`. }
+        public_key: { type: string, description: The current Ed25519 public key, 32 bytes, base64url without padding. }
+        keys:
+          type: array
+          description: Every key a signature may use, the current one first; a rotated key stays here for 7 days.
+          items:
+            type: object
+            required: [key_id, public_key]
+            properties:
+              key_id: { type: string }
+              public_key: { type: string }
+              expires_at: { type: [string, 'null'], format: date-time }
+        endpoints:
+          type: object
+          properties:
+            subscriptions: { type: string, format: uri, examples: ['https://kinframe.janssens.be/federation/v1/subscriptions'] }
+            ping: { type: string, format: uri }
+
+    RemoteServer:
+      type: object
+      description: Another kinframe server as this one knows it.
+      required: [server_url, server_name]
+      properties:
+        server_id: { type: [string, 'null'], description: Its stable `server_id` (from its well-known document). }
+        server_name: { type: string, examples: [Janssens] }
+        server_url: { type: string, format: uri, description: Its base URL. }
+        host: { type: string, examples: [kinframe.janssens.be] }
+        last_contact_at: { type: [string, 'null'], format: date-time }
+        last_error: { type: [string, 'null'] }
+        subscribers: { type: integer, description: 'Operator listing: frames there following families here.' }
+        follows: { type: integer, description: 'Operator listing: frames here following families there.' }
+        blocked: { type: boolean }
+
+    RemoteInviteRef:
+      type: object
+      required: [invite_url]
+      properties:
+        invite_url: { type: string, format: uri, maxLength: 2000, examples: ['https://kinframe.janssens.be/fi/9cQ2xV0kFq7Lm3Zt8bW1rA'] }
+
+    RemoteInvitePreview:
+      type: object
+      required: [server, feed_name, this_server_name]
+      properties:
+        server: { $ref: '#/components/schemas/RemoteServer' }
+        feed_name: { type: string }
+        cover_url: { type: [string, 'null'], format: uri, description: 'A signed thumbnail on A, valid for an hour.' }
+        frame_count: { type: integer, description: Frames that follow the family (local and remote). }
+        requires_approval: { type: boolean, description: The family's admins must approve first. }
+        this_server_name: { type: string, description: This server's name, for "Photos from this family will be copied to this server (…)". }
+        this_server_host: { type: string }
+
+    RemoteOnEnd:
+      type: string
+      description: 'When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.'
+      enum: [remove, keep]
+      default: remove
+
+    RemoteEndReason:
+      type: string
+      enum: [unsubscribed, removed_by_feed, feed_deleted, server_blocked, withdrawn, rejected]
+
+    RemoteSubscriptionCreate:
+      type: object
+      required: [invite_url]
+      properties:
+        invite_url: { type: string, format: uri, maxLength: 2000 }
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: integer, minimum: 1, maximum: 1000, description: 'Required with `history: last_n`.' }
+        birthdays: { type: boolean, default: true }
+        on_end: { $ref: '#/components/schemas/RemoteOnEnd' }
+
+    RemoteSubscriptionUpdate:
+      type: object
+      properties:
+        on_end: { $ref: '#/components/schemas/RemoteOnEnd' }
+        birthdays: { type: boolean }
+
+    RemoteSubscription:
+      type: object
+      description: A frame on this server following a family on another server (B's side).
+      required: [id, frame_id, status, feed_name, server, history, on_end, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        status:
+          type: string
+          description: '`pending` (A''s admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).'
+          enum: [pending, active, rejected, removed, error]
+        feed_name: { type: string }
+        cover_url: { type: [string, 'null'], format: uri }
+        server: { $ref: '#/components/schemas/RemoteServer' }
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: [integer, 'null'] }
+        birthdays: { type: boolean }
+        on_end: { $ref: '#/components/schemas/RemoteOnEnd' }
+        item_count: { type: integer, description: Photos copied to this server and on the frame. }
+        requested_by_name: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        activated_at: { type: [string, 'null'], format: date-time }
+        ended_at: { type: [string, 'null'], format: date-time }
+        removed_reason: { oneOf: [ { $ref: '#/components/schemas/RemoteEndReason' }, { type: 'null' } ] }
+        last_sync_at: { type: [string, 'null'], format: date-time }
+        last_error: { type: [string, 'null'] }
+        backfill:
+          type: object
+          properties:
+            state: { type: string, enum: [idle, running] }
+            placed: { type: integer }
+            total: { type: integer }
+
+    SubscriptionRemote:
+      type: object
+      description: '`Subscription.remote`: the subscriber is a frame on another server (A''s side).'
+      required: [server_name, server_url]
+      properties:
+        server_id: { type: [string, 'null'] }
+        server_name: { type: string }
+        server_url: { type: string, format: uri }
+        host: { type: string }
+        requested_by_name: { type: [string, 'null'], description: 'The frame manager on that server, as it reported.' }
+        show_comments: { type: boolean, description: The remote frame shows comment cards (it then receives comment summaries). }
+
+    PlacementRemote:
+      type: object
+      description: '`Placement.origin_remote`: the placement is a copy of a post of a family on another server (B''s side).'
+      required: [remote_subscription_id, server_name, server_url, feed_name]
+      properties:
+        remote_subscription_id: { $ref: '#/components/schemas/Id' }
+        server_name: { type: string }
+        server_url: { type: string, format: uri }
+        feed_name: { type: string }
+        sender_name: { type: string, description: 'The poster''s display name on A ("Lies").' }
+
+    ItemRemoteSender:
+      type: object
+      description: '`Item.remote_sender`: copied from another server; `sender_id` is then the remote sender record''s id.'
+      required: [name, server_name, server_url]
+      properties:
+        name: { type: string }
+        server_name: { type: string }
+        server_url: { type: string, format: uri }
+
+    BlockedServerCreate:
+      type: object
+      description: '`host` (e.g. `kinframe.example.org`) or a base URL in `server_url`.'
+      properties:
+        host: { type: string, maxLength: 253 }
+        server_url: { type: string, format: uri, maxLength: 2000 }
+        reason: { type: string, maxLength: 300 }
+
+    BlockedServer:
+      type: object
+      required: [id, host, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        host: { type: string }
+        server_name: { type: [string, 'null'] }
+        reason: { type: [string, 'null'] }
+        feed_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ], description: Null for instance-wide blocks. }
+        created_by_name: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+
+    FederationSubscribeRequest:
+      type: object
+      required: [invite_token, frame]
+      properties:
+        invite_token: { type: string, minLength: 22, maxLength: 64, description: The token of the `/fi/<token>` invite URL. }
+        preview: { type: boolean, default: false, description: Check and describe only; record nothing. }
+        frame:
+          type: object
+          required: [id, name]
+          properties:
+            id: { $ref: '#/components/schemas/Id' }
+            name: { type: string, maxLength: 80 }
+            show_comments: { type: boolean, default: false }
+        follow_id: { $ref: '#/components/schemas/Id' }
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: integer, minimum: 1, maximum: 1000 }
+        birthdays: { type: boolean, default: true }
+        requested_by_name: { type: string, maxLength: 80, description: The frame manager on B, shown to A's admins. }
+
+    FederationSubscription:
+      type: object
+      required: [status, feed]
+      properties:
+        subscription_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ], description: A's id; null for a preview. }
+        status: { type: string, enum: [preview, pending, active, rejected, removed] }
+        feed:
+          type: object
+          required: [name]
+          properties:
+            name: { type: string }
+            cover_url: { type: [string, 'null'], format: uri }
+            frame_count: { type: integer }
+        requires_approval: { type: boolean }
+        server_name: { type: string }
+
+    FederationItem:
+      type: object
+      required: [id, kind, master_url, master_url_expires_at, bytes, mime]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        kind: { $ref: '#/components/schemas/MediaKind' }
+        caption: { type: [string, 'null'] }
+        captured_at: { type: [string, 'null'], format: date-time }
+        focal_point: { $ref: '#/components/schemas/FocalPoint' }
+        fit: { $ref: '#/components/schemas/Fit' }
+        width: { type: integer }
+        height: { type: integer }
+        duration_ms: { type: [integer, 'null'] }
+        has_audio: { type: [boolean, 'null'] }
+        bytes: { type: integer }
+        sha256: { type: string, description: Of the master, hex. }
+        mime: { type: string, examples: [image/webp, video/mp4] }
+        master_url: { type: string, format: uri, description: Signed, valid for 1 hour; no signature needed to fetch it. }
+        master_url_expires_at: { type: string, format: date-time }
+        motion_url: { type: [string, 'null'], format: uri, description: 'Live items: the motion clip''s master, signed like `master_url`.' }
+
+    FederationPost:
+      type: object
+      required: [id, poster_key, poster_name, created_at, items]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        poster_key: { type: string, description: Stable opaque key of the poster within this subscription (not the user id). }
+        poster_name: { type: string }
+        created_at: { type: string, format: date-time }
+        backfill: { type: boolean, description: History (activation or a history change); B places it quietly. }
+        items: { type: array, items: { $ref: '#/components/schemas/FederationItem' } }
+
+    FederationComment:
+      type: object
+      required: [first_name, at]
+      properties:
+        first_name: { type: string }
+        text: { type: string, maxLength: 200 }
+        at: { type: string, format: date-time }
+
+    FederationBirthday:
+      type: object
+      required: [id, name, month, day]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        name: { type: string }
+        month: { type: integer, minimum: 1, maximum: 12 }
+        day: { type: integer, minimum: 1, maximum: 31 }
+        year: { type: [integer, 'null'], description: Only with the person's *show age*. }
+
+    FederationChange:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          description: |
+            `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+            the post is gone (unsend, admin removal, taking away, circle change). `items.remove`: some items of a post
+            are gone. `birthdays`: the family's birthday people now (replace). `comments`: the newest comments of a
+            post (only with *show comments*; replace). `subscription`: the subscription's status changed.
+          enum: [post.upsert, post.remove, items.remove, birthdays, comments, subscription]
+        post: { $ref: '#/components/schemas/FederationPost' }
+        post_id: { $ref: '#/components/schemas/Id' }
+        item_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+        birthdays: { type: array, items: { $ref: '#/components/schemas/FederationBirthday' } }
+        comments: { type: array, maxItems: 3, items: { $ref: '#/components/schemas/FederationComment' } }
+        status: { type: string, enum: [pending, active, rejected, removed] }
+        reason: { $ref: '#/components/schemas/RemoteEndReason' }
+
+    FederationChangePage:
+      type: object
+      required: [changes, cursor, more, status]
+      properties:
+        changes: { type: array, items: { $ref: '#/components/schemas/FederationChange' } }
+        cursor: { type: string, description: Pass it as `cursor` on the next call; store it only after the page was applied. }
+        more: { type: boolean, description: More changes are waiting; pull again at once. }
+        reset: { type: boolean, default: false, description: 'The given cursor was too old: this page restarts from a full snapshot (B drops what isn''t in it).' }
+        status: { type: string, enum: [pending, active, rejected, removed] }
+        feed_name: { type: string, description: The family's current name (credit "Lies · Janssens"). }
+
+    FederationActivity:
+      type: object
+      properties:
+        frame:
+          type: object
+          properties:
+            name: { type: string, maxLength: 80 }
+            show_comments: { type: boolean }
+        events:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            required: [id, kind, post_id, item_id, at]
+            properties:
+              id: { $ref: '#/components/schemas/Id' }
+              kind: { type: string, enum: [reaction, reply, seen] }
+              post_id: { $ref: '#/components/schemas/Id' }
+              item_id: { $ref: '#/components/schemas/Id' }
+              reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ], description: '`reaction`: null clears it.' }
+              reply: { $ref: '#/components/schemas/ReplyPreset' }
+              at: { type: string, format: date-time }
+
+    FederationPing:
+      type: object
+      required: [subscription_ids]
+      properties:
+        subscription_ids: { type: array, minItems: 1, maxItems: 500, items: { $ref: '#/components/schemas/Id' } }

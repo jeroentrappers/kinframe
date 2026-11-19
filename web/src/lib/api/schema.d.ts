@@ -51,7 +51,12 @@ export interface paths {
         get: operations["getMe"];
         put?: never;
         post?: never;
-        /** @description Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too. */
+        /**
+         * @description Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
+         *     The body's `photos` (README §5.21 "Account deletion") says what happens to the photos: `take` (default) or
+         *     `leave` (handed over to the families' and frames' owners). Older clients send only `remove_items`: `true`
+         *     means `take`, `false` means `leave`. `photos` wins when both are sent.
+         */
         delete: operations["deleteMe"];
         options?: never;
         head?: never;
@@ -170,7 +175,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Remove your own membership. The owner must transfer ownership first. */
+        /**
+         * @description Remove your own membership. The owner must transfer ownership first. `photos` (README §5.21): `keep` (default)
+         *     leaves your direct placements on the frame; `take` takes them away with the 30-day notice. Requests with
+         *     `photos` get `200` with the result; requests without it (older clients) get `204`.
+         */
         post: operations["leaveFrame"];
         delete?: never;
         options?: never;
@@ -699,7 +708,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`). */
+        /**
+         * @description Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+         *     README §5.21: `photos` `keep` (default) or `take`, `comments` `keep` (default) or `delete`, and
+         *     `leave_frame_ids` to leave frames in the same request. Requests with `photos` get `200` with the result;
+         *     requests without it (older clients) get `204`.
+         */
         post: operations["leaveFeed"];
         delete?: never;
         options?: never;
@@ -3053,6 +3067,388 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me/leave-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
+         *     caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
+         *     subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
+         *     current members and for people who already left or were removed and still have photos there (the take-away
+         *     sheet); `404 not_found` for scopes the caller has nothing in.
+         */
+        get: operations["getLeavePreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/former-places": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Families and frames the caller no longer belongs to (left or removed) where photos they sent are still live,
+         *     for "Take my photos away from Janssens" in the sent history (README §5.21).
+         */
+        get: operations["listFormerPlaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/take-away": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Take the caller's own photos away from this family (README §5.21 "Taking away"): their live posts leave the
+         *     family, and the posts' placements on every subscribed frame (local and on other servers) are taken away with
+         *     the 30-day notice. Works for current members, people who left and people who were removed. Idempotent: a
+         *     second call takes away only what came back or was posted since. `404 not_found` when the caller has nothing
+         *     live in the family.
+         */
+        post: operations["takeAwayFromFeed"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/take-away": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Take the caller's own direct placements (sends, forwards, shares) away from this frame with the 30-day notice.
+         *     Placements that reached the frame through a family are not touched (take them away from the family). Works
+         *     for current members, people who left and people who were removed. `404 not_found` when the caller has nothing
+         *     live on the frame.
+         */
+        post: operations["takeAwayFromFrame"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/taken-away": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Frame owner, admins and `manage_library` members. The frame's "Taken away" groups (one per taking: person,
+         *     date, count, until), newest first, while their 30 days run; the placements themselves are listed with
+         *     `listPlacements?visibility=taken_away&taking_id=`.
+         */
+        get: operations["listFrameTakenAway"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/taken-away": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Family owner and admins. Posts taken away from the family, grouped per taking, while their 30 days run (for
+         *     "Ask to keep" on the family side).
+         */
+        get: operations["listFeedTakenAway"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/keep-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Ask the person who took photos away to let them stay (README §5.21 "Ask to keep"). Exactly one of `frame_id`
+         *     (frame owner, admins, `manage_library`) and `feed_id` (family owner and admins). One request per scope and
+         *     taking: a second answers `409 limit_reached`. `403 forbidden` when the person blocked the caller (the group's
+         *     `can_ask` is then false with `cannot_ask_reason: blocked`), `409 invalid_transition` when the 30 days are over.
+         *     `item_ids` picks photos (items of the taking in that scope); absent means all of them.
+         */
+        post: operations["createKeepRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/keep-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Requests sent to the caller (the person who took photos away), newest first. Default `open` only. */
+        get: operations["listMyKeepRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/keep-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Frame owner, admins and `manage_library` members. Requests made for this frame, newest first (all states, 60 days). */
+        get: operations["listFrameKeepRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/keep-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Family owner and admins. Requests made for this family, newest first (all states, 60 days). */
+        get: operations["listFeedKeepRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/keep-requests/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The person asked and the askers (the scope's managers). Includes the photos asked for (`items`, with thumbnails)
+         *     so the person can pick which to allow.
+         */
+        get: operations["getKeepRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/keep-requests/{requestId}/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The person asked only. `all` and `none` need no `item_ids`; `some` needs at least one of the requested items.
+         *     Allowed photos come back (placement and post as before, credited as before); the rest are deleted when the 30
+         *     days end. The answer is final: `409 already_decided` for a second answer, `409 invalid_transition` after expiry.
+         */
+        post: operations["answerKeepRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/memories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The caller's private memories filter (README §5.21 "Memories"). Nobody else ever sees it. */
+        get: operations["getMemoryPreferences"];
+        /**
+         * @description Replaces the lists that are present (an absent field is left unchanged). People must be people the caller
+         *     shares or shared a family, frame or chat with; unknown ids are dropped. Hiding someone does not block them.
+         */
+        put: operations["updateMemoryPreferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/remote-invites:preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Frame managers on this server (B), before following a family on another server (A). The server fetches A's
+         *     `/.well-known/kinframe`, checks the invite with A (`federationSubscribe` with `preview: true`, signed) and
+         *     returns what the confirmation shows. `422 validation_failed` for a URL that isn't a kinframe subscribe invite,
+         *     `404 invite_invalid` / `410 invite_expired` as A answers, `403 forbidden` when A or this server refuses
+         *     (federation off, not on the allow list, blocked, or the family doesn't allow frames on other servers),
+         *     `502 upstream_unavailable` when A can't be reached. `503 feature_disabled` when federation is off here.
+         */
+        post: operations["previewRemoteInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/remote-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description Families on other servers this frame follows. Frame managers (owner, admin, `change_settings`) see every
+         *     status; other members see `active` ones. Ended ones are listed for 30 days.
+         */
+        get: operations["listRemoteSubscriptions"];
+        put?: never;
+        /**
+         * @description Frame managers. Follow a family on another server with its subscribe invite URL (the family must allow frames
+         *     on other servers and the invite must have `allow_remote`). The server asks A (`federationSubscribe`, signed);
+         *     the result is `active` for pre-approved invites, else `pending` until A's admins decide. Errors as for
+         *     `previewRemoteInvite`; `409 already_subscribed` when the frame already follows that family.
+         */
+        post: operations["createRemoteSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                remoteSubscriptionId: components["parameters"]["RemoteSubscriptionId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Frame managers. Unsubscribe (or withdraw a pending request): tells A (`federationUnsubscribe`, signed, retried
+         *     in the background when A is down) and keeps or removes the copied photos (`placements`, default the
+         *     subscription's `on_end`).
+         */
+        delete: operations["deleteRemoteSubscription"];
+        options?: never;
+        head?: never;
+        /** @description Frame managers. What happens to the copied photos when the subscription ends (`on_end`). */
+        patch: operations["updateRemoteSubscription"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/blocked-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /** @description Family owner and admins. Servers whose frames may not follow this family. */
+        get: operations["listFeedBlockedServers"];
+        put?: never;
+        /**
+         * @description Family owner and admins. Blocks a server for this family: its remote subscriptions to the family end
+         *     (`removed_reason: server_blocked`) and new requests from it are refused. Idempotent per host.
+         */
+        post: operations["blockFeedServer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/blocked-servers/{blockedServerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Family owner and admins. Ended subscriptions stay ended. */
+        delete: operations["unblockFeedServer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/tv-links": {
         parameters: {
             query?: never;
@@ -4247,6 +4643,242 @@ export interface paths {
         patch: operations["operatorUpdateReservation"];
         trace?: never;
     };
+    "/v1/operator/ownership/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Find frames and families for an ownership transfer (README §5.21 "Ownership by the operator"): by id, name, or a
+         *     member's email or display name (`q`, at least 2 characters). At most 20 of each, with their members.
+         */
+        get: operations["operatorSearchOwnership"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/frames/{frameId}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Move ownership of a frame to an existing member (`422 validation_failed` otherwise). The previous owner
+         *     becomes admin, or is removed with `remove_previous: true`. Both get `ownership_changed`; the change is logged
+         *     with the reason (`operatorListOwnershipLog`).
+         */
+        post: operations["operatorTransferFrameOwner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/feeds/{feedId}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The same for a family (feed). The new owner must be a member of the family. */
+        post: operations["operatorTransferFeedOwner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/ownership-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Operator ownership transfers and account-deletion handovers (README §5.21), newest first, kept 2 years. */
+        get: operations["operatorListOwnershipLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/blocked-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Servers blocked for the whole instance (README §5.22 "Trust"). */
+        get: operations["operatorListBlockedServers"];
+        put?: never;
+        /**
+         * @description Block a server instance-wide: every remote subscription with it ends on both sides (`server_blocked`), its
+         *     federation requests answer `403 forbidden`, and this server stops calling it. Idempotent per host.
+         */
+        post: operations["operatorBlockServer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/blocked-servers/{blockedServerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["operatorUnblockServer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/remote-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Servers this one federates with (either direction), with counts and their last contact. */
+        get: operations["operatorListRemoteServers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/federation/v1/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Called by B on A. Checks a `subscribe` invite (token from the invite URL) that has `allow_remote`, in a family
+         *     with `allow_remote_frames`, and records a remote subscription for B's frame: `active` at once (the invite is
+         *     pre-approved), otherwise `pending`. With `preview: true` nothing is recorded and the answer describes the
+         *     family for B's confirmation sheet. A repeat for the same B frame and family returns the live subscription.
+         *     Errors: `401 unauthorized` (bad or missing signature), `403 forbidden` (federation off, not allowed, server
+         *     blocked, family doesn't allow remote frames, invite without `allow_remote`), `404 invite_invalid`,
+         *     `410 invite_expired`, `409 limit_reached` (`limits.max_subscriptions_per_feed` counts remote ones too).
+         */
+        post: operations["federationSubscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/federation/v1/subscriptions/{subscriptionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Either side ends a remote subscription; `subscriptionId` is always A's id. Called by B on A (B's frame
+         *     unsubscribed) or by A on B (A's admins removed it, the family was deleted, or B was blocked). Idempotent.
+         */
+        delete: operations["federationUnsubscribe"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/federation/v1/subscriptions/{subscriptionId}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Called by B on A, signed by the server the subscription belongs to (`404 not_found` for anyone else). The
+         *     family's changes for this subscription after `cursor`, in order (README §5.22 "Cursor"). Without a cursor:
+         *     the history backfill first, then live changes. While `pending` the page is empty with `status: pending`.
+         */
+        get: operations["federationChanges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/federation/v1/subscriptions/{subscriptionId}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Called by B on A: the frame's reactions, quick replies and "seen" on placements of this subscription, in
+         *     batches, and the frame's name and *show comments* when they change (`frame`, also with no events). Events for
+         *     posts that are gone are ignored. Idempotent per event (`id`).
+         */
+        post: operations["federationActivity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/federation/v1/ping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Called by A on B after new changes (debounced 10 s): B pulls those subscriptions soon. Unknown ids are ignored.
+         *     Always `202` for a valid signature; a ping never carries data.
+         */
+        post: operations["federationPing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4418,6 +5050,37 @@ export interface components {
              * @default false
              */
             email_digest?: boolean;
+            /**
+             * @description Stable random id of this server (generated at first start), so apps signed in to several servers can tell
+             *     them apart and deduplicate accounts (docs/spec/multi-server.md §2.3).
+             */
+            server_id?: string;
+            /**
+             * @description The operator-set label of this server (`KINFRAME_SERVER_LABEL`, default the public host name), shown as the server chip in apps with several accounts.
+             * @example Janssens
+             */
+            server_name?: string;
+            /**
+             * Format: uri
+             * @description The server's public base URL (the `server` field of push payloads and the `kinframe-server` header of federation requests).
+             */
+            base_url?: string;
+            /**
+             * @description API major version, `v1`.
+             * @example v1
+             */
+            api_version?: string;
+            federation?: components["schemas"]["FederationInfo"];
+            /**
+             * @description True when the server has the leaving choices, take-away, keep requests, the account deletion handover and the memories filter (README §5.21).
+             * @default false
+             */
+            leaving?: boolean;
+            /**
+             * @description True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
+             * @default false
+             */
+            remote_families?: boolean;
             /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
@@ -5214,6 +5877,13 @@ export interface components {
              * @description Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
              */
             thumb_url?: string | null;
+            /** @description Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person. */
+            remote_sender?: components["schemas"]["ItemRemoteSender"] | null;
+            /**
+             * @description Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
+             *     `sender_id` is now the new owner; show "<former_sender_name> (former member)" as the credit.
+             */
+            former_sender_name?: string | null;
         };
         /**
          * @description An app a frame can import leftover photos from.
@@ -5304,6 +5974,14 @@ export interface components {
             backfill?: boolean;
             /** @description Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them. */
             prompt_id?: components["schemas"]["Id"] | null;
+            /** @description Set while the sender took it away and it waits in the frame's trash (`visibility: taken_away`, README §5.21). Never in the device change feed (the frame gets `placement.remove`). */
+            taken_away?: components["schemas"]["PlacementTakenAway"] | null;
+            /**
+             * @description Set on copies of posts of a family on another server (README §5.22). `origin` is then `feed`,
+             *     `origin_feed_id` null and `origin_feed_name` the remote family's name, so frames show "Lies · Janssens"
+             *     without knowing about servers.
+             */
+            origin_remote?: components["schemas"]["PlacementRemote"] | null;
         };
         ShareResult: {
             /** @description The placements created on the target frames (empty for a dry run). */
@@ -5442,6 +6120,8 @@ export interface components {
             pending_subscription_count?: number;
             /** @description Owner and admins only (0 for posters). */
             pending_join_request_count?: number;
+            /** @description Frames on other servers may follow this family through `subscribe` invites with `allow_remote` (default off; README §5.22). */
+            allow_remote_frames?: boolean;
         };
         FeedCreate: {
             name: string;
@@ -5464,6 +6144,8 @@ export interface components {
             posters_can_invite?: boolean;
             /** @default false */
             posters_can_add_birthdays?: boolean;
+            /** @default false */
+            allow_remote_frames?: boolean;
         };
         FeedUpdate: {
             name?: string;
@@ -5484,6 +6166,8 @@ export interface components {
             posters_can_invite?: boolean;
             /** @description Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them. */
             posters_can_add_birthdays?: boolean;
+            /** @description Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`). */
+            allow_remote_frames?: boolean;
         };
         FeedMember: {
             user_id: components["schemas"]["Id"];
@@ -5509,6 +6193,11 @@ export interface components {
             expires_in_hours?: number;
             /** @description Shown to admins when approving a join request. */
             note?: string;
+            /**
+             * @description `subscribe` only, and only when the family has `allow_remote_frames`: frames on other servers may use this link (README §5.22).
+             * @default false
+             */
+            allow_remote?: boolean;
         };
         FeedInvite: {
             id: components["schemas"]["Id"];
@@ -5530,6 +6219,8 @@ export interface components {
             note?: string | null;
             /** Format: date-time */
             expires_at: string;
+            /** @description Frames on other servers may use this link. */
+            allow_remote?: boolean;
         };
         FeedInvitePreview: {
             /** @description For `acceptFeedInvite` (also after a code lookup). */
@@ -5668,6 +6359,12 @@ export interface components {
             can_manage?: boolean;
             /** @description The caller may approve, reject and remove (feed side). */
             can_decide?: boolean;
+            /**
+             * @description Set for a frame on another server (README §5.22; only in `listFeedSubscriptions`). `frame.id` is then the
+             *     id that server gave its frame, `frame.online` is absent, and approve, reject and delete work as for local
+             *     ones; pause, resume and history changes are the other server's.
+             */
+            remote?: components["schemas"]["SubscriptionRemote"] | null;
         };
         /**
          * @description Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
@@ -7944,6 +8641,8 @@ export interface components {
             item_id?: components["schemas"]["Id"] | null;
             /** Format: date-time */
             at?: string;
+            /** @description A frame on another server (README §5.22); `frame_id` is then the remote subscription's id. */
+            server_name?: string | null;
         };
         ReactionList: {
             people: {
@@ -7988,6 +8687,8 @@ export interface components {
                 item_id?: components["schemas"]["Id"] | null;
                 reaction?: components["schemas"]["Reaction"] | null;
                 reply?: components["schemas"]["ReplyPreset"] | null;
+                /** @description A frame on another server (README §5.22): show "Oma's frame (kinframe.appmire.be)". `frame_id` is then the remote subscription's id. */
+                server_name?: string | null;
             } | null;
             /** @description Null for frame entries and tombstones. */
             body?: string | null;
@@ -8201,8 +8902,10 @@ export interface components {
             muted_until?: string | null;
             /** @description The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only). */
             archived: boolean;
-            /** @description No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller. */
+            /** @description No sending: the family or circle was deleted, or (direct) the other account is gone, blocked the caller, or the two no longer share a family or frame (README §5.21). */
             read_only?: boolean;
+            /** @description Why `read_only`: `no_longer_contacts` shows "You can no longer message Lies". */
+            read_only_reason?: ("archived" | "account_gone" | "blocked" | "no_longer_contacts") | null;
             /** @description "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on. */
             read_receipts?: boolean;
             /** Format: date-time */
@@ -8903,7 +9606,7 @@ export interface components {
         PushPayload: {
             /** @description The websocket event type this push stands for. */
             type: string;
-            /** @description The push key (`FamilySocialPushKey` and the older ones in README §6.3). */
+            /** @description The push key (`FamilySocialPushKey`, `LeavingPushKey` and the older ones in README §6.3). */
             key: string;
             title: string;
             body: string;
@@ -8913,6 +9616,633 @@ export interface components {
             /** @description A newer push with the same tag replaces the older one. */
             tag?: string;
             actions?: components["schemas"]["PushAction"][];
+            /**
+             * Format: uri
+             * @description The sending server's base URL (discovery `base_url`), so apps with several accounts open the right one (README §6.3). Absent from older servers: use the account the push endpoint belongs to.
+             */
+            server?: string;
+        };
+        /**
+         * @description `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
+         * @enum {string}
+         */
+        PhotosChoice: "keep" | "take";
+        /**
+         * @description `keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").
+         * @enum {string}
+         */
+        CommentsChoice: "keep" | "delete";
+        LeaveFeedRequest: {
+            photos?: components["schemas"]["PhotosChoice"];
+            comments?: components["schemas"]["CommentsChoice"];
+            /**
+             * @description Frames to leave in the same request (frames the caller is a member of, not owner, that subscribe to this
+             *     family; others answer `422 validation_failed`). The same `photos` choice applies to the caller's direct
+             *     placements on them.
+             */
+            leave_frame_ids?: components["schemas"]["Id"][];
+            /**
+             * @deprecated
+             * @description Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+             */
+            remove_my_posts?: boolean;
+        };
+        LeaveFrameRequest: {
+            photos?: components["schemas"]["PhotosChoice"];
+            /**
+             * @deprecated
+             * @description Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+             */
+            remove_my_items?: boolean;
+        };
+        TakeAwayRequest: {
+            comments?: components["schemas"]["CommentsChoice"];
+        };
+        /**
+         * @description The answer of leaving with `photos` and of the take-away endpoints. `taking_id` is null when nothing was taken
+         *     away (`photos: keep`, or nothing live).
+         */
+        TakeAwayResult: {
+            taking_id?: components["schemas"]["Id"] | null;
+            /** @description Items taken away (each counted once */
+            photos_taken_away: number;
+            comments_deleted: number;
+            /**
+             * Format: date-time
+             * @description When the frames' trash deletes what nobody asked to keep.
+             */
+            until?: string | null;
+            /** @description Frames that lost photos (local ones; frames on other servers are counted in `remote_frames`). */
+            frames: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                photos: number;
+            }[];
+            /** @description Frames on other servers following the family that were told to remove the photos. */
+            remote_frames?: number;
+            /** @description `leaveFeed` with `leave_frame_ids`: the frames actually left. */
+            left_frame_ids?: components["schemas"]["Id"][];
+        };
+        LeavePreview: {
+            /** @enum {string} */
+            scope: "feed" | "frame";
+            feed_id?: components["schemas"]["Id"] | null;
+            frame_id?: components["schemas"]["Id"] | null;
+            /** @description The family's or frame's name. */
+            name: string;
+            /** @description The caller is still a member (false for the take-away sheet of people who left or were removed). */
+            member: boolean;
+            /** @description The caller owns it (must transfer ownership before leaving). */
+            owner?: boolean;
+            /** @description The caller's own live items in this scope (family posts; or direct placements on the frame). */
+            photos: number;
+            /** @description Families: the caller's live comments in the family. */
+            comments?: number;
+            /** @description The caller's items in this scope still in a frame's trash from an earlier taking. */
+            already_taken_away?: number;
+            /** @description Families: frames the caller is a member of that subscribe to the family (the "Leave this frame too" checkboxes). */
+            frames?: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                role: components["schemas"]["Role"];
+                /** @description False for frames the caller owns (transfer first). */
+                can_leave?: boolean;
+                /** @description Checked by default (the frame gets this family's photos and the caller is not its owner). */
+                suggested: boolean;
+                /** @description The caller's own direct placements on that frame. */
+                direct_photos?: number;
+            }[];
+        };
+        FormerPlaces: {
+            feeds: {
+                feed_id: components["schemas"]["Id"];
+                name: string;
+                photos: number;
+                /** Format: date-time */
+                left_at?: string | null;
+            }[];
+            frames: {
+                frame_id: components["schemas"]["Id"];
+                name: string;
+                photos: number;
+                /** Format: date-time */
+                left_at?: string | null;
+            }[];
+        };
+        /** @description A placement taken away by its sender (README §5.21). It is off the frame and listed in the trash under "Taken away by …". */
+        PlacementTakenAway: {
+            taking_id: components["schemas"]["Id"];
+            /** @description Null for deleted accounts. */
+            by_user_id?: components["schemas"]["Id"] | null;
+            by_name: string;
+            /** Format: date-time */
+            at: string;
+            /** Format: date-time */
+            until: string;
+            keep_request_status?: components["schemas"]["KeepRequestStatus"] | null;
+        };
+        /** @description One taking as a frame's or family's managers see it. */
+        TakenAwayGroup: {
+            taking_id: components["schemas"]["Id"];
+            by?: components["schemas"]["PersonRef"] | null;
+            by_name: string;
+            /** Format: date-time */
+            taken_at: string;
+            /** Format: date-time */
+            until: string;
+            /** @description Items still taken away in this scope. */
+            count: number;
+            /** @description Short-lived signed thumbnails of the first few. */
+            preview_thumb_urls?: string[];
+            keep_request?: components["schemas"]["KeepRequest"] | null;
+            /** @description The caller may ask to keep now. */
+            can_ask: boolean;
+            /** @description `blocked`: show "Tom doesn't accept requests". */
+            cannot_ask_reason?: ("blocked" | "already_asked" | "expired" | "account_deleted" | "not_allowed") | null;
+        };
+        TakenAwayGroupList: {
+            groups: components["schemas"]["TakenAwayGroup"][];
+        };
+        /**
+         * @description `open` until answered or the 30 days end; `allowed` (all), `partly_allowed` (some), `declined`, `expired`.
+         * @enum {string}
+         */
+        KeepRequestStatus: "open" | "allowed" | "partly_allowed" | "declined" | "expired";
+        KeepRequestCreate: {
+            taking_id: components["schemas"]["Id"];
+            frame_id?: components["schemas"]["Id"];
+            feed_id?: components["schemas"]["Id"];
+            /** @description The photos to ask for; absent means every item of the taking in this scope. */
+            item_ids?: components["schemas"]["Id"][];
+            /** @description Optional words for the person ("The ones with the children */
+            note?: string;
+        };
+        KeepRequestAnswer: {
+            /** @enum {string} */
+            allow: "all" | "some" | "none";
+            /** @description `some` only: the allowed items (a subset of the request's). */
+            item_ids?: components["schemas"]["Id"][];
+        };
+        KeepRequest: {
+            id: components["schemas"]["Id"];
+            status: components["schemas"]["KeepRequestStatus"];
+            /** @enum {string} */
+            scope: "frame" | "feed";
+            frame_id?: components["schemas"]["Id"] | null;
+            frame_name?: string | null;
+            feed_id?: components["schemas"]["Id"] | null;
+            feed_name?: string | null;
+            taking_id: components["schemas"]["Id"];
+            /** @description The person asked (who took the photos away). */
+            person?: components["schemas"]["PersonRef"] | null;
+            asked_by?: components["schemas"]["PersonRef"] | null;
+            asked_by_name: string;
+            note?: string | null;
+            /** Format: date-time */
+            asked_at: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            answered_at?: string | null;
+            /** @description Items asked for. */
+            item_count: number;
+            allowed_count?: number;
+            /** @description `getKeepRequest` only: the items asked for, with `allowed` once answered. */
+            items?: {
+                item: components["schemas"]["Item"];
+                allowed?: boolean | null;
+            }[];
+        };
+        KeepRequestList: {
+            requests: components["schemas"]["KeepRequest"][];
+        };
+        AccountDeletion: {
+            /**
+             * @description `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+             *     still in a family or on a frame is handed over to that family's or frame's owner and stays credited
+             *     "<name> (former member)" (README §5.21 "Account deletion").
+             * @default take
+             * @enum {string}
+             */
+            photos?: "take" | "leave";
+        };
+        MemoryPreferences: {
+            /** @description People left out of the caller's memories. */
+            hidden_people: components["schemas"]["PersonRef"][];
+            /** @description Posts (feed or frame posts) never shown again as a memory. */
+            hidden_memories: components["schemas"]["Id"][];
+        };
+        MemoryPreferencesUpdate: {
+            hidden_people?: components["schemas"]["Id"][];
+            hidden_memories?: components["schemas"]["Id"][];
+        };
+        OperatorOwnerTransfer: {
+            user_id: components["schemas"]["Id"];
+            /** @description Kept in the ownership log; not shown to the people. */
+            reason: string;
+            /**
+             * @description Remove the previous owner instead of making them admin.
+             * @default false
+             */
+            remove_previous?: boolean;
+        };
+        OperatorScopeMember: {
+            user_id: components["schemas"]["Id"];
+            display_name: string;
+            email?: string | null;
+            /** @description Frame role (`Role`) or family role (`FeedRole`). */
+            role: string;
+        };
+        OperatorScope: {
+            /** @enum {string} */
+            kind: "frame" | "feed";
+            id: components["schemas"]["Id"];
+            name: string;
+            /** Format: date-time */
+            created_at?: string;
+            members: components["schemas"]["OperatorScopeMember"][];
+        };
+        OperatorOwnershipMatches: {
+            frames: components["schemas"]["OperatorScope"][];
+            feeds: components["schemas"]["OperatorScope"][];
+        };
+        OwnershipLogEntry: {
+            id: components["schemas"]["Id"];
+            /** @enum {string} */
+            kind: "operator_transfer" | "account_handover";
+            /** Format: date-time */
+            at: string;
+            scope_kind?: ("frame" | "feed") | null;
+            scope_id?: components["schemas"]["Id"] | null;
+            scope_name?: string | null;
+            /** @description Previous owner; for handovers the deleted account's name. */
+            from_name?: string | null;
+            to_name?: string | null;
+            operator_name?: string | null;
+            reason?: string | null;
+            removed_previous?: boolean | null;
+            /** @description Handovers only. */
+            item_count?: number | null;
+        };
+        OwnershipLogPage: {
+            entries: components["schemas"]["OwnershipLogEntry"][];
+            next_cursor: string | null;
+        };
+        /** @description `keep_request.updated`: a keep request was made, answered or expired (the person asked and the scope's managers). */
+        KeepRequestEvent: {
+            /** @enum {string} */
+            type: "keep_request.updated";
+            request: components["schemas"]["KeepRequest"];
+        };
+        /** @description `placement.updated`: placements were taken away or came back (the frame's library viewers and the sender). */
+        PlacementUpdatedEvent: {
+            /** @enum {string} */
+            type: "placement.updated";
+            frame_id: components["schemas"]["Id"];
+            placement_ids: components["schemas"]["Id"][];
+            /** @enum {string} */
+            reason: "taken_away" | "restored" | "purged";
+            taking_id?: components["schemas"]["Id"] | null;
+        };
+        /** @description `remote_subscription.updated`: a frame's follow of a family on another server changed status, synced or failed (the frame's managers; README §5.22). */
+        RemoteSubscriptionEvent: {
+            /** @enum {string} */
+            type: "remote_subscription.updated";
+            frame_id: components["schemas"]["Id"];
+            remote_subscription: components["schemas"]["RemoteSubscription"];
+        };
+        /**
+         * @description Push `key`s added by leaving (README §6.3). `photos_taken_away`: frame owner/admins and family owner/admins
+         *     (`ids`: `taking_id`, `frame_id` or `feed_id`). `keep_request`: the person asked (`request_id`).
+         *     `keep_answered`: the asker (`request_id`). `ownership_changed`: the old and the new owner (`frame_id` or
+         *     `feed_id`).
+         * @enum {string}
+         */
+        LeavingPushKey: "photos_taken_away" | "keep_request" | "keep_answered" | "ownership_changed";
+        /** @description The server's federation identity in `/.well-known/kinframe` (README §5.22). */
+        FederationInfo: {
+            /** @description False when the operator turned federation off (`KINFRAME_FEDERATION=off`); the rest is then absent. */
+            enabled: boolean;
+            /** @description The `keyid` of the current signing key */
+            key_id?: string;
+            /** @description The current Ed25519 public key */
+            public_key?: string;
+            /** @description Every key a signature may use, the current one first; a rotated key stays here for 7 days. */
+            keys?: {
+                key_id: string;
+                public_key: string;
+                /** Format: date-time */
+                expires_at?: string | null;
+            }[];
+            endpoints?: {
+                /**
+                 * Format: uri
+                 * @example https://kinframe.janssens.be/federation/v1/subscriptions
+                 */
+                subscriptions?: string;
+                /** Format: uri */
+                ping?: string;
+            };
+        };
+        /** @description Another kinframe server as this one knows it. */
+        RemoteServer: {
+            /** @description Its stable `server_id` (from its well-known document). */
+            server_id?: string | null;
+            /** @example Janssens */
+            server_name: string;
+            /**
+             * Format: uri
+             * @description Its base URL.
+             */
+            server_url: string;
+            /** @example kinframe.janssens.be */
+            host?: string;
+            /** Format: date-time */
+            last_contact_at?: string | null;
+            last_error?: string | null;
+            /** @description Operator listing: frames there following families here. */
+            subscribers?: number;
+            /** @description Operator listing: frames here following families there. */
+            follows?: number;
+            blocked?: boolean;
+        };
+        RemoteInviteRef: {
+            /**
+             * Format: uri
+             * @example https://kinframe.janssens.be/fi/9cQ2xV0kFq7Lm3Zt8bW1rA
+             */
+            invite_url: string;
+        };
+        RemoteInvitePreview: {
+            server: components["schemas"]["RemoteServer"];
+            feed_name: string;
+            /**
+             * Format: uri
+             * @description A signed thumbnail on A, valid for an hour.
+             */
+            cover_url?: string | null;
+            /** @description Frames that follow the family (local and remote). */
+            frame_count?: number;
+            /** @description The family's admins must approve first. */
+            requires_approval?: boolean;
+            /** @description This server's name */
+            this_server_name: string;
+            this_server_host?: string;
+        };
+        /**
+         * @description When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.
+         * @default remove
+         * @enum {string}
+         */
+        RemoteOnEnd: "remove" | "keep";
+        /** @enum {string} */
+        RemoteEndReason: "unsubscribed" | "removed_by_feed" | "feed_deleted" | "server_blocked" | "withdrawn" | "rejected";
+        RemoteSubscriptionCreate: {
+            /** Format: uri */
+            invite_url: string;
+            history?: components["schemas"]["SubscriptionHistory"];
+            /** @description Required with `history: last_n`. */
+            history_count?: number;
+            /** @default true */
+            birthdays?: boolean;
+            on_end?: components["schemas"]["RemoteOnEnd"];
+        };
+        RemoteSubscriptionUpdate: {
+            on_end?: components["schemas"]["RemoteOnEnd"];
+            birthdays?: boolean;
+        };
+        /** @description A frame on this server following a family on another server (B's side). */
+        RemoteSubscription: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            /**
+             * @description `pending` (A's admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).
+             * @enum {string}
+             */
+            status: "pending" | "active" | "rejected" | "removed" | "error";
+            feed_name: string;
+            /** Format: uri */
+            cover_url?: string | null;
+            server: components["schemas"]["RemoteServer"];
+            history: components["schemas"]["SubscriptionHistory"];
+            history_count?: number | null;
+            birthdays?: boolean;
+            on_end: components["schemas"]["RemoteOnEnd"];
+            /** @description Photos copied to this server and on the frame. */
+            item_count?: number;
+            requested_by_name?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            activated_at?: string | null;
+            /** Format: date-time */
+            ended_at?: string | null;
+            removed_reason?: components["schemas"]["RemoteEndReason"] | null;
+            /** Format: date-time */
+            last_sync_at?: string | null;
+            last_error?: string | null;
+            backfill?: {
+                /** @enum {string} */
+                state?: "idle" | "running";
+                placed?: number;
+                total?: number;
+            };
+        };
+        /** @description `Subscription.remote`: the subscriber is a frame on another server (A's side). */
+        SubscriptionRemote: {
+            server_id?: string | null;
+            server_name: string;
+            /** Format: uri */
+            server_url: string;
+            host?: string;
+            /** @description The frame manager on that server, as it reported. */
+            requested_by_name?: string | null;
+            /** @description The remote frame shows comment cards (it then receives comment summaries). */
+            show_comments?: boolean;
+        };
+        /** @description `Placement.origin_remote`: the placement is a copy of a post of a family on another server (B's side). */
+        PlacementRemote: {
+            remote_subscription_id: components["schemas"]["Id"];
+            server_name: string;
+            /** Format: uri */
+            server_url: string;
+            feed_name: string;
+            /** @description The poster's display name on A ("Lies"). */
+            sender_name?: string;
+        };
+        /** @description `Item.remote_sender`: copied from another server; `sender_id` is then the remote sender record's id. */
+        ItemRemoteSender: {
+            name: string;
+            server_name: string;
+            /** Format: uri */
+            server_url: string;
+        };
+        /** @description `host` (e.g. `kinframe.example.org`) or a base URL in `server_url`. */
+        BlockedServerCreate: {
+            host?: string;
+            /** Format: uri */
+            server_url?: string;
+            reason?: string;
+        };
+        BlockedServer: {
+            id: components["schemas"]["Id"];
+            host: string;
+            server_name?: string | null;
+            reason?: string | null;
+            /** @description Null for instance-wide blocks. */
+            feed_id?: components["schemas"]["Id"] | null;
+            created_by_name?: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        FederationSubscribeRequest: {
+            /** @description The token of the `/fi/<token>` invite URL. */
+            invite_token: string;
+            /**
+             * @description Check and describe only; record nothing.
+             * @default false
+             */
+            preview?: boolean;
+            frame: {
+                id: components["schemas"]["Id"];
+                name: string;
+                /** @default false */
+                show_comments?: boolean;
+            };
+            follow_id?: components["schemas"]["Id"];
+            history?: components["schemas"]["SubscriptionHistory"];
+            history_count?: number;
+            /** @default true */
+            birthdays?: boolean;
+            /** @description The frame manager on B */
+            requested_by_name?: string;
+        };
+        FederationSubscription: {
+            /** @description A's id; null for a preview. */
+            subscription_id?: components["schemas"]["Id"] | null;
+            /** @enum {string} */
+            status: "preview" | "pending" | "active" | "rejected" | "removed";
+            feed: {
+                name: string;
+                /** Format: uri */
+                cover_url?: string | null;
+                frame_count?: number;
+            };
+            requires_approval?: boolean;
+            server_name?: string;
+        };
+        FederationItem: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["MediaKind"];
+            caption?: string | null;
+            /** Format: date-time */
+            captured_at?: string | null;
+            focal_point?: components["schemas"]["FocalPoint"];
+            fit?: components["schemas"]["Fit"];
+            width?: number;
+            height?: number;
+            duration_ms?: number | null;
+            has_audio?: boolean | null;
+            bytes: number;
+            /** @description Of the master */
+            sha256?: string;
+            /**
+             * @example image/webp
+             * @example video/mp4
+             */
+            mime: string;
+            /**
+             * Format: uri
+             * @description Signed
+             */
+            master_url: string;
+            /** Format: date-time */
+            master_url_expires_at: string;
+            /**
+             * Format: uri
+             * @description Live items: the motion clip's master, signed like `master_url`.
+             */
+            motion_url?: string | null;
+        };
+        FederationPost: {
+            id: components["schemas"]["Id"];
+            /** @description Stable opaque key of the poster within this subscription (not the user id). */
+            poster_key: string;
+            poster_name: string;
+            /** Format: date-time */
+            created_at: string;
+            /** @description History (activation or a history change); B places it quietly. */
+            backfill?: boolean;
+            items: components["schemas"]["FederationItem"][];
+        };
+        FederationComment: {
+            first_name: string;
+            text?: string;
+            /** Format: date-time */
+            at: string;
+        };
+        FederationBirthday: {
+            id: components["schemas"]["Id"];
+            name: string;
+            month: number;
+            day: number;
+            /** @description Only with the person's *show age*. */
+            year?: number | null;
+        };
+        FederationChange: {
+            /**
+             * @description `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+             *     the post is gone (unsend, admin removal, taking away, circle change). `items.remove`: some items of a post
+             *     are gone. `birthdays`: the family's birthday people now (replace). `comments`: the newest comments of a
+             *     post (only with *show comments*; replace). `subscription`: the subscription's status changed.
+             * @enum {string}
+             */
+            type: "post.upsert" | "post.remove" | "items.remove" | "birthdays" | "comments" | "subscription";
+            post?: components["schemas"]["FederationPost"];
+            post_id?: components["schemas"]["Id"];
+            item_ids?: components["schemas"]["Id"][];
+            birthdays?: components["schemas"]["FederationBirthday"][];
+            comments?: components["schemas"]["FederationComment"][];
+            /** @enum {string} */
+            status?: "pending" | "active" | "rejected" | "removed";
+            reason?: components["schemas"]["RemoteEndReason"];
+        };
+        FederationChangePage: {
+            changes: components["schemas"]["FederationChange"][];
+            /** @description Pass it as `cursor` on the next call; store it only after the page was applied. */
+            cursor: string;
+            /** @description More changes are waiting; pull again at once. */
+            more: boolean;
+            /**
+             * @description The given cursor was too old: this page restarts from a full snapshot (B drops what isn't in it).
+             * @default false
+             */
+            reset?: boolean;
+            /** @enum {string} */
+            status: "pending" | "active" | "rejected" | "removed";
+            /** @description The family's current name (credit "Lies · Janssens"). */
+            feed_name?: string;
+        };
+        FederationActivity: {
+            frame?: {
+                name?: string;
+                show_comments?: boolean;
+            };
+            events?: {
+                id: components["schemas"]["Id"];
+                /** @enum {string} */
+                kind: "reaction" | "reply" | "seen";
+                post_id: components["schemas"]["Id"];
+                item_id: components["schemas"]["Id"];
+                /** @description `reaction`: null clears it. */
+                reaction?: components["schemas"]["Reaction"] | null;
+                reply?: components["schemas"]["ReplyPreset"];
+                /** Format: date-time */
+                at: string;
+            }[];
+        };
+        FederationPing: {
+            subscription_ids: components["schemas"]["Id"][];
         };
     };
     responses: {
@@ -8952,6 +10282,8 @@ export interface components {
         MessageId: components["schemas"]["Id"];
         ReportId: components["schemas"]["Id"];
         RequestId: components["schemas"]["Id"];
+        RemoteSubscriptionId: components["schemas"]["Id"];
+        BlockedServerId: components["schemas"]["Id"];
         TargetKind: components["schemas"]["ReactionTargetKind"];
         TargetId: components["schemas"]["Id"];
         /** @description A Monday (YYYY-MM-DD); other days answer `422 validation_failed`. */
@@ -9047,15 +10379,22 @@ export interface operations {
     };
     deleteMe: {
         parameters: {
-            query: {
-                /** @description Also remove everything this user sent from all frames. */
-                remove_items: boolean;
+            query?: {
+                /**
+                 * @deprecated
+                 * @description Older clients: `true` means `photos: take`, `false` means `photos: leave`.
+                 */
+                remove_items?: boolean;
             };
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AccountDeletion"];
+            };
+        };
         responses: {
             /** @description Deleted */
             204: {
@@ -9356,13 +10695,19 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": {
-                    /** @default false */
-                    remove_my_items?: boolean;
-                };
+                "application/json": components["schemas"]["LeaveFrameRequest"];
             };
         };
         responses: {
+            /** @description Left */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakeAwayResult"];
+                };
+            };
             /** @description Left */
             204: {
                 headers: {
@@ -9943,7 +11288,10 @@ export interface operations {
             query?: {
                 cursor?: components["parameters"]["Cursor"];
                 limit?: components["parameters"]["Limit"];
-                visibility?: "visible" | "hidden" | "trashed" | "pending_moderation" | "all";
+                /** @description `taken_away` (managers only): placements their senders took away, still in the 30-day trash (README §5.21); never part of `all`. */
+                visibility?: "visible" | "hidden" | "trashed" | "pending_moderation" | "all" | "taken_away";
+                /** @description With `visibility: taken_away`: only this taking. */
+                taking_id?: components["schemas"]["Id"];
                 sender_id?: components["schemas"]["Id"];
                 kind?: components["schemas"]["MediaKind"];
                 album_id?: components["schemas"]["Id"];
@@ -9978,6 +11326,8 @@ export interface operations {
                             videos?: number;
                             hidden?: number;
                             trashed?: number;
+                            /** @description Managers only: placements taken away by their senders (README §5.21). */
+                            taken_away?: number;
                         };
                     };
                 };
@@ -10369,16 +11719,19 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": {
-                    /**
-                     * @description Also remove your posts from the feed and every subscribed frame.
-                     * @default false
-                     */
-                    remove_my_posts?: boolean;
-                };
+                "application/json": components["schemas"]["LeaveFeedRequest"];
             };
         };
         responses: {
+            /** @description Left */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakeAwayResult"];
+                };
+            };
             /** @description Left */
             204: {
                 headers: {
@@ -14348,6 +15701,544 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    getLeavePreview: {
+        parameters: {
+            query?: {
+                feed_id?: components["schemas"]["Id"];
+                frame_id?: components["schemas"]["Id"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeavePreview"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFormerPlaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Places */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormerPlaces"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    takeAwayFromFeed: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["TakeAwayRequest"];
+            };
+        };
+        responses: {
+            /** @description Taken away */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakeAwayResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    takeAwayFromFrame: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Taken away */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakeAwayResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFrameTakenAway: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Groups */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakenAwayGroupList"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedTakenAway: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Groups */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakenAwayGroupList"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createKeepRequest: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeepRequestCreate"];
+            };
+        };
+        responses: {
+            /** @description Asked */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeepRequest"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMyKeepRequests: {
+        parameters: {
+            query?: {
+                status?: "open" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeepRequestList"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFrameKeepRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeepRequestList"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedKeepRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeepRequestList"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getKeepRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: components["parameters"]["RequestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeepRequest"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    answerKeepRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: components["parameters"]["RequestId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeepRequestAnswer"];
+            };
+        };
+        responses: {
+            /** @description Answered */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeepRequest"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getMemoryPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Preferences */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryPreferences"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateMemoryPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemoryPreferencesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryPreferences"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    previewRemoteInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoteInviteRef"];
+            };
+        };
+        responses: {
+            /** @description Preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteInvitePreview"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listRemoteSubscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Remote subscriptions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteSubscription"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createRemoteSubscription: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoteSubscriptionCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteSubscription"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteRemoteSubscription: {
+        parameters: {
+            query?: {
+                placements?: components["schemas"]["RemoteOnEnd"];
+            };
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                remoteSubscriptionId: components["parameters"]["RemoteSubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unsubscribed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateRemoteSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                remoteSubscriptionId: components["parameters"]["RemoteSubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoteSubscriptionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteSubscription"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedBlockedServers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Blocked servers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockedServer"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    blockFeedServer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BlockedServerCreate"];
+            };
+        };
+        responses: {
+            /** @description Blocked */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockedServer"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    unblockFeedServer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                blockedServerId: components["parameters"]["BlockedServerId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unblocked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     listTvLinks: {
         parameters: {
             query?: never;
@@ -16167,6 +18058,322 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ShopReservation"];
                 };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorSearchOwnership: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matches */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorOwnershipMatches"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorTransferFrameOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperatorOwnerTransfer"];
+            };
+        };
+        responses: {
+            /** @description Transferred */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorTransferFeedOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperatorOwnerTransfer"];
+            };
+        };
+        responses: {
+            /** @description Transferred */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorListOwnershipLog: {
+        parameters: {
+            query?: {
+                cursor?: components["parameters"]["Cursor"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Log */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipLogPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorListBlockedServers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Blocked servers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockedServer"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorBlockServer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BlockedServerCreate"];
+            };
+        };
+        responses: {
+            /** @description Blocked */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockedServer"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorUnblockServer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                blockedServerId: components["parameters"]["BlockedServerId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unblocked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorListRemoteServers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Remote servers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteServer"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    federationSubscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FederationSubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description Preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FederationSubscription"];
+                };
+            };
+            /** @description Recorded */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FederationSubscription"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    federationUnsubscribe: {
+        parameters: {
+            query?: {
+                reason?: components["schemas"]["RemoteEndReason"];
+            };
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ended */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    federationChanges: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Changes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FederationChangePage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    federationActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FederationActivity"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    federationPing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FederationPing"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             default: components["responses"]["Problem"];
         };

@@ -16,7 +16,7 @@ import (
 // reconcile (history backfill and trim) and sweeps after removals. Long work
 // is done in batches; a job re-enqueues itself until it is done.
 func (s *Server) RunJob(ctx context.Context, job *store.Job) (bool, error) {
-	for _, run := range []func(context.Context, *store.Job) (bool, error){s.runSocialJob, s.runChatJob, s.runEngagementJob} {
+	for _, run := range []func(context.Context, *store.Job) (bool, error){s.runSocialJob, s.runChatJob, s.runEngagementJob, s.runLeavingJob, s.runFederationJob} {
 		if handled, err := run(ctx, job); handled {
 			return true, err
 		}

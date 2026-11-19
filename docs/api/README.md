@@ -39,7 +39,8 @@ Default production server: `https://kinframe.appmire.be` (see `docs/deploy.md`).
 ## 2. Discovery
 
 `GET /.well-known/kinframe` needs no auth and is not versioned. Apps and frames call it when a server URL is
-entered. See `docs/architecture.md` → *Server discovery*.
+entered. See `docs/architecture.md` → *Server discovery*. It is also the server's public identity for apps with
+several accounts and for other servers (`server_id`, `server_name`, `base_url`, `federation`; §5.22).
 
 ## 3. Authentication
 
@@ -104,7 +105,14 @@ User ─┬─< Membership >─┬─ Frame ──── Device (current credent
       │   read position, mute                                                       │ reply_to, shared_post, link preview,
       │                                                                             └ system (put on a frame, recap, …)
       ├─< Block, Report, ThreadRead, ReminderPreferences, Nudge (reminder log), Milestone, WeeklySummary
+      ├─< Taking (feed | frame | account; 30 days) ─< TakingItem ──> Item     (placements/posts: taken_away_*, taking_id)
+      │     └─< KeepRequest (frame or feed, one per taking) ─< KeepRequestItem
+      ├─< MemoryHiddenPerson, MemoryHiddenPost (private memories filter)
 Frame ─< PhotoRequest ("Ask for new photos"), FrameFreshness
+Frame ─< RemoteFollow ──> RemoteServer (A)     (B side: copies of a remote family's posts, Placement.origin_remote,
+      │                                          Item owned by a RemoteSender)
+Feed ─< RemoteSubscriber ──> RemoteServer (B)  (A side: frames on other servers; FederationChange log; activity back)
+ServerIdentity, FederationKey, BlockedServer (instance-wide or per feed), OwnershipLog (operator transfers, handovers)
 
 PhotoSource (owner: User) ──▶ Album (of one frame) or Feed      (Immich / iCloud sync: one send per run, Item.via)
 GoogleImport (User) ──▶ Album or Feed                           (one-time copy from Google's picker)
@@ -123,6 +131,9 @@ TelegramLink: User ── one Telegram account
 - **Posts and threads** (§5.18): a **post** is a feed post or a frame post (a direct send to one frame); both
   share one id space and have a thread of comments, people's reactions, mentions and frame entries. A feed post may
   have a **circle** (a smaller group inside the family) as its audience.
+- **Leaving** (§5.21): a person's photos stay when they leave (default) or are **taken away** with a 30-day notice
+  in the frames' trash; managers can **ask to keep** them. **Remote families** (§5.22): a frame can follow a family
+  on another kinframe server; its posts are copied to the frame's server and placed like feed placements.
 - **Conversations** (§5.19): `direct`, `group`, `family` (one per feed) and `circle` (one per circle) chats;
   message photos, videos and voice recordings are ordinary items. **Engagement** (§5.20): freshness, photo
   requests, reminders, streaks, prompts, summaries, recaps and milestones.
@@ -606,8 +617,8 @@ says `feeds: true` when the server supports them.
   `admin` and `poster`. Feed membership is independent of frame membership. Unknown feeds and feeds the caller is
   not a member of both answer `404 not_found`; there is no listing beyond `GET /v1/feeds` (your own feeds).
 - Members: `GET /feeds/{id}/members`, `PATCH …/members/{userId} {role}`, `DELETE …/members/{userId}?remove_posts=`,
-  `POST /feeds/{id}/leave {remove_my_posts}`, `POST /feeds/{id}/transfer {user_id}`. Admins cannot change or remove
-  the owner or other admins (as for frames).
+  `POST /feeds/{id}/leave {photos, comments, leave_frame_ids}` (§5.21; the older `remove_my_posts` still works),
+  `POST /feeds/{id}/transfer {user_id}`. Admins cannot change or remove the owner or other admins (as for frames).
 
 **Feed invites**
 - `POST /v1/feeds/{id}/invites {purpose, max_uses, expires_in_hours, note}` (owner/admin) returns `token`,
@@ -618,7 +629,8 @@ says `feeds: true` when the server supports them.
 - `purpose: join`: the caller becomes a poster, or `pending` (a `JoinRequest`, decided with
   `POST /feeds/{id}/join-requests/{rid}/{approve|deny}`) when the feed has `invite_requires_approval` (default).
 - `purpose: subscribe`: the caller picks frames they manage (`frame_ids`, plus `history`); the subscriptions are
-  active at once because an admin made the link. The caller does not join the feed.
+  active at once because an admin made the link. The caller does not join the feed. With `allow_remote` (and the
+  feed's `allow_remote_frames`) frames on other servers may use the link too (§5.22).
 
 **Subscriptions**
 - `POST /v1/feeds/{id}/subscriptions {frame_id, history, history_count}`: the caller is a feed member and a frame
@@ -859,7 +871,8 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `event_invitation.decided` | `frame_id`, `invitation` | The frame accepted or declined an event you sent |
 | `feed_post.updated` | `feed_id`, `post_id`, `summary` (`FeedReceiptSummary`) | Delivery or seen counts of a feed post changed (the poster and feed owner/admins) |
 | `subscription.request` | `feed_id`, `subscription` | A frame asks to subscribe (feed owner/admins) |
-| `subscription.updated` | `feed_id`, `frame_id`, `subscription` | Approved, rejected, paused, resumed, history changed or removed (the requester, feed owner/admins and the frame's managers) |
+| `subscription.updated` | `feed_id`, `frame_id`, `subscription` | Approved, rejected, paused, resumed, history changed or removed (the requester, feed owner/admins and the frame's managers). Remote subscriptions (§5.22): on A with `subscription.remote` set and `frame_id` the other server's frame id; on B, as `remote_subscription.updated` |
+| `remote_subscription.updated` | `frame_id`, `remote_subscription` (`RemoteSubscription`) | A frame's follow of a family on another server changed status, synced, or failed (the frame's managers; §5.22) |
 | `feed.join_request` | `feed_id`, `request` | Approval needed (feed owner/admins) |
 | `feed.membership_updated` | `feed_id` | Your feed role changed, you were added or removed, or the feed was deleted |
 | `birthday.suggested` | `feed_id`, `birthday` (`BirthdayPerson`) | A poster suggested a birthday person (feed owner/admins) |
@@ -901,6 +914,8 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `streak.updated` | `feed_id`, `streak` (`FeedStreakSummary`) | This week's count, the goal or the streak changed (family members) |
 | `prompt.updated` | `feed_id`, `prompt` (`FeedPrompt`) | The week's prompt started, or an admin changed it |
 | `milestone.achieved` | `milestone` (`Milestone`) | The receiver reached a personal milestone (websocket only) |
+| `placement.updated` | `frame_id`, `placement_ids`, `reason` (`taken_away`, `restored`, `purged`), `taking_id`? | Placements were taken away by their sender, came back after a keep request, or were purged after 30 days (the frame's library viewers and the sender; §5.21) |
+| `keep_request.updated` | `request` (`KeepRequest`) | A keep request was made, answered or expired (the person asked and the scope's managers) |
 
 ### 6.3 Push
 
@@ -913,9 +928,12 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`, `feed_id`,
   `post_id`, `subscription_id`, `birthday_id`, `greeting_id`, `source_id`, `album_id`, `import_id`, `address_id`,
   `sender_id`, `chat_id`, and for family social `comment_id`, `parent_id`, `conversation_id`, `message_id`,
-  `target_kind`, `target_id`, `circle_id`, `report_id`, `request_id`, `week_of`, `month`). Payloads may also carry
+  `target_kind`, `target_id`, `circle_id`, `report_id`, `request_id`, `week_of`, `month`, and for leaving `taking_id`). Payloads may also carry
   `tag` (a newer push with the same tag replaces the older one) and `actions` (notification buttons). Endpoints the
   push service reports as gone (404/410) are deleted by the server.
+- Every payload carries `server`: the sending server's base URL (discovery `base_url`), so apps signed in to several
+  servers open the right account (§5.22). FCM and APNs carry it as a data value / custom key of the same name.
+  Payloads without it come from older servers: use the account the push endpoint belongs to.
 - Feed keys: `subscription_request` (feed owner/admins), `subscription_decided` (the requester),
   `subscription_removed` (frame owner/admins, when a feed admin removed it or the feed was deleted),
   `feed_join_request` (feed owner/admins), `feed_membership` (the member); reactions and replies on feed placements
@@ -963,6 +981,18 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   | `weekly_summary` | §5.20 | `week_of` | `weekly_summary` |
 
   The four reminder keys carry `actions: ["snooze_month", "fewer_reminders"]` (APNs category `kinframe.reminder`).
+- Leaving keys (§5.21, `LeavingPushKey`):
+
+  | Key | To | `ids` | `tag` |
+  |---|---|---|---|
+  | `photos_taken_away` | frame owner/admins of each frame that lost photos; the family's owner/admins | `taking_id`, `frame_id` or `feed_id` | `photos_taken_away:<taking_id>:<frame_id or feed_id>` |
+  | `keep_request` | the person who took photos away (once, no reminders) | `request_id`, `frame_id` or `feed_id` | — |
+  | `keep_answered` | the asker | `request_id`, `frame_id` or `feed_id` | — |
+  | `ownership_changed` | the old and the new owner (operator transfer) | `frame_id` or `feed_id` | — |
+
+  Remote families (§5.22) add no keys: remote subscription requests use `subscription_request`, ends use
+  `subscription_removed`, and reactions and replies of remote frames use `reaction`/`reply` with `feed_id` and
+  `post_id`.
 - Chat `message` and chat `mention` pushes, and comment `mention`/`comment_reply` pushes, carry `badge`: the receiver's
   unread total (`GET /v1/me/badge`) when the push was made. APNs puts it in `aps.badge`, FCM in the `badge` data value.
   Chat `message`/`mention` pushes use APNs category `kinframe.message` (the app adds a reply field). APNs `thread-id` is
@@ -1552,6 +1582,222 @@ digest; skipped when empty. Each mail links to the app and the web and has a one
   photos from Ben" (from the placements' senders) on its next wake.
 - `prompts` change and `Placement.prompt_id` as above. Heartbeat `features` may list `comments`, `photo_requests`,
   `prompts` (informational; nothing is withheld from older apps, which ignore the new change types).
+
+### 5.21 Leaving a family: taking photos away, asking to keep, memories
+
+Product spec: `docs/spec/leaving.md` (approved 2026-11-19); the work split and table ownership:
+`docs/spec/leaving-servers-work.md`. Discovery says `leaving: true` when the server has all of it; clients hide the
+new choices while it is false (the leave calls then work as before).
+
+**Principles in the API**: the sender decides about their own photos, always, also after leaving or being removed;
+nothing disappears without a 30-day notice in the frame's trash; staying is the default; admins removing someone
+never deletes photos; memories can leave people out, privately.
+
+**Leaving with a choice**
+- `POST /v1/feeds/{id}/leave` (`LeaveFeedRequest`): `photos` `keep` (default) or `take`; `comments` `keep` (default)
+  or `delete` (the leaver's comments in that family become tombstones, as if deleted one by one); `leave_frame_ids`
+  (frames the leaver is a member of, not owner, that subscribe to the family; the same `photos` choice applies to the
+  leaver's direct placements there). The sheet's numbers and checkboxes come from
+  `GET /v1/me/leave-preview?feed_id=` (`LeavePreview`: photos, comments, frames with `suggested` = the frame gets this
+  family's photos and the leaver is not its owner).
+- `POST /v1/frames/{id}/leave` (`LeaveFrameRequest`): `photos` for the leaver's direct placements (sends, forwards,
+  shares) on that frame; preview `GET /v1/me/leave-preview?frame_id=`.
+- Requests with `photos` get `200 TakeAwayResult` (how many items were taken away, from which local frames, how many
+  remote frames were told, until when); requests without it get `204` as before. Older clients: `remove_my_posts` /
+  `remove_my_items` `true` without `photos` mean `take`; without either the server applies **keep** (decision A).
+- Owners must transfer ownership first (`409 owner_cannot_leave`), for the family and for every frame in
+  `leave_frame_ids` (those answer `422 validation_failed`).
+
+**Taking away** (one *taking* per call; `takings`, `taking_items`)
+- Scope `feed` (the leaver's live posts in that family), `frame` (their direct placements on that frame) or
+  `account` (everything, at account deletion). Only the leaver's **own** items.
+- Family posts: the post leaves the family at once (timeline, `post.removed`, its thread hidden with it; stored as
+  `feed_posts.removed_at` + `removed_by` = the leaver + `taking_id`); its placements on every subscribed frame are
+  taken away; remote subscribers get `post.remove` (§5.22). The leaver's copy in their sent history stays.
+- Placements: `removed_at` + `taken_away_at`, `taken_away_until` (+30 days), `taken_away_by`, `taking_id`. The change
+  feed renders `placement.remove` at once (the frame deletes its cached copy and gets it back only if the placement
+  returns); the library leaves them out except `listPlacements?visibility=taken_away` (managers), where each has
+  `Placement.taken_away` and the trash lists them under "Taken away by Tom". `counts.taken_away` counts them.
+- Frame owners and admins of every frame that lost photos, and the family's owner and admins, get one
+  `photos_taken_away` push per taking and scope ("Tom took 214 photos away from Oma Janssens's frame. They stay in the
+  frame's trash until 19 December."), and `placement.updated` (`reason: taken_away`) on the websocket.
+- After `until`, placements still taken away are purged like trash (taken_away_at cleared, the media lifecycle
+  follows); posts stay removed. Items with no placements, posts or messages left are deleted as usual.
+- Idempotent: taking away again takes only what came back or was posted since. Only a keep request (or sending the
+  photos again) brings photos back.
+- People who left or were removed take their photos away later with `POST /v1/feeds/{id}/take-away`
+  (`TakeAwayRequest {comments}`) and `POST /v1/frames/{id}/take-away`; `GET /v1/me/former-places` lists the families
+  and frames where they still have live photos. The existing per-send unsend (`DELETE /v1/sends/{id}`, "Remove from
+  all frames and families") stays immediate, without notice.
+- Chat messages are never touched by leaving; family and circle chats follow membership as before.
+
+**Ask to keep** (`keep_requests`, `keep_request_items`)
+- `GET /v1/frames/{id}/taken-away` (frame owner, admins, `manage_library`) and `GET /v1/feeds/{id}/taken-away`
+  (family owner and admins) list the takings still running in that scope (`TakenAwayGroup`: who, when, count, until,
+  thumbnails, the request if any, `can_ask` and `cannot_ask_reason`).
+- `POST /v1/keep-requests {taking_id, frame_id | feed_id, item_ids?, note?}`: one per scope and taking
+  (`409 limit_reached` for a second); `item_ids` picks photos (default all of the taking in that scope). Refused with
+  `403 forbidden` when the person blocked the asker (`cannot_ask_reason: blocked`: "Tom doesn't accept requests"),
+  `409 invalid_transition` after `until`, nothing to ask for a deleted account that chose `take`
+  (`account_deleted`).
+- The person gets **one** `keep_request` push (no reminders) and the request in `GET /v1/me/keep-requests` (open
+  ones by default) and their history; `GET /v1/keep-requests/{id}` has the photos (`items`) to pick from.
+- `POST /v1/keep-requests/{id}/answer {allow: all|some|none, item_ids}`: final. Allowed items come back: the
+  placement's `removed_at` and `taken_away_*` are cleared and it is emitted again (`placement.upsert`, not as new:
+  `backfill: true`); for a family request the post (or its allowed items) is back in the timeline and on the
+  subscribed frames. They stay the person's photos (they can take them away again). The rest is deleted at `until`.
+  The asker gets `keep_answered`; both sides get `keep_request.updated`. Unanswered requests expire with the taking
+  (`expired`, `keep_request.updated`).
+
+**Removal by admins**: `removeFeedMember` and `removeMember` never take photos away; `remove_posts=true` on
+`removeFeedMember` stays an admin's explicit removal (immediate, as before). The removed person keeps the right to
+take their own photos away (above).
+
+**Account deletion** (`DELETE /v1/me`, body `AccountDeletion {photos: take|leave}`, default `take`; the older
+`?remove_items=true|false` maps to `take`/`leave`, `photos` wins)
+- `take`: every scope is taken away as above (the 30-day notice still runs, keep requests can't be made: there is
+  nobody to ask), then the account is deleted as before.
+- `leave`: every item that still has a live feed post or placement is handed over: `items.sender_user_id` becomes
+  the family's owner (feed posts) or the frame's owner (direct placements); an item in several scopes goes to the
+  owner of the family it was first posted in (by post time) and the other scopes keep pointing at it.
+  `items.former_sender_name` freezes the credit (`Item.former_sender_name`: "Tom (former member)"). Items only in
+  the leaver's history are deleted. The handover is the one-time consent recorded with the deletion
+  (`ownership_log`, kind `account_handover`: who, when, how many).
+
+**Ownership by the operator**: `POST /v1/operator/frames/{id}/owner` and `POST /v1/operator/feeds/{id}/owner`
+(`OperatorOwnerTransfer {user_id, reason, remove_previous}`) move ownership to an existing member; the old owner
+becomes admin or is removed. Both get `ownership_changed` (and `membership.updated` / `feed.membership_updated`);
+the change is logged with the reason. `GET /v1/operator/ownership/search?q=` finds frames and families with their
+members, `GET /v1/operator/ownership-log` lists transfers and handovers.
+
+**Memories** (`GET`/`PUT /v1/me/memories`, `memory_hidden_people`, `memory_hidden_posts`)
+- `hidden_people` (people ids) and `hidden_memories` (post ids). `PUT` replaces the lists it carries. Applied to the
+  user's own On this day, the monthly recap as rendered for them ("most-loved photo" picks the next one), the "Send
+  something to Oma's frame" suggestions and the weekly summary. **Not** to frames: they are shared and show what the
+  family sent. Nobody is told; hiding someone does not block them. "Don't show this memory again" adds the post id.
+
+**Contact that stops**: a direct chat between two people who no longer share a live family or frame becomes
+read-only for both (`Conversation.read_only`, `read_only_reason: no_longer_contacts`; "You can no longer message
+Lies"); history stays readable and each person can still delete their own messages; `sendMessage` answers
+`403 cannot_message`. It becomes writable again when they share a family or frame again. Group chats are unchanged;
+family and circle chats follow membership. Blocking works as before.
+
+**Not built now** (decision B): a family role that sees only one circle, for someone who left the family but keeps
+posting to "Grandchildren".
+
+### 5.22 Families on different servers
+
+Product spec: `docs/spec/multi-server.md` (approved 2026-11-19); the work split: `docs/spec/leaving-servers-work.md`.
+Two pieces: apps signed in to several servers (no protocol between servers), and frames following a family on
+another server (a narrow, read-only, signed server-to-server link). "A" is the server with the family, "B" the server
+with the frame; any server can be both.
+
+**Accounts in the apps** (Android and iOS; the web stays single-server, decision A)
+- An account is `{base URL, discovery, sign-in session, user}`; one is primary (opens first, receives shares by
+  default). Each has its own websocket, push registration (`POST /v1/me/push-endpoints` on that server), caches and
+  discovery flags; signing out of one leaves the others.
+- Discovery has `server_id` (stable, random; deduplicates accounts), `server_name` (the label for the server chip,
+  `KINFRAME_SERVER_LABEL`, default the public host) and `base_url`.
+- Merged views: Home (each server's timeline pages interleaved by time, family name plus a server chip when there is
+  more than one account), Chats (by last message, badge = the sum of `getBadge` per account), frames, families and
+  history. A chat lives on one server; a new chat uses the contact's server. Every detail screen talks to its own
+  server. Send and share: recipients grouped per server; one prepared media set, one upload per server.
+- Push payloads carry `server` (the base URL); a tap opens that account. Without it (older servers), the account
+  the push endpoint belongs to.
+- Invite and join links of any kinframe server are recognised: the app fetches `https://<host>/.well-known/kinframe`;
+  a server the app isn't signed in to is added after sign-in ("This family is on kinframe.janssens.be. Sign in there
+  to join.").
+- The web shows "You also use kinframe on other servers? The apps show them all together." and lists other servers
+  as links to their own web apps.
+
+**The well-known document**: `GET /.well-known/kinframe` (public, unversioned) is the discovery document, now with
+`server_id`, `server_name`, `base_url`, `api_version` and `federation` (`FederationInfo`: `enabled`, the current
+`key_id` and `public_key`, all valid `keys` including rotated ones for 7 days, and the `endpoints`). Servers cache
+each other's document (`remote_servers`), refresh it daily and on a signature failure.
+
+**Signatures** (`securitySchemes.serverSignature`)
+- Each server has an Ed25519 key pair, made at first start and stored with its secrets (`federation_keys`, the
+  private key sealed when at-rest encryption is configured).
+- Every `/federation/v1/...` request is signed with HTTP Message Signatures (RFC 9421): `Signature-Input:
+  sig1=("@method" "@path" "@query" "content-digest" "date" "kinframe-server");created=…;keyid="…";alg="ed25519"`
+  and `Signature: sig1=:…:`. `Content-Digest` (RFC 9530, `sha-256`, also for empty bodies) and `Kinframe-Server:
+  <caller base URL>` are required; `created` and `Date` within 5 minutes. The receiver resolves the caller by
+  `Kinframe-Server`, fetches its well-known document if needed, and verifies with the key named by `keyid` (refetch
+  once on an unknown key). Failures answer `401 unauthorized`; blocked or not-allowed servers `403 forbidden`.
+- Outgoing requests go through the network guard (public addresses only), with timeouts and back-off. Responses are
+  JSON; errors are problem documents as everywhere.
+
+**Trust settings**
+- Operator: `KINFRAME_FEDERATION` (`on` default, `off` turns all of it off: discovery `federation.enabled: false`,
+  `remote_families: false`, every `/federation/v1` call `403`), `KINFRAME_FEDERATION_ALLOW` (comma-separated hosts;
+  when set, only those), and the instance-wide block list (`/v1/operator/blocked-servers`, which ends every remote
+  subscription with that server on both sides). `GET /v1/operator/remote-servers` lists known servers.
+- Family (A): `allow_remote_frames` (default off, decision D) must be on, and the `subscribe` invite must have
+  `allow_remote` (default off). Owner and admins can block a server for the family
+  (`/v1/feeds/{id}/blocked-servers`), which ends its subscriptions (`server_blocked`). Turning `allow_remote_frames`
+  off ends every remote subscription (`removed_by_feed`).
+
+**Subscribing (B → A)**
+1. A frame manager on B opens the invite link in the app or pastes it in the frame's Families → "Add a family from
+   another server". `POST /v1/remote-invites:preview {invite_url}` makes B fetch A's well-known document and call
+   `POST /federation/v1/subscriptions {preview: true, invite_token, frame}`; the answer (`RemoteInvitePreview`) shows
+   "Janssens (on kinframe.janssens.be) — 3 frames. Photos from this family will be copied to this server
+   (kinframe.appmire.be) and shown on Oma's frame." with the history option.
+2. `POST /v1/frames/{id}/remote-subscriptions {invite_url, history, history_count, birthdays, on_end}` calls
+   `federationSubscribe` for real. A records a `remote_subscribers` row (frame id and name as B reported, B's server,
+   the requester's name): `active` at once for a `subscribe` invite (pre-approved by the admin who made it); A may
+   answer `pending` when its rules require approval, and then A's admins see it in `listFeedSubscriptions` with
+   `remote` set and decide with the usual `approve`/`reject`/`DELETE /v1/subscriptions/{sid}`
+   (`subscription.request` / `subscription_request` push as for local requests: "Tom wants to show Janssens on Oma's
+   frame (kinframe.appmire.be)"). B keeps a `remote_follows` row (`RemoteSubscription`).
+3. Remote subscriptions count against `limits.max_subscriptions_per_feed`. One live remote subscription per B frame
+   and family (`409 already_subscribed`).
+
+**Pull with a ping** (decision B)
+- B pulls `GET /federation/v1/subscriptions/{id}/changes?cursor=&limit=` (`FederationChangePage`). The `{id}` is always
+  A's subscription id; A answers only the server it belongs to (`404 not_found` otherwise).
+- A writes a change log per family (`federation_changes`, by database triggers on posts, post items, birthdays and
+  comments, only while the family has a live remote subscriber). A sends a signed `POST {B}/federation/v1/ping
+  {subscription_ids}` after new changes (debounced 10 s). B pulls on a ping, and every 15 minutes regardless; missed
+  pings never lose data.
+- **Cursor**: opaque; B stores it only after applying a page and passes it back. No cursor = start: first the history
+  backfill per the subscription's history option (counted back from `activated_at`, like local subscriptions; posts
+  as `post.upsert` with `backfill: true`, oldest first), then live changes. `more: true` means pull again at once. A
+  cursor older than the log's retention (30 days) gets `reset: true`: the page restarts from a full snapshot and B
+  removes what is not in it. Pending subscriptions get empty pages with `status: pending`; ended ones `status:
+  removed` with the reason (then B ends its follow).
+- Changes, in order: `post.upsert` (`FederationPost`: post id, an opaque `poster_key`, the poster's display name,
+  post time, items with caption, capture time, focal point, fit, size, type, sha-256 and master URLs signed for 1 hour;
+  rendered from the current state), `post.remove`, `items.remove` (unsend, admin removal, taking away per §5.21,
+  circle changes, trims), `birthdays` (the family's birthday people now, as for the local `birthdays` change: the
+  year only with *show age*), `comments` (only when the remote frame has *show comments*: the three newest, first
+  names, at most 200 characters), `subscription` (status changes).
+- B downloads each master once per item (verifies size, type and hash), makes the frame's renditions as for any
+  item, stores it owned by a **remote sender** (`remote_senders`: A + `poster_key`, display name) and places it on the
+  frame: `origin: feed`, `origin_feed_id` null, `origin_feed_name` = the family's name, `Placement.origin_remote`
+  (server, family, sender) and `Item.remote_sender`, credited "Lies · Janssens". Frames need nothing new. The frame's
+  own moderation applies. Removals on A remove the placements on B; B deletes items no longer referenced.
+
+**What is shared** (decision C): only what a local subscribed frame gets: whole-family posts. Never circle posts,
+chats, comments beyond the frame's comment card, member lists or emails. A's admins see, before a pending remote
+subscription becomes active, which server receives copies and its name; B's confirmation says that B's operator can
+see the copies.
+
+**Activity back (B → A)**: B queues the frame's reactions, quick replies and "seen" on remote placements
+(`remote_activity_outbox`) and sends them in batches: `POST /federation/v1/subscriptions/{id}/activity
+{events: [{id, kind, post_id, item_id, reaction|reply, at}], frame?: {name, show_comments}}`. A shows them in the
+thread as frame entries "Oma's frame (kinframe.appmire.be)" (`Comment.frame.server_name`,
+`FrameReactionRef.server_name`; `frame_id` is then the remote subscription id), counts them in reaction rows and
+receipts, and pushes `reaction`/`reply` to the poster as for local frames. Events are idempotent by `id`.
+
+**Removals**
+- B unsubscribes: `DELETE /v1/frames/{id}/remote-subscriptions/{sid}?placements=keep|remove` (default the follow's
+  `on_end`), which calls `DELETE /federation/v1/subscriptions/{id}` on A (retried in the background while A is down).
+- A ends it (admin removal, the family deleted, `allow_remote_frames` off, a block): A calls
+  `DELETE {B}/federation/v1/subscriptions/{id}?reason=` and the changes feed says `removed`; B removes or keeps the
+  copied placements per `on_end` (story 4) and the follow shows `removed` with the reason.
+- B's frame removed: its follows end and A is told.
+
 
 ## 7. Versioning
 
