@@ -56,6 +56,10 @@ extension Components {
         public typealias ReportId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/RequestId`.
         public typealias RequestId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/RemoteSubscriptionId`.
+        public typealias RemoteSubscriptionId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/BlockedServerId`.
+        public typealias BlockedServerId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/TargetKind`.
         public typealias TargetKind = Components.Schemas.ReactionTargetKind
         /// - Remark: Generated from `#/components/parameters/TargetId`.

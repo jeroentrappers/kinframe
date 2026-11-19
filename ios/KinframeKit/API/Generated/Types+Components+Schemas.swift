@@ -362,6 +362,34 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/email_digest`.
             public var emailDigest: Swift.Bool?
+            /// Stable random id of this server (generated at first start), so apps signed in to several servers can tell
+            /// them apart and deduplicate accounts (docs/spec/multi-server.md §2.3).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/server_id`.
+            public var serverId: Swift.String?
+            /// The operator-set label of this server (`KINFRAME_SERVER_LABEL`, default the public host name), shown as the server chip in apps with several accounts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/server_name`.
+            public var serverName: Swift.String?
+            /// The server's public base URL (the `server` field of push payloads and the `kinframe-server` header of federation requests).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/base_url`.
+            public var baseUrl: Swift.String?
+            /// API major version, `v1`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/api_version`.
+            public var apiVersion: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Discovery/federation`.
+            public var federation: Components.Schemas.FederationInfo?
+            /// True when the server has the leaving choices, take-away, keep requests, the account deletion handover and the memories filter (README §5.21).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/leaving`.
+            public var leaving: Swift.Bool?
+            /// True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/remote_families`.
+            public var remoteFamilies: Swift.Bool?
             /// VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             /// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
             ///
@@ -401,6 +429,13 @@ extension Components {
             ///   - linkPreviews: True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
             ///   - engagement: True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
             ///   - emailDigest: True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
+            ///   - serverId: Stable random id of this server (generated at first start), so apps signed in to several servers can tell
+            ///   - serverName: The operator-set label of this server (`KINFRAME_SERVER_LABEL`, default the public host name), shown as the server chip in apps with several accounts.
+            ///   - baseUrl: The server's public base URL (the `server` field of push payloads and the `kinframe-server` header of federation requests).
+            ///   - apiVersion: API major version, `v1`.
+            ///   - federation:
+            ///   - leaving: True when the server has the leaving choices, take-away, keep requests, the account deletion handover and the memories filter (README §5.21).
+            ///   - remoteFamilies: True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
             ///   - webpushPublicKey: VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             ///   - shop:
             public init(
@@ -432,6 +467,13 @@ extension Components {
                 linkPreviews: Swift.Bool? = nil,
                 engagement: Swift.Bool? = nil,
                 emailDigest: Swift.Bool? = nil,
+                serverId: Swift.String? = nil,
+                serverName: Swift.String? = nil,
+                baseUrl: Swift.String? = nil,
+                apiVersion: Swift.String? = nil,
+                federation: Components.Schemas.FederationInfo? = nil,
+                leaving: Swift.Bool? = nil,
+                remoteFamilies: Swift.Bool? = nil,
                 webpushPublicKey: Swift.String? = nil,
                 shop: Components.Schemas.Shop? = nil
             ) {
@@ -463,6 +505,13 @@ extension Components {
                 self.linkPreviews = linkPreviews
                 self.engagement = engagement
                 self.emailDigest = emailDigest
+                self.serverId = serverId
+                self.serverName = serverName
+                self.baseUrl = baseUrl
+                self.apiVersion = apiVersion
+                self.federation = federation
+                self.leaving = leaving
+                self.remoteFamilies = remoteFamilies
                 self.webpushPublicKey = webpushPublicKey
                 self.shop = shop
             }
@@ -495,6 +544,13 @@ extension Components {
                 case linkPreviews = "link_previews"
                 case engagement
                 case emailDigest = "email_digest"
+                case serverId = "server_id"
+                case serverName = "server_name"
+                case baseUrl = "base_url"
+                case apiVersion = "api_version"
+                case federation
+                case leaving
+                case remoteFamilies = "remote_families"
                 case webpushPublicKey = "webpush_public_key"
                 case shop
             }
@@ -3140,6 +3196,16 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Item/thumb_url`.
             public var thumbUrl: Swift.String?
+            /// Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/remote_sender`.
+            public var remoteSender: Components.Schemas.ItemRemoteSender?
+            /// Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
+            /// `sender_id` is now the new owner; show "<former_sender_name> (former member)" as the credit.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/former_sender_name`.
+            public var formerSenderName: Swift.String?
             /// Creates a new `Item`.
             ///
             /// - Parameters:
@@ -3165,6 +3231,8 @@ extension Components {
             ///   - via: Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
             ///   - motion: Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
             ///   - thumbUrl: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+            ///   - remoteSender: Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.
+            ///   - formerSenderName: Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
             public init(
                 id: Components.Schemas.Id,
                 kind: Components.Schemas.MediaKind,
@@ -3187,7 +3255,9 @@ extension Components {
                 importedSenderName: Swift.String? = nil,
                 via: Components.Schemas.ItemVia? = nil,
                 motion: Components.Schemas.ItemMotion? = nil,
-                thumbUrl: Swift.String? = nil
+                thumbUrl: Swift.String? = nil,
+                remoteSender: Components.Schemas.ItemRemoteSender? = nil,
+                formerSenderName: Swift.String? = nil
             ) {
                 self.id = id
                 self.kind = kind
@@ -3211,6 +3281,8 @@ extension Components {
                 self.via = via
                 self.motion = motion
                 self.thumbUrl = thumbUrl
+                self.remoteSender = remoteSender
+                self.formerSenderName = formerSenderName
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -3235,6 +3307,8 @@ extension Components {
                 case via
                 case motion
                 case thumbUrl = "thumb_url"
+                case remoteSender = "remote_sender"
+                case formerSenderName = "former_sender_name"
             }
         }
         /// An app a frame can import leftover photos from.
@@ -3459,6 +3533,17 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Placement/prompt_id`.
             public var promptId: Components.Schemas.Id?
+            /// Set while the sender took it away and it waits in the frame's trash (`visibility: taken_away`, README §5.21). Never in the device change feed (the frame gets `placement.remove`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/taken_away`.
+            public var takenAway: Components.Schemas.PlacementTakenAway?
+            /// Set on copies of posts of a family on another server (README §5.22). `origin` is then `feed`,
+            /// `origin_feed_id` null and `origin_feed_name` the remote family's name, so frames show "Lies · Janssens"
+            /// without knowing about servers.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/origin_remote`.
+            public var originRemote: Components.Schemas.PlacementRemote?
             /// Creates a new `Placement`.
             ///
             /// - Parameters:
@@ -3487,6 +3572,8 @@ extension Components {
             ///   - feedIds: Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
             ///   - backfill: Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
             ///   - promptId: Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
+            ///   - takenAway: Set while the sender took it away and it waits in the frame's trash (`visibility: taken_away`, README §5.21). Never in the device change feed (the frame gets `placement.remove`).
+            ///   - originRemote: Set on copies of posts of a family on another server (README §5.22). `origin` is then `feed`,
             public init(
                 id: Components.Schemas.Id,
                 frameId: Components.Schemas.Id,
@@ -3512,7 +3599,9 @@ extension Components {
                 originFeedName: Swift.String? = nil,
                 feedIds: [Components.Schemas.Id]? = nil,
                 backfill: Swift.Bool? = nil,
-                promptId: Components.Schemas.Id? = nil
+                promptId: Components.Schemas.Id? = nil,
+                takenAway: Components.Schemas.PlacementTakenAway? = nil,
+                originRemote: Components.Schemas.PlacementRemote? = nil
             ) {
                 self.id = id
                 self.frameId = frameId
@@ -3539,6 +3628,8 @@ extension Components {
                 self.feedIds = feedIds
                 self.backfill = backfill
                 self.promptId = promptId
+                self.takenAway = takenAway
+                self.originRemote = originRemote
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -3566,6 +3657,8 @@ extension Components {
                 case feedIds = "feed_ids"
                 case backfill
                 case promptId = "prompt_id"
+                case takenAway = "taken_away"
+                case originRemote = "origin_remote"
             }
         }
         /// - Remark: Generated from `#/components/schemas/ShareResult`.
@@ -4164,6 +4257,10 @@ extension Components {
                 ///
                 /// - Remark: Generated from `#/components/schemas/Feed/value2/pending_join_request_count`.
                 public var pendingJoinRequestCount: Swift.Int?
+                /// Frames on other servers may follow this family through `subscribe` invites with `allow_remote` (default off; README §5.22).
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/allow_remote_frames`.
+                public var allowRemoteFrames: Swift.Bool?
                 /// Creates a new `Value2Payload`.
                 ///
                 /// - Parameters:
@@ -4185,6 +4282,7 @@ extension Components {
                 ///   - postCount:
                 ///   - pendingSubscriptionCount: Owner and admins only (0 for posters).
                 ///   - pendingJoinRequestCount: Owner and admins only (0 for posters).
+                ///   - allowRemoteFrames: Frames on other servers may follow this family through `subscribe` invites with `allow_remote` (default off; README §5.22).
                 public init(
                     ownerName: Swift.String? = nil,
                     coverItemId: Components.Schemas.Id? = nil,
@@ -4203,7 +4301,8 @@ extension Components {
                     pendingBirthdayCount: Swift.Int? = nil,
                     postCount: Swift.Int? = nil,
                     pendingSubscriptionCount: Swift.Int? = nil,
-                    pendingJoinRequestCount: Swift.Int? = nil
+                    pendingJoinRequestCount: Swift.Int? = nil,
+                    allowRemoteFrames: Swift.Bool? = nil
                 ) {
                     self.ownerName = ownerName
                     self.coverItemId = coverItemId
@@ -4223,6 +4322,7 @@ extension Components {
                     self.postCount = postCount
                     self.pendingSubscriptionCount = pendingSubscriptionCount
                     self.pendingJoinRequestCount = pendingJoinRequestCount
+                    self.allowRemoteFrames = allowRemoteFrames
                 }
                 public enum CodingKeys: String, CodingKey {
                     case ownerName = "owner_name"
@@ -4243,6 +4343,7 @@ extension Components {
                     case postCount = "post_count"
                     case pendingSubscriptionCount = "pending_subscription_count"
                     case pendingJoinRequestCount = "pending_join_request_count"
+                    case allowRemoteFrames = "allow_remote_frames"
                 }
             }
             /// - Remark: Generated from `#/components/schemas/Feed/value2`.
@@ -4290,6 +4391,8 @@ extension Components {
             public var postersCanInvite: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/FeedCreate/posters_can_add_birthdays`.
             public var postersCanAddBirthdays: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/allow_remote_frames`.
+            public var allowRemoteFrames: Swift.Bool?
             /// Creates a new `FeedCreate`.
             ///
             /// - Parameters:
@@ -4302,6 +4405,7 @@ extension Components {
             ///   - membersCanCreateCircles:
             ///   - postersCanInvite:
             ///   - postersCanAddBirthdays:
+            ///   - allowRemoteFrames:
             public init(
                 name: Swift.String,
                 autoApproveSubscriptions: Swift.Bool? = nil,
@@ -4311,7 +4415,8 @@ extension Components {
                 newMembersCanPost: Swift.Bool? = nil,
                 membersCanCreateCircles: Swift.Bool? = nil,
                 postersCanInvite: Swift.Bool? = nil,
-                postersCanAddBirthdays: Swift.Bool? = nil
+                postersCanAddBirthdays: Swift.Bool? = nil,
+                allowRemoteFrames: Swift.Bool? = nil
             ) {
                 self.name = name
                 self.autoApproveSubscriptions = autoApproveSubscriptions
@@ -4322,6 +4427,7 @@ extension Components {
                 self.membersCanCreateCircles = membersCanCreateCircles
                 self.postersCanInvite = postersCanInvite
                 self.postersCanAddBirthdays = postersCanAddBirthdays
+                self.allowRemoteFrames = allowRemoteFrames
             }
             public enum CodingKeys: String, CodingKey {
                 case name
@@ -4333,6 +4439,7 @@ extension Components {
                 case membersCanCreateCircles = "members_can_create_circles"
                 case postersCanInvite = "posters_can_invite"
                 case postersCanAddBirthdays = "posters_can_add_birthdays"
+                case allowRemoteFrames = "allow_remote_frames"
             }
         }
         /// - Remark: Generated from `#/components/schemas/FeedUpdate`.
@@ -4373,6 +4480,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedUpdate/posters_can_add_birthdays`.
             public var postersCanAddBirthdays: Swift.Bool?
+            /// Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/allow_remote_frames`.
+            public var allowRemoteFrames: Swift.Bool?
             /// Creates a new `FeedUpdate`.
             ///
             /// - Parameters:
@@ -4386,6 +4497,7 @@ extension Components {
             ///   - membersCanCreateCircles:
             ///   - postersCanInvite: Posters may create `join` invites (and list and revoke their own).
             ///   - postersCanAddBirthdays: Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
+            ///   - allowRemoteFrames: Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`).
             public init(
                 name: Swift.String? = nil,
                 coverItemId: Components.Schemas.Id? = nil,
@@ -4396,7 +4508,8 @@ extension Components {
                 newMembersCanPost: Swift.Bool? = nil,
                 membersCanCreateCircles: Swift.Bool? = nil,
                 postersCanInvite: Swift.Bool? = nil,
-                postersCanAddBirthdays: Swift.Bool? = nil
+                postersCanAddBirthdays: Swift.Bool? = nil,
+                allowRemoteFrames: Swift.Bool? = nil
             ) {
                 self.name = name
                 self.coverItemId = coverItemId
@@ -4408,6 +4521,7 @@ extension Components {
                 self.membersCanCreateCircles = membersCanCreateCircles
                 self.postersCanInvite = postersCanInvite
                 self.postersCanAddBirthdays = postersCanAddBirthdays
+                self.allowRemoteFrames = allowRemoteFrames
             }
             public enum CodingKeys: String, CodingKey {
                 case name
@@ -4420,6 +4534,7 @@ extension Components {
                 case membersCanCreateCircles = "members_can_create_circles"
                 case postersCanInvite = "posters_can_invite"
                 case postersCanAddBirthdays = "posters_can_add_birthdays"
+                case allowRemoteFrames = "allow_remote_frames"
             }
         }
         /// - Remark: Generated from `#/components/schemas/FeedMember`.
@@ -4490,6 +4605,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedInviteCreate/note`.
             public var note: Swift.String?
+            /// `subscribe` only, and only when the family has `allow_remote_frames`: frames on other servers may use this link (README §5.22).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteCreate/allow_remote`.
+            public var allowRemote: Swift.Bool?
             /// Creates a new `FeedInviteCreate`.
             ///
             /// - Parameters:
@@ -4497,22 +4616,26 @@ extension Components {
             ///   - maxUses: null = unlimited
             ///   - expiresInHours:
             ///   - note: Shown to admins when approving a join request.
+            ///   - allowRemote: `subscribe` only, and only when the family has `allow_remote_frames`: frames on other servers may use this link (README §5.22).
             public init(
                 purpose: Components.Schemas.FeedInvitePurpose,
                 maxUses: Swift.Int? = nil,
                 expiresInHours: Swift.Int? = nil,
-                note: Swift.String? = nil
+                note: Swift.String? = nil,
+                allowRemote: Swift.Bool? = nil
             ) {
                 self.purpose = purpose
                 self.maxUses = maxUses
                 self.expiresInHours = expiresInHours
                 self.note = note
+                self.allowRemote = allowRemote
             }
             public enum CodingKeys: String, CodingKey {
                 case purpose
                 case maxUses = "max_uses"
                 case expiresInHours = "expires_in_hours"
                 case note
+                case allowRemote = "allow_remote"
             }
         }
         /// - Remark: Generated from `#/components/schemas/FeedInvite`.
@@ -4541,6 +4664,10 @@ extension Components {
             public var note: Swift.String?
             /// - Remark: Generated from `#/components/schemas/FeedInvite/expires_at`.
             public var expiresAt: Foundation.Date
+            /// Frames on other servers may use this link.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/allow_remote`.
+            public var allowRemote: Swift.Bool?
             /// Creates a new `FeedInvite`.
             ///
             /// - Parameters:
@@ -4554,6 +4681,7 @@ extension Components {
             ///   - uses:
             ///   - note:
             ///   - expiresAt:
+            ///   - allowRemote: Frames on other servers may use this link.
             public init(
                 id: Components.Schemas.Id,
                 purpose: Components.Schemas.FeedInvitePurpose,
@@ -4564,7 +4692,8 @@ extension Components {
                 maxUses: Swift.Int? = nil,
                 uses: Swift.Int? = nil,
                 note: Swift.String? = nil,
-                expiresAt: Foundation.Date
+                expiresAt: Foundation.Date,
+                allowRemote: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.purpose = purpose
@@ -4576,6 +4705,7 @@ extension Components {
                 self.uses = uses
                 self.note = note
                 self.expiresAt = expiresAt
+                self.allowRemote = allowRemote
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -4588,6 +4718,7 @@ extension Components {
                 case uses
                 case note
                 case expiresAt = "expires_at"
+                case allowRemote = "allow_remote"
             }
         }
         /// - Remark: Generated from `#/components/schemas/FeedInvitePreview`.
@@ -5107,6 +5238,13 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Subscription/can_decide`.
             public var canDecide: Swift.Bool?
+            /// Set for a frame on another server (README §5.22; only in `listFeedSubscriptions`). `frame.id` is then the
+            /// id that server gave its frame, `frame.online` is absent, and approve, reject and delete work as for local
+            /// ones; pause, resume and history changes are the other server's.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/remote`.
+            public var remote: Components.Schemas.SubscriptionRemote?
             /// Creates a new `Subscription`.
             ///
             /// - Parameters:
@@ -5129,6 +5267,7 @@ extension Components {
             ///   - estimate: Size of what the current history option places on this frame, for the subscribe dialog.
             ///   - canManage: The caller may pause, resume, change history and unsubscribe (frame side).
             ///   - canDecide: The caller may approve, reject and remove (feed side).
+            ///   - remote: Set for a frame on another server (README §5.22; only in `listFeedSubscriptions`). `frame.id` is then the
             public init(
                 id: Components.Schemas.Id,
                 status: Components.Schemas.SubscriptionStatus,
@@ -5148,7 +5287,8 @@ extension Components {
                 backfill: Components.Schemas.Subscription.BackfillPayload? = nil,
                 estimate: Components.Schemas.Subscription.EstimatePayload? = nil,
                 canManage: Swift.Bool? = nil,
-                canDecide: Swift.Bool? = nil
+                canDecide: Swift.Bool? = nil,
+                remote: Components.Schemas.SubscriptionRemote? = nil
             ) {
                 self.id = id
                 self.status = status
@@ -5169,6 +5309,7 @@ extension Components {
                 self.estimate = estimate
                 self.canManage = canManage
                 self.canDecide = canDecide
+                self.remote = remote
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -5190,6 +5331,7 @@ extension Components {
                 case estimate
                 case canManage = "can_manage"
                 case canDecide = "can_decide"
+                case remote
             }
         }
         /// Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
@@ -14086,6 +14228,10 @@ extension Components {
             public var itemId: Components.Schemas.Id?
             /// - Remark: Generated from `#/components/schemas/FrameReactionRef/at`.
             public var at: Foundation.Date?
+            /// A frame on another server (README §5.22); `frame_id` is then the remote subscription's id.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameReactionRef/server_name`.
+            public var serverName: Swift.String?
             /// Creates a new `FrameReactionRef`.
             ///
             /// - Parameters:
@@ -14094,18 +14240,21 @@ extension Components {
             ///   - reaction:
             ///   - itemId: The item the frame reacted to (posts with several items).
             ///   - at:
+            ///   - serverName: A frame on another server (README §5.22); `frame_id` is then the remote subscription's id.
             public init(
                 frameId: Components.Schemas.Id,
                 frameName: Swift.String,
                 reaction: Components.Schemas.Reaction,
                 itemId: Components.Schemas.Id? = nil,
-                at: Foundation.Date? = nil
+                at: Foundation.Date? = nil,
+                serverName: Swift.String? = nil
             ) {
                 self.frameId = frameId
                 self.frameName = frameName
                 self.reaction = reaction
                 self.itemId = itemId
                 self.at = at
+                self.serverName = serverName
             }
             public enum CodingKeys: String, CodingKey {
                 case frameId = "frame_id"
@@ -14113,6 +14262,7 @@ extension Components {
                 case reaction
                 case itemId = "item_id"
                 case at
+                case serverName = "server_name"
             }
         }
         /// - Remark: Generated from `#/components/schemas/ReactionList`.
@@ -14249,6 +14399,10 @@ extension Components {
                 public var reaction: Components.Schemas.Reaction?
                 /// - Remark: Generated from `#/components/schemas/Comment/frame/reply`.
                 public var reply: Components.Schemas.ReplyPreset?
+                /// A frame on another server (README §5.22): show "Oma's frame (kinframe.appmire.be)". `frame_id` is then the remote subscription's id.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Comment/frame/server_name`.
+                public var serverName: Swift.String?
                 /// Creates a new `FramePayload`.
                 ///
                 /// - Parameters:
@@ -14257,18 +14411,21 @@ extension Components {
                 ///   - itemId:
                 ///   - reaction:
                 ///   - reply:
+                ///   - serverName: A frame on another server (README §5.22): show "Oma's frame (kinframe.appmire.be)". `frame_id` is then the remote subscription's id.
                 public init(
                     frameId: Components.Schemas.Id,
                     frameName: Swift.String,
                     itemId: Components.Schemas.Id? = nil,
                     reaction: Components.Schemas.Reaction? = nil,
-                    reply: Components.Schemas.ReplyPreset? = nil
+                    reply: Components.Schemas.ReplyPreset? = nil,
+                    serverName: Swift.String? = nil
                 ) {
                     self.frameId = frameId
                     self.frameName = frameName
                     self.itemId = itemId
                     self.reaction = reaction
                     self.reply = reply
+                    self.serverName = serverName
                 }
                 public enum CodingKeys: String, CodingKey {
                     case frameId = "frame_id"
@@ -14276,6 +14433,7 @@ extension Components {
                     case itemId = "item_id"
                     case reaction
                     case reply
+                    case serverName = "server_name"
                 }
             }
             /// Frame entries only.
@@ -15105,10 +15263,23 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Conversation/archived`.
             public var archived: Swift.Bool
-            /// No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.
+            /// No sending: the family or circle was deleted, or (direct) the other account is gone, blocked the caller, or the two no longer share a family or frame (README §5.21).
             ///
             /// - Remark: Generated from `#/components/schemas/Conversation/read_only`.
             public var readOnly: Swift.Bool?
+            /// Why `read_only`: `no_longer_contacts` shows "You can no longer message Lies".
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/read_only_reason`.
+            @frozen public enum ReadOnlyReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case archived = "archived"
+                case accountGone = "account_gone"
+                case blocked = "blocked"
+                case noLongerContacts = "no_longer_contacts"
+            }
+            /// Why `read_only`: `no_longer_contacts` shows "You can no longer message Lies".
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/read_only_reason`.
+            public var readOnlyReason: Components.Schemas.Conversation.ReadOnlyReasonPayload?
             /// "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.
             ///
             /// - Remark: Generated from `#/components/schemas/Conversation/read_receipts`.
@@ -15136,7 +15307,8 @@ extension Components {
             ///   - muted:
             ///   - mutedUntil: Null with `muted: true` means always.
             ///   - archived: The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).
-            ///   - readOnly: No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.
+            ///   - readOnly: No sending: the family or circle was deleted, or (direct) the other account is gone, blocked the caller, or the two no longer share a family or frame (README §5.21).
+            ///   - readOnlyReason: Why `read_only`: `no_longer_contacts` shows "You can no longer message Lies".
             ///   - readReceipts: "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.
             ///   - createdAt:
             public init(
@@ -15159,6 +15331,7 @@ extension Components {
                 mutedUntil: Foundation.Date? = nil,
                 archived: Swift.Bool,
                 readOnly: Swift.Bool? = nil,
+                readOnlyReason: Components.Schemas.Conversation.ReadOnlyReasonPayload? = nil,
                 readReceipts: Swift.Bool? = nil,
                 createdAt: Foundation.Date? = nil
             ) {
@@ -15181,6 +15354,7 @@ extension Components {
                 self.mutedUntil = mutedUntil
                 self.archived = archived
                 self.readOnly = readOnly
+                self.readOnlyReason = readOnlyReason
                 self.readReceipts = readReceipts
                 self.createdAt = createdAt
             }
@@ -15204,6 +15378,7 @@ extension Components {
                 case mutedUntil = "muted_until"
                 case archived
                 case readOnly = "read_only"
+                case readOnlyReason = "read_only_reason"
                 case readReceipts = "read_receipts"
                 case createdAt = "created_at"
             }
@@ -18401,7 +18576,7 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/PushPayload/type`.
             public var _type: Swift.String
-            /// The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+            /// The push key (`FamilySocialPushKey`, `LeavingPushKey` and the older ones in README §6.3).
             ///
             /// - Remark: Generated from `#/components/schemas/PushPayload/key`.
             public var key: Swift.String
@@ -18435,16 +18610,21 @@ extension Components {
             public var tag: Swift.String?
             /// - Remark: Generated from `#/components/schemas/PushPayload/actions`.
             public var actions: [Components.Schemas.PushAction]?
+            /// The sending server's base URL (discovery `base_url`), so apps with several accounts open the right one (README §6.3). Absent from older servers: use the account the push endpoint belongs to.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PushPayload/server`.
+            public var server: Swift.String?
             /// Creates a new `PushPayload`.
             ///
             /// - Parameters:
             ///   - _type: The websocket event type this push stands for.
-            ///   - key: The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+            ///   - key: The push key (`FamilySocialPushKey`, `LeavingPushKey` and the older ones in README §6.3).
             ///   - title:
             ///   - body:
             ///   - ids:
             ///   - tag: A newer push with the same tag replaces the older one.
             ///   - actions:
+            ///   - server: The sending server's base URL (discovery `base_url`), so apps with several accounts open the right one (README §6.3). Absent from older servers: use the account the push endpoint belongs to.
             public init(
                 _type: Swift.String,
                 key: Swift.String,
@@ -18452,7 +18632,8 @@ extension Components {
                 body: Swift.String,
                 ids: Components.Schemas.PushPayload.IdsPayload,
                 tag: Swift.String? = nil,
-                actions: [Components.Schemas.PushAction]? = nil
+                actions: [Components.Schemas.PushAction]? = nil,
+                server: Swift.String? = nil
             ) {
                 self._type = _type
                 self.key = key
@@ -18461,6 +18642,7 @@ extension Components {
                 self.ids = ids
                 self.tag = tag
                 self.actions = actions
+                self.server = server
             }
             public enum CodingKeys: String, CodingKey {
                 case _type = "type"
@@ -18470,6 +18652,2746 @@ extension Components {
                 case ids
                 case tag
                 case actions
+                case server
+            }
+        }
+        /// `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotosChoice`.
+        @frozen public enum PhotosChoice: String, Codable, Hashable, Sendable, CaseIterable {
+            case keep = "keep"
+            case take = "take"
+        }
+        /// `keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").
+        ///
+        /// - Remark: Generated from `#/components/schemas/CommentsChoice`.
+        @frozen public enum CommentsChoice: String, Codable, Hashable, Sendable, CaseIterable {
+            case keep = "keep"
+            case delete = "delete"
+        }
+        /// - Remark: Generated from `#/components/schemas/LeaveFeedRequest`.
+        public struct LeaveFeedRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/LeaveFeedRequest/photos`.
+            public var photos: Components.Schemas.PhotosChoice?
+            /// - Remark: Generated from `#/components/schemas/LeaveFeedRequest/comments`.
+            public var comments: Components.Schemas.CommentsChoice?
+            /// Frames to leave in the same request (frames the caller is a member of, not owner, that subscribe to this
+            /// family; others answer `422 validation_failed`). The same `photos` choice applies to the caller's direct
+            /// placements on them.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeaveFeedRequest/leave_frame_ids`.
+            public var leaveFrameIds: [Components.Schemas.Id]?
+            /// Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeaveFeedRequest/remove_my_posts`.
+            @available(*, deprecated)
+            public var removeMyPosts: Swift.Bool?
+            /// Creates a new `LeaveFeedRequest`.
+            ///
+            /// - Parameters:
+            ///   - photos:
+            ///   - comments:
+            ///   - leaveFrameIds: Frames to leave in the same request (frames the caller is a member of, not owner, that subscribe to this
+            ///   - removeMyPosts: Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+            public init(
+                photos: Components.Schemas.PhotosChoice? = nil,
+                comments: Components.Schemas.CommentsChoice? = nil,
+                leaveFrameIds: [Components.Schemas.Id]? = nil,
+                removeMyPosts: Swift.Bool? = nil
+            ) {
+                self.photos = photos
+                self.comments = comments
+                self.leaveFrameIds = leaveFrameIds
+                self.removeMyPosts = removeMyPosts
+            }
+            public enum CodingKeys: String, CodingKey {
+                case photos
+                case comments
+                case leaveFrameIds = "leave_frame_ids"
+                case removeMyPosts = "remove_my_posts"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/LeaveFrameRequest`.
+        public struct LeaveFrameRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/LeaveFrameRequest/photos`.
+            public var photos: Components.Schemas.PhotosChoice?
+            /// Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeaveFrameRequest/remove_my_items`.
+            @available(*, deprecated)
+            public var removeMyItems: Swift.Bool?
+            /// Creates a new `LeaveFrameRequest`.
+            ///
+            /// - Parameters:
+            ///   - photos:
+            ///   - removeMyItems: Older clients. `true` without `photos` means `photos: take`; without either the server keeps the photos.
+            public init(
+                photos: Components.Schemas.PhotosChoice? = nil,
+                removeMyItems: Swift.Bool? = nil
+            ) {
+                self.photos = photos
+                self.removeMyItems = removeMyItems
+            }
+            public enum CodingKeys: String, CodingKey {
+                case photos
+                case removeMyItems = "remove_my_items"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TakeAwayRequest`.
+        public struct TakeAwayRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TakeAwayRequest/comments`.
+            public var comments: Components.Schemas.CommentsChoice?
+            /// Creates a new `TakeAwayRequest`.
+            ///
+            /// - Parameters:
+            ///   - comments:
+            public init(comments: Components.Schemas.CommentsChoice? = nil) {
+                self.comments = comments
+            }
+            public enum CodingKeys: String, CodingKey {
+                case comments
+            }
+        }
+        /// The answer of leaving with `photos` and of the take-away endpoints. `taking_id` is null when nothing was taken
+        /// away (`photos: keep`, or nothing live).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/TakeAwayResult`.
+        public struct TakeAwayResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/taking_id`.
+            public var takingId: Components.Schemas.Id?
+            /// Items taken away (each counted once
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/photos_taken_away`.
+            public var photosTakenAway: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/comments_deleted`.
+            public var commentsDeleted: Swift.Int
+            /// When the frames' trash deletes what nobody asked to keep.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/until`.
+            public var until: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/TakeAwayResult/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/TakeAwayResult/FramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/TakeAwayResult/FramesPayload/photos`.
+                public var photos: Swift.Int
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - photos:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    photos: Swift.Int
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.photos = photos
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case photos
+                }
+            }
+            /// Frames that lost photos (local ones; frames on other servers are counted in `remote_frames`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/frames`.
+            public typealias FramesPayload = [Components.Schemas.TakeAwayResult.FramesPayloadPayload]
+            /// Frames that lost photos (local ones; frames on other servers are counted in `remote_frames`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/frames`.
+            public var frames: Components.Schemas.TakeAwayResult.FramesPayload
+            /// Frames on other servers following the family that were told to remove the photos.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/remote_frames`.
+            public var remoteFrames: Swift.Int?
+            /// `leaveFeed` with `leave_frame_ids`: the frames actually left.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakeAwayResult/left_frame_ids`.
+            public var leftFrameIds: [Components.Schemas.Id]?
+            /// Creates a new `TakeAwayResult`.
+            ///
+            /// - Parameters:
+            ///   - takingId:
+            ///   - photosTakenAway: Items taken away (each counted once
+            ///   - commentsDeleted:
+            ///   - until: When the frames' trash deletes what nobody asked to keep.
+            ///   - frames: Frames that lost photos (local ones; frames on other servers are counted in `remote_frames`).
+            ///   - remoteFrames: Frames on other servers following the family that were told to remove the photos.
+            ///   - leftFrameIds: `leaveFeed` with `leave_frame_ids`: the frames actually left.
+            public init(
+                takingId: Components.Schemas.Id? = nil,
+                photosTakenAway: Swift.Int,
+                commentsDeleted: Swift.Int,
+                until: Foundation.Date? = nil,
+                frames: Components.Schemas.TakeAwayResult.FramesPayload,
+                remoteFrames: Swift.Int? = nil,
+                leftFrameIds: [Components.Schemas.Id]? = nil
+            ) {
+                self.takingId = takingId
+                self.photosTakenAway = photosTakenAway
+                self.commentsDeleted = commentsDeleted
+                self.until = until
+                self.frames = frames
+                self.remoteFrames = remoteFrames
+                self.leftFrameIds = leftFrameIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case takingId = "taking_id"
+                case photosTakenAway = "photos_taken_away"
+                case commentsDeleted = "comments_deleted"
+                case until
+                case frames
+                case remoteFrames = "remote_frames"
+                case leftFrameIds = "left_frame_ids"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/LeavePreview`.
+        public struct LeavePreview: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/scope`.
+            @frozen public enum ScopePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case feed = "feed"
+                case frame = "frame"
+            }
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/scope`.
+            public var scope: Components.Schemas.LeavePreview.ScopePayload
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// The family's or frame's name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/name`.
+            public var name: Swift.String
+            /// The caller is still a member (false for the take-away sheet of people who left or were removed).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/member`.
+            public var member: Swift.Bool
+            /// The caller owns it (must transfer ownership before leaving).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/owner`.
+            public var owner: Swift.Bool?
+            /// The caller's own live items in this scope (family posts; or direct placements on the frame).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/photos`.
+            public var photos: Swift.Int
+            /// Families: the caller's live comments in the family.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/comments`.
+            public var comments: Swift.Int?
+            /// The caller's items in this scope still in a frame's trash from an earlier taking.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/already_taken_away`.
+            public var alreadyTakenAway: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload/role`.
+                public var role: Components.Schemas.Role
+                /// False for frames the caller owns (transfer first).
+                ///
+                /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload/can_leave`.
+                public var canLeave: Swift.Bool?
+                /// Checked by default (the frame gets this family's photos and the caller is not its owner).
+                ///
+                /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload/suggested`.
+                public var suggested: Swift.Bool
+                /// The caller's own direct placements on that frame.
+                ///
+                /// - Remark: Generated from `#/components/schemas/LeavePreview/FramesPayload/direct_photos`.
+                public var directPhotos: Swift.Int?
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - role:
+                ///   - canLeave: False for frames the caller owns (transfer first).
+                ///   - suggested: Checked by default (the frame gets this family's photos and the caller is not its owner).
+                ///   - directPhotos: The caller's own direct placements on that frame.
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    role: Components.Schemas.Role,
+                    canLeave: Swift.Bool? = nil,
+                    suggested: Swift.Bool,
+                    directPhotos: Swift.Int? = nil
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.role = role
+                    self.canLeave = canLeave
+                    self.suggested = suggested
+                    self.directPhotos = directPhotos
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case role
+                    case canLeave = "can_leave"
+                    case suggested
+                    case directPhotos = "direct_photos"
+                }
+            }
+            /// Families: frames the caller is a member of that subscribe to the family (the "Leave this frame too" checkboxes).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/frames`.
+            public typealias FramesPayload = [Components.Schemas.LeavePreview.FramesPayloadPayload]
+            /// Families: frames the caller is a member of that subscribe to the family (the "Leave this frame too" checkboxes).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LeavePreview/frames`.
+            public var frames: Components.Schemas.LeavePreview.FramesPayload?
+            /// Creates a new `LeavePreview`.
+            ///
+            /// - Parameters:
+            ///   - scope:
+            ///   - feedId:
+            ///   - frameId:
+            ///   - name: The family's or frame's name.
+            ///   - member: The caller is still a member (false for the take-away sheet of people who left or were removed).
+            ///   - owner: The caller owns it (must transfer ownership before leaving).
+            ///   - photos: The caller's own live items in this scope (family posts; or direct placements on the frame).
+            ///   - comments: Families: the caller's live comments in the family.
+            ///   - alreadyTakenAway: The caller's items in this scope still in a frame's trash from an earlier taking.
+            ///   - frames: Families: frames the caller is a member of that subscribe to the family (the "Leave this frame too" checkboxes).
+            public init(
+                scope: Components.Schemas.LeavePreview.ScopePayload,
+                feedId: Components.Schemas.Id? = nil,
+                frameId: Components.Schemas.Id? = nil,
+                name: Swift.String,
+                member: Swift.Bool,
+                owner: Swift.Bool? = nil,
+                photos: Swift.Int,
+                comments: Swift.Int? = nil,
+                alreadyTakenAway: Swift.Int? = nil,
+                frames: Components.Schemas.LeavePreview.FramesPayload? = nil
+            ) {
+                self.scope = scope
+                self.feedId = feedId
+                self.frameId = frameId
+                self.name = name
+                self.member = member
+                self.owner = owner
+                self.photos = photos
+                self.comments = comments
+                self.alreadyTakenAway = alreadyTakenAway
+                self.frames = frames
+            }
+            public enum CodingKeys: String, CodingKey {
+                case scope
+                case feedId = "feed_id"
+                case frameId = "frame_id"
+                case name
+                case member
+                case owner
+                case photos
+                case comments
+                case alreadyTakenAway = "already_taken_away"
+                case frames
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FormerPlaces`.
+        public struct FormerPlaces: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FormerPlaces/FeedsPayload`.
+            public struct FeedsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FeedsPayload/feed_id`.
+                public var feedId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FeedsPayload/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FeedsPayload/photos`.
+                public var photos: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FeedsPayload/left_at`.
+                public var leftAt: Foundation.Date?
+                /// Creates a new `FeedsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - name:
+                ///   - photos:
+                ///   - leftAt:
+                public init(
+                    feedId: Components.Schemas.Id,
+                    name: Swift.String,
+                    photos: Swift.Int,
+                    leftAt: Foundation.Date? = nil
+                ) {
+                    self.feedId = feedId
+                    self.name = name
+                    self.photos = photos
+                    self.leftAt = leftAt
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case feedId = "feed_id"
+                    case name
+                    case photos
+                    case leftAt = "left_at"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FormerPlaces/feeds`.
+            public typealias FeedsPayload = [Components.Schemas.FormerPlaces.FeedsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/FormerPlaces/feeds`.
+            public var feeds: Components.Schemas.FormerPlaces.FeedsPayload
+            /// - Remark: Generated from `#/components/schemas/FormerPlaces/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FramesPayload/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FramesPayload/photos`.
+                public var photos: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/FormerPlaces/FramesPayload/left_at`.
+                public var leftAt: Foundation.Date?
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - name:
+                ///   - photos:
+                ///   - leftAt:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    name: Swift.String,
+                    photos: Swift.Int,
+                    leftAt: Foundation.Date? = nil
+                ) {
+                    self.frameId = frameId
+                    self.name = name
+                    self.photos = photos
+                    self.leftAt = leftAt
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case name
+                    case photos
+                    case leftAt = "left_at"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FormerPlaces/frames`.
+            public typealias FramesPayload = [Components.Schemas.FormerPlaces.FramesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/FormerPlaces/frames`.
+            public var frames: Components.Schemas.FormerPlaces.FramesPayload
+            /// Creates a new `FormerPlaces`.
+            ///
+            /// - Parameters:
+            ///   - feeds:
+            ///   - frames:
+            public init(
+                feeds: Components.Schemas.FormerPlaces.FeedsPayload,
+                frames: Components.Schemas.FormerPlaces.FramesPayload
+            ) {
+                self.feeds = feeds
+                self.frames = frames
+            }
+            public enum CodingKeys: String, CodingKey {
+                case feeds
+                case frames
+            }
+        }
+        /// A placement taken away by its sender (README §5.21). It is off the frame and listed in the trash under "Taken away by …".
+        ///
+        /// - Remark: Generated from `#/components/schemas/PlacementTakenAway`.
+        public struct PlacementTakenAway: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlacementTakenAway/taking_id`.
+            public var takingId: Components.Schemas.Id
+            /// Null for deleted accounts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlacementTakenAway/by_user_id`.
+            public var byUserId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PlacementTakenAway/by_name`.
+            public var byName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PlacementTakenAway/at`.
+            public var at: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PlacementTakenAway/until`.
+            public var until: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PlacementTakenAway/keep_request_status`.
+            public var keepRequestStatus: Components.Schemas.KeepRequestStatus?
+            /// Creates a new `PlacementTakenAway`.
+            ///
+            /// - Parameters:
+            ///   - takingId:
+            ///   - byUserId: Null for deleted accounts.
+            ///   - byName:
+            ///   - at:
+            ///   - until:
+            ///   - keepRequestStatus:
+            public init(
+                takingId: Components.Schemas.Id,
+                byUserId: Components.Schemas.Id? = nil,
+                byName: Swift.String,
+                at: Foundation.Date,
+                until: Foundation.Date,
+                keepRequestStatus: Components.Schemas.KeepRequestStatus? = nil
+            ) {
+                self.takingId = takingId
+                self.byUserId = byUserId
+                self.byName = byName
+                self.at = at
+                self.until = until
+                self.keepRequestStatus = keepRequestStatus
+            }
+            public enum CodingKeys: String, CodingKey {
+                case takingId = "taking_id"
+                case byUserId = "by_user_id"
+                case byName = "by_name"
+                case at
+                case until
+                case keepRequestStatus = "keep_request_status"
+            }
+        }
+        /// One taking as a frame's or family's managers see it.
+        ///
+        /// - Remark: Generated from `#/components/schemas/TakenAwayGroup`.
+        public struct TakenAwayGroup: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/taking_id`.
+            public var takingId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/by`.
+            public var by: Components.Schemas.PersonRef?
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/by_name`.
+            public var byName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/taken_at`.
+            public var takenAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/until`.
+            public var until: Foundation.Date
+            /// Items still taken away in this scope.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/count`.
+            public var count: Swift.Int
+            /// Short-lived signed thumbnails of the first few.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/preview_thumb_urls`.
+            public var previewThumbUrls: [Swift.String]?
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/keep_request`.
+            public var keepRequest: Components.Schemas.KeepRequest?
+            /// The caller may ask to keep now.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/can_ask`.
+            public var canAsk: Swift.Bool
+            /// `blocked`: show "Tom doesn't accept requests".
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/cannot_ask_reason`.
+            @frozen public enum CannotAskReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case blocked = "blocked"
+                case alreadyAsked = "already_asked"
+                case expired = "expired"
+                case accountDeleted = "account_deleted"
+                case notAllowed = "not_allowed"
+            }
+            /// `blocked`: show "Tom doesn't accept requests".
+            ///
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroup/cannot_ask_reason`.
+            public var cannotAskReason: Components.Schemas.TakenAwayGroup.CannotAskReasonPayload?
+            /// Creates a new `TakenAwayGroup`.
+            ///
+            /// - Parameters:
+            ///   - takingId:
+            ///   - by:
+            ///   - byName:
+            ///   - takenAt:
+            ///   - until:
+            ///   - count: Items still taken away in this scope.
+            ///   - previewThumbUrls: Short-lived signed thumbnails of the first few.
+            ///   - keepRequest:
+            ///   - canAsk: The caller may ask to keep now.
+            ///   - cannotAskReason: `blocked`: show "Tom doesn't accept requests".
+            public init(
+                takingId: Components.Schemas.Id,
+                by: Components.Schemas.PersonRef? = nil,
+                byName: Swift.String,
+                takenAt: Foundation.Date,
+                until: Foundation.Date,
+                count: Swift.Int,
+                previewThumbUrls: [Swift.String]? = nil,
+                keepRequest: Components.Schemas.KeepRequest? = nil,
+                canAsk: Swift.Bool,
+                cannotAskReason: Components.Schemas.TakenAwayGroup.CannotAskReasonPayload? = nil
+            ) {
+                self.takingId = takingId
+                self.by = by
+                self.byName = byName
+                self.takenAt = takenAt
+                self.until = until
+                self.count = count
+                self.previewThumbUrls = previewThumbUrls
+                self.keepRequest = keepRequest
+                self.canAsk = canAsk
+                self.cannotAskReason = cannotAskReason
+            }
+            public enum CodingKeys: String, CodingKey {
+                case takingId = "taking_id"
+                case by
+                case byName = "by_name"
+                case takenAt = "taken_at"
+                case until
+                case count
+                case previewThumbUrls = "preview_thumb_urls"
+                case keepRequest = "keep_request"
+                case canAsk = "can_ask"
+                case cannotAskReason = "cannot_ask_reason"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TakenAwayGroupList`.
+        public struct TakenAwayGroupList: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TakenAwayGroupList/groups`.
+            public var groups: [Components.Schemas.TakenAwayGroup]
+            /// Creates a new `TakenAwayGroupList`.
+            ///
+            /// - Parameters:
+            ///   - groups:
+            public init(groups: [Components.Schemas.TakenAwayGroup]) {
+                self.groups = groups
+            }
+            public enum CodingKeys: String, CodingKey {
+                case groups
+            }
+        }
+        /// `open` until answered or the 30 days end; `allowed` (all), `partly_allowed` (some), `declined`, `expired`.
+        ///
+        /// - Remark: Generated from `#/components/schemas/KeepRequestStatus`.
+        @frozen public enum KeepRequestStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case open = "open"
+            case allowed = "allowed"
+            case partlyAllowed = "partly_allowed"
+            case declined = "declined"
+            case expired = "expired"
+        }
+        /// - Remark: Generated from `#/components/schemas/KeepRequestCreate`.
+        public struct KeepRequestCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/KeepRequestCreate/taking_id`.
+            public var takingId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/KeepRequestCreate/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/KeepRequestCreate/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// The photos to ask for; absent means every item of the taking in this scope.
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequestCreate/item_ids`.
+            public var itemIds: [Components.Schemas.Id]?
+            /// Optional words for the person ("The ones with the children
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequestCreate/note`.
+            public var note: Swift.String?
+            /// Creates a new `KeepRequestCreate`.
+            ///
+            /// - Parameters:
+            ///   - takingId:
+            ///   - frameId:
+            ///   - feedId:
+            ///   - itemIds: The photos to ask for; absent means every item of the taking in this scope.
+            ///   - note: Optional words for the person ("The ones with the children
+            public init(
+                takingId: Components.Schemas.Id,
+                frameId: Components.Schemas.Id? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                itemIds: [Components.Schemas.Id]? = nil,
+                note: Swift.String? = nil
+            ) {
+                self.takingId = takingId
+                self.frameId = frameId
+                self.feedId = feedId
+                self.itemIds = itemIds
+                self.note = note
+            }
+            public enum CodingKeys: String, CodingKey {
+                case takingId = "taking_id"
+                case frameId = "frame_id"
+                case feedId = "feed_id"
+                case itemIds = "item_ids"
+                case note
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/KeepRequestAnswer`.
+        public struct KeepRequestAnswer: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/KeepRequestAnswer/allow`.
+            @frozen public enum AllowPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case all = "all"
+                case some = "some"
+                case none = "none"
+            }
+            /// - Remark: Generated from `#/components/schemas/KeepRequestAnswer/allow`.
+            public var allow: Components.Schemas.KeepRequestAnswer.AllowPayload
+            /// `some` only: the allowed items (a subset of the request's).
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequestAnswer/item_ids`.
+            public var itemIds: [Components.Schemas.Id]?
+            /// Creates a new `KeepRequestAnswer`.
+            ///
+            /// - Parameters:
+            ///   - allow:
+            ///   - itemIds: `some` only: the allowed items (a subset of the request's).
+            public init(
+                allow: Components.Schemas.KeepRequestAnswer.AllowPayload,
+                itemIds: [Components.Schemas.Id]? = nil
+            ) {
+                self.allow = allow
+                self.itemIds = itemIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case allow
+                case itemIds = "item_ids"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/KeepRequest`.
+        public struct KeepRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/status`.
+            public var status: Components.Schemas.KeepRequestStatus
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/scope`.
+            @frozen public enum ScopePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case frame = "frame"
+                case feed = "feed"
+            }
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/scope`.
+            public var scope: Components.Schemas.KeepRequest.ScopePayload
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/frame_name`.
+            public var frameName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/feed_name`.
+            public var feedName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/taking_id`.
+            public var takingId: Components.Schemas.Id
+            /// The person asked (who took the photos away).
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/person`.
+            public var person: Components.Schemas.PersonRef?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/asked_by`.
+            public var askedBy: Components.Schemas.PersonRef?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/asked_by_name`.
+            public var askedByName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/note`.
+            public var note: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/asked_at`.
+            public var askedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/answered_at`.
+            public var answeredAt: Foundation.Date?
+            /// Items asked for.
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/item_count`.
+            public var itemCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/allowed_count`.
+            public var allowedCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/ItemsPayload`.
+            public struct ItemsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/KeepRequest/ItemsPayload/item`.
+                public var item: Components.Schemas.Item
+                /// - Remark: Generated from `#/components/schemas/KeepRequest/ItemsPayload/allowed`.
+                public var allowed: Swift.Bool?
+                /// Creates a new `ItemsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - item:
+                ///   - allowed:
+                public init(
+                    item: Components.Schemas.Item,
+                    allowed: Swift.Bool? = nil
+                ) {
+                    self.item = item
+                    self.allowed = allowed
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case item
+                    case allowed
+                }
+            }
+            /// `getKeepRequest` only: the items asked for, with `allowed` once answered.
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/items`.
+            public typealias ItemsPayload = [Components.Schemas.KeepRequest.ItemsPayloadPayload]
+            /// `getKeepRequest` only: the items asked for, with `allowed` once answered.
+            ///
+            /// - Remark: Generated from `#/components/schemas/KeepRequest/items`.
+            public var items: Components.Schemas.KeepRequest.ItemsPayload?
+            /// Creates a new `KeepRequest`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - status:
+            ///   - scope:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - feedId:
+            ///   - feedName:
+            ///   - takingId:
+            ///   - person: The person asked (who took the photos away).
+            ///   - askedBy:
+            ///   - askedByName:
+            ///   - note:
+            ///   - askedAt:
+            ///   - expiresAt:
+            ///   - answeredAt:
+            ///   - itemCount: Items asked for.
+            ///   - allowedCount:
+            ///   - items: `getKeepRequest` only: the items asked for, with `allowed` once answered.
+            public init(
+                id: Components.Schemas.Id,
+                status: Components.Schemas.KeepRequestStatus,
+                scope: Components.Schemas.KeepRequest.ScopePayload,
+                frameId: Components.Schemas.Id? = nil,
+                frameName: Swift.String? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                feedName: Swift.String? = nil,
+                takingId: Components.Schemas.Id,
+                person: Components.Schemas.PersonRef? = nil,
+                askedBy: Components.Schemas.PersonRef? = nil,
+                askedByName: Swift.String,
+                note: Swift.String? = nil,
+                askedAt: Foundation.Date,
+                expiresAt: Foundation.Date,
+                answeredAt: Foundation.Date? = nil,
+                itemCount: Swift.Int,
+                allowedCount: Swift.Int? = nil,
+                items: Components.Schemas.KeepRequest.ItemsPayload? = nil
+            ) {
+                self.id = id
+                self.status = status
+                self.scope = scope
+                self.frameId = frameId
+                self.frameName = frameName
+                self.feedId = feedId
+                self.feedName = feedName
+                self.takingId = takingId
+                self.person = person
+                self.askedBy = askedBy
+                self.askedByName = askedByName
+                self.note = note
+                self.askedAt = askedAt
+                self.expiresAt = expiresAt
+                self.answeredAt = answeredAt
+                self.itemCount = itemCount
+                self.allowedCount = allowedCount
+                self.items = items
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case status
+                case scope
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case feedId = "feed_id"
+                case feedName = "feed_name"
+                case takingId = "taking_id"
+                case person
+                case askedBy = "asked_by"
+                case askedByName = "asked_by_name"
+                case note
+                case askedAt = "asked_at"
+                case expiresAt = "expires_at"
+                case answeredAt = "answered_at"
+                case itemCount = "item_count"
+                case allowedCount = "allowed_count"
+                case items
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/KeepRequestList`.
+        public struct KeepRequestList: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/KeepRequestList/requests`.
+            public var requests: [Components.Schemas.KeepRequest]
+            /// Creates a new `KeepRequestList`.
+            ///
+            /// - Parameters:
+            ///   - requests:
+            public init(requests: [Components.Schemas.KeepRequest]) {
+                self.requests = requests
+            }
+            public enum CodingKeys: String, CodingKey {
+                case requests
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/AccountDeletion`.
+        public struct AccountDeletion: Codable, Hashable, Sendable {
+            /// `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+            /// still in a family or on a frame is handed over to that family's or frame's owner and stays credited
+            /// "<name> (former member)" (README §5.21 "Account deletion").
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/AccountDeletion/photos`.
+            @frozen public enum PhotosPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case take = "take"
+                case leave = "leave"
+            }
+            /// `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+            /// still in a family or on a frame is handed over to that family's or frame's owner and stays credited
+            /// "<name> (former member)" (README §5.21 "Account deletion").
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/AccountDeletion/photos`.
+            public var photos: Components.Schemas.AccountDeletion.PhotosPayload?
+            /// Creates a new `AccountDeletion`.
+            ///
+            /// - Parameters:
+            ///   - photos: `take` (default): every photo leaves every frame and family with the 30-day notice. `leave`: each photo
+            public init(photos: Components.Schemas.AccountDeletion.PhotosPayload? = nil) {
+                self.photos = photos
+            }
+            public enum CodingKeys: String, CodingKey {
+                case photos
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MemoryPreferences`.
+        public struct MemoryPreferences: Codable, Hashable, Sendable {
+            /// People left out of the caller's memories.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MemoryPreferences/hidden_people`.
+            public var hiddenPeople: [Components.Schemas.PersonRef]
+            /// Posts (feed or frame posts) never shown again as a memory.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MemoryPreferences/hidden_memories`.
+            public var hiddenMemories: [Components.Schemas.Id]
+            /// Creates a new `MemoryPreferences`.
+            ///
+            /// - Parameters:
+            ///   - hiddenPeople: People left out of the caller's memories.
+            ///   - hiddenMemories: Posts (feed or frame posts) never shown again as a memory.
+            public init(
+                hiddenPeople: [Components.Schemas.PersonRef],
+                hiddenMemories: [Components.Schemas.Id]
+            ) {
+                self.hiddenPeople = hiddenPeople
+                self.hiddenMemories = hiddenMemories
+            }
+            public enum CodingKeys: String, CodingKey {
+                case hiddenPeople = "hidden_people"
+                case hiddenMemories = "hidden_memories"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MemoryPreferencesUpdate`.
+        public struct MemoryPreferencesUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MemoryPreferencesUpdate/hidden_people`.
+            public var hiddenPeople: [Components.Schemas.Id]?
+            /// - Remark: Generated from `#/components/schemas/MemoryPreferencesUpdate/hidden_memories`.
+            public var hiddenMemories: [Components.Schemas.Id]?
+            /// Creates a new `MemoryPreferencesUpdate`.
+            ///
+            /// - Parameters:
+            ///   - hiddenPeople:
+            ///   - hiddenMemories:
+            public init(
+                hiddenPeople: [Components.Schemas.Id]? = nil,
+                hiddenMemories: [Components.Schemas.Id]? = nil
+            ) {
+                self.hiddenPeople = hiddenPeople
+                self.hiddenMemories = hiddenMemories
+            }
+            public enum CodingKeys: String, CodingKey {
+                case hiddenPeople = "hidden_people"
+                case hiddenMemories = "hidden_memories"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OperatorOwnerTransfer`.
+        public struct OperatorOwnerTransfer: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OperatorOwnerTransfer/user_id`.
+            public var userId: Components.Schemas.Id
+            /// Kept in the ownership log; not shown to the people.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperatorOwnerTransfer/reason`.
+            public var reason: Swift.String
+            /// Remove the previous owner instead of making them admin.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperatorOwnerTransfer/remove_previous`.
+            public var removePrevious: Swift.Bool?
+            /// Creates a new `OperatorOwnerTransfer`.
+            ///
+            /// - Parameters:
+            ///   - userId:
+            ///   - reason: Kept in the ownership log; not shown to the people.
+            ///   - removePrevious: Remove the previous owner instead of making them admin.
+            public init(
+                userId: Components.Schemas.Id,
+                reason: Swift.String,
+                removePrevious: Swift.Bool? = nil
+            ) {
+                self.userId = userId
+                self.reason = reason
+                self.removePrevious = removePrevious
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userId = "user_id"
+                case reason
+                case removePrevious = "remove_previous"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OperatorScopeMember`.
+        public struct OperatorScopeMember: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OperatorScopeMember/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/OperatorScopeMember/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/OperatorScopeMember/email`.
+            public var email: Swift.String?
+            /// Frame role (`Role`) or family role (`FeedRole`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperatorScopeMember/role`.
+            public var role: Swift.String
+            /// Creates a new `OperatorScopeMember`.
+            ///
+            /// - Parameters:
+            ///   - userId:
+            ///   - displayName:
+            ///   - email:
+            ///   - role: Frame role (`Role`) or family role (`FeedRole`).
+            public init(
+                userId: Components.Schemas.Id,
+                displayName: Swift.String,
+                email: Swift.String? = nil,
+                role: Swift.String
+            ) {
+                self.userId = userId
+                self.displayName = displayName
+                self.email = email
+                self.role = role
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userId = "user_id"
+                case displayName = "display_name"
+                case email
+                case role
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OperatorScope`.
+        public struct OperatorScope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/kind`.
+            @frozen public enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case frame = "frame"
+                case feed = "feed"
+            }
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/kind`.
+            public var kind: Components.Schemas.OperatorScope.KindPayload
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/created_at`.
+            public var createdAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/members`.
+            public var members: [Components.Schemas.OperatorScopeMember]
+            /// Creates a new `OperatorScope`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - id:
+            ///   - name:
+            ///   - createdAt:
+            ///   - members:
+            public init(
+                kind: Components.Schemas.OperatorScope.KindPayload,
+                id: Components.Schemas.Id,
+                name: Swift.String,
+                createdAt: Foundation.Date? = nil,
+                members: [Components.Schemas.OperatorScopeMember]
+            ) {
+                self.kind = kind
+                self.id = id
+                self.name = name
+                self.createdAt = createdAt
+                self.members = members
+            }
+            public enum CodingKeys: String, CodingKey {
+                case kind
+                case id
+                case name
+                case createdAt = "created_at"
+                case members
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OperatorOwnershipMatches`.
+        public struct OperatorOwnershipMatches: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OperatorOwnershipMatches/frames`.
+            public var frames: [Components.Schemas.OperatorScope]
+            /// - Remark: Generated from `#/components/schemas/OperatorOwnershipMatches/feeds`.
+            public var feeds: [Components.Schemas.OperatorScope]
+            /// Creates a new `OperatorOwnershipMatches`.
+            ///
+            /// - Parameters:
+            ///   - frames:
+            ///   - feeds:
+            public init(
+                frames: [Components.Schemas.OperatorScope],
+                feeds: [Components.Schemas.OperatorScope]
+            ) {
+                self.frames = frames
+                self.feeds = feeds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frames
+                case feeds
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry`.
+        public struct OwnershipLogEntry: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/kind`.
+            @frozen public enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case operatorTransfer = "operator_transfer"
+                case accountHandover = "account_handover"
+            }
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/kind`.
+            public var kind: Components.Schemas.OwnershipLogEntry.KindPayload
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/at`.
+            public var at: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/scope_kind`.
+            @frozen public enum ScopeKindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case frame = "frame"
+                case feed = "feed"
+            }
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/scope_kind`.
+            public var scopeKind: Components.Schemas.OwnershipLogEntry.ScopeKindPayload?
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/scope_id`.
+            public var scopeId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/scope_name`.
+            public var scopeName: Swift.String?
+            /// Previous owner; for handovers the deleted account's name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/from_name`.
+            public var fromName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/to_name`.
+            public var toName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/operator_name`.
+            public var operatorName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/reason`.
+            public var reason: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/removed_previous`.
+            public var removedPrevious: Swift.Bool?
+            /// Handovers only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogEntry/item_count`.
+            public var itemCount: Swift.Int?
+            /// Creates a new `OwnershipLogEntry`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - kind:
+            ///   - at:
+            ///   - scopeKind:
+            ///   - scopeId:
+            ///   - scopeName:
+            ///   - fromName: Previous owner; for handovers the deleted account's name.
+            ///   - toName:
+            ///   - operatorName:
+            ///   - reason:
+            ///   - removedPrevious:
+            ///   - itemCount: Handovers only.
+            public init(
+                id: Components.Schemas.Id,
+                kind: Components.Schemas.OwnershipLogEntry.KindPayload,
+                at: Foundation.Date,
+                scopeKind: Components.Schemas.OwnershipLogEntry.ScopeKindPayload? = nil,
+                scopeId: Components.Schemas.Id? = nil,
+                scopeName: Swift.String? = nil,
+                fromName: Swift.String? = nil,
+                toName: Swift.String? = nil,
+                operatorName: Swift.String? = nil,
+                reason: Swift.String? = nil,
+                removedPrevious: Swift.Bool? = nil,
+                itemCount: Swift.Int? = nil
+            ) {
+                self.id = id
+                self.kind = kind
+                self.at = at
+                self.scopeKind = scopeKind
+                self.scopeId = scopeId
+                self.scopeName = scopeName
+                self.fromName = fromName
+                self.toName = toName
+                self.operatorName = operatorName
+                self.reason = reason
+                self.removedPrevious = removedPrevious
+                self.itemCount = itemCount
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case kind
+                case at
+                case scopeKind = "scope_kind"
+                case scopeId = "scope_id"
+                case scopeName = "scope_name"
+                case fromName = "from_name"
+                case toName = "to_name"
+                case operatorName = "operator_name"
+                case reason
+                case removedPrevious = "removed_previous"
+                case itemCount = "item_count"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OwnershipLogPage`.
+        public struct OwnershipLogPage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogPage/entries`.
+            public var entries: [Components.Schemas.OwnershipLogEntry]
+            /// - Remark: Generated from `#/components/schemas/OwnershipLogPage/next_cursor`.
+            public var nextCursor: Swift.String?
+            /// Creates a new `OwnershipLogPage`.
+            ///
+            /// - Parameters:
+            ///   - entries:
+            ///   - nextCursor:
+            public init(
+                entries: [Components.Schemas.OwnershipLogEntry],
+                nextCursor: Swift.String? = nil
+            ) {
+                self.entries = entries
+                self.nextCursor = nextCursor
+            }
+            public enum CodingKeys: String, CodingKey {
+                case entries
+                case nextCursor = "next_cursor"
+            }
+        }
+        /// `keep_request.updated`: a keep request was made, answered or expired (the person asked and the scope's managers).
+        ///
+        /// - Remark: Generated from `#/components/schemas/KeepRequestEvent`.
+        public struct KeepRequestEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/KeepRequestEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case keepRequest_updated = "keep_request.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/KeepRequestEvent/type`.
+            public var _type: Components.Schemas.KeepRequestEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/KeepRequestEvent/request`.
+            public var request: Components.Schemas.KeepRequest
+            /// Creates a new `KeepRequestEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - request:
+            public init(
+                _type: Components.Schemas.KeepRequestEvent._TypePayload,
+                request: Components.Schemas.KeepRequest
+            ) {
+                self._type = _type
+                self.request = request
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case request
+            }
+        }
+        /// `placement.updated`: placements were taken away or came back (the frame's library viewers and the sender).
+        ///
+        /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent`.
+        public struct PlacementUpdatedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case placement_updated = "placement.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/type`.
+            public var _type: Components.Schemas.PlacementUpdatedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/placement_ids`.
+            public var placementIds: [Components.Schemas.Id]
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/reason`.
+            @frozen public enum ReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case takenAway = "taken_away"
+                case restored = "restored"
+                case purged = "purged"
+            }
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/reason`.
+            public var reason: Components.Schemas.PlacementUpdatedEvent.ReasonPayload
+            /// - Remark: Generated from `#/components/schemas/PlacementUpdatedEvent/taking_id`.
+            public var takingId: Components.Schemas.Id?
+            /// Creates a new `PlacementUpdatedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - frameId:
+            ///   - placementIds:
+            ///   - reason:
+            ///   - takingId:
+            public init(
+                _type: Components.Schemas.PlacementUpdatedEvent._TypePayload,
+                frameId: Components.Schemas.Id,
+                placementIds: [Components.Schemas.Id],
+                reason: Components.Schemas.PlacementUpdatedEvent.ReasonPayload,
+                takingId: Components.Schemas.Id? = nil
+            ) {
+                self._type = _type
+                self.frameId = frameId
+                self.placementIds = placementIds
+                self.reason = reason
+                self.takingId = takingId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case frameId = "frame_id"
+                case placementIds = "placement_ids"
+                case reason
+                case takingId = "taking_id"
+            }
+        }
+        /// `remote_subscription.updated`: a frame's follow of a family on another server changed status, synced or failed (the frame's managers; README §5.22).
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionEvent`.
+        public struct RemoteSubscriptionEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case remoteSubscription_updated = "remote_subscription.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionEvent/type`.
+            public var _type: Components.Schemas.RemoteSubscriptionEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionEvent/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionEvent/remote_subscription`.
+            public var remoteSubscription: Components.Schemas.RemoteSubscription
+            /// Creates a new `RemoteSubscriptionEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - frameId:
+            ///   - remoteSubscription:
+            public init(
+                _type: Components.Schemas.RemoteSubscriptionEvent._TypePayload,
+                frameId: Components.Schemas.Id,
+                remoteSubscription: Components.Schemas.RemoteSubscription
+            ) {
+                self._type = _type
+                self.frameId = frameId
+                self.remoteSubscription = remoteSubscription
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case frameId = "frame_id"
+                case remoteSubscription = "remote_subscription"
+            }
+        }
+        /// Push `key`s added by leaving (README §6.3). `photos_taken_away`: frame owner/admins and family owner/admins
+        /// (`ids`: `taking_id`, `frame_id` or `feed_id`). `keep_request`: the person asked (`request_id`).
+        /// `keep_answered`: the asker (`request_id`). `ownership_changed`: the old and the new owner (`frame_id` or
+        /// `feed_id`).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/LeavingPushKey`.
+        @frozen public enum LeavingPushKey: String, Codable, Hashable, Sendable, CaseIterable {
+            case photosTakenAway = "photos_taken_away"
+            case keepRequest = "keep_request"
+            case keepAnswered = "keep_answered"
+            case ownershipChanged = "ownership_changed"
+        }
+        /// The server's federation identity in `/.well-known/kinframe` (README §5.22).
+        ///
+        /// - Remark: Generated from `#/components/schemas/FederationInfo`.
+        public struct FederationInfo: Codable, Hashable, Sendable {
+            /// False when the operator turned federation off (`KINFRAME_FEDERATION=off`); the rest is then absent.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/enabled`.
+            public var enabled: Swift.Bool
+            /// The `keyid` of the current signing key
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/key_id`.
+            public var keyId: Swift.String?
+            /// The current Ed25519 public key
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/public_key`.
+            public var publicKey: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/KeysPayload`.
+            public struct KeysPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FederationInfo/KeysPayload/key_id`.
+                public var keyId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FederationInfo/KeysPayload/public_key`.
+                public var publicKey: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FederationInfo/KeysPayload/expires_at`.
+                public var expiresAt: Foundation.Date?
+                /// Creates a new `KeysPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - keyId:
+                ///   - publicKey:
+                ///   - expiresAt:
+                public init(
+                    keyId: Swift.String,
+                    publicKey: Swift.String,
+                    expiresAt: Foundation.Date? = nil
+                ) {
+                    self.keyId = keyId
+                    self.publicKey = publicKey
+                    self.expiresAt = expiresAt
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case keyId = "key_id"
+                    case publicKey = "public_key"
+                    case expiresAt = "expires_at"
+                }
+            }
+            /// Every key a signature may use, the current one first; a rotated key stays here for 7 days.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/keys`.
+            public typealias KeysPayload = [Components.Schemas.FederationInfo.KeysPayloadPayload]
+            /// Every key a signature may use, the current one first; a rotated key stays here for 7 days.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/keys`.
+            public var keys: Components.Schemas.FederationInfo.KeysPayload?
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/endpoints`.
+            public struct EndpointsPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FederationInfo/endpoints/subscriptions`.
+                public var subscriptions: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/FederationInfo/endpoints/ping`.
+                public var ping: Swift.String?
+                /// Creates a new `EndpointsPayload`.
+                ///
+                /// - Parameters:
+                ///   - subscriptions:
+                ///   - ping:
+                public init(
+                    subscriptions: Swift.String? = nil,
+                    ping: Swift.String? = nil
+                ) {
+                    self.subscriptions = subscriptions
+                    self.ping = ping
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case subscriptions
+                    case ping
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationInfo/endpoints`.
+            public var endpoints: Components.Schemas.FederationInfo.EndpointsPayload?
+            /// Creates a new `FederationInfo`.
+            ///
+            /// - Parameters:
+            ///   - enabled: False when the operator turned federation off (`KINFRAME_FEDERATION=off`); the rest is then absent.
+            ///   - keyId: The `keyid` of the current signing key
+            ///   - publicKey: The current Ed25519 public key
+            ///   - keys: Every key a signature may use, the current one first; a rotated key stays here for 7 days.
+            ///   - endpoints:
+            public init(
+                enabled: Swift.Bool,
+                keyId: Swift.String? = nil,
+                publicKey: Swift.String? = nil,
+                keys: Components.Schemas.FederationInfo.KeysPayload? = nil,
+                endpoints: Components.Schemas.FederationInfo.EndpointsPayload? = nil
+            ) {
+                self.enabled = enabled
+                self.keyId = keyId
+                self.publicKey = publicKey
+                self.keys = keys
+                self.endpoints = endpoints
+            }
+            public enum CodingKeys: String, CodingKey {
+                case enabled
+                case keyId = "key_id"
+                case publicKey = "public_key"
+                case keys
+                case endpoints
+            }
+        }
+        /// Another kinframe server as this one knows it.
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteServer`.
+        public struct RemoteServer: Codable, Hashable, Sendable {
+            /// Its stable `server_id` (from its well-known document).
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/server_id`.
+            public var serverId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/server_name`.
+            public var serverName: Swift.String
+            /// Its base URL.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/server_url`.
+            public var serverUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/host`.
+            public var host: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/last_contact_at`.
+            public var lastContactAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/last_error`.
+            public var lastError: Swift.String?
+            /// Operator listing: frames there following families here.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/subscribers`.
+            public var subscribers: Swift.Int?
+            /// Operator listing: frames here following families there.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/follows`.
+            public var follows: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/RemoteServer/blocked`.
+            public var blocked: Swift.Bool?
+            /// Creates a new `RemoteServer`.
+            ///
+            /// - Parameters:
+            ///   - serverId: Its stable `server_id` (from its well-known document).
+            ///   - serverName:
+            ///   - serverUrl: Its base URL.
+            ///   - host:
+            ///   - lastContactAt:
+            ///   - lastError:
+            ///   - subscribers: Operator listing: frames there following families here.
+            ///   - follows: Operator listing: frames here following families there.
+            ///   - blocked:
+            public init(
+                serverId: Swift.String? = nil,
+                serverName: Swift.String,
+                serverUrl: Swift.String,
+                host: Swift.String? = nil,
+                lastContactAt: Foundation.Date? = nil,
+                lastError: Swift.String? = nil,
+                subscribers: Swift.Int? = nil,
+                follows: Swift.Int? = nil,
+                blocked: Swift.Bool? = nil
+            ) {
+                self.serverId = serverId
+                self.serverName = serverName
+                self.serverUrl = serverUrl
+                self.host = host
+                self.lastContactAt = lastContactAt
+                self.lastError = lastError
+                self.subscribers = subscribers
+                self.follows = follows
+                self.blocked = blocked
+            }
+            public enum CodingKeys: String, CodingKey {
+                case serverId = "server_id"
+                case serverName = "server_name"
+                case serverUrl = "server_url"
+                case host
+                case lastContactAt = "last_contact_at"
+                case lastError = "last_error"
+                case subscribers
+                case follows
+                case blocked
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteInviteRef`.
+        public struct RemoteInviteRef: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteInviteRef/invite_url`.
+            public var inviteUrl: Swift.String
+            /// Creates a new `RemoteInviteRef`.
+            ///
+            /// - Parameters:
+            ///   - inviteUrl:
+            public init(inviteUrl: Swift.String) {
+                self.inviteUrl = inviteUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case inviteUrl = "invite_url"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview`.
+        public struct RemoteInvitePreview: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/server`.
+            public var server: Components.Schemas.RemoteServer
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/feed_name`.
+            public var feedName: Swift.String
+            /// A signed thumbnail on A, valid for an hour.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/cover_url`.
+            public var coverUrl: Swift.String?
+            /// Frames that follow the family (local and remote).
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/frame_count`.
+            public var frameCount: Swift.Int?
+            /// The family's admins must approve first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/requires_approval`.
+            public var requiresApproval: Swift.Bool?
+            /// This server's name
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/this_server_name`.
+            public var thisServerName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/RemoteInvitePreview/this_server_host`.
+            public var thisServerHost: Swift.String?
+            /// Creates a new `RemoteInvitePreview`.
+            ///
+            /// - Parameters:
+            ///   - server:
+            ///   - feedName:
+            ///   - coverUrl: A signed thumbnail on A, valid for an hour.
+            ///   - frameCount: Frames that follow the family (local and remote).
+            ///   - requiresApproval: The family's admins must approve first.
+            ///   - thisServerName: This server's name
+            ///   - thisServerHost:
+            public init(
+                server: Components.Schemas.RemoteServer,
+                feedName: Swift.String,
+                coverUrl: Swift.String? = nil,
+                frameCount: Swift.Int? = nil,
+                requiresApproval: Swift.Bool? = nil,
+                thisServerName: Swift.String,
+                thisServerHost: Swift.String? = nil
+            ) {
+                self.server = server
+                self.feedName = feedName
+                self.coverUrl = coverUrl
+                self.frameCount = frameCount
+                self.requiresApproval = requiresApproval
+                self.thisServerName = thisServerName
+                self.thisServerHost = thisServerHost
+            }
+            public enum CodingKeys: String, CodingKey {
+                case server
+                case feedName = "feed_name"
+                case coverUrl = "cover_url"
+                case frameCount = "frame_count"
+                case requiresApproval = "requires_approval"
+                case thisServerName = "this_server_name"
+                case thisServerHost = "this_server_host"
+            }
+        }
+        /// When the subscription ends: `remove` the copied photos from the frame (default) or `keep` the ones already there.
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteOnEnd`.
+        @frozen public enum RemoteOnEnd: String, Codable, Hashable, Sendable, CaseIterable {
+            case remove = "remove"
+            case keep = "keep"
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteEndReason`.
+        @frozen public enum RemoteEndReason: String, Codable, Hashable, Sendable, CaseIterable {
+            case unsubscribed = "unsubscribed"
+            case removedByFeed = "removed_by_feed"
+            case feedDeleted = "feed_deleted"
+            case serverBlocked = "server_blocked"
+            case withdrawn = "withdrawn"
+            case rejected = "rejected"
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionCreate`.
+        public struct RemoteSubscriptionCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionCreate/invite_url`.
+            public var inviteUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionCreate/history`.
+            public var history: Components.Schemas.SubscriptionHistory?
+            /// Required with `history: last_n`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionCreate/history_count`.
+            public var historyCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionCreate/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionCreate/on_end`.
+            public var onEnd: Components.Schemas.RemoteOnEnd?
+            /// Creates a new `RemoteSubscriptionCreate`.
+            ///
+            /// - Parameters:
+            ///   - inviteUrl:
+            ///   - history:
+            ///   - historyCount: Required with `history: last_n`.
+            ///   - birthdays:
+            ///   - onEnd:
+            public init(
+                inviteUrl: Swift.String,
+                history: Components.Schemas.SubscriptionHistory? = nil,
+                historyCount: Swift.Int? = nil,
+                birthdays: Swift.Bool? = nil,
+                onEnd: Components.Schemas.RemoteOnEnd? = nil
+            ) {
+                self.inviteUrl = inviteUrl
+                self.history = history
+                self.historyCount = historyCount
+                self.birthdays = birthdays
+                self.onEnd = onEnd
+            }
+            public enum CodingKeys: String, CodingKey {
+                case inviteUrl = "invite_url"
+                case history
+                case historyCount = "history_count"
+                case birthdays
+                case onEnd = "on_end"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionUpdate`.
+        public struct RemoteSubscriptionUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionUpdate/on_end`.
+            public var onEnd: Components.Schemas.RemoteOnEnd?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscriptionUpdate/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// Creates a new `RemoteSubscriptionUpdate`.
+            ///
+            /// - Parameters:
+            ///   - onEnd:
+            ///   - birthdays:
+            public init(
+                onEnd: Components.Schemas.RemoteOnEnd? = nil,
+                birthdays: Swift.Bool? = nil
+            ) {
+                self.onEnd = onEnd
+                self.birthdays = birthdays
+            }
+            public enum CodingKeys: String, CodingKey {
+                case onEnd = "on_end"
+                case birthdays
+            }
+        }
+        /// A frame on this server following a family on another server (B's side).
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteSubscription`.
+        public struct RemoteSubscription: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// `pending` (A's admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "pending"
+                case active = "active"
+                case rejected = "rejected"
+                case removed = "removed"
+                case error = "error"
+            }
+            /// `pending` (A's admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/status`.
+            public var status: Components.Schemas.RemoteSubscription.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/feed_name`.
+            public var feedName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/cover_url`.
+            public var coverUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/server`.
+            public var server: Components.Schemas.RemoteServer
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/history`.
+            public var history: Components.Schemas.SubscriptionHistory
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/history_count`.
+            public var historyCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/on_end`.
+            public var onEnd: Components.Schemas.RemoteOnEnd
+            /// Photos copied to this server and on the frame.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/item_count`.
+            public var itemCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/requested_by_name`.
+            public var requestedByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/activated_at`.
+            public var activatedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/ended_at`.
+            public var endedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/removed_reason`.
+            public var removedReason: Components.Schemas.RemoteEndReason?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/last_sync_at`.
+            public var lastSyncAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/last_error`.
+            public var lastError: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/backfill`.
+            public struct BackfillPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/RemoteSubscription/backfill/state`.
+                @frozen public enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case idle = "idle"
+                    case running = "running"
+                }
+                /// - Remark: Generated from `#/components/schemas/RemoteSubscription/backfill/state`.
+                public var state: Components.Schemas.RemoteSubscription.BackfillPayload.StatePayload?
+                /// - Remark: Generated from `#/components/schemas/RemoteSubscription/backfill/placed`.
+                public var placed: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/RemoteSubscription/backfill/total`.
+                public var total: Swift.Int?
+                /// Creates a new `BackfillPayload`.
+                ///
+                /// - Parameters:
+                ///   - state:
+                ///   - placed:
+                ///   - total:
+                public init(
+                    state: Components.Schemas.RemoteSubscription.BackfillPayload.StatePayload? = nil,
+                    placed: Swift.Int? = nil,
+                    total: Swift.Int? = nil
+                ) {
+                    self.state = state
+                    self.placed = placed
+                    self.total = total
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case state
+                    case placed
+                    case total
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/RemoteSubscription/backfill`.
+            public var backfill: Components.Schemas.RemoteSubscription.BackfillPayload?
+            /// Creates a new `RemoteSubscription`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - frameId:
+            ///   - status: `pending` (A's admins decide), `active`, `rejected`, `removed` (see `removed_reason`), or `error` (A unreachable or refusing for 3 days; retried).
+            ///   - feedName:
+            ///   - coverUrl:
+            ///   - server:
+            ///   - history:
+            ///   - historyCount:
+            ///   - birthdays:
+            ///   - onEnd:
+            ///   - itemCount: Photos copied to this server and on the frame.
+            ///   - requestedByName:
+            ///   - createdAt:
+            ///   - activatedAt:
+            ///   - endedAt:
+            ///   - removedReason:
+            ///   - lastSyncAt:
+            ///   - lastError:
+            ///   - backfill:
+            public init(
+                id: Components.Schemas.Id,
+                frameId: Components.Schemas.Id,
+                status: Components.Schemas.RemoteSubscription.StatusPayload,
+                feedName: Swift.String,
+                coverUrl: Swift.String? = nil,
+                server: Components.Schemas.RemoteServer,
+                history: Components.Schemas.SubscriptionHistory,
+                historyCount: Swift.Int? = nil,
+                birthdays: Swift.Bool? = nil,
+                onEnd: Components.Schemas.RemoteOnEnd,
+                itemCount: Swift.Int? = nil,
+                requestedByName: Swift.String? = nil,
+                createdAt: Foundation.Date,
+                activatedAt: Foundation.Date? = nil,
+                endedAt: Foundation.Date? = nil,
+                removedReason: Components.Schemas.RemoteEndReason? = nil,
+                lastSyncAt: Foundation.Date? = nil,
+                lastError: Swift.String? = nil,
+                backfill: Components.Schemas.RemoteSubscription.BackfillPayload? = nil
+            ) {
+                self.id = id
+                self.frameId = frameId
+                self.status = status
+                self.feedName = feedName
+                self.coverUrl = coverUrl
+                self.server = server
+                self.history = history
+                self.historyCount = historyCount
+                self.birthdays = birthdays
+                self.onEnd = onEnd
+                self.itemCount = itemCount
+                self.requestedByName = requestedByName
+                self.createdAt = createdAt
+                self.activatedAt = activatedAt
+                self.endedAt = endedAt
+                self.removedReason = removedReason
+                self.lastSyncAt = lastSyncAt
+                self.lastError = lastError
+                self.backfill = backfill
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case frameId = "frame_id"
+                case status
+                case feedName = "feed_name"
+                case coverUrl = "cover_url"
+                case server
+                case history
+                case historyCount = "history_count"
+                case birthdays
+                case onEnd = "on_end"
+                case itemCount = "item_count"
+                case requestedByName = "requested_by_name"
+                case createdAt = "created_at"
+                case activatedAt = "activated_at"
+                case endedAt = "ended_at"
+                case removedReason = "removed_reason"
+                case lastSyncAt = "last_sync_at"
+                case lastError = "last_error"
+                case backfill
+            }
+        }
+        /// `Subscription.remote`: the subscriber is a frame on another server (A's side).
+        ///
+        /// - Remark: Generated from `#/components/schemas/SubscriptionRemote`.
+        public struct SubscriptionRemote: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRemote/server_id`.
+            public var serverId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRemote/server_name`.
+            public var serverName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRemote/server_url`.
+            public var serverUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRemote/host`.
+            public var host: Swift.String?
+            /// The frame manager on that server, as it reported.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRemote/requested_by_name`.
+            public var requestedByName: Swift.String?
+            /// The remote frame shows comment cards (it then receives comment summaries).
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRemote/show_comments`.
+            public var showComments: Swift.Bool?
+            /// Creates a new `SubscriptionRemote`.
+            ///
+            /// - Parameters:
+            ///   - serverId:
+            ///   - serverName:
+            ///   - serverUrl:
+            ///   - host:
+            ///   - requestedByName: The frame manager on that server, as it reported.
+            ///   - showComments: The remote frame shows comment cards (it then receives comment summaries).
+            public init(
+                serverId: Swift.String? = nil,
+                serverName: Swift.String,
+                serverUrl: Swift.String,
+                host: Swift.String? = nil,
+                requestedByName: Swift.String? = nil,
+                showComments: Swift.Bool? = nil
+            ) {
+                self.serverId = serverId
+                self.serverName = serverName
+                self.serverUrl = serverUrl
+                self.host = host
+                self.requestedByName = requestedByName
+                self.showComments = showComments
+            }
+            public enum CodingKeys: String, CodingKey {
+                case serverId = "server_id"
+                case serverName = "server_name"
+                case serverUrl = "server_url"
+                case host
+                case requestedByName = "requested_by_name"
+                case showComments = "show_comments"
+            }
+        }
+        /// `Placement.origin_remote`: the placement is a copy of a post of a family on another server (B's side).
+        ///
+        /// - Remark: Generated from `#/components/schemas/PlacementRemote`.
+        public struct PlacementRemote: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlacementRemote/remote_subscription_id`.
+            public var remoteSubscriptionId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PlacementRemote/server_name`.
+            public var serverName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PlacementRemote/server_url`.
+            public var serverUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PlacementRemote/feed_name`.
+            public var feedName: Swift.String
+            /// The poster's display name on A ("Lies").
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlacementRemote/sender_name`.
+            public var senderName: Swift.String?
+            /// Creates a new `PlacementRemote`.
+            ///
+            /// - Parameters:
+            ///   - remoteSubscriptionId:
+            ///   - serverName:
+            ///   - serverUrl:
+            ///   - feedName:
+            ///   - senderName: The poster's display name on A ("Lies").
+            public init(
+                remoteSubscriptionId: Components.Schemas.Id,
+                serverName: Swift.String,
+                serverUrl: Swift.String,
+                feedName: Swift.String,
+                senderName: Swift.String? = nil
+            ) {
+                self.remoteSubscriptionId = remoteSubscriptionId
+                self.serverName = serverName
+                self.serverUrl = serverUrl
+                self.feedName = feedName
+                self.senderName = senderName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case remoteSubscriptionId = "remote_subscription_id"
+                case serverName = "server_name"
+                case serverUrl = "server_url"
+                case feedName = "feed_name"
+                case senderName = "sender_name"
+            }
+        }
+        /// `Item.remote_sender`: copied from another server; `sender_id` is then the remote sender record's id.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ItemRemoteSender`.
+        public struct ItemRemoteSender: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ItemRemoteSender/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ItemRemoteSender/server_name`.
+            public var serverName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ItemRemoteSender/server_url`.
+            public var serverUrl: Swift.String
+            /// Creates a new `ItemRemoteSender`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - serverName:
+            ///   - serverUrl:
+            public init(
+                name: Swift.String,
+                serverName: Swift.String,
+                serverUrl: Swift.String
+            ) {
+                self.name = name
+                self.serverName = serverName
+                self.serverUrl = serverUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case serverName = "server_name"
+                case serverUrl = "server_url"
+            }
+        }
+        /// `host` (e.g. `kinframe.example.org`) or a base URL in `server_url`.
+        ///
+        /// - Remark: Generated from `#/components/schemas/BlockedServerCreate`.
+        public struct BlockedServerCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BlockedServerCreate/host`.
+            public var host: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BlockedServerCreate/server_url`.
+            public var serverUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BlockedServerCreate/reason`.
+            public var reason: Swift.String?
+            /// Creates a new `BlockedServerCreate`.
+            ///
+            /// - Parameters:
+            ///   - host:
+            ///   - serverUrl:
+            ///   - reason:
+            public init(
+                host: Swift.String? = nil,
+                serverUrl: Swift.String? = nil,
+                reason: Swift.String? = nil
+            ) {
+                self.host = host
+                self.serverUrl = serverUrl
+                self.reason = reason
+            }
+            public enum CodingKeys: String, CodingKey {
+                case host
+                case serverUrl = "server_url"
+                case reason
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/BlockedServer`.
+        public struct BlockedServer: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/host`.
+            public var host: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/server_name`.
+            public var serverName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/reason`.
+            public var reason: Swift.String?
+            /// Null for instance-wide blocks.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/created_by_name`.
+            public var createdByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BlockedServer/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `BlockedServer`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - host:
+            ///   - serverName:
+            ///   - reason:
+            ///   - feedId: Null for instance-wide blocks.
+            ///   - createdByName:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                host: Swift.String,
+                serverName: Swift.String? = nil,
+                reason: Swift.String? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                createdByName: Swift.String? = nil,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.host = host
+                self.serverName = serverName
+                self.reason = reason
+                self.feedId = feedId
+                self.createdByName = createdByName
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case host
+                case serverName = "server_name"
+                case reason
+                case feedId = "feed_id"
+                case createdByName = "created_by_name"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest`.
+        public struct FederationSubscribeRequest: Codable, Hashable, Sendable {
+            /// The token of the `/fi/<token>` invite URL.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/invite_token`.
+            public var inviteToken: Swift.String
+            /// Check and describe only; record nothing.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/preview`.
+            public var preview: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/frame`.
+            public struct FramePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/frame/id`.
+                public var id: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/frame/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/frame/show_comments`.
+                public var showComments: Swift.Bool?
+                /// Creates a new `FramePayload`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - name:
+                ///   - showComments:
+                public init(
+                    id: Components.Schemas.Id,
+                    name: Swift.String,
+                    showComments: Swift.Bool? = nil
+                ) {
+                    self.id = id
+                    self.name = name
+                    self.showComments = showComments
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case id
+                    case name
+                    case showComments = "show_comments"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/frame`.
+            public var frame: Components.Schemas.FederationSubscribeRequest.FramePayload
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/follow_id`.
+            public var followId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/history`.
+            public var history: Components.Schemas.SubscriptionHistory?
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/history_count`.
+            public var historyCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// The frame manager on B
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationSubscribeRequest/requested_by_name`.
+            public var requestedByName: Swift.String?
+            /// Creates a new `FederationSubscribeRequest`.
+            ///
+            /// - Parameters:
+            ///   - inviteToken: The token of the `/fi/<token>` invite URL.
+            ///   - preview: Check and describe only; record nothing.
+            ///   - frame:
+            ///   - followId:
+            ///   - history:
+            ///   - historyCount:
+            ///   - birthdays:
+            ///   - requestedByName: The frame manager on B
+            public init(
+                inviteToken: Swift.String,
+                preview: Swift.Bool? = nil,
+                frame: Components.Schemas.FederationSubscribeRequest.FramePayload,
+                followId: Components.Schemas.Id? = nil,
+                history: Components.Schemas.SubscriptionHistory? = nil,
+                historyCount: Swift.Int? = nil,
+                birthdays: Swift.Bool? = nil,
+                requestedByName: Swift.String? = nil
+            ) {
+                self.inviteToken = inviteToken
+                self.preview = preview
+                self.frame = frame
+                self.followId = followId
+                self.history = history
+                self.historyCount = historyCount
+                self.birthdays = birthdays
+                self.requestedByName = requestedByName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case inviteToken = "invite_token"
+                case preview
+                case frame
+                case followId = "follow_id"
+                case history
+                case historyCount = "history_count"
+                case birthdays
+                case requestedByName = "requested_by_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationSubscription`.
+        public struct FederationSubscription: Codable, Hashable, Sendable {
+            /// A's id; null for a preview.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/subscription_id`.
+            public var subscriptionId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case preview = "preview"
+                case pending = "pending"
+                case active = "active"
+                case rejected = "rejected"
+                case removed = "removed"
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/status`.
+            public var status: Components.Schemas.FederationSubscription.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/feed`.
+            public struct FeedPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FederationSubscription/feed/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FederationSubscription/feed/cover_url`.
+                public var coverUrl: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/FederationSubscription/feed/frame_count`.
+                public var frameCount: Swift.Int?
+                /// Creates a new `FeedPayload`.
+                ///
+                /// - Parameters:
+                ///   - name:
+                ///   - coverUrl:
+                ///   - frameCount:
+                public init(
+                    name: Swift.String,
+                    coverUrl: Swift.String? = nil,
+                    frameCount: Swift.Int? = nil
+                ) {
+                    self.name = name
+                    self.coverUrl = coverUrl
+                    self.frameCount = frameCount
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case name
+                    case coverUrl = "cover_url"
+                    case frameCount = "frame_count"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/feed`.
+            public var feed: Components.Schemas.FederationSubscription.FeedPayload
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/requires_approval`.
+            public var requiresApproval: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FederationSubscription/server_name`.
+            public var serverName: Swift.String?
+            /// Creates a new `FederationSubscription`.
+            ///
+            /// - Parameters:
+            ///   - subscriptionId: A's id; null for a preview.
+            ///   - status:
+            ///   - feed:
+            ///   - requiresApproval:
+            ///   - serverName:
+            public init(
+                subscriptionId: Components.Schemas.Id? = nil,
+                status: Components.Schemas.FederationSubscription.StatusPayload,
+                feed: Components.Schemas.FederationSubscription.FeedPayload,
+                requiresApproval: Swift.Bool? = nil,
+                serverName: Swift.String? = nil
+            ) {
+                self.subscriptionId = subscriptionId
+                self.status = status
+                self.feed = feed
+                self.requiresApproval = requiresApproval
+                self.serverName = serverName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case subscriptionId = "subscription_id"
+                case status
+                case feed
+                case requiresApproval = "requires_approval"
+                case serverName = "server_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationItem`.
+        public struct FederationItem: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationItem/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FederationItem/kind`.
+            public var kind: Components.Schemas.MediaKind
+            /// - Remark: Generated from `#/components/schemas/FederationItem/caption`.
+            public var caption: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/captured_at`.
+            public var capturedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/focal_point`.
+            public var focalPoint: Components.Schemas.FocalPoint?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/fit`.
+            public var fit: Components.Schemas.Fit?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/width`.
+            public var width: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/height`.
+            public var height: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/duration_ms`.
+            public var durationMs: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/has_audio`.
+            public var hasAudio: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/bytes`.
+            public var bytes: Swift.Int
+            /// Of the master
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationItem/sha256`.
+            public var sha256: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/mime`.
+            public var mime: Swift.String
+            /// Signed
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationItem/master_url`.
+            public var masterUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FederationItem/master_url_expires_at`.
+            public var masterUrlExpiresAt: Foundation.Date
+            /// Live items: the motion clip's master, signed like `master_url`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationItem/motion_url`.
+            public var motionUrl: Swift.String?
+            /// Creates a new `FederationItem`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - kind:
+            ///   - caption:
+            ///   - capturedAt:
+            ///   - focalPoint:
+            ///   - fit:
+            ///   - width:
+            ///   - height:
+            ///   - durationMs:
+            ///   - hasAudio:
+            ///   - bytes:
+            ///   - sha256: Of the master
+            ///   - mime:
+            ///   - masterUrl: Signed
+            ///   - masterUrlExpiresAt:
+            ///   - motionUrl: Live items: the motion clip's master, signed like `master_url`.
+            public init(
+                id: Components.Schemas.Id,
+                kind: Components.Schemas.MediaKind,
+                caption: Swift.String? = nil,
+                capturedAt: Foundation.Date? = nil,
+                focalPoint: Components.Schemas.FocalPoint? = nil,
+                fit: Components.Schemas.Fit? = nil,
+                width: Swift.Int? = nil,
+                height: Swift.Int? = nil,
+                durationMs: Swift.Int? = nil,
+                hasAudio: Swift.Bool? = nil,
+                bytes: Swift.Int,
+                sha256: Swift.String? = nil,
+                mime: Swift.String,
+                masterUrl: Swift.String,
+                masterUrlExpiresAt: Foundation.Date,
+                motionUrl: Swift.String? = nil
+            ) {
+                self.id = id
+                self.kind = kind
+                self.caption = caption
+                self.capturedAt = capturedAt
+                self.focalPoint = focalPoint
+                self.fit = fit
+                self.width = width
+                self.height = height
+                self.durationMs = durationMs
+                self.hasAudio = hasAudio
+                self.bytes = bytes
+                self.sha256 = sha256
+                self.mime = mime
+                self.masterUrl = masterUrl
+                self.masterUrlExpiresAt = masterUrlExpiresAt
+                self.motionUrl = motionUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case kind
+                case caption
+                case capturedAt = "captured_at"
+                case focalPoint = "focal_point"
+                case fit
+                case width
+                case height
+                case durationMs = "duration_ms"
+                case hasAudio = "has_audio"
+                case bytes
+                case sha256
+                case mime
+                case masterUrl = "master_url"
+                case masterUrlExpiresAt = "master_url_expires_at"
+                case motionUrl = "motion_url"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationPost`.
+        public struct FederationPost: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationPost/id`.
+            public var id: Components.Schemas.Id
+            /// Stable opaque key of the poster within this subscription (not the user id).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationPost/poster_key`.
+            public var posterKey: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FederationPost/poster_name`.
+            public var posterName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FederationPost/created_at`.
+            public var createdAt: Foundation.Date
+            /// History (activation or a history change); B places it quietly.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationPost/backfill`.
+            public var backfill: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FederationPost/items`.
+            public var items: [Components.Schemas.FederationItem]
+            /// Creates a new `FederationPost`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - posterKey: Stable opaque key of the poster within this subscription (not the user id).
+            ///   - posterName:
+            ///   - createdAt:
+            ///   - backfill: History (activation or a history change); B places it quietly.
+            ///   - items:
+            public init(
+                id: Components.Schemas.Id,
+                posterKey: Swift.String,
+                posterName: Swift.String,
+                createdAt: Foundation.Date,
+                backfill: Swift.Bool? = nil,
+                items: [Components.Schemas.FederationItem]
+            ) {
+                self.id = id
+                self.posterKey = posterKey
+                self.posterName = posterName
+                self.createdAt = createdAt
+                self.backfill = backfill
+                self.items = items
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case posterKey = "poster_key"
+                case posterName = "poster_name"
+                case createdAt = "created_at"
+                case backfill
+                case items
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationComment`.
+        public struct FederationComment: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationComment/first_name`.
+            public var firstName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FederationComment/text`.
+            public var text: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FederationComment/at`.
+            public var at: Foundation.Date
+            /// Creates a new `FederationComment`.
+            ///
+            /// - Parameters:
+            ///   - firstName:
+            ///   - text:
+            ///   - at:
+            public init(
+                firstName: Swift.String,
+                text: Swift.String? = nil,
+                at: Foundation.Date
+            ) {
+                self.firstName = firstName
+                self.text = text
+                self.at = at
+            }
+            public enum CodingKeys: String, CodingKey {
+                case firstName = "first_name"
+                case text
+                case at
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationBirthday`.
+        public struct FederationBirthday: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationBirthday/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FederationBirthday/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FederationBirthday/month`.
+            public var month: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FederationBirthday/day`.
+            public var day: Swift.Int
+            /// Only with the person's *show age*.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationBirthday/year`.
+            public var year: Swift.Int?
+            /// Creates a new `FederationBirthday`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - name:
+            ///   - month:
+            ///   - day:
+            ///   - year: Only with the person's *show age*.
+            public init(
+                id: Components.Schemas.Id,
+                name: Swift.String,
+                month: Swift.Int,
+                day: Swift.Int,
+                year: Swift.Int? = nil
+            ) {
+                self.id = id
+                self.name = name
+                self.month = month
+                self.day = day
+                self.year = year
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case month
+                case day
+                case year
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationChange`.
+        public struct FederationChange: Codable, Hashable, Sendable {
+            /// `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+            /// the post is gone (unsend, admin removal, taking away, circle change). `items.remove`: some items of a post
+            /// are gone. `birthdays`: the family's birthday people now (replace). `comments`: the newest comments of a
+            /// post (only with *show comments*; replace). `subscription`: the subscription's status changed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationChange/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case post_upsert = "post.upsert"
+                case post_remove = "post.remove"
+                case items_remove = "items.remove"
+                case birthdays = "birthdays"
+                case comments = "comments"
+                case subscription = "subscription"
+            }
+            /// `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+            /// the post is gone (unsend, admin removal, taking away, circle change). `items.remove`: some items of a post
+            /// are gone. `birthdays`: the family's birthday people now (replace). `comments`: the newest comments of a
+            /// post (only with *show comments*; replace). `subscription`: the subscription's status changed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationChange/type`.
+            public var _type: Components.Schemas.FederationChange._TypePayload
+            /// - Remark: Generated from `#/components/schemas/FederationChange/post`.
+            public var post: Components.Schemas.FederationPost?
+            /// - Remark: Generated from `#/components/schemas/FederationChange/post_id`.
+            public var postId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/FederationChange/item_ids`.
+            public var itemIds: [Components.Schemas.Id]?
+            /// - Remark: Generated from `#/components/schemas/FederationChange/birthdays`.
+            public var birthdays: [Components.Schemas.FederationBirthday]?
+            /// - Remark: Generated from `#/components/schemas/FederationChange/comments`.
+            public var comments: [Components.Schemas.FederationComment]?
+            /// - Remark: Generated from `#/components/schemas/FederationChange/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "pending"
+                case active = "active"
+                case rejected = "rejected"
+                case removed = "removed"
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationChange/status`.
+            public var status: Components.Schemas.FederationChange.StatusPayload?
+            /// - Remark: Generated from `#/components/schemas/FederationChange/reason`.
+            public var reason: Components.Schemas.RemoteEndReason?
+            /// Creates a new `FederationChange`.
+            ///
+            /// - Parameters:
+            ///   - _type: `post.upsert`: a post (new, backfilled, or back after a keep request); B places its items. `post.remove`:
+            ///   - post:
+            ///   - postId:
+            ///   - itemIds:
+            ///   - birthdays:
+            ///   - comments:
+            ///   - status:
+            ///   - reason:
+            public init(
+                _type: Components.Schemas.FederationChange._TypePayload,
+                post: Components.Schemas.FederationPost? = nil,
+                postId: Components.Schemas.Id? = nil,
+                itemIds: [Components.Schemas.Id]? = nil,
+                birthdays: [Components.Schemas.FederationBirthday]? = nil,
+                comments: [Components.Schemas.FederationComment]? = nil,
+                status: Components.Schemas.FederationChange.StatusPayload? = nil,
+                reason: Components.Schemas.RemoteEndReason? = nil
+            ) {
+                self._type = _type
+                self.post = post
+                self.postId = postId
+                self.itemIds = itemIds
+                self.birthdays = birthdays
+                self.comments = comments
+                self.status = status
+                self.reason = reason
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case post
+                case postId = "post_id"
+                case itemIds = "item_ids"
+                case birthdays
+                case comments
+                case status
+                case reason
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationChangePage`.
+        public struct FederationChangePage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/changes`.
+            public var changes: [Components.Schemas.FederationChange]
+            /// Pass it as `cursor` on the next call; store it only after the page was applied.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/cursor`.
+            public var cursor: Swift.String
+            /// More changes are waiting; pull again at once.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/more`.
+            public var more: Swift.Bool
+            /// The given cursor was too old: this page restarts from a full snapshot (B drops what isn't in it).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/reset`.
+            public var reset: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "pending"
+                case active = "active"
+                case rejected = "rejected"
+                case removed = "removed"
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/status`.
+            public var status: Components.Schemas.FederationChangePage.StatusPayload
+            /// The family's current name (credit "Lies · Janssens").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FederationChangePage/feed_name`.
+            public var feedName: Swift.String?
+            /// Creates a new `FederationChangePage`.
+            ///
+            /// - Parameters:
+            ///   - changes:
+            ///   - cursor: Pass it as `cursor` on the next call; store it only after the page was applied.
+            ///   - more: More changes are waiting; pull again at once.
+            ///   - reset: The given cursor was too old: this page restarts from a full snapshot (B drops what isn't in it).
+            ///   - status:
+            ///   - feedName: The family's current name (credit "Lies · Janssens").
+            public init(
+                changes: [Components.Schemas.FederationChange],
+                cursor: Swift.String,
+                more: Swift.Bool,
+                reset: Swift.Bool? = nil,
+                status: Components.Schemas.FederationChangePage.StatusPayload,
+                feedName: Swift.String? = nil
+            ) {
+                self.changes = changes
+                self.cursor = cursor
+                self.more = more
+                self.reset = reset
+                self.status = status
+                self.feedName = feedName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case changes
+                case cursor
+                case more
+                case reset
+                case status
+                case feedName = "feed_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationActivity`.
+        public struct FederationActivity: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationActivity/frame`.
+            public struct FramePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/frame/name`.
+                public var name: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/frame/show_comments`.
+                public var showComments: Swift.Bool?
+                /// Creates a new `FramePayload`.
+                ///
+                /// - Parameters:
+                ///   - name:
+                ///   - showComments:
+                public init(
+                    name: Swift.String? = nil,
+                    showComments: Swift.Bool? = nil
+                ) {
+                    self.name = name
+                    self.showComments = showComments
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case name
+                    case showComments = "show_comments"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationActivity/frame`.
+            public var frame: Components.Schemas.FederationActivity.FramePayload?
+            /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload`.
+            public struct EventsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/id`.
+                public var id: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/kind`.
+                @frozen public enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case reaction = "reaction"
+                    case reply = "reply"
+                    case seen = "seen"
+                }
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/kind`.
+                public var kind: Components.Schemas.FederationActivity.EventsPayloadPayload.KindPayload
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/post_id`.
+                public var postId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/item_id`.
+                public var itemId: Components.Schemas.Id
+                /// `reaction`: null clears it.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/reaction`.
+                public var reaction: Components.Schemas.Reaction?
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/reply`.
+                public var reply: Components.Schemas.ReplyPreset?
+                /// - Remark: Generated from `#/components/schemas/FederationActivity/EventsPayload/at`.
+                public var at: Foundation.Date
+                /// Creates a new `EventsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - kind:
+                ///   - postId:
+                ///   - itemId:
+                ///   - reaction: `reaction`: null clears it.
+                ///   - reply:
+                ///   - at:
+                public init(
+                    id: Components.Schemas.Id,
+                    kind: Components.Schemas.FederationActivity.EventsPayloadPayload.KindPayload,
+                    postId: Components.Schemas.Id,
+                    itemId: Components.Schemas.Id,
+                    reaction: Components.Schemas.Reaction? = nil,
+                    reply: Components.Schemas.ReplyPreset? = nil,
+                    at: Foundation.Date
+                ) {
+                    self.id = id
+                    self.kind = kind
+                    self.postId = postId
+                    self.itemId = itemId
+                    self.reaction = reaction
+                    self.reply = reply
+                    self.at = at
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case id
+                    case kind
+                    case postId = "post_id"
+                    case itemId = "item_id"
+                    case reaction
+                    case reply
+                    case at
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FederationActivity/events`.
+            public typealias EventsPayload = [Components.Schemas.FederationActivity.EventsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/FederationActivity/events`.
+            public var events: Components.Schemas.FederationActivity.EventsPayload?
+            /// Creates a new `FederationActivity`.
+            ///
+            /// - Parameters:
+            ///   - frame:
+            ///   - events:
+            public init(
+                frame: Components.Schemas.FederationActivity.FramePayload? = nil,
+                events: Components.Schemas.FederationActivity.EventsPayload? = nil
+            ) {
+                self.frame = frame
+                self.events = events
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frame
+                case events
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FederationPing`.
+        public struct FederationPing: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FederationPing/subscription_ids`.
+            public var subscriptionIds: [Components.Schemas.Id]
+            /// Creates a new `FederationPing`.
+            ///
+            /// - Parameters:
+            ///   - subscriptionIds:
+            public init(subscriptionIds: [Components.Schemas.Id]) {
+                self.subscriptionIds = subscriptionIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case subscriptionIds = "subscription_ids"
             }
         }
     }
