@@ -1,0 +1,5 @@
+• Feeds: a private family feed that every frame can subscribe to. Post once, see "seen on 4 of 5 frames" and reactions.
+• Birthdays: frames show a birthday card with balloons on the day; a tap sends a greeting back.
+• Photo sources: keep an album or feed in step with Immich or an iCloud shared album.
+• Albums can play only in album mode.
+• The app tells you when an update is needed.
