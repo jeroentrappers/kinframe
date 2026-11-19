@@ -1,6 +1,6 @@
 # Convert a frame
 
-Turns a stock Frameo photo frame (tested: Denver PFF-1024; converted once, not yet fully tested: Denver PFF-1515)
+Turns a stock Frameo photo frame (tested: Denver PFF-1024 and Denver PFF-1515)
 into a kinframe frame, and turns it back. There are two
 tools that run the same steps:
 

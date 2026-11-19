@@ -81,7 +81,7 @@ export const APPOPS_ALLOW = [
 	{ op: 'REQUEST_INSTALL_PACKAGES', minSdk: 26 }
 ] as const;
 /** Tested models, as `<ro.product.brand lowercased>/<ro.product.device>` (docs/hardware/supported-devices.md). */
-export const SUPPORTED_MODELS = ['denver/PFF_1024'] as const;
+export const SUPPORTED_MODELS = ['denver/PFF_1024', 'denver/PFF-1515'] as const;
 /** The frame app's minSdk (Android 6.0). */
 export const MIN_SDK = 23;
 /** ABIs the frame APK ships native code for. */

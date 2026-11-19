@@ -1,9 +1,10 @@
 # Denver PFF-1515 (15.6" Frameo frame): hardware profile
 
-Probed over USB adb on 2026-11-18, factory-fresh (never connected to Wi-Fi), then converted once with the convert tool
-(`--force`). The frame ships with the stock Frameo app. Status: **untested** in the convert tool (see
-[supported-devices.md](supported-devices.md)); the problems the first conversion found are fixed in both tools but not
-yet tried on this frame. Compare the [Denver PFF-1024](denver-pff-1024.md), a 10.1" sibling on the same platform.
+Probed over USB adb on 2026-11-18, factory-fresh (never connected to Wi-Fi), then converted with the convert tool. The
+frame ships with the stock Frameo app. Status: **supported** in the convert tool (see
+[supported-devices.md](supported-devices.md)): the problems the first conversion found are fixed in both tools, and a
+revert and a second conversion with the fixes passed on this frame. Compare the [Denver PFF-1024](denver-pff-1024.md), a
+10.1" sibling on the same platform.
 
 ## Summary
 
