@@ -391,7 +391,8 @@ private fun Composer(s: ConversationState, conv: Conversation, a: ConversationAc
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(ConversationViewModel.MAX_ITEMS)) { uris -> a.vm.sendMedia(uris) }
     val recorder = a.voice
-    val rec by (recorder?.state ?: kotlinx.coroutines.flow.MutableStateFlow(VoiceRecorder.State.Idle)).collectAsState()
+    val idle = remember { kotlinx.coroutines.flow.MutableStateFlow<VoiceRecorder.State>(VoiceRecorder.State.Idle) }
+    val rec by (recorder?.state ?: idle).collectAsState()
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val recording = rec as? VoiceRecorder.State.Recording
     LaunchedEffect(recording != null) { while (recording != null) { now = System.currentTimeMillis(); a.vm.recording(); delay(250) } }
