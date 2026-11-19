@@ -1,5 +1,8 @@
 # Denver PFF-1515 (15.6" Frameo frame): hardware profile
 
+The tested frames are sold as **Denver PFF-1543LW** (light wood; that is what the box and the Amazon listing say) and
+report themselves as `PFF-1515`. The black PFF-1515B is probably the same hardware but has not been tried.
+
 Probed over USB adb on 2026-11-18, factory-fresh (never connected to Wi-Fi), then converted with the convert tool. The
 frame ships with the stock Frameo app. Status: **supported** in the convert tool (see
 [supported-devices.md](supported-devices.md)): the problems the first conversion found are fixed in both tools, and a
