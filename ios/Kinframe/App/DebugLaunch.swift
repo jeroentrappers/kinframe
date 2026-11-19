@@ -7,7 +7,7 @@ import SwiftUI
 ///
 /// - `-kfReset YES`: forget the server, session and onboarding progress.
 /// - `-kfServer <url>` with `-kfDevEmail <email>` [`-kfDevName <name>`]: sign in with a dev token (dev servers only).
-/// - `-kfStep welcome|server|signIn`: onboarding step.  `-kfTab frames|feeds|send|history|settings`: tab.
+/// - `-kfStep welcome|server|signIn`: onboarding step.  `-kfTab home|chats|frames|feeds|send|history|settings`: tab.
 /// - `-kfFeed <id> [-kfFeedSection posts|members|frames|birthdays|settings]`: open a feed.
 /// - `-kfLanguage en|nl|system`.  `-kfOpen <url>`: open a link as if tapped.  `-kfFrame <id>`: open a frame.
 /// - `-kfScrollTo plugins|details|ownership`: scroll the frame page there (`signOut`: the end of Settings).
@@ -78,8 +78,13 @@ enum DebugLaunch {
         case "send": app.tab = .send
         case "history": app.tab = .history; app.historyPath = NavigationPath()
         case "settings": app.tab = .settings
+        case "home": app.tab = .home
+        case "chats": app.tab = .chats
         default: break
         }
+        // -kfPost <id>, -kfChat <id>: open a post's thread or a conversation (family social).
+        if let id = args.string(forKey: "kfPost") { app.openSocial(.post(postId: id, commentId: nil)) }
+        if let id = args.string(forKey: "kfChat") { app.openSocial(.conversation(conversationId: id, messageId: nil)) }
         if let id = args.string(forKey: "kfSend") {
             app.historyPath = NavigationPath([HistoryRoute(sendId: id)])
         }

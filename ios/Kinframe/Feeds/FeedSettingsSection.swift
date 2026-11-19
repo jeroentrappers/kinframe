@@ -75,7 +75,8 @@ struct FeedSettingsSection: View {
                 Divider().overlay(Palette.border)
                 toggle($postersCanInvite, L("ios.feeds.setPostersInvite"), L("ios.feeds.setPostersInviteHint"))
                 Divider().overlay(Palette.border)
-                toggle($membersSeeReactions, L("ios.feeds.setSeeReactions"), L("ios.feeds.setSeeReactionsHint"))
+                toggle($membersSeeReactions, L("ios.feeds.setSeeReactions"),
+                       L(app.social.features.social ? "social.family.seeReactionsHint" : "ios.feeds.setSeeReactionsHint"))
             }
             group(L("ios.feeds.settingsFrames")) {
                 toggle($autoApprove, L("ios.feeds.setAutoApprove"), L("ios.feeds.setAutoApproveHint"))
@@ -85,6 +86,9 @@ struct FeedSettingsSection: View {
                     toggle($postersCanAddBirthdays, L("ios.bday.setPosters"), L("ios.bday.setPostersHint"))
                 }
             }
+
+            // Family social and encouragement settings save on change (Social/FamilySocial.swift).
+            FamilySocialSettings(model: model)
 
             if feed?.role == .owner { danger }
         }

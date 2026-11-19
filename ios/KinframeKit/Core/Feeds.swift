@@ -141,31 +141,38 @@ public struct FeedAbilities: Equatable, Sendable {
     public let role: FeedRole
     public let membersSeeReactions: Bool
     public let postersCanInvite: Bool
+    /// Every member sees per-frame receipts (family social; before it, `members_see_reactions` meant both).
+    public let membersSeeReceipts: Bool
 
-    public init(role: FeedRole, membersSeeReactions: Bool = false, postersCanInvite: Bool = false) {
+    public init(role: FeedRole, membersSeeReactions: Bool = false, postersCanInvite: Bool = false, membersSeeReceipts: Bool? = nil) {
         self.role = role
         self.membersSeeReactions = membersSeeReactions
         self.postersCanInvite = postersCanInvite
+        self.membersSeeReceipts = membersSeeReceipts ?? membersSeeReactions
     }
 
     public init(_ feed: Feed) {
         self.init(role: feed.role, membersSeeReactions: feed.value2.membersSeeReactions ?? false,
-                  postersCanInvite: feed.value2.postersCanInvite ?? false)
+                  postersCanInvite: feed.value2.postersCanInvite ?? false,
+                  membersSeeReceipts: feed.value2.membersSeeReceipts)
     }
+
+    /// Posting photos: every role but `member` (README §5.18).
+    public var canPost: Bool { role != .member }
 
     public var isAdmin: Bool { role == .owner || role == .admin }
     /// Rename, cover, the feed's settings, join requests and pending subscriptions.
     public var canManage: Bool { isAdmin }
     public var isOwner: Bool { role == .owner }
-    /// Join invites: admins, or every member when the feed lets posters invite.
-    public var canCreateJoinInvites: Bool { isAdmin || postersCanInvite }
+    /// Join invites: admins, or posters when the feed lets posters invite (never `member`).
+    public var canCreateJoinInvites: Bool { isAdmin || (postersCanInvite && role == .poster) }
     /// Subscribe invites (pre-approved) are for admins only.
     public var canCreateSubscribeInvites: Bool { isAdmin }
     public var canSeeInvites: Bool { canCreateJoinInvites }
 
-    /// Receipts and reactions of a post (the server leaves them null otherwise).
+    /// Receipts of a post (the server leaves them null otherwise).
     public func canSeeReceipts(posterId: String, me: String?) -> Bool {
-        isAdmin || membersSeeReactions || posterId == me
+        isAdmin || membersSeeReceipts || posterId == me
     }
 
     /// Unsend (own) or remove (admins) a post or one of its items.
@@ -173,13 +180,14 @@ public struct FeedAbilities: Equatable, Sendable {
         isAdmin || posterId == me
     }
 
-    /// Change a member's role or remove them. Owners manage everyone but themselves; admins manage posters.
+    /// Change a member's role or remove them. Owners manage everyone but themselves; admins manage posters and
+    /// members (the `member` role, family social).
     public func canEdit(_ member: FeedRole, isMe: Bool) -> Bool {
         guard !isMe, member != .owner else { return false }
         switch role {
         case .owner: return true
-        case .admin: return member == .poster
-        case .poster: return false
+        case .admin: return member == .poster || member == .member
+        case .poster, .member: return false
         }
     }
 }
@@ -400,6 +408,8 @@ public enum PushRoute: Equatable, Sendable {
     case emailAddress(addressId: String, frameId: String?, feedId: String?)
     /// A Telegram chat needs its owner (`telegram_attention`): the chat, in its frame's or feed's settings.
     case telegramChat(chatId: String, frameId: String?, feedId: String?)
+    /// Family social keys (SocialPush.swift).
+    case social(SocialRoute)
 
     public enum FeedSectionHint: String, Sendable {
         case posts, members, frames, birthdays, settings
@@ -435,6 +445,7 @@ public enum PushRoute: Equatable, Sendable {
             return id("feed_id").map { .feed(feedId: $0, section: .birthdays) } ?? .feeds
         default:
             return PhotoSourcePush.route(key: key, id: id) ?? ChannelPush.route(key: key, id: id)
+                ?? SocialPush.route(key: key, id: id).map { .social($0) }
         }
     }
 }

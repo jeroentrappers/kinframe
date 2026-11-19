@@ -53,6 +53,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo or video to send to a frame.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Record a voice message for your family.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

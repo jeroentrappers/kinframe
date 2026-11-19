@@ -22,8 +22,15 @@ public enum PhotoUpload {
         case .failed:
             guard await preparer.withinLimits(source, kind: .photo) else { throw OutboxRunner.unprepared }
         }
-        let size = Int64((try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
         let name = ((filename as NSString).deletingPathExtension.isEmpty ? "photo" : (filename as NSString).deletingPathExtension) + "." + file.pathExtension
+        return try await tus(file, filename: name, mime: mime, prepared: prepared, api: api, session: session, progress: progress)
+    }
+
+    /// Upload one file as it is with tus (in the foreground); returns the upload id. Also used for chat media and
+    /// voice messages, which are prepared by their callers.
+    public static func tus(_ file: URL, filename name: String, mime: String, prepared: String?, api: API,
+                           session: URLSession = .shared, progress: @escaping @Sendable (Double) -> Void = { _ in }) async throws -> String {
+        let size = Int64((try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
         var upload = TusUpload(file: file.lastPathComponent, size: size, filename: name, mime: mime)
         upload.prepared = prepared
         let endpoint = api.baseURL.appending(path: "v1/uploads")

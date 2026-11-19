@@ -4,8 +4,9 @@ import Foundation
 /// The motion clip of a Live Photo, `GET /v1/items/{id}/media/motion`. The server either redirects to a short-lived
 /// signed URL (played without our token) or streams the clip itself (played with it).
 public enum MotionClip {
-    public static func asset(api: API, itemId: String) async throws -> AVURLAsset {
-        let url = api.url("v1/items/\(itemId)/media/motion")
+    /// `variant`: `motion` for Live Photo clips; `master` plays a chat video or a voice message's recording.
+    public static func asset(api: API, itemId: String, variant: String = "motion") async throws -> AVURLAsset {
+        let url = api.url("v1/items/\(itemId)/media/\(variant)")
         var request = URLRequest(url: url)
         request.setValue("bytes=0-0", forHTTPHeaderField: "Range")
         request.identifyApp()

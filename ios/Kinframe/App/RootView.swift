@@ -104,6 +104,18 @@ struct MainTabs: View {
     var body: some View {
         @Bindable var app = app
         TabView(selection: $app.tab) {
+            // Family social: Home (timeline and strip) and Chats, each only when the server has it.
+            if app.social.features.home {
+                HomeTab()
+                    .tabItem { Label(L("social.home.title"), systemImage: "house") }
+                    .tag(AppModel.Tab.home)
+            }
+            if app.social.features.chats {
+                ChatsTab()
+                    .tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
+                    .badge(ChatList.unreadChats(app.social.conversations))
+                    .tag(AppModel.Tab.chats)
+            }
             FramesTab()
                 .tabItem { Label(L("nav.frames"), systemImage: "photo.on.rectangle") }
                 .tag(AppModel.Tab.frames)
@@ -127,6 +139,28 @@ struct MainTabs: View {
         .onAppear { app.consumePendingLink() }
         .onChange(of: app.feedsEnabled) { _, on in
             if !on, app.tab == .feeds { app.tab = .frames }
+        }
+        .onChange(of: app.social.features) { _, f in
+            if !f.home, app.tab == .home { app.tab = .frames }
+            if !f.chats, app.tab == .chats { app.tab = .frames }
+        }
+        // Home is the start once the server has family social (unless something else was opened already).
+        .task(id: app.social.features.home) {
+            if app.social.features.home, app.tab == .frames, app.framesPath.isEmpty { app.tab = .home }
+        }
+        .sheet(item: Binding(get: { app.social.sheet }, set: { app.social.sheet = $0 })) { sheet in
+            switch sheet {
+            case .freshSend(let frameId, let requestId): FreshSendSheet(frameId: frameId, requestId: requestId)
+            case .weeklySummary(let week): WeeklySummarySheet(weekOf: week)
+            case .operatorReports: ReportsView(feedId: nil)
+            case .feedReports(let feedId): ReportsView(feedId: feedId)
+            }
+        }
+        .sheet(item: Binding(get: { app.social.personSheet }, set: { app.social.personSheet = $0 })) { route in
+            NavigationStack {
+                PersonView(userId: route.userId, inSheet: true)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { app.social.personSheet = nil } } }
+            }
         }
         .sheet(item: $app.activeLink) { link in
             DeepLinkSheet(link: link)

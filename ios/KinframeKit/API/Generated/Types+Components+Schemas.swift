@@ -124,6 +124,9 @@ extension Components {
             case sourceTestFailed = "source_test_failed"
             case duplicateSender = "duplicate_sender"
             case telegramAlreadyLinked = "telegram_already_linked"
+            case cannotMessage = "cannot_message"
+            case commentsClosed = "comments_closed"
+            case audioTooLong = "audio_too_long"
             case serverError = "server_error"
         }
         /// Version policy for one family app platform (README §5.15).
@@ -333,6 +336,32 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/telegram_max_file_bytes`.
             public var telegramMaxFileBytes: Swift.Int?
+            /// True when the server has the home timeline, comment threads, people's reactions, mentions, the `member` role and circles (docs/spec/family-social.md, README §5.18). Only with `feeds`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/social`.
+            public var social: Swift.Bool?
+            /// True when the server has conversations (direct, group, family, circle), blocks and reports (README §5.19).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/chats`.
+            public var chats: Swift.Bool?
+            /// True when chats accept voice messages (needs ffmpeg on the server; README §5.19).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/voice_messages`.
+            public var voiceMessages: Swift.Bool?
+            /// True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
+            /// links in messages itself (public addresses only). Off by default; clients then show links without previews.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/link_previews`.
+            public var linkPreviews: Swift.Bool?
+            /// True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/engagement`.
+            public var engagement: Swift.Bool?
+            /// True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/email_digest`.
+            public var emailDigest: Swift.Bool?
             /// VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             /// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
             ///
@@ -366,6 +395,12 @@ extension Components {
             ///   - telegramBotUsername: The bot's username without "@", for `https://t.me/<username>` links; null without `telegram`.
             ///   - telegramPrivacyMode: True when the bot runs in Telegram's privacy mode: a group must make the bot an admin before it sees photos,
             ///   - telegramMaxFileBytes: The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`.
+            ///   - social: True when the server has the home timeline, comment threads, people's reactions, mentions, the `member` role and circles (docs/spec/family-social.md, README §5.18). Only with `feeds`.
+            ///   - chats: True when the server has conversations (direct, group, family, circle), blocks and reports (README §5.19).
+            ///   - voiceMessages: True when chats accept voice messages (needs ffmpeg on the server; README §5.19).
+            ///   - linkPreviews: True when the operator turned on link previews (`KINFRAME_LINK_PREVIEWS=1`): the server fetches pages of
+            ///   - engagement: True when the server has frame freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps and milestones (README §5.20).
+            ///   - emailDigest: True when the server can send outgoing mail, so people can choose a daily or weekly email digest of comments and messages.
             ///   - webpushPublicKey: VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             ///   - shop:
             public init(
@@ -391,6 +426,12 @@ extension Components {
                 telegramBotUsername: Swift.String? = nil,
                 telegramPrivacyMode: Swift.Bool? = nil,
                 telegramMaxFileBytes: Swift.Int? = nil,
+                social: Swift.Bool? = nil,
+                chats: Swift.Bool? = nil,
+                voiceMessages: Swift.Bool? = nil,
+                linkPreviews: Swift.Bool? = nil,
+                engagement: Swift.Bool? = nil,
+                emailDigest: Swift.Bool? = nil,
                 webpushPublicKey: Swift.String? = nil,
                 shop: Components.Schemas.Shop? = nil
             ) {
@@ -416,6 +457,12 @@ extension Components {
                 self.telegramBotUsername = telegramBotUsername
                 self.telegramPrivacyMode = telegramPrivacyMode
                 self.telegramMaxFileBytes = telegramMaxFileBytes
+                self.social = social
+                self.chats = chats
+                self.voiceMessages = voiceMessages
+                self.linkPreviews = linkPreviews
+                self.engagement = engagement
+                self.emailDigest = emailDigest
                 self.webpushPublicKey = webpushPublicKey
                 self.shop = shop
             }
@@ -442,6 +489,12 @@ extension Components {
                 case telegramBotUsername = "telegram_bot_username"
                 case telegramPrivacyMode = "telegram_privacy_mode"
                 case telegramMaxFileBytes = "telegram_max_file_bytes"
+                case social
+                case chats
+                case voiceMessages = "voice_messages"
+                case linkPreviews = "link_previews"
+                case engagement
+                case emailDigest = "email_digest"
                 case webpushPublicKey = "webpush_public_key"
                 case shop
             }
@@ -504,8 +557,42 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Shop/stock`.
             public var stock: Components.Schemas.Shop.StockPayload?
-            /// Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
-            /// affiliate links (shown with a disclosure). Absent when the operator configured none.
+            /// A notice shown prominently at the top of the storefront and the shop page, above the products (e.g.
+            /// "we resell converted frames"). Plain text, no HTML; a blank line starts a new paragraph. Absent when
+            /// the operator configured none.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/notice`.
+            public struct NoticePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Shop/notice/value1`.
+                public var value1: Components.Schemas.LocalizedText
+                /// Creates a new `NoticePayload`.
+                ///
+                /// - Parameters:
+                ///   - value1:
+                public init(value1: Components.Schemas.LocalizedText) {
+                    self.value1 = value1
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    self.value1 = try .init(from: decoder)
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try self.value1.encode(to: encoder)
+                }
+            }
+            /// A notice shown prominently at the top of the storefront and the shop page, above the products (e.g.
+            /// "we resell converted frames"). Plain text, no HTML; a blank line starts a new paragraph. Absent when
+            /// the operator configured none.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/notice`.
+            public var notice: Components.Schemas.Shop.NoticePayload?
+            /// - Remark: Generated from `#/components/schemas/Shop/diy`.
+            public var diy: Components.Schemas.ShopDiy?
+            /// Retailers selling a frame the convert tool supports. Links for countries outside `shipping.countries`
+            /// are shown to visitors elsewhere ("Outside Belgium?"); links that list a shipping country are shown to
+            /// visitors from that country in the "buy it yourself and convert it" section. The links may be affiliate
+            /// links (shown with a disclosure). Absent when the operator configured none.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Shop/elsewhere`.
@@ -606,7 +693,9 @@ extension Components {
             ///   - shipping:
             ///   - estimatedDelivery:
             ///   - stock: Shops with stock management: the dispatch day of an order placed now, when every item is in stock
-            ///   - elsewhere: Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+            ///   - notice: A notice shown prominently at the top of the storefront and the shop page, above the products (e.g.
+            ///   - diy:
+            ///   - elsewhere: Retailers selling a frame the convert tool supports. Links for countries outside `shipping.countries`
             ///   - domains: Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
             ///   - defaultLocale: Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
             ///   - checkout: True when orders are paid online: `createShopReservation` then needs the delivery address and answers
@@ -619,6 +708,8 @@ extension Components {
                 shipping: Components.Schemas.ShopShipping,
                 estimatedDelivery: Components.Schemas.LocalizedText? = nil,
                 stock: Components.Schemas.Shop.StockPayload? = nil,
+                notice: Components.Schemas.Shop.NoticePayload? = nil,
+                diy: Components.Schemas.ShopDiy? = nil,
                 elsewhere: [Components.Schemas.ShopElsewhereLink]? = nil,
                 domains: [Swift.String]? = nil,
                 defaultLocale: Swift.String? = nil,
@@ -632,6 +723,8 @@ extension Components {
                 self.shipping = shipping
                 self.estimatedDelivery = estimatedDelivery
                 self.stock = stock
+                self.notice = notice
+                self.diy = diy
                 self.elsewhere = elsewhere
                 self.domains = domains
                 self.defaultLocale = defaultLocale
@@ -646,6 +739,8 @@ extension Components {
                 case shipping
                 case estimatedDelivery = "estimated_delivery"
                 case stock
+                case notice
+                case diy
                 case elsewhere
                 case domains
                 case defaultLocale = "default_locale"
@@ -653,7 +748,35 @@ extension Components {
                 case seller
             }
         }
-        /// A retailer selling a compatible frame in some countries the shop doesn't ship to.
+        /// Title and text of the "buy it yourself and convert it" section, shown to visitors in a shipping country when
+        /// `elsewhere` has links for that country. Plain text; a blank line in `body` starts a new paragraph. Either may
+        /// be absent; the web app then uses its own texts.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShopDiy`.
+        public struct ShopDiy: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopDiy/title`.
+            public var title: Components.Schemas.LocalizedText?
+            /// - Remark: Generated from `#/components/schemas/ShopDiy/body`.
+            public var body: Components.Schemas.LocalizedText?
+            /// Creates a new `ShopDiy`.
+            ///
+            /// - Parameters:
+            ///   - title:
+            ///   - body:
+            public init(
+                title: Components.Schemas.LocalizedText? = nil,
+                body: Components.Schemas.LocalizedText? = nil
+            ) {
+                self.title = title
+                self.body = body
+            }
+            public enum CodingKeys: String, CodingKey {
+                case title
+                case body
+            }
+        }
+        /// A retailer selling a frame the convert tool supports, for visitors from some countries.
         ///
         /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink`.
         public struct ShopElsewhereLink: Codable, Hashable, Sendable {
@@ -673,6 +796,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/affiliate`.
             public var affiliate: Swift.Bool?
+            /// True for an alternative shown as a small text link ("Also at bol.com") below the main links.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/secondary`.
+            public var secondary: Swift.Bool?
             /// Creates a new `ShopElsewhereLink`.
             ///
             /// - Parameters:
@@ -681,18 +808,21 @@ extension Components {
             ///   - product: The frame model.
             ///   - url:
             ///   - affiliate: True for an affiliate link; the web app then shows a disclosure.
+            ///   - secondary: True for an alternative shown as a small text link ("Also at bol.com") below the main links.
             public init(
                 countries: [Swift.String],
                 retailer: Swift.String,
                 product: Swift.String,
                 url: Swift.String,
-                affiliate: Swift.Bool? = nil
+                affiliate: Swift.Bool? = nil,
+                secondary: Swift.Bool? = nil
             ) {
                 self.countries = countries
                 self.retailer = retailer
                 self.product = product
                 self.url = url
                 self.affiliate = affiliate
+                self.secondary = secondary
             }
             public enum CodingKeys: String, CodingKey {
                 case countries
@@ -700,6 +830,7 @@ extension Components {
                 case product
                 case url
                 case affiliate
+                case secondary
             }
         }
         /// Language code → text; `en` is the fallback.
@@ -1386,6 +1517,36 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Limits/max_telegram_items_per_chat_hour`.
             public var maxTelegramItemsPerChatHour: Swift.Int?
+            /// Characters (Unicode code points) per comment.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_comment_chars`.
+            public var maxCommentChars: Swift.Int?
+            /// Characters (Unicode code points) per chat message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_message_chars`.
+            public var maxMessageChars: Swift.Int?
+            /// Mentions per comment or message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_mentions`.
+            public var maxMentions: Swift.Int?
+            /// Photos and videos per chat message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_message_items`.
+            public var maxMessageItems: Swift.Int?
+            /// People in a group chat
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_group_members`.
+            public var maxGroupMembers: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/Limits/max_circles_per_feed`.
+            public var maxCirclesPerFeed: Swift.Int?
+            /// Length of one voice message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_voice_seconds`.
+            public var maxVoiceSeconds: Swift.Int?
+            /// How long after sending the author can edit a message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/message_edit_hours`.
+            public var messageEditHours: Swift.Int?
             /// Creates a new `Limits`.
             ///
             /// - Parameters:
@@ -1410,6 +1571,14 @@ extension Components {
             ///   - maxTelegramChatsPerTarget: Connected Telegram chats per frame or feed.
             ///   - maxTelegramChatsPerUser: Connected Telegram chats one account owns.
             ///   - maxTelegramItemsPerChatHour: Photos and videos accepted per Telegram chat per hour; more are skipped with one reply in the chat.
+            ///   - maxCommentChars: Characters (Unicode code points) per comment.
+            ///   - maxMessageChars: Characters (Unicode code points) per chat message.
+            ///   - maxMentions: Mentions per comment or message.
+            ///   - maxMessageItems: Photos and videos per chat message.
+            ///   - maxGroupMembers: People in a group chat
+            ///   - maxCirclesPerFeed:
+            ///   - maxVoiceSeconds: Length of one voice message.
+            ///   - messageEditHours: How long after sending the author can edit a message.
             public init(
                 maxItemsPerSend: Swift.Int,
                 maxVideoSeconds: Swift.Int,
@@ -1431,7 +1600,15 @@ extension Components {
                 maxEmailHeldMessages: Swift.Int? = nil,
                 maxTelegramChatsPerTarget: Swift.Int? = nil,
                 maxTelegramChatsPerUser: Swift.Int? = nil,
-                maxTelegramItemsPerChatHour: Swift.Int? = nil
+                maxTelegramItemsPerChatHour: Swift.Int? = nil,
+                maxCommentChars: Swift.Int? = nil,
+                maxMessageChars: Swift.Int? = nil,
+                maxMentions: Swift.Int? = nil,
+                maxMessageItems: Swift.Int? = nil,
+                maxGroupMembers: Swift.Int? = nil,
+                maxCirclesPerFeed: Swift.Int? = nil,
+                maxVoiceSeconds: Swift.Int? = nil,
+                messageEditHours: Swift.Int? = nil
             ) {
                 self.maxItemsPerSend = maxItemsPerSend
                 self.maxVideoSeconds = maxVideoSeconds
@@ -1454,6 +1631,14 @@ extension Components {
                 self.maxTelegramChatsPerTarget = maxTelegramChatsPerTarget
                 self.maxTelegramChatsPerUser = maxTelegramChatsPerUser
                 self.maxTelegramItemsPerChatHour = maxTelegramItemsPerChatHour
+                self.maxCommentChars = maxCommentChars
+                self.maxMessageChars = maxMessageChars
+                self.maxMentions = maxMentions
+                self.maxMessageItems = maxMessageItems
+                self.maxGroupMembers = maxGroupMembers
+                self.maxCirclesPerFeed = maxCirclesPerFeed
+                self.maxVoiceSeconds = maxVoiceSeconds
+                self.messageEditHours = messageEditHours
             }
             public enum CodingKeys: String, CodingKey {
                 case maxItemsPerSend = "max_items_per_send"
@@ -1477,6 +1662,14 @@ extension Components {
                 case maxTelegramChatsPerTarget = "max_telegram_chats_per_target"
                 case maxTelegramChatsPerUser = "max_telegram_chats_per_user"
                 case maxTelegramItemsPerChatHour = "max_telegram_items_per_chat_hour"
+                case maxCommentChars = "max_comment_chars"
+                case maxMessageChars = "max_message_chars"
+                case maxMentions = "max_mentions"
+                case maxMessageItems = "max_message_items"
+                case maxGroupMembers = "max_group_members"
+                case maxCirclesPerFeed = "max_circles_per_feed"
+                case maxVoiceSeconds = "max_voice_seconds"
+                case messageEditHours = "message_edit_hours"
             }
         }
         /// A geocoding result (Open-Meteo geocoding API).
@@ -1558,6 +1751,10 @@ extension Components {
             public var timezone: Swift.String?
             /// - Remark: Generated from `#/components/schemas/User/is_operator`.
             public var isOperator: Swift.Bool?
+            /// Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
+            ///
+            /// - Remark: Generated from `#/components/schemas/User/show_read_receipts`.
+            public var showReadReceipts: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/User/created_at`.
             public var createdAt: Foundation.Date?
             /// Creates a new `User`.
@@ -1571,6 +1768,7 @@ extension Components {
             ///   - locale:
             ///   - timezone: IANA time zone reported by the user's apps; null until one did.
             ///   - isOperator:
+            ///   - showReadReceipts: Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
             ///   - createdAt:
             public init(
                 id: Components.Schemas.Id,
@@ -1581,6 +1779,7 @@ extension Components {
                 locale: Swift.String? = nil,
                 timezone: Swift.String? = nil,
                 isOperator: Swift.Bool? = nil,
+                showReadReceipts: Swift.Bool? = nil,
                 createdAt: Foundation.Date? = nil
             ) {
                 self.id = id
@@ -1591,6 +1790,7 @@ extension Components {
                 self.locale = locale
                 self.timezone = timezone
                 self.isOperator = isOperator
+                self.showReadReceipts = showReadReceipts
                 self.createdAt = createdAt
             }
             public enum CodingKeys: String, CodingKey {
@@ -1602,6 +1802,7 @@ extension Components {
                 case locale
                 case timezone
                 case isOperator = "is_operator"
+                case showReadReceipts = "show_read_receipts"
                 case createdAt = "created_at"
             }
         }
@@ -1801,6 +2002,14 @@ extension Components {
             public var needsUpdate: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/FrameSummary/device_kind`.
             public var deviceKind: Components.Schemas.DeviceKind?
+            /// How recently the frame got new photos from people (README §5.20). Absent on servers without `engagement`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSummary/freshness`.
+            public var freshness: Components.Schemas.Freshness?
+            /// The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSummary/photo_request`.
+            public var photoRequest: Components.Schemas.PhotoRequest?
             /// Creates a new `FrameSummary`.
             ///
             /// - Parameters:
@@ -1816,6 +2025,8 @@ extension Components {
             ///   - appVersion:
             ///   - needsUpdate:
             ///   - deviceKind:
+            ///   - freshness: How recently the frame got new photos from people (README §5.20). Absent on servers without `engagement`.
+            ///   - photoRequest: The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
             public init(
                 id: Components.Schemas.Id,
                 name: Swift.String,
@@ -1828,7 +2039,9 @@ extension Components {
                 screen: Components.Schemas.Screen? = nil,
                 appVersion: Swift.String? = nil,
                 needsUpdate: Swift.Bool? = nil,
-                deviceKind: Components.Schemas.DeviceKind? = nil
+                deviceKind: Components.Schemas.DeviceKind? = nil,
+                freshness: Components.Schemas.Freshness? = nil,
+                photoRequest: Components.Schemas.PhotoRequest? = nil
             ) {
                 self.id = id
                 self.name = name
@@ -1842,6 +2055,8 @@ extension Components {
                 self.appVersion = appVersion
                 self.needsUpdate = needsUpdate
                 self.deviceKind = deviceKind
+                self.freshness = freshness
+                self.photoRequest = photoRequest
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -1856,6 +2071,8 @@ extension Components {
                 case appVersion = "app_version"
                 case needsUpdate = "needs_update"
                 case deviceKind = "device_kind"
+                case freshness
+                case photoRequest = "photo_request"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Frame`.
@@ -2027,6 +2244,9 @@ extension Components {
             /// the `birthdays` change (informational only: nothing is withheld; apps use it for
             /// `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
             /// (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
+            /// `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
+            /// has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
+            /// app"; nothing is withheld.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Heartbeat/features`.
@@ -2667,10 +2887,21 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/SendCreate/frame_ids`.
             public var frameIds: [Components.Schemas.Id]
-            /// Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).
+            /// Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). Needs role `poster` or above (`403 missing_permission` for `member`).
             ///
             /// - Remark: Generated from `#/components/schemas/SendCreate/feed_ids`.
             public var feedIds: [Components.Schemas.Id]?
+            /// The audience inside a feed: at most one circle per feed, its feed must be in `feed_ids`, and the caller must
+            /// be in the circle (`422 validation_failed`, field `circle_ids`). That feed's post is shared with the circle
+            /// only (README §5.18); other feeds get a whole-family post.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/SendCreate/circle_ids`.
+            public var circleIds: [Components.Schemas.Id]?
+            /// Tag the feed posts as answers to this weekly prompt (`FeedPrompt.id`, current or previous week); only the post in that prompt's feed is tagged.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SendCreate/prompt_id`.
+            public var promptId: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload`.
             public struct ItemsPayloadPayload: Codable, Hashable, Sendable {
                 /// tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still.
@@ -2812,20 +3043,28 @@ extension Components {
             ///
             /// - Parameters:
             ///   - frameIds: Frames to send to directly. May be empty when `feed_ids` is not.
-            ///   - feedIds: Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).
+            ///   - feedIds: Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). Needs role `poster` or above (`403 missing_permission` for `member`).
+            ///   - circleIds: The audience inside a feed: at most one circle per feed, its feed must be in `feed_ids`, and the caller must
+            ///   - promptId: Tag the feed posts as answers to this weekly prompt (`FeedPrompt.id`, current or previous week); only the post in that prompt's feed is tagged.
             ///   - items:
             public init(
                 frameIds: [Components.Schemas.Id],
                 feedIds: [Components.Schemas.Id]? = nil,
+                circleIds: [Components.Schemas.Id]? = nil,
+                promptId: Swift.String? = nil,
                 items: Components.Schemas.SendCreate.ItemsPayload
             ) {
                 self.frameIds = frameIds
                 self.feedIds = feedIds
+                self.circleIds = circleIds
+                self.promptId = promptId
                 self.items = items
             }
             public enum CodingKeys: String, CodingKey {
                 case frameIds = "frame_ids"
                 case feedIds = "feed_ids"
+                case circleIds = "circle_ids"
+                case promptId = "prompt_id"
                 case items
             }
         }
@@ -3216,6 +3455,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Placement/backfill`.
             public var backfill: Swift.Bool?
+            /// Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/prompt_id`.
+            public var promptId: Components.Schemas.Id?
             /// Creates a new `Placement`.
             ///
             /// - Parameters:
@@ -3243,6 +3486,7 @@ extension Components {
             ///   - originFeedName: Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
             ///   - feedIds: Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
             ///   - backfill: Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
+            ///   - promptId: Feed placements whose post answers a weekly prompt (`prompts` change): frames show the prompt's title card before the first of them.
             public init(
                 id: Components.Schemas.Id,
                 frameId: Components.Schemas.Id,
@@ -3267,7 +3511,8 @@ extension Components {
                 originFeedId: Components.Schemas.Id? = nil,
                 originFeedName: Swift.String? = nil,
                 feedIds: [Components.Schemas.Id]? = nil,
-                backfill: Swift.Bool? = nil
+                backfill: Swift.Bool? = nil,
+                promptId: Components.Schemas.Id? = nil
             ) {
                 self.id = id
                 self.frameId = frameId
@@ -3293,6 +3538,7 @@ extension Components {
                 self.originFeedName = originFeedName
                 self.feedIds = feedIds
                 self.backfill = backfill
+                self.promptId = promptId
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -3319,6 +3565,7 @@ extension Components {
                 case originFeedName = "origin_feed_name"
                 case feedIds = "feed_ids"
                 case backfill
+                case promptId = "prompt_id"
             }
         }
         /// - Remark: Generated from `#/components/schemas/ShareResult`.
@@ -3753,11 +4000,14 @@ extension Components {
                 case onlyInAlbumMode = "only_in_album_mode"
             }
         }
+        /// `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
+        ///
         /// - Remark: Generated from `#/components/schemas/FeedRole`.
         @frozen public enum FeedRole: String, Codable, Hashable, Sendable, CaseIterable {
             case owner = "owner"
             case admin = "admin"
             case poster = "poster"
+            case member = "member"
         }
         /// - Remark: Generated from `#/components/schemas/FeedSummary`.
         public struct FeedSummary: Codable, Hashable, Sendable {
@@ -3781,6 +4031,18 @@ extension Components {
             public var lastPostAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/FeedSummary/created_at`.
             public var createdAt: Foundation.Date?
+            /// How recently the family got new posts from people (README §5.20). Absent without `engagement`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/freshness`.
+            public var freshness: Components.Schemas.Freshness?
+            /// Null when the family turned streaks off. Absent without `engagement`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/streak`.
+            public var streak: Components.Schemas.FeedStreakSummary?
+            /// The family chat. Absent without `chats`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/conversation_id`.
+            public var conversationId: Components.Schemas.Id?
             /// Creates a new `FeedSummary`.
             ///
             /// - Parameters:
@@ -3792,6 +4054,9 @@ extension Components {
             ///   - subscriptionCount: Active and paused subscriptions.
             ///   - lastPostAt:
             ///   - createdAt:
+            ///   - freshness: How recently the family got new posts from people (README §5.20). Absent without `engagement`.
+            ///   - streak: Null when the family turned streaks off. Absent without `engagement`.
+            ///   - conversationId: The family chat. Absent without `chats`.
             public init(
                 id: Components.Schemas.Id,
                 name: Swift.String,
@@ -3800,7 +4065,10 @@ extension Components {
                 memberCount: Swift.Int,
                 subscriptionCount: Swift.Int,
                 lastPostAt: Foundation.Date? = nil,
-                createdAt: Foundation.Date? = nil
+                createdAt: Foundation.Date? = nil,
+                freshness: Components.Schemas.Freshness? = nil,
+                streak: Components.Schemas.FeedStreakSummary? = nil,
+                conversationId: Components.Schemas.Id? = nil
             ) {
                 self.id = id
                 self.name = name
@@ -3810,6 +4078,9 @@ extension Components {
                 self.subscriptionCount = subscriptionCount
                 self.lastPostAt = lastPostAt
                 self.createdAt = createdAt
+                self.freshness = freshness
+                self.streak = streak
+                self.conversationId = conversationId
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -3820,6 +4091,9 @@ extension Components {
                 case subscriptionCount = "subscription_count"
                 case lastPostAt = "last_post_at"
                 case createdAt = "created_at"
+                case freshness
+                case streak
+                case conversationId = "conversation_id"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Feed`.
@@ -3838,8 +4112,28 @@ extension Components {
                 public var autoApproveSubscriptions: Swift.Bool?
                 /// - Remark: Generated from `#/components/schemas/Feed/value2/invite_requires_approval`.
                 public var inviteRequiresApproval: Swift.Bool?
+                /// Every member sees frames' reactions and quick replies in posts' reaction rows and threads (default on for new feeds).
+                ///
                 /// - Remark: Generated from `#/components/schemas/Feed/value2/members_see_reactions`.
                 public var membersSeeReactions: Swift.Bool?
+                /// Every member sees per-frame receipts (delivered, seen) of every post (default off).
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/members_see_receipts`.
+                public var membersSeeReceipts: Swift.Bool?
+                /// Joiners become `poster` (default) or, when off, `member`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/new_members_can_post`.
+                public var newMembersCanPost: Swift.Bool?
+                /// Any member may create circles (default on); otherwise owner and admins only.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/members_can_create_circles`.
+                public var membersCanCreateCircles: Swift.Bool?
+                /// Circles the caller can see.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/circle_count`.
+                public var circleCount: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/mute`.
+                public var mute: Components.Schemas.FeedMute?
                 /// Posters may create `join` invites and revoke their own.
                 ///
                 /// - Remark: Generated from `#/components/schemas/Feed/value2/posters_can_invite`.
@@ -3877,7 +4171,12 @@ extension Components {
                 ///   - coverItemId: An item of a live post of this feed.
                 ///   - autoApproveSubscriptions:
                 ///   - inviteRequiresApproval:
-                ///   - membersSeeReactions:
+                ///   - membersSeeReactions: Every member sees frames' reactions and quick replies in posts' reaction rows and threads (default on for new feeds).
+                ///   - membersSeeReceipts: Every member sees per-frame receipts (delivered, seen) of every post (default off).
+                ///   - newMembersCanPost: Joiners become `poster` (default) or, when off, `member`.
+                ///   - membersCanCreateCircles: Any member may create circles (default on); otherwise owner and admins only.
+                ///   - circleCount: Circles the caller can see.
+                ///   - mute:
                 ///   - postersCanInvite: Posters may create `join` invites and revoke their own.
                 ///   - postersCanAddBirthdays: Posters add birthday people directly instead of suggesting them.
                 ///   - birthdayNotifications: The caller's own preference (`updateFeedPreferences`): morning and greeting notifications for this feed's birthdays.
@@ -3892,6 +4191,11 @@ extension Components {
                     autoApproveSubscriptions: Swift.Bool? = nil,
                     inviteRequiresApproval: Swift.Bool? = nil,
                     membersSeeReactions: Swift.Bool? = nil,
+                    membersSeeReceipts: Swift.Bool? = nil,
+                    newMembersCanPost: Swift.Bool? = nil,
+                    membersCanCreateCircles: Swift.Bool? = nil,
+                    circleCount: Swift.Int? = nil,
+                    mute: Components.Schemas.FeedMute? = nil,
                     postersCanInvite: Swift.Bool? = nil,
                     postersCanAddBirthdays: Swift.Bool? = nil,
                     birthdayNotifications: Swift.Bool? = nil,
@@ -3906,6 +4210,11 @@ extension Components {
                     self.autoApproveSubscriptions = autoApproveSubscriptions
                     self.inviteRequiresApproval = inviteRequiresApproval
                     self.membersSeeReactions = membersSeeReactions
+                    self.membersSeeReceipts = membersSeeReceipts
+                    self.newMembersCanPost = newMembersCanPost
+                    self.membersCanCreateCircles = membersCanCreateCircles
+                    self.circleCount = circleCount
+                    self.mute = mute
                     self.postersCanInvite = postersCanInvite
                     self.postersCanAddBirthdays = postersCanAddBirthdays
                     self.birthdayNotifications = birthdayNotifications
@@ -3921,6 +4230,11 @@ extension Components {
                     case autoApproveSubscriptions = "auto_approve_subscriptions"
                     case inviteRequiresApproval = "invite_requires_approval"
                     case membersSeeReactions = "members_see_reactions"
+                    case membersSeeReceipts = "members_see_receipts"
+                    case newMembersCanPost = "new_members_can_post"
+                    case membersCanCreateCircles = "members_can_create_circles"
+                    case circleCount = "circle_count"
+                    case mute
                     case postersCanInvite = "posters_can_invite"
                     case postersCanAddBirthdays = "posters_can_add_birthdays"
                     case birthdayNotifications = "birthday_notifications"
@@ -3962,8 +4276,16 @@ extension Components {
             public var autoApproveSubscriptions: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/FeedCreate/invite_requires_approval`.
             public var inviteRequiresApproval: Swift.Bool?
+            /// Default changed to true with docs/spec/family-social.md: reactions are social now.
+            ///
             /// - Remark: Generated from `#/components/schemas/FeedCreate/members_see_reactions`.
             public var membersSeeReactions: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/members_see_receipts`.
+            public var membersSeeReceipts: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/new_members_can_post`.
+            public var newMembersCanPost: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/members_can_create_circles`.
+            public var membersCanCreateCircles: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/FeedCreate/posters_can_invite`.
             public var postersCanInvite: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/FeedCreate/posters_can_add_birthdays`.
@@ -3974,7 +4296,10 @@ extension Components {
             ///   - name:
             ///   - autoApproveSubscriptions:
             ///   - inviteRequiresApproval:
-            ///   - membersSeeReactions:
+            ///   - membersSeeReactions: Default changed to true with docs/spec/family-social.md: reactions are social now.
+            ///   - membersSeeReceipts:
+            ///   - newMembersCanPost:
+            ///   - membersCanCreateCircles:
             ///   - postersCanInvite:
             ///   - postersCanAddBirthdays:
             public init(
@@ -3982,6 +4307,9 @@ extension Components {
                 autoApproveSubscriptions: Swift.Bool? = nil,
                 inviteRequiresApproval: Swift.Bool? = nil,
                 membersSeeReactions: Swift.Bool? = nil,
+                membersSeeReceipts: Swift.Bool? = nil,
+                newMembersCanPost: Swift.Bool? = nil,
+                membersCanCreateCircles: Swift.Bool? = nil,
                 postersCanInvite: Swift.Bool? = nil,
                 postersCanAddBirthdays: Swift.Bool? = nil
             ) {
@@ -3989,6 +4317,9 @@ extension Components {
                 self.autoApproveSubscriptions = autoApproveSubscriptions
                 self.inviteRequiresApproval = inviteRequiresApproval
                 self.membersSeeReactions = membersSeeReactions
+                self.membersSeeReceipts = membersSeeReceipts
+                self.newMembersCanPost = newMembersCanPost
+                self.membersCanCreateCircles = membersCanCreateCircles
                 self.postersCanInvite = postersCanInvite
                 self.postersCanAddBirthdays = postersCanAddBirthdays
             }
@@ -3997,6 +4328,9 @@ extension Components {
                 case autoApproveSubscriptions = "auto_approve_subscriptions"
                 case inviteRequiresApproval = "invite_requires_approval"
                 case membersSeeReactions = "members_see_reactions"
+                case membersSeeReceipts = "members_see_receipts"
+                case newMembersCanPost = "new_members_can_post"
+                case membersCanCreateCircles = "members_can_create_circles"
                 case postersCanInvite = "posters_can_invite"
                 case postersCanAddBirthdays = "posters_can_add_birthdays"
             }
@@ -4017,10 +4351,20 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedUpdate/invite_requires_approval`.
             public var inviteRequiresApproval: Swift.Bool?
-            /// Every member sees receipts and reactions of every post.
+            /// Every member sees frames' reactions and quick replies on every post.
             ///
             /// - Remark: Generated from `#/components/schemas/FeedUpdate/members_see_reactions`.
             public var membersSeeReactions: Swift.Bool?
+            /// Every member sees per-frame receipts of every post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/members_see_receipts`.
+            public var membersSeeReceipts: Swift.Bool?
+            /// Joiners become `poster` (true) or `member` (false). Existing members keep their role.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/new_members_can_post`.
+            public var newMembersCanPost: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/members_can_create_circles`.
+            public var membersCanCreateCircles: Swift.Bool?
             /// Posters may create `join` invites (and list and revoke their own).
             ///
             /// - Remark: Generated from `#/components/schemas/FeedUpdate/posters_can_invite`.
@@ -4036,7 +4380,10 @@ extension Components {
             ///   - coverItemId: An item of a live post of this feed; null removes the cover.
             ///   - autoApproveSubscriptions: Requests by non-admin members become active without approval.
             ///   - inviteRequiresApproval: Join invites need an admin's approval.
-            ///   - membersSeeReactions: Every member sees receipts and reactions of every post.
+            ///   - membersSeeReactions: Every member sees frames' reactions and quick replies on every post.
+            ///   - membersSeeReceipts: Every member sees per-frame receipts of every post.
+            ///   - newMembersCanPost: Joiners become `poster` (true) or `member` (false). Existing members keep their role.
+            ///   - membersCanCreateCircles:
             ///   - postersCanInvite: Posters may create `join` invites (and list and revoke their own).
             ///   - postersCanAddBirthdays: Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
             public init(
@@ -4045,6 +4392,9 @@ extension Components {
                 autoApproveSubscriptions: Swift.Bool? = nil,
                 inviteRequiresApproval: Swift.Bool? = nil,
                 membersSeeReactions: Swift.Bool? = nil,
+                membersSeeReceipts: Swift.Bool? = nil,
+                newMembersCanPost: Swift.Bool? = nil,
+                membersCanCreateCircles: Swift.Bool? = nil,
                 postersCanInvite: Swift.Bool? = nil,
                 postersCanAddBirthdays: Swift.Bool? = nil
             ) {
@@ -4053,6 +4403,9 @@ extension Components {
                 self.autoApproveSubscriptions = autoApproveSubscriptions
                 self.inviteRequiresApproval = inviteRequiresApproval
                 self.membersSeeReactions = membersSeeReactions
+                self.membersSeeReceipts = membersSeeReceipts
+                self.newMembersCanPost = newMembersCanPost
+                self.membersCanCreateCircles = membersCanCreateCircles
                 self.postersCanInvite = postersCanInvite
                 self.postersCanAddBirthdays = postersCanAddBirthdays
             }
@@ -4062,6 +4415,9 @@ extension Components {
                 case autoApproveSubscriptions = "auto_approve_subscriptions"
                 case inviteRequiresApproval = "invite_requires_approval"
                 case membersSeeReactions = "members_see_reactions"
+                case membersSeeReceipts = "members_see_receipts"
+                case newMembersCanPost = "new_members_can_post"
+                case membersCanCreateCircles = "members_can_create_circles"
                 case postersCanInvite = "posters_can_invite"
                 case postersCanAddBirthdays = "posters_can_add_birthdays"
             }
@@ -4993,14 +5349,28 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedPost/items`.
             public var items: [Components.Schemas.Item]
-            /// Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+            /// Own posts, owner/admins, or everyone with `members_see_receipts`; otherwise null.
             ///
             /// - Remark: Generated from `#/components/schemas/FeedPost/receipts`.
             public var receipts: Components.Schemas.FeedReceiptSummary?
-            /// Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+            /// Frames' reactions and replies: own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. Latest first, at most 50 (all in `getFeedPostReceipts`).
             ///
             /// - Remark: Generated from `#/components/schemas/FeedPost/reactions`.
             public var reactions: [Components.Schemas.FeedReaction]?
+            /// The circle this post was shared with (only its members see it); null for the whole family.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/circle_id`.
+            public var circleId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/FeedPost/circle_name`.
+            public var circleName: Swift.String?
+            /// The weekly prompt it answers (`tagPostPrompt`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/prompt_id`.
+            public var promptId: Components.Schemas.Id?
+            /// The post's comments and people's reactions. Absent without `social`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/thread`.
+            public var thread: Components.Schemas.ThreadSummary?
             /// Creates a new `FeedPost`.
             ///
             /// - Parameters:
@@ -5011,8 +5381,12 @@ extension Components {
             ///   - createdAt:
             ///   - via: Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos").
             ///   - items: Live items in send order.
-            ///   - receipts: Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
-            ///   - reactions: Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+            ///   - receipts: Own posts, owner/admins, or everyone with `members_see_receipts`; otherwise null.
+            ///   - reactions: Frames' reactions and replies: own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. Latest first, at most 50 (all in `getFeedPostReceipts`).
+            ///   - circleId: The circle this post was shared with (only its members see it); null for the whole family.
+            ///   - circleName:
+            ///   - promptId: The weekly prompt it answers (`tagPostPrompt`).
+            ///   - thread: The post's comments and people's reactions. Absent without `social`.
             public init(
                 id: Components.Schemas.Id,
                 feedId: Components.Schemas.Id,
@@ -5022,7 +5396,11 @@ extension Components {
                 via: Components.Schemas.ItemVia? = nil,
                 items: [Components.Schemas.Item],
                 receipts: Components.Schemas.FeedReceiptSummary? = nil,
-                reactions: [Components.Schemas.FeedReaction]? = nil
+                reactions: [Components.Schemas.FeedReaction]? = nil,
+                circleId: Components.Schemas.Id? = nil,
+                circleName: Swift.String? = nil,
+                promptId: Components.Schemas.Id? = nil,
+                thread: Components.Schemas.ThreadSummary? = nil
             ) {
                 self.id = id
                 self.feedId = feedId
@@ -5033,6 +5411,10 @@ extension Components {
                 self.items = items
                 self.receipts = receipts
                 self.reactions = reactions
+                self.circleId = circleId
+                self.circleName = circleName
+                self.promptId = promptId
+                self.thread = thread
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -5044,6 +5426,10 @@ extension Components {
                 case items
                 case receipts
                 case reactions
+                case circleId = "circle_id"
+                case circleName = "circle_name"
+                case promptId = "prompt_id"
+                case thread
             }
         }
         /// One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
@@ -5590,16 +5976,36 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedPreferencesUpdate/birthday_notifications`.
             public var birthdayNotifications: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedPreferencesUpdate/mute`.
+            public var mute: Components.Schemas.FeedMute?
             /// Creates a new `FeedPreferencesUpdate`.
             ///
             /// - Parameters:
             ///   - birthdayNotifications: Morning notification and greetings for this feed's birthdays.
-            public init(birthdayNotifications: Swift.Bool? = nil) {
+            ///   - mute:
+            public init(
+                birthdayNotifications: Swift.Bool? = nil,
+                mute: Components.Schemas.FeedMute? = nil
+            ) {
                 self.birthdayNotifications = birthdayNotifications
+                self.mute = mute
             }
             public enum CodingKeys: String, CodingKey {
                 case birthdayNotifications = "birthday_notifications"
+                case mute
             }
+        }
+        /// The caller's mute for one family: `none`; `posts` (no pushes for comments, replies and reactions on its posts;
+        /// mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
+        /// mentions too). Websocket events still arrive.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FeedMute`.
+        @frozen public enum FeedMute: String, Codable, Hashable, Sendable, CaseIterable {
+            case none = "none"
+            case posts = "posts"
+            case chat = "chat"
+            case all = "all"
         }
         /// A frame said happy birthday to a person of this feed on their day. One per person, frame and date; recorded
         /// in every feed that lists the person. Also the payload of the `birthday.greeting` websocket event.
@@ -10204,6 +10610,55 @@ extension Components {
             }
             /// - Remark: Generated from `#/components/schemas/FrameSettings/notifications`.
             public var notifications: Components.Schemas.FrameSettings.NotificationsPayload?
+            /// Family social on the frame (docs/spec/family-social.md §8, README §5.20). Owner, admins and `change_settings` members.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSettings/social`.
+            public struct SocialPayload: Codable, Hashable, Sendable {
+                /// When a photo with comments appears, a card with the newest comment fades in for 8 s (once per photo per day). The server sends the `comments` change only while this is on.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/social/show_comments`.
+                public var showComments: Swift.Bool?
+                /// Show "Ask for new photos" in the frame's quick menu.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/social/ask_for_photos`.
+                public var askForPhotos: Swift.Bool?
+                /// Show a weekly prompt's title card before its answers.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/social/prompt_cards`.
+                public var promptCards: Swift.Bool?
+                /// Show "New photos from Ben" on the next wake after new photos arrived (computed by the frame from the new placements' senders).
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/social/new_photos_from`.
+                public var newPhotosFrom: Swift.Bool?
+                /// Creates a new `SocialPayload`.
+                ///
+                /// - Parameters:
+                ///   - showComments: When a photo with comments appears, a card with the newest comment fades in for 8 s (once per photo per day). The server sends the `comments` change only while this is on.
+                ///   - askForPhotos: Show "Ask for new photos" in the frame's quick menu.
+                ///   - promptCards: Show a weekly prompt's title card before its answers.
+                ///   - newPhotosFrom: Show "New photos from Ben" on the next wake after new photos arrived (computed by the frame from the new placements' senders).
+                public init(
+                    showComments: Swift.Bool? = nil,
+                    askForPhotos: Swift.Bool? = nil,
+                    promptCards: Swift.Bool? = nil,
+                    newPhotosFrom: Swift.Bool? = nil
+                ) {
+                    self.showComments = showComments
+                    self.askForPhotos = askForPhotos
+                    self.promptCards = promptCards
+                    self.newPhotosFrom = newPhotosFrom
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case showComments = "show_comments"
+                    case askForPhotos = "ask_for_photos"
+                    case promptCards = "prompt_cards"
+                    case newPhotosFrom = "new_photos_from"
+                }
+            }
+            /// Family social on the frame (docs/spec/family-social.md §8, README §5.20). Owner, admins and `change_settings` members.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSettings/social`.
+            public var social: Components.Schemas.FrameSettings.SocialPayload?
             /// - Remark: Generated from `#/components/schemas/FrameSettings/kiosk`.
             public struct KioskPayload: Codable, Hashable, Sendable {
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/kiosk/allow_remove_members_on_frame`.
@@ -10380,6 +10835,7 @@ extension Components {
             ///   - calendar: Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
             ///   - location: Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
             ///   - notifications:
+            ///   - social: Family social on the frame (docs/spec/family-social.md §8, README §5.20). Owner, admins and `change_settings` members.
             ///   - kiosk:
             ///   - updates:
             ///   - plugins: Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
@@ -10393,6 +10849,7 @@ extension Components {
                 calendar: Components.Schemas.FrameSettings.CalendarPayload? = nil,
                 location: Components.Schemas.FrameSettings.LocationPayload? = nil,
                 notifications: Components.Schemas.FrameSettings.NotificationsPayload? = nil,
+                social: Components.Schemas.FrameSettings.SocialPayload? = nil,
                 kiosk: Components.Schemas.FrameSettings.KioskPayload? = nil,
                 updates: Components.Schemas.FrameSettings.UpdatesPayload? = nil,
                 plugins: Components.Schemas.FrameSettings.PluginsPayload? = nil
@@ -10406,6 +10863,7 @@ extension Components {
                 self.calendar = calendar
                 self.location = location
                 self.notifications = notifications
+                self.social = social
                 self.kiosk = kiosk
                 self.updates = updates
                 self.plugins = plugins
@@ -10420,6 +10878,7 @@ extension Components {
                 case calendar
                 case location
                 case notifications
+                case social
                 case kiosk
                 case updates
                 case plugins
@@ -11859,6 +12318,9 @@ extension Components {
                 case weather = "weather"
                 case calendar = "calendar"
                 case birthdays = "birthdays"
+                case comments = "comments"
+                case photoRequest = "photo_request"
+                case prompts = "prompts"
                 case reset = "reset"
             }
             /// - Remark: Generated from `#/components/schemas/Change/type`.
@@ -12123,6 +12585,18 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Change/birthdays`.
             public var birthdays: Components.Schemas.FrameBirthdays?
+            /// `comments` change (entity `id` = the placement): its newest comments, or null = drop them (show comments turned off, comments removed). Only for frames with `settings.social.show_comments`. Old frame apps ignore it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Change/comments`.
+            public var comments: Components.Schemas.PlacementComments?
+            /// `photo_request` change (entity `id` = the frame): the frame's latest "Ask for new photos", or null when there is none in the last 7 days.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Change/photo_request`.
+            public var photoRequest: Components.Schemas.FramePhotoRequest?
+            /// `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Change/prompts`.
+            public var prompts: Components.Schemas.FramePrompts?
             /// Creates a new `Change`.
             ///
             /// - Parameters:
@@ -12137,6 +12611,9 @@ extension Components {
             ///   - weather:
             ///   - calendar:
             ///   - birthdays: The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it.
+            ///   - comments: `comments` change (entity `id` = the placement): its newest comments, or null = drop them (show comments turned off, comments removed). Only for frames with `settings.social.show_comments`. Old frame apps ignore it.
+            ///   - photoRequest: `photo_request` change (entity `id` = the frame): the frame's latest "Ask for new photos", or null when there is none in the last 7 days.
+            ///   - prompts: `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.
             public init(
                 seq: Swift.Int,
                 _type: Components.Schemas.Change._TypePayload,
@@ -12148,7 +12625,10 @@ extension Components {
                 frame: Components.Schemas.Change.FramePayload? = nil,
                 weather: Components.Schemas.Weather? = nil,
                 calendar: Components.Schemas.Calendar? = nil,
-                birthdays: Components.Schemas.FrameBirthdays? = nil
+                birthdays: Components.Schemas.FrameBirthdays? = nil,
+                comments: Components.Schemas.PlacementComments? = nil,
+                photoRequest: Components.Schemas.FramePhotoRequest? = nil,
+                prompts: Components.Schemas.FramePrompts? = nil
             ) {
                 self.seq = seq
                 self._type = _type
@@ -12161,6 +12641,9 @@ extension Components {
                 self.weather = weather
                 self.calendar = calendar
                 self.birthdays = birthdays
+                self.comments = comments
+                self.photoRequest = photoRequest
+                self.prompts = prompts
             }
             public enum CodingKeys: String, CodingKey {
                 case seq
@@ -12174,6 +12657,9 @@ extension Components {
                 case weather
                 case calendar
                 case birthdays
+                case comments
+                case photoRequest = "photo_request"
+                case prompts
             }
         }
         /// Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -13415,6 +13901,4575 @@ extension Components {
                 case photoPlacement = "photo_placement"
                 case createdAt = "created_at"
                 case decidedAt = "decided_at"
+            }
+        }
+        /// A person as shown next to a comment, message or reaction. `former_member: true` for deleted accounts: show
+        /// the localized "Former member" instead of `display_name` (which is then empty) and no avatar.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PersonRef`.
+        public struct PersonRef: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PersonRef/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PersonRef/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PersonRef/avatar_url`.
+            public var avatarUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PersonRef/former_member`.
+            public var formerMember: Swift.Bool?
+            /// Creates a new `PersonRef`.
+            ///
+            /// - Parameters:
+            ///   - userId:
+            ///   - displayName:
+            ///   - avatarUrl:
+            ///   - formerMember:
+            public init(
+                userId: Components.Schemas.Id,
+                displayName: Swift.String,
+                avatarUrl: Swift.String? = nil,
+                formerMember: Swift.Bool? = nil
+            ) {
+                self.userId = userId
+                self.displayName = displayName
+                self.avatarUrl = avatarUrl
+                self.formerMember = formerMember
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userId = "user_id"
+                case displayName = "display_name"
+                case avatarUrl = "avatar_url"
+                case formerMember = "former_member"
+            }
+        }
+        /// A person's reaction. The first four are the frame's reactions (`Reaction`), so counts merge with frames':
+        /// `love` ❤️, `laugh` 😂, `wow` 😮, `sad` 😢; people also have `thumbs_up` 👍 and `pray` 🙏.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PersonReaction`.
+        @frozen public enum PersonReaction: String, Codable, Hashable, Sendable, CaseIterable {
+            case love = "love"
+            case laugh = "laugh"
+            case wow = "wow"
+            case sad = "sad"
+            case thumbsUp = "thumbs_up"
+            case pray = "pray"
+        }
+        /// `post_item` is one item of a post (the `post_id` query parameter names the post).
+        ///
+        /// - Remark: Generated from `#/components/schemas/ReactionTargetKind`.
+        @frozen public enum ReactionTargetKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case post = "post"
+            case postItem = "post_item"
+            case comment = "comment"
+            case message = "message"
+        }
+        /// The reaction row of a post, post item, comment or message: people and frames together ("❤ Oma's frame, Anna
+        /// and 3 others"). `counts` merges people and frames (frames' `Reaction` values map to the same names).
+        /// `frames` is only filled for posts and post items, and for feed posts only when the caller may see frame
+        /// reactions (`members_see_reactions`, or own post, or feed owner/admin; README §5.18). People the caller blocked
+        /// are left out of `people` but counted.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ReactionSummary`.
+        public struct ReactionSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/total`.
+            public var total: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/CountsPayload`.
+            public struct CountsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ReactionSummary/CountsPayload/emoji`.
+                public var emoji: Components.Schemas.PersonReaction
+                /// - Remark: Generated from `#/components/schemas/ReactionSummary/CountsPayload/count`.
+                public var count: Swift.Int
+                /// Creates a new `CountsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - emoji:
+                ///   - count:
+                public init(
+                    emoji: Components.Schemas.PersonReaction,
+                    count: Swift.Int
+                ) {
+                    self.emoji = emoji
+                    self.count = count
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case emoji
+                    case count
+                }
+            }
+            /// Per emoji, most frequent first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/counts`.
+            public typealias CountsPayload = [Components.Schemas.ReactionSummary.CountsPayloadPayload]
+            /// Per emoji, most frequent first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/counts`.
+            public var counts: Components.Schemas.ReactionSummary.CountsPayload
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/PeoplePayload`.
+            public struct PeoplePayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ReactionSummary/PeoplePayload/person`.
+                public var person: Components.Schemas.PersonRef
+                /// - Remark: Generated from `#/components/schemas/ReactionSummary/PeoplePayload/emoji`.
+                public var emoji: Components.Schemas.PersonReaction
+                /// Creates a new `PeoplePayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - person:
+                ///   - emoji:
+                public init(
+                    person: Components.Schemas.PersonRef,
+                    emoji: Components.Schemas.PersonReaction
+                ) {
+                    self.person = person
+                    self.emoji = emoji
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case person
+                    case emoji
+                }
+            }
+            /// Up to 3 people, the caller's contacts first, newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/people`.
+            public typealias PeoplePayload = [Components.Schemas.ReactionSummary.PeoplePayloadPayload]
+            /// Up to 3 people, the caller's contacts first, newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/people`.
+            public var people: Components.Schemas.ReactionSummary.PeoplePayload
+            /// Up to 3 frames, newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/frames`.
+            public var frames: [Components.Schemas.FrameReactionRef]
+            /// - Remark: Generated from `#/components/schemas/ReactionSummary/mine`.
+            public var mine: Components.Schemas.PersonReaction?
+            /// Creates a new `ReactionSummary`.
+            ///
+            /// - Parameters:
+            ///   - total:
+            ///   - counts: Per emoji, most frequent first.
+            ///   - people: Up to 3 people, the caller's contacts first, newest first.
+            ///   - frames: Up to 3 frames, newest first.
+            ///   - mine:
+            public init(
+                total: Swift.Int,
+                counts: Components.Schemas.ReactionSummary.CountsPayload,
+                people: Components.Schemas.ReactionSummary.PeoplePayload,
+                frames: [Components.Schemas.FrameReactionRef],
+                mine: Components.Schemas.PersonReaction? = nil
+            ) {
+                self.total = total
+                self.counts = counts
+                self.people = people
+                self.frames = frames
+                self.mine = mine
+            }
+            public enum CodingKeys: String, CodingKey {
+                case total
+                case counts
+                case people
+                case frames
+                case mine
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FrameReactionRef`.
+        public struct FrameReactionRef: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FrameReactionRef/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FrameReactionRef/frame_name`.
+            public var frameName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FrameReactionRef/reaction`.
+            public var reaction: Components.Schemas.Reaction
+            /// The item the frame reacted to (posts with several items).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameReactionRef/item_id`.
+            public var itemId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/FrameReactionRef/at`.
+            public var at: Foundation.Date?
+            /// Creates a new `FrameReactionRef`.
+            ///
+            /// - Parameters:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - reaction:
+            ///   - itemId: The item the frame reacted to (posts with several items).
+            ///   - at:
+            public init(
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                reaction: Components.Schemas.Reaction,
+                itemId: Components.Schemas.Id? = nil,
+                at: Foundation.Date? = nil
+            ) {
+                self.frameId = frameId
+                self.frameName = frameName
+                self.reaction = reaction
+                self.itemId = itemId
+                self.at = at
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case reaction
+                case itemId = "item_id"
+                case at
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ReactionList`.
+        public struct ReactionList: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReactionList/PeoplePayload`.
+            public struct PeoplePayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ReactionList/PeoplePayload/person`.
+                public var person: Components.Schemas.PersonRef
+                /// - Remark: Generated from `#/components/schemas/ReactionList/PeoplePayload/emoji`.
+                public var emoji: Components.Schemas.PersonReaction
+                /// - Remark: Generated from `#/components/schemas/ReactionList/PeoplePayload/at`.
+                public var at: Foundation.Date
+                /// Creates a new `PeoplePayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - person:
+                ///   - emoji:
+                ///   - at:
+                public init(
+                    person: Components.Schemas.PersonRef,
+                    emoji: Components.Schemas.PersonReaction,
+                    at: Foundation.Date
+                ) {
+                    self.person = person
+                    self.emoji = emoji
+                    self.at = at
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case person
+                    case emoji
+                    case at
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/ReactionList/people`.
+            public typealias PeoplePayload = [Components.Schemas.ReactionList.PeoplePayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/ReactionList/people`.
+            public var people: Components.Schemas.ReactionList.PeoplePayload
+            /// - Remark: Generated from `#/components/schemas/ReactionList/frames`.
+            public var frames: [Components.Schemas.FrameReactionRef]
+            /// Creates a new `ReactionList`.
+            ///
+            /// - Parameters:
+            ///   - people:
+            ///   - frames:
+            public init(
+                people: Components.Schemas.ReactionList.PeoplePayload,
+                frames: [Components.Schemas.FrameReactionRef]
+            ) {
+                self.people = people
+                self.frames = frames
+            }
+            public enum CodingKeys: String, CodingKey {
+                case people
+                case frames
+            }
+        }
+        /// A mention inside a comment or message `body`: `start` and `length` are in UTF-16 code units (what JavaScript,
+        /// Kotlin and Swift's `utf16` view count), covering the "@Name" text. Spans must lie inside the body and must not
+        /// overlap; at most `limits.max_mentions` per text.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Mention`.
+        public struct Mention: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Mention/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Mention/start`.
+            public var start: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/Mention/length`.
+            public var length: Swift.Int
+            /// Creates a new `Mention`.
+            ///
+            /// - Parameters:
+            ///   - userId:
+            ///   - start:
+            ///   - length:
+            public init(
+                userId: Components.Schemas.Id,
+                start: Swift.Int,
+                length: Swift.Int
+            ) {
+                self.userId = userId
+                self.start = start
+                self.length = length
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userId = "user_id"
+                case start
+                case length
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ThreadState`.
+        @frozen public enum ThreadState: String, Codable, Hashable, Sendable, CaseIterable {
+            case open = "open"
+            case closed = "closed"
+        }
+        /// `person`: a comment or reply. `frame`: a read-only frame entry ("Oma's frame loved this", "Oma's frame: Call me!").
+        ///
+        /// - Remark: Generated from `#/components/schemas/CommentKind`.
+        @frozen public enum CommentKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case person = "person"
+            case frame = "frame"
+        }
+        /// - Remark: Generated from `#/components/schemas/Comment`.
+        public struct Comment: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Comment/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Comment/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Comment/kind`.
+            public var kind: Components.Schemas.CommentKind
+            /// Replies only: the top-level comment (one level of replies).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/parent_id`.
+            public var parentId: Components.Schemas.Id?
+            /// `person` comments; null for frame entries.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/author`.
+            public var author: Components.Schemas.PersonRef?
+            /// A reply to a reply quotes that person ("@Ben"), while hanging under the same top comment.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/quoted`.
+            public var quoted: Components.Schemas.PersonRef?
+            /// Frame entries only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/frame`.
+            public struct FramePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Comment/frame/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Comment/frame/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/Comment/frame/item_id`.
+                public var itemId: Components.Schemas.Id?
+                /// - Remark: Generated from `#/components/schemas/Comment/frame/reaction`.
+                public var reaction: Components.Schemas.Reaction?
+                /// - Remark: Generated from `#/components/schemas/Comment/frame/reply`.
+                public var reply: Components.Schemas.ReplyPreset?
+                /// Creates a new `FramePayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - itemId:
+                ///   - reaction:
+                ///   - reply:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    itemId: Components.Schemas.Id? = nil,
+                    reaction: Components.Schemas.Reaction? = nil,
+                    reply: Components.Schemas.ReplyPreset? = nil
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.itemId = itemId
+                    self.reaction = reaction
+                    self.reply = reply
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case itemId = "item_id"
+                    case reaction
+                    case reply
+                }
+            }
+            /// Frame entries only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/frame`.
+            public var frame: Components.Schemas.Comment.FramePayload?
+            /// Null for frame entries and tombstones.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/body`.
+            public var body: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Comment/mentions`.
+            public var mentions: [Components.Schemas.Mention]?
+            /// - Remark: Generated from `#/components/schemas/Comment/reactions`.
+            public var reactions: Components.Schemas.ReactionSummary?
+            /// Top-level comments only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/reply_count`.
+            public var replyCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/Comment/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/Comment/edited_at`.
+            public var editedAt: Foundation.Date?
+            /// Deleted by its author but kept as a tombstone because it has replies ("Comment deleted").
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/deleted`.
+            public var deleted: Swift.Bool?
+            /// Only ever true for the author, who still sees it ("Removed by a family admin"); everyone else no longer gets it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Comment/removed_by_admin`.
+            public var removedByAdmin: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/Comment/can_edit`.
+            public var canEdit: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/Comment/can_delete`.
+            public var canDelete: Swift.Bool?
+            /// Creates a new `Comment`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - postId:
+            ///   - kind:
+            ///   - parentId: Replies only: the top-level comment (one level of replies).
+            ///   - author: `person` comments; null for frame entries.
+            ///   - quoted: A reply to a reply quotes that person ("@Ben"), while hanging under the same top comment.
+            ///   - frame: Frame entries only.
+            ///   - body: Null for frame entries and tombstones.
+            ///   - mentions:
+            ///   - reactions:
+            ///   - replyCount: Top-level comments only.
+            ///   - createdAt:
+            ///   - editedAt:
+            ///   - deleted: Deleted by its author but kept as a tombstone because it has replies ("Comment deleted").
+            ///   - removedByAdmin: Only ever true for the author, who still sees it ("Removed by a family admin"); everyone else no longer gets it.
+            ///   - canEdit:
+            ///   - canDelete:
+            public init(
+                id: Components.Schemas.Id,
+                postId: Components.Schemas.Id,
+                kind: Components.Schemas.CommentKind,
+                parentId: Components.Schemas.Id? = nil,
+                author: Components.Schemas.PersonRef? = nil,
+                quoted: Components.Schemas.PersonRef? = nil,
+                frame: Components.Schemas.Comment.FramePayload? = nil,
+                body: Swift.String? = nil,
+                mentions: [Components.Schemas.Mention]? = nil,
+                reactions: Components.Schemas.ReactionSummary? = nil,
+                replyCount: Swift.Int? = nil,
+                createdAt: Foundation.Date,
+                editedAt: Foundation.Date? = nil,
+                deleted: Swift.Bool? = nil,
+                removedByAdmin: Swift.Bool? = nil,
+                canEdit: Swift.Bool? = nil,
+                canDelete: Swift.Bool? = nil
+            ) {
+                self.id = id
+                self.postId = postId
+                self.kind = kind
+                self.parentId = parentId
+                self.author = author
+                self.quoted = quoted
+                self.frame = frame
+                self.body = body
+                self.mentions = mentions
+                self.reactions = reactions
+                self.replyCount = replyCount
+                self.createdAt = createdAt
+                self.editedAt = editedAt
+                self.deleted = deleted
+                self.removedByAdmin = removedByAdmin
+                self.canEdit = canEdit
+                self.canDelete = canDelete
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case postId = "post_id"
+                case kind
+                case parentId = "parent_id"
+                case author
+                case quoted
+                case frame
+                case body
+                case mentions
+                case reactions
+                case replyCount = "reply_count"
+                case createdAt = "created_at"
+                case editedAt = "edited_at"
+                case deleted
+                case removedByAdmin = "removed_by_admin"
+                case canEdit = "can_edit"
+                case canDelete = "can_delete"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CommentCreate`.
+        public struct CommentCreate: Codable, Hashable, Sendable {
+            /// Trimmed; at most `limits.max_comment_chars` characters (Unicode code points).
+            ///
+            /// - Remark: Generated from `#/components/schemas/CommentCreate/body`.
+            public var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CommentCreate/parent_id`.
+            public var parentId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/CommentCreate/quoted_user_id`.
+            public var quotedUserId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/CommentCreate/mentions`.
+            public var mentions: [Components.Schemas.Mention]?
+            /// Creates a new `CommentCreate`.
+            ///
+            /// - Parameters:
+            ///   - body: Trimmed; at most `limits.max_comment_chars` characters (Unicode code points).
+            ///   - parentId:
+            ///   - quotedUserId:
+            ///   - mentions:
+            public init(
+                body: Swift.String,
+                parentId: Components.Schemas.Id? = nil,
+                quotedUserId: Components.Schemas.Id? = nil,
+                mentions: [Components.Schemas.Mention]? = nil
+            ) {
+                self.body = body
+                self.parentId = parentId
+                self.quotedUserId = quotedUserId
+                self.mentions = mentions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case body
+                case parentId = "parent_id"
+                case quotedUserId = "quoted_user_id"
+                case mentions
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CommentUpdate`.
+        public struct CommentUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CommentUpdate/body`.
+            public var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CommentUpdate/mentions`.
+            public var mentions: [Components.Schemas.Mention]?
+            /// Creates a new `CommentUpdate`.
+            ///
+            /// - Parameters:
+            ///   - body:
+            ///   - mentions:
+            public init(
+                body: Swift.String,
+                mentions: [Components.Schemas.Mention]? = nil
+            ) {
+                self.body = body
+                self.mentions = mentions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case body
+                case mentions
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CommentPage`.
+        public struct CommentPage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CommentPage/comments`.
+            public var comments: [Components.Schemas.Comment]
+            /// More comments after the last one; pass its id as `after`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CommentPage/has_more`.
+            public var hasMore: Swift.Bool
+            /// Creates a new `CommentPage`.
+            ///
+            /// - Parameters:
+            ///   - comments:
+            ///   - hasMore: More comments after the last one; pass its id as `after`.
+            public init(
+                comments: [Components.Schemas.Comment],
+                hasMore: Swift.Bool
+            ) {
+                self.comments = comments
+                self.hasMore = hasMore
+            }
+            public enum CodingKeys: String, CodingKey {
+                case comments
+                case hasMore = "has_more"
+            }
+        }
+        /// The thread of a post as shown on the timeline.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ThreadSummary`.
+        public struct ThreadSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/state`.
+            public var state: Components.Schemas.ThreadState
+            /// Person comments and replies
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/comment_count`.
+            public var commentCount: Swift.Int
+            /// The two newest person comments (replies included), oldest of the two first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/latest_comments`.
+            public var latestComments: [Components.Schemas.Comment]
+            /// Person comments after the caller's `read_up_to` (all of them if never read)
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/unread_count`.
+            public var unreadCount: Swift.Int?
+            /// Unread comments that mention the caller or reply to them.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/unread_mentions`.
+            public var unreadMentions: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/read_up_to`.
+            public var readUpTo: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/muted`.
+            public var muted: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/reactions`.
+            public var reactions: Components.Schemas.ReactionSummary
+            /// False when closed or the caller may only read.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/can_comment`.
+            public var canComment: Swift.Bool?
+            /// May close the thread and remove others' comments.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThreadSummary/can_moderate`.
+            public var canModerate: Swift.Bool?
+            /// Creates a new `ThreadSummary`.
+            ///
+            /// - Parameters:
+            ///   - postId:
+            ///   - state:
+            ///   - commentCount: Person comments and replies
+            ///   - latestComments: The two newest person comments (replies included), oldest of the two first.
+            ///   - unreadCount: Person comments after the caller's `read_up_to` (all of them if never read)
+            ///   - unreadMentions: Unread comments that mention the caller or reply to them.
+            ///   - readUpTo:
+            ///   - muted:
+            ///   - reactions:
+            ///   - canComment: False when closed or the caller may only read.
+            ///   - canModerate: May close the thread and remove others' comments.
+            public init(
+                postId: Components.Schemas.Id,
+                state: Components.Schemas.ThreadState,
+                commentCount: Swift.Int,
+                latestComments: [Components.Schemas.Comment],
+                unreadCount: Swift.Int? = nil,
+                unreadMentions: Swift.Int? = nil,
+                readUpTo: Components.Schemas.Id? = nil,
+                muted: Swift.Bool? = nil,
+                reactions: Components.Schemas.ReactionSummary,
+                canComment: Swift.Bool? = nil,
+                canModerate: Swift.Bool? = nil
+            ) {
+                self.postId = postId
+                self.state = state
+                self.commentCount = commentCount
+                self.latestComments = latestComments
+                self.unreadCount = unreadCount
+                self.unreadMentions = unreadMentions
+                self.readUpTo = readUpTo
+                self.muted = muted
+                self.reactions = reactions
+                self.canComment = canComment
+                self.canModerate = canModerate
+            }
+            public enum CodingKeys: String, CodingKey {
+                case postId = "post_id"
+                case state
+                case commentCount = "comment_count"
+                case latestComments = "latest_comments"
+                case unreadCount = "unread_count"
+                case unreadMentions = "unread_mentions"
+                case readUpTo = "read_up_to"
+                case muted
+                case reactions
+                case canComment = "can_comment"
+                case canModerate = "can_moderate"
+            }
+        }
+        /// `feed`: a post in a family (feed). `frame`: a direct send to one frame (one per send and frame).
+        ///
+        /// - Remark: Generated from `#/components/schemas/PostKind`.
+        @frozen public enum PostKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case feed = "feed"
+            case frame = "frame"
+        }
+        /// The line under a post: "Seen on 4 frames · ❤ from Oma's frame". `frames`/`seen` follow the post's receipts
+        /// (`FeedReceiptSummary`); visible to the poster, the feed's owner/admins, and every member when the feed has
+        /// `members_see_receipts` (frame posts: everyone who sees the post). Otherwise null on `TimelinePost.seen`.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PostSeen`.
+        public struct PostSeen: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PostSeen/frames`.
+            public var frames: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/PostSeen/seen`.
+            public var seen: Swift.Int
+            /// Creates a new `PostSeen`.
+            ///
+            /// - Parameters:
+            ///   - frames:
+            ///   - seen:
+            public init(
+                frames: Swift.Int,
+                seen: Swift.Int
+            ) {
+                self.frames = frames
+                self.seen = seen
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frames
+                case seen
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TimelinePost`.
+        public struct TimelinePost: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/kind`.
+            public var kind: Components.Schemas.PostKind
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// The family
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/feed_name`.
+            public var feedName: Swift.String?
+            /// Feed posts shared with one circle only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/circle_id`.
+            public var circleId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/circle_name`.
+            public var circleName: Swift.String?
+            /// `frame` posts: the frame ("To Oma's frame").
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/frame_name`.
+            public var frameName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/poster`.
+            public var poster: Components.Schemas.PersonRef
+            /// The poster's send (own posts only).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/send_id`.
+            public var sendId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/via`.
+            public var via: Components.Schemas.ItemVia?
+            /// Live items in send order (for frame posts
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/items`.
+            public var items: [Components.Schemas.Item]
+            /// The weekly prompt this post answers; clients group consecutive answers ("6 answers to …").
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/prompt`.
+            public struct PromptPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/TimelinePost/prompt/id`.
+                public var id: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/TimelinePost/prompt/title`.
+                public var title: Swift.String
+                /// Creates a new `PromptPayload`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - title:
+                public init(
+                    id: Components.Schemas.Id,
+                    title: Swift.String
+                ) {
+                    self.id = id
+                    self.title = title
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case id
+                    case title
+                }
+            }
+            /// The weekly prompt this post answers; clients group consecutive answers ("6 answers to …").
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/prompt`.
+            public var prompt: Components.Schemas.TimelinePost.PromptPayload?
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/seen`.
+            public var seen: Components.Schemas.PostSeen?
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/thread`.
+            public var thread: Components.Schemas.ThreadSummary
+            /// The poster, or a feed owner/admin (`removeFeedPost`); frame posts: the sender (`unsend` per frame is not offered; it removes the whole send).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePost/can_remove`.
+            public var canRemove: Swift.Bool?
+            /// Creates a new `TimelinePost`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - kind:
+            ///   - feedId:
+            ///   - feedName: The family
+            ///   - circleId: Feed posts shared with one circle only.
+            ///   - circleName:
+            ///   - frameId: `frame` posts: the frame ("To Oma's frame").
+            ///   - frameName:
+            ///   - poster:
+            ///   - sendId: The poster's send (own posts only).
+            ///   - createdAt:
+            ///   - via:
+            ///   - items: Live items in send order (for frame posts
+            ///   - prompt: The weekly prompt this post answers; clients group consecutive answers ("6 answers to …").
+            ///   - seen:
+            ///   - thread:
+            ///   - canRemove: The poster, or a feed owner/admin (`removeFeedPost`); frame posts: the sender (`unsend` per frame is not offered; it removes the whole send).
+            public init(
+                id: Components.Schemas.Id,
+                kind: Components.Schemas.PostKind,
+                feedId: Components.Schemas.Id? = nil,
+                feedName: Swift.String? = nil,
+                circleId: Components.Schemas.Id? = nil,
+                circleName: Swift.String? = nil,
+                frameId: Components.Schemas.Id? = nil,
+                frameName: Swift.String? = nil,
+                poster: Components.Schemas.PersonRef,
+                sendId: Components.Schemas.Id? = nil,
+                createdAt: Foundation.Date,
+                via: Components.Schemas.ItemVia? = nil,
+                items: [Components.Schemas.Item],
+                prompt: Components.Schemas.TimelinePost.PromptPayload? = nil,
+                seen: Components.Schemas.PostSeen? = nil,
+                thread: Components.Schemas.ThreadSummary,
+                canRemove: Swift.Bool? = nil
+            ) {
+                self.id = id
+                self.kind = kind
+                self.feedId = feedId
+                self.feedName = feedName
+                self.circleId = circleId
+                self.circleName = circleName
+                self.frameId = frameId
+                self.frameName = frameName
+                self.poster = poster
+                self.sendId = sendId
+                self.createdAt = createdAt
+                self.via = via
+                self.items = items
+                self.prompt = prompt
+                self.seen = seen
+                self.thread = thread
+                self.canRemove = canRemove
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case kind
+                case feedId = "feed_id"
+                case feedName = "feed_name"
+                case circleId = "circle_id"
+                case circleName = "circle_name"
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case poster
+                case sendId = "send_id"
+                case createdAt = "created_at"
+                case via
+                case items
+                case prompt
+                case seen
+                case thread
+                case canRemove = "can_remove"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TimelinePage`.
+        public struct TimelinePage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TimelinePage/posts`.
+            public var posts: [Components.Schemas.TimelinePost]
+            /// Pass as `before` for the next (older) page; null at the end.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimelinePage/next_before`.
+            public var nextBefore: Swift.String?
+            /// Creates a new `TimelinePage`.
+            ///
+            /// - Parameters:
+            ///   - posts:
+            ///   - nextBefore: Pass as `before` for the next (older) page; null at the end.
+            public init(
+                posts: [Components.Schemas.TimelinePost],
+                nextBefore: Swift.String? = nil
+            ) {
+                self.posts = posts
+                self.nextBefore = nextBefore
+            }
+            public enum CodingKeys: String, CodingKey {
+                case posts
+                case nextBefore = "next_before"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CircleRole`.
+        @frozen public enum CircleRole: String, Codable, Hashable, Sendable, CaseIterable {
+            case admin = "admin"
+            case member = "member"
+        }
+        /// - Remark: Generated from `#/components/schemas/CircleMember`.
+        public struct CircleMember: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CircleMember/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CircleMember/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CircleMember/avatar_url`.
+            public var avatarUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CircleMember/role`.
+            public var role: Components.Schemas.CircleRole
+            /// - Remark: Generated from `#/components/schemas/CircleMember/added_at`.
+            public var addedAt: Foundation.Date?
+            /// Creates a new `CircleMember`.
+            ///
+            /// - Parameters:
+            ///   - userId:
+            ///   - displayName:
+            ///   - avatarUrl:
+            ///   - role:
+            ///   - addedAt:
+            public init(
+                userId: Components.Schemas.Id,
+                displayName: Swift.String,
+                avatarUrl: Swift.String? = nil,
+                role: Components.Schemas.CircleRole,
+                addedAt: Foundation.Date? = nil
+            ) {
+                self.userId = userId
+                self.displayName = displayName
+                self.avatarUrl = avatarUrl
+                self.role = role
+                self.addedAt = addedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userId = "user_id"
+                case displayName = "display_name"
+                case avatarUrl = "avatar_url"
+                case role
+                case addedAt = "added_at"
+            }
+        }
+        /// A smaller group inside a family ("Anna's household", "The cousins"): its own chat (`conversation_id`) and an
+        /// audience for posts. Circle posts reach the family's subscribed frames that have a manager (owner, admin or
+        /// `change_settings`) in the circle, plus the frames in `frame_ids` (README §5.18).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Circle`.
+        public struct Circle: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Circle/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Circle/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Circle/name`.
+            public var name: Swift.String
+            /// Null when the caller is a feed owner/admin who is not in the circle.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Circle/my_role`.
+            public var myRole: Components.Schemas.CircleRole?
+            /// - Remark: Generated from `#/components/schemas/Circle/members`.
+            public var members: [Components.Schemas.CircleMember]
+            /// - Remark: Generated from `#/components/schemas/Circle/member_count`.
+            public var memberCount: Swift.Int
+            /// Extra frames (subscribed to the family) the circle's posts reach.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Circle/frame_ids`.
+            public var frameIds: [Components.Schemas.Id]?
+            /// - Remark: Generated from `#/components/schemas/Circle/FramesReachedPayload`.
+            public struct FramesReachedPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Circle/FramesReachedPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Circle/FramesReachedPayload/frame_name`.
+                public var frameName: Swift.String
+                /// Creates a new `FramesReachedPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                }
+            }
+            /// Every subscribed frame its posts reach now (managers in the circle, plus `frame_ids`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Circle/frames_reached`.
+            public typealias FramesReachedPayload = [Components.Schemas.Circle.FramesReachedPayloadPayload]
+            /// Every subscribed frame its posts reach now (managers in the circle, plus `frame_ids`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Circle/frames_reached`.
+            public var framesReached: Components.Schemas.Circle.FramesReachedPayload?
+            /// The circle's chat (members only).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Circle/conversation_id`.
+            public var conversationId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/Circle/created_at`.
+            public var createdAt: Foundation.Date?
+            /// Creates a new `Circle`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - feedId:
+            ///   - name:
+            ///   - myRole: Null when the caller is a feed owner/admin who is not in the circle.
+            ///   - members:
+            ///   - memberCount:
+            ///   - frameIds: Extra frames (subscribed to the family) the circle's posts reach.
+            ///   - framesReached: Every subscribed frame its posts reach now (managers in the circle, plus `frame_ids`).
+            ///   - conversationId: The circle's chat (members only).
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                feedId: Components.Schemas.Id,
+                name: Swift.String,
+                myRole: Components.Schemas.CircleRole? = nil,
+                members: [Components.Schemas.CircleMember],
+                memberCount: Swift.Int,
+                frameIds: [Components.Schemas.Id]? = nil,
+                framesReached: Components.Schemas.Circle.FramesReachedPayload? = nil,
+                conversationId: Components.Schemas.Id? = nil,
+                createdAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.feedId = feedId
+                self.name = name
+                self.myRole = myRole
+                self.members = members
+                self.memberCount = memberCount
+                self.frameIds = frameIds
+                self.framesReached = framesReached
+                self.conversationId = conversationId
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case feedId = "feed_id"
+                case name
+                case myRole = "my_role"
+                case members
+                case memberCount = "member_count"
+                case frameIds = "frame_ids"
+                case framesReached = "frames_reached"
+                case conversationId = "conversation_id"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CircleCreate`.
+        public struct CircleCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CircleCreate/name`.
+            public var name: Swift.String
+            /// Feed members besides the caller.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CircleCreate/member_ids`.
+            public var memberIds: [Components.Schemas.Id]
+            /// - Remark: Generated from `#/components/schemas/CircleCreate/frame_ids`.
+            public var frameIds: [Components.Schemas.Id]?
+            /// Creates a new `CircleCreate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - memberIds: Feed members besides the caller.
+            ///   - frameIds:
+            public init(
+                name: Swift.String,
+                memberIds: [Components.Schemas.Id],
+                frameIds: [Components.Schemas.Id]? = nil
+            ) {
+                self.name = name
+                self.memberIds = memberIds
+                self.frameIds = frameIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case memberIds = "member_ids"
+                case frameIds = "frame_ids"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CircleUpdate`.
+        public struct CircleUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CircleUpdate/name`.
+            public var name: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CircleUpdate/frame_ids`.
+            public var frameIds: [Components.Schemas.Id]?
+            /// Creates a new `CircleUpdate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - frameIds:
+            public init(
+                name: Swift.String? = nil,
+                frameIds: [Components.Schemas.Id]? = nil
+            ) {
+                self.name = name
+                self.frameIds = frameIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case frameIds = "frame_ids"
+            }
+        }
+        /// `direct`: two people, one per pair. `group`: 3–100 people with a name. `family`: one per feed, its members always the feed's members. `circle`: one per circle, its members the circle's.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ConversationKind`.
+        @frozen public enum ConversationKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case direct = "direct"
+            case group = "group"
+            case family = "family"
+            case circle = "circle"
+        }
+        /// Groups only; family, circle and direct members are always `member` (family moderation follows feed roles).
+        ///
+        /// - Remark: Generated from `#/components/schemas/ConversationRole`.
+        @frozen public enum ConversationRole: String, Codable, Hashable, Sendable, CaseIterable {
+            case admin = "admin"
+            case member = "member"
+        }
+        /// - Remark: Generated from `#/components/schemas/ConversationMember`.
+        public struct ConversationMember: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ConversationMember/person`.
+            public var person: Components.Schemas.PersonRef
+            /// - Remark: Generated from `#/components/schemas/ConversationMember/role`.
+            public var role: Components.Schemas.ConversationRole
+            /// - Remark: Generated from `#/components/schemas/ConversationMember/joined_at`.
+            public var joinedAt: Foundation.Date?
+            /// Only when read receipts are shown in this conversation (`Conversation.read_receipts`) and this member shows them too; null otherwise.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ConversationMember/last_read_message_id`.
+            public var lastReadMessageId: Components.Schemas.Id?
+            /// Creates a new `ConversationMember`.
+            ///
+            /// - Parameters:
+            ///   - person:
+            ///   - role:
+            ///   - joinedAt:
+            ///   - lastReadMessageId: Only when read receipts are shown in this conversation (`Conversation.read_receipts`) and this member shows them too; null otherwise.
+            public init(
+                person: Components.Schemas.PersonRef,
+                role: Components.Schemas.ConversationRole,
+                joinedAt: Foundation.Date? = nil,
+                lastReadMessageId: Components.Schemas.Id? = nil
+            ) {
+                self.person = person
+                self.role = role
+                self.joinedAt = joinedAt
+                self.lastReadMessageId = lastReadMessageId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case person
+                case role
+                case joinedAt = "joined_at"
+                case lastReadMessageId = "last_read_message_id"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MuteFor`.
+        @frozen public enum MuteFor: String, Codable, Hashable, Sendable, CaseIterable {
+            case off = "off"
+            case _1h = "1h"
+            case _8h = "8h"
+            case _1w = "1w"
+            case always = "always"
+        }
+        /// - Remark: Generated from `#/components/schemas/Conversation`.
+        public struct Conversation: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Conversation/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Conversation/kind`.
+            public var kind: Components.Schemas.ConversationKind
+            /// Group name; the family's or circle's name; for `direct`, the other person's display name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/name`.
+            public var name: Swift.String
+            /// Group photo; the family's cover; for `direct`, the other person's avatar.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/photo_url`.
+            public var photoUrl: Swift.String?
+            /// `family` and `circle`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/Conversation/circle_id`.
+            public var circleId: Components.Schemas.Id?
+            /// `direct` only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/other`.
+            public var other: Components.Schemas.PersonRef?
+            /// Every member (conversations are at most 100 people; family chats can be larger and list everyone).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/members`.
+            public var members: [Components.Schemas.ConversationMember]?
+            /// - Remark: Generated from `#/components/schemas/Conversation/member_count`.
+            public var memberCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/Conversation/my_role`.
+            public var myRole: Components.Schemas.ConversationRole?
+            /// Messages after the caller's read position
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/unread_count`.
+            public var unreadCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/Conversation/unread_mentions`.
+            public var unreadMentions: Swift.Int?
+            /// The caller's own read position.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/read_up_to`.
+            public var readUpTo: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/Conversation/last_message`.
+            public var lastMessage: Components.Schemas.Message?
+            /// Last message
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/last_activity_at`.
+            public var lastActivityAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/Conversation/muted`.
+            public var muted: Swift.Bool
+            /// Null with `muted: true` means always.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/muted_until`.
+            public var mutedUntil: Foundation.Date?
+            /// The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/archived`.
+            public var archived: Swift.Bool
+            /// No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/read_only`.
+            public var readOnly: Swift.Bool?
+            /// "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Conversation/read_receipts`.
+            public var readReceipts: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/Conversation/created_at`.
+            public var createdAt: Foundation.Date?
+            /// Creates a new `Conversation`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - kind:
+            ///   - name: Group name; the family's or circle's name; for `direct`, the other person's display name.
+            ///   - photoUrl: Group photo; the family's cover; for `direct`, the other person's avatar.
+            ///   - feedId: `family` and `circle`.
+            ///   - circleId:
+            ///   - other: `direct` only.
+            ///   - members: Every member (conversations are at most 100 people; family chats can be larger and list everyone).
+            ///   - memberCount:
+            ///   - myRole:
+            ///   - unreadCount: Messages after the caller's read position
+            ///   - unreadMentions:
+            ///   - readUpTo: The caller's own read position.
+            ///   - lastMessage:
+            ///   - lastActivityAt: Last message
+            ///   - muted:
+            ///   - mutedUntil: Null with `muted: true` means always.
+            ///   - archived: The caller archived it (a new message un-archives it), or its family or circle was deleted (read-only).
+            ///   - readOnly: No sending: the family or circle was deleted, or (direct) the other account is gone or blocked the caller.
+            ///   - readReceipts: "Seen" is shown here: direct chats and groups of up to 10 people, when the caller has `show_read_receipts` on.
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                kind: Components.Schemas.ConversationKind,
+                name: Swift.String,
+                photoUrl: Swift.String? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                circleId: Components.Schemas.Id? = nil,
+                other: Components.Schemas.PersonRef? = nil,
+                members: [Components.Schemas.ConversationMember]? = nil,
+                memberCount: Swift.Int,
+                myRole: Components.Schemas.ConversationRole? = nil,
+                unreadCount: Swift.Int,
+                unreadMentions: Swift.Int? = nil,
+                readUpTo: Components.Schemas.Id? = nil,
+                lastMessage: Components.Schemas.Message? = nil,
+                lastActivityAt: Foundation.Date,
+                muted: Swift.Bool,
+                mutedUntil: Foundation.Date? = nil,
+                archived: Swift.Bool,
+                readOnly: Swift.Bool? = nil,
+                readReceipts: Swift.Bool? = nil,
+                createdAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.kind = kind
+                self.name = name
+                self.photoUrl = photoUrl
+                self.feedId = feedId
+                self.circleId = circleId
+                self.other = other
+                self.members = members
+                self.memberCount = memberCount
+                self.myRole = myRole
+                self.unreadCount = unreadCount
+                self.unreadMentions = unreadMentions
+                self.readUpTo = readUpTo
+                self.lastMessage = lastMessage
+                self.lastActivityAt = lastActivityAt
+                self.muted = muted
+                self.mutedUntil = mutedUntil
+                self.archived = archived
+                self.readOnly = readOnly
+                self.readReceipts = readReceipts
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case kind
+                case name
+                case photoUrl = "photo_url"
+                case feedId = "feed_id"
+                case circleId = "circle_id"
+                case other
+                case members
+                case memberCount = "member_count"
+                case myRole = "my_role"
+                case unreadCount = "unread_count"
+                case unreadMentions = "unread_mentions"
+                case readUpTo = "read_up_to"
+                case lastMessage = "last_message"
+                case lastActivityAt = "last_activity_at"
+                case muted
+                case mutedUntil = "muted_until"
+                case archived
+                case readOnly = "read_only"
+                case readReceipts = "read_receipts"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ConversationCreate`.
+        public struct ConversationCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ConversationCreate/kind`.
+            @frozen public enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case direct = "direct"
+                case group = "group"
+            }
+            /// - Remark: Generated from `#/components/schemas/ConversationCreate/kind`.
+            public var kind: Components.Schemas.ConversationCreate.KindPayload
+            /// Other people (not the caller).
+            ///
+            /// - Remark: Generated from `#/components/schemas/ConversationCreate/member_ids`.
+            public var memberIds: [Components.Schemas.Id]
+            /// Required for groups.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ConversationCreate/name`.
+            public var name: Swift.String?
+            /// Creates a new `ConversationCreate`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - memberIds: Other people (not the caller).
+            ///   - name: Required for groups.
+            public init(
+                kind: Components.Schemas.ConversationCreate.KindPayload,
+                memberIds: [Components.Schemas.Id],
+                name: Swift.String? = nil
+            ) {
+                self.kind = kind
+                self.memberIds = memberIds
+                self.name = name
+            }
+            public enum CodingKeys: String, CodingKey {
+                case kind
+                case memberIds = "member_ids"
+                case name
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ConversationUpdate`.
+        public struct ConversationUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ConversationUpdate/name`.
+            public var name: Swift.String?
+            /// Creates a new `ConversationUpdate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            public init(name: Swift.String? = nil) {
+                self.name = name
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ConversationPreferencesUpdate`.
+        public struct ConversationPreferencesUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ConversationPreferencesUpdate/mute`.
+            public var mute: Components.Schemas.MuteFor?
+            /// - Remark: Generated from `#/components/schemas/ConversationPreferencesUpdate/archived`.
+            public var archived: Swift.Bool?
+            /// Creates a new `ConversationPreferencesUpdate`.
+            ///
+            /// - Parameters:
+            ///   - mute:
+            ///   - archived:
+            public init(
+                mute: Components.Schemas.MuteFor? = nil,
+                archived: Swift.Bool? = nil
+            ) {
+                self.mute = mute
+                self.archived = archived
+            }
+            public enum CodingKeys: String, CodingKey {
+                case mute
+                case archived
+            }
+        }
+        /// `system`: posted by kinframe (put on a frame, streak milestone, monthly recap, weekly prompt, member changes); no author, can be reacted to, can't be edited.
+        ///
+        /// - Remark: Generated from `#/components/schemas/MessageKind`.
+        @frozen public enum MessageKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case person = "person"
+            case system = "system"
+        }
+        /// One photo or video, as in `SendCreate.items`.
+        ///
+        /// - Remark: Generated from `#/components/schemas/MessageItemCreate`.
+        public struct MessageItemCreate: Codable, Hashable, Sendable {
+            /// tus upload id (or an existing item id of the caller's when the server reported a duplicate).
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/upload_id`.
+            public var uploadId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/caption`.
+            public var caption: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/captured_at`.
+            public var capturedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/trim`.
+            public struct TrimPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/MessageItemCreate/trim/start_ms`.
+                public var startMs: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/MessageItemCreate/trim/end_ms`.
+                public var endMs: Swift.Int?
+                /// Creates a new `TrimPayload`.
+                ///
+                /// - Parameters:
+                ///   - startMs:
+                ///   - endMs:
+                public init(
+                    startMs: Swift.Int? = nil,
+                    endMs: Swift.Int? = nil
+                ) {
+                    self.startMs = startMs
+                    self.endMs = endMs
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case startMs = "start_ms"
+                    case endMs = "end_ms"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/trim`.
+            public var trim: Components.Schemas.MessageItemCreate.TrimPayload?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/include_audio`.
+            public var includeAudio: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/width`.
+            public var width: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/height`.
+            public var height: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/duration_ms`.
+            public var durationMs: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/live_video_upload_id`.
+            public var liveVideoUploadId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/MessageItemCreate/live`.
+            public var live: Swift.Bool?
+            /// Creates a new `MessageItemCreate`.
+            ///
+            /// - Parameters:
+            ///   - uploadId: tus upload id (or an existing item id of the caller's when the server reported a duplicate).
+            ///   - caption:
+            ///   - capturedAt:
+            ///   - trim:
+            ///   - includeAudio:
+            ///   - width:
+            ///   - height:
+            ///   - durationMs:
+            ///   - liveVideoUploadId:
+            ///   - live:
+            public init(
+                uploadId: Swift.String,
+                caption: Swift.String? = nil,
+                capturedAt: Foundation.Date? = nil,
+                trim: Components.Schemas.MessageItemCreate.TrimPayload? = nil,
+                includeAudio: Swift.Bool? = nil,
+                width: Swift.Int? = nil,
+                height: Swift.Int? = nil,
+                durationMs: Swift.Int? = nil,
+                liveVideoUploadId: Swift.String? = nil,
+                live: Swift.Bool? = nil
+            ) {
+                self.uploadId = uploadId
+                self.caption = caption
+                self.capturedAt = capturedAt
+                self.trim = trim
+                self.includeAudio = includeAudio
+                self.width = width
+                self.height = height
+                self.durationMs = durationMs
+                self.liveVideoUploadId = liveVideoUploadId
+                self.live = live
+            }
+            public enum CodingKeys: String, CodingKey {
+                case uploadId = "upload_id"
+                case caption
+                case capturedAt = "captured_at"
+                case trim
+                case includeAudio = "include_audio"
+                case width
+                case height
+                case durationMs = "duration_ms"
+                case liveVideoUploadId = "live_video_upload_id"
+                case live
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MessageCreate`.
+        public struct MessageCreate: Codable, Hashable, Sendable {
+            /// Client-generated id (e.g. a UUID) for the optimistic bubble; echoed back, and a retry with the same one returns the first message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/client_id`.
+            public var clientId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/body`.
+            public var body: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/mentions`.
+            public var mentions: [Components.Schemas.Mention]?
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/items`.
+            public var items: [Components.Schemas.MessageItemCreate]?
+            /// A voice message (README §5.19); not together with `items`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/voice`.
+            public struct VoicePayload: Codable, Hashable, Sendable {
+                /// The tus upload of the recording: AAC in MP4 (`audio/mp4`, `.m4a`) or Opus in WebM or Ogg.
+                ///
+                /// - Remark: Generated from `#/components/schemas/MessageCreate/voice/upload_id`.
+                public var uploadId: Swift.String
+                /// What the client recorded; the server measures it itself.
+                ///
+                /// - Remark: Generated from `#/components/schemas/MessageCreate/voice/duration_ms`.
+                public var durationMs: Swift.Int?
+                /// Creates a new `VoicePayload`.
+                ///
+                /// - Parameters:
+                ///   - uploadId: The tus upload of the recording: AAC in MP4 (`audio/mp4`, `.m4a`) or Opus in WebM or Ogg.
+                ///   - durationMs: What the client recorded; the server measures it itself.
+                public init(
+                    uploadId: Swift.String,
+                    durationMs: Swift.Int? = nil
+                ) {
+                    self.uploadId = uploadId
+                    self.durationMs = durationMs
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case uploadId = "upload_id"
+                    case durationMs = "duration_ms"
+                }
+            }
+            /// A voice message (README §5.19); not together with `items`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/voice`.
+            public var voice: Components.Schemas.MessageCreate.VoicePayload?
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/reply_to_id`.
+            public var replyToId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/shared_post_id`.
+            public var sharedPostId: Components.Schemas.Id?
+            /// false: don't attach a preview of the body's first link.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageCreate/link_preview`.
+            public var linkPreview: Swift.Bool?
+            /// Creates a new `MessageCreate`.
+            ///
+            /// - Parameters:
+            ///   - clientId: Client-generated id (e.g. a UUID) for the optimistic bubble; echoed back, and a retry with the same one returns the first message.
+            ///   - body:
+            ///   - mentions:
+            ///   - items:
+            ///   - voice: A voice message (README §5.19); not together with `items`.
+            ///   - replyToId:
+            ///   - sharedPostId:
+            ///   - linkPreview: false: don't attach a preview of the body's first link.
+            public init(
+                clientId: Swift.String? = nil,
+                body: Swift.String? = nil,
+                mentions: [Components.Schemas.Mention]? = nil,
+                items: [Components.Schemas.MessageItemCreate]? = nil,
+                voice: Components.Schemas.MessageCreate.VoicePayload? = nil,
+                replyToId: Components.Schemas.Id? = nil,
+                sharedPostId: Components.Schemas.Id? = nil,
+                linkPreview: Swift.Bool? = nil
+            ) {
+                self.clientId = clientId
+                self.body = body
+                self.mentions = mentions
+                self.items = items
+                self.voice = voice
+                self.replyToId = replyToId
+                self.sharedPostId = sharedPostId
+                self.linkPreview = linkPreview
+            }
+            public enum CodingKeys: String, CodingKey {
+                case clientId = "client_id"
+                case body
+                case mentions
+                case items
+                case voice
+                case replyToId = "reply_to_id"
+                case sharedPostId = "shared_post_id"
+                case linkPreview = "link_preview"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MessageUpdate`.
+        public struct MessageUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MessageUpdate/body`.
+            public var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/MessageUpdate/mentions`.
+            public var mentions: [Components.Schemas.Mention]?
+            /// Creates a new `MessageUpdate`.
+            ///
+            /// - Parameters:
+            ///   - body:
+            ///   - mentions:
+            public init(
+                body: Swift.String,
+                mentions: [Components.Schemas.Mention]? = nil
+            ) {
+                self.body = body
+                self.mentions = mentions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case body
+                case mentions
+            }
+        }
+        /// The message replied to, as quoted above the reply.
+        ///
+        /// - Remark: Generated from `#/components/schemas/MessageQuote`.
+        public struct MessageQuote: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/author`.
+            public var author: Components.Schemas.PersonRef?
+            /// The first 200 characters of the body.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/excerpt`.
+            public var excerpt: Swift.String?
+            /// The first item's kind
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/media_kind`.
+            public var mediaKind: Components.Schemas.MediaKind?
+            /// The quoted message is a voice message ("🎤 Voice message").
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/voice`.
+            public var voice: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/thumb_url`.
+            public var thumbUrl: Swift.String?
+            /// The quoted message was deleted or isn't visible to the caller.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageQuote/deleted`.
+            public var deleted: Swift.Bool
+            /// Creates a new `MessageQuote`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - author:
+            ///   - excerpt: The first 200 characters of the body.
+            ///   - mediaKind: The first item's kind
+            ///   - voice: The quoted message is a voice message ("🎤 Voice message").
+            ///   - thumbUrl:
+            ///   - deleted: The quoted message was deleted or isn't visible to the caller.
+            public init(
+                id: Components.Schemas.Id,
+                author: Components.Schemas.PersonRef? = nil,
+                excerpt: Swift.String? = nil,
+                mediaKind: Components.Schemas.MediaKind? = nil,
+                voice: Swift.Bool? = nil,
+                thumbUrl: Swift.String? = nil,
+                deleted: Swift.Bool
+            ) {
+                self.id = id
+                self.author = author
+                self.excerpt = excerpt
+                self.mediaKind = mediaKind
+                self.voice = voice
+                self.thumbUrl = thumbUrl
+                self.deleted = deleted
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case author
+                case excerpt
+                case mediaKind = "media_kind"
+                case voice
+                case thumbUrl = "thumb_url"
+                case deleted
+            }
+        }
+        /// A post shared in a chat ("Share in chat").
+        ///
+        /// - Remark: Generated from `#/components/schemas/PostCard`.
+        public struct PostCard: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PostCard/post_id`.
+            public var postId: Components.Schemas.Id
+            /// False when the caller may not see the post (another family, a circle they are not in) or it was removed: show "This post isn't available".
+            ///
+            /// - Remark: Generated from `#/components/schemas/PostCard/available`.
+            public var available: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/PostCard/kind`.
+            public var kind: Components.Schemas.PostKind?
+            /// - Remark: Generated from `#/components/schemas/PostCard/feed_name`.
+            public var feedName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PostCard/frame_name`.
+            public var frameName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PostCard/poster`.
+            public var poster: Components.Schemas.PersonRef?
+            /// - Remark: Generated from `#/components/schemas/PostCard/created_at`.
+            public var createdAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/PostCard/item_count`.
+            public var itemCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PostCard/thumb_urls`.
+            public var thumbUrls: [Swift.String]?
+            /// - Remark: Generated from `#/components/schemas/PostCard/caption`.
+            public var caption: Swift.String?
+            /// Creates a new `PostCard`.
+            ///
+            /// - Parameters:
+            ///   - postId:
+            ///   - available: False when the caller may not see the post (another family, a circle they are not in) or it was removed: show "This post isn't available".
+            ///   - kind:
+            ///   - feedName:
+            ///   - frameName:
+            ///   - poster:
+            ///   - createdAt:
+            ///   - itemCount:
+            ///   - thumbUrls:
+            ///   - caption:
+            public init(
+                postId: Components.Schemas.Id,
+                available: Swift.Bool,
+                kind: Components.Schemas.PostKind? = nil,
+                feedName: Swift.String? = nil,
+                frameName: Swift.String? = nil,
+                poster: Components.Schemas.PersonRef? = nil,
+                createdAt: Foundation.Date? = nil,
+                itemCount: Swift.Int? = nil,
+                thumbUrls: [Swift.String]? = nil,
+                caption: Swift.String? = nil
+            ) {
+                self.postId = postId
+                self.available = available
+                self.kind = kind
+                self.feedName = feedName
+                self.frameName = frameName
+                self.poster = poster
+                self.createdAt = createdAt
+                self.itemCount = itemCount
+                self.thumbUrls = thumbUrls
+                self.caption = caption
+            }
+            public enum CodingKeys: String, CodingKey {
+                case postId = "post_id"
+                case available
+                case kind
+                case feedName = "feed_name"
+                case frameName = "frame_name"
+                case poster
+                case createdAt = "created_at"
+                case itemCount = "item_count"
+                case thumbUrls = "thumb_urls"
+                case caption
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/LinkPreview`.
+        public struct LinkPreview: Codable, Hashable, Sendable {
+            /// The link as written.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/url`.
+            public var url: Swift.String
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "pending"
+                case ok = "ok"
+                case failed = "failed"
+            }
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/status`.
+            public var status: Components.Schemas.LinkPreview.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/title`.
+            public var title: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/description`.
+            public var description: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/site_name`.
+            public var siteName: Swift.String?
+            /// Fetched and re-encoded by the server (WebP, at most 512 px), served from the server: clients never load remote images.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/image_url`.
+            public var imageUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/image_width`.
+            public var imageWidth: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/LinkPreview/image_height`.
+            public var imageHeight: Swift.Int?
+            /// Creates a new `LinkPreview`.
+            ///
+            /// - Parameters:
+            ///   - url: The link as written.
+            ///   - status:
+            ///   - title:
+            ///   - description:
+            ///   - siteName:
+            ///   - imageUrl: Fetched and re-encoded by the server (WebP, at most 512 px), served from the server: clients never load remote images.
+            ///   - imageWidth:
+            ///   - imageHeight:
+            public init(
+                url: Swift.String,
+                status: Components.Schemas.LinkPreview.StatusPayload,
+                title: Swift.String? = nil,
+                description: Swift.String? = nil,
+                siteName: Swift.String? = nil,
+                imageUrl: Swift.String? = nil,
+                imageWidth: Swift.Int? = nil,
+                imageHeight: Swift.Int? = nil
+            ) {
+                self.url = url
+                self.status = status
+                self.title = title
+                self.description = description
+                self.siteName = siteName
+                self.imageUrl = imageUrl
+                self.imageWidth = imageWidth
+                self.imageHeight = imageHeight
+            }
+            public enum CodingKeys: String, CodingKey {
+                case url
+                case status
+                case title
+                case description
+                case siteName = "site_name"
+                case imageUrl = "image_url"
+                case imageWidth = "image_width"
+                case imageHeight = "image_height"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/SystemMessageType`.
+        @frozen public enum SystemMessageType: String, Codable, Hashable, Sendable, CaseIterable {
+            case putOnFrame = "put_on_frame"
+            case streakMilestone = "streak_milestone"
+            case monthlyRecap = "monthly_recap"
+            case prompt = "prompt"
+            case memberJoined = "member_joined"
+            case memberLeft = "member_left"
+        }
+        /// The content of a `system` message; clients render it in the viewer's language from these fields.
+        ///
+        /// - Remark: Generated from `#/components/schemas/SystemMessage`.
+        public struct SystemMessage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/type`.
+            public var _type: Components.Schemas.SystemMessageType
+            /// Who did it: put on a frame, joined or left.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/person`.
+            public var person: Components.Schemas.PersonRef?
+            /// `put_on_frame`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/send_id`.
+            public var sendId: Components.Schemas.Id?
+            /// `put_on_frame`: the message whose items were sent.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/source_message_id`.
+            public var sourceMessageId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/item_count`.
+            public var itemCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/frame_names`.
+            public var frameNames: [Swift.String]?
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/feed_names`.
+            public var feedNames: [Swift.String]?
+            /// `streak_milestone`: 4, 12, 26, 52, then every 52.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/weeks`.
+            public var weeks: Swift.Int?
+            /// `monthly_recap`: YYYY-MM (`getFeedRecap`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/month`.
+            public var month: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/recap`.
+            public var recap: Components.Schemas.MonthlyRecap?
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/prompt_id`.
+            public var promptId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/SystemMessage/prompt_title`.
+            public var promptTitle: Swift.String?
+            /// Creates a new `SystemMessage`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - person: Who did it: put on a frame, joined or left.
+            ///   - sendId: `put_on_frame`.
+            ///   - sourceMessageId: `put_on_frame`: the message whose items were sent.
+            ///   - itemCount:
+            ///   - frameNames:
+            ///   - feedNames:
+            ///   - weeks: `streak_milestone`: 4, 12, 26, 52, then every 52.
+            ///   - month: `monthly_recap`: YYYY-MM (`getFeedRecap`).
+            ///   - recap:
+            ///   - promptId:
+            ///   - promptTitle:
+            public init(
+                _type: Components.Schemas.SystemMessageType,
+                person: Components.Schemas.PersonRef? = nil,
+                sendId: Components.Schemas.Id? = nil,
+                sourceMessageId: Components.Schemas.Id? = nil,
+                itemCount: Swift.Int? = nil,
+                frameNames: [Swift.String]? = nil,
+                feedNames: [Swift.String]? = nil,
+                weeks: Swift.Int? = nil,
+                month: Swift.String? = nil,
+                recap: Components.Schemas.MonthlyRecap? = nil,
+                promptId: Components.Schemas.Id? = nil,
+                promptTitle: Swift.String? = nil
+            ) {
+                self._type = _type
+                self.person = person
+                self.sendId = sendId
+                self.sourceMessageId = sourceMessageId
+                self.itemCount = itemCount
+                self.frameNames = frameNames
+                self.feedNames = feedNames
+                self.weeks = weeks
+                self.month = month
+                self.recap = recap
+                self.promptId = promptId
+                self.promptTitle = promptTitle
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case person
+                case sendId = "send_id"
+                case sourceMessageId = "source_message_id"
+                case itemCount = "item_count"
+                case frameNames = "frame_names"
+                case feedNames = "feed_names"
+                case weeks
+                case month
+                case recap
+                case promptId = "prompt_id"
+                case promptTitle = "prompt_title"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/Message`.
+        public struct Message: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Message/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Message/conversation_id`.
+            public var conversationId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Message/kind`.
+            public var kind: Components.Schemas.MessageKind
+            /// Null for system messages.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/author`.
+            public var author: Components.Schemas.PersonRef?
+            /// The author's `client_id` (author only).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/client_id`.
+            public var clientId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Message/body`.
+            public var body: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Message/mentions`.
+            public var mentions: [Components.Schemas.Mention]?
+            /// Photos and videos. Ordinary items; `GET /v1/items/{id}/media/{variant}` serves them to conversation members.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/items`.
+            public var items: [Components.Schemas.Item]
+            /// - Remark: Generated from `#/components/schemas/Message/voice`.
+            public var voice: Components.Schemas.VoiceClip?
+            /// - Remark: Generated from `#/components/schemas/Message/reply_to`.
+            public var replyTo: Components.Schemas.MessageQuote?
+            /// - Remark: Generated from `#/components/schemas/Message/shared_post`.
+            public var sharedPost: Components.Schemas.PostCard?
+            /// - Remark: Generated from `#/components/schemas/Message/link_preview`.
+            public var linkPreview: Components.Schemas.LinkPreview?
+            /// - Remark: Generated from `#/components/schemas/Message/system`.
+            public var system: Components.Schemas.SystemMessage?
+            /// - Remark: Generated from `#/components/schemas/Message/reactions`.
+            public var reactions: Components.Schemas.ReactionSummary
+            /// - Remark: Generated from `#/components/schemas/Message/FrameActivityPayload`.
+            public struct FrameActivityPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Message/FrameActivityPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Message/FrameActivityPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/Message/FrameActivityPayload/item_id`.
+                public var itemId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Message/FrameActivityPayload/reaction`.
+                public var reaction: Components.Schemas.Reaction?
+                /// - Remark: Generated from `#/components/schemas/Message/FrameActivityPayload/replies`.
+                public var replies: [Components.Schemas.ReplyPreset]?
+                /// Creates a new `FrameActivityPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - itemId:
+                ///   - reaction:
+                ///   - replies:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    itemId: Components.Schemas.Id,
+                    reaction: Components.Schemas.Reaction? = nil,
+                    replies: [Components.Schemas.ReplyPreset]? = nil
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.itemId = itemId
+                    self.reaction = reaction
+                    self.replies = replies
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case itemId = "item_id"
+                    case reaction
+                    case replies
+                }
+            }
+            /// Frame reactions and quick replies on placements made from this message by "Put on a frame".
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/frame_activity`.
+            public typealias FrameActivityPayload = [Components.Schemas.Message.FrameActivityPayloadPayload]
+            /// Frame reactions and quick replies on placements made from this message by "Put on a frame".
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/frame_activity`.
+            public var frameActivity: Components.Schemas.Message.FrameActivityPayload?
+            /// - Remark: Generated from `#/components/schemas/Message/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/Message/edited_at`.
+            public var editedAt: Foundation.Date?
+            /// Tombstone: "This message was deleted" (body, items, voice, preview and reactions are gone).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/deleted`.
+            public var deleted: Swift.Bool
+            /// With `deleted`: removed by a moderator ("This message was removed").
+            ///
+            /// - Remark: Generated from `#/components/schemas/Message/removed_by_admin`.
+            public var removedByAdmin: Swift.Bool?
+            /// Creates a new `Message`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - conversationId:
+            ///   - kind:
+            ///   - author: Null for system messages.
+            ///   - clientId: The author's `client_id` (author only).
+            ///   - body:
+            ///   - mentions:
+            ///   - items: Photos and videos. Ordinary items; `GET /v1/items/{id}/media/{variant}` serves them to conversation members.
+            ///   - voice:
+            ///   - replyTo:
+            ///   - sharedPost:
+            ///   - linkPreview:
+            ///   - system:
+            ///   - reactions:
+            ///   - frameActivity: Frame reactions and quick replies on placements made from this message by "Put on a frame".
+            ///   - createdAt:
+            ///   - editedAt:
+            ///   - deleted: Tombstone: "This message was deleted" (body, items, voice, preview and reactions are gone).
+            ///   - removedByAdmin: With `deleted`: removed by a moderator ("This message was removed").
+            public init(
+                id: Components.Schemas.Id,
+                conversationId: Components.Schemas.Id,
+                kind: Components.Schemas.MessageKind,
+                author: Components.Schemas.PersonRef? = nil,
+                clientId: Swift.String? = nil,
+                body: Swift.String? = nil,
+                mentions: [Components.Schemas.Mention]? = nil,
+                items: [Components.Schemas.Item],
+                voice: Components.Schemas.VoiceClip? = nil,
+                replyTo: Components.Schemas.MessageQuote? = nil,
+                sharedPost: Components.Schemas.PostCard? = nil,
+                linkPreview: Components.Schemas.LinkPreview? = nil,
+                system: Components.Schemas.SystemMessage? = nil,
+                reactions: Components.Schemas.ReactionSummary,
+                frameActivity: Components.Schemas.Message.FrameActivityPayload? = nil,
+                createdAt: Foundation.Date,
+                editedAt: Foundation.Date? = nil,
+                deleted: Swift.Bool,
+                removedByAdmin: Swift.Bool? = nil
+            ) {
+                self.id = id
+                self.conversationId = conversationId
+                self.kind = kind
+                self.author = author
+                self.clientId = clientId
+                self.body = body
+                self.mentions = mentions
+                self.items = items
+                self.voice = voice
+                self.replyTo = replyTo
+                self.sharedPost = sharedPost
+                self.linkPreview = linkPreview
+                self.system = system
+                self.reactions = reactions
+                self.frameActivity = frameActivity
+                self.createdAt = createdAt
+                self.editedAt = editedAt
+                self.deleted = deleted
+                self.removedByAdmin = removedByAdmin
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case conversationId = "conversation_id"
+                case kind
+                case author
+                case clientId = "client_id"
+                case body
+                case mentions
+                case items
+                case voice
+                case replyTo = "reply_to"
+                case sharedPost = "shared_post"
+                case linkPreview = "link_preview"
+                case system
+                case reactions
+                case frameActivity = "frame_activity"
+                case createdAt = "created_at"
+                case editedAt = "edited_at"
+                case deleted
+                case removedByAdmin = "removed_by_admin"
+            }
+        }
+        /// A voice message's recording (README §5.19). Stored as an item of its own (never placed on a frame or in a
+        /// library); `GET /v1/items/{item_id}/media/master` serves the AAC master (`audio/mp4`, Range supported).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/VoiceClip`.
+        public struct VoiceClip: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/VoiceClip/item_id`.
+            public var itemId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/VoiceClip/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case processing = "processing"
+                case ready = "ready"
+                case failed = "failed"
+            }
+            /// - Remark: Generated from `#/components/schemas/VoiceClip/status`.
+            public var status: Components.Schemas.VoiceClip.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/VoiceClip/duration_ms`.
+            public var durationMs: Swift.Int?
+            /// 64 loudness values 0–100 over the recording (empty while processing).
+            ///
+            /// - Remark: Generated from `#/components/schemas/VoiceClip/waveform`.
+            public var waveform: [Swift.Int]?
+            /// Creates a new `VoiceClip`.
+            ///
+            /// - Parameters:
+            ///   - itemId:
+            ///   - status:
+            ///   - durationMs:
+            ///   - waveform: 64 loudness values 0–100 over the recording (empty while processing).
+            public init(
+                itemId: Components.Schemas.Id,
+                status: Components.Schemas.VoiceClip.StatusPayload,
+                durationMs: Swift.Int? = nil,
+                waveform: [Swift.Int]? = nil
+            ) {
+                self.itemId = itemId
+                self.status = status
+                self.durationMs = durationMs
+                self.waveform = waveform
+            }
+            public enum CodingKeys: String, CodingKey {
+                case itemId = "item_id"
+                case status
+                case durationMs = "duration_ms"
+                case waveform
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MessagePage`.
+        public struct MessagePage: Codable, Hashable, Sendable {
+            /// Oldest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessagePage/messages`.
+            public var messages: [Components.Schemas.Message]
+            /// - Remark: Generated from `#/components/schemas/MessagePage/has_more_before`.
+            public var hasMoreBefore: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/MessagePage/has_more_after`.
+            public var hasMoreAfter: Swift.Bool
+            /// Creates a new `MessagePage`.
+            ///
+            /// - Parameters:
+            ///   - messages: Oldest first.
+            ///   - hasMoreBefore:
+            ///   - hasMoreAfter:
+            public init(
+                messages: [Components.Schemas.Message],
+                hasMoreBefore: Swift.Bool,
+                hasMoreAfter: Swift.Bool
+            ) {
+                self.messages = messages
+                self.hasMoreBefore = hasMoreBefore
+                self.hasMoreAfter = hasMoreAfter
+            }
+            public enum CodingKeys: String, CodingKey {
+                case messages
+                case hasMoreBefore = "has_more_before"
+                case hasMoreAfter = "has_more_after"
+            }
+        }
+        /// `frame_ids` and `feed_ids` together must not be empty.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PutOnFrameRequest`.
+        public struct PutOnFrameRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PutOnFrameRequest/frame_ids`.
+            public var frameIds: [Components.Schemas.Id]
+            /// - Remark: Generated from `#/components/schemas/PutOnFrameRequest/feed_ids`.
+            public var feedIds: [Components.Schemas.Id]?
+            /// As in `SendCreate.circle_ids`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PutOnFrameRequest/circle_ids`.
+            public var circleIds: [Components.Schemas.Id]?
+            /// A subset of the message's photos and videos; default all of them.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PutOnFrameRequest/item_ids`.
+            public var itemIds: [Components.Schemas.Id]?
+            /// Creates a new `PutOnFrameRequest`.
+            ///
+            /// - Parameters:
+            ///   - frameIds:
+            ///   - feedIds:
+            ///   - circleIds: As in `SendCreate.circle_ids`.
+            ///   - itemIds: A subset of the message's photos and videos; default all of them.
+            public init(
+                frameIds: [Components.Schemas.Id],
+                feedIds: [Components.Schemas.Id]? = nil,
+                circleIds: [Components.Schemas.Id]? = nil,
+                itemIds: [Components.Schemas.Id]? = nil
+            ) {
+                self.frameIds = frameIds
+                self.feedIds = feedIds
+                self.circleIds = circleIds
+                self.itemIds = itemIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frameIds = "frame_ids"
+                case feedIds = "feed_ids"
+                case circleIds = "circle_ids"
+                case itemIds = "item_ids"
+            }
+        }
+        /// A contact (someone the caller shares a family or a frame with).
+        ///
+        /// - Remark: Generated from `#/components/schemas/Person`.
+        public struct Person: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Person/person`.
+            public var person: Components.Schemas.PersonRef
+            /// - Remark: Generated from `#/components/schemas/Person/FeedsPayload`.
+            public struct FeedsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Person/FeedsPayload/feed_id`.
+                public var feedId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Person/FeedsPayload/feed_name`.
+                public var feedName: Swift.String
+                /// Creates a new `FeedsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - feedName:
+                public init(
+                    feedId: Components.Schemas.Id,
+                    feedName: Swift.String
+                ) {
+                    self.feedId = feedId
+                    self.feedName = feedName
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case feedId = "feed_id"
+                    case feedName = "feed_name"
+                }
+            }
+            /// The families both are in.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Person/feeds`.
+            public typealias FeedsPayload = [Components.Schemas.Person.FeedsPayloadPayload]
+            /// The families both are in.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Person/feeds`.
+            public var feeds: Components.Schemas.Person.FeedsPayload
+            /// - Remark: Generated from `#/components/schemas/Person/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Person/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Person/FramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                }
+            }
+            /// The frames both are members of.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Person/frames`.
+            public typealias FramesPayload = [Components.Schemas.Person.FramesPayloadPayload]
+            /// The frames both are members of.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Person/frames`.
+            public var frames: Components.Schemas.Person.FramesPayload
+            /// The caller blocked this person.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Person/blocked`.
+            public var blocked: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/Person/direct_conversation_id`.
+            public var directConversationId: Components.Schemas.Id?
+            /// The milestones this person chose to show (all of them for the caller's own profile).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Person/milestones`.
+            public var milestones: [Components.Schemas.MilestoneKey]?
+            /// Creates a new `Person`.
+            ///
+            /// - Parameters:
+            ///   - person:
+            ///   - feeds: The families both are in.
+            ///   - frames: The frames both are members of.
+            ///   - blocked: The caller blocked this person.
+            ///   - directConversationId:
+            ///   - milestones: The milestones this person chose to show (all of them for the caller's own profile).
+            public init(
+                person: Components.Schemas.PersonRef,
+                feeds: Components.Schemas.Person.FeedsPayload,
+                frames: Components.Schemas.Person.FramesPayload,
+                blocked: Swift.Bool,
+                directConversationId: Components.Schemas.Id? = nil,
+                milestones: [Components.Schemas.MilestoneKey]? = nil
+            ) {
+                self.person = person
+                self.feeds = feeds
+                self.frames = frames
+                self.blocked = blocked
+                self.directConversationId = directConversationId
+                self.milestones = milestones
+            }
+            public enum CodingKeys: String, CodingKey {
+                case person
+                case feeds
+                case frames
+                case blocked
+                case directConversationId = "direct_conversation_id"
+                case milestones
+            }
+        }
+        /// The app badge: conversations with unread messages (not muted) plus threads with unread mentions of or replies to the caller (not muted).
+        ///
+        /// - Remark: Generated from `#/components/schemas/Badge`.
+        public struct Badge: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Badge/total`.
+            public var total: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/Badge/conversations`.
+            public var conversations: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/Badge/threads`.
+            public var threads: Swift.Int
+            /// Creates a new `Badge`.
+            ///
+            /// - Parameters:
+            ///   - total:
+            ///   - conversations:
+            ///   - threads:
+            public init(
+                total: Swift.Int,
+                conversations: Swift.Int,
+                threads: Swift.Int
+            ) {
+                self.total = total
+                self.conversations = conversations
+                self.threads = threads
+            }
+            public enum CodingKeys: String, CodingKey {
+                case total
+                case conversations
+                case threads
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/Block`.
+        public struct Block: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Block/person`.
+            public var person: Components.Schemas.PersonRef
+            /// - Remark: Generated from `#/components/schemas/Block/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `Block`.
+            ///
+            /// - Parameters:
+            ///   - person:
+            ///   - createdAt:
+            public init(
+                person: Components.Schemas.PersonRef,
+                createdAt: Foundation.Date
+            ) {
+                self.person = person
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case person
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ReportTargetKind`.
+        @frozen public enum ReportTargetKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case comment = "comment"
+            case message = "message"
+            case post = "post"
+        }
+        /// - Remark: Generated from `#/components/schemas/ReportReason`.
+        @frozen public enum ReportReason: String, Codable, Hashable, Sendable, CaseIterable {
+            case unkind = "unkind"
+            case spam = "spam"
+            case inappropriate = "inappropriate"
+            case other = "other"
+        }
+        /// - Remark: Generated from `#/components/schemas/ReportCreate`.
+        public struct ReportCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReportCreate/target_kind`.
+            public var targetKind: Components.Schemas.ReportTargetKind
+            /// - Remark: Generated from `#/components/schemas/ReportCreate/target_id`.
+            public var targetId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ReportCreate/reason`.
+            public var reason: Components.Schemas.ReportReason
+            /// - Remark: Generated from `#/components/schemas/ReportCreate/note`.
+            public var note: Swift.String?
+            /// Creates a new `ReportCreate`.
+            ///
+            /// - Parameters:
+            ///   - targetKind:
+            ///   - targetId:
+            ///   - reason:
+            ///   - note:
+            public init(
+                targetKind: Components.Schemas.ReportTargetKind,
+                targetId: Components.Schemas.Id,
+                reason: Components.Schemas.ReportReason,
+                note: Swift.String? = nil
+            ) {
+                self.targetKind = targetKind
+                self.targetId = targetId
+                self.reason = reason
+                self.note = note
+            }
+            public enum CodingKeys: String, CodingKey {
+                case targetKind = "target_kind"
+                case targetId = "target_id"
+                case reason
+                case note
+            }
+        }
+        /// The reporter sees their own report (`mine`) without `excerpt`, `author` or `note` of others; handlers see everything except who reported.
+        ///
+        /// - Remark: Generated from `#/components/schemas/Report`.
+        public struct Report: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Report/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Report/target_kind`.
+            public var targetKind: Components.Schemas.ReportTargetKind
+            /// - Remark: Generated from `#/components/schemas/Report/target_id`.
+            public var targetId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Report/post_id`.
+            public var postId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/Report/conversation_id`.
+            public var conversationId: Components.Schemas.Id?
+            /// Null when the operator handles it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Report/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/Report/reason`.
+            public var reason: Components.Schemas.ReportReason
+            /// - Remark: Generated from `#/components/schemas/Report/note`.
+            public var note: Swift.String?
+            /// Who wrote the reported content (handlers).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Report/author`.
+            public var author: Components.Schemas.PersonRef?
+            /// The reported text as it was when reported (kept even if it was edited or deleted since), or a description of the media; handlers only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Report/excerpt`.
+            public var excerpt: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Report/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case open = "open"
+                case removed = "removed"
+                case dismissed = "dismissed"
+            }
+            /// - Remark: Generated from `#/components/schemas/Report/status`.
+            public var status: Components.Schemas.Report.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/Report/mine`.
+            public var mine: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/Report/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/Report/resolved_at`.
+            public var resolvedAt: Foundation.Date?
+            /// Creates a new `Report`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - targetKind:
+            ///   - targetId:
+            ///   - postId:
+            ///   - conversationId:
+            ///   - feedId: Null when the operator handles it.
+            ///   - reason:
+            ///   - note:
+            ///   - author: Who wrote the reported content (handlers).
+            ///   - excerpt: The reported text as it was when reported (kept even if it was edited or deleted since), or a description of the media; handlers only.
+            ///   - status:
+            ///   - mine:
+            ///   - createdAt:
+            ///   - resolvedAt:
+            public init(
+                id: Components.Schemas.Id,
+                targetKind: Components.Schemas.ReportTargetKind,
+                targetId: Components.Schemas.Id,
+                postId: Components.Schemas.Id? = nil,
+                conversationId: Components.Schemas.Id? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                reason: Components.Schemas.ReportReason,
+                note: Swift.String? = nil,
+                author: Components.Schemas.PersonRef? = nil,
+                excerpt: Swift.String? = nil,
+                status: Components.Schemas.Report.StatusPayload,
+                mine: Swift.Bool? = nil,
+                createdAt: Foundation.Date,
+                resolvedAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.targetKind = targetKind
+                self.targetId = targetId
+                self.postId = postId
+                self.conversationId = conversationId
+                self.feedId = feedId
+                self.reason = reason
+                self.note = note
+                self.author = author
+                self.excerpt = excerpt
+                self.status = status
+                self.mine = mine
+                self.createdAt = createdAt
+                self.resolvedAt = resolvedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case targetKind = "target_kind"
+                case targetId = "target_id"
+                case postId = "post_id"
+                case conversationId = "conversation_id"
+                case feedId = "feed_id"
+                case reason
+                case note
+                case author
+                case excerpt
+                case status
+                case mine
+                case createdAt = "created_at"
+                case resolvedAt = "resolved_at"
+            }
+        }
+        /// How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
+        /// today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
+        /// "2 weeks quiet", `never` "No photos yet".
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Freshness`.
+        public struct Freshness: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Freshness/state`.
+            @frozen public enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case fresh = "fresh"
+                case recent = "recent"
+                case quiet = "quiet"
+                case never = "never"
+            }
+            /// - Remark: Generated from `#/components/schemas/Freshness/state`.
+            public var state: Components.Schemas.Freshness.StatePayload
+            /// - Remark: Generated from `#/components/schemas/Freshness/level`.
+            public var level: Swift.Double
+            /// Whole days since the last personal photo (null = never).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Freshness/days_quiet`.
+            public var daysQuiet: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/Freshness/last_shared_at`.
+            public var lastSharedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/Freshness/last_shared_by`.
+            public var lastSharedBy: Components.Schemas.PersonRef?
+            /// Creates a new `Freshness`.
+            ///
+            /// - Parameters:
+            ///   - state:
+            ///   - level:
+            ///   - daysQuiet: Whole days since the last personal photo (null = never).
+            ///   - lastSharedAt:
+            ///   - lastSharedBy:
+            public init(
+                state: Components.Schemas.Freshness.StatePayload,
+                level: Swift.Double,
+                daysQuiet: Swift.Int? = nil,
+                lastSharedAt: Foundation.Date? = nil,
+                lastSharedBy: Components.Schemas.PersonRef? = nil
+            ) {
+                self.state = state
+                self.level = level
+                self.daysQuiet = daysQuiet
+                self.lastSharedAt = lastSharedAt
+                self.lastSharedBy = lastSharedBy
+            }
+            public enum CodingKeys: String, CodingKey {
+                case state
+                case level
+                case daysQuiet = "days_quiet"
+                case lastSharedAt = "last_shared_at"
+                case lastSharedBy = "last_shared_by"
+            }
+        }
+        /// `open`: waiting (7 days at most). `answered`: someone sent a photo that reached the frame. `expired`: nobody did within 7 days.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoRequestState`.
+        @frozen public enum PhotoRequestState: String, Codable, Hashable, Sendable, CaseIterable {
+            case open = "open"
+            case answered = "answered"
+            case expired = "expired"
+        }
+        /// A frame's "Ask for new photos".
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoRequest`.
+        public struct PhotoRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/frame_name`.
+            public var frameName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/state`.
+            public var state: Components.Schemas.PhotoRequestState
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/answered_at`.
+            public var answeredAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/answered_by`.
+            public var answeredBy: Components.Schemas.PersonRef?
+            /// - Remark: Generated from `#/components/schemas/PhotoRequest/freshness`.
+            public var freshness: Components.Schemas.Freshness?
+            /// Creates a new `PhotoRequest`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - state:
+            ///   - createdAt:
+            ///   - expiresAt:
+            ///   - answeredAt:
+            ///   - answeredBy:
+            ///   - freshness:
+            public init(
+                id: Components.Schemas.Id,
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                state: Components.Schemas.PhotoRequestState,
+                createdAt: Foundation.Date,
+                expiresAt: Foundation.Date,
+                answeredAt: Foundation.Date? = nil,
+                answeredBy: Components.Schemas.PersonRef? = nil,
+                freshness: Components.Schemas.Freshness? = nil
+            ) {
+                self.id = id
+                self.frameId = frameId
+                self.frameName = frameName
+                self.state = state
+                self.createdAt = createdAt
+                self.expiresAt = expiresAt
+                self.answeredAt = answeredAt
+                self.answeredBy = answeredBy
+                self.freshness = freshness
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case state
+                case createdAt = "created_at"
+                case expiresAt = "expires_at"
+                case answeredAt = "answered_at"
+                case answeredBy = "answered_by"
+                case freshness
+            }
+        }
+        /// The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change).
+        ///
+        /// - Remark: Generated from `#/components/schemas/FramePhotoRequest`.
+        public struct FramePhotoRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FramePhotoRequest/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FramePhotoRequest/state`.
+            public var state: Components.Schemas.PhotoRequestState
+            /// - Remark: Generated from `#/components/schemas/FramePhotoRequest/created_at`.
+            public var createdAt: Foundation.Date
+            /// Until then the button shows "Asked today 💛".
+            ///
+            /// - Remark: Generated from `#/components/schemas/FramePhotoRequest/next_allowed_at`.
+            public var nextAllowedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/FramePhotoRequest/answered_at`.
+            public var answeredAt: Foundation.Date?
+            /// First name of whoever answered ("New photos from Ben").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FramePhotoRequest/answered_by_name`.
+            public var answeredByName: Swift.String?
+            /// Creates a new `FramePhotoRequest`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - state:
+            ///   - createdAt:
+            ///   - nextAllowedAt: Until then the button shows "Asked today 💛".
+            ///   - answeredAt:
+            ///   - answeredByName: First name of whoever answered ("New photos from Ben").
+            public init(
+                id: Components.Schemas.Id,
+                state: Components.Schemas.PhotoRequestState,
+                createdAt: Foundation.Date,
+                nextAllowedAt: Foundation.Date,
+                answeredAt: Foundation.Date? = nil,
+                answeredByName: Swift.String? = nil
+            ) {
+                self.id = id
+                self.state = state
+                self.createdAt = createdAt
+                self.nextAllowedAt = nextAllowedAt
+                self.answeredAt = answeredAt
+                self.answeredByName = answeredByName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case state
+                case createdAt = "created_at"
+                case nextAllowedAt = "next_allowed_at"
+                case answeredAt = "answered_at"
+                case answeredByName = "answered_by_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedStreakSummary`.
+        public struct FeedStreakSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedStreakSummary/current_weeks`.
+            public var currentWeeks: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedStreakSummary/week_photos`.
+            public var weekPhotos: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedStreakSummary/goal`.
+            public var goal: Swift.Int
+            /// This week's goal is reached.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedStreakSummary/met`.
+            public var met: Swift.Bool
+            /// Creates a new `FeedStreakSummary`.
+            ///
+            /// - Parameters:
+            ///   - currentWeeks:
+            ///   - weekPhotos:
+            ///   - goal:
+            ///   - met: This week's goal is reached.
+            public init(
+                currentWeeks: Swift.Int,
+                weekPhotos: Swift.Int,
+                goal: Swift.Int,
+                met: Swift.Bool
+            ) {
+                self.currentWeeks = currentWeeks
+                self.weekPhotos = weekPhotos
+                self.goal = goal
+                self.met = met
+            }
+            public enum CodingKeys: String, CodingKey {
+                case currentWeeks = "current_weeks"
+                case weekPhotos = "week_photos"
+                case goal
+                case met
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedEngagement`.
+        public struct FeedEngagement: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/streak_enabled`.
+            public var streakEnabled: Swift.Bool
+            /// Photos the family together posts per week.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/streak_goal`.
+            public var streakGoal: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/prompts_enabled`.
+            public var promptsEnabled: Swift.Bool
+            /// A subscribed frame without new personal photos for this long gets the "getting quiet" reminder.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/quiet_after_days`.
+            public var quietAfterDays: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/monthly_recap`.
+            public var monthlyRecap: Swift.Bool
+            /// IANA zone for weeks (Monday–Sunday), prompts and recaps; default: the most common `locale.timezone` of its subscribed frames, else the owner's, else Europe/Brussels.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedEngagement/timezone`.
+            public var timezone: Swift.String
+            /// Creates a new `FeedEngagement`.
+            ///
+            /// - Parameters:
+            ///   - feedId:
+            ///   - streakEnabled:
+            ///   - streakGoal: Photos the family together posts per week.
+            ///   - promptsEnabled:
+            ///   - quietAfterDays: A subscribed frame without new personal photos for this long gets the "getting quiet" reminder.
+            ///   - monthlyRecap:
+            ///   - timezone: IANA zone for weeks (Monday–Sunday), prompts and recaps; default: the most common `locale.timezone` of its subscribed frames, else the owner's, else Europe/Brussels.
+            public init(
+                feedId: Components.Schemas.Id,
+                streakEnabled: Swift.Bool,
+                streakGoal: Swift.Int,
+                promptsEnabled: Swift.Bool,
+                quietAfterDays: Swift.Int,
+                monthlyRecap: Swift.Bool,
+                timezone: Swift.String
+            ) {
+                self.feedId = feedId
+                self.streakEnabled = streakEnabled
+                self.streakGoal = streakGoal
+                self.promptsEnabled = promptsEnabled
+                self.quietAfterDays = quietAfterDays
+                self.monthlyRecap = monthlyRecap
+                self.timezone = timezone
+            }
+            public enum CodingKeys: String, CodingKey {
+                case feedId = "feed_id"
+                case streakEnabled = "streak_enabled"
+                case streakGoal = "streak_goal"
+                case promptsEnabled = "prompts_enabled"
+                case quietAfterDays = "quiet_after_days"
+                case monthlyRecap = "monthly_recap"
+                case timezone
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate`.
+        public struct FeedEngagementUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate/streak_enabled`.
+            public var streakEnabled: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate/streak_goal`.
+            public var streakGoal: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate/prompts_enabled`.
+            public var promptsEnabled: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate/quiet_after_days`.
+            public var quietAfterDays: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate/monthly_recap`.
+            public var monthlyRecap: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedEngagementUpdate/timezone`.
+            public var timezone: Swift.String?
+            /// Creates a new `FeedEngagementUpdate`.
+            ///
+            /// - Parameters:
+            ///   - streakEnabled:
+            ///   - streakGoal:
+            ///   - promptsEnabled:
+            ///   - quietAfterDays:
+            ///   - monthlyRecap:
+            ///   - timezone:
+            public init(
+                streakEnabled: Swift.Bool? = nil,
+                streakGoal: Swift.Int? = nil,
+                promptsEnabled: Swift.Bool? = nil,
+                quietAfterDays: Swift.Int? = nil,
+                monthlyRecap: Swift.Bool? = nil,
+                timezone: Swift.String? = nil
+            ) {
+                self.streakEnabled = streakEnabled
+                self.streakGoal = streakGoal
+                self.promptsEnabled = promptsEnabled
+                self.quietAfterDays = quietAfterDays
+                self.monthlyRecap = monthlyRecap
+                self.timezone = timezone
+            }
+            public enum CodingKeys: String, CodingKey {
+                case streakEnabled = "streak_enabled"
+                case streakGoal = "streak_goal"
+                case promptsEnabled = "prompts_enabled"
+                case quietAfterDays = "quiet_after_days"
+                case monthlyRecap = "monthly_recap"
+                case timezone
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedStreak`.
+        public struct FeedStreak: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/enabled`.
+            public var enabled: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/goal`.
+            public var goal: Swift.Int
+            /// Weeks in a row the goal was met (frozen weeks keep it
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/current_weeks`.
+            public var currentWeeks: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/best_weeks`.
+            public var bestWeeks: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/freezes_left`.
+            public var freezesLeft: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/week`.
+            public struct WeekPayload: Codable, Hashable, Sendable {
+                /// The Monday.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/week/week_of`.
+                public var weekOf: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/week/photos`.
+                public var photos: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/week/met`.
+                public var met: Swift.Bool
+                /// Who posted this week (no counts per person).
+                ///
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/week/helpers`.
+                public var helpers: [Components.Schemas.PersonRef]
+                /// Creates a new `WeekPayload`.
+                ///
+                /// - Parameters:
+                ///   - weekOf: The Monday.
+                ///   - photos:
+                ///   - met:
+                ///   - helpers: Who posted this week (no counts per person).
+                public init(
+                    weekOf: Swift.String,
+                    photos: Swift.Int,
+                    met: Swift.Bool,
+                    helpers: [Components.Schemas.PersonRef]
+                ) {
+                    self.weekOf = weekOf
+                    self.photos = photos
+                    self.met = met
+                    self.helpers = helpers
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case weekOf = "week_of"
+                    case photos
+                    case met
+                    case helpers
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/week`.
+            public var week: Components.Schemas.FeedStreak.WeekPayload
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/HistoryPayload`.
+            public struct HistoryPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/HistoryPayload/week_of`.
+                public var weekOf: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/HistoryPayload/outcome`.
+                @frozen public enum OutcomePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case met = "met"
+                    case frozen = "frozen"
+                    case missed = "missed"
+                }
+                /// - Remark: Generated from `#/components/schemas/FeedStreak/HistoryPayload/outcome`.
+                public var outcome: Components.Schemas.FeedStreak.HistoryPayloadPayload.OutcomePayload
+                /// Creates a new `HistoryPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - weekOf:
+                ///   - outcome:
+                public init(
+                    weekOf: Swift.String,
+                    outcome: Components.Schemas.FeedStreak.HistoryPayloadPayload.OutcomePayload
+                ) {
+                    self.weekOf = weekOf
+                    self.outcome = outcome
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case weekOf = "week_of"
+                    case outcome
+                }
+            }
+            /// The last 12 closed weeks, newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/history`.
+            public typealias HistoryPayload = [Components.Schemas.FeedStreak.HistoryPayloadPayload]
+            /// The last 12 closed weeks, newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedStreak/history`.
+            public var history: Components.Schemas.FeedStreak.HistoryPayload?
+            /// Creates a new `FeedStreak`.
+            ///
+            /// - Parameters:
+            ///   - enabled:
+            ///   - goal:
+            ///   - currentWeeks: Weeks in a row the goal was met (frozen weeks keep it
+            ///   - bestWeeks:
+            ///   - freezesLeft:
+            ///   - week:
+            ///   - history: The last 12 closed weeks, newest first.
+            public init(
+                enabled: Swift.Bool,
+                goal: Swift.Int,
+                currentWeeks: Swift.Int,
+                bestWeeks: Swift.Int,
+                freezesLeft: Swift.Int,
+                week: Components.Schemas.FeedStreak.WeekPayload,
+                history: Components.Schemas.FeedStreak.HistoryPayload? = nil
+            ) {
+                self.enabled = enabled
+                self.goal = goal
+                self.currentWeeks = currentWeeks
+                self.bestWeeks = bestWeeks
+                self.freezesLeft = freezesLeft
+                self.week = week
+                self.history = history
+            }
+            public enum CodingKeys: String, CodingKey {
+                case enabled
+                case goal
+                case currentWeeks = "current_weeks"
+                case bestWeeks = "best_weeks"
+                case freezesLeft = "freezes_left"
+                case week
+                case history
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedPrompt`.
+        public struct FeedPrompt: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// The Monday the prompt runs from.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/week_of`.
+            public var weekOf: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case current = "current"
+                case planned = "planned"
+                case past = "past"
+                case skipped = "skipped"
+            }
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/status`.
+            public var status: Components.Schemas.FeedPrompt.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/source`.
+            @frozen public enum SourcePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case server = "server"
+                case custom = "custom"
+            }
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/source`.
+            public var source: Components.Schemas.FeedPrompt.SourcePayload
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/library_key`.
+            public var libraryKey: Swift.String?
+            /// In the caller's language for server prompts; empty when skipped.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/answer_count`.
+            public var answerCount: Swift.Int?
+            /// The admin who chose or wrote it; null for the server's choice.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPrompt/set_by`.
+            public var setBy: Components.Schemas.PersonRef?
+            /// Creates a new `FeedPrompt`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - feedId:
+            ///   - weekOf: The Monday the prompt runs from.
+            ///   - status:
+            ///   - source:
+            ///   - libraryKey:
+            ///   - title: In the caller's language for server prompts; empty when skipped.
+            ///   - answerCount:
+            ///   - setBy: The admin who chose or wrote it; null for the server's choice.
+            public init(
+                id: Components.Schemas.Id,
+                feedId: Components.Schemas.Id,
+                weekOf: Swift.String,
+                status: Components.Schemas.FeedPrompt.StatusPayload,
+                source: Components.Schemas.FeedPrompt.SourcePayload,
+                libraryKey: Swift.String? = nil,
+                title: Swift.String,
+                answerCount: Swift.Int? = nil,
+                setBy: Components.Schemas.PersonRef? = nil
+            ) {
+                self.id = id
+                self.feedId = feedId
+                self.weekOf = weekOf
+                self.status = status
+                self.source = source
+                self.libraryKey = libraryKey
+                self.title = title
+                self.answerCount = answerCount
+                self.setBy = setBy
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case feedId = "feed_id"
+                case weekOf = "week_of"
+                case status
+                case source
+                case libraryKey = "library_key"
+                case title
+                case answerCount = "answer_count"
+                case setBy = "set_by"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedPromptSet`.
+        public struct FeedPromptSet: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedPromptSet/library_key`.
+            public var libraryKey: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedPromptSet/title`.
+            public var title: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedPromptSet/skip`.
+            public var skip: Swift.Bool?
+            /// Creates a new `FeedPromptSet`.
+            ///
+            /// - Parameters:
+            ///   - libraryKey:
+            ///   - title:
+            ///   - skip:
+            public init(
+                libraryKey: Swift.String? = nil,
+                title: Swift.String? = nil,
+                skip: Swift.Bool? = nil
+            ) {
+                self.libraryKey = libraryKey
+                self.title = title
+                self.skip = skip
+            }
+            public enum CodingKeys: String, CodingKey {
+                case libraryKey = "library_key"
+                case title
+                case skip
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PromptLibraryEntry`.
+        public struct PromptLibraryEntry: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PromptLibraryEntry/key`.
+            public var key: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PromptLibraryEntry/title`.
+            public var title: Swift.String
+            /// Creates a new `PromptLibraryEntry`.
+            ///
+            /// - Parameters:
+            ///   - key:
+            ///   - title:
+            public init(
+                key: Swift.String,
+                title: Swift.String
+            ) {
+                self.key = key
+                self.title = title
+            }
+            public enum CodingKeys: String, CodingKey {
+                case key
+                case title
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OnThisDay`.
+        public struct OnThisDay: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OnThisDay/date`.
+            public var date: Swift.String
+            /// - Remark: Generated from `#/components/schemas/OnThisDay/GroupsPayload`.
+            public struct GroupsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/OnThisDay/GroupsPayload/feed_id`.
+                public var feedId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/OnThisDay/GroupsPayload/feed_name`.
+                public var feedName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/OnThisDay/GroupsPayload/years_ago`.
+                public var yearsAgo: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/OnThisDay/GroupsPayload/post_ids`.
+                public var postIds: [Components.Schemas.Id]
+                /// - Remark: Generated from `#/components/schemas/OnThisDay/GroupsPayload/items`.
+                public var items: [Components.Schemas.Item]
+                /// Creates a new `GroupsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - feedName:
+                ///   - yearsAgo:
+                ///   - postIds:
+                ///   - items:
+                public init(
+                    feedId: Components.Schemas.Id,
+                    feedName: Swift.String,
+                    yearsAgo: Swift.Int,
+                    postIds: [Components.Schemas.Id],
+                    items: [Components.Schemas.Item]
+                ) {
+                    self.feedId = feedId
+                    self.feedName = feedName
+                    self.yearsAgo = yearsAgo
+                    self.postIds = postIds
+                    self.items = items
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case feedId = "feed_id"
+                    case feedName = "feed_name"
+                    case yearsAgo = "years_ago"
+                    case postIds = "post_ids"
+                    case items
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/OnThisDay/groups`.
+            public typealias GroupsPayload = [Components.Schemas.OnThisDay.GroupsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/OnThisDay/groups`.
+            public var groups: Components.Schemas.OnThisDay.GroupsPayload
+            /// Creates a new `OnThisDay`.
+            ///
+            /// - Parameters:
+            ///   - date:
+            ///   - groups:
+            public init(
+                date: Swift.String,
+                groups: Components.Schemas.OnThisDay.GroupsPayload
+            ) {
+                self.date = date
+                self.groups = groups
+            }
+            public enum CodingKeys: String, CodingKey {
+                case date
+                case groups
+            }
+        }
+        /// "Your photos were seen 58 times on 3 frames this week; Oma loved 4".
+        ///
+        /// - Remark: Generated from `#/components/schemas/WeeklySummary`.
+        public struct WeeklySummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/week_of`.
+            public var weekOf: Swift.String
+            /// Placements of the caller's items first seen this week.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/seen_count`.
+            public var seenCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/frame_count`.
+            public var frameCount: Swift.Int
+            /// Frame ❤ on the caller's items this week.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/love_count`.
+            public var loveCount: Swift.Int
+            /// People's reactions on the caller's posts and items this week.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/reaction_count`.
+            public var reactionCount: Swift.Int
+            /// Comments by others on the caller's posts this week.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/comment_count`.
+            public var commentCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/WeeklySummary/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/WeeklySummary/FramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/WeeklySummary/FramesPayload/seen_count`.
+                public var seenCount: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/WeeklySummary/FramesPayload/love_count`.
+                public var loveCount: Swift.Int
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - seenCount:
+                ///   - loveCount:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    seenCount: Swift.Int,
+                    loveCount: Swift.Int
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.seenCount = seenCount
+                    self.loveCount = loveCount
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case seenCount = "seen_count"
+                    case loveCount = "love_count"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/frames`.
+            public typealias FramesPayload = [Components.Schemas.WeeklySummary.FramesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/frames`.
+            public var frames: Components.Schemas.WeeklySummary.FramesPayload
+            /// The item with the most reactions.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklySummary/top_item`.
+            public var topItem: Components.Schemas.Item?
+            /// Creates a new `WeeklySummary`.
+            ///
+            /// - Parameters:
+            ///   - weekOf:
+            ///   - seenCount: Placements of the caller's items first seen this week.
+            ///   - frameCount:
+            ///   - loveCount: Frame ❤ on the caller's items this week.
+            ///   - reactionCount: People's reactions on the caller's posts and items this week.
+            ///   - commentCount: Comments by others on the caller's posts this week.
+            ///   - frames:
+            ///   - topItem: The item with the most reactions.
+            public init(
+                weekOf: Swift.String,
+                seenCount: Swift.Int,
+                frameCount: Swift.Int,
+                loveCount: Swift.Int,
+                reactionCount: Swift.Int,
+                commentCount: Swift.Int,
+                frames: Components.Schemas.WeeklySummary.FramesPayload,
+                topItem: Components.Schemas.Item? = nil
+            ) {
+                self.weekOf = weekOf
+                self.seenCount = seenCount
+                self.frameCount = frameCount
+                self.loveCount = loveCount
+                self.reactionCount = reactionCount
+                self.commentCount = commentCount
+                self.frames = frames
+                self.topItem = topItem
+            }
+            public enum CodingKeys: String, CodingKey {
+                case weekOf = "week_of"
+                case seenCount = "seen_count"
+                case frameCount = "frame_count"
+                case loveCount = "love_count"
+                case reactionCount = "reaction_count"
+                case commentCount = "comment_count"
+                case frames
+                case topItem = "top_item"
+            }
+        }
+        /// About the family, never ranking individuals.
+        ///
+        /// - Remark: Generated from `#/components/schemas/MonthlyRecap`.
+        public struct MonthlyRecap: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/month`.
+            public var month: Swift.String
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/photos_shared`.
+            public var photosShared: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/videos_shared`.
+            public var videosShared: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/sharer_count`.
+            public var sharerCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/most_loved`.
+            public struct MostLovedPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/MonthlyRecap/most_loved/post_id`.
+                public var postId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/MonthlyRecap/most_loved/item`.
+                public var item: Components.Schemas.Item
+                /// People and frames.
+                ///
+                /// - Remark: Generated from `#/components/schemas/MonthlyRecap/most_loved/reaction_count`.
+                public var reactionCount: Swift.Int?
+                /// Creates a new `MostLovedPayload`.
+                ///
+                /// - Parameters:
+                ///   - postId:
+                ///   - item:
+                ///   - reactionCount: People and frames.
+                public init(
+                    postId: Components.Schemas.Id,
+                    item: Components.Schemas.Item,
+                    reactionCount: Swift.Int? = nil
+                ) {
+                    self.postId = postId
+                    self.item = item
+                    self.reactionCount = reactionCount
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case postId = "post_id"
+                    case item
+                    case reactionCount = "reaction_count"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/most_loved`.
+            public var mostLoved: Components.Schemas.MonthlyRecap.MostLovedPayload?
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/FreshestFramesPayload`.
+            public struct FreshestFramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/MonthlyRecap/FreshestFramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/MonthlyRecap/FreshestFramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/MonthlyRecap/FreshestFramesPayload/days_with_new_photos`.
+                public var daysWithNewPhotos: Swift.Int
+                /// Creates a new `FreshestFramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - daysWithNewPhotos:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    daysWithNewPhotos: Swift.Int
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.daysWithNewPhotos = daysWithNewPhotos
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case daysWithNewPhotos = "days_with_new_photos"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/freshest_frames`.
+            public typealias FreshestFramesPayload = [Components.Schemas.MonthlyRecap.FreshestFramesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/freshest_frames`.
+            public var freshestFrames: Components.Schemas.MonthlyRecap.FreshestFramesPayload?
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/new_members`.
+            public var newMembers: [Components.Schemas.PersonRef]?
+            /// - Remark: Generated from `#/components/schemas/MonthlyRecap/streak_weeks`.
+            public var streakWeeks: Swift.Int?
+            /// Creates a new `MonthlyRecap`.
+            ///
+            /// - Parameters:
+            ///   - feedId:
+            ///   - month:
+            ///   - photosShared:
+            ///   - videosShared:
+            ///   - sharerCount:
+            ///   - mostLoved:
+            ///   - freshestFrames:
+            ///   - newMembers:
+            ///   - streakWeeks:
+            public init(
+                feedId: Components.Schemas.Id,
+                month: Swift.String,
+                photosShared: Swift.Int,
+                videosShared: Swift.Int,
+                sharerCount: Swift.Int,
+                mostLoved: Components.Schemas.MonthlyRecap.MostLovedPayload? = nil,
+                freshestFrames: Components.Schemas.MonthlyRecap.FreshestFramesPayload? = nil,
+                newMembers: [Components.Schemas.PersonRef]? = nil,
+                streakWeeks: Swift.Int? = nil
+            ) {
+                self.feedId = feedId
+                self.month = month
+                self.photosShared = photosShared
+                self.videosShared = videosShared
+                self.sharerCount = sharerCount
+                self.mostLoved = mostLoved
+                self.freshestFrames = freshestFrames
+                self.newMembers = newMembers
+                self.streakWeeks = streakWeeks
+            }
+            public enum CodingKeys: String, CodingKey {
+                case feedId = "feed_id"
+                case month
+                case photosShared = "photos_shared"
+                case videosShared = "videos_shared"
+                case sharerCount = "sharer_count"
+                case mostLoved = "most_loved"
+                case freshestFrames = "freshest_frames"
+                case newMembers = "new_members"
+                case streakWeeks = "streak_weeks"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MilestoneKey`.
+        @frozen public enum MilestoneKey: String, Codable, Hashable, Sendable, CaseIterable {
+            case firstPhoto = "first_photo"
+            case photos10 = "photos_10"
+            case photos100 = "photos_100"
+            case photos1000 = "photos_1000"
+            case firstVideo = "first_video"
+            case yearOfSharing = "year_of_sharing"
+            case loves100 = "loves_100"
+        }
+        /// - Remark: Generated from `#/components/schemas/Milestone`.
+        public struct Milestone: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Milestone/key`.
+            public var key: Components.Schemas.MilestoneKey
+            /// - Remark: Generated from `#/components/schemas/Milestone/achieved_at`.
+            public var achievedAt: Foundation.Date
+            /// Shown on the caller's profile to their contacts (default false).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Milestone/shown`.
+            public var shown: Swift.Bool
+            /// The caller dismissed its card.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Milestone/seen`.
+            public var seen: Swift.Bool
+            /// Creates a new `Milestone`.
+            ///
+            /// - Parameters:
+            ///   - key:
+            ///   - achievedAt:
+            ///   - shown: Shown on the caller's profile to their contacts (default false).
+            ///   - seen: The caller dismissed its card.
+            public init(
+                key: Components.Schemas.MilestoneKey,
+                achievedAt: Foundation.Date,
+                shown: Swift.Bool,
+                seen: Swift.Bool
+            ) {
+                self.key = key
+                self.achievedAt = achievedAt
+                self.shown = shown
+                self.seen = seen
+            }
+            public enum CodingKeys: String, CodingKey {
+                case key
+                case achievedAt = "achieved_at"
+                case shown
+                case seen
+            }
+        }
+        /// `fewer`: half the weekly budget and no streak reminders. `off`: no reminders (frame requests follow `frame_requests`).
+        ///
+        /// - Remark: Generated from `#/components/schemas/ReminderLevel`.
+        @frozen public enum ReminderLevel: String, Codable, Hashable, Sendable, CaseIterable {
+            case normal = "normal"
+            case fewer = "fewer"
+            case off = "off"
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailDigest`.
+        @frozen public enum EmailDigest: String, Codable, Hashable, Sendable, CaseIterable {
+            case off = "off"
+            case daily = "daily"
+            case weekly = "weekly"
+        }
+        /// Local times (`User.timezone`) without reminders; they wait until the end. Default 21:00–09:00.
+        ///
+        /// - Remark: Generated from `#/components/schemas/QuietHours`.
+        public struct QuietHours: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/QuietHours/start`.
+            public var start: Swift.String
+            /// - Remark: Generated from `#/components/schemas/QuietHours/end`.
+            public var end: Swift.String
+            /// Creates a new `QuietHours`.
+            ///
+            /// - Parameters:
+            ///   - start:
+            ///   - end:
+            public init(
+                start: Swift.String,
+                end: Swift.String
+            ) {
+                self.start = start
+                self.end = end
+            }
+            public enum CodingKeys: String, CodingKey {
+                case start
+                case end
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ReminderPreferences`.
+        public struct ReminderPreferences: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/level`.
+            public var level: Components.Schemas.ReminderLevel
+            /// The server lowered `level` to `fewer` after 4 unanswered reminders in a row; show it once, then send `auto_reduced_seen`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/auto_reduced`.
+            public var autoReduced: Swift.Bool?
+            /// Pushes when a frame asks for new photos.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/frame_requests`.
+            public var frameRequests: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/weekly_summary`.
+            public var weeklySummary: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/birthday_reminders`.
+            public var birthdayReminders: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/snoozed_until`.
+            public var snoozedUntil: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/quiet_hours`.
+            public var quietHours: Components.Schemas.QuietHours
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/email_digest`.
+            public var emailDigest: Components.Schemas.EmailDigest
+            /// The server can send mail (discovery `email_digest`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferences/email_digest_available`.
+            public var emailDigestAvailable: Swift.Bool?
+            /// Creates a new `ReminderPreferences`.
+            ///
+            /// - Parameters:
+            ///   - level:
+            ///   - autoReduced: The server lowered `level` to `fewer` after 4 unanswered reminders in a row; show it once, then send `auto_reduced_seen`.
+            ///   - frameRequests: Pushes when a frame asks for new photos.
+            ///   - weeklySummary:
+            ///   - birthdayReminders:
+            ///   - snoozedUntil:
+            ///   - quietHours:
+            ///   - emailDigest:
+            ///   - emailDigestAvailable: The server can send mail (discovery `email_digest`).
+            public init(
+                level: Components.Schemas.ReminderLevel,
+                autoReduced: Swift.Bool? = nil,
+                frameRequests: Swift.Bool,
+                weeklySummary: Swift.Bool,
+                birthdayReminders: Swift.Bool,
+                snoozedUntil: Foundation.Date? = nil,
+                quietHours: Components.Schemas.QuietHours,
+                emailDigest: Components.Schemas.EmailDigest,
+                emailDigestAvailable: Swift.Bool? = nil
+            ) {
+                self.level = level
+                self.autoReduced = autoReduced
+                self.frameRequests = frameRequests
+                self.weeklySummary = weeklySummary
+                self.birthdayReminders = birthdayReminders
+                self.snoozedUntil = snoozedUntil
+                self.quietHours = quietHours
+                self.emailDigest = emailDigest
+                self.emailDigestAvailable = emailDigestAvailable
+            }
+            public enum CodingKeys: String, CodingKey {
+                case level
+                case autoReduced = "auto_reduced"
+                case frameRequests = "frame_requests"
+                case weeklySummary = "weekly_summary"
+                case birthdayReminders = "birthday_reminders"
+                case snoozedUntil = "snoozed_until"
+                case quietHours = "quiet_hours"
+                case emailDigest = "email_digest"
+                case emailDigestAvailable = "email_digest_available"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate`.
+        public struct ReminderPreferencesUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/level`.
+            public var level: Components.Schemas.ReminderLevel?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/frame_requests`.
+            public var frameRequests: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/weekly_summary`.
+            public var weeklySummary: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/birthday_reminders`.
+            public var birthdayReminders: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/snooze_days`.
+            public var snoozeDays: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/quiet_hours`.
+            public var quietHours: Components.Schemas.QuietHours?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/email_digest`.
+            public var emailDigest: Components.Schemas.EmailDigest?
+            /// - Remark: Generated from `#/components/schemas/ReminderPreferencesUpdate/auto_reduced_seen`.
+            public var autoReducedSeen: Swift.Bool?
+            /// Creates a new `ReminderPreferencesUpdate`.
+            ///
+            /// - Parameters:
+            ///   - level:
+            ///   - frameRequests:
+            ///   - weeklySummary:
+            ///   - birthdayReminders:
+            ///   - snoozeDays:
+            ///   - quietHours:
+            ///   - emailDigest:
+            ///   - autoReducedSeen:
+            public init(
+                level: Components.Schemas.ReminderLevel? = nil,
+                frameRequests: Swift.Bool? = nil,
+                weeklySummary: Swift.Bool? = nil,
+                birthdayReminders: Swift.Bool? = nil,
+                snoozeDays: Swift.Int? = nil,
+                quietHours: Components.Schemas.QuietHours? = nil,
+                emailDigest: Components.Schemas.EmailDigest? = nil,
+                autoReducedSeen: Swift.Bool? = nil
+            ) {
+                self.level = level
+                self.frameRequests = frameRequests
+                self.weeklySummary = weeklySummary
+                self.birthdayReminders = birthdayReminders
+                self.snoozeDays = snoozeDays
+                self.quietHours = quietHours
+                self.emailDigest = emailDigest
+                self.autoReducedSeen = autoReducedSeen
+            }
+            public enum CodingKeys: String, CodingKey {
+                case level
+                case frameRequests = "frame_requests"
+                case weeklySummary = "weekly_summary"
+                case birthdayReminders = "birthday_reminders"
+                case snoozeDays = "snooze_days"
+                case quietHours = "quiet_hours"
+                case emailDigest = "email_digest"
+                case autoReducedSeen = "auto_reduced_seen"
+            }
+        }
+        /// Payload of the `comments` change (entity: the placement): the three newest person comments of the placement's
+        /// feed post, for frames with `settings.social.show_comments` on (README §5.20). Plain text, first names only.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PlacementComments`.
+        public struct PlacementComments: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlacementComments/placement_id`.
+            public var placementId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PlacementComments/CommentsPayload`.
+            public struct CommentsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PlacementComments/CommentsPayload/id`.
+                public var id: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/PlacementComments/CommentsPayload/author_name`.
+                public var authorName: Swift.String
+                /// Cut at 280 characters with "…"; mentions as plain text.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PlacementComments/CommentsPayload/body`.
+                public var body: Swift.String
+                /// - Remark: Generated from `#/components/schemas/PlacementComments/CommentsPayload/created_at`.
+                public var createdAt: Foundation.Date
+                /// Creates a new `CommentsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - authorName:
+                ///   - body: Cut at 280 characters with "…"; mentions as plain text.
+                ///   - createdAt:
+                public init(
+                    id: Components.Schemas.Id,
+                    authorName: Swift.String,
+                    body: Swift.String,
+                    createdAt: Foundation.Date
+                ) {
+                    self.id = id
+                    self.authorName = authorName
+                    self.body = body
+                    self.createdAt = createdAt
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case id
+                    case authorName = "author_name"
+                    case body
+                    case createdAt = "created_at"
+                }
+            }
+            /// Newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlacementComments/comments`.
+            public typealias CommentsPayload = [Components.Schemas.PlacementComments.CommentsPayloadPayload]
+            /// Newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlacementComments/comments`.
+            public var comments: Components.Schemas.PlacementComments.CommentsPayload
+            /// Creates a new `PlacementComments`.
+            ///
+            /// - Parameters:
+            ///   - placementId:
+            ///   - comments: Newest first.
+            public init(
+                placementId: Components.Schemas.Id,
+                comments: Components.Schemas.PlacementComments.CommentsPayload
+            ) {
+                self.placementId = placementId
+                self.comments = comments
+            }
+            public enum CodingKeys: String, CodingKey {
+                case placementId = "placement_id"
+                case comments
+            }
+        }
+        /// Payload of the `prompts` change (entity: the frame): current prompts of its families, for the title card before their answers.
+        ///
+        /// - Remark: Generated from `#/components/schemas/FramePrompts`.
+        public struct FramePrompts: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FramePrompts/generated_at`.
+            public var generatedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/FramePrompts/PromptsPayload`.
+            public struct PromptsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FramePrompts/PromptsPayload/prompt_id`.
+                public var promptId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FramePrompts/PromptsPayload/feed_id`.
+                public var feedId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FramePrompts/PromptsPayload/feed_name`.
+                public var feedName: Swift.String
+                /// In the frame's `locale.language`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FramePrompts/PromptsPayload/title`.
+                public var title: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FramePrompts/PromptsPayload/week_of`.
+                public var weekOf: Swift.String
+                /// Creates a new `PromptsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - promptId:
+                ///   - feedId:
+                ///   - feedName:
+                ///   - title: In the frame's `locale.language`.
+                ///   - weekOf:
+                public init(
+                    promptId: Components.Schemas.Id,
+                    feedId: Components.Schemas.Id,
+                    feedName: Swift.String,
+                    title: Swift.String,
+                    weekOf: Swift.String
+                ) {
+                    self.promptId = promptId
+                    self.feedId = feedId
+                    self.feedName = feedName
+                    self.title = title
+                    self.weekOf = weekOf
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case promptId = "prompt_id"
+                    case feedId = "feed_id"
+                    case feedName = "feed_name"
+                    case title
+                    case weekOf = "week_of"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FramePrompts/prompts`.
+            public typealias PromptsPayload = [Components.Schemas.FramePrompts.PromptsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/FramePrompts/prompts`.
+            public var prompts: Components.Schemas.FramePrompts.PromptsPayload
+            /// Creates a new `FramePrompts`.
+            ///
+            /// - Parameters:
+            ///   - generatedAt:
+            ///   - prompts:
+            public init(
+                generatedAt: Foundation.Date,
+                prompts: Components.Schemas.FramePrompts.PromptsPayload
+            ) {
+                self.generatedAt = generatedAt
+                self.prompts = prompts
+            }
+            public enum CodingKeys: String, CodingKey {
+                case generatedAt = "generated_at"
+                case prompts
+            }
+        }
+        /// `post.updated`: a post's thread state, comment count or reaction row changed (everyone who sees the post).
+        ///
+        /// - Remark: Generated from `#/components/schemas/PostEvent`.
+        public struct PostEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PostEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case post_updated = "post.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/PostEvent/type`.
+            public var _type: Components.Schemas.PostEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/PostEvent/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PostEvent/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PostEvent/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PostEvent/thread`.
+            public var thread: Components.Schemas.ThreadSummary
+            /// Creates a new `PostEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - postId:
+            ///   - feedId:
+            ///   - frameId:
+            ///   - thread:
+            public init(
+                _type: Components.Schemas.PostEvent._TypePayload,
+                postId: Components.Schemas.Id,
+                feedId: Components.Schemas.Id? = nil,
+                frameId: Components.Schemas.Id? = nil,
+                thread: Components.Schemas.ThreadSummary
+            ) {
+                self._type = _type
+                self.postId = postId
+                self.feedId = feedId
+                self.frameId = frameId
+                self.thread = thread
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case postId = "post_id"
+                case feedId = "feed_id"
+                case frameId = "frame_id"
+                case thread
+            }
+        }
+        /// `post.removed`: removed, or no longer visible to the receiver.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PostRemovedEvent`.
+        public struct PostRemovedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PostRemovedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case post_removed = "post.removed"
+            }
+            /// - Remark: Generated from `#/components/schemas/PostRemovedEvent/type`.
+            public var _type: Components.Schemas.PostRemovedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/PostRemovedEvent/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PostRemovedEvent/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PostRemovedEvent/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// Creates a new `PostRemovedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - postId:
+            ///   - feedId:
+            ///   - frameId:
+            public init(
+                _type: Components.Schemas.PostRemovedEvent._TypePayload,
+                postId: Components.Schemas.Id,
+                feedId: Components.Schemas.Id? = nil,
+                frameId: Components.Schemas.Id? = nil
+            ) {
+                self._type = _type
+                self.postId = postId
+                self.feedId = feedId
+                self.frameId = frameId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case postId = "post_id"
+                case feedId = "feed_id"
+                case frameId = "frame_id"
+            }
+        }
+        /// `comment.created` (new comment, reply or frame entry) and `comment.updated` (edited, or deleted into a tombstone).
+        ///
+        /// - Remark: Generated from `#/components/schemas/CommentEvent`.
+        public struct CommentEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CommentEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case comment_created = "comment.created"
+                case comment_updated = "comment.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/CommentEvent/type`.
+            public var _type: Components.Schemas.CommentEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/CommentEvent/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CommentEvent/comment`.
+            public var comment: Components.Schemas.Comment
+            /// Creates a new `CommentEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - postId:
+            ///   - comment:
+            public init(
+                _type: Components.Schemas.CommentEvent._TypePayload,
+                postId: Components.Schemas.Id,
+                comment: Components.Schemas.Comment
+            ) {
+                self._type = _type
+                self.postId = postId
+                self.comment = comment
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case postId = "post_id"
+                case comment
+            }
+        }
+        /// `comment.deleted`: gone from the thread for the receiver.
+        ///
+        /// - Remark: Generated from `#/components/schemas/CommentDeletedEvent`.
+        public struct CommentDeletedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CommentDeletedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case comment_deleted = "comment.deleted"
+            }
+            /// - Remark: Generated from `#/components/schemas/CommentDeletedEvent/type`.
+            public var _type: Components.Schemas.CommentDeletedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/CommentDeletedEvent/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CommentDeletedEvent/comment_id`.
+            public var commentId: Components.Schemas.Id
+            /// Creates a new `CommentDeletedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - postId:
+            ///   - commentId:
+            public init(
+                _type: Components.Schemas.CommentDeletedEvent._TypePayload,
+                postId: Components.Schemas.Id,
+                commentId: Components.Schemas.Id
+            ) {
+                self._type = _type
+                self.postId = postId
+                self.commentId = commentId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case postId = "post_id"
+                case commentId = "comment_id"
+            }
+        }
+        /// `thread.read`: the receiver read a thread on another device.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ThreadReadEvent`.
+        public struct ThreadReadEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ThreadReadEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case thread_read = "thread.read"
+            }
+            /// - Remark: Generated from `#/components/schemas/ThreadReadEvent/type`.
+            public var _type: Components.Schemas.ThreadReadEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/ThreadReadEvent/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ThreadReadEvent/read_up_to`.
+            public var readUpTo: Components.Schemas.Id
+            /// Creates a new `ThreadReadEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - postId:
+            ///   - readUpTo:
+            public init(
+                _type: Components.Schemas.ThreadReadEvent._TypePayload,
+                postId: Components.Schemas.Id,
+                readUpTo: Components.Schemas.Id
+            ) {
+                self._type = _type
+                self.postId = postId
+                self.readUpTo = readUpTo
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case postId = "post_id"
+                case readUpTo = "read_up_to"
+            }
+        }
+        /// `reaction.updated`: people's reactions on a target changed; `summary` is computed for the receiver.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent`.
+        public struct ReactionUpdatedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case reaction_updated = "reaction.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/type`.
+            public var _type: Components.Schemas.ReactionUpdatedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/target_kind`.
+            public var targetKind: Components.Schemas.ReactionTargetKind
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/target_id`.
+            public var targetId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/post_id`.
+            public var postId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/conversation_id`.
+            public var conversationId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/ReactionUpdatedEvent/summary`.
+            public var summary: Components.Schemas.ReactionSummary
+            /// Creates a new `ReactionUpdatedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - targetKind:
+            ///   - targetId:
+            ///   - postId:
+            ///   - conversationId:
+            ///   - summary:
+            public init(
+                _type: Components.Schemas.ReactionUpdatedEvent._TypePayload,
+                targetKind: Components.Schemas.ReactionTargetKind,
+                targetId: Components.Schemas.Id,
+                postId: Components.Schemas.Id? = nil,
+                conversationId: Components.Schemas.Id? = nil,
+                summary: Components.Schemas.ReactionSummary
+            ) {
+                self._type = _type
+                self.targetKind = targetKind
+                self.targetId = targetId
+                self.postId = postId
+                self.conversationId = conversationId
+                self.summary = summary
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case targetKind = "target_kind"
+                case targetId = "target_id"
+                case postId = "post_id"
+                case conversationId = "conversation_id"
+                case summary
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CircleEvent`.
+        public struct CircleEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CircleEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case circle_updated = "circle.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/CircleEvent/type`.
+            public var _type: Components.Schemas.CircleEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/CircleEvent/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CircleEvent/circle`.
+            public var circle: Components.Schemas.Circle
+            /// Creates a new `CircleEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - feedId:
+            ///   - circle:
+            public init(
+                _type: Components.Schemas.CircleEvent._TypePayload,
+                feedId: Components.Schemas.Id,
+                circle: Components.Schemas.Circle
+            ) {
+                self._type = _type
+                self.feedId = feedId
+                self.circle = circle
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case feedId = "feed_id"
+                case circle
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CircleRemovedEvent`.
+        public struct CircleRemovedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CircleRemovedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case circle_removed = "circle.removed"
+            }
+            /// - Remark: Generated from `#/components/schemas/CircleRemovedEvent/type`.
+            public var _type: Components.Schemas.CircleRemovedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/CircleRemovedEvent/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CircleRemovedEvent/circle_id`.
+            public var circleId: Components.Schemas.Id
+            /// Creates a new `CircleRemovedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - feedId:
+            ///   - circleId:
+            public init(
+                _type: Components.Schemas.CircleRemovedEvent._TypePayload,
+                feedId: Components.Schemas.Id,
+                circleId: Components.Schemas.Id
+            ) {
+                self._type = _type
+                self.feedId = feedId
+                self.circleId = circleId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case feedId = "feed_id"
+                case circleId = "circle_id"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ConversationEvent`.
+        public struct ConversationEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ConversationEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case conversation_updated = "conversation.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/ConversationEvent/type`.
+            public var _type: Components.Schemas.ConversationEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/ConversationEvent/conversation`.
+            public var conversation: Components.Schemas.Conversation
+            /// Creates a new `ConversationEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - conversation:
+            public init(
+                _type: Components.Schemas.ConversationEvent._TypePayload,
+                conversation: Components.Schemas.Conversation
+            ) {
+                self._type = _type
+                self.conversation = conversation
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case conversation
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ConversationRemovedEvent`.
+        public struct ConversationRemovedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ConversationRemovedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case conversation_removed = "conversation.removed"
+            }
+            /// - Remark: Generated from `#/components/schemas/ConversationRemovedEvent/type`.
+            public var _type: Components.Schemas.ConversationRemovedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/ConversationRemovedEvent/conversation_id`.
+            public var conversationId: Components.Schemas.Id
+            /// Creates a new `ConversationRemovedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - conversationId:
+            public init(
+                _type: Components.Schemas.ConversationRemovedEvent._TypePayload,
+                conversationId: Components.Schemas.Id
+            ) {
+                self._type = _type
+                self.conversationId = conversationId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case conversationId = "conversation_id"
+            }
+        }
+        /// `message.created`, and `message.updated` (edited, items ready, preview fetched, frame activity, deleted into a tombstone).
+        ///
+        /// - Remark: Generated from `#/components/schemas/MessageEvent`.
+        public struct MessageEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MessageEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case message_created = "message.created"
+                case message_updated = "message.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/MessageEvent/type`.
+            public var _type: Components.Schemas.MessageEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/MessageEvent/conversation_id`.
+            public var conversationId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/MessageEvent/message`.
+            public var message: Components.Schemas.Message
+            /// Creates a new `MessageEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - conversationId:
+            ///   - message:
+            public init(
+                _type: Components.Schemas.MessageEvent._TypePayload,
+                conversationId: Components.Schemas.Id,
+                message: Components.Schemas.Message
+            ) {
+                self._type = _type
+                self.conversationId = conversationId
+                self.message = message
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case conversationId = "conversation_id"
+                case message
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ReadUpdatedEvent`.
+        public struct ReadUpdatedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReadUpdatedEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case read_updated = "read.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/ReadUpdatedEvent/type`.
+            public var _type: Components.Schemas.ReadUpdatedEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/ReadUpdatedEvent/conversation_id`.
+            public var conversationId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ReadUpdatedEvent/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ReadUpdatedEvent/last_read_message_id`.
+            public var lastReadMessageId: Components.Schemas.Id
+            /// Creates a new `ReadUpdatedEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - conversationId:
+            ///   - userId:
+            ///   - lastReadMessageId:
+            public init(
+                _type: Components.Schemas.ReadUpdatedEvent._TypePayload,
+                conversationId: Components.Schemas.Id,
+                userId: Components.Schemas.Id,
+                lastReadMessageId: Components.Schemas.Id
+            ) {
+                self._type = _type
+                self.conversationId = conversationId
+                self.userId = userId
+                self.lastReadMessageId = lastReadMessageId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case conversationId = "conversation_id"
+                case userId = "user_id"
+                case lastReadMessageId = "last_read_message_id"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TypingEvent`.
+        public struct TypingEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case typing = "typing"
+            }
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/type`.
+            public var _type: Components.Schemas.TypingEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/conversation_id`.
+            public var conversationId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/activity`.
+            @frozen public enum ActivityPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case typing = "typing"
+                case recording = "recording"
+            }
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/activity`.
+            public var activity: Components.Schemas.TypingEvent.ActivityPayload
+            /// - Remark: Generated from `#/components/schemas/TypingEvent/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// Creates a new `TypingEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - conversationId:
+            ///   - userId:
+            ///   - displayName:
+            ///   - activity:
+            ///   - expiresAt:
+            public init(
+                _type: Components.Schemas.TypingEvent._TypePayload,
+                conversationId: Components.Schemas.Id,
+                userId: Components.Schemas.Id,
+                displayName: Swift.String,
+                activity: Components.Schemas.TypingEvent.ActivityPayload,
+                expiresAt: Foundation.Date
+            ) {
+                self._type = _type
+                self.conversationId = conversationId
+                self.userId = userId
+                self.displayName = displayName
+                self.activity = activity
+                self.expiresAt = expiresAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case conversationId = "conversation_id"
+                case userId = "user_id"
+                case displayName = "display_name"
+                case activity
+                case expiresAt = "expires_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/BadgeEvent`.
+        public struct BadgeEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BadgeEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case badge_updated = "badge.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/BadgeEvent/type`.
+            public var _type: Components.Schemas.BadgeEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/BadgeEvent/badge`.
+            public var badge: Components.Schemas.Badge
+            /// Creates a new `BadgeEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - badge:
+            public init(
+                _type: Components.Schemas.BadgeEvent._TypePayload,
+                badge: Components.Schemas.Badge
+            ) {
+                self._type = _type
+                self.badge = badge
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case badge
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ReportEvent`.
+        public struct ReportEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ReportEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case report_created = "report.created"
+            }
+            /// - Remark: Generated from `#/components/schemas/ReportEvent/type`.
+            public var _type: Components.Schemas.ReportEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/ReportEvent/report`.
+            public var report: Components.Schemas.Report
+            /// Creates a new `ReportEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - report:
+            public init(
+                _type: Components.Schemas.ReportEvent._TypePayload,
+                report: Components.Schemas.Report
+            ) {
+                self._type = _type
+                self.report = report
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case report
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PhotoRequestEvent`.
+        public struct PhotoRequestEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoRequestEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case photoRequest_created = "photo_request.created"
+                case photoRequest_updated = "photo_request.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/PhotoRequestEvent/type`.
+            public var _type: Components.Schemas.PhotoRequestEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/PhotoRequestEvent/request`.
+            public var request: Components.Schemas.PhotoRequest
+            /// Creates a new `PhotoRequestEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - request:
+            public init(
+                _type: Components.Schemas.PhotoRequestEvent._TypePayload,
+                request: Components.Schemas.PhotoRequest
+            ) {
+                self._type = _type
+                self.request = request
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case request
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/StreakEvent`.
+        public struct StreakEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/StreakEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case streak_updated = "streak.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/StreakEvent/type`.
+            public var _type: Components.Schemas.StreakEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/StreakEvent/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/StreakEvent/streak`.
+            public var streak: Components.Schemas.FeedStreakSummary
+            /// Creates a new `StreakEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - feedId:
+            ///   - streak:
+            public init(
+                _type: Components.Schemas.StreakEvent._TypePayload,
+                feedId: Components.Schemas.Id,
+                streak: Components.Schemas.FeedStreakSummary
+            ) {
+                self._type = _type
+                self.feedId = feedId
+                self.streak = streak
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case feedId = "feed_id"
+                case streak
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PromptEvent`.
+        public struct PromptEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PromptEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case prompt_updated = "prompt.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/PromptEvent/type`.
+            public var _type: Components.Schemas.PromptEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/PromptEvent/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PromptEvent/prompt`.
+            public var prompt: Components.Schemas.FeedPrompt
+            /// Creates a new `PromptEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - feedId:
+            ///   - prompt:
+            public init(
+                _type: Components.Schemas.PromptEvent._TypePayload,
+                feedId: Components.Schemas.Id,
+                prompt: Components.Schemas.FeedPrompt
+            ) {
+                self._type = _type
+                self.feedId = feedId
+                self.prompt = prompt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case feedId = "feed_id"
+                case prompt
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MilestoneEvent`.
+        public struct MilestoneEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MilestoneEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case milestone_achieved = "milestone.achieved"
+            }
+            /// - Remark: Generated from `#/components/schemas/MilestoneEvent/type`.
+            public var _type: Components.Schemas.MilestoneEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/MilestoneEvent/milestone`.
+            public var milestone: Components.Schemas.Milestone
+            /// Creates a new `MilestoneEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - milestone:
+            public init(
+                _type: Components.Schemas.MilestoneEvent._TypePayload,
+                milestone: Components.Schemas.Milestone
+            ) {
+                self._type = _type
+                self.milestone = milestone
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case milestone
+            }
+        }
+        /// Push `key`s added by family social (README §6.3; the older keys are listed there). Clients ignore keys they
+        /// don't know.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FamilySocialPushKey`.
+        @frozen public enum FamilySocialPushKey: String, Codable, Hashable, Sendable, CaseIterable {
+            case comment = "comment"
+            case commentReply = "comment_reply"
+            case mention = "mention"
+            case reactionPerson = "reaction_person"
+            case reactionDigest = "reaction_digest"
+            case message = "message"
+            case conversationAdded = "conversation_added"
+            case report = "report"
+            case frameRequest = "frame_request"
+            case reminderQuiet = "reminder_quiet"
+            case reminderStreak = "reminder_streak"
+            case reminderBirthday = "reminder_birthday"
+            case weeklySummary = "weekly_summary"
+        }
+        /// Notification buttons in `PushPayload.actions`: `snooze_month` calls `updateReminderPreferences {snooze_days: 30}`, `fewer_reminders` `{level: fewer}`.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PushAction`.
+        @frozen public enum PushAction: String, Codable, Hashable, Sendable, CaseIterable {
+            case snoozeMonth = "snooze_month"
+            case fewerReminders = "fewer_reminders"
+        }
+        /// The decrypted WebPush payload and the content of UnifiedPush messages (README §6.3); FCM data and APNs
+        /// custom keys carry the same fields. `ids` holds only ids (strings), never content.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PushPayload`.
+        public struct PushPayload: Codable, Hashable, Sendable {
+            /// The websocket event type this push stands for.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PushPayload/type`.
+            public var _type: Swift.String
+            /// The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PushPayload/key`.
+            public var key: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PushPayload/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PushPayload/body`.
+            public var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PushPayload/ids`.
+            public struct IdsPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: [String: Swift.String]
+                /// Creates a new `IdsPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: [String: Swift.String] = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/PushPayload/ids`.
+            public var ids: Components.Schemas.PushPayload.IdsPayload
+            /// A newer push with the same tag replaces the older one.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PushPayload/tag`.
+            public var tag: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PushPayload/actions`.
+            public var actions: [Components.Schemas.PushAction]?
+            /// Creates a new `PushPayload`.
+            ///
+            /// - Parameters:
+            ///   - _type: The websocket event type this push stands for.
+            ///   - key: The push key (`FamilySocialPushKey` and the older ones in README §6.3).
+            ///   - title:
+            ///   - body:
+            ///   - ids:
+            ///   - tag: A newer push with the same tag replaces the older one.
+            ///   - actions:
+            public init(
+                _type: Swift.String,
+                key: Swift.String,
+                title: Swift.String,
+                body: Swift.String,
+                ids: Components.Schemas.PushPayload.IdsPayload,
+                tag: Swift.String? = nil,
+                actions: [Components.Schemas.PushAction]? = nil
+            ) {
+                self._type = _type
+                self.key = key
+                self.title = title
+                self.body = body
+                self.ids = ids
+                self.tag = tag
+                self.actions = actions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case key
+                case title
+                case body
+                case ids
+                case tag
+                case actions
             }
         }
     }

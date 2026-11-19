@@ -1,0 +1,522 @@
+{
+  "problem.comments_closed": {
+    "en": "Comments are turned off for this post.",
+    "nl": "Reageren is uitgezet voor dit bericht."
+  },
+  "social.circle.add": {
+    "en": "Add people",
+    "nl": "Mensen toevoegen"
+  },
+  "social.circle.chat": {
+    "en": "Circle chat",
+    "nl": "Kringchat"
+  },
+  "social.circle.delete": {
+    "en": "Delete circle",
+    "nl": "Kring verwijderen"
+  },
+  "social.circle.deleteBody": {
+    "en": "Its posts disappear everywhere, also from the frames, and its chat is archived.",
+    "nl": "De berichten verdwijnen overal, ook van de kaders, en de chat wordt gearchiveerd."
+  },
+  "social.circle.deleteConfirm": {
+    "en": "Delete {name}?",
+    "nl": "{name} verwijderen?"
+  },
+  "social.circle.emptyBody": {
+    "en": "Make one for a branch of the family.",
+    "nl": "Maak er een voor een tak van de familie."
+  },
+  "social.circle.emptyTitle": {
+    "en": "No circles yet",
+    "nl": "Nog geen kringen"
+  },
+  "social.circle.frames": {
+    "en": "Frames its posts reach",
+    "nl": "Kaders die de berichten krijgen"
+  },
+  "social.circle.framesHint": {
+    "en": "Frames of the family that have a manager in the circle get its posts. Switch on others to add them.",
+    "nl": "Kaders van de familie met een beheerder in de kring krijgen de berichten. Zet andere aan om ze toe te voegen."
+  },
+  "social.circle.leave": {
+    "en": "Leave circle",
+    "nl": "Kring verlaten"
+  },
+  "social.circle.lede": {
+    "en": "Smaller groups inside the family, like “Anna’s household” or “The cousins”: their own chat, and you can share a post with just them.",
+    "nl": "Kleinere groepen binnen de familie, zoals “Het gezin van Anna” of “De neven en nichten”: met een eigen chat, en je kunt een bericht met alleen hen delen."
+  },
+  "social.circle.memberCount.one": {
+    "en": "1 person",
+    "nl": "1 persoon"
+  },
+  "social.circle.memberCount.other": {
+    "en": "{count} people",
+    "nl": "{count} personen"
+  },
+  "social.circle.members": {
+    "en": "Who’s in it",
+    "nl": "Wie erin zit"
+  },
+  "social.circle.membersHint": {
+    "en": "Hold a name to make them an admin or remove them.",
+    "nl": "Houd een naam vast om iemand beheerder te maken of te verwijderen."
+  },
+  "social.circle.name": {
+    "en": "Name",
+    "nl": "Naam"
+  },
+  "social.circle.nameEmpty": {
+    "en": "Give the circle a name.",
+    "nl": "Geef de kring een naam."
+  },
+  "social.circle.nameLong": {
+    "en": "At most {max} characters.",
+    "nl": "Hoogstens {max} tekens."
+  },
+  "social.circle.namePlaceholder": {
+    "en": "The cousins",
+    "nl": "De neven en nichten"
+  },
+  "social.circle.nameTaken": {
+    "en": "This family already has a circle with that name.",
+    "nl": "Deze familie heeft al een kring met die naam."
+  },
+  "social.circle.new": {
+    "en": "New circle",
+    "nl": "Nieuwe kring"
+  },
+  "social.circle.notIn": {
+    "en": "you’re not in it",
+    "nl": "jij zit er niet in"
+  },
+  "social.circle.tab": {
+    "en": "Circles",
+    "nl": "Kringen"
+  },
+  "social.comment.copy": {
+    "en": "Copy",
+    "nl": "Kopiëren"
+  },
+  "social.comment.delete": {
+    "en": "Delete comment",
+    "nl": "Reactie verwijderen"
+  },
+  "social.comment.deleteBody": {
+    "en": "A comment with replies stays as “Comment deleted”.",
+    "nl": "Een reactie met antwoorden blijft staan als “Reactie verwijderd”."
+  },
+  "social.comment.deleteConfirm": {
+    "en": "Delete this comment?",
+    "nl": "Deze reactie verwijderen?"
+  },
+  "social.comment.deleted": {
+    "en": "Comment deleted",
+    "nl": "Reactie verwijderd"
+  },
+  "social.comment.edited": {
+    "en": "edited",
+    "nl": "bewerkt"
+  },
+  "social.comment.remove": {
+    "en": "Remove comment",
+    "nl": "Reactie weghalen"
+  },
+  "social.comment.removeBody": {
+    "en": "It disappears for everyone, with its replies. Its author sees that a family admin removed it.",
+    "nl": "Ze verdwijnt voor iedereen, met de antwoorden. Wie ze schreef, ziet dat een beheerder ze weghaalde."
+  },
+  "social.comment.removedByAdmin": {
+    "en": "Removed by a family admin",
+    "nl": "Verwijderd door een beheerder van de familie"
+  },
+  "social.comment.reply": {
+    "en": "Reply",
+    "nl": "Antwoorden"
+  },
+  "social.compose.answerPrompt": {
+    "en": "Answer this week’s prompt",
+    "nl": "Antwoord op de vraag van deze week"
+  },
+  "social.compose.circleHint": {
+    "en": "Only {circle} sees this post. Frames: {frames}.",
+    "nl": "Alleen {circle} ziet dit bericht. Kaders: {frames}."
+  },
+  "social.compose.shareWith": {
+    "en": "Share with",
+    "nl": "Delen met"
+  },
+  "social.compose.wholeFamily": {
+    "en": "Whole family",
+    "nl": "Hele familie"
+  },
+  "social.family.chat": {
+    "en": "Family chat",
+    "nl": "Familiechat"
+  },
+  "social.family.circles": {
+    "en": "Members can create circles",
+    "nl": "Leden mogen kringen maken"
+  },
+  "social.family.circlesHint": {
+    "en": "Off: only the owner and admins create circles.",
+    "nl": "Uit: alleen de eigenaar en beheerders maken kringen."
+  },
+  "social.family.newCanPost": {
+    "en": "New members can post",
+    "nl": "Nieuwe leden mogen plaatsen"
+  },
+  "social.family.newCanPostHint": {
+    "en": "Off: people who join follow along as members (they comment and chat) until an admin lets them post.",
+    "nl": "Uit: wie erbij komt, volgt mee als lid (reageren en chatten) tot een beheerder plaatsen toestaat."
+  },
+  "social.family.seeReactionsHint": {
+    "en": "Everyone sees how the frames reacted and replied. People’s reactions are always visible.",
+    "nl": "Iedereen ziet hoe de kaders reageerden en antwoordden. Reacties van mensen zijn altijd zichtbaar."
+  },
+  "social.family.seeReceipts": {
+    "en": "Members see receipts",
+    "nl": "Leden zien de ontvangst"
+  },
+  "social.family.seeReceiptsHint": {
+    "en": "Everyone sees on which frames each post arrived and was seen. Otherwise only the poster and admins.",
+    "nl": "Iedereen ziet op welke kaders elk bericht aankwam en bekeken werd. Anders alleen wie plaatste en de beheerders."
+  },
+  "social.family.settings": {
+    "en": "Comments and circles",
+    "nl": "Reacties en kringen"
+  },
+  "social.formerMember": {
+    "en": "Former member",
+    "nl": "Voormalig lid"
+  },
+  "social.frame.askForPhotos": {
+    "en": "Ask for new photos",
+    "nl": "Om nieuwe foto’s vragen"
+  },
+  "social.frame.askForPhotosHint": {
+    "en": "A button in the frame’s menu that tells the family it would like new photos.",
+    "nl": "Een knop in het menu van het kader die de familie laat weten dat er nieuwe foto’s welkom zijn."
+  },
+  "social.frame.newPhotosFrom": {
+    "en": "“New photos from…”",
+    "nl": "“Nieuwe foto’s van…”"
+  },
+  "social.frame.newPhotosFromHint": {
+    "en": "Says who sent the new photos when the frame wakes up.",
+    "nl": "Zegt wie de nieuwe foto’s stuurde wanneer het kader wakker wordt."
+  },
+  "social.frame.promptCards": {
+    "en": "Prompt cards",
+    "nl": "Kaarten met de vraag van de week"
+  },
+  "social.frame.promptCardsHint": {
+    "en": "Shows the week’s prompt before the photos that answer it.",
+    "nl": "Toont de vraag van de week vóór de foto’s die erop antwoorden."
+  },
+  "social.frame.showComments": {
+    "en": "Show comments",
+    "nl": "Reacties tonen"
+  },
+  "social.frame.showCommentsHint": {
+    "en": "When a photo with comments appears, the newest one fades in for 8 seconds, once a day.",
+    "nl": "Als een foto met reacties verschijnt, komt de nieuwste 8 seconden in beeld, één keer per dag."
+  },
+  "social.frame.title": {
+    "en": "Family on the frame",
+    "nl": "Familie op het kader"
+  },
+  "social.frame.updateApp": {
+    "en": "Update the frame app to use this.",
+    "nl": "Werk de app van het kader bij om dit te gebruiken."
+  },
+  "social.frameEntry.laugh": {
+    "en": "{frame} laughed at this",
+    "nl": "{frame} moest hierom lachen"
+  },
+  "social.frameEntry.love": {
+    "en": "{frame} loved this",
+    "nl": "{frame} vond dit prachtig"
+  },
+  "social.frameEntry.reply": {
+    "en": "{frame}: {reply}",
+    "nl": "{frame}: {reply}"
+  },
+  "social.frameEntry.sad": {
+    "en": "{frame} was moved",
+    "nl": "{frame} was ontroerd"
+  },
+  "social.frameEntry.wow": {
+    "en": "{frame} was amazed",
+    "nl": "{frame} was onder de indruk"
+  },
+  "social.home.emptyBody": {
+    "en": "Photos shared in your families and sent to your frames appear here, newest first.",
+    "nl": "Foto’s die in je families gedeeld en naar je kaders gestuurd worden, verschijnen hier, de nieuwste eerst."
+  },
+  "social.home.emptyTitle": {
+    "en": "Nothing shared yet",
+    "nl": "Nog niets gedeeld"
+  },
+  "social.home.stripOnly": {
+    "en": "How fresh your frames and families are. Tap one to send something.",
+    "nl": "Hoe vers je kaders en families zijn. Tik erop om iets te sturen."
+  },
+  "social.home.title": {
+    "en": "Home",
+    "nl": "Thuis"
+  },
+  "social.list.and": {
+    "en": "{list} and {last}",
+    "nl": "{list} en {last}"
+  },
+  "social.media.failed": {
+    "en": "This video can’t be played right now.",
+    "nl": "Deze video kan nu niet afgespeeld worden."
+  },
+  "social.media.play": {
+    "en": "Play video",
+    "nl": "Video afspelen"
+  },
+  "social.mention.pick": {
+    "en": "Mention {name}",
+    "nl": "{name} noemen"
+  },
+  "social.mute.all": {
+    "en": "Everything muted",
+    "nl": "Alles gedempt"
+  },
+  "social.mute.chat": {
+    "en": "Chat muted",
+    "nl": "Chat gedempt"
+  },
+  "social.mute.none": {
+    "en": "Everything",
+    "nl": "Alles"
+  },
+  "social.mute.posts": {
+    "en": "Posts muted (mentions still come)",
+    "nl": "Berichten gedempt (vermeldingen komen nog)"
+  },
+  "social.mute.title": {
+    "en": "Notifications",
+    "nl": "Meldingen"
+  },
+  "social.post.deliveredTo.one": {
+    "en": "On its way to 1 frame",
+    "nl": "Onderweg naar 1 kader"
+  },
+  "social.post.deliveredTo.other": {
+    "en": "On its way to {count} frames",
+    "nl": "Onderweg naar {count} kaders"
+  },
+  "social.post.goneBody": {
+    "en": "It was removed, or you can no longer see it.",
+    "nl": "Het is verwijderd, of je kunt het niet meer zien."
+  },
+  "social.post.goneTitle": {
+    "en": "This post is gone",
+    "nl": "Dit bericht is weg"
+  },
+  "social.post.inCircle": {
+    "en": "{feed} · {circle}",
+    "nl": "{feed} · {circle}"
+  },
+  "social.post.loveFrom": {
+    "en": "❤️ from {frame}",
+    "nl": "❤️ van {frame}"
+  },
+  "social.post.reactToPhoto": {
+    "en": "React to this photo",
+    "nl": "Reageer op deze foto"
+  },
+  "social.post.seenOn.one": {
+    "en": "Seen on 1 frame",
+    "nl": "Gezien op 1 kader"
+  },
+  "social.post.seenOn.other": {
+    "en": "Seen on {count} frames",
+    "nl": "Gezien op {count} kaders"
+  },
+  "social.post.shareInChat": {
+    "en": "Share in chat",
+    "nl": "Delen in een chat"
+  },
+  "social.post.toFrame": {
+    "en": "To {frame}",
+    "nl": "Naar {frame}"
+  },
+  "social.reaction.hint": {
+    "en": "Tap for ❤️, hold for more",
+    "nl": "Tik voor ❤️, houd vast voor meer"
+  },
+  "social.reaction.laugh": {
+    "en": "Laugh",
+    "nl": "Lach"
+  },
+  "social.reaction.love": {
+    "en": "Love",
+    "nl": "Hartje"
+  },
+  "social.reaction.pray": {
+    "en": "Thank you",
+    "nl": "Dank je"
+  },
+  "social.reaction.react": {
+    "en": "React",
+    "nl": "Reageer"
+  },
+  "social.reaction.remove": {
+    "en": "Remove my reaction",
+    "nl": "Mijn reactie weghalen"
+  },
+  "social.reaction.sad": {
+    "en": "Sad",
+    "nl": "Verdrietig"
+  },
+  "social.reaction.thumbs_up": {
+    "en": "Thumbs up",
+    "nl": "Duim omhoog"
+  },
+  "social.reaction.wow": {
+    "en": "Wow",
+    "nl": "Wauw"
+  },
+  "social.reaction.yours": {
+    "en": "Your reaction: {emoji}",
+    "nl": "Jouw reactie: {emoji}"
+  },
+  "social.reactions.a11y": {
+    "en": "Reactions: {names}",
+    "nl": "Reacties: {names}"
+  },
+  "social.reactions.count.one": {
+    "en": "{count} reaction",
+    "nl": "{count} reactie"
+  },
+  "social.reactions.count.other": {
+    "en": "{count} reactions",
+    "nl": "{count} reacties"
+  },
+  "social.reactions.frames": {
+    "en": "Frames",
+    "nl": "Kaders"
+  },
+  "social.reactions.others.one": {
+    "en": "{names} and 1 other",
+    "nl": "{names} en 1 andere"
+  },
+  "social.reactions.others.other": {
+    "en": "{names} and {count} others",
+    "nl": "{names} en {count} anderen"
+  },
+  "social.reactions.people": {
+    "en": "People",
+    "nl": "Mensen"
+  },
+  "social.reactions.title": {
+    "en": "Reactions",
+    "nl": "Reacties"
+  },
+  "social.reactions.two": {
+    "en": "{a} and {b}",
+    "nl": "{a} en {b}"
+  },
+  "social.reactions.who": {
+    "en": "Shows who reacted",
+    "nl": "Toont wie reageerde"
+  },
+  "social.role.member": {
+    "en": "Member",
+    "nl": "Lid"
+  },
+  "social.role.memberHint": {
+    "en": "Follows along: sees the posts, comments, reacts and chats, but doesn’t post photos.",
+    "nl": "Volgt mee: ziet de berichten, reageert en chat, maar plaatst geen foto’s."
+  },
+  "social.role.rolesHint": {
+    "en": "Posters and admins post photos; members follow along, comment and chat. The frames are part of the family too.",
+    "nl": "Plaatsers en beheerders plaatsen foto’s; leden volgen mee, reageren en chatten. De kaders horen ook bij de familie."
+  },
+  "social.thread.close": {
+    "en": "Turn comments off",
+    "nl": "Reageren uitzetten"
+  },
+  "social.thread.closed": {
+    "en": "Comments are turned off for this post.",
+    "nl": "Reageren is uitgezet voor dit bericht."
+  },
+  "social.thread.closedShort": {
+    "en": "Comments off",
+    "nl": "Reacties uit"
+  },
+  "social.thread.comment": {
+    "en": "Comment",
+    "nl": "Reageren"
+  },
+  "social.thread.editing": {
+    "en": "Editing your comment",
+    "nl": "Je reactie bewerken"
+  },
+  "social.thread.empty": {
+    "en": "No comments yet. Say something nice!",
+    "nl": "Nog geen reacties. Zeg iets liefs!"
+  },
+  "social.thread.mute": {
+    "en": "Mute this post",
+    "nl": "Dit bericht dempen"
+  },
+  "social.thread.muted": {
+    "en": "Muted",
+    "nl": "Gedempt"
+  },
+  "social.thread.new.one": {
+    "en": "1 new",
+    "nl": "1 nieuw"
+  },
+  "social.thread.new.other": {
+    "en": "{count} new",
+    "nl": "{count} nieuw"
+  },
+  "social.thread.open": {
+    "en": "Turn comments on",
+    "nl": "Reageren aanzetten"
+  },
+  "social.thread.placeholder": {
+    "en": "Add a comment… (@ to mention)",
+    "nl": "Schrijf een reactie… (@ om iemand te noemen)"
+  },
+  "social.thread.readOnly": {
+    "en": "You can see this post but not comment on it.",
+    "nl": "Je kunt dit bericht zien, maar er niet op reageren."
+  },
+  "social.thread.replyingTo": {
+    "en": "Replying to {name}",
+    "nl": "Antwoord aan {name}"
+  },
+  "social.thread.send": {
+    "en": "Post comment",
+    "nl": "Reactie plaatsen"
+  },
+  "social.thread.title": {
+    "en": "Post",
+    "nl": "Bericht"
+  },
+  "social.thread.unmute": {
+    "en": "Unmute this post",
+    "nl": "Dit bericht niet meer dempen"
+  },
+  "social.thread.viewAll.one": {
+    "en": "View the comment",
+    "nl": "Bekijk de reactie"
+  },
+  "social.thread.viewAll.other": {
+    "en": "View all {count} comments",
+    "nl": "Bekijk alle {count} reacties"
+  },
+  "social.you": {
+    "en": "You",
+    "nl": "Jij"
+  }
+}

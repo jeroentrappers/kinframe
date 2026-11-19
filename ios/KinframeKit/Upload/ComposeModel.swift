@@ -41,6 +41,10 @@ public final class ComposeModel {
     public var frameIds: Set<String> = []
     /// Feeds to post to, next to the frames (docs/spec/feeds.md §6.1). At least one frame or feed.
     public var feedIds: Set<String> = []
+    /// "Share with": a circle per chosen feed (feed id → circle id); a feed without one gets a whole-family post.
+    public var circleByFeed: [String: String] = [:]
+    /// The weekly prompt these posts answer (its feed must be chosen).
+    public var promptId: String?
     /// Caption for every item without its own.
     public var sharedCaption = ""
     public var limits: Limits
@@ -224,8 +228,13 @@ public final class ComposeModel {
         }
         let chosen = frames.filter { frameIds.contains($0.id) }
         let chosenFeeds = feeds.filter { feedIds.contains($0.id) }
-        let job = OutboxJob(id: id, server: server, frameIds: chosen.map(\.id), frameNames: chosen.map(\.name),
+        var job = OutboxJob(id: id, server: server, frameIds: chosen.map(\.id), frameNames: chosen.map(\.name),
                             feedIds: chosenFeeds.map(\.id), feedNames: chosenFeeds.map(\.name), items: items)
+        let circles = chosenFeeds.compactMap { circleByFeed[$0.id] }
+        job.circleIds = circles.isEmpty ? nil : circles
+        job.promptId = chosenFeeds.isEmpty ? nil : promptId
+        circleByFeed = [:]
+        promptId = nil
         drafts = []
         sharedCaption = ""
         try? FileManager.default.removeItem(at: staging)

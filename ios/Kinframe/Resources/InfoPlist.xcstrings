@@ -1,0 +1,20 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Take a photo or video to send to a frame." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Neem een foto of video om naar een kader te sturen." } }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Record a voice message for your family." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Neem een spraakbericht op voor je familie." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

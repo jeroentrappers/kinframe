@@ -12,7 +12,7 @@ final class AppModel {
     }
 
     enum Tab: Hashable {
-        case frames, feeds, send, history, settings
+        case home, chats, frames, feeds, send, history, settings
     }
 
     /// A deep link that arrived for another server, waiting for the person to confirm switching.
@@ -42,6 +42,9 @@ final class AppModel {
     var framesPath = NavigationPath()
     var historyPath = NavigationPath()
     var feedsPath = NavigationPath()
+    /// Family social: Home (timeline) and Chats.
+    var homePath = NavigationPath()
+    var chatsPath = NavigationPath()
     /// Frame code or invite being handled (sheet), from a deep link.
     var pendingLink: DeepLink?
     var activeLink: DeepLink?
@@ -50,6 +53,8 @@ final class AppModel {
     var composeFrameIds: Set<String> = []
     /// Feeds preselected for the next compose ("Post" in a feed).
     var composeFeedIds: Set<String> = []
+    /// The weekly prompt the next compose answers ("Answer" on a prompt card).
+    var composePromptId: String?
     /// A feed post to open from a notification (its receipts).
     var pendingFeedPost: FeedPostRoute?
     /// Bumped when history should reload (a send was created, live events).
@@ -70,10 +75,13 @@ final class AppModel {
     private var updateRefresh = DiscoveryRefreshThrottle(interval: 60)
     /// Live events for screens that care (history, frame detail).
     let events = EventHub()
+    /// Family social: chats, badge, reminders, milestones (Social/SocialStore.swift).
+    let social = SocialStore()
 
     init() {
         L10n.bootstrap()
         outbox = OutboxMonitor()
+        social.app = self
         auth.onSignedOut = { [weak self] in self?.sessionEnded() }
         live.onEvent = { [weak self] in self?.handle($0) }
         live.onStatus = { [weak self] in self?.liveStatus = $0 }
@@ -228,6 +236,7 @@ final class AppModel {
             await loadFrames()
             await loadFeeds()
             if photoSources.googleImport { await googleImport.resumeIfNeeded() }
+            await social.refresh()
         }
     }
 
@@ -246,6 +255,9 @@ final class AppModel {
         framesPath = NavigationPath()
         historyPath = NavigationPath()
         feedsPath = NavigationPath()
+        homePath = NavigationPath()
+        chatsPath = NavigationPath()
+        social.reset()
         tab = .frames
         outbox.configure(server: nil, tokens: nil)
         Onboarding.reset()
@@ -399,6 +411,8 @@ final class AppModel {
             openChannel(.emailAddress(addressId), frameId: frameId, feedId: feedId)
         case .telegramChat(let chatId, let frameId, let feedId):
             openChannel(.telegramChat(chatId), frameId: frameId, feedId: feedId)
+        case .social(let r):
+            openSocial(r)
         }
     }
 
@@ -465,6 +479,7 @@ final class AppModel {
             await loadFrames()
             await loadFeeds()
             await syncTimeZone()
+            await social.refresh()
         }
     }
 
@@ -522,7 +537,11 @@ final class AppModel {
             }
             Task { await loadFeeds() }
         case .feedMembershipUpdated:
-            Task { await loadFeeds() }
+            Task {
+                await loadFeeds()
+                // Family chats follow family membership (README §5.18).
+                if social.features.chats { await social.loadConversations() }
+            }
         case .birthdaySuggested(let feedId, let b):
             guard let b else { break }
             toasts.show(L("ios.bday.live.suggested", ["name": b.createdByName ?? L("ios.bday.formerMember"), "person": b.displayName]),
@@ -553,6 +572,8 @@ final class AppModel {
             })
         case .telegramChatUpdated(let c):
             noteChatState(c)
+        case .social(let e):
+            handleSocial(e)
         case .sendUpdated, .reply, .feedReply, .feedPostUpdated, .birthdayUpdated, .birthdayRemoved, .photoSourceRemoved,
              .emailAddressUpdated, .emailAddressRemoved, .emailSenderDecided, .telegramChatRemoved, .telegramCodeUpdated,
              .telegramLinkUpdated:

@@ -72,8 +72,8 @@
     "nl": "{name} bewerken"
   },
   "ios.bday.emptyBody": {
-    "en": "Add the family’s birthdays. Every frame that follows this feed shows a card on the day and a countdown the week before.",
-    "nl": "Voeg de verjaardagen van de familie toe. Elk kader dat deze feed volgt, toont op de dag zelf een kaartje en de week ervoor een aftelling."
+    "en": "Add the family’s birthdays. Every frame that follows this family shows a card on the day and a countdown the week before.",
+    "nl": "Voeg de verjaardagen van de familie toe. Elk kader dat deze familie volgt, toont op de dag zelf een kaartje en de week ervoor een aftelling."
   },
   "ios.bday.emptyTitle": {
     "en": "No birthdays yet",
@@ -120,12 +120,12 @@
     "nl": "In jaren zonder 29 februari vieren de kaders op 28 februari."
   },
   "ios.bday.limitReached": {
-    "en": "This feed has reached the limit of {max} birthdays.",
-    "nl": "Deze feed heeft het maximum van {max} verjaardagen bereikt."
+    "en": "This family has reached the limit of {max} birthdays.",
+    "nl": "Deze familie heeft het maximum van {max} verjaardagen bereikt."
   },
   "ios.bday.link": {
-    "en": "Feed member",
-    "nl": "Lid van de feed"
+    "en": "Family member",
+    "nl": "Lid van de familie"
   },
   "ios.bday.linkHint": {
     "en": "When there’s no photo, the member’s profile photo is used. They can also change their own birthday.",
@@ -180,24 +180,24 @@
     "nl": "Verjaardagsmeldingen"
   },
   "ios.bday.notificationsHint": {
-    "en": "A notification on the morning of each birthday in this feed, and when a frame says happy birthday.",
-    "nl": "Een melding op de ochtend van elke verjaardag in deze feed, en wanneer een kader een fijne verjaardag wenst."
+    "en": "A notification on the morning of each birthday in this family, and when a frame says happy birthday.",
+    "nl": "Een melding op de ochtend van elke verjaardag in deze familie, en wanneer een kader een fijne verjaardag wenst."
   },
   "ios.bday.notificationsOff": {
-    "en": "Birthday notifications are off for {feed}",
-    "nl": "Verjaardagsmeldingen staan uit voor {feed}"
+    "en": "Birthday notifications are off for {family}",
+    "nl": "Verjaardagsmeldingen staan uit voor {familie}"
   },
   "ios.bday.notificationsOn": {
-    "en": "Birthday notifications are on for {feed}",
-    "nl": "Verjaardagsmeldingen staan aan voor {feed}"
+    "en": "Birthday notifications are on for {family}",
+    "nl": "Verjaardagsmeldingen staan aan voor {familie}"
   },
   "ios.bday.off": {
-    "en": "Birthdays of {feed} no longer show on this frame",
-    "nl": "Verjaardagen van {feed} verschijnen niet meer op dit kader"
+    "en": "Birthdays of {family} no longer show on this frame",
+    "nl": "Verjaardagen van {familie} verschijnen niet meer op dit kader"
   },
   "ios.bday.on": {
-    "en": "Birthdays of {feed} show on this frame",
-    "nl": "Verjaardagen van {feed} verschijnen op dit kader"
+    "en": "Birthdays of {family} show on this frame",
+    "nl": "Verjaardagen van {familie} verschijnen op dit kader"
   },
   "ios.bday.pendingTitle": {
     "en": "Suggestions",
@@ -260,8 +260,8 @@
     "nl": "De kaders zeggen hoe oud ze worden. Daarvoor is het geboortejaar nodig."
   },
   "ios.bday.subShow": {
-    "en": "Show the feed’s birthdays",
-    "nl": "Verjaardagen van de feed tonen"
+    "en": "Show the family’s birthdays",
+    "nl": "Verjaardagen van de familie tonen"
   },
   "ios.bday.subShowHint": {
     "en": "A card on the day and a countdown the week before.",
@@ -272,8 +272,8 @@
     "nl": "Verjaardag voorstellen"
   },
   "ios.bday.suggestHint": {
-    "en": "An admin of the feed checks suggestions before they show on the frames.",
-    "nl": "Een beheerder van de feed bekijkt voorstellen voor ze op de kaders verschijnen."
+    "en": "An admin of the family checks suggestions before they show on the frames.",
+    "nl": "Een beheerder van de familie bekijkt voorstellen voor ze op de kaders verschijnen."
   },
   "ios.bday.suggestMine": {
     "en": "Suggest my birthday",
@@ -284,8 +284,8 @@
     "nl": "Verjaardag voorstellen"
   },
   "ios.bday.suggested": {
-    "en": "Suggested. An admin of the feed will check it.",
-    "nl": "Voorgesteld. Een beheerder van de feed bekijkt het."
+    "en": "Suggested. An admin of the family will check it.",
+    "nl": "Voorgesteld. Een beheerder van de familie bekijkt het."
   },
   "ios.bday.suggestedBy": {
     "en": "suggested by {name}",
@@ -340,8 +340,8 @@
     "nl": "Alleen beheerders, wie de verjaardag toevoegde en de persoon zelf zien het jaar."
   },
   "ios.bday.yearHintShown": {
-    "en": "Everyone in the feed sees the year, and the frames show the age.",
-    "nl": "Iedereen in de feed ziet het jaar, en de kaders tonen de leeftijd."
+    "en": "Everyone in the family sees the year, and the frames show the age.",
+    "nl": "Iedereen in de familie ziet het jaar, en de kaders tonen de leeftijd."
   },
   "ios.bday.yearNone": {
     "en": "No year",

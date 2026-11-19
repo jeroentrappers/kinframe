@@ -68,6 +68,15 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var telegramBotUsername: String?
     public var telegramPrivacyMode: Bool = false
     public var telegramMaxFileBytes: Int64?
+    /// Family social (docs/spec/family-social.md): the timeline, threads, people's reactions, the `member` role and
+    /// circles (`social`, only with `feeds`); chats, blocks and reports (`chats`), voice messages and link previews in
+    /// them; encouragement to share (`engagement`) and the email digest. Each area is hidden while its flag is off.
+    public var social: Bool = false
+    public var chats: Bool = false
+    public var voiceMessages: Bool = false
+    public var linkPreviews: Bool = false
+    public var engagement: Bool = false
+    public var emailDigest: Bool = false
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -94,6 +103,10 @@ public struct Discovery: Codable, Equatable, Sendable {
         case telegramBotUsername = "telegram_bot_username"
         case telegramPrivacyMode = "telegram_privacy_mode"
         case telegramMaxFileBytes = "telegram_max_file_bytes"
+        case social, chats, engagement
+        case voiceMessages = "voice_messages"
+        case linkPreviews = "link_previews"
+        case emailDigest = "email_digest"
     }
 
     public init(from decoder: Decoder) throws {
@@ -120,6 +133,12 @@ public struct Discovery: Codable, Equatable, Sendable {
         telegramBotUsername = telegram ? ((try? c.decodeIfPresent(String.self, forKey: .telegramBotUsername)) ?? nil) : nil
         telegramPrivacyMode = telegram && ((try? c.decodeIfPresent(Bool.self, forKey: .telegramPrivacyMode)) ?? false)
         telegramMaxFileBytes = telegram ? ((try? c.decodeIfPresent(Int64.self, forKey: .telegramMaxFileBytes)) ?? nil) : nil
+        social = feeds && ((try? c.decodeIfPresent(Bool.self, forKey: .social)) ?? false)
+        chats = (try? c.decodeIfPresent(Bool.self, forKey: .chats)) ?? false
+        voiceMessages = chats && ((try? c.decodeIfPresent(Bool.self, forKey: .voiceMessages)) ?? false)
+        linkPreviews = chats && ((try? c.decodeIfPresent(Bool.self, forKey: .linkPreviews)) ?? false)
+        engagement = (try? c.decodeIfPresent(Bool.self, forKey: .engagement)) ?? false
+        emailDigest = (try? c.decodeIfPresent(Bool.self, forKey: .emailDigest)) ?? false
         // The server sends the shop's configuration (an object); we keep only whether there is one.
         if let b = try? c.decode(Bool.self, forKey: .shop) {
             shop = b

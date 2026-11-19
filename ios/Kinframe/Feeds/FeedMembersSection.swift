@@ -110,7 +110,7 @@ struct FeedMembersSection: View {
                 }
             }
             .card(padding: 0)
-            Text(L("ios.feeds.rolesHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+            Text(L(app.social.features.social ? "social.role.rolesHint" : "ios.feeds.rolesHint")).font(.footnote).foregroundStyle(Palette.textMuted)
         }
     }
 
@@ -237,7 +237,7 @@ private struct FeedMemberSheet: View {
     @Environment(\.dismiss) private var dismiss
     let model: FeedDetailModel
     let member: FeedMember
-    @State private var admin = false
+    @State private var role: FeedRole = .poster
     @State private var removePosts = false
     @State private var confirmRemove = false
     @State private var confirmTransfer = false
@@ -259,15 +259,21 @@ private struct FeedMemberSheet: View {
                 }
                 .listRowBackground(Palette.surface)
                 Section {
-                    Picker(L("people.role"), selection: $admin) {
-                        Text(L("ios.feeds.rolePoster")).tag(false)
-                        Text(L("role.admin")).tag(true)
+                    Picker(L("people.role"), selection: $role) {
+                        // Family social adds `member`: follows along, comments and chats, doesn't post photos.
+                        if app.social.features.social || member.role == .member {
+                            Text(L("social.role.member")).tag(FeedRole.member)
+                        }
+                        Text(L("ios.feeds.rolePoster")).tag(FeedRole.poster)
+                        if model.abilities?.isOwner == true || member.role == .admin {
+                            Text(L("role.admin")).tag(FeedRole.admin)
+                        }
                     }
                     .pickerStyle(.segmented)
                 } header: {
                     Text(L("people.role"))
                 } footer: {
-                    Text(admin ? L("ios.feeds.adminHint") : L("ios.feeds.posterHint"))
+                    Text(role == .admin ? L("ios.feeds.adminHint") : role == .member ? L("social.role.memberHint") : L("ios.feeds.posterHint"))
                 }
                 .listRowBackground(Palette.surface)
                 if model.abilities?.isOwner == true {
@@ -293,7 +299,7 @@ private struct FeedMemberSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L("common.save")) { Task { await save() } }
                         .fontWeight(.semibold)
-                        .disabled(busy || admin == (member.role == .admin))
+                        .disabled(busy || role == member.role)
                 }
             }
             .confirmationDialog(L("people.removeConfirm", ["name": member.displayName]), isPresented: $confirmRemove, titleVisibility: .visible) {
@@ -309,14 +315,14 @@ private struct FeedMemberSheet: View {
                 Text(L("ios.feeds.transferBody"))
             }
         }
-        .onAppear { admin = member.role == .admin }
+        .onAppear { role = member.role }
     }
 
     private func save() async {
         busy = true
         defer { busy = false }
         do {
-            try await model.setRole(member, admin: admin)
+            try await model.setRole(member, role: role)
             app.toasts.show(L("common.saved"))
             dismiss()
         } catch {
