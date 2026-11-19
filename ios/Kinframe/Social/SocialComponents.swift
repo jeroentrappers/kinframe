@@ -121,7 +121,7 @@ struct ReactionListSheet: View {
                                     HStack(spacing: 12) {
                                         Image(systemName: "photo.on.rectangle").frame(width: 36, height: 36)
                                             .background(Circle().fill(Palette.surface2)).foregroundStyle(Palette.textMuted)
-                                        Text(f.frameName)
+                                        Text(RemoteLabel.frame(f.frameName, server: f.serverName))
                                         Spacer()
                                         Text(PersonReaction(f.reaction).emoji).font(.title3)
                                     }

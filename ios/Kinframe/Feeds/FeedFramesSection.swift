@@ -8,6 +8,8 @@ struct FeedFramesSection: View {
     let model: FeedDetailModel
     @State private var actions: SubscriptionActions
     @State private var subscribing = false
+    /// "Block this server" from a remote frame's row (README §5.22).
+    @State private var blockingServer: FeedSubscription?
 
     init(model: FeedDetailModel) {
         self.model = model
@@ -52,6 +54,11 @@ struct FeedFramesSection: View {
         .subscriptionActions(actions, maxAll: app.limits.maxFeedBackfillItems, toasts: app.toasts) { old, new in
             model.replace(old, with: new)
         }
+        .sheet(item: $blockingServer) { s in
+            RemoteBlockServerSheet(api: model.api, feedId: model.id, host: s.remote?.host ?? s.remote?.serverUrl ?? "") { _ in
+                Task { await model.loadSubscriptions() }
+            }
+        }
         .sheet(isPresented: $subscribing) {
             if let feed = model.feed {
                 SubscribeSheet(api: model.api, mode: .frameFor(feed: feed.summary), existing: model.subscriptions) { s in
@@ -62,7 +69,8 @@ struct FeedFramesSection: View {
     }
 
     private func row(_ s: FeedSubscription) -> some View {
-        SubscriptionRow(subscription: s, side: .feed, busy: actions.busy == s.id) { action in
+        SubscriptionRow(subscription: s, side: .feed, busy: actions.busy == s.id,
+                        onBlockServer: app.remoteFamiliesEnabled && s.canDecide == true ? { blockingServer = $0 } : nil) { action in
             actions.start(action, on: s, toasts: app.toasts) { old, new in model.replace(old, with: new) }
         }
     }

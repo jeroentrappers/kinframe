@@ -175,8 +175,9 @@ final class FeedDetailModel {
         try await api.leaveFeed(id, removeMyPosts: removeMyPosts)
     }
 
-    func createInvite(purpose: FeedInvitePurpose, hours: Int, singleUse: Bool, note: String) async throws -> FeedInvite {
-        let invite = try await api.createFeedInvite(id, purpose: purpose, hours: hours, maxUses: singleUse ? 1 : nil, note: note)
+    func createInvite(purpose: FeedInvitePurpose, hours: Int, singleUse: Bool, note: String, allowRemote: Bool = false) async throws -> FeedInvite {
+        let invite = try await api.createFeedInvite(id, purpose: purpose, hours: hours, maxUses: singleUse ? 1 : nil, note: note,
+                                                    allowRemote: allowRemote)
         invites.insert(invite, at: 0)
         return invite
     }
