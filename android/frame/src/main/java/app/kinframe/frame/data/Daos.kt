@@ -169,3 +169,29 @@ interface OutboxDao {
     suspend fun reschedule(id: Long, attempts: Int, notBefore: Long, payload: String)
     @Query("DELETE FROM outbox") suspend fun deleteAll()
 }
+
+@Dao
+interface BirthdayGreetingDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insert(g: BirthdayGreetingEntity): Long
+    @Query("SELECT birthdayId FROM birthday_greetings WHERE date = :date") fun observeForDate(date: String): Flow<List<String>>
+    @Query("SELECT COUNT(*) > 0 FROM birthday_greetings WHERE birthdayId = :id AND date = :date") suspend fun has(id: String, date: String): Boolean
+    @Query("DELETE FROM birthday_greetings WHERE sentAt < :before") suspend fun prune(before: Long)
+}
+
+@Dao
+interface FeedTombstoneDao {
+    @Upsert suspend fun put(t: FeedTombstoneEntity)
+    @Query("SELECT COUNT(*) > 0 FROM feed_tombstones WHERE placementId = :id") suspend fun has(id: String): Boolean
+    @Query("DELETE FROM feed_tombstones WHERE placementId = :id") suspend fun delete(id: String)
+    @Query("DELETE FROM feed_tombstones WHERE removedAt < :before") suspend fun prune(before: Long)
+    @Query("DELETE FROM feed_tombstones") suspend fun deleteAll()
+}
+
+@Dao
+interface AlbumFlagDao {
+    @Upsert suspend fun put(a: AlbumFlagEntity)
+    @Query("DELETE FROM album_flags WHERE albumId = :id") suspend fun delete(id: String)
+    @Query("DELETE FROM album_flags") suspend fun deleteAll()
+    @Query("SELECT albumId FROM album_flags WHERE onlyInAlbumMode = 1") suspend fun albumOnlyIds(): List<String>
+    @Query("SELECT albumId FROM album_flags WHERE onlyInAlbumMode = 1") fun observeAlbumOnlyIds(): Flow<List<String>>
+}

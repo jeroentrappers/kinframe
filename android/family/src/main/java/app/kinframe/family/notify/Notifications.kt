@@ -30,6 +30,75 @@ object Notifications {
     const val TARGET_PEOPLE = "people"
     const val TARGET_FRAME = "frame"
     const val TARGET_CALENDAR = "calendar"
+    const val EXTRA_FEED_ID = "app.kinframe.family.FEED_ID"
+    const val EXTRA_POST_ID = "app.kinframe.family.POST_ID"
+    /** A feed (its posts, or its people / frames for requests). */
+    const val TARGET_FEED = "feed"
+    const val TARGET_FEED_PEOPLE = "feed_people"
+    const val TARGET_FEED_FRAMES = "feed_frames"
+    /** A frame's Feeds tab (its subscriptions). */
+    const val TARGET_FRAME_FEEDS = "frame_feeds"
+    /** A feed's Birthdays tab (docs/spec/birthdays.md §8). */
+    const val TARGET_FEED_BIRTHDAYS = "feed_birthdays"
+
+    /** Push keys for feeds (README §6.3). */
+    const val PUSH_SUBSCRIPTION_REQUEST = "subscription_request"
+    const val PUSH_SUBSCRIPTION_DECIDED = "subscription_decided"
+    const val PUSH_SUBSCRIPTION_REMOVED = "subscription_removed"
+    const val PUSH_FEED_JOIN_REQUEST = "feed_join_request"
+    const val PUSH_FEED_MEMBERSHIP = "feed_membership"
+
+    const val EXTRA_SOURCE_ID = "app.kinframe.family.SOURCE_ID"
+    const val EXTRA_IMPORT_ID = "app.kinframe.family.IMPORT_ID"
+    /** Settings → My photo sources (the owner of a source that needs attention). */
+    const val TARGET_PHOTO_SOURCES = "photo_sources"
+    /** A finished Google Photos import's result. */
+    const val TARGET_GOOGLE_IMPORT = "google_import"
+
+    /** Push keys for photo sources (README §6.3, photo-sources.md §10). */
+    const val PUSH_PHOTO_SOURCE_ATTENTION = app.kinframe.core.api.PhotoSourcePush.ATTENTION
+    const val PUSH_GOOGLE_IMPORT_DONE = app.kinframe.core.api.PhotoSourcePush.GOOGLE_IMPORT_DONE
+
+    /** Push keys for birthdays (README §6.3, birthdays.md §8). */
+    const val PUSH_BIRTHDAY_SUGGESTION = "birthday_suggestion"
+    const val PUSH_BIRTHDAY_DECIDED = "birthday_decided"
+    const val PUSH_BIRTHDAY_TODAY = "birthday_today"
+    const val PUSH_BIRTHDAY_GREETING = "birthday_greeting"
+
+    fun isBirthday(kind: String): Boolean =
+        kind == PUSH_BIRTHDAY_SUGGESTION || kind == PUSH_BIRTHDAY_DECIDED || kind == PUSH_BIRTHDAY_TODAY || kind == PUSH_BIRTHDAY_GREETING ||
+            kind == "birthday_approved" || kind == "birthday_rejected"
+
+    /**
+     * Greetings for the same person and day replace each other on the phone (birthdays.md §7): the server writes the
+     * running count in the body ("Opa's frame and 2 other frames…"), so only the newest is kept. The server's top-level
+     * `tag` wins; otherwise it is built from `ids` (the push's `date`, else today's local date).
+     */
+    fun tagOf(msg: PushMessage, today: java.time.LocalDate = java.time.LocalDate.now()): String? {
+        if (msg.tag.isNotBlank()) return msg.tag
+        if (msg.kind != PUSH_BIRTHDAY_GREETING) return null
+        val id = msg.ids["birthday_id"] ?: return null
+        return "birthday:$id:${msg.ids["date"] ?: today}"
+    }
+
+    /** Where a tap on a push goes. */
+    fun targetOf(msg: PushMessage): String = when (msg.kind) {
+        "join_request" -> TARGET_PEOPLE
+        "membership", "membership.updated" -> TARGET_FRAME
+        "event_invitation.decided" -> TARGET_CALENDAR
+        PUSH_SUBSCRIPTION_REQUEST -> TARGET_FEED_FRAMES
+        PUSH_FEED_JOIN_REQUEST -> TARGET_FEED_PEOPLE
+        PUSH_FEED_MEMBERSHIP -> TARGET_FEED
+        PUSH_BIRTHDAY_SUGGESTION, PUSH_BIRTHDAY_DECIDED, PUSH_BIRTHDAY_TODAY, PUSH_BIRTHDAY_GREETING, "birthday_approved", "birthday_rejected" ->
+            if (msg.ids["feed_id"] != null) TARGET_FEED_BIRTHDAYS else TARGET_HISTORY
+        // The requester (decided) and the frame side (removed) look at the frame's subscriptions.
+        PUSH_SUBSCRIPTION_DECIDED, PUSH_SUBSCRIPTION_REMOVED -> if (msg.ids["frame_id"] != null) TARGET_FRAME_FEEDS else TARGET_FEED
+        // Reactions and replies on a feed post open the post's receipts; others the send.
+        "reaction", "reply" -> if (msg.ids["feed_id"] != null && msg.ids["post_id"] != null) TARGET_FEED else TARGET_HISTORY
+        PUSH_PHOTO_SOURCE_ATTENTION -> TARGET_PHOTO_SOURCES
+        PUSH_GOOGLE_IMPORT_DONE -> TARGET_GOOGLE_IMPORT
+        else -> TARGET_HISTORY
+    }
 
     fun createChannels(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
@@ -82,34 +151,49 @@ object Notifications {
 
     /** A push from the server: `{type, title, body, ids}` (README §6.3). */
     fun showPush(context: Context, msg: PushMessage) {
-        val channel = when (msg.type) {
-            "join_request" -> CHANNEL_PEOPLE
-            "reaction", "reply" -> CHANNEL_ACTIVITY
+        val channel = when (msg.kind) {
+            "join_request", PUSH_SUBSCRIPTION_REQUEST, PUSH_FEED_JOIN_REQUEST, PUSH_FEED_MEMBERSHIP, PUSH_BIRTHDAY_SUGGESTION -> CHANNEL_PEOPLE
+            "reaction", "reply", PUSH_BIRTHDAY_DECIDED, PUSH_BIRTHDAY_TODAY, PUSH_BIRTHDAY_GREETING, "birthday_approved", "birthday_rejected",
+            PUSH_GOOGLE_IMPORT_DONE -> CHANNEL_ACTIVITY
             else -> CHANNEL_FRAMES
         }
         val title = msg.title.ifBlank {
             context.getString(
-                when (msg.type) {
+                when (msg.kind) {
                     "reaction" -> R.string.notif_reaction_title
                     "reply" -> R.string.notif_reply_title
                     "join_request" -> R.string.notif_join_title
+                    PUSH_SUBSCRIPTION_REQUEST -> R.string.notif_subscription_request_title
+                    PUSH_SUBSCRIPTION_DECIDED -> R.string.notif_subscription_decided_title
+                    PUSH_SUBSCRIPTION_REMOVED -> R.string.notif_subscription_removed_title
+                    PUSH_FEED_JOIN_REQUEST -> R.string.notif_feed_join_title
+                    PUSH_FEED_MEMBERSHIP -> R.string.notif_feed_membership_title
+                    PUSH_BIRTHDAY_SUGGESTION -> R.string.notif_birthday_suggestion_title
+                    PUSH_BIRTHDAY_DECIDED, "birthday_approved", "birthday_rejected" -> R.string.notif_birthday_decided_title
+                    PUSH_BIRTHDAY_TODAY -> R.string.notif_birthday_today_title
+                    PUSH_BIRTHDAY_GREETING -> R.string.notif_birthday_greeting_title
+                    PUSH_PHOTO_SOURCE_ATTENTION -> R.string.notif_photo_source_title
+                    PUSH_GOOGLE_IMPORT_DONE -> R.string.notif_google_done_title
                     else -> R.string.app_name
                 },
             )
         }
-        val key = msg.ids["send_id"] ?: msg.ids["placement_id"] ?: msg.ids["request_id"] ?: msg.ids["frame_id"] ?: msg.type
+        val key = msg.ids["send_id"] ?: msg.ids["placement_id"] ?: msg.ids["request_id"] ?: msg.ids["subscription_id"]
+            ?: msg.ids["source_id"] ?: msg.ids["import_id"]
+            ?: msg.ids["greeting_id"] ?: msg.ids["birthday_id"]
+            ?: msg.ids["post_id"] ?: msg.ids["feed_id"] ?: msg.ids["frame_id"] ?: msg.kind
         val intent = openApp(context, key.hashCode()) {
-            when (msg.type) {
-                "join_request" -> putExtra(EXTRA_TARGET, TARGET_PEOPLE)
-                "membership" , "membership.updated" -> putExtra(EXTRA_TARGET, TARGET_FRAME)
-                "event_invitation.decided" -> putExtra(EXTRA_TARGET, TARGET_CALENDAR)
-                else -> putExtra(EXTRA_TARGET, TARGET_HISTORY)
-            }
+            putExtra(EXTRA_TARGET, targetOf(msg))
             msg.ids["send_id"]?.let { putExtra(EXTRA_SEND_ID, it) }
             msg.ids["frame_id"]?.let { putExtra(EXTRA_FRAME_ID, it) }
             msg.ids["placement_id"]?.let { putExtra(EXTRA_PLACEMENT_ID, it) }
+            msg.ids["feed_id"]?.let { putExtra(EXTRA_FEED_ID, it) }
+            msg.ids["post_id"]?.let { putExtra(EXTRA_POST_ID, it) }
+            msg.ids["source_id"]?.let { putExtra(EXTRA_SOURCE_ID, it) }
+            msg.ids["import_id"]?.let { putExtra(EXTRA_IMPORT_ID, it) }
         }
-        post(context, (msg.type + key).hashCode(), NotificationCompat.Builder(context, channel)
+        val tag = tagOf(msg)
+        post(context, if (tag != null) 1 else (msg.kind + key).hashCode(), tag = tag, n = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(msg.body)
@@ -120,10 +204,10 @@ object Notifications {
     }
 
     @android.annotation.SuppressLint("MissingPermission") // canPost() checks POST_NOTIFICATIONS
-    private fun post(context: Context, id: Int, n: Notification) {
+    private fun post(context: Context, id: Int, n: Notification, tag: String? = null) {
         if (!canPost(context)) return
         try {
-            NotificationManagerCompat.from(context).notify(id, n)
+            if (tag != null) NotificationManagerCompat.from(context).notify(tag, id, n) else NotificationManagerCompat.from(context).notify(id, n)
         } catch (_: SecurityException) {
             // Permission revoked between the check and the call.
         }

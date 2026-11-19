@@ -13,6 +13,8 @@ export interface FramePlacement {
 	kind: 'photo' | 'video' | 'live';
 	caption: string | null;
 	senderName: string;
+	/** The outside service a photo source or Google import got it from ("Immich"), for "Anna via Immich". */
+	via: string | null;
 	senderId: string | null;
 	capturedAt: string | null;
 	receivedAt: string;
@@ -47,6 +49,7 @@ export function toFramePlacement(p: PlacementChange): FramePlacement {
 		kind: it.kind,
 		caption: it.caption ?? null,
 		senderName: it.imported_sender_name ?? it.sender_name ?? '',
+		via: it.via?.label ?? null,
 		senderId: it.imported_from ? null : (it.sender_id ?? null),
 		capturedAt: it.captured_at ?? null,
 		receivedAt: p.received_at ?? it.created_at,

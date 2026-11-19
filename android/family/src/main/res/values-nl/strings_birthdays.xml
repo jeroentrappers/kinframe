@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Birthdays (docs/spec/birthdays.md) -->
+    <string name="feed_tab_birthdays">Verjaardagen</string>
+    <string name="birthday_today">Vandaag 🎈</string>
+    <string name="birthday_tomorrow">Morgen</string>
+    <plurals name="birthday_in_days">
+        <item quantity="one">over %d dag</item>
+        <item quantity="other">over %d dagen</item>
+    </plurals>
+    <plurals name="birthday_turns">
+        <item quantity="one">wordt %d</item>
+        <item quantity="other">wordt %d</item>
+    </plurals>
+    <string name="birthday_add">Toevoegen</string>
+    <string name="birthday_suggest">Voorstellen</string>
+    <string name="birthday_add_mine">Mijn verjaardag toevoegen</string>
+    <string name="birthday_suggest_hint">Nieuwe verjaardagen zijn voorstellen tot %1$s of een andere beheerder ze goedkeurt.</string>
+    <string name="birthday_suggestions">Voorstellen</string>
+    <string name="birthday_your_suggestions">Jouw voorstellen</string>
+    <string name="birthday_list_title">Binnenkort</string>
+    <string name="birthday_empty">Nog geen verjaardagen. Voeg oma, opa of de nieuwe baby toe: elke fotolijst van deze feed toont ze.</string>
+    <string name="birthday_declined">Afgewezen</string>
+    <string name="birthday_declined_by">Afgewezen door %1$s</string>
+    <string name="birthday_notifications_title">Meldingen</string>
+    <string name="birthday_notifications">Verjaardagsmeldingen</string>
+    <string name="birthday_notifications_hint">Een melding op de ochtend van een verjaardag, en wanneer een fotolijst proficiat wenst</string>
+    <string name="birthday_notifications_on">Verjaardagsmeldingen aan</string>
+    <string name="birthday_notifications_off">Verjaardagsmeldingen uit</string>
+    <string name="birthday_year_private">Geboren in %1$d · de leeftijd staat niet op de fotolijsten</string>
+    <string name="birthday_suggested_by">Voorgesteld door %1$s</string>
+    <string name="birthday_former_member">een voormalig lid</string>
+    <string name="birthday_waiting">Wacht op %1$s of een andere beheerder</string>
+    <string name="birthday_approve">Goedkeuren</string>
+    <string name="birthday_reject">Afwijzen</string>
+    <string name="birthday_edit">Bewerken</string>
+    <string name="birthday_edit_title">Verjaardag bewerken</string>
+    <string name="birthday_add_title">Verjaardag toevoegen</string>
+    <string name="birthday_suggest_title">Verjaardag voorstellen</string>
+    <string name="birthday_name">Naam</string>
+    <string name="birthday_day">Dag</string>
+    <string name="birthday_month">Maand</string>
+    <string name="birthday_year">Jaar (optioneel)</string>
+    <string name="birthday_year_hint">Alleen beheerders, wie het toevoegt en de persoon zelf zien het jaar, tenzij de leeftijd getoond wordt.</string>
+    <string name="birthday_show_age">Leeftijd tonen</string>
+    <string name="birthday_show_age_hint">Fotolijsten tonen \"Oma wordt vandaag 80!\"</string>
+    <string name="birthday_show_age_needs_year">Hiervoor is het jaar nodig</string>
+    <string name="birthday_link">Wie is het in deze feed?</string>
+    <string name="birthday_link_none">Geen lid</string>
+    <string name="birthday_photo_choose">Foto kiezen</string>
+    <string name="birthday_photo_remove">Foto verwijderen</string>
+    <string name="birthday_duplicate_note">%1$s met deze verjaardag staat al op de lijst.</string>
+    <string name="birthday_withdraw">Voorstel intrekken</string>
+    <string name="birthday_remove">Van de lijst verwijderen</string>
+    <string name="birthday_suggest_send">Voorstellen</string>
+    <string name="birthday_error_name">Vul een naam in</string>
+    <string name="birthday_error_date">Kies een dag en maand die bestaan</string>
+    <string name="birthday_error_year">Het jaar moet tussen 1900 en dit jaar liggen</string>
+    <string name="birthday_error_leap">29 februari bestaat alleen in schrikkeljaren</string>
+    <string name="birthday_limit_reached">Deze feed heeft het maximum aantal verjaardagen bereikt</string>
+    <string name="birthday_saved">Opgeslagen</string>
+    <string name="birthday_added">%1$s toegevoegd: elke fotolijst van deze feed toont het</string>
+    <string name="birthday_suggested">%1$s voorgesteld: wacht op een beheerder</string>
+    <string name="birthday_duplicate">%1$s met deze verjaardag staat al op de lijst</string>
+    <string name="birthday_duplicate_approve">%1$s staat al op de lijst: wijs dit voorstel af of pas het aan</string>
+    <string name="birthday_approved">De verjaardag van %1$s is toegevoegd</string>
+    <string name="birthday_rejected">Voorstel voor %1$s afgewezen</string>
+    <string name="birthday_removed">%1$s verwijderd</string>
+    <string name="birthday_restored">%1$s staat weer op de lijst</string>
+    <string name="feed_setting_posters_birthdays">Posters kunnen verjaardagen toevoegen</string>
+    <string name="feed_setting_posters_birthdays_hint">Anders wachten hun toevoegingen als voorstel op een beheerder</string>
+    <string name="frame_feeds_show_birthdays">Verjaardagen tonen</string>
+    <string name="frame_feeds_show_birthdays_hint">De verjaardagen van de feed op de fotolijst: een kaartje op de dag en aftellen vanaf een week ervoor</string>
+    <plurals name="frame_feeds_birthday_count">
+        <item quantity="one">%d verjaardag uit deze feed</item>
+        <item quantity="other">%d verjaardagen uit deze feed</item>
+    </plurals>
+    <string name="frame_feeds_birthdays_update_app">Werk de app op %1$s bij om verjaardagen te tonen</string>
+    <string name="frame_feeds_birthdays_on">Verjaardagen uit %1$s worden getoond</string>
+    <string name="frame_feeds_birthdays_off">Verjaardagen uit %1$s worden verborgen</string>
+    <string name="notif_birthday_suggestion_title">Voorstel voor een verjaardag</string>
+    <string name="notif_birthday_decided_title">Voorstel voor een verjaardag</string>
+    <string name="notif_birthday_today_title">Vandaag jarig 🎈</string>
+    <string name="notif_birthday_greeting_title">Gelukkige verjaardag 🎉</string>
+</resources>

@@ -94,7 +94,8 @@
 		const when = which === 'none' ? null : which === 'taken' ? (pl.capturedAt ?? pl.receivedAt) : pl.receivedAt;
 		const d = when ? new Date(when) : null;
 		const date = d && !Number.isNaN(d.getTime()) ? new Intl.DateTimeFormat(i18n.tag, { day: 'numeric', month: 'long', year: 'numeric' }).format(d) : '';
-		return [pl.senderName, date].filter(Boolean).join(' · ');
+		const who = pl.via ? (pl.senderName ? t('credit.via', { name: pl.senderName, service: pl.via }) : t('credit.viaOnly', { service: pl.via })) : pl.senderName;
+		return [who, date].filter(Boolean).join(' · ');
 	}
 
 	const weather = $derived.by(() => {

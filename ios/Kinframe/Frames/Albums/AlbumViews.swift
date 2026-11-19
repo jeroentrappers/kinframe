@@ -13,6 +13,10 @@ struct AlbumHeader: View {
     let togglePlaying: () -> Void
     let act: (FrameLibrarySection.AlbumSheet) -> Void
     let delete: () -> Void
+    /// Album managers, when the server has photo sources / Google Photos import.
+    var syncFrom: (() -> Void)?
+    var googleImport: (() -> Void)?
+    var setAlbumOnly: ((Bool) -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -40,9 +44,18 @@ struct AlbumHeader: View {
                                  systemImage: "calendar", foreground: on ? Palette.accentText : Palette.textMuted, background: on ? Palette.accentSoft : Palette.surface2)
                                 .accessibilityLabel(L("albums.scheduled"))
                         }
+                        if (album.photoSourceCount ?? 0) > 0 {
+                            Pill(L("ios.ps.albumSyncs"), systemImage: "arrow.triangle.2.circlepath")
+                        }
+                        if album.onlyInAlbumMode == true {
+                            Pill(L("ios.albums.onlyInAlbumMode"), systemImage: "eye.slash")
+                        }
                     }
                 }
                 Spacer(minLength: 0)
+            }
+            if album.onlyInAlbumMode == true {
+                Text(L("ios.albums.onlyInAlbumModeHint")).font(.footnote).foregroundStyle(Palette.textMuted)
             }
             HStack(spacing: 8) {
                 if control {
@@ -62,6 +75,21 @@ struct AlbumHeader: View {
                             .disabled(!canArrange)
                         Button { act(.schedule) } label: { Label(L("albums.schedule"), systemImage: "calendar") }
                         Button { act(.rename) } label: { Label(L("albums.rename"), systemImage: "pencil") }
+                        if let setAlbumOnly {
+                            Toggle(isOn: Binding(get: { album.onlyInAlbumMode == true }, set: { setAlbumOnly($0) })) {
+                                Label(L("ios.albums.onlyInAlbumMode"), systemImage: "eye.slash")
+                            }
+                        }
+                        if syncFrom != nil || googleImport != nil {
+                            Section {
+                                if let syncFrom {
+                                    Button(action: syncFrom) { Label(L("ios.ps.syncFrom"), systemImage: "arrow.triangle.2.circlepath") }
+                                }
+                                if let googleImport {
+                                    Button(action: googleImport) { Label(L("ios.gi.add"), systemImage: "photo.badge.plus") }
+                                }
+                            }
+                        }
                         Button(role: .destructive, action: delete) { Label(L("albums.delete"), systemImage: "trash") }
                     } label: {
                         Image(systemName: "ellipsis.circle").font(.title2).frame(width: 44, height: 44)
@@ -348,7 +376,7 @@ struct AlbumArrangeSheet: View {
                             Text("\(i + 1)").font(.subheadline.monospacedDigit()).foregroundStyle(Palette.textMuted).frame(minWidth: 24)
                             RemoteThumb(url: p.item.thumbUrl, kind: p.item.kind, cornerRadius: 8).frame(width: 56, height: 56)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(p.item.caption.flatMap { $0.isEmpty ? nil : $0 } ?? L("library.from", ["name": p.item.senderName ?? "?"]))
+                                Text(p.item.caption.flatMap { $0.isEmpty ? nil : $0 } ?? L("library.from", ["name": Credit.item(p.item) ?? "?"]))
                                     .lineLimit(1).foregroundStyle(Palette.text)
                                 if let taken = p.item.capturedAt {
                                     Text(Format.dateTime(taken, locale: L10n.locale)).font(.caption).foregroundStyle(Palette.textMuted)

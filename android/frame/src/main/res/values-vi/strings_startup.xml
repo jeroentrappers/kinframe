@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Đang khởi động…</string>
+    <string name="startup_checking_library">Đang kiểm tra ảnh sau khi mất điện…</string>
+    <string name="startup_checking_update">Đang kiểm tra phiên bản ứng dụng…</string>
+    <string name="startup_loading_photos">Đang tải ảnh…</string>
+    <string name="startup_preparing_photo">Đang chuẩn bị ảnh đầu tiên…</string>
+    <string name="startup_waiting_wifi">Đang chờ Wi-Fi…</string>
+    <string name="startup_setting_clock">Đang chỉnh đồng hồ…</string>
+    <string name="startup_connecting">Đang kết nối với máy chủ…</string>
+    <string name="power_cut_title">Khung ảnh đã bị tắt mà không tắt đúng cách</string>
+    <string name="power_cut_body_ok">Mọi thứ đã được kiểm tra và đều ổn.</string>
+    <string name="power_cut_body_redownload">Mọi thứ đã được kiểm tra. Một số ảnh đang được tải lại.</string>
+    <string name="power_cut_tip">Lần sau, hãy chọn %1$s → %2$s trong menu và chờ đến khi màn hình hiện “%3$s”.</string>
+</resources>

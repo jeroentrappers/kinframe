@@ -18,6 +18,8 @@ import (
 
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
+
+	"github.com/jeroentrappers/kinframe/server/internal/netguard"
 )
 
 // SyncError is a failed fetch: Auth means credentials were rejected.
@@ -115,6 +117,17 @@ type FetchResult struct {
 
 func netError(err error) error {
 	var dnsErr *net.DNSError
+	if b, ok := netguard.Blocked(err); ok {
+		switch b.Reason {
+		case netguard.ReasonPrivate:
+			return failf("this server may not reach private network addresses (%s)", b.Host)
+		case netguard.ReasonScheme:
+			return failf("only https:// links are allowed for public addresses (%s)", b.Host)
+		case netguard.ReasonRedirect:
+			return failf("the link redirects too often")
+		}
+		return failf("this address is not allowed (%s)", b.Host)
+	}
 	switch {
 	case errors.As(err, &dnsErr):
 		return failf("server not found (%s)", dnsErr.Name)

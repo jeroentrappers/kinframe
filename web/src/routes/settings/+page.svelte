@@ -174,6 +174,16 @@
 			{/if}
 		</section>
 
+		{#if discovery.photoSources || discovery.googlePhotosImport}
+			<a class="card card-pad row between shop-link" href="/photo-sources">
+				<span>
+					<span class="s-label">{t('sources.myTitle')}</span>
+					<span class="hint">{t('sources.settingsHint')}</span>
+				</span>
+				<Icon name="chevronRight" size={20} />
+			</a>
+		{/if}
+
 		{#if auth.me?.is_operator && discovery.shop}
 			<a class="card card-pad row between shop-link" href="/settings/reservations">
 				<span>

@@ -34,11 +34,22 @@ type Placement struct {
 	// SharedByUserID is the member who shared this placement from another
 	// frame's library; nil when the item's sender placed it.
 	SharedByUserID *uuid.UUID `db:"shared_by_user_id"`
+	// Origin is how the placement got onto the frame: send, share, feed or import
+	// (docs/spec/feeds-data-model.md). "" on create means send, or share with SharedByUserID.
+	// (Column alias placement_origin: items have an origin column too.)
+	Origin       string     `db:"placement_origin"`
+	OriginFeedID *uuid.UUID `db:"origin_feed_id"`
+	// HeldDirectly: a send, forward, share or import holds it (not only feeds).
+	HeldDirectly bool `db:"held_directly"`
+	// FeedSuspended: only feeds hold it and none of their subscriptions is active (paused).
+	FeedSuspended bool `db:"feed_suspended"`
+	// Backfill: placed as feed history; frames don't treat it as new.
+	Backfill bool `db:"backfill"`
 }
 
 const placementCols = `p.id, p.frame_id, p.item_id, p.send_id, p.status, p.hidden, p.trashed_at, p.pending_moderation,
 	p.fit_override, p.focal_override_x, p.focal_override_y, p.rotation, p.reaction, p.delivered_at, p.seen_at,
-	p.received_at, p.removed_at, p.shared_by_user_id`
+	p.received_at, p.removed_at, p.shared_by_user_id, p.origin AS placement_origin, p.origin_feed_id, p.held_directly, p.feed_suspended, p.backfill`
 
 type Reply struct {
 	Preset string    `json:"preset"`
@@ -52,15 +63,22 @@ type PlacementRow struct {
 	Replies      []Reply     `db:"replies"`
 	AlbumIDs     []uuid.UUID `db:"album_ids"`
 	SharedByName *string     `db:"shared_by_name"`
+	// FeedIDs are the feeds whose active subscriptions hold the placement.
+	FeedIDs        []uuid.UUID `db:"feed_ids"`
+	OriginFeedName *string     `db:"origin_feed_name"`
 }
 
 // placementRowCols omits p.item_id: ItemRow supplies the item_id column for both structs.
 const placementRowCols = `p.id, p.frame_id, p.send_id, p.status, p.hidden, p.trashed_at, p.pending_moderation,
 	p.fit_override, p.focal_override_x, p.focal_override_y, p.rotation, p.reaction, p.delivered_at, p.seen_at,
-	p.received_at, p.removed_at, p.shared_by_user_id`
+	p.received_at, p.removed_at, p.shared_by_user_id, p.origin AS placement_origin, p.origin_feed_id, p.held_directly, p.feed_suspended, p.backfill`
 
 const placementRowSelect = `SELECT ` + placementRowCols + `, ` + itemRowCols + `,
 	(SELECT sb.display_name FROM users sb WHERE sb.id = p.shared_by_user_id) AS shared_by_name,
+	(SELECT fd.name FROM feeds fd WHERE fd.id = p.origin_feed_id AND fd.deleted_at IS NULL) AS origin_feed_name,
+	COALESCE((SELECT array_agg(DISTINCT s.feed_id ORDER BY s.feed_id) FROM feed_deliveries d
+		JOIN subscriptions s ON s.id = d.subscription_id AND s.status = 'active'
+		WHERE d.placement_id = p.id AND d.state = 'placed'), '{}') AS feed_ids,
 	COALESCE((SELECT json_agg(json_build_object('preset', r.preset, 'at', r.at) ORDER BY r.at)
 		FROM placement_replies r WHERE r.placement_id = p.id), '[]'::json) AS replies,
 	COALESCE((SELECT array_agg(ap.album_id ORDER BY ap.album_id) FROM album_placements ap WHERE ap.placement_id = p.id), '{}') AS album_ids
@@ -73,10 +91,20 @@ func (tx *Tx) CreatePlacement(ctx context.Context, p Placement) error {
 	if !p.ReceivedAt.IsZero() {
 		received = &p.ReceivedAt
 	}
+	origin := p.Origin
+	if origin == "" {
+		origin = "send"
+		if p.SharedByUserID != nil {
+			origin = "share"
+		}
+	}
+	held := origin != "feed"
 	_, err := tx.Exec(ctx, `
-		INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation, shared_by_user_id, hidden, rotation, received_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, now()))`,
-		p.ID, p.FrameID, p.ItemID, p.SendID, p.Status, p.PendingModeration, p.SharedByUserID, p.Hidden, p.Rotation, received)
+		INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation, shared_by_user_id, hidden, rotation, received_at,
+			origin, origin_feed_id, held_directly, backfill)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, now()), $11, $12, $13, $14)`,
+		p.ID, p.FrameID, p.ItemID, p.SendID, p.Status, p.PendingModeration, p.SharedByUserID, p.Hidden, p.Rotation, received,
+		origin, p.OriginFeedID, held, p.Backfill)
 	return err
 }
 
@@ -131,11 +159,31 @@ func (tx *Tx) UpdatePlacement(ctx context.Context, frameID, id uuid.UUID, p Plac
 }
 
 // RemovePlacements soft-removes placements and records removals in the feed.
-// Returns the removed placements.
+// Feed deliveries that held them become tombstones ('declined'), so backfills
+// never place those items on that frame again (the frame, or someone with
+// rights on it, removed them). Returns the removed placements.
 func (tx *Tx) RemovePlacements(ctx context.Context, where string, args ...any) ([]Placement, error) {
 	removed, err := many[Placement](tx.Query(ctx, `UPDATE placements p SET removed_at = now() WHERE p.removed_at IS NULL AND (`+where+`) RETURNING `+placementCols, args...))
 	if err != nil {
 		return nil, err
+	}
+	if len(removed) > 0 {
+		ids := make([]uuid.UUID, len(removed))
+		for i, p := range removed {
+			ids[i] = p.ID
+		}
+		if _, err := tx.Exec(ctx, `UPDATE feed_deliveries SET state = 'declined', placement_id = NULL
+			WHERE placement_id = ANY($1) AND state = 'placed'`, ids); err != nil {
+			return nil, err
+		}
+		// Album sources of the frame never import these again (photo-sources.md §5.2).
+		frames, items := make([]uuid.UUID, len(removed)), make([]uuid.UUID, len(removed))
+		for i, p := range removed {
+			frames[i], items[i] = p.FrameID, p.ItemID
+		}
+		if err := tx.markRemovedLocally(ctx, `(ps.frame_id, psi.item_id) IN (SELECT * FROM unnest($1::uuid[], $2::uuid[]))`, frames, items); err != nil {
+			return nil, err
+		}
 	}
 	for _, p := range removed {
 		if err := tx.FeedPut(ctx, p.FrameID, FeedPlacement, p.ID, true); err != nil {
@@ -166,8 +214,12 @@ type StatusChange struct {
 	SenderID    *uuid.UUID `db:"sender_user_id"`
 	// SharedByID is set for placements shared from another frame's library.
 	SharedByID *uuid.UUID `db:"shared_by_user_id"`
+	// Origin of the placement (feed placements get no per-send "delivered" push).
+	Origin string `db:"origin"`
 	// NewlyDelivered is set when this change delivered the placement (it was pending or ready).
 	NewlyDelivered bool `db:"newly_delivered"`
+	// SourceSend: the placement belongs to a photo source's or Google import's send (no "delivered" push).
+	SourceSend bool `db:"source_send"`
 }
 
 // MarkDelivered moves ready placements on the frame to delivered.
@@ -175,7 +227,8 @@ func (tx *Tx) MarkDelivered(ctx context.Context, frameID uuid.UUID, ids []uuid.U
 	return many[StatusChange](tx.Query(ctx, `
 		UPDATE placements p SET status = 'delivered', delivered_at = now() FROM items i
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = ANY($2) AND p.status IN ('pending', 'ready') AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, true AS newly_delivered`, frameID, ids))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, p.origin, true AS newly_delivered,
+			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL) AS source_send`, frameID, ids))
 }
 
 // MarkSeen moves placements to seen (delivered implied) at the given time.
@@ -184,7 +237,8 @@ func (tx *Tx) MarkSeen(ctx context.Context, frameID, id uuid.UUID, at time.Time)
 		UPDATE placements p SET status = 'seen', seen_at = $3, delivered_at = COALESCE(p.delivered_at, $3)
 		FROM items i, (SELECT status AS old_status FROM placements WHERE id = $2) o
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = $2 AND p.status IN ('pending', 'ready', 'delivered') AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, o.old_status IN ('pending', 'ready') AS newly_delivered`, frameID, id, at))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, p.origin, o.old_status IN ('pending', 'ready') AS newly_delivered,
+			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL) AS source_send`, frameID, id, at))
 }
 
 // MarkReady moves pending placements of a media on a frame to ready.
@@ -192,7 +246,8 @@ func (tx *Tx) MarkReady(ctx context.Context, mediaID, frameID uuid.UUID) ([]Stat
 	changed, err := many[StatusChange](tx.Query(ctx, `
 		UPDATE placements p SET status = 'ready' FROM items i
 		WHERE i.id = p.item_id AND i.media_id = $1 AND p.frame_id = $2 AND p.status = 'pending' AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, false AS newly_delivered`, mediaID, frameID))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, p.origin, false AS newly_delivered,
+			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL) AS source_send`, mediaID, frameID))
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +259,7 @@ func (tx *Tx) MarkReady(ctx context.Context, mediaID, frameID uuid.UUID) ([]Stat
 func (s *Store) SendDeliveredOn(ctx context.Context, sendID, frameID uuid.UUID) (bool, error) {
 	var done bool
 	err := s.Pool.QueryRow(ctx, `SELECT NOT EXISTS (SELECT 1 FROM placements WHERE send_id = $1 AND frame_id = $2
-		AND removed_at IS NULL AND shared_by_user_id IS NULL AND status IN ('pending', 'ready'))`, sendID, frameID).Scan(&done)
+		AND removed_at IS NULL AND shared_by_user_id IS NULL AND origin <> 'feed' AND status IN ('pending', 'ready'))`, sendID, frameID).Scan(&done)
 	return done, err
 }
 
@@ -260,8 +315,9 @@ type PlacementFilter struct {
 	SenderID   *uuid.UUID
 	Kind       *string
 	AlbumID    *uuid.UUID
-	OnThisDay  string // "MM-DD": captured on this day in an earlier year
-	Sort       string // received_desc, received_asc, taken_desc, taken_asc
+	FeedID     *uuid.UUID // only placements held by this feed (Placement.feed_ids)
+	OnThisDay  string     // "MM-DD": captured on this day in an earlier year
+	Sort       string     // received_desc, received_asc, taken_desc, taken_asc
 	Cursor     string
 	Limit      int
 }
@@ -294,14 +350,15 @@ var ErrBadCursor = fmt.Errorf("bad cursor")
 func (s *Store) ListPlacements(ctx context.Context, f PlacementFilter) ([]PlacementRow, *string, error) {
 	sortKey := `p.received_at`
 	if f.Sort == "taken_desc" || f.Sort == "taken_asc" {
-		sortKey = `COALESCE(m.captured_at, i.captured_hint, p.received_at)`
+		sortKey = `COALESCE(i.captured_override, m.captured_at, i.captured_hint, p.received_at)`
 	}
 	desc := f.Sort == "" || f.Sort == "received_desc" || f.Sort == "taken_desc"
 	cmp, dir := ">", "ASC"
 	if desc {
 		cmp, dir = "<", "DESC"
 	}
-	where := `p.frame_id = $1 AND p.removed_at IS NULL`
+	// Placements of paused feed subscriptions are not on the frame (feeds.md §5.1).
+	where := `p.frame_id = $1 AND p.removed_at IS NULL AND NOT p.feed_suspended`
 	args := []any{f.FrameID}
 	arg := func(v any) string { args = append(args, v); return fmt.Sprintf("$%d", len(args)) }
 	switch f.Visibility {
@@ -330,8 +387,12 @@ func (s *Store) ListPlacements(ctx context.Context, f PlacementFilter) ([]Placem
 	if f.AlbumID != nil {
 		where += ` AND EXISTS (SELECT 1 FROM album_placements ap WHERE ap.placement_id = p.id AND ap.album_id = ` + arg(*f.AlbumID) + `)`
 	}
+	if f.FeedID != nil {
+		where += ` AND EXISTS (SELECT 1 FROM feed_deliveries d JOIN subscriptions s ON s.id = d.subscription_id AND s.status = 'active'
+			WHERE d.placement_id = p.id AND d.state = 'placed' AND s.feed_id = ` + arg(*f.FeedID) + `)`
+	}
 	if f.OnThisDay != "" {
-		taken := `(COALESCE(m.captured_at, i.captured_hint) AT TIME ZONE 'UTC')`
+		taken := `(COALESCE(i.captured_override, m.captured_at, i.captured_hint) AT TIME ZONE 'UTC')`
 		where += ` AND to_char(` + taken + `, 'MM-DD') = ` + arg(f.OnThisDay) +
 			` AND EXTRACT(year FROM ` + taken + `) < EXTRACT(year FROM now() AT TIME ZONE 'UTC')`
 	}
@@ -380,7 +441,7 @@ func (s *Store) CountPlacements(ctx context.Context, frameID uuid.UUID, onlySend
 			count(*) FILTER (WHERE p.hidden AND p.trashed_at IS NULL)::int AS hidden,
 			count(*) FILTER (WHERE p.trashed_at IS NOT NULL)::int AS trashed
 		FROM placements p JOIN items i ON i.id = p.item_id JOIN media m ON m.id = i.media_id
-		WHERE p.frame_id = $1 AND p.removed_at IS NULL AND ($2::uuid IS NULL OR i.sender_user_id = $2 OR p.shared_by_user_id = $2)`, frameID, onlySender))
+		WHERE p.frame_id = $1 AND p.removed_at IS NULL AND NOT p.feed_suspended AND ($2::uuid IS NULL OR i.sender_user_id = $2 OR p.shared_by_user_id = $2)`, frameID, onlySender))
 }
 
 // ---------------------------------------------------------------- sends
@@ -399,10 +460,13 @@ type Send struct {
 	ID        uuid.UUID `db:"id"`
 	SenderID  uuid.UUID `db:"sender_user_id"`
 	CreatedAt time.Time `db:"created_at"`
+	// Via is set on sends a photo source or Google import made (immich, icloud, google_photos).
+	Via           *string    `db:"via"`
+	PhotoSourceID *uuid.UUID `db:"photo_source_id"`
 }
 
 func (s *Store) GetSend(ctx context.Context, q db.DBTX, id uuid.UUID) (*Send, error) {
-	return one[Send](q.Query(ctx, `SELECT id, sender_user_id, created_at FROM sends WHERE id = $1`, id))
+	return one[Send](q.Query(ctx, `SELECT id, sender_user_id, created_at, via, photo_source_id FROM sends WHERE id = $1`, id))
 }
 
 // ListSends pages the sender's sends, newest first. state: ongoing, delivered or all.
@@ -415,7 +479,7 @@ func (s *Store) ListSends(ctx context.Context, senderID uuid.UUID, state string,
 		filter = ` AND EXISTS (SELECT 1 FROM placements p WHERE p.send_id = s.id AND p.removed_at IS NULL)
 			AND NOT EXISTS (SELECT 1 FROM placements p WHERE p.send_id = s.id AND p.removed_at IS NULL AND p.status IN ('pending','ready'))`
 	}
-	return many[Send](s.Pool.Query(ctx, `SELECT s.id, s.sender_user_id, s.created_at FROM sends s
+	return many[Send](s.Pool.Query(ctx, `SELECT s.id, s.sender_user_id, s.created_at, s.via, s.photo_source_id FROM sends s
 		WHERE s.sender_user_id = $1 AND ($2::uuid IS NULL OR s.id < $2)`+filter+` ORDER BY s.id DESC LIMIT $3`, senderID, after, limit))
 }
 
@@ -433,15 +497,15 @@ func (s *Store) SendItemRows(ctx context.Context, q db.DBTX, sendIDs []uuid.UUID
 }
 
 type SendPlacementRow struct {
-	PlacementID uuid.UUID  `db:"id"`
-	SendID      uuid.UUID  `db:"send_id"`
-	ItemID      uuid.UUID  `db:"item_id"`
-	FrameID     uuid.UUID  `db:"frame_id"`
-	FrameName   string     `db:"frame_name"`
-	Status      string     `db:"status"`
-	Removed     bool       `db:"removed"`
-	Reaction    *string    `db:"reaction"`
-	Replies     []string   `db:"replies"`
+	PlacementID  uuid.UUID  `db:"id"`
+	SendID       uuid.UUID  `db:"send_id"`
+	ItemID       uuid.UUID  `db:"item_id"`
+	FrameID      uuid.UUID  `db:"frame_id"`
+	FrameName    string     `db:"frame_name"`
+	Status       string     `db:"status"`
+	Removed      bool       `db:"removed"`
+	Reaction     *string    `db:"reaction"`
+	Replies      []string   `db:"replies"`
 	DeviceID     *uuid.UUID `db:"device_id"`
 	MediaStatus  string     `db:"media_status"`
 	SharedByName *string    `db:"shared_by_name"`
@@ -454,7 +518,7 @@ func (s *Store) SendPlacementRows(ctx context.Context, q db.DBTX, sendIDs []uuid
 			f.device_id, m.status AS media_status,
 			(SELECT sb.display_name FROM users sb WHERE sb.id = p.shared_by_user_id) AS shared_by_name
 		FROM placements p JOIN frames f ON f.id = p.frame_id JOIN items i ON i.id = p.item_id JOIN media m ON m.id = i.media_id
-		WHERE p.send_id = ANY($1) ORDER BY f.name, p.frame_id, p.received_at, p.id`, sendIDs))
+		WHERE p.send_id = ANY($1) AND p.origin <> 'feed' ORDER BY f.name, p.frame_id, p.received_at, p.id`, sendIDs))
 }
 
 // SendFrames lists frames a send already targets.

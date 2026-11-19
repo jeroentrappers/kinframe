@@ -74,6 +74,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         // The websocket already shows what happens while the app is open.
         []
     }
+
+    /// A tapped notification opens what it is about: a feed's subscription requests or join requests, its birthdays
+    /// (suggestions, decisions, the morning notice, greetings), a frame's feeds, a feed post's receipts, a send
+    /// (docs/api/README.md §6.3; payloads carry only ids).
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        guard let route = PushRoute.parse(response.notification.request.content.userInfo) else { return }
+        await MainActor.run { model.open(route) }
+    }
 }
 
 /// Wraps a non-Sendable value that is only used on one thread at a time.

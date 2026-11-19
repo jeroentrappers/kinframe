@@ -133,7 +133,7 @@ struct SendCard: View {
             thumbs
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(kindSummary(send.items)).font(.headline).foregroundStyle(Palette.text)
+                    Text(Credit.sender(kindSummary(send.items), via: send.via)).font(.headline).foregroundStyle(Palette.text)
                     Spacer()
                     Text(Format.relative(send.createdAt, locale: L10n.locale)).font(.subheadline).foregroundStyle(Palette.textMuted)
                 }
@@ -152,6 +152,9 @@ struct SendCard: View {
                         ReactionChips(reactions: d.reactions, replies: d.replies)
                     }
                     .accessibilityElement(children: .combine)
+                }
+                ForEach(send.feeds ?? []) { f in
+                    FeedRecipientRow(feed: f)
                 }
             }
             .padding(16)
@@ -185,6 +188,36 @@ struct SendCard: View {
         .frame(height: shown.count == 1 ? 200 : 140)
         .clipped()
         .accessibilityHidden(true)
+    }
+}
+
+/// A feed the send was posted to: "Peeters kids · Seen on 4 of 5 frames".
+struct FeedRecipientRow: View {
+    let feed: SendFeed
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Label(feed.feedName, systemImage: "rectangle.stack")
+                    .labelStyle(TightLabelStyle())
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Palette.text)
+                    .lineLimit(1)
+                Spacer()
+                if feed.removed == true {
+                    StagePill(stage: .removed)
+                } else if let s = feed.summary {
+                    StagePill(stage: FeedReceipts.stage(s))
+                }
+            }
+            if feed.removed == true {
+                Text(L("ios.feeds.postRemovedNote")).font(.footnote).foregroundStyle(Palette.textMuted)
+            } else if let s = feed.summary {
+                Text(FeedReceipts.text(s)).font(.footnote).foregroundStyle(Palette.textMuted)
+                ProgressView(value: FeedReceipts.progress(s)).tint(Palette.accent).accessibilityHidden(true)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">กำลังเริ่มต้น…</string>
+    <string name="startup_checking_library">กำลังตรวจสอบรูปหลังไฟดับ…</string>
+    <string name="startup_checking_update">กำลังตรวจสอบเวอร์ชันแอป…</string>
+    <string name="startup_loading_photos">กำลังโหลดรูป…</string>
+    <string name="startup_preparing_photo">กำลังเตรียมรูปแรก…</string>
+    <string name="startup_waiting_wifi">กำลังรอ Wi-Fi…</string>
+    <string name="startup_setting_clock">กำลังตั้งนาฬิกา…</string>
+    <string name="startup_connecting">กำลังเชื่อมต่อเซิร์ฟเวอร์…</string>
+    <string name="power_cut_title">กรอบรูปถูกปิดโดยไม่ได้ปิดเครื่องให้ถูกต้อง</string>
+    <string name="power_cut_body_ok">ตรวจสอบทุกอย่างแล้ว ไม่มีปัญหา</string>
+    <string name="power_cut_body_redownload">ตรวจสอบทุกอย่างแล้ว รูปบางส่วนกำลังดาวน์โหลดใหม่</string>
+    <string name="power_cut_tip">ครั้งหน้า ให้เลือก %1$s → %2$s ในเมนู แล้วรอจนหน้าจอแสดงข้อความ “%3$s”</string>
+</resources>

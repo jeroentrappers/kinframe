@@ -75,6 +75,24 @@ GET /.well-known/kinframe
   from its local cache.
 - Frame reports flow back to the backend: heartbeat, storage, app version, "photo shown", reactions. Senders see
   delivery state and reactions in the family app.
+- **Feeds** (`docs/spec/feeds.md`): a send can also target feeds. The server stores each item once, records a post per
+  feed and materializes one placement per item on every actively subscribed frame (`origin: feed`), so frames sync
+  feed posts through the same change feed. Subscribing, changing the history option, pausing, resuming,
+  unsubscribing and unsending reconcile those placements in background jobs, idempotently, under the frame lock
+  (`docs/spec/feeds-data-model.md`). Posters see receipts and reactions aggregated across the subscribed frames.
+- **Birthdays** (`docs/spec/birthdays.md`): a feed keeps a list of birthday people. The server renders, per frame, the
+  approved people of its active subscriptions (merged across feeds) into one compacted `birthdays` change, like the
+  calendar, and re-emits it only when that list changes. The frame works out "today", countdowns and ages in its own
+  time zone, offline, and sends greetings back with a device call; a server loop sends each member's morning
+  notification at 08:00 in their time zone.
+- **Photo sources** (`docs/spec/photo-sources.md`): the server syncs outside albums (Immich through its REST API,
+  iCloud shared albums through the endpoints of Apple's public album page) into an album or a feed on a schedule,
+  like calendars. Each run lists the album, downloads what is new through a network guard (no loopback or link-local
+  addresses, private networks only when the operator allows them, TLS always verified), feeds the files into the
+  normal media pipeline and creates one send by the source's owner, so placements, feed posts, moderation and receipts
+  are the existing ones. "Add from Google Photos" is a one-time import: the server runs the OAuth consent with an
+  operator-configured Google client, creates a Photos Picker session that the client opens, and copies the picked
+  items; no long-lived Google token is kept.
 - Phone notifications: UnifiedPush/ntfy by default (no Google dependency), with FCM/APNs optional for store builds.
 
 ## Emoji on Android 6 frames

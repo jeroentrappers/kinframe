@@ -13,6 +13,19 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Web parity: Discovery `webpush_public_key` (VAPID), `listPlacements?on_this_day=MM-DD` ("On this day": captured on
   that month-day in an earlier year, UTC capture dates), and the documented 3 s minimum for `trim`
   (`422 validation_failed` on `items.N.trim`). Deleting the album a frame plays resets `slideshow.album_id` to null.
+- Feeds (docs/spec/feeds.md, README §5.12): `posters_can_invite` on Feed, FeedCreate and FeedUpdate (posters may
+  create `join` invites and list/revoke their own; `subscribe` invites stay owner/admin); the feed invite code
+  pattern accepts lower case (the description said case-insensitive, the pattern did not); Heartbeat `features`
+  (`feed_backfill`, see "Feeds" below).
+- Birthdays (docs/spec/birthdays.md, README §5.13): `BirthdayPerson.created_by_id` (account id of whoever added or
+  suggested the entry, null when that account is gone), so clients can tell "added by me" (poster year visibility,
+  edit and withdraw). Birthday pushes also carry `date` (the occurrence date) and, for greetings, `frame_id` in `ids`:
+  clients need the date to build the `birthday:<birthday_id>:<date>` tag, and the frame's local date can differ from
+  the phone's. Greeting pushes also carry that tag as a top-level `tag` in the payload (`{type, key, title, body,
+  ids, tag}`), so a newer greeting for the same person and day replaces the older one.
+- Photo sources (docs/spec/photo-sources.md, README §5.14): no changes to the contract were needed. The coordinator
+  added `Album.only_in_album_mode`; the server implements it. `ImmichAlbum.thumbnail_url` is always null (no proxy
+  endpoint exists in the contract for it).
 - Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
@@ -23,7 +36,7 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   (`#/components/schemas/Album/properties/schedule`) and handles 3.1 type arrays poorly, so `tools/specprep` rewrites
   a copy (inline deep refs, `type: [x, 'null']` → `nullable`, `oneOf [ref, null]` → nullable, labelled 3.0.3). The same
   prepared copy is embedded for request validation (kin-openapi). The contract file itself is untouched.
-- `tusCreateUpload`, `putAvatar`, `getItemMedia`, `deviceGetMedia` and `devToken` are hand-written (tus, binary or
+- `tusCreateUpload`, `putAvatar`, `putFeedBirthdayPhoto`, `getItemMedia`, `deviceGetMedia` and `devToken` are hand-written (tus, binary or
   multi-content-type bodies, redirects, dev-only).
 
 ## API behaviour
@@ -117,6 +130,201 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   entries older than `KINFRAME_FEED_RETENTION_DAYS`.
 - Unclaimed devices get an empty feed. Acks don't produce feed entries (the frame already knows).
 
+## Feeds
+
+- Migration `00013_feeds.sql`: the tables of docs/spec/feeds-data-model.md, plus `feeds.posters_can_invite`,
+  `subscriptions.via_invite` (survives the invite row), `subscriptions.backfill_placed/backfill_total` (progress),
+  `placements.origin/origin_feed_id/held_directly/feed_suspended/backfill`, and `devices.features` (the latest
+  heartbeat's `features`). Existing placements get `origin` from their data (share, import, else send).
+- Materialization is in `store/feedsync.go` and follows the data model: `place`/`unplace` under the frame lock,
+  then the subscription row. Jobs (run by the worker through `api.Server.RunJob`): `feed_fanout` (a new post on
+  every active subscription), `feed_reconcile` (history backfill/trim, batches of 200, re-enqueued until done,
+  abandoned when `reconciled_version` moved), `feed_sweep` (unplaces what a removed post or ended subscription
+  held, deletes its delivery rows; when a deleted feed has none left its row is deleted).
+- A fanout only places posts made at or after the subscription's first activation; older posts are history and
+  only the reconcile places them (quietly, per the history option), whatever order the jobs run in.
+- Tombstones: every placement removal outside `unplace` (purge, trash expiry, member/account removal with items,
+  unsend of the send) turns its `placed` delivery rows into `declined`. A declined row for an item blocks feed
+  placements of that item on that frame from any post or feed until the subscription ends.
+- Pause recomputes `feed_suspended` (not held directly and no active subscription holds it) and re-emits the
+  subscription's placements; suspended placements render as `placement.remove` and are left out of the library
+  (`listPlacements`, counts). Ending a subscription does the same at once, then the sweep removes them.
+- Old frame apps: backfilled placements render as `placement.remove` (and are left out of snapshots) for frames
+  whose latest heartbeat does not list `feed_backfill`; the heartbeat that first lists it re-emits all live
+  backfilled placements of the frame. Browser frames are never withheld. Withheld placements show as
+  `pending`/`ready` in receipts.
+- Moderation: a feed placement starts `pending_moderation` when the frame moderates and the poster is not its
+  owner/admin. Rejecting is a purge (tombstone).
+- Subscriptions: approve/reject are feed owner/admin, pause/resume/history the frame side (owner, admin,
+  `change_settings`). Repeating the current transition returns 200 unchanged; approve or reject of a decided one
+  `409 already_decided`; other impossible ones `409 invalid_transition`. `DELETE` of an ended one is `204`.
+  `removed_reason`: `withdrawn` (pending, frame side or requester), `unsubscribed` (frame side), `removed_by_feed`.
+  `409 already_subscribed` carries the existing subscription id as `detail`.
+- Visibility: frame managers and feed owner/admins see every status (and `requested_by_name`); other members of
+  either side and posters only `active`/`paused`; the requester always their own. `estimate` counts the wanted
+  items and their master bytes (renditions are smaller). Removed-frame subscriptions stay listed for the feed.
+- Receipts: per frame (active and paused subscriptions with delivery rows): all items declined → `removed`; paused
+  → `paused` (not in `frames`); otherwise counted in `frames`, `awaiting_approval` when an item awaits moderation,
+  delivered/seen when every non-failed item is. Hidden/trashed are not revealed. Placements of a feed are not in
+  `Send.frames[]`, the send's posts are in `Send.feeds[]` (removed ones with `removed: true`, no summary).
+- Feed placements get no per-send `delivered` push; `feed_post.updated` goes to the poster and feed owner/admins
+  after fanout, acks, reactions and replies. Reaction/reply events and pushes carry `feed_id`/`post_id` (the
+  origin feed's post when several hold it).
+- Invites: code = 8 Crockford base32 characters (no I, L, O, U), never all digits, stored upper case; lookup
+  accepts lower case, a hyphen and spaces and reads I/L as 1 and O as 0. Lookup is rate-limited like code
+  redemption (10/h per user, 30/h per IP), invite creation like frame invites (60/h per user). Link:
+  `<public URL>/fi/<token>` (also in the Apple app site association).
+- Feed deletion: owner only; posts and subscriptions end in the request (frame owners/admins get
+  `subscription_removed`), sweeps clear the frames, then the feed row goes (cascading its subscriptions).
+- Account deletion answers `409 owner_cannot_leave` while the user owns feeds; feed memberships are deleted, and
+  with `remove_items` their posts are unsent too.
+- Limits: `max_feeds_per_user` (20), `max_subscriptions_per_feed` (100, counts pending/active/paused),
+  `max_feed_backfill_items` (5000) via `KINFRAME_MAX_FEEDS_PER_USER`, `KINFRAME_MAX_SUBSCRIPTIONS_PER_FEED`,
+  `KINFRAME_MAX_FEED_BACKFILL_ITEMS` and `PUT /v1/operator/limits`; unset or zero means the default.
+- Settings: setting `slideshow.album_id` clears `slideshow.feed_id` and vice versa; ending a subscription removes
+  `slideshow.feed_id` when it pointed at that feed (a settings change on the frame).
+- Pushes: keys `subscription_request`, `subscription_decided` (texts `subscription_approved`/`_rejected`),
+  `subscription_removed`, `feed_join_request`, `feed_membership`, localized like the others.
+- Rejected and removed subscriptions are deleted by the maintenance loop 30 days after they ended.
+
+## Birthdays
+
+- Migration `00014_birthdays.sql`: the tables of birthdays.md §12, plus `frame_birthdays (frame_id, digest,
+  emitted_at)` (what each frame was last sent) and indexes on greetings per frame and entries per linked user. The
+  date CHECK is an inline `CASE` on the month (no `make_date`), with the leap-year CHECK as specified.
+- The `birthdays` change (kind `birthdays`, entity = frame id) is rendered from current state at read time;
+  `generated_at` is `frame_birthdays.emitted_at`. `store.SyncFrameBirthdays` recomputes the merged list under the
+  frame lock and bumps the entry only when its digest (people, ids, photo keys, the shown year) changed, so edits the
+  frame cannot see (a hidden year, a pending suggestion) emit nothing. An empty list renders as `birthdays: null`
+  and is left out of snapshots. Sync points: create/edit/remove/approve of approved entries and photo changes (every
+  frame with an active `birthdays` subscription to the feed, frames locked in id order after the feed lock),
+  activate/pause/resume/end of a subscription and its `birthdays` flag (that frame), feed deletion (the entries are
+  deleted in the request, then each subscription ends), a linked member leaving, being removed or deleting the
+  account (link cleared), and a linked member's avatar change while it serves as the photo.
+- Merge (§6.5) in `store.MergeBirthdays`: key = name key + month + day; entries ordered by their subscription's
+  `activated_at`, then entry age; the primary is the first with a photo (own photo or the linked member's avatar),
+  else the first. The year is sent only if every entry with a year has `show_age` and all years agree. Sorted by
+  month, day, name.
+- Name key: NFKC, Unicode case folding, NFD with combining marks removed, NFC, whitespace collapsed.
+- Permissions follow §4.1. PATCH compares with the stored values, so fields sent unchanged are not edits (clients may
+  send whole objects); the linked member may only change `birth_year`, `show_age` and unlink, other changed fields
+  are `403 forbidden`. Suggesters may delete (withdraw) their own pending or rejected entries. Entries the caller may
+  not see are `404`, like unknown ones; visible but not editable ones `403`.
+- `decided_by_name`/`decided_at` are shown for suggestions only, to owner/admins and the suggester. `next_birthday`,
+  `turns` and `greetings_today` use the caller's `User.timezone`, else Europe/Brussels; with a visible year,
+  occurrences up to the year of birth are skipped.
+- Photos: hand-written `PUT …/photo` (excluded from codegen like `putAvatar`), the avatar pipeline, keys
+  `avatars/b/<random>.webp` served by the public avatar route. Replacing, removing the photo, the entry, a rejected
+  entry's expiry or the feed deletes the file.
+- Limits: `max_birthdays_per_feed` (200, `KINFRAME_MAX_BIRTHDAYS_PER_FEED`, operator limits); create and suggest are
+  serialized per feed by the feed row lock and rate-limited at 60/h per user (in memory).
+- Greetings: the person must be in the frame's current merged list (any of its `birthday_ids`), the date an
+  occurrence (29 February on 28 February in non-leap years) after the year of birth, within the server's UTC date
+  −2 … +1. One row per merged entry, `ON CONFLICT DO NOTHING`; `204` when all existed. The 50-a-day cap counts
+  greetings (taps) the frame recorded since the UTC day started; the rows of one tap share their `created_at`.
+  Pushes: one per member (with `birthday_notifications` on in one of the greeted feeds); `birthday_id` is the member's
+  oldest entry of that person in any of their feeds, so greetings from different frames get the same tag; the body
+  counts the frames that greeted any of those entries that day (texts `birthday_greeting`, `_two`, `_many`).
+- Morning notices: `Server.BirthdayMornings(now)` runs every 5 minutes (and at start). Candidates are approved entries
+  on the UTC date ±1 in feeds where the member has notifications on; per member the local time must be 08:00–20:00,
+  the person's day today (leap rule, not the year of birth), groups containing the member's own entry are left out,
+  and `birthday_notices` (insert-or-skip) makes it once per local date. Zone: `User.timezone`, else the most common
+  `locale.timezone` of the active subscribed frames of the feeds those entries are in (ties alphabetical), else
+  Europe/Brussels. Texts: `birthday_today`, `birthday_today_age` ("Oma turns 80 today 🎈", no ordinals across 36
+  languages) and `birthday_today_many` ("3 birthdays in the family today: Oma, Lotte, …").
+- `birthday.updated` is rendered per recipient (year visibility) and not sent to whoever got `birthday.suggested` or
+  `birthday.decided` for the same action. Members who leave lose their link (and the event re-renders the entry).
+- The server clock for birthdays (`Server.SetClock`) is injectable for tests; the morning job takes `now`.
+- Maintenance: rejected entries 30 days after the decision (photos too), greetings after 13 months, notices after 7
+  days.
+
+## Photo sources and Google Photos import
+
+- Migration `00015_photo_sources.sql`: the tables of photo-sources.md §15, plus `photo_sources.server_url`
+  (`immich_api` display URL), `upstream_count`, `hold_since`/`last_new_at` (feed debounce),
+  `photo_source_items.replacement_media_id` (a changed upstream file, swapped in once processed), `upstream_added_at`
+  (iCloud `batchDateCreated`), `retry_at` (failed rows), `google_imports.target_kind`, `auth_url_enc`, `done_ids`
+  (resume), `feed_posts.quiet` (a source's first-run posts are placed as history), `albums.only_in_album_mode`, and
+  indexes on `media.source_sha256` and `photo_source_items.upstream_checksum` for the duplicate checks.
+- Code: `internal/netguard` (SSRF guard), `internal/photosource` (Immich, iCloud, Google Picker clients, the
+  scheduler; `photosourcetest` has httptest fakes), `api/photosources.go` (endpoints), `api/photosync.go` (one run),
+  `api/googleimport.go` (consent, callback, polling, copying). The scheduler ticks every 30 s, runs at most 4 sources
+  at once and one per upstream host; a run is claimed in the database (`run_started_at`, stale after an hour,
+  cleared at start), so two processes never run one source.
+- **Network guard** (§12.3, decision 1): every user-entered URL (photo sources **and calendars**) goes through it.
+  Each resolved address is checked when it is dialed and the connection goes to exactly that address (DNS rebinding
+  can't swap one in), redirects (at most 5) are checked the same way, no proxies, TLS always verified (extra CAs from
+  `KINFRAME_SOURCES_CA_FILE`). Loopback, unspecified, link-local, multicast and broadcast are always blocked; private
+  networks (RFC 1918, `fc00::/7`, CGNAT) per `KINFRAME_SOURCES_PRIVATE_NETWORKS` (`auto`: allowed when the public
+  URL's host is `localhost` or resolves only to private addresses) or `KINFRAME_SOURCES_ALLOWED_HOSTS`; plain
+  `http://` only to allowed private addresses. iCloud requests are pinned to `icloud.com`/`icloud-content.com`,
+  Google's to `googleapis.com`/`googleusercontent.com`/`google.com`. The server's own listen address is not treated
+  specially beyond loopback.
+- **Release note (calendars)**: calendar links on private addresses (a LAN CalDAV server) stop working on a public
+  server unless `KINFRAME_SOURCES_PRIVATE_NETWORKS=on` (or the host is in `KINFRAME_SOURCES_ALLOWED_HOSTS`); plain
+  `http://` calendar links to public hosts are refused (most providers redirect to https anyway). The test shows
+  "this server may not reach private network addresses" / "only https:// links are allowed".
+- Secrets: links, link passwords, Immich API keys, the PKCE verifier, the consent URL and Google access tokens are
+  sealed with their own HKDF key (`kinframe photo source secrets v1`). A key change makes runs fail with
+  `credentials_unreadable`. Logs carry hosts and ids only.
+- Duplicate key: `sha256(provider|host|album:<Immich album id>)` for Immich (a new link to the same album is the same
+  source), the share key/slug for individual-asset links, the token for iCloud. Concurrent creates are caught by the
+  unique index (`409 duplicate_source`).
+- Testing a connection, listing Immich albums: blocked addresses and unsupported links answer `200 ok: false` with
+  the code (like every other test failure); create/update answer `422 validation_failed` (`private_address_blocked`
+  on `url`/`server_url`) or `422 source_test_failed` (code in `detail`).
+- Runs: the owner's rights are re-checked first (deleted or soft-deleted owners included). Listing errors never
+  remove anything. History (`none`/`last_n`/`all`) is applied once, to the very first listing; the first import is
+  quiet (album placements `backfill` with `received_at` = upstream added/capture time; feed posts `quiet`) until no
+  pending row of it is left, so a backlog spread over several runs stays quiet. Downloads stop at
+  `max_photo_source_run_bytes` or 15 minutes; the next run is 2 minutes later. A file that can't be read or isn't
+  available is retried 3 times, then `failed` and retried daily for 7 days. Imported but unplaced items (a crash
+  between download and placement) are placed by the next run.
+- Album targets: one send per run (`sends.via`, `photo_source_id`), placements appended to the album in capture
+  order, moderation unless the owner is owner/admin of the frame. Feed targets (decision 2): new items are downloaded
+  and created at once but posted only when the outside album has had no new items for 30 minutes, or 3 hours after
+  the first held item; `next_sync_at` is moved to that moment. One post per `max_items_per_send` items.
+- Dedupe: (source, upstream id); then the upstream checksum against rows of other sources whose items are live in
+  the target (before downloading); then sha256 against `media.source_sha256` and `media.original_sha256` of live
+  placements on the album's frame / live post items of the feed (album duplicates join the album); then media
+  reuse of the owner's same file. `media.original_sha256` is the `sha256` upload metadata of prepared uploads.
+- Removals: mirror removes only the source's own hold (placements also held by a feed delivery stay); duplicates
+  only leave the album. The mass-removal guard (> 20 and > 50 % of live items) holds them as `pending_removals` until
+  `sync {confirm_removals: true}`, switching to `keep` (which clears it), or a new link. Tombstones
+  (`removed_locally`): purge, trash expiry, moderation reject, unsend (album sources of that frame), out of the album
+  (that album's sources), out of a feed post (that feed's sources). A frame rejecting a feed placement does not
+  tombstone the feed source (other frames still show it). A sync never overwrites a tombstone with a stale row.
+- Edits: caption (unless `caption_edited`), capture time (`items.captured_override`, rendered as `captured_at` and
+  used for "taken" sorting and On this day), and a changed file (new media processed in the background, swapped into
+  the same item by a later run; renditions follow, the placements are re-emitted then).
+- Status: transient codes (`unreachable`, `upstream_error`, `rate_limited_upstream`) keep the source `active` with
+  `last_error_code` until 3 failures in a row or 6 h, then `error`; back-off 1 min doubling to 6 h. Other codes are
+  `needs_attention`; `link_not_found`, `album_not_found`, `auth_failed`, `password_required` (and `format_changed` for
+  iCloud) are probed daily, the rest wait for a person (`next_sync_at` null). A PATCH of the connection, take-over or
+  resume runs at once. Sync now: 2 minutes per source (`Retry-After`), 30/h per user.
+- Notifications: `photo_source.updated` (whole `PhotoSource`, rendered per recipient) at run start, at run end and
+  on every change through the API, to the album's library managers / feed owner+admins and the owner;
+  `photo_source.removed` on deletion (also with the album or feed). Push `photo_source_attention` to the owner only:
+  on `needs_attention`, or after 3 days in `error` (text `photo_source_unreachable`), at most once per source and code
+  per 7 days (`attention_pushed`). Source and Google import sends get no `delivered` and no `failed` push.
+  `notify_reactions: false` drops the owner's reaction/reply event and push (history and receipts still update).
+- Google: consent with PKCE S256, `access_type=online`, `prompt=select_account`, state hashed and single use (cleared
+  at the callback whatever happens), 15 minutes. The callback is hand-written (excluded from codegen) and answers
+  `302` to the stored `return_uri` with `import_id` and `status`, or a small `400` HTML page for an unknown, reused or
+  expired state. Allowed `return_uri` values, exactly: `app.kinframe:/google-import` (Android and iOS: the apps'
+  `app.kinframe` scheme) and `<public URL>/google-import/return` (the web SPA route, served by the SPA fallback; also
+  usable as an Android app link). The picker step on web appends `/autoclose` itself. Polling uses Google's
+  `pollInterval` (at least 1 s, at most 30 s); `PERMISSION_DENIED`/`NOT_FOUND` on the session means expired. Items:
+  `=d` (photos; `=w2560-h2560` when the file isn't readable), `=dv` (videos once `READY`, else waited for up to
+  10 minutes), the listing is repeated after 50 minutes for fresh base URLs, same-file picks count as duplicates.
+  One send into the album, or posts of 200 into a feed; never quiet. Then the session is deleted. Tokens: a `done`
+  import keeps its sealed token until it expires (≤ 1 h) so the next import within the hour skips consent (§7.3);
+  failed, expired and cancelled imports forget it at once; maintenance clears every token after expiry or 2 hours,
+  fails imports waiting for consent after 15 minutes, and deletes finished imports after 7 days. Push
+  `google_import_done` (text `google_import_failed` for failures) only without an open websocket. A restart resumes
+  `picking`/`importing` imports; items copied before a crash but not yet placed are not placed (known gap).
+- Rate limits (in memory): test + Immich albums 30/h, create 30/h, sync now 30/h per user, Google starts 20/h.
+
 ## Settings
 
 - Stale `If-Match` is accepted when none of the patched fields changed since that version (field-level merge);
@@ -163,14 +371,16 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 ## Rate limits (in memory, per process)
 
 Redeem 10/h per user and 30/h per IP (also used for replace-device); enroll 20/h per IP; device token 120/h per IP;
-invites 60/h per user; dev tokens 120/h per IP.
+invites 60/h per user; birthday create/suggest 60/h per user; dev tokens 120/h per IP.
 
 ## Not done yet (v0.1 follow-ups)
 
 - Face detection for focal points (interface `worker.FocalDetector`, centre for now); perceptual duplicate detection.
 - Calendar.
 - Garbage collection of media no longer referenced by any live placement.
-- FCM/APNs delivery.
+- FCM/APNs delivery. When it is built: pushes with a tag (`notify.Push.Tag`, birthday greetings
+  `birthday:<birthday_id>:<date>`) must set `apns-collapse-id` to the tag on APNs (at most 64 bytes; these are 56)
+  and the notification `tag` on FCM, so the newer greeting replaces the older one.
 - Media tool versions: the image is **Debian 13 (trixie)**: libvips 8.16, ffmpeg 7.1. It was moved off bookworm
   because libvips 8.14 there did **not** strip EXIF/GPS with `[Q=..,strip]`, which `TestPhotoPipeline` caught inside
   the image. The root cause in 8.14 wasn't investigated further. `make test-docker` (full suite with

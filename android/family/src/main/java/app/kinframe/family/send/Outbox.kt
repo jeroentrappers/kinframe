@@ -147,7 +147,13 @@ data class OutboxSend(
     val state: String = OutboxState.QUEUED,
     /** ProblemCode (or "network", "unauthorized") of the last failure. */
     val error: String? = null,
+    /** Feeds to post to, next to [frameIds] (feeds.md §6.1); at least one of the two is non-empty. */
+    val feedIds: List<String> = emptyList(),
+    val feedNames: List<String> = emptyList(),
 ) {
+    /** Frames and feeds, for "Sending to …". */
+    val recipientNames: List<String> get() = frameNames + feedNames
+
     val totalBytes: Long get() = items.sumOf { it.totalUploadSize }
     val uploadedBytes: Long get() = items.sumOf { it.sentBytes() + (it.motion?.sentBytes() ?: 0) }
 }

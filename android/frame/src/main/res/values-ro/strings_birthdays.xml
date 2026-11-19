@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s împlinește azi %2$d an!</item>
+        <item quantity="few">🎈 %1$s împlinește azi %2$d ani!</item>
+        <item quantity="other">🎈 %1$s împlinește azi %2$d de ani!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Azi e zi de naștere: %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Zile de naștere azi</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">și încă %d</item>
+        <item quantity="few">și încă %d</item>
+        <item quantity="other">și încă %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s împlinește %2$d an</item>
+        <item quantity="few">%1$s împlinește %2$d ani</item>
+        <item quantity="other">%1$s împlinește %2$d de ani</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Zi de naștere: %1$s</string>
+    <string name="birthday_countdown_two">%1$s și %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s și încă %2$d</item>
+        <item quantity="few">%1$s și încă %2$d</item>
+        <item quantity="other">%1$s și încă %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Urează „La mulți ani” de pe această ramă</string>
+    <string name="birthday_greet_button">Trimite „La mulți ani” pentru %1$s</string>
+    <string name="birthday_greet_sent">Trimis ✓ — familia va vedea</string>
+    <string name="birthday_detail_label">Zi de naștere</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">împlinește %d an</item>
+        <item quantity="few">împlinește %d ani</item>
+        <item quantity="other">împlinește %d de ani</item>
+    </plurals>
+</resources>

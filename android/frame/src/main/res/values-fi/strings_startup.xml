@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Käynnistetään…</string>
+    <string name="startup_checking_library">Tarkistetaan kuvia sähkökatkon jälkeen…</string>
+    <string name="startup_checking_update">Tarkistetaan sovelluksen versiota…</string>
+    <string name="startup_loading_photos">Ladataan kuvia…</string>
+    <string name="startup_preparing_photo">Valmistellaan ensimmäistä kuvaa…</string>
+    <string name="startup_waiting_wifi">Odotetaan Wi-Fiä…</string>
+    <string name="startup_setting_clock">Asetetaan kelloa…</string>
+    <string name="startup_connecting">Yhdistetään palvelimeen…</string>
+    <string name="power_cut_title">Virta katkaistiin ilman sammutusta</string>
+    <string name="power_cut_body_ok">Kaikki tarkistettiin, ja kaikki on kunnossa.</string>
+    <string name="power_cut_body_redownload">Kaikki tarkistettiin. Osa kuvista ladataan uudelleen.</string>
+    <string name="power_cut_tip">Valitse ensi kerralla valikosta %1$s → %2$s ja odota, kunnes näytöllä lukee ”%3$s”.</string>
+</resources>

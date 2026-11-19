@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">מתבצעת הפעלה…</string>
+    <string name="startup_checking_library">בודקים את התמונות אחרי הפסקת חשמל…</string>
+    <string name="startup_checking_update">בודקים את גרסת האפליקציה…</string>
+    <string name="startup_loading_photos">טוענים את התמונות…</string>
+    <string name="startup_preparing_photo">מכינים את התמונה הראשונה…</string>
+    <string name="startup_waiting_wifi">ממתינים ל-Wi-Fi…</string>
+    <string name="startup_setting_clock">מכוונים את השעון…</string>
+    <string name="startup_connecting">מתחברים לשרת…</string>
+    <string name="power_cut_title">המסגרת כובתה בלי כיבוי מסודר</string>
+    <string name="power_cut_body_ok">הכול נבדק והכול תקין.</string>
+    <string name="power_cut_body_redownload">הכול נבדק. חלק מהתמונות יורדות שוב.</string>
+    <string name="power_cut_tip">בפעם הבאה יש לבחור בתפריט %1$s ← %2$s ולהמתין עד שיופיע על המסך “%3$s”.</string>
+</resources>

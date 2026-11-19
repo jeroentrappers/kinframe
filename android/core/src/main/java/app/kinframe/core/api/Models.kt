@@ -37,7 +37,23 @@ data class Discovery(
     val weather: Boolean = false,
     /** The server syncs calendars for frames (ICS/webcal and CalDAV). */
     val calendar: Boolean = false,
-)
+    /** The server supports feeds and subscriptions (docs/spec/feeds.md); apps hide them otherwise. */
+    val feeds: Boolean = false,
+    /** Feeds have birthday lists (docs/spec/birthdays.md); only true together with [feeds]. */
+    val birthdays: Boolean = false,
+    /** Albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md); apps hide sources otherwise. */
+    val photoSources: Boolean = false,
+    /** The providers this server allows ([PhotoSourceProvider]); empty without [photoSources]. */
+    val photoSourceProviders: List<String> = emptyList(),
+    /** Sources may reach home-network addresses (a LAN Immich); false: the connect sheet asks for a public address. */
+    val photoSourcesPrivateNetworks: Boolean = false,
+    /** The operator configured a Google OAuth client: apps offer "Add from Google Photos". */
+    val googlePhotosImport: Boolean = false,
+) {
+    /** The photo source providers to offer: none when the server has sources off. */
+    val sourceProviders: List<String>
+        get() = if (!photoSources) emptyList() else photoSourceProviders.filter { it in PhotoSourceProvider.all }
+}
 
 @Serializable
 data class DiscoveryAuth(
@@ -53,6 +69,23 @@ data class Limits(
     val maxVideoSeconds: Int = 300,
     val maxUploadBytes: Long = 2147483648,
     val trashRetentionDays: Int = 30,
+    /** Feeds one account may own. */
+    val maxFeedsPerUser: Int = 20,
+    val maxSubscriptionsPerFeed: Int = 100,
+    /** Cap of `history: all` per subscription (newest first). */
+    val maxFeedBackfillItems: Int = 5000,
+    /** Birthday people per feed (pending and approved). */
+    val maxBirthdaysPerFeed: Int = 200,
+    /** Photo sources per album or feed. */
+    val maxPhotoSourcesPerTarget: Int = 5,
+    /** Photo sources one account owns. */
+    val maxPhotoSourcesPerUser: Int = 20,
+    /** Live imported items per photo source; newer upstream items beyond it are skipped. */
+    val maxPhotoSourceItems: Int = 10000,
+    /** Bytes one sync run downloads; the rest follows in the next runs. */
+    val maxPhotoSourceRunBytes: Long = 2147483648,
+    /** Items per Google Photos import. */
+    val maxGoogleImportItems: Int = 500,
 )
 
 @Serializable
@@ -157,6 +190,8 @@ data class Item(
     val importedFrom: String? = null,
     /** The original sender's name in that app, shown instead of the frame ("Anna · via Frameo"). */
     val importedSenderName: String? = null,
+    /** Synced by a photo source or copied by a Google Photos import: "Anna via Immich" (photo-sources.md §9.5). */
+    val via: ItemVia? = null,
 ) {
     /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
     val isLive: Boolean get() = kind == MediaKind.LIVE
@@ -235,7 +270,19 @@ data class Placement(
     /** Set when a member shared this placement from another frame's library (README §5.3); the item keeps its sender. */
     val sharedByUserId: String? = null,
     val sharedByName: String? = null,
-)
+    /** How it got here ([PlacementOrigin]): `send`, `share`, `feed` or `import`. */
+    val origin: String = PlacementOrigin.SEND,
+    /** `origin: feed`: the feed that placed it, and its current name (frames show "Sender · Feed name"). */
+    val originFeedId: String? = null,
+    val originFeedName: String? = null,
+    /** Feeds whose active subscriptions hold this placement (feed mode, like [albumIds] for album mode). */
+    val feedIds: List<String> = emptyList(),
+    /** Placed as feed history: not new on the frame (no "N new" card, no screen wake); `received_at` is the post time. */
+    val backfill: Boolean = false,
+) {
+    /** The feed to credit ("Anna · Peeters kids"), when the placement came through one. */
+    val creditFeedName: String? get() = originFeedName?.takeIf { origin == PlacementOrigin.FEED && it.isNotBlank() }
+}
 
 @Serializable
 data class PlacementReply(val preset: String? = null, val at: String? = null)
@@ -266,6 +313,8 @@ object ChangeType {
     const val FRAME = "frame"
     const val WEATHER = "weather"
     const val CALENDAR = "calendar"
+    /** The frame's birthday people ([FrameBirthdays]); `birthdays: null` means drop them. */
+    const val BIRTHDAYS = "birthdays"
     const val RESET = "reset"
 }
 
@@ -282,6 +331,8 @@ data class Change(
     val weather: JsonObject? = null,
     /** The merged calendar ([FrameCalendar]); null means "drop your calendar". */
     val calendar: JsonObject? = null,
+    /** The frame's birthday people ([FrameBirthdays]); null means "drop your birthdays". */
+    val birthdays: JsonObject? = null,
 )
 
 @Serializable
@@ -319,7 +370,21 @@ data class Heartbeat(
     /** Self-update state (README §5.7): idle, downloading, waiting, installing, needs_user, updated, failed, rolled_back. */
     val updateState: String? = null,
     val lastUpdateError: String? = null,
+    /** What this frame app understands beyond the base protocol ([FrameFeatures]); the server adapts to it. */
+    val features: List<String>? = null,
 )
+
+/** `Heartbeat.features` values. */
+object FrameFeatures {
+    /** Feed history placements (`Placement.backfill`) are shown quietly: no "N new" card, no screen wake. */
+    const val FEED_BACKFILL = "feed_backfill"
+
+    /** The frame shows the `birthdays` change (informational: the server withholds nothing). */
+    const val BIRTHDAYS = "birthdays"
+
+    /** Everything this build supports, sent in every heartbeat. */
+    val SUPPORTED: List<String> = listOf(FEED_BACKFILL, BIRTHDAYS)
+}
 
 /** `FrameUpdate`: a frame app release mirrored by the server (`GET /device/update`). */
 @Serializable
@@ -391,6 +456,16 @@ object ProblemCode {
     const val OWNER_CANNOT_LEAVE = "owner_cannot_leave"
     const val UPSTREAM_UNAVAILABLE = "upstream_unavailable"
     const val FEATURE_DISABLED = "feature_disabled"
+    const val ALREADY_DECIDED = "already_decided"
+    const val ALREADY_SUBSCRIBED = "already_subscribed"
+    const val INVALID_TRANSITION = "invalid_transition"
+    const val LIMIT_REACHED = "limit_reached"
+    /** A pending or approved birthday entry with the same normalized name, day and month exists (id in `detail`). */
+    const val DUPLICATE_BIRTHDAY = "duplicate_birthday"
+    /** A photo source create or connection change could not read the album (`detail`: the `PhotoSourceErrorCode`). */
+    const val SOURCE_TEST_FAILED = "source_test_failed"
+    /** The same outside album already feeds this target (`detail`: the existing source id). */
+    const val DUPLICATE_SOURCE = "duplicate_source"
     const val SERVER_ERROR = "server_error"
 }
 

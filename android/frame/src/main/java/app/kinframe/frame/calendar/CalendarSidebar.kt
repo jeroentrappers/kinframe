@@ -141,7 +141,7 @@ fun UpcomingAgenda(
             }
             day.all.forEach { e ->
                 headings += false
-                SidebarEvent(e, whenText(e, day.date, env)) { onEvent(e) }
+                SidebarEvent(e, whenText(e, day.date, env), today = isToday && e.birthday?.date == day.date) { onEvent(e) }
             }
         }
     }
@@ -236,13 +236,13 @@ private fun SidebarDay(day: CalendarLayout.AgendaDay, isToday: Boolean, env: Cal
                 style = Kin.type.body.copy(fontSize = 17.sp), color = Kin.colors.inkFaint,
             )
         }
-        day.all.forEach { e -> SidebarEvent(e, whenText(e, day.date, env)) { onEvent(e) } }
+        day.all.forEach { e -> SidebarEvent(e, whenText(e, day.date, env), today = isToday && e.birthday?.date == day.date) { onEvent(e) } }
     }
 }
 
 /** A compact event row: colour bar, time, title. */
 @Composable
-private fun SidebarEvent(e: CalEvent, whenText: String, onClick: () -> Unit) {
+private fun SidebarEvent(e: CalEvent, whenText: String, today: Boolean = false, onClick: () -> Unit) {
     val sw = CalendarPalette.of(e.color)
     val dark = Kin.colors.isDark
     Row(
@@ -253,7 +253,10 @@ private fun SidebarEvent(e: CalEvent, whenText: String, onClick: () -> Unit) {
         Box(Modifier.width(5.dp).height(46.dp).background(if (dark) sw.onDark else sw.strong))
         Column(Modifier.padding(start = 12.dp, top = 4.dp, bottom = 4.dp)) {
             Text(whenText, style = Kin.type.caption.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium), color = if (dark) sw.onDark else sw.strong.darken(), maxLines = 1)
-            Text(e.title, style = Kin.type.bodyStrong.copy(fontSize = 17.sp, lineHeight = 21.sp), color = Kin.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            // "Today" starts with "🎈 Oma is 80 today!" for a birthday (birthdays.md §6.6).
+            val b = e.birthday
+            val title = if (b != null && today) app.kinframe.frame.birthdays.todayPhrase(b) else e.title
+            Text(title, style = Kin.type.bodyStrong.copy(fontSize = 17.sp, lineHeight = 21.sp), color = Kin.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Spacer(Modifier.weight(1f))
     }

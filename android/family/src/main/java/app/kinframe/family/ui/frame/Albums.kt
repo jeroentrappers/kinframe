@@ -95,6 +95,8 @@ fun AlbumChips(state: LibraryState, canManage: Boolean, onSelect: (String?) -> U
             ToggleChip("${a.name} · ${a.placementCount}", state.albumId == a.id, { onSelect(a.id) }, leading = when {
                 state.playingAlbumId == a.id -> ({ Icon(KinIcons.Play, stringResource(R.string.albums_playing_badge), Modifier.size(14.dp)) })
                 a.schedule != null -> ({ Icon(KinIcons.Calendar, stringResource(R.string.albums_scheduled), Modifier.size(14.dp)) })
+                a.onlyInAlbumMode -> ({ Icon(KinIcons.EyeOff, stringResource(R.string.albums_only_mode_badge), Modifier.size(14.dp)) })
+                a.photoSourceCount > 0 -> ({ Icon(KinIcons.Link, stringResource(R.string.source_section_title), Modifier.size(14.dp)) })
                 else -> null
             })
         }
@@ -110,6 +112,8 @@ class AlbumHeaderActions(
     val onSchedule: () -> Unit,
     val onRename: () -> Unit,
     val onDelete: () -> Unit,
+    /** "Only in album mode" switch (album managers); null hides it. */
+    val onOnlyInAlbumMode: ((Boolean) -> Unit)? = null,
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -128,6 +132,8 @@ fun AlbumHeader(album: Album, cover: Placement?, playing: Boolean, canSettings: 
                 album.schedule?.let { s ->
                     Pill(stringResource(R.string.albums_schedule_short, AlbumDates.label(s.fromMonthDay), AlbumDates.label(s.toMonthDay)), c.accentSoft, c.onAccentSoft, icon = KinIcons.Calendar)
                 }
+                if (album.onlyInAlbumMode) Pill(stringResource(R.string.albums_only_mode_badge), c.paperDeep, c.inkSoft, icon = KinIcons.EyeOff)
+                if (album.photoSourceCount > 0) Pill(pluralStringResource(R.plurals.source_album_badge, album.photoSourceCount, album.photoSourceCount), c.sageSoft, c.onSageSoft, icon = KinIcons.Link)
             }
         }
     }
@@ -143,6 +149,9 @@ fun AlbumHeader(album: Album, cover: Placement?, playing: Boolean, canSettings: 
             QuietButton(stringResource(R.string.albums_rename), a.onRename)
             QuietButton(stringResource(R.string.albums_delete), a.onDelete, danger = true)
         }
+    }
+    if (canManage) a.onOnlyInAlbumMode?.let { set ->
+        SwitchRow(stringResource(R.string.albums_only_mode), album.onlyInAlbumMode, set, hint = stringResource(R.string.albums_only_mode_hint))
     }
 }
 
@@ -316,7 +325,7 @@ fun PlacementViewer(p: Placement, a: ViewerActions, onClose: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(p.item.senderName?.let { stringResource(R.string.library_from, it) } ?: stringResource(R.string.library_photo), style = Kin.type.title, color = c.ink, modifier = Modifier.weight(1f))
+                Text(p.item.senderName?.let { stringResource(R.string.library_from, app.kinframe.family.ui.sources.creditName(it, p.item.via)) } ?: stringResource(R.string.library_photo), style = Kin.type.title, color = c.ink, modifier = Modifier.weight(1f))
                 TextButton(onClose) { Text(stringResource(R.string.common_close)) }
             }
             val model = p.media?.posterUrl.takeIf { video } ?: p.media?.url.takeIf { !video } ?: p.item.thumbUrl

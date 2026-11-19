@@ -7,6 +7,18 @@ public struct Limits: Codable, Equatable, Sendable {
     public var maxVideoSeconds: Int
     public var maxUploadBytes: Int64
     public var trashRetentionDays: Int?
+    /// Feeds one account may own, subscriptions per feed, and the cap of `history: all` per subscription.
+    public var maxFeedsPerUser: Int = 20
+    public var maxSubscriptionsPerFeed: Int = 100
+    public var maxFeedBackfillItems: Int = 5000
+    /// Birthday people per feed (pending and approved).
+    public var maxBirthdaysPerFeed: Int = 200
+    /// Photo sources (docs/spec/photo-sources.md §11): per album or feed, per account, live items per source, and
+    /// items per Google Photos import.
+    public var maxPhotoSourcesPerTarget: Int = 5
+    public var maxPhotoSourcesPerUser: Int = 20
+    public var maxPhotoSourceItems: Int = 10_000
+    public var maxGoogleImportItems: Int = 500
 
     public init(maxItemsPerSend: Int = 200, maxVideoSeconds: Int = 300, maxUploadBytes: Int64 = 2 << 30, trashRetentionDays: Int? = 30) {
         self.maxItemsPerSend = maxItemsPerSend
@@ -22,6 +34,14 @@ public struct Limits: Codable, Equatable, Sendable {
         case maxVideoSeconds = "max_video_seconds"
         case maxUploadBytes = "max_upload_bytes"
         case trashRetentionDays = "trash_retention_days"
+        case maxFeedsPerUser = "max_feeds_per_user"
+        case maxSubscriptionsPerFeed = "max_subscriptions_per_feed"
+        case maxFeedBackfillItems = "max_feed_backfill_items"
+        case maxBirthdaysPerFeed = "max_birthdays_per_feed"
+        case maxPhotoSourcesPerTarget = "max_photo_sources_per_target"
+        case maxPhotoSourcesPerUser = "max_photo_sources_per_user"
+        case maxPhotoSourceItems = "max_photo_source_items"
+        case maxGoogleImportItems = "max_google_import_items"
     }
 
     public init(from decoder: Decoder) throws {
@@ -30,6 +50,14 @@ public struct Limits: Codable, Equatable, Sendable {
         maxVideoSeconds = try c.decodeIfPresent(Int.self, forKey: .maxVideoSeconds) ?? 300
         maxUploadBytes = try c.decodeIfPresent(Int64.self, forKey: .maxUploadBytes) ?? 2 << 30
         trashRetentionDays = try c.decodeIfPresent(Int.self, forKey: .trashRetentionDays)
+        maxFeedsPerUser = try c.decodeIfPresent(Int.self, forKey: .maxFeedsPerUser) ?? 20
+        maxSubscriptionsPerFeed = try c.decodeIfPresent(Int.self, forKey: .maxSubscriptionsPerFeed) ?? 100
+        maxFeedBackfillItems = try c.decodeIfPresent(Int.self, forKey: .maxFeedBackfillItems) ?? 5000
+        maxBirthdaysPerFeed = try c.decodeIfPresent(Int.self, forKey: .maxBirthdaysPerFeed) ?? 200
+        maxPhotoSourcesPerTarget = (try? c.decodeIfPresent(Int.self, forKey: .maxPhotoSourcesPerTarget)) ?? 5
+        maxPhotoSourcesPerUser = (try? c.decodeIfPresent(Int.self, forKey: .maxPhotoSourcesPerUser)) ?? 20
+        maxPhotoSourceItems = (try? c.decodeIfPresent(Int.self, forKey: .maxPhotoSourceItems)) ?? 10_000
+        maxGoogleImportItems = (try? c.decodeIfPresent(Int.self, forKey: .maxGoogleImportItems)) ?? 500
     }
 }
 
@@ -133,17 +161,17 @@ public enum ComposeRules {
     }
 
     public enum Blocker: Equatable, Sendable {
-        case noItems, noFrames, issues(Int), captionTooLong, overLimit(Int)
+        /// `noFrames`: no recipient at all (neither a frame nor a feed). `tooManyFeeds`: more feeds than a send takes.
+        case noItems, noFrames, issues(Int), captionTooLong, overLimit(Int), tooManyFeeds(Int)
     }
 
-    /// Why the send button is disabled, if it is.
-    public static func blocker(itemCount: Int, frameCount: Int, issues: Int, longestCaption: Int, limits: Limits) -> Blocker? {
+    /// Why the send button is disabled, if it is. A feed counts as one recipient, however many frames follow it.
+    public static func blocker(itemCount: Int, frameCount: Int, feedCount: Int = 0, issues: Int, longestCaption: Int, limits: Limits) -> Blocker? {
         if itemCount == 0 { return .noItems }
         if itemCount > limits.maxItemsPerSend { return .overLimit(limits.maxItemsPerSend) }
         if issues > 0 { return .issues(issues) }
         if longestCaption > Format.captionMax { return .captionTooLong }
-        if frameCount == 0 { return .noFrames }
-        return nil
+        return Recipients.problem(frameCount: frameCount, feedCount: feedCount)
     }
 }
 

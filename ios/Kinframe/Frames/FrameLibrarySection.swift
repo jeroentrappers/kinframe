@@ -18,9 +18,16 @@ struct FrameLibrarySection: View {
     @State private var albumNext: AlbumSheet?
     @State private var confirmDelete = false
     @State private var playBusy = false
+    @State private var addingSource = false
 
-    init(api: API, frame: FrameSummary) {
+    private var sourceFeatures: PhotoSourceFeatures { PhotoSourceFeatures(app.discovery) }
+
+    /// Open this album first.
+    private let initialAlbumId: String?
+
+    init(api: API, frame: FrameSummary, albumId: String? = nil) {
         self.frame = frame
+        initialAlbumId = albumId
         _model = State(initialValue: LibraryModel(api: api, frameId: frame.id))
     }
 
@@ -36,7 +43,18 @@ struct FrameLibrarySection: View {
                 AlbumHeader(album: album, cover: cover(album), playing: model.playingId == album.id, control: control, manage: manage,
                             canArrange: model.placements.count > 1, playBusy: playBusy,
                             togglePlaying: { Task { await togglePlaying(album) } },
-                            act: { albumSheet = $0 }, delete: { confirmDelete = true })
+                            act: { albumSheet = $0 }, delete: { confirmDelete = true },
+                            syncFrom: manage && sourceFeatures.sources ? { addingSource = true } : nil,
+                            googleImport: manage && sourceFeatures.googleImport
+                                ? { app.googleImport.start(.album(frameId: frame.id, albumId: album.id), name: album.name) } : nil,
+                            setAlbumOnly: { on in Task { await setAlbumOnly(album, on) } })
+                if manage, sourceFeatures.sources, (album.photoSourceCount ?? 0) > 0 || addingSource {
+                    TargetPhotoSources(api: model.api, target: .album(frameId: frame.id, albumId: album.id), targetName: album.name,
+                                       album: album, adding: $addingSource, setAlbumOnly: { await setAlbumOnly(album, true) }) {
+                        Task { await model.loadAlbums(); await model.load() }
+                    }
+                    .id(album.id)
+                }
             } else {
                 if model.view == .visible { MemoriesStrip(memories: model.memories) { open = $0 } }
                 filterBar
@@ -81,6 +99,7 @@ struct FrameLibrarySection: View {
         }
         .task {
             await model.loadAlbums()
+            if let initialAlbumId, model.albums.contains(where: { $0.id == initialAlbumId }) { model.select(album: initialAlbumId) }
             await model.loadMemories()
             if control { await model.loadPlaying() }
             #if DEBUG
@@ -129,10 +148,20 @@ struct FrameLibrarySection: View {
             albumSheetView(sheet)
         }
         .alert(L("albums.deleteConfirm", ["name": model.album?.name ?? ""]), isPresented: $confirmDelete) {
-            Button(L("albums.delete"), role: .destructive) { Task { await deleteAlbum() } }
+            if (model.album?.photoSourceCount ?? 0) > 0 {
+                // The album syncs from outside: ask about the photos its sources imported (spec §9.1).
+                Button(L("ios.ps.deleteAlbumKeep")) { Task { await deleteAlbum(removeSourceItems: false) } }
+                Button(L("ios.ps.deleteAlbumRemove"), role: .destructive) { Task { await deleteAlbum(removeSourceItems: true) } }
+            } else {
+                Button(L("albums.delete"), role: .destructive) { Task { await deleteAlbum() } }
+            }
             Button(L("common.cancel"), role: .cancel) {}
         } message: {
-            Text(model.album.map { model.playingId == $0.id } == true ? L("albums.deleteBodyPlaying") : L("albums.deleteBody"))
+            if (model.album?.photoSourceCount ?? 0) > 0 {
+                Text(L("ios.ps.deleteAlbumBody"))
+            } else {
+                Text(model.album.map { model.playingId == $0.id } == true ? L("albums.deleteBodyPlaying") : L("albums.deleteBody"))
+            }
         }
     }
 
@@ -144,7 +173,8 @@ struct FrameLibrarySection: View {
                 chip(L("albums.all"), systemImage: "photo.on.rectangle", count: nil, on: model.albumId == nil) { model.select(album: nil) }
                 ForEach(model.albums) { a in
                     chip(a.name, systemImage: model.playingId == a.id ? "play.fill" : "rectangle.stack", count: a.placementCount,
-                         on: model.albumId == a.id, scheduled: a.schedule?.fromMonthDay != nil) { model.select(album: a.id) }
+                         on: model.albumId == a.id, scheduled: a.schedule?.fromMonthDay != nil,
+                         albumOnly: a.onlyInAlbumMode == true, syncs: (a.photoSourceCount ?? 0) > 0) { model.select(album: a.id) }
                 }
                 if manage {
                     Button {
@@ -166,13 +196,16 @@ struct FrameLibrarySection: View {
         .accessibilityLabel(L("albums.label"))
     }
 
-    private func chip(_ title: String, systemImage: String, count: Int?, on: Bool, scheduled: Bool = false, action: @escaping () -> Void) -> some View {
+    private func chip(_ title: String, systemImage: String, count: Int?, on: Bool, scheduled: Bool = false, albumOnly: Bool = false,
+                      syncs: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: systemImage).font(.caption.weight(.bold))
                 Text(title).lineLimit(1)
                 if let count { Text("\(count)").monospacedDigit().opacity(0.7) }
                 if scheduled { Image(systemName: "calendar").font(.caption).accessibilityLabel(L("albums.scheduled")) }
+                if syncs { Image(systemName: "arrow.triangle.2.circlepath").font(.caption).accessibilityLabel(L("ios.ps.albumSyncs")) }
+                if albumOnly { Image(systemName: "eye.slash").font(.caption).accessibilityLabel(L("ios.albums.onlyInAlbumMode")) }
             }
             .font(.subheadline.weight(.semibold))
             .padding(.horizontal, 14)
@@ -308,7 +341,7 @@ struct FrameLibrarySection: View {
         if let caption = p.item.caption, !caption.isEmpty {
             parts.append(caption)
         } else {
-            parts.append(L("library.itemBy", ["name": p.item.senderName ?? "?"]))
+            parts.append(L("library.itemBy", ["name": Credit.item(p.item) ?? "?"]))
         }
         if p.item.kind == .live { parts.append(L("ios.live.a11y")) }
         if model.album?.coverPlacementId == p.id { parts.append(L("albums.cover")) }
@@ -500,10 +533,19 @@ struct FrameLibrarySection: View {
         }
     }
 
-    private func deleteAlbum() async {
+    private func setAlbumOnly(_ album: Album, _ on: Bool) async {
+        do {
+            try await model.setOnlyInAlbumMode(album, on)
+            app.toasts.show(on ? L("ios.albums.onlyInAlbumModeOn", ["name": album.name]) : L("ios.albums.onlyInAlbumModeOff", ["name": album.name]))
+        } catch {
+            report(error)
+        }
+    }
+
+    private func deleteAlbum(removeSourceItems: Bool = false) async {
         guard let album = model.album else { return }
         do {
-            try await model.deleteAlbum(album)
+            try await model.deleteAlbum(album, removeSourceItems: removeSourceItems)
             app.toasts.show(L("albums.deleted", ["name": album.name]))
         } catch {
             report(error)
@@ -630,7 +672,7 @@ struct PlacementSheet: View {
                         Text(caption).font(.title3).foregroundStyle(Palette.text)
                     }
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(L("library.from", ["name": placement.item.senderName ?? "?"]))
+                        Text(L("library.from", ["name": Credit.item(placement.item) ?? "?"]))
                         if let sharer = placement.sharedByName {
                             Label(L("share.sharedBy", ["name": sharer]), systemImage: "arrowshape.turn.up.right")
                         }

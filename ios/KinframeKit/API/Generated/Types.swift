@@ -153,8 +153,10 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /v1/sends/{sendId}`.
     /// - Remark: Generated from `#/paths//v1/sends/{sendId}/delete(unsend)`.
     func unsend(_ input: Operations.Unsend.Input) async throws -> Operations.Unsend.Output
-    /// Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
-    /// renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+    /// Place the same items on additional frames, or post them to feeds. Uses the same path as `sharePlacements`:
+    /// no new upload or master, renditions only for screen sizes that have none yet, and frames that already hold an
+    /// item are skipped (a placement that was only there through a feed becomes held directly, so unsubscribing no
+    /// longer removes it).
     ///
     ///
     /// - Remark: HTTP `POST /v1/sends/{sendId}/forward`.
@@ -219,11 +221,427 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/frames/{frameId}/albums/{albumId}`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/patch(updateAlbum)`.
     func updateAlbum(_ input: Operations.UpdateAlbum.Input) async throws -> Operations.UpdateAlbum.Output
-    /// Placements stay on the frame.
+    /// Placements stay on the frame, unless `remove_source_items` is true: then the photos the album's photo sources
+    /// imported are removed too (docs/spec/photo-sources.md §9.1). The album's photo sources are deleted either way.
+    ///
     ///
     /// - Remark: HTTP `DELETE /v1/frames/{frameId}/albums/{albumId}`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/delete(deleteAlbum)`.
     func deleteAlbum(_ input: Operations.DeleteAlbum.Input) async throws -> Operations.DeleteAlbum.Output
+    /// The album's photo sources with their status (album managers, i.e. owner, admin or manage_library; `403 missing_permission` otherwise).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/albums/{albumId}/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/photo-sources/get(listAlbumPhotoSources)`.
+    func listAlbumPhotoSources(_ input: Operations.ListAlbumPhotoSources.Input) async throws -> Operations.ListAlbumPhotoSources.Output
+    /// Feeds the caller is a member of (any role). See docs/spec/feeds.md.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds`.
+    /// - Remark: Generated from `#/paths//v1/feeds/get(listMyFeeds)`.
+    func listMyFeeds(_ input: Operations.ListMyFeeds.Input) async throws -> Operations.ListMyFeeds.Output
+    /// The caller becomes the feed's owner. At most `limits.max_feeds_per_user` owned feeds (`409 limit_reached`).
+    ///
+    /// - Remark: HTTP `POST /v1/feeds`.
+    /// - Remark: Generated from `#/paths//v1/feeds/post(createFeed)`.
+    func createFeed(_ input: Operations.CreateFeed.Input) async throws -> Operations.CreateFeed.Output
+    /// Feed members only; everyone else gets `404 not_found` (feeds are never discoverable).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/get(getFeed)`.
+    func getFeed(_ input: Operations.GetFeed.Input) async throws -> Operations.GetFeed.Output
+    /// Owner or admin. Renaming re-emits the feed's placements on every subscribed frame so their credit follows.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/patch(updateFeed)`.
+    func updateFeed(_ input: Operations.UpdateFeed.Input) async throws -> Operations.UpdateFeed.Output
+    /// Owner only. Removes every post from every subscribed frame (placements that also reached a frame directly
+    /// stay), ends all subscriptions (`removed`, reason `feed_deleted`) and notifies the frames' owners and admins.
+    /// Items stay in the posters' sent history. Runs in the background; the feed is gone for clients at once.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)`.
+    func deleteFeed(_ input: Operations.DeleteFeed.Input) async throws -> Operations.DeleteFeed.Output
+    /// Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/leave`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)`.
+    func leaveFeed(_ input: Operations.LeaveFeed.Input) async throws -> Operations.LeaveFeed.Output
+    /// Owner only. The new owner must be a member; the previous owner becomes admin.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/transfer`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/transfer/post(transferFeedOwnership)`.
+    func transferFeedOwnership(_ input: Operations.TransferFeedOwnership.Input) async throws -> Operations.TransferFeedOwnership.Output
+    /// Any feed member.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/members`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/get(listFeedMembers)`.
+    func listFeedMembers(_ input: Operations.ListFeedMembers.Input) async throws -> Operations.ListFeedMembers.Output
+    /// Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)`.
+    func updateFeedMember(_ input: Operations.UpdateFeedMember.Input) async throws -> Operations.UpdateFeedMember.Output
+    /// Owner or admin (admins cannot remove the owner or other admins).
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)`.
+    func removeFeedMember(_ input: Operations.RemoveFeedMember.Input) async throws -> Operations.RemoveFeedMember.Output
+    /// Owner or admin. Pending requests from join invites (`via` is always `invite`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
+    func listFeedJoinRequests(_ input: Operations.ListFeedJoinRequests.Input) async throws -> Operations.ListFeedJoinRequests.Output
+    /// Owner or admin. Approved requesters become posters.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)`.
+    func decideFeedJoinRequest(_ input: Operations.DecideFeedJoinRequest.Input) async throws -> Operations.DecideFeedJoinRequest.Output
+    /// Owner or admin: all active (not expired, revoked or used up) invites. Posters, when the feed has
+    /// `posters_can_invite`: their own active invites.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/invites`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/get(listFeedInvites)`.
+    func listFeedInvites(_ input: Operations.ListFeedInvites.Input) async throws -> Operations.ListFeedInvites.Output
+    /// Owner or admin, or any member when the feed has `posters_can_invite` (default off) for `join` invites;
+    /// `subscribe` invites are pre-approved and stay owner/admin only (`403 forbidden`). Returns a link (`https://<web>/fi/<token>`, also shown as QR) and a short code for the
+    /// app's "Enter a code" field. `join` invites make the redeemer a poster (after approval unless the feed's
+    /// `invite_requires_approval` is off); `subscribe` invites let the redeemer subscribe frames they manage,
+    /// pre-approved, without joining.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/invites`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/post(createFeedInvite)`.
+    func createFeedInvite(_ input: Operations.CreateFeedInvite.Input) async throws -> Operations.CreateFeedInvite.Output
+    /// Owner or admin, or the poster who created it.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/invites/{inviteId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/{inviteId}/delete(revokeFeedInvite)`.
+    func revokeFeedInvite(_ input: Operations.RevokeFeedInvite.Input) async throws -> Operations.RevokeFeedInvite.Output
+    /// Resolve a short feed invite code (typed into "Enter a code"; codes contain letters, frame codes are 8 digits)
+    /// to its preview, including the token for `acceptFeedInvite`. Rate-limited like code redemption; unknown codes
+    /// answer `404 invite_invalid`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feed-invites:lookup`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)`.
+    func lookupFeedInvite(_ input: Operations.LookupFeedInvite.Input) async throws -> Operations.LookupFeedInvite.Output
+    /// Requires sign-in so tokens can't be enumerated anonymously.
+    ///
+    /// - Remark: HTTP `GET /v1/feed-invites/{token}`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/get(previewFeedInvite)`.
+    func previewFeedInvite(_ input: Operations.PreviewFeedInvite.Input) async throws -> Operations.PreviewFeedInvite.Output
+    /// `join` invites: no body needed; the caller joins as poster or a join request is created. `subscribe` invites:
+    /// `frame_ids` (frames the caller manages: owner, admin or `change_settings`) are subscribed and active at once;
+    /// frames that already have a live subscription to the feed are reported with their existing one.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feed-invites/{token}/accept`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/accept/post(acceptFeedInvite)`.
+    func acceptFeedInvite(_ input: Operations.AcceptFeedInvite.Input) async throws -> Operations.AcceptFeedInvite.Output
+    /// Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
+    /// for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
+    /// they are null. Post as a feed is done with `createSend` (`feed_ids`).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/get(listFeedPosts)`.
+    func listFeedPosts(_ input: Operations.ListFeedPosts.Input) async throws -> Operations.ListFeedPosts.Output
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/get(getFeedPost)`.
+    func getFeedPost(_ input: Operations.GetFeedPost.Input) async throws -> Operations.GetFeedPost.Output
+    /// The poster (unsend) or an owner/admin of the feed. Removes the post from the feed and its placements from every
+    /// subscribed frame, except placements that also reached a frame directly or through another feed. The send and its
+    /// direct placements are untouched. Never needs a frame to be online.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/delete(removeFeedPost)`.
+    func removeFeedPost(_ input: Operations.RemoveFeedPost.Input) async throws -> Operations.RemoveFeedPost.Output
+    /// Like `removeFeedPost` for one item. Removing the last item removes the post.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/posts/{postId}/items/{itemId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)`.
+    func removeFeedPostItem(_ input: Operations.RemoveFeedPostItem.Input) async throws -> Operations.RemoveFeedPostItem.Output
+    /// Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
+    /// (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+    /// for direct sends; who moderated is never revealed.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts/{postId}/receipts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/receipts/get(getFeedPostReceipts)`.
+    func getFeedPostReceipts(_ input: Operations.GetFeedPostReceipts.Input) async throws -> Operations.GetFeedPostReceipts.Output
+    /// The feed's birthday people (docs/spec/birthdays.md), sorted by the next birthday in the caller's time zone.
+    /// Any feed member sees `approved` ones; owner and admins also see `pending` and `rejected` ones (rejected for 30
+    /// days), posters their own suggestions. `birth_year` is null unless the caller may see it (owner/admin, whoever
+    /// added the entry, the linked member, or `show_age` on).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthdays`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/get(listFeedBirthdays)`.
+    func listFeedBirthdays(_ input: Operations.ListFeedBirthdays.Input) async throws -> Operations.ListFeedBirthdays.Output
+    /// Add a birthday person. Owner, admins and (with the feed's `posters_can_add_birthdays`) posters add it as
+    /// `approved`: it reaches every frame with a birthday subscription. Other posters create a `pending` suggestion
+    /// and the feed's owner and admins are notified (`birthday.suggested`, push `birthday_suggestion`).
+    /// `409 duplicate_birthday` (existing entry's id in `detail`) when a pending or approved entry of this feed has
+    /// the same normalized name, day and month; `409 limit_reached` beyond `limits.max_birthdays_per_feed`
+    /// (pending and approved count); `422 validation_failed` for an impossible date (`day`) or year (`birth_year`).
+    /// `user_id` must be a member of this feed without another entry. The photo is uploaded afterwards with
+    /// `putFeedBirthdayPhoto`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)`.
+    func createFeedBirthday(_ input: Operations.CreateFeedBirthday.Input) async throws -> Operations.CreateFeedBirthday.Output
+    /// Same visibility and field rules as `listFeedBirthdays`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/get(getFeedBirthday)`.
+    func getFeedBirthday(_ input: Operations.GetFeedBirthday.Input) async throws -> Operations.GetFeedBirthday.Output
+    /// Owner and admins: any field of any entry (also of a pending suggestion before approving it). The suggester:
+    /// their pending suggestion. Posters with `posters_can_add_birthdays`: entries they added. The linked member:
+    /// `birth_year`, `show_age` and unlinking (`user_id: null`) of their own entry. Other fields answer
+    /// `403 forbidden`. Omitted fields are kept; `birth_year: null` clears the year. Changes to approved entries
+    /// reach the frames with a `birthdays` change. Same `409`/`422` rules as `createFeedBirthday`.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)`.
+    func updateFeedBirthday(_ input: Operations.UpdateFeedBirthday.Input) async throws -> Operations.UpdateFeedBirthday.Output
+    /// Owner and admins (any entry), the suggester (withdraw a pending suggestion), posters with
+    /// `posters_can_add_birthdays` (entries they added) and the linked member (their own entry). Deletes the entry,
+    /// its photo and its greetings; frames drop the person with the next `birthdays` change. Not reversible on the
+    /// server: clients offer Undo by creating it again.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/delete(removeFeedBirthday)`.
+    func removeFeedBirthday(_ input: Operations.RemoveFeedBirthday.Input) async throws -> Operations.RemoveFeedBirthday.Output
+    /// Owner or admin; `pending` → `approved`. Notifies the suggester (`birthday.decided`, push `birthday_decided`)
+    /// and puts the person on the frames. Repeating it on an approved entry returns it unchanged;
+    /// `409 already_decided` on a rejected one; `409 duplicate_birthday` when an approved entry with the same name
+    /// and date appeared meanwhile.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays/{birthdayId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/approve/post(approveFeedBirthday)`.
+    func approveFeedBirthday(_ input: Operations.ApproveFeedBirthday.Input) async throws -> Operations.ApproveFeedBirthday.Output
+    /// Owner or admin; `pending` → `rejected`. Notifies the suggester. The entry stays visible to the suggester and
+    /// admins for 30 days, then it is deleted; a new suggestion for the same person is allowed at once. Repeating it
+    /// returns the entry unchanged; `409 already_decided` on an approved one (remove it instead).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/reject/post(rejectFeedBirthday)`.
+    func rejectFeedBirthday(_ input: Operations.RejectFeedBirthday.Input) async throws -> Operations.RejectFeedBirthday.Output
+    /// Set the person's photo, like `putAvatar`: the server crops to a centred square, stores 256x256 WebP at a new
+    /// unguessable URL and deletes the previous file. Whoever may edit the entry's photo (see `updateFeedBirthday`;
+    /// the linked member too).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/feeds/{feedId}/birthdays/{birthdayId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/put(putFeedBirthdayPhoto)`.
+    func putFeedBirthdayPhoto(_ input: Operations.PutFeedBirthdayPhoto.Input) async throws -> Operations.PutFeedBirthdayPhoto.Output
+    /// Remove the uploaded photo; the linked member's avatar (if any) is used instead.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/delete(deleteFeedBirthdayPhoto)`.
+    func deleteFeedBirthdayPhoto(_ input: Operations.DeleteFeedBirthdayPhoto.Input) async throws -> Operations.DeleteFeedBirthdayPhoto.Output
+    /// Greetings frames sent for this feed's birthday people ("Opa's frame says happy birthday to Oma"), newest
+    /// first, kept 13 months. Any feed member.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthday-greetings`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthday-greetings/get(listFeedBirthdayGreetings)`.
+    func listFeedBirthdayGreetings(_ input: Operations.ListFeedBirthdayGreetings.Input) async throws -> Operations.ListFeedBirthdayGreetings.Output
+    /// The caller's own preferences in this feed (any member). `birthday_notifications` (default true): the morning
+    /// notification on a birthday day and greeting notifications for this feed's people.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/preferences`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/preferences/patch(updateFeedPreferences)`.
+    func updateFeedPreferences(_ input: Operations.UpdateFeedPreferences.Input) async throws -> Operations.UpdateFeedPreferences.Output
+    /// Owner and admins see every status, including who requested. Other members see `active` and `paused`
+    /// subscriptions only, without `requested_by_name`. Rejected and removed ones are listed for 30 days.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/get(listFeedSubscriptions)`.
+    func listFeedSubscriptions(_ input: Operations.ListFeedSubscriptions.Input) async throws -> Operations.ListFeedSubscriptions.Output
+    /// Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
+    /// `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
+    /// has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+    /// `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
+    /// this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)`.
+    func requestSubscription(_ input: Operations.RequestSubscription.Input) async throws -> Operations.RequestSubscription.Output
+    /// The feeds a frame subscribes to. Frame managers (owner, admin, `change_settings`) see every status; other
+    /// members see `active` and `paused` ones.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/subscriptions/get(listFrameSubscriptions)`.
+    func listFrameSubscriptions(_ input: Operations.ListFrameSubscriptions.Input) async throws -> Operations.ListFrameSubscriptions.Output
+    /// Visible to the frame's members and the feed's members, with the same field rules as the lists.
+    ///
+    /// - Remark: HTTP `GET /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/get(getSubscription)`.
+    func getSubscription(_ input: Operations.GetSubscription.Input) async throws -> Operations.GetSubscription.Output
+    /// Frame managers only. Changing the history option backfills (quietly) or trims feed-only placements of
+    /// history items; posts made after `activated_at` are never trimmed. Allowed in `pending`, `active` and
+    /// `paused`.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/patch(updateSubscription)`.
+    func updateSubscription(_ input: Operations.UpdateSubscription.Input) async throws -> Operations.UpdateSubscription.Output
+    /// Ends a subscription (`removed`): frame managers unsubscribe (or withdraw a pending request), the requester may
+    /// withdraw their pending request, and feed owners/admins remove any subscription. Feed-only placements leave the
+    /// frame; `slideshow.feed_id` resets to null if it pointed at this feed. The other side is notified.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/delete(removeSubscription)`.
+    func removeSubscription(_ input: Operations.RemoveSubscription.Input) async throws -> Operations.RemoveSubscription.Output
+    /// Feed owner or admin; `pending` → `active`. Starts the history backfill and notifies the requester.
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/approve/post(approveSubscription)`.
+    func approveSubscription(_ input: Operations.ApproveSubscription.Input) async throws -> Operations.ApproveSubscription.Output
+    /// Feed owner or admin; `pending` → `rejected`. Notifies the requester.
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/reject/post(rejectSubscription)`.
+    func rejectSubscription(_ input: Operations.RejectSubscription.Input) async throws -> Operations.RejectSubscription.Output
+    /// Frame managers; `active` → `paused`. The feed's placements leave the frame (kept on the server, restored on
+    /// resume) unless they also reached it directly or through another active feed. No new posts are placed.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/pause`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/pause/post(pauseSubscription)`.
+    func pauseSubscription(_ input: Operations.PauseSubscription.Input) async throws -> Operations.PauseSubscription.Output
+    /// Frame managers; `paused` → `active`. Restores the feed's placements and quietly places the posts made while
+    /// paused.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/resume`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/resume/post(resumeSubscription)`.
+    func resumeSubscription(_ input: Operations.ResumeSubscription.Input) async throws -> Operations.ResumeSubscription.Output
+    /// The feed's photo sources with their status (feed owner and admins; posters get `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/photo-sources/get(listFeedPhotoSources)`.
+    func listFeedPhotoSources(_ input: Operations.ListFeedPhotoSources.Input) async throws -> Operations.ListFeedPhotoSources.Output
+    /// Sources the caller owns (set up), across all albums and feeds, for Settings → Photo sources.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/get(listMyPhotoSources)`.
+    func listMyPhotoSources(_ input: Operations.ListMyPhotoSources.Input) async throws -> Operations.ListMyPhotoSources.Output
+    /// Connect an outside album to a kinframe album (`album_id`: album managers of its frame) or a feed (`feed_id`:
+    /// feed owner/admins). The caller becomes the source's owner: imported photos are sent by them. The server tests
+    /// the connection first (`422 source_test_failed` with the `PhotoSourceErrorCode` in `detail`; a blocked private
+    /// address is `422 validation_failed` on `url`/`server_url`), then starts the first run (`running: true`).
+    /// Secrets (`url`, `api_key`, `password`) are sealed at rest and never returned. `409 duplicate_source` when the
+    /// same outside album already feeds this target (`detail`: its id), `409 limit_reached` beyond
+    /// `limits.max_photo_sources_per_target` or `max_photo_sources_per_user`, `503 feature_disabled` when the server
+    /// has photo sources (or this provider) turned off. Rate-limited (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)`.
+    func createPhotoSource(_ input: Operations.CreatePhotoSource.Input) async throws -> Operations.CreatePhotoSource.Output
+    /// Try a connection without saving it: reads the outside album's name and size, and the warnings the source would
+    /// have (`downloads_disabled`, `metadata_hidden`). `ok: false` with `error_code` when it cannot be read. For
+    /// `immich_api` without `immich_album_id`, `albums` lists the account's albums (like `listImmichAlbums`).
+    /// Rate-limited together with `listImmichAlbums` (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources:test`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)`.
+    func testPhotoSource(_ input: Operations.TestPhotoSource.Input) async throws -> Operations.TestPhotoSource.Output
+    /// The albums an Immich API key can read (own and shared with that account), before creating an `immich_api`
+    /// source, so the client can let the person pick one. Nothing is saved. Failures answer `200` with `ok: false`
+    /// and `error_code`, like `testPhotoSource`. Rate-limited together with `testPhotoSource`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources:immich-albums`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)`.
+    func listImmichAlbums(_ input: Operations.ListImmichAlbums.Input) async throws -> Operations.ListImmichAlbums.Output
+    /// Managers of the target (album managers, feed owner/admins) and the owner. Others get `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/get(getPhotoSource)`.
+    func getPhotoSource(_ input: Operations.GetPhotoSource.Input) async throws -> Operations.GetPhotoSource.Output
+    /// Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op).
+    /// Changing the link, server URL, key, password or album tests it first (`422 source_test_failed`) and then
+    /// syncs at once; success returns an `error`/`needs_attention` source to `active`. `take_over: true` makes the
+    /// caller the owner (needed after `owner_lost_access`; for `immich_api` together with a new `api_key`).
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/patch(updatePhotoSource)`.
+    func updatePhotoSource(_ input: Operations.UpdatePhotoSource.Input) async throws -> Operations.UpdatePhotoSource.Output
+    /// Stop syncing (managers of the target). With `remove_items` the photos this source imported are removed from
+    /// the frame (album) or from the feed's posts, like an unsend, in the background; without it they stay as the
+    /// owner's ordinary photos (still credited "via …"). Clients ask which, showing `counts.imported`.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/delete(deletePhotoSource)`.
+    func deletePhotoSource(_ input: Operations.DeletePhotoSource.Input) async throws -> Operations.DeletePhotoSource.Output
+    /// Sync now (managers of the target). Returns at once with `running: true`. At most once per 2 minutes per source
+    /// and 30 per hour per user (`429` with `Retry-After`). A paused source answers `409 invalid_transition`.
+    /// `confirm_removals: true` applies removals held back by the mass-removal guard (`pending_removals`,
+    /// `last_error_code: mass_removal`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources/{sourceId}/sync`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)`.
+    func syncPhotoSource(_ input: Operations.SyncPhotoSource.Input) async throws -> Operations.SyncPhotoSource.Output
+    /// The caller's imports of the last 7 days, newest first (so an app that was closed while the picker was open can resume).
+    ///
+    /// - Remark: HTTP `GET /v1/google-imports`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/get(listMyGoogleImports)`.
+    func listMyGoogleImports(_ input: Operations.ListMyGoogleImports.Input) async throws -> Operations.ListMyGoogleImports.Output
+    /// "Add from Google Photos" into an album (album managers) or a feed (any feed member). Answers `needs_auth` with
+    /// `auth_url` (open it in a browser session; Google redirects to `googleOAuthCallback`, which redirects to
+    /// `return_uri`), or directly `picking` with `picker_uri` when the caller's previous import left a token with more
+    /// than 10 minutes to live. `503 feature_disabled` when the server has no Google OAuth client (discovery
+    /// `google_photos_import: false`). `return_uri` must be `app.kinframe:/google-import`,
+    /// `<public URL>/google-import/return` or `<web>/google-import/return` (`422 validation_failed`). Rate-limited
+    /// (20/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/google-imports`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)`.
+    func startGoogleImport(_ input: Operations.StartGoogleImport.Input) async throws -> Operations.StartGoogleImport.Output
+    /// The importer only. Poll while `picking` or `importing` (every 2–5 s, or follow `google_import.updated`).
+    ///
+    /// - Remark: HTTP `GET /v1/google-imports/{importId}`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/get(getGoogleImport)`.
+    func getGoogleImport(_ input: Operations.GetGoogleImport.Input) async throws -> Operations.GetGoogleImport.Output
+    /// Cancel (the importer). From `needs_auth` or `picking` the picker session is deleted; from `importing` the server
+    /// stops after the current file and keeps what was added (undo is `unsend` of `send_ids`). A finished import
+    /// answers `409 invalid_transition`; cancelling a cancelled one returns it unchanged.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/google-imports/{importId}/cancel`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/cancel/post(cancelGoogleImport)`.
+    func cancelGoogleImport(_ input: Operations.CancelGoogleImport.Input) async throws -> Operations.CancelGoogleImport.Output
+    /// Google's OAuth redirect (registered by the operator as `<public URL>/v1/oauth/google/callback`). Opened by the
+    /// browser, never called by clients. Checks `state` (single use, 15 minutes), exchanges `code` with the PKCE
+    /// verifier, creates the picker session and answers `302` to the import's `return_uri` with
+    /// `?import_id=<id>&status=<GoogleImportStatus>` (`picking`, or `failed` after a denied or failed consent).
+    /// An unknown, expired or reused `state` gets a small HTML page instead of a redirect.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/oauth/google/callback`.
+    /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)`.
+    func googleOAuthCallback(_ input: Operations.GoogleOAuthCallback.Input) async throws -> Operations.GoogleOAuthCallback.Output
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
     /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
@@ -540,6 +958,19 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/device/invitations/{invitationId}/photo`.
     /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)`.
     func deviceGetInvitationPhoto(_ input: Operations.DeviceGetInvitationPhoto.Input) async throws -> Operations.DeviceGetInvitationPhoto.Output
+    /// "Say happy birthday" on the frame's birthday card (docs/spec/birthdays.md §7). `birthdayId` is a
+    /// `FrameBirthday.id` (or any of its `birthday_ids`), `date` the frame's local date. Idempotent: one greeting per
+    /// person, frame and date, recorded once in every feed that lists the person; `204` also when it existed.
+    /// Feed members get `birthday.greeting` (push `birthday_greeting` with `birthday_notifications`).
+    /// `404 not_found` when the person is not on this frame (removed, subscription paused or birthdays off);
+    /// `422 validation_failed` (field `date`) when `date` is not the person's birthday (29 February counts on
+    /// 28 February in non-leap years) or lies outside the server's UTC date −2 … +1 days. At most 50 a day per frame
+    /// (`429 rate_limited`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/device/birthdays/{birthdayId}/greetings/{date}`.
+    /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)`.
+    func deviceGreetBirthday(_ input: Operations.DeviceGreetBirthday.Input) async throws -> Operations.DeviceGreetBirthday.Output
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -1005,8 +1436,10 @@ extension APIProtocol {
     public func unsend(path: Operations.Unsend.Input.Path) async throws -> Operations.Unsend.Output {
         try await unsend(Operations.Unsend.Input(path: path))
     }
-    /// Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
-    /// renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+    /// Place the same items on additional frames, or post them to feeds. Uses the same path as `sharePlacements`:
+    /// no new upload or master, renditions only for screen sizes that have none yet, and frames that already hold an
+    /// item are skipped (a placement that was only there through a feed becomes held directly, so unsubscribing no
+    /// longer removes it).
     ///
     ///
     /// - Remark: HTTP `POST /v1/sends/{sendId}/forward`.
@@ -1169,12 +1602,930 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Placements stay on the frame.
+    /// Placements stay on the frame, unless `remove_source_items` is true: then the photos the album's photo sources
+    /// imported are removed too (docs/spec/photo-sources.md §9.1). The album's photo sources are deleted either way.
+    ///
     ///
     /// - Remark: HTTP `DELETE /v1/frames/{frameId}/albums/{albumId}`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/delete(deleteAlbum)`.
-    public func deleteAlbum(path: Operations.DeleteAlbum.Input.Path) async throws -> Operations.DeleteAlbum.Output {
-        try await deleteAlbum(Operations.DeleteAlbum.Input(path: path))
+    public func deleteAlbum(
+        path: Operations.DeleteAlbum.Input.Path,
+        query: Operations.DeleteAlbum.Input.Query = .init()
+    ) async throws -> Operations.DeleteAlbum.Output {
+        try await deleteAlbum(Operations.DeleteAlbum.Input(
+            path: path,
+            query: query
+        ))
+    }
+    /// The album's photo sources with their status (album managers, i.e. owner, admin or manage_library; `403 missing_permission` otherwise).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/albums/{albumId}/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/photo-sources/get(listAlbumPhotoSources)`.
+    public func listAlbumPhotoSources(
+        path: Operations.ListAlbumPhotoSources.Input.Path,
+        headers: Operations.ListAlbumPhotoSources.Input.Headers = .init()
+    ) async throws -> Operations.ListAlbumPhotoSources.Output {
+        try await listAlbumPhotoSources(Operations.ListAlbumPhotoSources.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Feeds the caller is a member of (any role). See docs/spec/feeds.md.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds`.
+    /// - Remark: Generated from `#/paths//v1/feeds/get(listMyFeeds)`.
+    public func listMyFeeds(headers: Operations.ListMyFeeds.Input.Headers = .init()) async throws -> Operations.ListMyFeeds.Output {
+        try await listMyFeeds(Operations.ListMyFeeds.Input(headers: headers))
+    }
+    /// The caller becomes the feed's owner. At most `limits.max_feeds_per_user` owned feeds (`409 limit_reached`).
+    ///
+    /// - Remark: HTTP `POST /v1/feeds`.
+    /// - Remark: Generated from `#/paths//v1/feeds/post(createFeed)`.
+    public func createFeed(
+        headers: Operations.CreateFeed.Input.Headers = .init(),
+        body: Operations.CreateFeed.Input.Body
+    ) async throws -> Operations.CreateFeed.Output {
+        try await createFeed(Operations.CreateFeed.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Feed members only; everyone else gets `404 not_found` (feeds are never discoverable).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/get(getFeed)`.
+    public func getFeed(
+        path: Operations.GetFeed.Input.Path,
+        headers: Operations.GetFeed.Input.Headers = .init()
+    ) async throws -> Operations.GetFeed.Output {
+        try await getFeed(Operations.GetFeed.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin. Renaming re-emits the feed's placements on every subscribed frame so their credit follows.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/patch(updateFeed)`.
+    public func updateFeed(
+        path: Operations.UpdateFeed.Input.Path,
+        headers: Operations.UpdateFeed.Input.Headers = .init(),
+        body: Operations.UpdateFeed.Input.Body
+    ) async throws -> Operations.UpdateFeed.Output {
+        try await updateFeed(Operations.UpdateFeed.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner only. Removes every post from every subscribed frame (placements that also reached a frame directly
+    /// stay), ends all subscriptions (`removed`, reason `feed_deleted`) and notifies the frames' owners and admins.
+    /// Items stay in the posters' sent history. Runs in the background; the feed is gone for clients at once.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)`.
+    public func deleteFeed(
+        path: Operations.DeleteFeed.Input.Path,
+        headers: Operations.DeleteFeed.Input.Headers = .init()
+    ) async throws -> Operations.DeleteFeed.Output {
+        try await deleteFeed(Operations.DeleteFeed.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/leave`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)`.
+    public func leaveFeed(
+        path: Operations.LeaveFeed.Input.Path,
+        headers: Operations.LeaveFeed.Input.Headers = .init(),
+        body: Operations.LeaveFeed.Input.Body? = nil
+    ) async throws -> Operations.LeaveFeed.Output {
+        try await leaveFeed(Operations.LeaveFeed.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner only. The new owner must be a member; the previous owner becomes admin.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/transfer`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/transfer/post(transferFeedOwnership)`.
+    public func transferFeedOwnership(
+        path: Operations.TransferFeedOwnership.Input.Path,
+        headers: Operations.TransferFeedOwnership.Input.Headers = .init(),
+        body: Operations.TransferFeedOwnership.Input.Body
+    ) async throws -> Operations.TransferFeedOwnership.Output {
+        try await transferFeedOwnership(Operations.TransferFeedOwnership.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Any feed member.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/members`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/get(listFeedMembers)`.
+    public func listFeedMembers(
+        path: Operations.ListFeedMembers.Input.Path,
+        headers: Operations.ListFeedMembers.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedMembers.Output {
+        try await listFeedMembers(Operations.ListFeedMembers.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)`.
+    public func updateFeedMember(
+        path: Operations.UpdateFeedMember.Input.Path,
+        headers: Operations.UpdateFeedMember.Input.Headers = .init(),
+        body: Operations.UpdateFeedMember.Input.Body
+    ) async throws -> Operations.UpdateFeedMember.Output {
+        try await updateFeedMember(Operations.UpdateFeedMember.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner or admin (admins cannot remove the owner or other admins).
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)`.
+    public func removeFeedMember(
+        path: Operations.RemoveFeedMember.Input.Path,
+        query: Operations.RemoveFeedMember.Input.Query = .init(),
+        headers: Operations.RemoveFeedMember.Input.Headers = .init()
+    ) async throws -> Operations.RemoveFeedMember.Output {
+        try await removeFeedMember(Operations.RemoveFeedMember.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Owner or admin. Pending requests from join invites (`via` is always `invite`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
+    public func listFeedJoinRequests(
+        path: Operations.ListFeedJoinRequests.Input.Path,
+        headers: Operations.ListFeedJoinRequests.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedJoinRequests.Output {
+        try await listFeedJoinRequests(Operations.ListFeedJoinRequests.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin. Approved requesters become posters.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)`.
+    public func decideFeedJoinRequest(
+        path: Operations.DecideFeedJoinRequest.Input.Path,
+        headers: Operations.DecideFeedJoinRequest.Input.Headers = .init()
+    ) async throws -> Operations.DecideFeedJoinRequest.Output {
+        try await decideFeedJoinRequest(Operations.DecideFeedJoinRequest.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin: all active (not expired, revoked or used up) invites. Posters, when the feed has
+    /// `posters_can_invite`: their own active invites.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/invites`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/get(listFeedInvites)`.
+    public func listFeedInvites(
+        path: Operations.ListFeedInvites.Input.Path,
+        headers: Operations.ListFeedInvites.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedInvites.Output {
+        try await listFeedInvites(Operations.ListFeedInvites.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin, or any member when the feed has `posters_can_invite` (default off) for `join` invites;
+    /// `subscribe` invites are pre-approved and stay owner/admin only (`403 forbidden`). Returns a link (`https://<web>/fi/<token>`, also shown as QR) and a short code for the
+    /// app's "Enter a code" field. `join` invites make the redeemer a poster (after approval unless the feed's
+    /// `invite_requires_approval` is off); `subscribe` invites let the redeemer subscribe frames they manage,
+    /// pre-approved, without joining.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/invites`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/post(createFeedInvite)`.
+    public func createFeedInvite(
+        path: Operations.CreateFeedInvite.Input.Path,
+        headers: Operations.CreateFeedInvite.Input.Headers = .init(),
+        body: Operations.CreateFeedInvite.Input.Body
+    ) async throws -> Operations.CreateFeedInvite.Output {
+        try await createFeedInvite(Operations.CreateFeedInvite.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner or admin, or the poster who created it.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/invites/{inviteId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/{inviteId}/delete(revokeFeedInvite)`.
+    public func revokeFeedInvite(
+        path: Operations.RevokeFeedInvite.Input.Path,
+        headers: Operations.RevokeFeedInvite.Input.Headers = .init()
+    ) async throws -> Operations.RevokeFeedInvite.Output {
+        try await revokeFeedInvite(Operations.RevokeFeedInvite.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Resolve a short feed invite code (typed into "Enter a code"; codes contain letters, frame codes are 8 digits)
+    /// to its preview, including the token for `acceptFeedInvite`. Rate-limited like code redemption; unknown codes
+    /// answer `404 invite_invalid`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feed-invites:lookup`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)`.
+    public func lookupFeedInvite(
+        headers: Operations.LookupFeedInvite.Input.Headers = .init(),
+        body: Operations.LookupFeedInvite.Input.Body
+    ) async throws -> Operations.LookupFeedInvite.Output {
+        try await lookupFeedInvite(Operations.LookupFeedInvite.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Requires sign-in so tokens can't be enumerated anonymously.
+    ///
+    /// - Remark: HTTP `GET /v1/feed-invites/{token}`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/get(previewFeedInvite)`.
+    public func previewFeedInvite(
+        path: Operations.PreviewFeedInvite.Input.Path,
+        headers: Operations.PreviewFeedInvite.Input.Headers = .init()
+    ) async throws -> Operations.PreviewFeedInvite.Output {
+        try await previewFeedInvite(Operations.PreviewFeedInvite.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// `join` invites: no body needed; the caller joins as poster or a join request is created. `subscribe` invites:
+    /// `frame_ids` (frames the caller manages: owner, admin or `change_settings`) are subscribed and active at once;
+    /// frames that already have a live subscription to the feed are reported with their existing one.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feed-invites/{token}/accept`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/accept/post(acceptFeedInvite)`.
+    public func acceptFeedInvite(
+        path: Operations.AcceptFeedInvite.Input.Path,
+        headers: Operations.AcceptFeedInvite.Input.Headers = .init(),
+        body: Operations.AcceptFeedInvite.Input.Body? = nil
+    ) async throws -> Operations.AcceptFeedInvite.Output {
+        try await acceptFeedInvite(Operations.AcceptFeedInvite.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
+    /// for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
+    /// they are null. Post as a feed is done with `createSend` (`feed_ids`).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/get(listFeedPosts)`.
+    public func listFeedPosts(
+        path: Operations.ListFeedPosts.Input.Path,
+        query: Operations.ListFeedPosts.Input.Query = .init(),
+        headers: Operations.ListFeedPosts.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedPosts.Output {
+        try await listFeedPosts(Operations.ListFeedPosts.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/get(getFeedPost)`.
+    public func getFeedPost(
+        path: Operations.GetFeedPost.Input.Path,
+        headers: Operations.GetFeedPost.Input.Headers = .init()
+    ) async throws -> Operations.GetFeedPost.Output {
+        try await getFeedPost(Operations.GetFeedPost.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The poster (unsend) or an owner/admin of the feed. Removes the post from the feed and its placements from every
+    /// subscribed frame, except placements that also reached a frame directly or through another feed. The send and its
+    /// direct placements are untouched. Never needs a frame to be online.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/delete(removeFeedPost)`.
+    public func removeFeedPost(
+        path: Operations.RemoveFeedPost.Input.Path,
+        headers: Operations.RemoveFeedPost.Input.Headers = .init()
+    ) async throws -> Operations.RemoveFeedPost.Output {
+        try await removeFeedPost(Operations.RemoveFeedPost.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Like `removeFeedPost` for one item. Removing the last item removes the post.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/posts/{postId}/items/{itemId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)`.
+    public func removeFeedPostItem(
+        path: Operations.RemoveFeedPostItem.Input.Path,
+        headers: Operations.RemoveFeedPostItem.Input.Headers = .init()
+    ) async throws -> Operations.RemoveFeedPostItem.Output {
+        try await removeFeedPostItem(Operations.RemoveFeedPostItem.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
+    /// (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+    /// for direct sends; who moderated is never revealed.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts/{postId}/receipts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/receipts/get(getFeedPostReceipts)`.
+    public func getFeedPostReceipts(
+        path: Operations.GetFeedPostReceipts.Input.Path,
+        headers: Operations.GetFeedPostReceipts.Input.Headers = .init()
+    ) async throws -> Operations.GetFeedPostReceipts.Output {
+        try await getFeedPostReceipts(Operations.GetFeedPostReceipts.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The feed's birthday people (docs/spec/birthdays.md), sorted by the next birthday in the caller's time zone.
+    /// Any feed member sees `approved` ones; owner and admins also see `pending` and `rejected` ones (rejected for 30
+    /// days), posters their own suggestions. `birth_year` is null unless the caller may see it (owner/admin, whoever
+    /// added the entry, the linked member, or `show_age` on).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthdays`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/get(listFeedBirthdays)`.
+    public func listFeedBirthdays(
+        path: Operations.ListFeedBirthdays.Input.Path,
+        query: Operations.ListFeedBirthdays.Input.Query = .init(),
+        headers: Operations.ListFeedBirthdays.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedBirthdays.Output {
+        try await listFeedBirthdays(Operations.ListFeedBirthdays.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Add a birthday person. Owner, admins and (with the feed's `posters_can_add_birthdays`) posters add it as
+    /// `approved`: it reaches every frame with a birthday subscription. Other posters create a `pending` suggestion
+    /// and the feed's owner and admins are notified (`birthday.suggested`, push `birthday_suggestion`).
+    /// `409 duplicate_birthday` (existing entry's id in `detail`) when a pending or approved entry of this feed has
+    /// the same normalized name, day and month; `409 limit_reached` beyond `limits.max_birthdays_per_feed`
+    /// (pending and approved count); `422 validation_failed` for an impossible date (`day`) or year (`birth_year`).
+    /// `user_id` must be a member of this feed without another entry. The photo is uploaded afterwards with
+    /// `putFeedBirthdayPhoto`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)`.
+    public func createFeedBirthday(
+        path: Operations.CreateFeedBirthday.Input.Path,
+        headers: Operations.CreateFeedBirthday.Input.Headers = .init(),
+        body: Operations.CreateFeedBirthday.Input.Body
+    ) async throws -> Operations.CreateFeedBirthday.Output {
+        try await createFeedBirthday(Operations.CreateFeedBirthday.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Same visibility and field rules as `listFeedBirthdays`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/get(getFeedBirthday)`.
+    public func getFeedBirthday(
+        path: Operations.GetFeedBirthday.Input.Path,
+        headers: Operations.GetFeedBirthday.Input.Headers = .init()
+    ) async throws -> Operations.GetFeedBirthday.Output {
+        try await getFeedBirthday(Operations.GetFeedBirthday.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner and admins: any field of any entry (also of a pending suggestion before approving it). The suggester:
+    /// their pending suggestion. Posters with `posters_can_add_birthdays`: entries they added. The linked member:
+    /// `birth_year`, `show_age` and unlinking (`user_id: null`) of their own entry. Other fields answer
+    /// `403 forbidden`. Omitted fields are kept; `birth_year: null` clears the year. Changes to approved entries
+    /// reach the frames with a `birthdays` change. Same `409`/`422` rules as `createFeedBirthday`.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)`.
+    public func updateFeedBirthday(
+        path: Operations.UpdateFeedBirthday.Input.Path,
+        headers: Operations.UpdateFeedBirthday.Input.Headers = .init(),
+        body: Operations.UpdateFeedBirthday.Input.Body
+    ) async throws -> Operations.UpdateFeedBirthday.Output {
+        try await updateFeedBirthday(Operations.UpdateFeedBirthday.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner and admins (any entry), the suggester (withdraw a pending suggestion), posters with
+    /// `posters_can_add_birthdays` (entries they added) and the linked member (their own entry). Deletes the entry,
+    /// its photo and its greetings; frames drop the person with the next `birthdays` change. Not reversible on the
+    /// server: clients offer Undo by creating it again.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/delete(removeFeedBirthday)`.
+    public func removeFeedBirthday(
+        path: Operations.RemoveFeedBirthday.Input.Path,
+        headers: Operations.RemoveFeedBirthday.Input.Headers = .init()
+    ) async throws -> Operations.RemoveFeedBirthday.Output {
+        try await removeFeedBirthday(Operations.RemoveFeedBirthday.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin; `pending` → `approved`. Notifies the suggester (`birthday.decided`, push `birthday_decided`)
+    /// and puts the person on the frames. Repeating it on an approved entry returns it unchanged;
+    /// `409 already_decided` on a rejected one; `409 duplicate_birthday` when an approved entry with the same name
+    /// and date appeared meanwhile.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays/{birthdayId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/approve/post(approveFeedBirthday)`.
+    public func approveFeedBirthday(
+        path: Operations.ApproveFeedBirthday.Input.Path,
+        headers: Operations.ApproveFeedBirthday.Input.Headers = .init()
+    ) async throws -> Operations.ApproveFeedBirthday.Output {
+        try await approveFeedBirthday(Operations.ApproveFeedBirthday.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin; `pending` → `rejected`. Notifies the suggester. The entry stays visible to the suggester and
+    /// admins for 30 days, then it is deleted; a new suggestion for the same person is allowed at once. Repeating it
+    /// returns the entry unchanged; `409 already_decided` on an approved one (remove it instead).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/reject/post(rejectFeedBirthday)`.
+    public func rejectFeedBirthday(
+        path: Operations.RejectFeedBirthday.Input.Path,
+        headers: Operations.RejectFeedBirthday.Input.Headers = .init()
+    ) async throws -> Operations.RejectFeedBirthday.Output {
+        try await rejectFeedBirthday(Operations.RejectFeedBirthday.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Set the person's photo, like `putAvatar`: the server crops to a centred square, stores 256x256 WebP at a new
+    /// unguessable URL and deletes the previous file. Whoever may edit the entry's photo (see `updateFeedBirthday`;
+    /// the linked member too).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/feeds/{feedId}/birthdays/{birthdayId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/put(putFeedBirthdayPhoto)`.
+    public func putFeedBirthdayPhoto(
+        path: Operations.PutFeedBirthdayPhoto.Input.Path,
+        headers: Operations.PutFeedBirthdayPhoto.Input.Headers = .init(),
+        body: Operations.PutFeedBirthdayPhoto.Input.Body
+    ) async throws -> Operations.PutFeedBirthdayPhoto.Output {
+        try await putFeedBirthdayPhoto(Operations.PutFeedBirthdayPhoto.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Remove the uploaded photo; the linked member's avatar (if any) is used instead.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/delete(deleteFeedBirthdayPhoto)`.
+    public func deleteFeedBirthdayPhoto(
+        path: Operations.DeleteFeedBirthdayPhoto.Input.Path,
+        headers: Operations.DeleteFeedBirthdayPhoto.Input.Headers = .init()
+    ) async throws -> Operations.DeleteFeedBirthdayPhoto.Output {
+        try await deleteFeedBirthdayPhoto(Operations.DeleteFeedBirthdayPhoto.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Greetings frames sent for this feed's birthday people ("Opa's frame says happy birthday to Oma"), newest
+    /// first, kept 13 months. Any feed member.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthday-greetings`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthday-greetings/get(listFeedBirthdayGreetings)`.
+    public func listFeedBirthdayGreetings(
+        path: Operations.ListFeedBirthdayGreetings.Input.Path,
+        query: Operations.ListFeedBirthdayGreetings.Input.Query = .init(),
+        headers: Operations.ListFeedBirthdayGreetings.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedBirthdayGreetings.Output {
+        try await listFeedBirthdayGreetings(Operations.ListFeedBirthdayGreetings.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// The caller's own preferences in this feed (any member). `birthday_notifications` (default true): the morning
+    /// notification on a birthday day and greeting notifications for this feed's people.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/preferences`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/preferences/patch(updateFeedPreferences)`.
+    public func updateFeedPreferences(
+        path: Operations.UpdateFeedPreferences.Input.Path,
+        headers: Operations.UpdateFeedPreferences.Input.Headers = .init(),
+        body: Operations.UpdateFeedPreferences.Input.Body
+    ) async throws -> Operations.UpdateFeedPreferences.Output {
+        try await updateFeedPreferences(Operations.UpdateFeedPreferences.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner and admins see every status, including who requested. Other members see `active` and `paused`
+    /// subscriptions only, without `requested_by_name`. Rejected and removed ones are listed for 30 days.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/get(listFeedSubscriptions)`.
+    public func listFeedSubscriptions(
+        path: Operations.ListFeedSubscriptions.Input.Path,
+        query: Operations.ListFeedSubscriptions.Input.Query = .init(),
+        headers: Operations.ListFeedSubscriptions.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedSubscriptions.Output {
+        try await listFeedSubscriptions(Operations.ListFeedSubscriptions.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
+    /// `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
+    /// has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+    /// `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
+    /// this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)`.
+    public func requestSubscription(
+        path: Operations.RequestSubscription.Input.Path,
+        headers: Operations.RequestSubscription.Input.Headers = .init(),
+        body: Operations.RequestSubscription.Input.Body
+    ) async throws -> Operations.RequestSubscription.Output {
+        try await requestSubscription(Operations.RequestSubscription.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The feeds a frame subscribes to. Frame managers (owner, admin, `change_settings`) see every status; other
+    /// members see `active` and `paused` ones.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/subscriptions/get(listFrameSubscriptions)`.
+    public func listFrameSubscriptions(
+        path: Operations.ListFrameSubscriptions.Input.Path,
+        query: Operations.ListFrameSubscriptions.Input.Query = .init(),
+        headers: Operations.ListFrameSubscriptions.Input.Headers = .init()
+    ) async throws -> Operations.ListFrameSubscriptions.Output {
+        try await listFrameSubscriptions(Operations.ListFrameSubscriptions.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Visible to the frame's members and the feed's members, with the same field rules as the lists.
+    ///
+    /// - Remark: HTTP `GET /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/get(getSubscription)`.
+    public func getSubscription(
+        path: Operations.GetSubscription.Input.Path,
+        headers: Operations.GetSubscription.Input.Headers = .init()
+    ) async throws -> Operations.GetSubscription.Output {
+        try await getSubscription(Operations.GetSubscription.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame managers only. Changing the history option backfills (quietly) or trims feed-only placements of
+    /// history items; posts made after `activated_at` are never trimmed. Allowed in `pending`, `active` and
+    /// `paused`.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/patch(updateSubscription)`.
+    public func updateSubscription(
+        path: Operations.UpdateSubscription.Input.Path,
+        headers: Operations.UpdateSubscription.Input.Headers = .init(),
+        body: Operations.UpdateSubscription.Input.Body
+    ) async throws -> Operations.UpdateSubscription.Output {
+        try await updateSubscription(Operations.UpdateSubscription.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Ends a subscription (`removed`): frame managers unsubscribe (or withdraw a pending request), the requester may
+    /// withdraw their pending request, and feed owners/admins remove any subscription. Feed-only placements leave the
+    /// frame; `slideshow.feed_id` resets to null if it pointed at this feed. The other side is notified.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/delete(removeSubscription)`.
+    public func removeSubscription(
+        path: Operations.RemoveSubscription.Input.Path,
+        headers: Operations.RemoveSubscription.Input.Headers = .init()
+    ) async throws -> Operations.RemoveSubscription.Output {
+        try await removeSubscription(Operations.RemoveSubscription.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Feed owner or admin; `pending` → `active`. Starts the history backfill and notifies the requester.
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/approve/post(approveSubscription)`.
+    public func approveSubscription(
+        path: Operations.ApproveSubscription.Input.Path,
+        headers: Operations.ApproveSubscription.Input.Headers = .init()
+    ) async throws -> Operations.ApproveSubscription.Output {
+        try await approveSubscription(Operations.ApproveSubscription.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Feed owner or admin; `pending` → `rejected`. Notifies the requester.
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/reject/post(rejectSubscription)`.
+    public func rejectSubscription(
+        path: Operations.RejectSubscription.Input.Path,
+        headers: Operations.RejectSubscription.Input.Headers = .init()
+    ) async throws -> Operations.RejectSubscription.Output {
+        try await rejectSubscription(Operations.RejectSubscription.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame managers; `active` → `paused`. The feed's placements leave the frame (kept on the server, restored on
+    /// resume) unless they also reached it directly or through another active feed. No new posts are placed.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/pause`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/pause/post(pauseSubscription)`.
+    public func pauseSubscription(
+        path: Operations.PauseSubscription.Input.Path,
+        headers: Operations.PauseSubscription.Input.Headers = .init()
+    ) async throws -> Operations.PauseSubscription.Output {
+        try await pauseSubscription(Operations.PauseSubscription.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame managers; `paused` → `active`. Restores the feed's placements and quietly places the posts made while
+    /// paused.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/resume`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/resume/post(resumeSubscription)`.
+    public func resumeSubscription(
+        path: Operations.ResumeSubscription.Input.Path,
+        headers: Operations.ResumeSubscription.Input.Headers = .init()
+    ) async throws -> Operations.ResumeSubscription.Output {
+        try await resumeSubscription(Operations.ResumeSubscription.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The feed's photo sources with their status (feed owner and admins; posters get `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/photo-sources/get(listFeedPhotoSources)`.
+    public func listFeedPhotoSources(
+        path: Operations.ListFeedPhotoSources.Input.Path,
+        headers: Operations.ListFeedPhotoSources.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedPhotoSources.Output {
+        try await listFeedPhotoSources(Operations.ListFeedPhotoSources.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Sources the caller owns (set up), across all albums and feeds, for Settings → Photo sources.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/get(listMyPhotoSources)`.
+    public func listMyPhotoSources(headers: Operations.ListMyPhotoSources.Input.Headers = .init()) async throws -> Operations.ListMyPhotoSources.Output {
+        try await listMyPhotoSources(Operations.ListMyPhotoSources.Input(headers: headers))
+    }
+    /// Connect an outside album to a kinframe album (`album_id`: album managers of its frame) or a feed (`feed_id`:
+    /// feed owner/admins). The caller becomes the source's owner: imported photos are sent by them. The server tests
+    /// the connection first (`422 source_test_failed` with the `PhotoSourceErrorCode` in `detail`; a blocked private
+    /// address is `422 validation_failed` on `url`/`server_url`), then starts the first run (`running: true`).
+    /// Secrets (`url`, `api_key`, `password`) are sealed at rest and never returned. `409 duplicate_source` when the
+    /// same outside album already feeds this target (`detail`: its id), `409 limit_reached` beyond
+    /// `limits.max_photo_sources_per_target` or `max_photo_sources_per_user`, `503 feature_disabled` when the server
+    /// has photo sources (or this provider) turned off. Rate-limited (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)`.
+    public func createPhotoSource(
+        headers: Operations.CreatePhotoSource.Input.Headers = .init(),
+        body: Operations.CreatePhotoSource.Input.Body
+    ) async throws -> Operations.CreatePhotoSource.Output {
+        try await createPhotoSource(Operations.CreatePhotoSource.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Try a connection without saving it: reads the outside album's name and size, and the warnings the source would
+    /// have (`downloads_disabled`, `metadata_hidden`). `ok: false` with `error_code` when it cannot be read. For
+    /// `immich_api` without `immich_album_id`, `albums` lists the account's albums (like `listImmichAlbums`).
+    /// Rate-limited together with `listImmichAlbums` (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources:test`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)`.
+    public func testPhotoSource(
+        headers: Operations.TestPhotoSource.Input.Headers = .init(),
+        body: Operations.TestPhotoSource.Input.Body
+    ) async throws -> Operations.TestPhotoSource.Output {
+        try await testPhotoSource(Operations.TestPhotoSource.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The albums an Immich API key can read (own and shared with that account), before creating an `immich_api`
+    /// source, so the client can let the person pick one. Nothing is saved. Failures answer `200` with `ok: false`
+    /// and `error_code`, like `testPhotoSource`. Rate-limited together with `testPhotoSource`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources:immich-albums`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)`.
+    public func listImmichAlbums(
+        headers: Operations.ListImmichAlbums.Input.Headers = .init(),
+        body: Operations.ListImmichAlbums.Input.Body
+    ) async throws -> Operations.ListImmichAlbums.Output {
+        try await listImmichAlbums(Operations.ListImmichAlbums.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Managers of the target (album managers, feed owner/admins) and the owner. Others get `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/get(getPhotoSource)`.
+    public func getPhotoSource(
+        path: Operations.GetPhotoSource.Input.Path,
+        headers: Operations.GetPhotoSource.Input.Headers = .init()
+    ) async throws -> Operations.GetPhotoSource.Output {
+        try await getPhotoSource(Operations.GetPhotoSource.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op).
+    /// Changing the link, server URL, key, password or album tests it first (`422 source_test_failed`) and then
+    /// syncs at once; success returns an `error`/`needs_attention` source to `active`. `take_over: true` makes the
+    /// caller the owner (needed after `owner_lost_access`; for `immich_api` together with a new `api_key`).
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/patch(updatePhotoSource)`.
+    public func updatePhotoSource(
+        path: Operations.UpdatePhotoSource.Input.Path,
+        headers: Operations.UpdatePhotoSource.Input.Headers = .init(),
+        body: Operations.UpdatePhotoSource.Input.Body
+    ) async throws -> Operations.UpdatePhotoSource.Output {
+        try await updatePhotoSource(Operations.UpdatePhotoSource.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Stop syncing (managers of the target). With `remove_items` the photos this source imported are removed from
+    /// the frame (album) or from the feed's posts, like an unsend, in the background; without it they stay as the
+    /// owner's ordinary photos (still credited "via …"). Clients ask which, showing `counts.imported`.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/delete(deletePhotoSource)`.
+    public func deletePhotoSource(
+        path: Operations.DeletePhotoSource.Input.Path,
+        query: Operations.DeletePhotoSource.Input.Query,
+        headers: Operations.DeletePhotoSource.Input.Headers = .init()
+    ) async throws -> Operations.DeletePhotoSource.Output {
+        try await deletePhotoSource(Operations.DeletePhotoSource.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Sync now (managers of the target). Returns at once with `running: true`. At most once per 2 minutes per source
+    /// and 30 per hour per user (`429` with `Retry-After`). A paused source answers `409 invalid_transition`.
+    /// `confirm_removals: true` applies removals held back by the mass-removal guard (`pending_removals`,
+    /// `last_error_code: mass_removal`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources/{sourceId}/sync`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)`.
+    public func syncPhotoSource(
+        path: Operations.SyncPhotoSource.Input.Path,
+        headers: Operations.SyncPhotoSource.Input.Headers = .init(),
+        body: Operations.SyncPhotoSource.Input.Body? = nil
+    ) async throws -> Operations.SyncPhotoSource.Output {
+        try await syncPhotoSource(Operations.SyncPhotoSource.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The caller's imports of the last 7 days, newest first (so an app that was closed while the picker was open can resume).
+    ///
+    /// - Remark: HTTP `GET /v1/google-imports`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/get(listMyGoogleImports)`.
+    public func listMyGoogleImports(headers: Operations.ListMyGoogleImports.Input.Headers = .init()) async throws -> Operations.ListMyGoogleImports.Output {
+        try await listMyGoogleImports(Operations.ListMyGoogleImports.Input(headers: headers))
+    }
+    /// "Add from Google Photos" into an album (album managers) or a feed (any feed member). Answers `needs_auth` with
+    /// `auth_url` (open it in a browser session; Google redirects to `googleOAuthCallback`, which redirects to
+    /// `return_uri`), or directly `picking` with `picker_uri` when the caller's previous import left a token with more
+    /// than 10 minutes to live. `503 feature_disabled` when the server has no Google OAuth client (discovery
+    /// `google_photos_import: false`). `return_uri` must be `app.kinframe:/google-import`,
+    /// `<public URL>/google-import/return` or `<web>/google-import/return` (`422 validation_failed`). Rate-limited
+    /// (20/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/google-imports`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)`.
+    public func startGoogleImport(
+        headers: Operations.StartGoogleImport.Input.Headers = .init(),
+        body: Operations.StartGoogleImport.Input.Body
+    ) async throws -> Operations.StartGoogleImport.Output {
+        try await startGoogleImport(Operations.StartGoogleImport.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The importer only. Poll while `picking` or `importing` (every 2–5 s, or follow `google_import.updated`).
+    ///
+    /// - Remark: HTTP `GET /v1/google-imports/{importId}`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/get(getGoogleImport)`.
+    public func getGoogleImport(
+        path: Operations.GetGoogleImport.Input.Path,
+        headers: Operations.GetGoogleImport.Input.Headers = .init()
+    ) async throws -> Operations.GetGoogleImport.Output {
+        try await getGoogleImport(Operations.GetGoogleImport.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Cancel (the importer). From `needs_auth` or `picking` the picker session is deleted; from `importing` the server
+    /// stops after the current file and keeps what was added (undo is `unsend` of `send_ids`). A finished import
+    /// answers `409 invalid_transition`; cancelling a cancelled one returns it unchanged.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/google-imports/{importId}/cancel`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/cancel/post(cancelGoogleImport)`.
+    public func cancelGoogleImport(
+        path: Operations.CancelGoogleImport.Input.Path,
+        headers: Operations.CancelGoogleImport.Input.Headers = .init()
+    ) async throws -> Operations.CancelGoogleImport.Output {
+        try await cancelGoogleImport(Operations.CancelGoogleImport.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Google's OAuth redirect (registered by the operator as `<public URL>/v1/oauth/google/callback`). Opened by the
+    /// browser, never called by clients. Checks `state` (single use, 15 minutes), exchanges `code` with the PKCE
+    /// verifier, creates the picker session and answers `302` to the import's `return_uri` with
+    /// `?import_id=<id>&status=<GoogleImportStatus>` (`picking`, or `failed` after a denied or failed consent).
+    /// An unknown, expired or reused `state` gets a small HTML page instead of a redirect.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/oauth/google/callback`.
+    /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)`.
+    public func googleOAuthCallback(
+        query: Operations.GoogleOAuthCallback.Input.Query,
+        headers: Operations.GoogleOAuthCallback.Input.Headers = .init()
+    ) async throws -> Operations.GoogleOAuthCallback.Output {
+        try await googleOAuthCallback(Operations.GoogleOAuthCallback.Input(
+            query: query,
+            headers: headers
+        ))
     }
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
@@ -1858,6 +3209,27 @@ extension APIProtocol {
         headers: Operations.DeviceGetInvitationPhoto.Input.Headers = .init()
     ) async throws -> Operations.DeviceGetInvitationPhoto.Output {
         try await deviceGetInvitationPhoto(Operations.DeviceGetInvitationPhoto.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// "Say happy birthday" on the frame's birthday card (docs/spec/birthdays.md §7). `birthdayId` is a
+    /// `FrameBirthday.id` (or any of its `birthday_ids`), `date` the frame's local date. Idempotent: one greeting per
+    /// person, frame and date, recorded once in every feed that lists the person; `204` also when it existed.
+    /// Feed members get `birthday.greeting` (push `birthday_greeting` with `birthday_notifications`).
+    /// `404 not_found` when the person is not on this frame (removed, subscription paused or birthdays off);
+    /// `422 validation_failed` (field `date`) when `date` is not the person's birthday (29 February counts on
+    /// 28 February in non-leap years) or lies outside the server's UTC date −2 … +1 days. At most 50 a day per frame
+    /// (`429 rate_limited`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/device/birthdays/{birthdayId}/greetings/{date}`.
+    /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)`.
+    public func deviceGreetBirthday(
+        path: Operations.DeviceGreetBirthday.Input.Path,
+        headers: Operations.DeviceGreetBirthday.Input.Headers = .init()
+    ) async throws -> Operations.DeviceGreetBirthday.Output {
+        try await deviceGreetBirthday(Operations.DeviceGreetBirthday.Input(
             path: path,
             headers: headers
         ))

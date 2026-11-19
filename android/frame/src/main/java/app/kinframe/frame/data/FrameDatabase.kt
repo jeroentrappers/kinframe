@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.withTransaction
 
 @Database(
-    entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class],
-    version = 7,
+    entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class, FeedTombstoneEntity::class, BirthdayGreetingEntity::class, AlbumFlagEntity::class],
+    version = 10,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -17,6 +17,9 @@ abstract class FrameDatabase : RoomDatabase() {
     abstract fun syncState(): SyncStateDao
     abstract fun acks(): AckDao
     abstract fun outbox(): OutboxDao
+    abstract fun feedTombstones(): FeedTombstoneDao
+    abstract fun birthdayGreetings(): BirthdayGreetingDao
+    abstract fun albumFlags(): AlbumFlagDao
 
     suspend fun <R> tx(block: suspend () -> R): R = withTransaction(block)
 
@@ -32,6 +35,38 @@ abstract class FrameDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "frame.db"
+
+        /**
+         * v10: photo sources (docs/spec/photo-sources.md): the service credited in the caption ("via Immich", §9.5) and
+         * album flags for "Only in album mode" (§9.1). Albums weren't stored before, so the flags arrive with the next
+         * `album.upsert`; until then everything plays as before.
+         */
+        val MIGRATION_9_10 = object : androidx.room.migration.Migration(9, 10) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN viaLabel TEXT DEFAULT NULL")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `album_flags` (`albumId` TEXT NOT NULL, `onlyInAlbumMode` INTEGER NOT NULL, PRIMARY KEY(`albumId`))")
+            }
+        }
+
+        /** v9: birthdays (docs/spec/birthdays.md): the last `birthdays` change and the greetings sent from the frame. */
+        val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN birthdaysJson TEXT DEFAULT NULL")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `birthday_greetings` (`birthdayId` TEXT NOT NULL, `date` TEXT NOT NULL, `sentAt` INTEGER NOT NULL, PRIMARY KEY(`birthdayId`, `date`))")
+            }
+        }
+
+        /** v8: feeds (docs/spec/feeds.md): placement origin, the feed that placed it, the feeds holding it, backfill; tombstones for pause. */
+        val MIGRATION_7_8 = object : androidx.room.migration.Migration(7, 8) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN origin TEXT NOT NULL DEFAULT 'send'")
+                db.execSQL("ALTER TABLE placements ADD COLUMN originFeedId TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN originFeedName TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN feedIds TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN backfill INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `feed_tombstones` (`placementId` TEXT NOT NULL, `removedAt` INTEGER NOT NULL, PRIMARY KEY(`placementId`))")
+            }
+        }
 
         /** v7: items imported from Frameo's leftover data (caption credit "Anna · via Frameo"). */
         val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
@@ -90,7 +125,7 @@ abstract class FrameDatabase : RoomDatabase() {
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

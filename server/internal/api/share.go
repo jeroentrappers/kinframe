@@ -70,6 +70,13 @@ func (s *Server) placeOnFrames(ctx context.Context, tx *store.Tx, items []placeI
 			var existing uuid.UUID
 			err := tx.QueryRow(ctx, `SELECT id FROM placements WHERE frame_id = $1 AND item_id = $2 AND removed_at IS NULL`, fid, it.ItemID).Scan(&existing)
 			if err == nil {
+				// A placement only a feed held is now held directly too (feeds.md §6.2),
+				// so unsubscribing no longer removes it.
+				if !dryRun {
+					if _, err := tx.HoldDirectly(ctx, fid, existing); err != nil {
+						return nil, nil, err
+					}
+				}
 				skipped = append(skipped, shareSkip{PlacementID: it.Source, FrameID: fid, Reason: "already_on_frame", ExistingPlacementID: existing})
 				continue
 			}

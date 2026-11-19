@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.ui.FrameRoot
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -61,8 +62,13 @@ class MainActivity : ComponentActivity() {
         })
 
         setContent { FrameRoot(graph.controller) }
-        // Compose paints every pixel; skipping the window background saves a full-screen fill per frame.
-        window.setBackgroundDrawable(null)
+        // Compose paints every pixel; skipping the window background saves a full-screen fill per frame. It stays
+        // (the boot animation's colour, see themes.xml) while the start-up splash is up, so nothing black can show
+        // before Compose's first frame or through a cross-fade.
+        lifecycleScope.launch {
+            graph.controller.splashUp.first { !it }
+            window.setBackgroundDrawable(null)
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

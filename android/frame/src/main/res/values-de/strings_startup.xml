@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Wird gestartet…</string>
+    <string name="startup_checking_library">Fotos werden nach einem Stromausfall geprüft…</string>
+    <string name="startup_checking_update">App-Version wird geprüft…</string>
+    <string name="startup_loading_photos">Fotos werden geladen…</string>
+    <string name="startup_preparing_photo">Erstes Foto wird vorbereitet…</string>
+    <string name="startup_waiting_wifi">Warten auf WLAN…</string>
+    <string name="startup_setting_clock">Uhr wird gestellt…</string>
+    <string name="startup_connecting">Verbindung zum Server wird hergestellt…</string>
+    <string name="power_cut_title">Ausgeschaltet, ohne herunterzufahren</string>
+    <string name="power_cut_body_ok">Alles wurde geprüft und ist in Ordnung.</string>
+    <string name="power_cut_body_redownload">Alles wurde geprüft. Einige Fotos werden erneut heruntergeladen.</string>
+    <string name="power_cut_tip">Wähle beim nächsten Mal im Menü %1$s → %2$s und warte, bis „%3$s“ auf dem Bildschirm steht.</string>
+</resources>

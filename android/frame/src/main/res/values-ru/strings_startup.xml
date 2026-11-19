@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Запуск…</string>
+    <string name="startup_checking_library">Проверка фото после отключения питания…</string>
+    <string name="startup_checking_update">Проверка версии приложения…</string>
+    <string name="startup_loading_photos">Загрузка фото…</string>
+    <string name="startup_preparing_photo">Подготовка первого фото…</string>
+    <string name="startup_waiting_wifi">Ожидание Wi-Fi…</string>
+    <string name="startup_setting_clock">Настройка часов…</string>
+    <string name="startup_connecting">Подключение к серверу…</string>
+    <string name="power_cut_title">Рамка выключилась без завершения работы</string>
+    <string name="power_cut_body_ok">Всё проверено, всё в порядке.</string>
+    <string name="power_cut_body_redownload">Всё проверено. Некоторые фото загружаются заново.</string>
+    <string name="power_cut_tip">В следующий раз выберите в меню %1$s → %2$s и дождитесь надписи «%3$s» на экране.</string>
+</resources>

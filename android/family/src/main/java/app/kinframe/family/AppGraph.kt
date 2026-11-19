@@ -31,6 +31,7 @@ import app.kinframe.family.send.OutboxStore
 import app.kinframe.family.send.SendRunner
 import app.kinframe.family.send.SendWorker
 import app.kinframe.family.util.DeepLink
+import app.kinframe.family.ui.sources.GoogleImportFlow
 import app.kinframe.family.ui.tv.TvPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +51,12 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /** A request from outside the app: a notification tap. */
-data class OpenTarget(val target: String, val sendId: String? = null, val frameId: String? = null, val placementId: String? = null)
+data class OpenTarget(
+    val target: String, val sendId: String? = null, val frameId: String? = null, val placementId: String? = null,
+    val feedId: String? = null, val postId: String? = null,
+    /** Photo sources (README §6.3): the source that needs attention, the Google import that finished. */
+    val sourceId: String? = null, val importId: String? = null,
+)
 
 /**
  * The app's object graph (hand-wired; the app is small enough). One per process, created by [FamilyApp].
@@ -102,6 +108,12 @@ class AppGraph(
 
     /** A notification tap to route. */
     val openTarget = MutableStateFlow<OpenTarget?>(null)
+
+    /** Text shared into the app (an Immich or iCloud album link), waiting for "Sync this album to…". */
+    val incomingSourceLink = MutableStateFlow<String?>(null)
+
+    /** "Add from Google Photos": one import at a time, across screens and the trip to Google and back. */
+    val googleImports = GoogleImportFlow({ api.value }, scope, live.events)
 
     private val _sent = MutableSharedFlow<String>(extraBufferCapacity = 8)
     /** Ids of sends that just left the outbox (history reloads). */

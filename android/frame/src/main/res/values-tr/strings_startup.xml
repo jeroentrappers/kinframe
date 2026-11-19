@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Başlatılıyor…</string>
+    <string name="startup_checking_library">Elektrik kesintisinden sonra fotoğraflar kontrol ediliyor…</string>
+    <string name="startup_checking_update">Uygulama sürümü kontrol ediliyor…</string>
+    <string name="startup_loading_photos">Fotoğraflar yükleniyor…</string>
+    <string name="startup_preparing_photo">İlk fotoğraf hazırlanıyor…</string>
+    <string name="startup_waiting_wifi">Wi-Fi bekleniyor…</string>
+    <string name="startup_setting_clock">Saat ayarlanıyor…</string>
+    <string name="startup_connecting">Sunucuya bağlanılıyor…</string>
+    <string name="power_cut_title">Kapatılmadan elektriği kesildi</string>
+    <string name="power_cut_body_ok">Her şey kontrol edildi, sorun yok.</string>
+    <string name="power_cut_body_redownload">Her şey kontrol edildi. Bazı fotoğraflar yeniden indiriliyor.</string>
+    <string name="power_cut_tip">Bir dahaki sefere menüden %1$s → %2$s seçeneğini seçin ve ekranda “%3$s” yazana kadar bekleyin.</string>
+</resources>

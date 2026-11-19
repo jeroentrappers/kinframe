@@ -5,9 +5,11 @@
 	import { i18n, kindSummary, t, tn } from '$lib/i18n/index.svelte';
 	import type { ReplyPreset } from '$lib/api/client';
 	import Icon from './Icon.svelte';
+	import { summaryVia } from '$lib/sender';
 	import ReactionChips from './ReactionChips.svelte';
 	import StagePill from './StagePill.svelte';
 	import Thumb from './Thumb.svelte';
+	import ReceiptSummary from './feed/ReceiptSummary.svelte';
 
 	let { send, highlight = false }: { send: Send; highlight?: boolean } = $props();
 
@@ -36,7 +38,7 @@
 	<div class="body">
 		<div class="head">
 			<p class="what">
-				{kindSummary(kinds)}
+				{summaryVia(kindSummary(kinds), send.via)}
 			</p>
 			<time class="muted small" datetime={send.created_at} title={formatDateTime(send.created_at, i18n.tag)}>{relativeTime(send.created_at, i18n.tag)}</time>
 		</div>
@@ -59,11 +61,30 @@
 					<ReactionChips reactions={d.reactions} replies={d.replies as ReplyPreset[]} />
 				</li>
 			{/each}
+			{#each send.feeds ?? [] as f (f.post_id)}
+				<li class="frame-row" data-testid="send-feed">
+					<div class="fr-top">
+						<a class="fname feed-name" href="/feeds/{f.feed_id}?post={f.post_id}"><Icon name="feed" size={14} />{f.feed_name}</a>
+						{#if f.removed}<span class="badge">{t('history.feedRemoved')}</span>{/if}
+					</div>
+					{#if !f.removed}<ReceiptSummary summary={f.summary} compact />{/if}
+				</li>
+			{/each}
 		</ul>
 	</div>
 </article>
 
 <style>
+	.feed-name {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: inherit;
+		text-decoration: none;
+	}
+	.feed-name:hover {
+		text-decoration: underline;
+	}
 	.send-card {
 		display: grid;
 		grid-template-columns: 1fr;

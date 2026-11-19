@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s täyttää tänään %2$d!</item>
+        <item quantity="other">🎈 %1$s täyttää tänään %2$d!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Syntymäpäivä tänään: %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Syntymäpäiviä tänään</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">ja %d muuta</item>
+        <item quantity="other">ja %d muuta</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s täyttää %2$d</item>
+        <item quantity="other">%1$s täyttää %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Syntymäpäivä: %1$s</string>
+    <string name="birthday_countdown_two">%1$s ja %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s ja %2$d muuta</item>
+        <item quantity="other">%1$s ja %2$d muuta</item>
+    </plurals>
+    <string name="birthday_greet_title">Lähetä onnittelut tästä kuvakehyksestä</string>
+    <string name="birthday_greet_button">Onnittele: %1$s</string>
+    <string name="birthday_greet_sent">Lähetetty ✓ – perhe näkee sen</string>
+    <string name="birthday_detail_label">Syntymäpäivä</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">täyttää %d</item>
+        <item quantity="other">täyttää %d</item>
+    </plurals>
+</resources>

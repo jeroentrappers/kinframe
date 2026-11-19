@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s wordt vandaag %2$d!</item>
+        <item quantity="other">🎈 %1$s wordt vandaag %2$d!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s is vandaag jarig!</string>
+    <string name="birthday_card_title_many">🎈 Vandaag jarig</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">en nog %d</item>
+        <item quantity="other">en nog %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s wordt %2$d</item>
+        <item quantity="other">%1$s wordt %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s is jarig</string>
+    <string name="birthday_countdown_two">%1$s en %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s en nog %2$d</item>
+        <item quantity="other">%1$s en nog %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Wens een fijne verjaardag vanaf deze fotolijst</string>
+    <string name="birthday_greet_button">Wens %1$s een fijne verjaardag</string>
+    <string name="birthday_greet_sent">Verstuurd ✓ — de familie ziet het</string>
+    <string name="birthday_detail_label">Verjaardag</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">wordt %d</item>
+        <item quantity="other">wordt %d</item>
+    </plurals>
+</resources>

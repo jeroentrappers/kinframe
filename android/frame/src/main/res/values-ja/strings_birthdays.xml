@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="other">🎈 今日は%1$sの%2$d歳の誕生日！</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 今日は%1$sの誕生日！</string>
+    <string name="birthday_card_title_many">🎈 今日の誕生日</string>
+    <plurals name="birthday_card_more">
+        <item quantity="other">ほか%d人</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="other">%1$sが%2$d歳に</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$sの誕生日</string>
+    <string name="birthday_countdown_two">%1$sと%2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="other">%1$sほか%2$d人</item>
+    </plurals>
+    <string name="birthday_greet_title">このフレームからお祝いを送る</string>
+    <string name="birthday_greet_button">%1$sに誕生日おめでとうを送る</string>
+    <string name="birthday_greet_sent">送信しました ✓ — 家族に届きます</string>
+    <string name="birthday_detail_label">誕生日</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="other">%d歳に</item>
+    </plurals>
+</resources>

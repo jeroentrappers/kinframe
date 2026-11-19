@@ -8,6 +8,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
+    <!-- "Add from Google Photos" opens Google's picker in the Google Photos app when it is installed (README §5.14). -->
+    <queries>
+        <package android:name="com.google.android.apps.photos" />
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
     <application
         android:name=".FamilyApp"
         android:allowBackup="false"
@@ -36,6 +44,12 @@
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />
             </intent-filter>
+            <!-- An Immich or iCloud shared album link shared as text: "Sync this album to…" (photo-sources.md). -->
+            <intent-filter android:label="@string/share_text_label">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
             <intent-filter android:label="@string/share_label">
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -43,7 +57,7 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
 
-            <!-- App Links for the default server: frame QR codes and invite links. Needs
+            <!-- App Links for the default server: frame QR codes, invite links and feed invite links. Needs
                  https://kinframe.appmire.be/.well-known/assetlinks.json listing this app's signing key. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -53,16 +67,27 @@
                 <data android:host="kinframe.appmire.be" />
                 <data android:pathPrefix="/f/" />
                 <data android:pathPrefix="/i/" />
+                <!-- Feed invite links (README §5.12). -->
+                <data android:pathPrefix="/fi/" />
             </intent-filter>
         </activity>
 
-        <!-- Logto's redirect receiver: replace its default filter (<scheme>://<applicationId>/callback) with the fixed
-             redirects registered for every server by bootstrap-logto: app.kinframe:/callback and app.kinframe:/logout. -->
+        <!-- Logto's redirect receiver: its default filter (<scheme>://<applicationId>/callback) is removed. The fixed
+             redirects registered for every server by bootstrap-logto (app.kinframe:/callback and app.kinframe:/logout)
+             and the Google Photos import return (app.kinframe:/google-import) all arrive at RedirectActivity, which owns
+             the scheme (filters can't match custom-scheme paths without a host) and forwards sign-in redirects here. -->
         <activity
             android:name="io.logto.sdk.android.auth.logto.LogtoRedirectReceiverActivity"
             android:exported="true"
             tools:node="merge">
             <intent-filter tools:node="removeAll" />
+        </activity>
+        <activity
+            android:name=".auth.RedirectActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

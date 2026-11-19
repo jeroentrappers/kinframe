@@ -51,6 +51,27 @@ fun CountdownWidgets(items: List<CountdownItem>, today: LocalDate, onPaper: Bool
     }
 }
 
+/**
+ * The top-right column (birthdays.md §6.6): the birthday card on the day, then the countdown tiles (already merged and
+ * cut to fit, [app.kinframe.frame.birthdays.BirthdayLogic.mergeCountdowns]). The card opens the greeting sheet; a tile
+ * opens the calendar.
+ */
+@Composable
+fun CountdownColumn(
+    card: (@Composable () -> Unit)?,
+    items: List<CountdownItem>,
+    today: LocalDate,
+    onPaper: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (card == null && items.isEmpty()) return
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.End) {
+        card?.invoke()
+        if (items.isNotEmpty()) CountdownWidgets(items, today, onPaper, onClick)
+    }
+}
+
 @Composable
 private fun CountdownTile(c: CountdownItem, today: LocalDate, onPaper: Boolean) {
     val days = ChronoUnit.DAYS.between(today, c.day).toInt().coerceAtLeast(0)
@@ -64,7 +85,12 @@ private fun CountdownTile(c: CountdownItem, today: LocalDate, onPaper: Boolean) 
             .padding(start = 14.dp, end = 18.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(10.dp).clip(CircleShape).background(if (onPaper) sw.strong else sw.onDark))
+        if (c.birthdays.isNotEmpty()) {
+            // A birthday tile: a small balloon in place of the colour dot.
+            app.kinframe.frame.birthdays.BalloonGlyph(if (onPaper) sw.strong else sw.onDark, Modifier.size(width = 12.dp, height = 18.dp))
+        } else {
+            Box(Modifier.size(10.dp).clip(CircleShape).background(if (onPaper) sw.strong else sw.onDark))
+        }
         if (days >= 2) {
             // "%d days" as one translated phrase (plural agreement per language), with the number set large.
             val phrase = pluralStringResource(R.plurals.countdown_days, days, days)
@@ -92,7 +118,7 @@ private fun CountdownTile(c: CountdownItem, today: LocalDate, onPaper: Boolean) 
             )
         }
         Text(
-            c.title, style = Kin.type.body.copy(fontSize = 17.sp, shadow = shadow), color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            if (c.birthdays.isNotEmpty()) app.kinframe.frame.birthdays.birthdayTileTitle(c.birthdays) else c.title, style = Kin.type.body.copy(fontSize = 17.sp, shadow = shadow), color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(start = 12.dp),
         )
     }

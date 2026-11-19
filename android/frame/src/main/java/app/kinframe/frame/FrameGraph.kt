@@ -11,6 +11,7 @@ import app.kinframe.frame.data.FramePrefs
 import app.kinframe.frame.data.MediaCache
 import app.kinframe.frame.data.SettingsRepository
 import app.kinframe.frame.system.CrashGuard
+import app.kinframe.frame.system.LegacyTrust
 import app.kinframe.frame.system.NetworkMonitor
 import app.kinframe.frame.system.TimeSync
 import app.kinframe.frame.system.RootShell
@@ -43,7 +44,8 @@ class FrameGraph(val app: Application) {
     val media = MediaCache(app.filesDir)
     val network = NetworkMonitor(app)
 
-    val http: OkHttpClient = OkHttpClient.Builder()
+    /** Every network call of the frame goes through this client (or one derived from it with newBuilder()). */
+    val http: OkHttpClient = LegacyTrust.apply(OkHttpClient.Builder(), app)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(45, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)

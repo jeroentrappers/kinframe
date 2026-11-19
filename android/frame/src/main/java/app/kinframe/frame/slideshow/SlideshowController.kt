@@ -104,6 +104,9 @@ class SlideshowController(private val c: FrameController) {
     val stage: StateFlow<Stage> = _stage
     private val _empty = MutableStateFlow<EmptyState?>(null)
     val empty: StateFlow<EmptyState?> = _empty
+    private val _loaded = MutableStateFlow(false)
+    /** The library has been read at least once ([empty] and the playlist are known). */
+    val loaded: StateFlow<Boolean> = _loaded
     private val _newCount = MutableStateFlow(0)
     val newCount: StateFlow<Int> = _newCount
     private val _video = MutableStateFlow<VideoState?>(null)
@@ -144,7 +147,8 @@ class SlideshowController(private val c: FrameController) {
         started = true
         stopped = false
         dataJob = c.scope.launch {
-            combine(g.db.placements().observeAll(), g.settings.settings) { all, s -> all to s }.collect { (all, s) ->
+            combine(g.db.placements().observeAll(), g.settings.settings, g.db.albumFlags().observeAlbumOnlyIds()) { all, s, only -> Triple(all, s, only.toSet()) }.collect { (all, s, only) ->
+                albumOnly = only
                 onData(all, s)
             }
         }
@@ -200,6 +204,9 @@ class SlideshowController(private val c: FrameController) {
         else c.scope.launch { if (_stage.value.incoming == null) next(manual = false) }
     }
 
+    /** Albums flagged "Only in album mode". */
+    private var albumOnly: Set<String> = emptySet()
+
     private suspend fun onData(all: List<PlacementEntity>, s: FrameSettings) {
         val renderChanged = s.slideshow.fill != settings.slideshow.fill || s.slideshow.background != settings.slideshow.background ||
             s.slideshow.captionDate != settings.slideshow.captionDate || s.display.textScale != settings.display.textScale ||
@@ -209,8 +216,9 @@ class SlideshowController(private val c: FrameController) {
         settings = s
         val skipped = g.crashGuard.skippedItems()
         val allVisible = all.filter { it.isVisible }
-        // Album mode (settings `album_id`): only that album; an empty or unknown album plays everything.
-        val visible = s.slideshow.albumId?.let { album -> allVisible.filter { album in it.albumIdList } }?.takeIf { it.isNotEmpty() } ?: allVisible
+        // Album mode (`album_id`) or feed mode (`feed_id`): only that album or feed; empty or unknown plays everything.
+        // The normal slideshow leaves out "Only in album mode" albums (photo-sources.md §9.1).
+        val visible = SlideshowSource.select(allVisible, s.slideshow.albumId, s.slideshow.feedId, albumOnly)
         val today = java.time.Instant.ofEpochMilli(g.clock.nowMs()).atZone(g.clock.zone).toLocalDate()
         val onThisDay = if (s.slideshow.onThisDay) OnThisDay.ids(visible, today, g.clock.zone) else emptySet()
         playable = visible.filter { it.localFile != null && it.id !in skipped }.associateBy { it.id }
@@ -227,13 +235,16 @@ class SlideshowController(private val c: FrameController) {
             PlayOrder.of(s.slideshow.order), s.slideshow.reverse,
         )
         if (playlist.current == null) playlist.restore(g.prefs.playlistCurrent)
+        _loaded.value = true
         _newCount.value = playlist.pendingNew().size
         val cur = _stage.value.incoming?.placement
         // Caption, reaction or focal point of the current slide changed: re-render it in place.
         var refresh = false
         if (cur != null) playable[cur.id]?.let { fresh ->
             if (fresh.caption != cur.caption || fresh.reaction != cur.reaction || fresh.captionEdited != cur.captionEdited ||
-                fresh.fit != cur.fit || fresh.focalX != cur.focalX || fresh.focalY != cur.focalY || fresh.rotation != cur.rotation
+                fresh.fit != cur.fit || fresh.focalX != cur.focalX || fresh.focalY != cur.focalY || fresh.rotation != cur.rotation ||
+                fresh.originFeedName != cur.originFeedName || // a feed rename updates the credit
+                fresh.viaLabel != cur.viaLabel
             ) refresh = true
             _current.value = fresh
         }
@@ -336,8 +347,12 @@ class SlideshowController(private val c: FrameController) {
         }
     }
 
-    private suspend fun present(id: String, direction: Int, kind: TransitionKind, startProgress: Float = 0f, previewKey: String? = null) {
+    private suspend fun present(id: String, direction: Int, requested: TransitionKind, startProgress: Float = 0f, previewKey: String? = null) {
         val p = playable[id] ?: return
+        // The first photo under the start-up splash appears at once: the splash fades out over it, so splash and photo
+        // cross-fade directly (no fade from nothing underneath).
+        val underSplash = _stage.value.incoming == null && c.splashUp.value
+        val kind = if (underSplash) TransitionKind.Cut else requested
         g.crashGuard.currentItem = id
         val group = groupFor(p)
         group.drop(1).forEach { playlist.consume(it.id) }
@@ -357,7 +372,7 @@ class SlideshowController(private val c: FrameController) {
         }
         transitionRunning = duration > 0
         val hold = settings.slideshow.intervalS.coerceIn(2, 86_400) * 1000L + duration
-        _stage.value = Stage(prev.incoming, slide, prev.seq + 1, if (prev.incoming == null) TransitionKind.Crossfade else kind, duration, direction, hold, start)
+        _stage.value = Stage(prev.incoming, slide, prev.seq + 1, if (prev.incoming == null && !underSplash) TransitionKind.Crossfade else kind, duration, direction, hold, start)
         _current.value = p
         shownAt = SystemClock.elapsedRealtime()
         g.prefs.playlistCurrent = id
@@ -449,7 +464,7 @@ class SlideshowController(private val c: FrameController) {
         val placed = if (split != null) Collage.placeInto(listOf(split.big, split.small), aspects, screenW, screenH) else Collage.place(aspects, screenW, screenH)
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
-        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}" } +
+        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}:${it.originFeedName}:${it.viaLabel}" } +
             "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}|split=${split != null}:$splitSide"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }

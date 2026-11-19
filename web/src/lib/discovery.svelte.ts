@@ -1,11 +1,21 @@
-import { setApiBase, type Discovery, type Limits } from './api/client';
+import { setApiBase, type Discovery, type Limits, type PhotoSourceProvider } from './api/client';
+import { offeredProviders } from './photoSources';
 import { appUrl, isStorefrontHost } from './storefront';
 
 export const DEFAULT_LIMITS: Required<Limits> = {
 	max_items_per_send: 200,
 	max_video_seconds: 300,
 	max_upload_bytes: 2 * 1024 ** 3,
-	trash_retention_days: 30
+	trash_retention_days: 30,
+	max_feeds_per_user: 20,
+	max_subscriptions_per_feed: 100,
+	max_feed_backfill_items: 5000,
+	max_birthdays_per_feed: 200,
+	max_photo_sources_per_target: 5,
+	max_photo_sources_per_user: 20,
+	max_photo_source_items: 10000,
+	max_photo_source_run_bytes: 2147483648,
+	max_google_import_items: 500
 };
 
 /**
@@ -53,6 +63,37 @@ class DiscoveryState {
 	/** `path` on the app's main origin (discovery `web`), for links from a storefront; null when unknown. */
 	appUrl(path = '/') {
 		return appUrl(this.doc?.web, this.doc?.api, path, typeof location !== 'undefined' ? location.origin : undefined);
+	}
+
+	/** Feeds and subscriptions (docs/spec/feeds.md): the server says so in discovery. Off hides every feed UI. */
+	get feeds() {
+		return this.doc?.feeds === true;
+	}
+
+	/** Birthday lists in feeds (docs/spec/birthdays.md): only together with feeds. Off hides every birthday UI. */
+	get birthdays() {
+		return this.feeds && this.doc?.birthdays === true;
+	}
+
+	/** Immich and iCloud sources for albums and feeds (docs/spec/photo-sources.md): off hides every source UI. */
+	get photoSources() {
+		return this.doc?.photo_sources === true && this.photoSourceProviders.length > 0;
+	}
+
+	/** The providers this server allows (`icloud_link` can be off on its own). */
+	get photoSourceProviders(): PhotoSourceProvider[] {
+		if (this.doc?.photo_sources !== true) return [];
+		return offeredProviders(this.doc.photo_source_providers);
+	}
+
+	/** Whether sources may reach home-network addresses; false shows the "use a public address" hint. */
+	get photoSourcesPrivateNetworks() {
+		return this.doc?.photo_sources_private_networks === true;
+	}
+
+	/** "Add from Google Photos": the operator configured a Google OAuth client. */
+	get googlePhotosImport() {
+		return this.doc?.google_photos_import === true;
 	}
 
 	/** Logto is usable when the server published an issuer and a web client id. */

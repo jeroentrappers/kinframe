@@ -22,6 +22,18 @@ extension Components {
         public typealias EventId = Components.Schemas.CalendarEventId
         /// - Remark: Generated from `#/components/parameters/EndpointId`.
         public typealias EndpointId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/FeedId`.
+        public typealias FeedId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/PostId`.
+        public typealias PostId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/SubscriptionId`.
+        public typealias SubscriptionId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/BirthdayId`.
+        public typealias BirthdayId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/SourceId`.
+        public typealias SourceId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/ImportId`.
+        public typealias ImportId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/InviteToken`.
         public typealias InviteToken = Swift.String
         /// - Remark: Generated from `#/components/parameters/Cursor`.

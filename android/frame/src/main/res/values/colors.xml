@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="kin_accent">#C0623E</color>
+    <!-- The boot animation's background (tools/brand/boot/build.py), which the start-up splash continues. -->
+    <color name="kin_boot_background">#191512</color>
 </resources>

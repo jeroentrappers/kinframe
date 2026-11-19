@@ -43,6 +43,7 @@ class HistoryViewModel(private val api: KinApi, live: Flow<LiveEvent>, sent: Flo
                     is LiveEvent.SendUpdated -> upsert(e.send)
                     is LiveEvent.Reaction -> mapSends { Delivery.applyReaction(it, e.placementId, e.reaction) }
                     is LiveEvent.Reply -> mapSends { Delivery.applyReply(it, e.placementId, e.preset) }
+                    is LiveEvent.FeedPostUpdated -> mapSends { Delivery.applyFeedSummary(it, e.postId, e.summary) }
                     else -> Unit
                 }
             }
@@ -136,6 +137,8 @@ data class SendDetailState(
 sealed interface SendDetailEvent {
     data object CaptionSaved : SendDetailEvent
     data object Unsent : SendDetailEvent
+    /** Posted to feeds with "Post to a feed" (names of the feeds). */
+    data class Forwarded(val feeds: List<String>) : SendDetailEvent
 }
 
 /** One send: per-frame delivery, reactions and replies, caption editing and unsend. */
@@ -154,6 +157,7 @@ class SendDetailViewModel(private val api: KinApi, private val sendId: String, l
                     is LiveEvent.SendUpdated -> e.send.takeIf { it.id == sendId }
                     is LiveEvent.Reaction -> Delivery.applyReaction(cur, e.placementId, e.reaction)
                     is LiveEvent.Reply -> Delivery.applyReply(cur, e.placementId, e.preset)
+                    is LiveEvent.FeedPostUpdated -> Delivery.applyFeedSummary(cur, e.postId, e.summary)
                     else -> null
                 }
                 if (next != null) _state.update { it.copy(send = Load.Ready(next)) }
@@ -194,6 +198,21 @@ class SendDetailViewModel(private val api: KinApi, private val sendId: String, l
                     )
                 }
                 _events.tryEmit(SendDetailEvent.CaptionSaved)
+            } catch (e: Exception) {
+                _state.update { it.copy(saving = false, error = Problems.message(e)) }
+            }
+        }
+    }
+
+    /** "Post to a feed": the send's items go to [feedIds] without a new upload (`POST /sends/{id}/forward`). */
+    fun forwardToFeeds(feedIds: List<String>, names: List<String>) {
+        if (feedIds.isEmpty() || state.value.saving) return
+        _state.update { it.copy(saving = true, error = null) }
+        viewModelScope.launch {
+            try {
+                val send = api.forwardSend(sendId, emptyList(), feedIds)
+                _state.update { it.copy(saving = false, send = Load.Ready(send)) }
+                _events.tryEmit(SendDetailEvent.Forwarded(names))
             } catch (e: Exception) {
                 _state.update { it.copy(saving = false, error = Problems.message(e)) }
             }

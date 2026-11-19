@@ -75,6 +75,7 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 		render = s.deviceSettingsDoc
 	}
 	settings.Sanitize(patch)
+	exclusiveSlideshowSource(patch)
 	paths := settings.LeafPaths(patch)
 	var out json.RawMessage
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
@@ -233,4 +234,22 @@ func (s *Server) DevicePatchSettings(ctx context.Context, req gen.DevicePatchSet
 		return nil, err
 	}
 	return Response{Status: 200, Body: doc}, nil
+}
+
+// exclusiveSlideshowSource: album mode and feed mode exclude each other, so
+// setting slideshow.album_id clears slideshow.feed_id and vice versa
+// (feeds.md §6.7). Setting both at once keeps the album.
+func exclusiveSlideshowSource(patch map[string]any) {
+	ss, ok := patch["slideshow"].(map[string]any)
+	if !ok {
+		return
+	}
+	album, hasAlbum := ss["album_id"]
+	feed, hasFeed := ss["feed_id"]
+	switch {
+	case hasAlbum && album != nil:
+		ss["feed_id"] = nil
+	case hasFeed && feed != nil:
+		ss["album_id"] = nil
+	}
 }

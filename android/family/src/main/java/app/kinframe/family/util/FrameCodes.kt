@@ -4,6 +4,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import app.kinframe.core.api.FeedCodes
 
 /**
  * Frame codes: 8 digits, shown as `1234 5678` (README §5.1). People type, paste a code with spaces or dashes, or
@@ -38,5 +39,50 @@ object FrameCodes {
     object CodeOffsetMapping : OffsetMapping {
         override fun originalToTransformed(offset: Int): Int = if (offset <= 4) offset else offset + 1
         override fun transformedToOriginal(offset: Int): Int = if (offset <= 4) offset else offset - 1
+    }
+}
+
+/**
+ * What someone typed or pasted into the shared "Enter a code" field (README §5.12): an 8-digit frame code, a feed invite
+ * code (letters, `KF7Q-M2XA`), or a feed invite link. Codes with a letter are feed codes; digits only are frame codes.
+ */
+sealed interface EnteredCode {
+    /** The text the field holds (digits, or the feed code characters). */
+    val text: String
+    val complete: Boolean
+
+    data class Frame(val digits: String) : EnteredCode {
+        override val text get() = digits
+        override val complete get() = digits.length == FrameCodes.LENGTH
+    }
+
+    data class Feed(val code: String) : EnteredCode {
+        override val text get() = code
+        override val complete get() = FeedCodes.normalize(code) != null
+    }
+
+    /** A pasted `/fi/<token>` link: no code needed. */
+    data class FeedLink(val token: String) : EnteredCode {
+        override val text get() = ""
+        override val complete get() = true
+    }
+
+    companion object {
+        /** With [feeds] off (discovery), everything is read as a frame code, as before. */
+        fun parse(input: String, feeds: Boolean): EnteredCode {
+            if (feeds) {
+                val link = DeepLinks.parse(input.trim())
+                if (link is DeepLink.FeedInvite) return FeedLink(link.token)
+                if (link == null && FeedCodes.looksLikeFeedCode(input)) return Feed(FeedCodes.chars(input))
+            }
+            return Frame(FrameCodes.digits(input))
+        }
+
+        /** Shows `1234 5678` for frame codes and `KF7Q-M2XA` for feed codes; both insert one character after the fourth. */
+        val visualTransformation = VisualTransformation { text ->
+            val raw = text.text
+            val out = if (raw.any { it.isLetter() }) FeedCodes.format(raw) else FrameCodes.format(raw)
+            TransformedText(AnnotatedString(out), FrameCodes.CodeOffsetMapping)
+        }
     }
 }

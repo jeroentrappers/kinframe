@@ -85,6 +85,8 @@ dependencies {
     implementation(libs.unifiedpush.connector) { exclude(group = "com.google.crypto.tink", module = "tink") }
     implementation(libs.tink.android)
     implementation(libs.coil.compose)
+    // QR codes of feed invite links.
+    implementation(libs.zxing.core)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.video)
     implementation(libs.media3.transformer)

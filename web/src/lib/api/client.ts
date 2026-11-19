@@ -34,6 +34,63 @@ export type CalendarView = Schemas['CalendarView'];
 export type CalendarSchedule = Schemas['CalendarSchedule'];
 export type EventInvitation = Schemas['EventInvitation'];
 
+// Feeds and subscriptions (docs/spec/feeds.md, README §5.12).
+export type FeedRole = Schemas['FeedRole'];
+export type FeedSummary = Schemas['FeedSummary'];
+export type Feed = Schemas['Feed'];
+export type FeedCreate = Schemas['FeedCreate'];
+export type FeedUpdate = Schemas['FeedUpdate'];
+export type FeedMember = Schemas['FeedMember'];
+export type FeedInvite = Schemas['FeedInvite'];
+export type FeedInvitePurpose = Schemas['FeedInvitePurpose'];
+export type FeedInviteCreate = Schemas['FeedInviteCreate'];
+export type FeedInvitePreview = Schemas['FeedInvitePreview'];
+export type FeedInviteResult = Schemas['FeedInviteResult'];
+export type FeedPost = Schemas['FeedPost'];
+export type FeedPostReceipts = Schemas['FeedPostReceipts'];
+export type FeedReceiptSummary = Schemas['FeedReceiptSummary'];
+export type FeedReaction = Schemas['FeedReaction'];
+export type FeedDeliveryStatus = Schemas['FeedDeliveryStatus'];
+export type Subscription = Schemas['Subscription'];
+export type SubscriptionStatus = Schemas['SubscriptionStatus'];
+export type SubscriptionHistory = Schemas['SubscriptionHistory'];
+export type SendFeed = Schemas['SendFeed'];
+export type PlacementOrigin = Schemas['PlacementOrigin'];
+
+// Birthdays (docs/spec/birthdays.md, README §5.13).
+export type BirthdayStatus = Schemas['BirthdayStatus'];
+export type BirthdayPerson = Schemas['BirthdayPerson'];
+export type BirthdayPersonCreate = Schemas['BirthdayPersonCreate'];
+export type BirthdayPersonUpdate = Schemas['BirthdayPersonUpdate'];
+export type FeedBirthdayGreeting = Schemas['FeedBirthdayGreeting'];
+export type FeedPreferencesUpdate = Schemas['FeedPreferencesUpdate'];
+export type SubscriptionUpdate = Schemas['SubscriptionUpdate'];
+
+// Photo sources and Google Photos import (docs/spec/photo-sources.md, README §5.14).
+export type PhotoService = Schemas['PhotoService'];
+export type ItemVia = Schemas['ItemVia'];
+export type PhotoSourceProvider = Schemas['PhotoSourceProvider'];
+export type PhotoSourceStatus = Schemas['PhotoSourceStatus'];
+export type PhotoSourceErrorCode = Schemas['PhotoSourceErrorCode'];
+export type PhotoSourceWarning = Schemas['PhotoSourceWarning'];
+export type PhotoSourceHistory = Schemas['PhotoSourceHistory'];
+export type PhotoSourceDeletePolicy = Schemas['PhotoSourceDeletePolicy'];
+export type PhotoSourceTarget = Schemas['PhotoSourceTarget'];
+export type PhotoSourceConnection = Schemas['PhotoSourceConnection'];
+export type PhotoSourceCreate = Schemas['PhotoSourceCreate'];
+export type PhotoSourceUpdate = Schemas['PhotoSourceUpdate'];
+export type PhotoSourceCounts = Schemas['PhotoSourceCounts'];
+export type PhotoSourceRun = Schemas['PhotoSourceRun'];
+export type PhotoSource = Schemas['PhotoSource'];
+export type PhotoSourceTestResult = Schemas['PhotoSourceTestResult'];
+export type ImmichConnection = Schemas['ImmichConnection'];
+export type ImmichAlbum = Schemas['ImmichAlbum'];
+export type ImmichAlbumList = Schemas['ImmichAlbumList'];
+export type GoogleImportStatus = Schemas['GoogleImportStatus'];
+export type GoogleImportErrorCode = Schemas['GoogleImportErrorCode'];
+export type GoogleImportCreate = Schemas['GoogleImportCreate'];
+export type GoogleImport = Schemas['GoogleImport'];
+
 /** An RFC 9457 problem (or a network failure, code `network`). */
 export class ApiError extends Error {
 	readonly status: number;

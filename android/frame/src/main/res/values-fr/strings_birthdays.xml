@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s a %2$d an aujourd\'hui !</item>
+        <item quantity="many">🎈 %1$s a %2$d ans aujourd\'hui !</item>
+        <item quantity="other">🎈 %1$s a %2$d ans aujourd\'hui !</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 C\'est l\'anniversaire de %1$s aujourd\'hui !</string>
+    <string name="birthday_card_title_many">🎈 Anniversaires du jour</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">et %d de plus</item>
+        <item quantity="many">et %d de plus</item>
+        <item quantity="other">et %d de plus</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s va avoir %2$d an</item>
+        <item quantity="many">%1$s va avoir %2$d ans</item>
+        <item quantity="other">%1$s va avoir %2$d ans</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Anniversaire de %1$s</string>
+    <string name="birthday_countdown_two">%1$s et %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s et %2$d de plus</item>
+        <item quantity="many">%1$s et %2$d de plus</item>
+        <item quantity="other">%1$s et %2$d de plus</item>
+    </plurals>
+    <string name="birthday_greet_title">Souhaiter un joyeux anniversaire depuis ce cadre</string>
+    <string name="birthday_greet_button">Souhaiter un joyeux anniversaire à %1$s</string>
+    <string name="birthday_greet_sent">Envoyé ✓ — la famille le verra</string>
+    <string name="birthday_detail_label">Anniversaire</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">va avoir %d an</item>
+        <item quantity="many">va avoir %d ans</item>
+        <item quantity="other">va avoir %d ans</item>
+    </plurals>
+</resources>

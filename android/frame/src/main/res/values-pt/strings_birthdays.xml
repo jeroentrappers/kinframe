@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s faz %2$d ano hoje!</item>
+        <item quantity="many">🎈 %1$s faz %2$d anos hoje!</item>
+        <item quantity="other">🎈 %1$s faz %2$d anos hoje!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Hoje é o aniversário de %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Aniversários de hoje</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">e mais %d</item>
+        <item quantity="many">e mais %d</item>
+        <item quantity="other">e mais %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s faz %2$d ano</item>
+        <item quantity="many">%1$s faz %2$d anos</item>
+        <item quantity="other">%1$s faz %2$d anos</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Aniversário de %1$s</string>
+    <string name="birthday_countdown_two">%1$s e %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s e mais %2$d</item>
+        <item quantity="many">%1$s e mais %2$d</item>
+        <item quantity="other">%1$s e mais %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Dar parabéns por este porta-retrato</string>
+    <string name="birthday_greet_button">Dar parabéns para %1$s</string>
+    <string name="birthday_greet_sent">Enviado ✓ — a família vai ver</string>
+    <string name="birthday_detail_label">Aniversário</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">faz %d ano</item>
+        <item quantity="many">faz %d anos</item>
+        <item quantity="other">faz %d anos</item>
+    </plurals>
+</resources>

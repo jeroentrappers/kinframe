@@ -19,6 +19,27 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for BirthdayStatus.
+const (
+	BirthdayStatusApproved BirthdayStatus = "approved"
+	BirthdayStatusPending  BirthdayStatus = "pending"
+	BirthdayStatusRejected BirthdayStatus = "rejected"
+)
+
+// Valid indicates whether the value is a known member of the BirthdayStatus enum.
+func (e BirthdayStatus) Valid() bool {
+	switch e {
+	case BirthdayStatusApproved:
+		return true
+	case BirthdayStatusPending:
+		return true
+	case BirthdayStatusRejected:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for CalendarColor.
 const (
 	Amber     CalendarColor = "amber"
@@ -215,6 +236,7 @@ func (e ChangePlacementRotation) Valid() bool {
 const (
 	ChangeTypeAlbumRemove     ChangeType = "album.remove"
 	ChangeTypeAlbumUpsert     ChangeType = "album.upsert"
+	ChangeTypeBirthdays       ChangeType = "birthdays"
 	ChangeTypeCalendar        ChangeType = "calendar"
 	ChangeTypeFrame           ChangeType = "frame"
 	ChangeTypeMemberRemove    ChangeType = "member.remove"
@@ -232,6 +254,8 @@ func (e ChangeType) Valid() bool {
 	case ChangeTypeAlbumRemove:
 		return true
 	case ChangeTypeAlbumUpsert:
+		return true
+	case ChangeTypeBirthdays:
 		return true
 	case ChangeTypeCalendar:
 		return true
@@ -328,6 +352,123 @@ func (e EventPhotoPlacement) Valid() bool {
 	case Background:
 		return true
 	case Top:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedDeliveryStatus.
+const (
+	FeedDeliveryStatusAwaitingApproval FeedDeliveryStatus = "awaiting_approval"
+	FeedDeliveryStatusDelivered        FeedDeliveryStatus = "delivered"
+	FeedDeliveryStatusFailed           FeedDeliveryStatus = "failed"
+	FeedDeliveryStatusPending          FeedDeliveryStatus = "pending"
+	FeedDeliveryStatusReady            FeedDeliveryStatus = "ready"
+	FeedDeliveryStatusRemoved          FeedDeliveryStatus = "removed"
+	FeedDeliveryStatusSeen             FeedDeliveryStatus = "seen"
+	FeedDeliveryStatusSuspended        FeedDeliveryStatus = "suspended"
+)
+
+// Valid indicates whether the value is a known member of the FeedDeliveryStatus enum.
+func (e FeedDeliveryStatus) Valid() bool {
+	switch e {
+	case FeedDeliveryStatusAwaitingApproval:
+		return true
+	case FeedDeliveryStatusDelivered:
+		return true
+	case FeedDeliveryStatusFailed:
+		return true
+	case FeedDeliveryStatusPending:
+		return true
+	case FeedDeliveryStatusReady:
+		return true
+	case FeedDeliveryStatusRemoved:
+		return true
+	case FeedDeliveryStatusSeen:
+		return true
+	case FeedDeliveryStatusSuspended:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedInvitePurpose.
+const (
+	Join      FeedInvitePurpose = "join"
+	Subscribe FeedInvitePurpose = "subscribe"
+)
+
+// Valid indicates whether the value is a known member of the FeedInvitePurpose enum.
+func (e FeedInvitePurpose) Valid() bool {
+	switch e {
+	case Join:
+		return true
+	case Subscribe:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedInviteResultStatus.
+const (
+	FeedInviteResultStatusAlreadyMember FeedInviteResultStatus = "already_member"
+	FeedInviteResultStatusJoined        FeedInviteResultStatus = "joined"
+	FeedInviteResultStatusPending       FeedInviteResultStatus = "pending"
+	FeedInviteResultStatusSubscribed    FeedInviteResultStatus = "subscribed"
+)
+
+// Valid indicates whether the value is a known member of the FeedInviteResultStatus enum.
+func (e FeedInviteResultStatus) Valid() bool {
+	switch e {
+	case FeedInviteResultStatusAlreadyMember:
+		return true
+	case FeedInviteResultStatusJoined:
+		return true
+	case FeedInviteResultStatusPending:
+		return true
+	case FeedInviteResultStatusSubscribed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedPostReceiptsFramesSubscriptionStatus.
+const (
+	FeedPostReceiptsFramesSubscriptionStatusActive FeedPostReceiptsFramesSubscriptionStatus = "active"
+	FeedPostReceiptsFramesSubscriptionStatusPaused FeedPostReceiptsFramesSubscriptionStatus = "paused"
+)
+
+// Valid indicates whether the value is a known member of the FeedPostReceiptsFramesSubscriptionStatus enum.
+func (e FeedPostReceiptsFramesSubscriptionStatus) Valid() bool {
+	switch e {
+	case FeedPostReceiptsFramesSubscriptionStatusActive:
+		return true
+	case FeedPostReceiptsFramesSubscriptionStatusPaused:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FeedRole.
+const (
+	FeedRoleAdmin  FeedRole = "admin"
+	FeedRoleOwner  FeedRole = "owner"
+	FeedRolePoster FeedRole = "poster"
+)
+
+// Valid indicates whether the value is a known member of the FeedRole enum.
+func (e FeedRole) Valid() bool {
+	switch e {
+	case FeedRoleAdmin:
+		return true
+	case FeedRoleOwner:
+		return true
+	case FeedRolePoster:
 		return true
 	default:
 		return false
@@ -691,6 +832,72 @@ func (e FrameSettingsVideoPlayback) Valid() bool {
 	case OnceAdvance:
 		return true
 	case OnceHold:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for GoogleImportErrorCode.
+const (
+	GoogleImportErrorCodeAuthFailed        GoogleImportErrorCode = "auth_failed"
+	GoogleImportErrorCodeConsentDenied     GoogleImportErrorCode = "consent_denied"
+	GoogleImportErrorCodeDownloadFailed    GoogleImportErrorCode = "download_failed"
+	GoogleImportErrorCodeGoogleUnavailable GoogleImportErrorCode = "google_unavailable"
+	GoogleImportErrorCodePickerExpired     GoogleImportErrorCode = "picker_expired"
+	GoogleImportErrorCodeServerError       GoogleImportErrorCode = "server_error"
+	GoogleImportErrorCodeTargetGone        GoogleImportErrorCode = "target_gone"
+)
+
+// Valid indicates whether the value is a known member of the GoogleImportErrorCode enum.
+func (e GoogleImportErrorCode) Valid() bool {
+	switch e {
+	case GoogleImportErrorCodeAuthFailed:
+		return true
+	case GoogleImportErrorCodeConsentDenied:
+		return true
+	case GoogleImportErrorCodeDownloadFailed:
+		return true
+	case GoogleImportErrorCodeGoogleUnavailable:
+		return true
+	case GoogleImportErrorCodePickerExpired:
+		return true
+	case GoogleImportErrorCodeServerError:
+		return true
+	case GoogleImportErrorCodeTargetGone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for GoogleImportStatus.
+const (
+	GoogleImportStatusCancelled GoogleImportStatus = "cancelled"
+	GoogleImportStatusDone      GoogleImportStatus = "done"
+	GoogleImportStatusExpired   GoogleImportStatus = "expired"
+	GoogleImportStatusFailed    GoogleImportStatus = "failed"
+	GoogleImportStatusImporting GoogleImportStatus = "importing"
+	GoogleImportStatusNeedsAuth GoogleImportStatus = "needs_auth"
+	GoogleImportStatusPicking   GoogleImportStatus = "picking"
+)
+
+// Valid indicates whether the value is a known member of the GoogleImportStatus enum.
+func (e GoogleImportStatus) Valid() bool {
+	switch e {
+	case GoogleImportStatusCancelled:
+		return true
+	case GoogleImportStatusDone:
+		return true
+	case GoogleImportStatusExpired:
+		return true
+	case GoogleImportStatusFailed:
+		return true
+	case GoogleImportStatusImporting:
+		return true
+	case GoogleImportStatusNeedsAuth:
+		return true
+	case GoogleImportStatusPicking:
 		return true
 	default:
 		return false
@@ -1075,6 +1282,213 @@ func (e NowShowingType) Valid() bool {
 	}
 }
 
+// Defines values for PhotoService.
+const (
+	GooglePhotos PhotoService = "google_photos"
+	Icloud       PhotoService = "icloud"
+	Immich       PhotoService = "immich"
+)
+
+// Valid indicates whether the value is a known member of the PhotoService enum.
+func (e PhotoService) Valid() bool {
+	switch e {
+	case GooglePhotos:
+		return true
+	case Icloud:
+		return true
+	case Immich:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceDeletePolicy.
+const (
+	PhotoSourceDeletePolicyKeep   PhotoSourceDeletePolicy = "keep"
+	PhotoSourceDeletePolicyMirror PhotoSourceDeletePolicy = "mirror"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceDeletePolicy enum.
+func (e PhotoSourceDeletePolicy) Valid() bool {
+	switch e {
+	case PhotoSourceDeletePolicyKeep:
+		return true
+	case PhotoSourceDeletePolicyMirror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceErrorCode.
+const (
+	PhotoSourceErrorCodeAlbumNotFound         PhotoSourceErrorCode = "album_not_found"
+	PhotoSourceErrorCodeAuthFailed            PhotoSourceErrorCode = "auth_failed"
+	PhotoSourceErrorCodeCredentialsUnreadable PhotoSourceErrorCode = "credentials_unreadable"
+	PhotoSourceErrorCodeFormatChanged         PhotoSourceErrorCode = "format_changed"
+	PhotoSourceErrorCodeLinkExpired           PhotoSourceErrorCode = "link_expired"
+	PhotoSourceErrorCodeLinkNotFound          PhotoSourceErrorCode = "link_not_found"
+	PhotoSourceErrorCodeMassRemoval           PhotoSourceErrorCode = "mass_removal"
+	PhotoSourceErrorCodeOwnerLostAccess       PhotoSourceErrorCode = "owner_lost_access"
+	PhotoSourceErrorCodePasswordRequired      PhotoSourceErrorCode = "password_required"
+	PhotoSourceErrorCodePermissionMissing     PhotoSourceErrorCode = "permission_missing"
+	PhotoSourceErrorCodePrivateAddressBlocked PhotoSourceErrorCode = "private_address_blocked"
+	PhotoSourceErrorCodeRateLimitedUpstream   PhotoSourceErrorCode = "rate_limited_upstream"
+	PhotoSourceErrorCodeTlsError              PhotoSourceErrorCode = "tls_error"
+	PhotoSourceErrorCodeTooLarge              PhotoSourceErrorCode = "too_large"
+	PhotoSourceErrorCodeUnreachable           PhotoSourceErrorCode = "unreachable"
+	PhotoSourceErrorCodeUnsupportedLink       PhotoSourceErrorCode = "unsupported_link"
+	PhotoSourceErrorCodeUpstreamError         PhotoSourceErrorCode = "upstream_error"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceErrorCode enum.
+func (e PhotoSourceErrorCode) Valid() bool {
+	switch e {
+	case PhotoSourceErrorCodeAlbumNotFound:
+		return true
+	case PhotoSourceErrorCodeAuthFailed:
+		return true
+	case PhotoSourceErrorCodeCredentialsUnreadable:
+		return true
+	case PhotoSourceErrorCodeFormatChanged:
+		return true
+	case PhotoSourceErrorCodeLinkExpired:
+		return true
+	case PhotoSourceErrorCodeLinkNotFound:
+		return true
+	case PhotoSourceErrorCodeMassRemoval:
+		return true
+	case PhotoSourceErrorCodeOwnerLostAccess:
+		return true
+	case PhotoSourceErrorCodePasswordRequired:
+		return true
+	case PhotoSourceErrorCodePermissionMissing:
+		return true
+	case PhotoSourceErrorCodePrivateAddressBlocked:
+		return true
+	case PhotoSourceErrorCodeRateLimitedUpstream:
+		return true
+	case PhotoSourceErrorCodeTlsError:
+		return true
+	case PhotoSourceErrorCodeTooLarge:
+		return true
+	case PhotoSourceErrorCodeUnreachable:
+		return true
+	case PhotoSourceErrorCodeUnsupportedLink:
+		return true
+	case PhotoSourceErrorCodeUpstreamError:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceHistory.
+const (
+	PhotoSourceHistoryAll   PhotoSourceHistory = "all"
+	PhotoSourceHistoryLastN PhotoSourceHistory = "last_n"
+	PhotoSourceHistoryNone  PhotoSourceHistory = "none"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceHistory enum.
+func (e PhotoSourceHistory) Valid() bool {
+	switch e {
+	case PhotoSourceHistoryAll:
+		return true
+	case PhotoSourceHistoryLastN:
+		return true
+	case PhotoSourceHistoryNone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceProvider.
+const (
+	IcloudLink PhotoSourceProvider = "icloud_link"
+	ImmichApi  PhotoSourceProvider = "immich_api"
+	ImmichLink PhotoSourceProvider = "immich_link"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceProvider enum.
+func (e PhotoSourceProvider) Valid() bool {
+	switch e {
+	case IcloudLink:
+		return true
+	case ImmichApi:
+		return true
+	case ImmichLink:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceStatus.
+const (
+	PhotoSourceStatusActive         PhotoSourceStatus = "active"
+	PhotoSourceStatusError          PhotoSourceStatus = "error"
+	PhotoSourceStatusNeedsAttention PhotoSourceStatus = "needs_attention"
+	PhotoSourceStatusPaused         PhotoSourceStatus = "paused"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceStatus enum.
+func (e PhotoSourceStatus) Valid() bool {
+	switch e {
+	case PhotoSourceStatusActive:
+		return true
+	case PhotoSourceStatusError:
+		return true
+	case PhotoSourceStatusNeedsAttention:
+		return true
+	case PhotoSourceStatusPaused:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceTargetKind.
+const (
+	PhotoSourceTargetKindAlbum PhotoSourceTargetKind = "album"
+	PhotoSourceTargetKindFeed  PhotoSourceTargetKind = "feed"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceTargetKind enum.
+func (e PhotoSourceTargetKind) Valid() bool {
+	switch e {
+	case PhotoSourceTargetKindAlbum:
+		return true
+	case PhotoSourceTargetKindFeed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PhotoSourceWarning.
+const (
+	DownloadsDisabled PhotoSourceWarning = "downloads_disabled"
+	ItemLimitReached  PhotoSourceWarning = "item_limit_reached"
+	MetadataHidden    PhotoSourceWarning = "metadata_hidden"
+)
+
+// Valid indicates whether the value is a known member of the PhotoSourceWarning enum.
+func (e PhotoSourceWarning) Valid() bool {
+	switch e {
+	case DownloadsDisabled:
+		return true
+	case ItemLimitReached:
+		return true
+	case MetadataHidden:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PinHashAlg.
 const (
 	Pbkdf2Sha256 PinHashAlg = "pbkdf2-sha256"
@@ -1108,6 +1522,30 @@ func (e PlacementRotation) Valid() bool {
 	case PlacementRotationN270:
 		return true
 	case PlacementRotationN90:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PlacementOrigin.
+const (
+	PlacementOriginFeed   PlacementOrigin = "feed"
+	PlacementOriginImport PlacementOrigin = "import"
+	PlacementOriginSend   PlacementOrigin = "send"
+	PlacementOriginShare  PlacementOrigin = "share"
+)
+
+// Valid indicates whether the value is a known member of the PlacementOrigin enum.
+func (e PlacementOrigin) Valid() bool {
+	switch e {
+	case PlacementOriginFeed:
+		return true
+	case PlacementOriginImport:
+		return true
+	case PlacementOriginSend:
+		return true
+	case PlacementOriginShare:
 		return true
 	default:
 		return false
@@ -1187,23 +1625,29 @@ func (e PluginInstanceVisibility) Valid() bool {
 const (
 	ProblemCodeAlreadyDecided      ProblemCode = "already_decided"
 	ProblemCodeAlreadyMember       ProblemCode = "already_member"
+	ProblemCodeAlreadySubscribed   ProblemCode = "already_subscribed"
 	ProblemCodeAppUpdateRequired   ProblemCode = "app_update_required"
 	ProblemCodeCodeExpired         ProblemCode = "code_expired"
 	ProblemCodeCodeInvalid         ProblemCode = "code_invalid"
 	ProblemCodeCommandTimeout      ProblemCode = "command_timeout"
 	ProblemCodeCorruptMedia        ProblemCode = "corrupt_media"
 	ProblemCodeDeviceRevoked       ProblemCode = "device_revoked"
+	ProblemCodeDuplicateBirthday   ProblemCode = "duplicate_birthday"
+	ProblemCodeDuplicateSource     ProblemCode = "duplicate_source"
 	ProblemCodeFeatureDisabled     ProblemCode = "feature_disabled"
 	ProblemCodeForbidden           ProblemCode = "forbidden"
 	ProblemCodeFrameOffline        ProblemCode = "frame_offline"
+	ProblemCodeInvalidTransition   ProblemCode = "invalid_transition"
 	ProblemCodeInviteExpired       ProblemCode = "invite_expired"
 	ProblemCodeInviteInvalid       ProblemCode = "invite_invalid"
+	ProblemCodeLimitReached        ProblemCode = "limit_reached"
 	ProblemCodeLinkExpired         ProblemCode = "link_expired"
 	ProblemCodeMissingPermission   ProblemCode = "missing_permission"
 	ProblemCodeNotFound            ProblemCode = "not_found"
 	ProblemCodeOwnerCannotLeave    ProblemCode = "owner_cannot_leave"
 	ProblemCodeRateLimited         ProblemCode = "rate_limited"
 	ProblemCodeServerError         ProblemCode = "server_error"
+	ProblemCodeSourceTestFailed    ProblemCode = "source_test_failed"
 	ProblemCodeTokenExpired        ProblemCode = "token_expired"
 	ProblemCodeTooManyItems        ProblemCode = "too_many_items"
 	ProblemCodeUnauthorized        ProblemCode = "unauthorized"
@@ -1223,6 +1667,8 @@ func (e ProblemCode) Valid() bool {
 		return true
 	case ProblemCodeAlreadyMember:
 		return true
+	case ProblemCodeAlreadySubscribed:
+		return true
 	case ProblemCodeAppUpdateRequired:
 		return true
 	case ProblemCodeCodeExpired:
@@ -1235,15 +1681,23 @@ func (e ProblemCode) Valid() bool {
 		return true
 	case ProblemCodeDeviceRevoked:
 		return true
+	case ProblemCodeDuplicateBirthday:
+		return true
+	case ProblemCodeDuplicateSource:
+		return true
 	case ProblemCodeFeatureDisabled:
 		return true
 	case ProblemCodeForbidden:
 		return true
 	case ProblemCodeFrameOffline:
 		return true
+	case ProblemCodeInvalidTransition:
+		return true
 	case ProblemCodeInviteExpired:
 		return true
 	case ProblemCodeInviteInvalid:
+		return true
+	case ProblemCodeLimitReached:
 		return true
 	case ProblemCodeLinkExpired:
 		return true
@@ -1256,6 +1710,8 @@ func (e ProblemCode) Valid() bool {
 	case ProblemCodeRateLimited:
 		return true
 	case ProblemCodeServerError:
+		return true
+	case ProblemCodeSourceTestFailed:
 		return true
 	case ProblemCodeTokenExpired:
 		return true
@@ -1458,22 +1914,22 @@ func (e ShareResultSkippedReason) Valid() bool {
 
 // Defines values for ShopReservationStatus.
 const (
-	Cancelled ShopReservationStatus = "cancelled"
-	Confirmed ShopReservationStatus = "confirmed"
-	Contacted ShopReservationStatus = "contacted"
-	New       ShopReservationStatus = "new"
+	ShopReservationStatusCancelled ShopReservationStatus = "cancelled"
+	ShopReservationStatusConfirmed ShopReservationStatus = "confirmed"
+	ShopReservationStatusContacted ShopReservationStatus = "contacted"
+	ShopReservationStatusNew       ShopReservationStatus = "new"
 )
 
 // Valid indicates whether the value is a known member of the ShopReservationStatus enum.
 func (e ShopReservationStatus) Valid() bool {
 	switch e {
-	case Cancelled:
+	case ShopReservationStatusCancelled:
 		return true
-	case Confirmed:
+	case ShopReservationStatusConfirmed:
 		return true
-	case Contacted:
+	case ShopReservationStatusContacted:
 		return true
-	case New:
+	case ShopReservationStatusNew:
 		return true
 	default:
 		return false
@@ -1525,6 +1981,102 @@ func (e SleepScheduleMode) Valid() bool {
 	case SleepScheduleModeDim:
 		return true
 	case SleepScheduleModeOff:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SubscriptionBackfillState.
+const (
+	SubscriptionBackfillStateIdle    SubscriptionBackfillState = "idle"
+	SubscriptionBackfillStateQueued  SubscriptionBackfillState = "queued"
+	SubscriptionBackfillStateRunning SubscriptionBackfillState = "running"
+)
+
+// Valid indicates whether the value is a known member of the SubscriptionBackfillState enum.
+func (e SubscriptionBackfillState) Valid() bool {
+	switch e {
+	case SubscriptionBackfillStateIdle:
+		return true
+	case SubscriptionBackfillStateQueued:
+		return true
+	case SubscriptionBackfillStateRunning:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SubscriptionRemovedReason.
+const (
+	SubscriptionRemovedReasonFeedDeleted   SubscriptionRemovedReason = "feed_deleted"
+	SubscriptionRemovedReasonFrameRemoved  SubscriptionRemovedReason = "frame_removed"
+	SubscriptionRemovedReasonRemovedByFeed SubscriptionRemovedReason = "removed_by_feed"
+	SubscriptionRemovedReasonUnsubscribed  SubscriptionRemovedReason = "unsubscribed"
+	SubscriptionRemovedReasonWithdrawn     SubscriptionRemovedReason = "withdrawn"
+)
+
+// Valid indicates whether the value is a known member of the SubscriptionRemovedReason enum.
+func (e SubscriptionRemovedReason) Valid() bool {
+	switch e {
+	case SubscriptionRemovedReasonFeedDeleted:
+		return true
+	case SubscriptionRemovedReasonFrameRemoved:
+		return true
+	case SubscriptionRemovedReasonRemovedByFeed:
+		return true
+	case SubscriptionRemovedReasonUnsubscribed:
+		return true
+	case SubscriptionRemovedReasonWithdrawn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SubscriptionHistory.
+const (
+	SubscriptionHistoryAll   SubscriptionHistory = "all"
+	SubscriptionHistoryLastN SubscriptionHistory = "last_n"
+	SubscriptionHistoryNone  SubscriptionHistory = "none"
+)
+
+// Valid indicates whether the value is a known member of the SubscriptionHistory enum.
+func (e SubscriptionHistory) Valid() bool {
+	switch e {
+	case SubscriptionHistoryAll:
+		return true
+	case SubscriptionHistoryLastN:
+		return true
+	case SubscriptionHistoryNone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SubscriptionStatus.
+const (
+	SubscriptionStatusActive   SubscriptionStatus = "active"
+	SubscriptionStatusPaused   SubscriptionStatus = "paused"
+	SubscriptionStatusPending  SubscriptionStatus = "pending"
+	SubscriptionStatusRejected SubscriptionStatus = "rejected"
+	SubscriptionStatusRemoved  SubscriptionStatus = "removed"
+)
+
+// Valid indicates whether the value is a known member of the SubscriptionStatus enum.
+func (e SubscriptionStatus) Valid() bool {
+	switch e {
+	case SubscriptionStatusActive:
+		return true
+	case SubscriptionStatusPaused:
+		return true
+	case SubscriptionStatusPending:
+		return true
+	case SubscriptionStatusRejected:
+		return true
+	case SubscriptionStatusRemoved:
 		return true
 	default:
 		return false
@@ -1726,6 +2278,42 @@ func (e DevicePatchPlacementJSONBodyRotation) Valid() bool {
 	}
 }
 
+// Defines values for DecideFeedJoinRequestParamsDecision.
+const (
+	DecideFeedJoinRequestParamsDecisionApprove DecideFeedJoinRequestParamsDecision = "approve"
+	DecideFeedJoinRequestParamsDecisionDeny    DecideFeedJoinRequestParamsDecision = "deny"
+)
+
+// Valid indicates whether the value is a known member of the DecideFeedJoinRequestParamsDecision enum.
+func (e DecideFeedJoinRequestParamsDecision) Valid() bool {
+	switch e {
+	case DecideFeedJoinRequestParamsDecisionApprove:
+		return true
+	case DecideFeedJoinRequestParamsDecisionDeny:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for UpdateFeedMemberJSONBodyRole.
+const (
+	UpdateFeedMemberJSONBodyRoleAdmin  UpdateFeedMemberJSONBodyRole = "admin"
+	UpdateFeedMemberJSONBodyRolePoster UpdateFeedMemberJSONBodyRole = "poster"
+)
+
+// Valid indicates whether the value is a known member of the UpdateFeedMemberJSONBodyRole enum.
+func (e UpdateFeedMemberJSONBodyRole) Valid() bool {
+	switch e {
+	case UpdateFeedMemberJSONBodyRoleAdmin:
+		return true
+	case UpdateFeedMemberJSONBodyRolePoster:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for DecideJoinRequestParamsDecision.
 const (
 	DecideJoinRequestParamsDecisionApprove DecideJoinRequestParamsDecision = "approve"
@@ -1873,9 +2461,15 @@ type Album struct {
 	CoverPlacementId *Id `json:"cover_placement_id,omitempty"`
 
 	// Id UUIDv7
-	Id             Id     `json:"id"`
-	Name           string `json:"name"`
-	PlacementCount int    `json:"placement_count"`
+	Id   Id     `json:"id"`
+	Name string `json:"name"`
+
+	// OnlyInAlbumMode Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
+	OnlyInAlbumMode *bool `json:"only_in_album_mode,omitempty"`
+
+	// PhotoSourceCount Photo sources syncing into this album (docs/spec/photo-sources.md); details for album managers in `listAlbumPhotoSources`.
+	PhotoSourceCount *int `json:"photo_source_count,omitempty"`
+	PlacementCount   int  `json:"placement_count"`
 
 	// PlacementIds Ordered.
 	PlacementIds *[]Id `json:"placement_ids,omitempty"`
@@ -1893,7 +2487,10 @@ type AlbumWrite struct {
 	// CoverPlacementId UUIDv7
 	CoverPlacementId *Id     `json:"cover_placement_id,omitempty"`
 	Name             *string `json:"name,omitempty"`
-	PlacementIds     *[]Id   `json:"placement_ids,omitempty"`
+
+	// OnlyInAlbumMode Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
+	OnlyInAlbumMode *bool `json:"only_in_album_mode,omitempty"`
+	PlacementIds    *[]Id `json:"placement_ids,omitempty"`
 
 	// Schedule Play this album automatically between dates each year (e.g. December).
 	Schedule *struct {
@@ -1901,6 +2498,109 @@ type AlbumWrite struct {
 		ToMonthDay   *string `json:"to_month_day,omitempty"`
 	} `json:"schedule,omitempty"`
 }
+
+// BirthdayPerson A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
+// a feed member.
+type BirthdayPerson struct {
+	// BirthYear Null when unknown or when the caller may not see it: shown to owner/admins, whoever added the entry and
+	// the linked member; to other members only with `show_age`.
+	//
+	//
+	// Example: 1946
+	BirthYear *int `json:"birth_year,omitempty"`
+
+	// CanDecide The caller may approve or reject it (pending, owner/admin).
+	CanDecide *bool `json:"can_decide,omitempty"`
+
+	// CanEdit The caller may change this entry (some fields only, for the linked member).
+	CanEdit   *bool     `json:"can_edit,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+
+	// CreatedById Account id of whoever added or suggested it ("added by me"); null when that account is gone.
+	CreatedById *Id `json:"created_by_id,omitempty"`
+
+	// CreatedByName Null when that account is gone.
+	CreatedByName *string `json:"created_by_name,omitempty"`
+
+	// Day Example: 12
+	Day       int        `json:"day"`
+	DecidedAt *time.Time `json:"decided_at,omitempty"`
+
+	// DecidedByName Suggestions only; owner/admins and the suggester.
+	DecidedByName *string `json:"decided_by_name,omitempty"`
+
+	// DisplayName Example: Oma
+	DisplayName string `json:"display_name"`
+
+	// FeedId UUIDv7
+	FeedId Id `json:"feed_id"`
+
+	// GreetingsToday Frames that sent a greeting for today's occurrence (0 on other days).
+	GreetingsToday *int `json:"greetings_today,omitempty"`
+
+	// HasOwnPhoto `photo_url` is an uploaded photo, not the linked member's avatar.
+	HasOwnPhoto *bool `json:"has_own_photo,omitempty"`
+
+	// Id UUIDv7
+	Id               Id      `json:"id"`
+	LinkedMemberName *string `json:"linked_member_name,omitempty"`
+
+	// Month Example: 3
+	Month int `json:"month"`
+
+	// NextBirthday The next occurrence on or after today in the caller's time zone (`User.timezone`); 29 February becomes 28 February in non-leap years.
+	NextBirthday *openapi_types.Date `json:"next_birthday,omitempty"`
+
+	// PhotoUrl 256x256 WebP, public at an unguessable URL like avatars. The uploaded photo, else the linked member's avatar.
+	PhotoUrl *string `json:"photo_url,omitempty"`
+
+	// ShowAge Frames and notifications show the age (needs `birth_year`).
+	ShowAge bool `json:"show_age"`
+
+	// Status `pending`: a poster's suggestion waiting for the feed's owner or an admin. `approved`: on the list and on
+	// frames. `rejected`: declined; listed for the suggester and admins for 30 days.
+	Status BirthdayStatus `json:"status"`
+
+	// Suggested Created as a poster's suggestion (also after approval).
+	Suggested *bool `json:"suggested,omitempty"`
+
+	// Turns Age on `next_birthday`, when `birth_year` is visible to the caller.
+	Turns     *int       `json:"turns,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// UserId The linked feed member; cleared when they leave the feed or delete their account.
+	UserId *Id `json:"user_id,omitempty"`
+}
+
+// BirthdayPersonCreate `day`/`month` must form a real date (29 February is allowed, and with `birth_year` only in leap years).
+// `birth_year` from 1900 to the current year.
+type BirthdayPersonCreate struct {
+	BirthYear   *int   `json:"birth_year,omitempty"`
+	Day         int    `json:"day"`
+	DisplayName string `json:"display_name"`
+	Month       int    `json:"month"`
+	ShowAge     *bool  `json:"show_age,omitempty"`
+
+	// UserId Link to a member of this feed who has no entry yet ("Add my birthday" sends the caller's id).
+	UserId *Id `json:"user_id,omitempty"`
+}
+
+// BirthdayPersonUpdate defines model for BirthdayPersonUpdate.
+type BirthdayPersonUpdate struct {
+	// BirthYear null clears the year.
+	BirthYear   *int    `json:"birth_year,omitempty"`
+	Day         *int    `json:"day,omitempty"`
+	DisplayName *string `json:"display_name,omitempty"`
+	Month       *int    `json:"month,omitempty"`
+	ShowAge     *bool   `json:"show_age,omitempty"`
+
+	// UserId null unlinks.
+	UserId *Id `json:"user_id,omitempty"`
+}
+
+// BirthdayStatus `pending`: a poster's suggestion waiting for the feed's owner or an admin. `approved`: on the list and on
+// frames. `rejected`: declined; listed for the suggester and admins for 30 days.
+type BirthdayStatus string
 
 // Calendar Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
 // list, deduplicated across sources by UID and start, sorted by start.
@@ -2029,7 +2729,7 @@ type CalendarSourceCreate struct {
 	Enabled *bool                    `json:"enabled,omitempty"`
 	Kind    CalendarSourceCreateKind `json:"kind"`
 
-	// Name Defaults to the calendar's own name
+	// Name Defaults to the calendar's own name, else the host.
 	Name *string `json:"name,omitempty"`
 
 	// Password CalDAV only; use an app-specific password.
@@ -2085,12 +2785,12 @@ type CalendarSyncStatus string
 
 // CalendarTestResult defines model for CalendarTestResult.
 type CalendarTestResult struct {
-	// CalendarName The calendar's own name
+	// CalendarName The calendar's own name, if it has one.
 	CalendarName *string `json:"calendar_name,omitempty"`
 
 	// Calendars CalDAV only. Calendars on the account that hold events.
 	Calendars *[]struct {
-		// Color The server's colour (hex)
+		// Color The server's colour (hex), as a hint.
 		Color *string `json:"color,omitempty"`
 		Name  string  `json:"name"`
 		Url   string  `json:"url"`
@@ -2149,9 +2849,12 @@ type CatalogPlugin struct {
 
 // Change defines model for Change.
 type Change struct {
-	Album    *Album    `json:"album,omitempty"`
-	Calendar *Calendar `json:"calendar,omitempty"`
-	Frame    *struct {
+	Album *Album `json:"album,omitempty"`
+
+	// Birthdays The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it.
+	Birthdays *FrameBirthdays `json:"birthdays,omitempty"`
+	Calendar  *Calendar       `json:"calendar,omitempty"`
+	Frame     *struct {
 		Location  *string `json:"location,omitempty"`
 		Name      *string `json:"name,omitempty"`
 		OwnerName *string `json:"owner_name,omitempty"`
@@ -2168,8 +2871,17 @@ type Change struct {
 		UserId *Id `json:"user_id,omitempty"`
 	} `json:"member,omitempty"`
 	Placement *struct {
-		AlbumIds      *[]Id       `json:"album_ids,omitempty"`
-		DeliveredAt   *time.Time  `json:"delivered_at,omitempty"`
+		AlbumIds *[]Id `json:"album_ids,omitempty"`
+
+		// Backfill Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
+		// import). Frames don't treat it as new: no "N new" card, no screen wake. `received_at` is then the post time
+		// (for a photo source's first import: when the photo was added upstream, else its capture time).
+		Backfill    *bool      `json:"backfill,omitempty"`
+		DeliveredAt *time.Time `json:"delivered_at,omitempty"`
+
+		// FeedIds Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
+		// Used for feed mode (`slideshow.feed_id`), like `album_ids` for album mode.
+		FeedIds       *[]Id       `json:"feed_ids,omitempty"`
 		FitOverride   *Fit        `json:"fit_override,omitempty"`
 		FocalOverride *FocalPoint `json:"focal_override,omitempty"`
 
@@ -2209,6 +2921,17 @@ type Change struct {
 			Url    *string `json:"url,omitempty"`
 			Width  *int    `json:"width,omitempty"`
 		} `json:"motion,omitempty"`
+
+		// Origin How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
+		// frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
+		// `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
+		Origin *PlacementOrigin `json:"origin,omitempty"`
+
+		// OriginFeedId `origin: feed`: the feed that placed it.
+		OriginFeedId *Id `json:"origin_feed_id,omitempty"`
+
+		// OriginFeedName Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
+		OriginFeedName    *string    `json:"origin_feed_name,omitempty"`
 		PendingModeration *bool      `json:"pending_moderation,omitempty"`
 		Reaction          *Reaction  `json:"reaction,omitempty"`
 		ReceivedAt        *time.Time `json:"received_at,omitempty"`
@@ -2366,13 +3089,32 @@ type Discovery struct {
 		WebClientId     string  `json:"web_client_id"`
 	} `json:"auth"`
 
+	// Birthdays True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
+	Birthdays *bool `json:"birthdays,omitempty"`
+
 	// Calendar True when the server syncs calendars for frames (ICS/webcal and CalDAV).
 	Calendar *bool `json:"calendar,omitempty"`
 
 	// DevAuth True only on development servers running dev auth mode (POST /dev/token). Never true in production.
-	DevAuth *bool  `json:"dev_auth,omitempty"`
-	Limits  Limits `json:"limits"`
-	Name    string `json:"name"`
+	DevAuth *bool `json:"dev_auth,omitempty"`
+
+	// Feeds True when the server supports feeds and subscriptions (docs/spec/feeds.md).
+	Feeds *bool `json:"feeds,omitempty"`
+
+	// GooglePhotosImport True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+	GooglePhotosImport *bool  `json:"google_photos_import,omitempty"`
+	Limits             Limits `json:"limits"`
+	Name               string `json:"name"`
+
+	// PhotoSourceProviders The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
+	PhotoSourceProviders *[]PhotoSourceProvider `json:"photo_source_providers,omitempty"`
+
+	// PhotoSources True when albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md).
+	PhotoSources *bool `json:"photo_sources,omitempty"`
+
+	// PhotoSourcesPrivateNetworks True when sources may reach private network addresses (a home-network Immich such as
+	// `http://192.168.1.10:2283`). False: the connect sheet asks for a public address (docs/spec/photo-sources.md §12.3).
+	PhotoSourcesPrivateNetworks *bool `json:"photo_sources_private_networks,omitempty"`
 
 	// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
 	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
@@ -2442,6 +3184,362 @@ type EventInvitationCreate struct {
 // EventPhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
 type EventPhotoPlacement string
 
+// Feed defines model for Feed.
+type Feed struct {
+	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
+
+	// BirthdayCount Approved birthday people.
+	BirthdayCount *int `json:"birthday_count,omitempty"`
+
+	// BirthdayNotifications The caller's own preference (`updateFeedPreferences`): morning and greeting notifications for this feed's birthdays.
+	BirthdayNotifications *bool `json:"birthday_notifications,omitempty"`
+
+	// CoverItemId An item of a live post of this feed.
+	CoverItemId *Id `json:"cover_item_id,omitempty"`
+
+	// CoverUrl Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
+	CoverUrl  *string    `json:"cover_url,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Id UUIDv7
+	Id                     Id         `json:"id"`
+	InviteRequiresApproval *bool      `json:"invite_requires_approval,omitempty"`
+	LastPostAt             *time.Time `json:"last_post_at,omitempty"`
+	MemberCount            int        `json:"member_count"`
+	MembersSeeReactions    *bool      `json:"members_see_reactions,omitempty"`
+	Name                   string     `json:"name"`
+	OwnerName              *string    `json:"owner_name,omitempty"`
+
+	// PendingBirthdayCount Suggestions waiting; owner and admins only (0 for posters).
+	PendingBirthdayCount *int `json:"pending_birthday_count,omitempty"`
+
+	// PendingJoinRequestCount Owner and admins only (0 for posters).
+	PendingJoinRequestCount *int `json:"pending_join_request_count,omitempty"`
+
+	// PendingSubscriptionCount Owner and admins only (0 for posters).
+	PendingSubscriptionCount *int `json:"pending_subscription_count,omitempty"`
+	PostCount                *int `json:"post_count,omitempty"`
+
+	// PostersCanAddBirthdays Posters add birthday people directly instead of suggesting them.
+	PostersCanAddBirthdays *bool `json:"posters_can_add_birthdays,omitempty"`
+
+	// PostersCanInvite Posters may create `join` invites and revoke their own.
+	PostersCanInvite *bool    `json:"posters_can_invite,omitempty"`
+	Role             FeedRole `json:"role"`
+
+	// SubscriptionCount Active and paused subscriptions.
+	SubscriptionCount int `json:"subscription_count"`
+}
+
+// FeedBirthdayGreeting A frame said happy birthday to a person of this feed on their day. One per person, frame and date; recorded
+// in every feed that lists the person. Also the payload of the `birthday.greeting` websocket event.
+type FeedBirthdayGreeting struct {
+	// BirthdayId UUIDv7
+	BirthdayId Id `json:"birthday_id"`
+
+	// BirthdayName Example: Oma
+	BirthdayName string    `json:"birthday_name"`
+	CreatedAt    time.Time `json:"created_at"`
+
+	// Date The occurrence date (the frame's local date).
+	Date openapi_types.Date `json:"date"`
+
+	// FeedId UUIDv7
+	FeedId Id `json:"feed_id"`
+
+	// FrameId UUIDv7
+	FrameId       Id      `json:"frame_id"`
+	FrameLocation *string `json:"frame_location,omitempty"`
+
+	// FrameName The frame's name when it sent the greeting.
+	//
+	// Example: Opa's frame
+	FrameName string `json:"frame_name"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+}
+
+// FeedCreate defines model for FeedCreate.
+type FeedCreate struct {
+	AutoApproveSubscriptions *bool  `json:"auto_approve_subscriptions,omitempty"`
+	InviteRequiresApproval   *bool  `json:"invite_requires_approval,omitempty"`
+	MembersSeeReactions      *bool  `json:"members_see_reactions,omitempty"`
+	Name                     string `json:"name"`
+	PostersCanAddBirthdays   *bool  `json:"posters_can_add_birthdays,omitempty"`
+	PostersCanInvite         *bool  `json:"posters_can_invite,omitempty"`
+}
+
+// FeedDeliveryStatus One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
+// `suspended` (subscription paused) or `removed` (rejected or deleted on that frame).
+type FeedDeliveryStatus string
+
+// FeedInvite defines model for FeedInvite.
+type FeedInvite struct {
+	// Code Short code for "Enter a code", shown as `KF7Q-M2XA`.
+	//
+	// Example: KF7QM2XA
+	Code          string    `json:"code"`
+	CreatedByName *string   `json:"created_by_name,omitempty"`
+	ExpiresAt     time.Time `json:"expires_at"`
+
+	// Id UUIDv7
+	Id      Id      `json:"id"`
+	MaxUses *int    `json:"max_uses,omitempty"`
+	Note    *string `json:"note,omitempty"`
+
+	// Purpose `join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.
+	Purpose FeedInvitePurpose `json:"purpose"`
+	Token   string            `json:"token"`
+
+	// Url https://<web>/fi/<token>; also shown as QR.
+	Url  string `json:"url"`
+	Uses *int   `json:"uses,omitempty"`
+}
+
+// FeedInviteAccept defines model for FeedInviteAccept.
+type FeedInviteAccept struct {
+	// Birthdays Show the feed's birthday people on the frames.
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// FrameIds `subscribe` invites (required there): the frames to subscribe.
+	FrameIds *[]Id `json:"frame_ids,omitempty"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History *SubscriptionHistory `json:"history,omitempty"`
+
+	// HistoryCount Required with `history: last_n`.
+	HistoryCount *int `json:"history_count,omitempty"`
+}
+
+// FeedInviteCreate defines model for FeedInviteCreate.
+type FeedInviteCreate struct {
+	ExpiresInHours *int `json:"expires_in_hours,omitempty"`
+
+	// MaxUses null = unlimited
+	MaxUses *int `json:"max_uses,omitempty"`
+
+	// Note Shown to admins when approving a join request.
+	Note *string `json:"note,omitempty"`
+
+	// Purpose `join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.
+	Purpose FeedInvitePurpose `json:"purpose"`
+}
+
+// FeedInvitePreview defines model for FeedInvitePreview.
+type FeedInvitePreview struct {
+	AlreadyMember *bool   `json:"already_member,omitempty"`
+	CoverUrl      *string `json:"cover_url,omitempty"`
+	FeedName      string  `json:"feed_name"`
+
+	// Frames `subscribe` only: the frames the caller manages (owner, admin or `change_settings`), and whether each already
+	// has a live subscription to this feed.
+	Frames *[]struct {
+		// FrameId UUIDv7
+		FrameId            Id                  `json:"frame_id"`
+		FrameName          string              `json:"frame_name"`
+		SubscriptionStatus *SubscriptionStatus `json:"subscription_status,omitempty"`
+	} `json:"frames,omitempty"`
+	InvitedByName string  `json:"invited_by_name"`
+	MemberCount   *int    `json:"member_count,omitempty"`
+	OwnerName     *string `json:"owner_name,omitempty"`
+
+	// Purpose `join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.
+	Purpose FeedInvitePurpose `json:"purpose"`
+
+	// RequiresApproval `join` only: the request waits for an admin.
+	RequiresApproval bool `json:"requires_approval"`
+
+	// Token For `acceptFeedInvite` (also after a code lookup).
+	Token string `json:"token"`
+}
+
+// FeedInvitePurpose `join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.
+type FeedInvitePurpose string
+
+// FeedInviteResult defines model for FeedInviteResult.
+type FeedInviteResult struct {
+	Feed FeedSummary `json:"feed"`
+
+	// JoinRequestId UUIDv7
+	JoinRequestId *Id                    `json:"join_request_id,omitempty"`
+	Status        FeedInviteResultStatus `json:"status"`
+
+	// Subscriptions `subscribed`: one per requested frame (existing live subscriptions are returned as they are).
+	Subscriptions *[]Subscription `json:"subscriptions,omitempty"`
+}
+
+// FeedInviteResultStatus defines model for FeedInviteResult.Status.
+type FeedInviteResultStatus string
+
+// FeedMember defines model for FeedMember.
+type FeedMember struct {
+	AvatarUrl    *string    `json:"avatar_url,omitempty"`
+	DisplayName  string     `json:"display_name"`
+	JoinedAt     *time.Time `json:"joined_at,omitempty"`
+	LastPostedAt *time.Time `json:"last_posted_at,omitempty"`
+	Role         FeedRole   `json:"role"`
+
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
+// FeedPost defines model for FeedPost.
+type FeedPost struct {
+	CreatedAt time.Time `json:"created_at"`
+
+	// FeedId UUIDv7
+	FeedId Id `json:"feed_id"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Items Live items in send order.
+	Items  []Item `json:"items"`
+	Poster struct {
+		AvatarUrl   *string `json:"avatar_url,omitempty"`
+		DisplayName string  `json:"display_name"`
+
+		// UserId UUIDv7
+		UserId Id `json:"user_id"`
+	} `json:"poster"`
+
+	// Reactions Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+	Reactions *[]FeedReaction `json:"reactions,omitempty"`
+
+	// Receipts Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+	Receipts *FeedReceiptSummary `json:"receipts,omitempty"`
+
+	// SendId The poster's send (own posts only).
+	SendId *Id `json:"send_id,omitempty"`
+
+	// Via Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".
+	Via *ItemVia `json:"via,omitempty"`
+}
+
+// FeedPostReceipts defines model for FeedPostReceipts.
+type FeedPostReceipts struct {
+	Frames []struct {
+		// FrameId UUIDv7
+		FrameId       Id      `json:"frame_id"`
+		FrameLocation *string `json:"frame_location,omitempty"`
+		FrameName     string  `json:"frame_name"`
+		Items         []struct {
+			DeliveredAt *time.Time `json:"delivered_at,omitempty"`
+
+			// ItemId UUIDv7
+			ItemId      Id        `json:"item_id"`
+			PlacementId *Id       `json:"placement_id,omitempty"`
+			Reaction    *Reaction `json:"reaction,omitempty"`
+			Replies     *[]struct {
+				At     *time.Time   `json:"at,omitempty"`
+				Preset *ReplyPreset `json:"preset,omitempty"`
+			} `json:"replies,omitempty"`
+			SeenAt *time.Time `json:"seen_at,omitempty"`
+
+			// Status One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
+			// `suspended` (subscription paused) or `removed` (rejected or deleted on that frame).
+			Status FeedDeliveryStatus `json:"status"`
+		} `json:"items"`
+		LastSeenAt *time.Time `json:"last_seen_at,omitempty"`
+		Online     *bool      `json:"online,omitempty"`
+
+		// SubscriptionId UUIDv7
+		SubscriptionId     Id                                       `json:"subscription_id"`
+		SubscriptionStatus FeedPostReceiptsFramesSubscriptionStatus `json:"subscription_status"`
+	} `json:"frames"`
+
+	// PostId UUIDv7
+	PostId Id `json:"post_id"`
+
+	// Summary Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
+	// delivered/seen when every item of the post is. Paused frames are only in `paused`.
+	Summary FeedReceiptSummary `json:"summary"`
+}
+
+// FeedPostReceiptsFramesSubscriptionStatus defines model for FeedPostReceipts.Frames.SubscriptionStatus.
+type FeedPostReceiptsFramesSubscriptionStatus string
+
+// FeedPreferencesUpdate defines model for FeedPreferencesUpdate.
+type FeedPreferencesUpdate struct {
+	// BirthdayNotifications Morning notification and greetings for this feed's birthdays.
+	BirthdayNotifications *bool `json:"birthday_notifications,omitempty"`
+}
+
+// FeedReaction defines model for FeedReaction.
+type FeedReaction struct {
+	At *time.Time `json:"at,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId   Id     `json:"frame_id"`
+	FrameName string `json:"frame_name"`
+
+	// ItemId UUIDv7
+	ItemId Id `json:"item_id"`
+
+	// PlacementId UUIDv7
+	PlacementId Id             `json:"placement_id"`
+	Reaction    *Reaction      `json:"reaction,omitempty"`
+	Replies     *[]ReplyPreset `json:"replies,omitempty"`
+}
+
+// FeedReceiptSummary Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
+// delivered/seen when every item of the post is. Paused frames are only in `paused`.
+type FeedReceiptSummary struct {
+	AwaitingApproval *int `json:"awaiting_approval,omitempty"`
+	Delivered        int  `json:"delivered"`
+	Frames           int  `json:"frames"`
+	Paused           *int `json:"paused,omitempty"`
+
+	// Removed Frames whose moderation rejected the post or that deleted it.
+	Removed *int `json:"removed,omitempty"`
+	Seen    int  `json:"seen"`
+}
+
+// FeedRole defines model for FeedRole.
+type FeedRole string
+
+// FeedSummary defines model for FeedSummary.
+type FeedSummary struct {
+	// CoverUrl Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
+	CoverUrl  *string    `json:"cover_url,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Id UUIDv7
+	Id          Id         `json:"id"`
+	LastPostAt  *time.Time `json:"last_post_at,omitempty"`
+	MemberCount int        `json:"member_count"`
+	Name        string     `json:"name"`
+	Role        FeedRole   `json:"role"`
+
+	// SubscriptionCount Active and paused subscriptions.
+	SubscriptionCount int `json:"subscription_count"`
+}
+
+// FeedUpdate defines model for FeedUpdate.
+type FeedUpdate struct {
+	// AutoApproveSubscriptions Requests by non-admin members become active without approval.
+	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
+
+	// CoverItemId An item of a live post of this feed; null removes the cover.
+	CoverItemId *Id `json:"cover_item_id,omitempty"`
+
+	// InviteRequiresApproval Join invites need an admin's approval.
+	InviteRequiresApproval *bool `json:"invite_requires_approval,omitempty"`
+
+	// MembersSeeReactions Every member sees receipts and reactions of every post.
+	MembersSeeReactions *bool   `json:"members_see_reactions,omitempty"`
+	Name                *string `json:"name,omitempty"`
+
+	// PostersCanAddBirthdays Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
+	PostersCanAddBirthdays *bool `json:"posters_can_add_birthdays,omitempty"`
+
+	// PostersCanInvite Posters may create `join` invites (and list and revoke their own).
+	PostersCanInvite *bool `json:"posters_can_invite,omitempty"`
+}
+
 // Fit defines model for Fit.
 type Fit string
 
@@ -2478,6 +3576,37 @@ type Frame struct {
 	PlacementCount         *int        `json:"placement_count,omitempty"`
 	Role                   Role        `json:"role"`
 	Screen                 *Screen     `json:"screen,omitempty"`
+}
+
+// FrameBirthday One person on the frame, merged across the frame's birthday subscriptions on normalized name + day + month
+// (docs/spec/birthdays.md §6.5). The frame computes today, countdowns and ages in its own time zone.
+type FrameBirthday struct {
+	// BirthYear Present only when the age may be shown (`show_age` on for every merged entry that has a year, and the
+	// years agree). Absent otherwise: show no age.
+	BirthYear *int `json:"birth_year,omitempty"`
+
+	// BirthdayIds Every merged `BirthdayPerson` id.
+	BirthdayIds []Id `json:"birthday_ids"`
+	Day         int  `json:"day"`
+	FeedIds     []Id `json:"feed_ids"`
+
+	// Id The primary entry (a `BirthdayPerson` id); use it for `deviceGreetBirthday`.
+	Id    openapi_types.UUID `json:"id"`
+	Month int                `json:"month"`
+
+	// Name Example: Oma
+	Name string `json:"name"`
+
+	// PhotoUrl 256x256 WebP (public, unguessable, cacheable by URL).
+	PhotoUrl *string `json:"photo_url,omitempty"`
+}
+
+// FrameBirthdays Payload of the `birthdays` change (docs/api/README.md §5.13): the approved people of every feed the frame has
+// an `active` subscription with `birthdays: true` to, merged, sorted by month and day. Nothing in it depends on
+// today, so it is emitted only when the list changes.
+type FrameBirthdays struct {
+	GeneratedAt time.Time       `json:"generated_at"`
+	People      []FrameBirthday `json:"people"`
 }
 
 // FrameCode defines model for FrameCode.
@@ -2599,14 +3728,19 @@ type FrameSettings struct {
 		} `json:"layout,omitempty"`
 	} `json:"plugins,omitempty"`
 	Slideshow *struct {
-		// AlbumId null = all photos
+		// AlbumId null = all photos. Setting it clears `feed_id`.
 		AlbumId     *string                            `json:"album_id,omitempty"`
 		Background  *FrameSettingsSlideshowBackground  `json:"background,omitempty"`
 		CaptionDate *FrameSettingsSlideshowCaptionDate `json:"caption_date,omitempty"`
 		Collage     *bool                              `json:"collage,omitempty"`
 		CollageMax  *int                               `json:"collage_max,omitempty"`
-		Fill        *bool                              `json:"fill,omitempty"`
-		IntervalS   *int                               `json:"interval_s,omitempty"`
+
+		// FeedId Feed mode: play only placements of this subscribed feed (`Placement.feed_ids`); null = all photos.
+		// Setting it clears `album_id`. Reset to null when the subscription ends. An empty or unknown feed plays
+		// everything.
+		FeedId    *string `json:"feed_id,omitempty"`
+		Fill      *bool   `json:"fill,omitempty"`
+		IntervalS *int    `json:"interval_s,omitempty"`
 
 		// LivePhotos Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
 		// tap, `off` shows the still only.
@@ -2638,7 +3772,7 @@ type FrameSettings struct {
 		Clock           *bool `json:"clock,omitempty"`
 		Clock24h        *bool `json:"clock_24h,omitempty"`
 
-		// Countdowns Countdown widgets on the slideshow (the nearest three).
+		// Countdowns Countdown widgets on the slideshow (the nearest three): marked events and, from 7 days before, feed birthdays (docs/spec/birthdays.md §6.6). The birthday card on the day itself does not depend on it.
 		Countdowns *bool `json:"countdowns,omitempty"`
 		Date       *bool `json:"date,omitempty"`
 
@@ -2742,14 +3876,83 @@ type FrameUpdate struct {
 	VersionName string `json:"version_name"`
 }
 
+// GoogleImport defines model for GoogleImport.
+type GoogleImport struct {
+	// AuthUrl `needs_auth` only: Google's consent page, to open in a browser session (never an embedded web view).
+	AuthUrl    *string                `json:"auth_url,omitempty"`
+	CreatedAt  time.Time              `json:"created_at"`
+	ErrorCode  *GoogleImportErrorCode `json:"error_code,omitempty"`
+	FinishedAt *time.Time             `json:"finished_at,omitempty"`
+
+	// Id UUIDv7
+	Id              Id         `json:"id"`
+	PickerExpiresAt *time.Time `json:"picker_expires_at,omitempty"`
+
+	// PickerUri `picking` only: Google's picker. Web clients append `/autoclose`; on Android the Google Photos app can handle it.
+	PickerUri *string `json:"picker_uri,omitempty"`
+	Progress  struct {
+		Bytes *int `json:"bytes,omitempty"`
+
+		// Duplicates Already in the album or feed.
+		Duplicates *int `json:"duplicates,omitempty"`
+		Failed     *int `json:"failed,omitempty"`
+		Imported   int  `json:"imported"`
+		Picked     int  `json:"picked"`
+
+		// Skipped Too long, too large or unsupported.
+		Skipped *int `json:"skipped,omitempty"`
+	} `json:"progress"`
+
+	// SendIds The sends (and thus posts) the import made; unsend them to undo.
+	SendIds *[]Id `json:"send_ids,omitempty"`
+
+	// Status `needs_auth`: open `auth_url`. `picking`: open `picker_uri`; the server waits for Google. `importing`: copying
+	// (`progress`). `done` (possibly with `progress.failed` > 0), `failed` (`error_code`), `expired` (nothing picked
+	// before Google's session ended) and `cancelled` are final.
+	Status GoogleImportStatus `json:"status"`
+
+	// Target Where the photos go. Exactly one of `album_id` (with its frame) or `feed_id` is set.
+	Target    PhotoSourceTarget `json:"target"`
+	UpdatedAt *time.Time        `json:"updated_at,omitempty"`
+}
+
+// GoogleImportCreate Exactly one of `album_id` or `feed_id`.
+type GoogleImportCreate struct {
+	// AlbumId UUIDv7
+	AlbumId *Id `json:"album_id,omitempty"`
+
+	// FeedId UUIDv7
+	FeedId *Id `json:"feed_id,omitempty"`
+
+	// ReturnUri Where the browser goes after consent, with `?import_id=…&status=…` added.
+	//
+	// Example: app.kinframe:/google-import
+	ReturnUri string `json:"return_uri"`
+}
+
+// GoogleImportErrorCode defines model for GoogleImportErrorCode.
+type GoogleImportErrorCode string
+
+// GoogleImportStatus `needs_auth`: open `auth_url`. `picking`: open `picker_uri`; the server waits for Google. `importing`: copying
+// (`progress`). `done` (possibly with `progress.failed` > 0), `failed` (`error_code`), `expired` (nothing picked
+// before Google's session ended) and `cancelled` are final.
+type GoogleImportStatus string
+
 // Heartbeat defines model for Heartbeat.
 type Heartbeat struct {
-	AndroidSdk        *int   `json:"android_sdk,omitempty"`
-	AppVersion        string `json:"app_version"`
-	AppVersionCode    *int   `json:"app_version_code,omitempty"`
-	CacheBytes        *int   `json:"cache_bytes,omitempty"`
-	CrashCount24h     *int   `json:"crash_count_24h,omitempty"`
-	LastShutdownClean *bool  `json:"last_shutdown_clean,omitempty"`
+	AndroidSdk     *int   `json:"android_sdk,omitempty"`
+	AppVersion     string `json:"app_version"`
+	AppVersionCode *int   `json:"app_version_code,omitempty"`
+	CacheBytes     *int   `json:"cache_bytes,omitempty"`
+	CrashCount24h  *int   `json:"crash_count_24h,omitempty"`
+
+	// Features Optional capabilities of the frame app. `feed_backfill`: the frame shows `Placement.backfill` placements
+	// quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
+	// backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
+	// the `birthdays` change (informational only: nothing is withheld; apps use it for
+	// `Subscription.frame.birthdays_supported`).
+	Features          *[]string `json:"features,omitempty"`
+	LastShutdownClean *bool     `json:"last_shutdown_clean,omitempty"`
 
 	// LastUpdateError Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199`
 	LastUpdateError  *string    `json:"last_update_error,omitempty"`
@@ -2794,6 +3997,37 @@ type HeartbeatUpdateState string
 
 // Id UUIDv7
 type Id = openapi_types.UUID
+
+// ImmichAlbum defines model for ImmichAlbum.
+type ImmichAlbum struct {
+	AssetCount int     `json:"asset_count"`
+	Id         string  `json:"id"`
+	Name       string  `json:"name"`
+	OwnerName  *string `json:"owner_name,omitempty"`
+
+	// Shared Shared with the key's account by someone else.
+	Shared *bool `json:"shared,omitempty"`
+
+	// ThumbnailUrl A short-lived kinframe URL of the album thumbnail (proxied; the key never reaches the client).
+	ThumbnailUrl *string    `json:"thumbnail_url,omitempty"`
+	UpdatedAt    *time.Time `json:"updated_at,omitempty"`
+}
+
+// ImmichAlbumList defines model for ImmichAlbumList.
+type ImmichAlbumList struct {
+	// Albums Own albums first, then shared ones, by name.
+	Albums        []ImmichAlbum         `json:"albums"`
+	Error         *string               `json:"error,omitempty"`
+	ErrorCode     *PhotoSourceErrorCode `json:"error_code,omitempty"`
+	Ok            bool                  `json:"ok"`
+	ServerVersion *string               `json:"server_version,omitempty"`
+}
+
+// ImmichConnection defines model for ImmichConnection.
+type ImmichConnection struct {
+	ApiKey    *string `json:"api_key,omitempty"`
+	ServerUrl string  `json:"server_url"`
+}
 
 // Invite defines model for Invite.
 type Invite struct {
@@ -2861,7 +4095,12 @@ type Item struct {
 
 	// ThumbUrl Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
 	ThumbUrl *string `json:"thumb_url,omitempty"`
-	Width    *int    `json:"width,omitempty"`
+
+	// Via Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
+	// sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
+	// for feed placements). Optional: clients that don't know it show the sender only.
+	Via   *ItemVia `json:"via,omitempty"`
+	Width *int     `json:"width,omitempty"`
 }
 
 // ItemStatus defines model for Item.Status.
@@ -2881,6 +4120,20 @@ type ItemMotionStatus string
 
 // ItemOrigin An app a frame can import leftover photos from.
 type ItemOrigin string
+
+// ItemVia defines model for ItemVia.
+type ItemVia struct {
+	// Label Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+	//
+	// Example: Immich
+	Label string `json:"label"`
+
+	// Service The outside service a photo came from.
+	Service PhotoService `json:"service"`
+
+	// SourceId The photo source that synced it, while it exists (null for Google imports and deleted sources).
+	SourceId *Id `json:"source_id,omitempty"`
+}
 
 // JoinRequest defines model for JoinRequest.
 type JoinRequest struct {
@@ -2905,10 +4158,34 @@ type JoinRequestVia string
 
 // Limits defines model for Limits.
 type Limits struct {
-	MaxItemsPerSend    int  `json:"max_items_per_send"`
-	MaxUploadBytes     int  `json:"max_upload_bytes"`
-	MaxVideoSeconds    int  `json:"max_video_seconds"`
-	TrashRetentionDays *int `json:"trash_retention_days,omitempty"`
+	// MaxBirthdaysPerFeed Birthday people per feed (pending and approved).
+	MaxBirthdaysPerFeed *int `json:"max_birthdays_per_feed,omitempty"`
+
+	// MaxFeedBackfillItems Cap of `history: all` per subscription (newest first).
+	MaxFeedBackfillItems *int `json:"max_feed_backfill_items,omitempty"`
+
+	// MaxFeedsPerUser Feeds one account may own.
+	MaxFeedsPerUser *int `json:"max_feeds_per_user,omitempty"`
+
+	// MaxGoogleImportItems Items per Google Photos import (the picker's own maximum is 2000).
+	MaxGoogleImportItems *int `json:"max_google_import_items,omitempty"`
+	MaxItemsPerSend      int  `json:"max_items_per_send"`
+
+	// MaxPhotoSourceItems Live imported items per photo source; newer upstream items beyond it are skipped.
+	MaxPhotoSourceItems *int `json:"max_photo_source_items,omitempty"`
+
+	// MaxPhotoSourceRunBytes Bytes one sync run downloads; the rest follows in the next runs.
+	MaxPhotoSourceRunBytes *int `json:"max_photo_source_run_bytes,omitempty"`
+
+	// MaxPhotoSourcesPerTarget Photo sources per album or feed.
+	MaxPhotoSourcesPerTarget *int `json:"max_photo_sources_per_target,omitempty"`
+
+	// MaxPhotoSourcesPerUser Photo sources one account owns.
+	MaxPhotoSourcesPerUser  *int `json:"max_photo_sources_per_user,omitempty"`
+	MaxSubscriptionsPerFeed *int `json:"max_subscriptions_per_feed,omitempty"`
+	MaxUploadBytes          int  `json:"max_upload_bytes"`
+	MaxVideoSeconds         int  `json:"max_video_seconds"`
+	TrashRetentionDays      *int `json:"trash_retention_days,omitempty"`
 }
 
 // LocalizedText Language code → text; `en` is the fallback.
@@ -3079,6 +4356,315 @@ type Permissions struct {
 	Send           *bool `json:"send,omitempty"`
 }
 
+// PhotoService The outside service a photo came from.
+type PhotoService string
+
+// PhotoSource defines model for PhotoSource.
+type PhotoSource struct {
+	// BestEffort True for `icloud_link`: no official API; clients show the best-effort note.
+	BestEffort *bool `json:"best_effort,omitempty"`
+
+	// CanManage The caller may pause, change and delete it.
+	CanManage *bool             `json:"can_manage,omitempty"`
+	Counts    PhotoSourceCounts `json:"counts"`
+	CreatedAt time.Time         `json:"created_at"`
+
+	// ErrorSince First failure of the current streak.
+	ErrorSince  *time.Time `json:"error_since,omitempty"`
+	HasApiKey   *bool      `json:"has_api_key,omitempty"`
+	HasPassword *bool      `json:"has_password,omitempty"`
+
+	// History What the first run imports: `none` (only photos added from now on), `last_n` (the `history_count` newest by
+	// capture date) or `all` (up to `limits.max_photo_source_items`). Imported quietly (`Placement.backfill`).
+	// Defaults: `all` for albums, `last_n` with 20 for feeds.
+	History      PhotoSourceHistory `json:"history"`
+	HistoryCount *int               `json:"history_count,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// ImmichAlbumId `immich_api` only.
+	ImmichAlbumId *string    `json:"immich_album_id,omitempty"`
+	IncludeVideos bool       `json:"include_videos"`
+	IsOwner       *bool      `json:"is_owner,omitempty"`
+	LastAttemptAt *time.Time `json:"last_attempt_at,omitempty"`
+
+	// LastError Short English detail for support; clients show their own text for `last_error_code`.
+	LastError     *string               `json:"last_error,omitempty"`
+	LastErrorCode *PhotoSourceErrorCode `json:"last_error_code,omitempty"`
+	LastRun       *PhotoSourceRun       `json:"last_run,omitempty"`
+
+	// LastSyncedAt Last successful run.
+	LastSyncedAt *time.Time `json:"last_synced_at,omitempty"`
+
+	// Name The outside album's name (or the name given at creation).
+	Name string `json:"name"`
+
+	// NextSyncAt Null while paused or waiting for a person.
+	NextSyncAt      *time.Time `json:"next_sync_at,omitempty"`
+	NotifyReactions *bool      `json:"notify_reactions,omitempty"`
+
+	// OnUpstreamDelete What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+	// `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+	// confirmation (`mass_removal`).
+	OnUpstreamDelete PhotoSourceDeletePolicy `json:"on_upstream_delete"`
+
+	// Owner Who set it up; imported photos are sent by them. Null when that account is gone.
+	Owner *struct {
+		AvatarUrl   *string `json:"avatar_url,omitempty"`
+		DisplayName string  `json:"display_name"`
+
+		// UserId UUIDv7
+		UserId Id `json:"user_id"`
+	} `json:"owner,omitempty"`
+
+	// PendingRemovals Removals held back by the mass-removal guard; confirm with `syncPhotoSource {confirm_removals: true}`.
+	PendingRemovals *int `json:"pending_removals,omitempty"`
+
+	// Provider `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+	// `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+	// public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+	Provider PhotoSourceProvider `json:"provider"`
+
+	// Running A run is in progress.
+	Running bool `json:"running"`
+
+	// ServerUrl `immich_api` only.
+	ServerUrl *string `json:"server_url,omitempty"`
+
+	// Status `active`: syncing on schedule (a single failed run being retried stays active, with `last_error_code`).
+	// `error`: failures expected to pass (unreachable, upstream errors) for 3 runs or 6 hours; retried with backoff.
+	// `needs_attention`: only a person can fix it (`last_error_code`); syncing stopped except a daily probe for some
+	// codes. `paused`: paused by a manager; imported photos keep showing.
+	Status PhotoSourceStatus `json:"status"`
+
+	// Target Where the photos go. Exactly one of `album_id` (with its frame) or `feed_id` is set.
+	Target PhotoSourceTarget `json:"target"`
+
+	// UrlHint Redacted link for display (links only).
+	//
+	// Example: https://photos.example.org/share/…
+	UrlHint  *string               `json:"url_hint,omitempty"`
+	Warnings *[]PhotoSourceWarning `json:"warnings,omitempty"`
+}
+
+// PhotoSourceConnection How to reach the outside album. `immich_link` and `icloud_link` need `url` (and `password` for a protected
+// Immich link); `immich_api` needs `server_url`, `api_key` and, to create, `immich_album_id`. Secrets are
+// write-only: they are sealed at rest and never returned.
+type PhotoSourceConnection struct {
+	// ApiKey `immich_api` only. Needs album.read, asset.read, asset.view and asset.download.
+	ApiKey *string `json:"api_key,omitempty"`
+
+	// ImmichAlbumId `immich_api` only: the album, from `listImmichAlbums`.
+	ImmichAlbumId *string `json:"immich_album_id,omitempty"`
+
+	// Password `immich_link` only: the link password.
+	Password *string `json:"password,omitempty"`
+
+	// Provider `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+	// `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+	// public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+	Provider PhotoSourceProvider `json:"provider"`
+
+	// ServerUrl `immich_api` only: the Immich server, e.g. `https://photos.example.org` (an `/api` suffix is tolerated).
+	ServerUrl *string `json:"server_url,omitempty"`
+
+	// Url The shared link (links only). It is the secret; responses carry `url_hint`.
+	//
+	// Example: https://photos.example.org/share/0d1e…
+	Url *string `json:"url,omitempty"`
+}
+
+// PhotoSourceCounts defines model for PhotoSourceCounts.
+type PhotoSourceCounts struct {
+	// Duplicates Upstream photos the target already had.
+	Duplicates *int `json:"duplicates,omitempty"`
+	Failed     *int `json:"failed,omitempty"`
+
+	// GoneUpstream No longer in the outside album (kept with `keep`).
+	GoneUpstream *int `json:"gone_upstream,omitempty"`
+
+	// Imported Live items this source created.
+	Imported int `json:"imported"`
+
+	// Pending Waiting to be downloaded (backlog).
+	Pending int `json:"pending"`
+
+	// RemovedLocally Removed on kinframe; never imported again.
+	RemovedLocally *int `json:"removed_locally,omitempty"`
+
+	// Skipped Not imported on purpose (videos off, too long, too large, unsupported, over the limit, before the first import's cut).
+	Skipped *int `json:"skipped,omitempty"`
+
+	// Upstream Photos and videos in the outside album at the last listing.
+	Upstream *int `json:"upstream,omitempty"`
+}
+
+// PhotoSourceCreate defines model for PhotoSourceCreate.
+type PhotoSourceCreate struct {
+	// AlbumId UUIDv7
+	AlbumId *Id `json:"album_id,omitempty"`
+
+	// ApiKey `immich_api` only. Needs album.read, asset.read, asset.view and asset.download.
+	ApiKey *string `json:"api_key,omitempty"`
+
+	// FeedId UUIDv7
+	FeedId *Id `json:"feed_id,omitempty"`
+
+	// History What the first run imports: `none` (only photos added from now on), `last_n` (the `history_count` newest by
+	// capture date) or `all` (up to `limits.max_photo_source_items`). Imported quietly (`Placement.backfill`).
+	// Defaults: `all` for albums, `last_n` with 20 for feeds.
+	History *PhotoSourceHistory `json:"history,omitempty"`
+
+	// HistoryCount Required with `history: last_n`.
+	HistoryCount *int `json:"history_count,omitempty"`
+
+	// ImmichAlbumId `immich_api` only: the album, from `listImmichAlbums`.
+	ImmichAlbumId *string `json:"immich_album_id,omitempty"`
+	IncludeVideos *bool   `json:"include_videos,omitempty"`
+
+	// Name Display name; defaults to the outside album's name.
+	Name *string `json:"name,omitempty"`
+
+	// NotifyReactions The owner gets reaction and reply notifications for this source's photos.
+	NotifyReactions *bool `json:"notify_reactions,omitempty"`
+
+	// OnUpstreamDelete What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+	// `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+	// confirmation (`mass_removal`).
+	OnUpstreamDelete *PhotoSourceDeletePolicy `json:"on_upstream_delete,omitempty"`
+
+	// Password `immich_link` only: the link password.
+	Password *string `json:"password,omitempty"`
+
+	// Provider `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+	// `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+	// public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+	Provider PhotoSourceProvider `json:"provider"`
+
+	// ServerUrl `immich_api` only: the Immich server, e.g. `https://photos.example.org` (an `/api` suffix is tolerated).
+	ServerUrl *string `json:"server_url,omitempty"`
+
+	// Url The shared link (links only). It is the secret; responses carry `url_hint`.
+	//
+	// Example: https://photos.example.org/share/0d1e…
+	Url *string `json:"url,omitempty"`
+}
+
+// PhotoSourceDeletePolicy What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+// `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+// confirmation (`mass_removal`).
+type PhotoSourceDeletePolicy string
+
+// PhotoSourceErrorCode Why the last run (or a test) failed; user-facing texts are in docs/spec/photo-sources.md §13.
+type PhotoSourceErrorCode string
+
+// PhotoSourceHistory What the first run imports: `none` (only photos added from now on), `last_n` (the `history_count` newest by
+// capture date) or `all` (up to `limits.max_photo_source_items`). Imported quietly (`Placement.backfill`).
+// Defaults: `all` for albums, `last_n` with 20 for feeds.
+type PhotoSourceHistory string
+
+// PhotoSourceProvider `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+// `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+// public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+type PhotoSourceProvider string
+
+// PhotoSourceRun defines model for PhotoSourceRun.
+type PhotoSourceRun struct {
+	Added      *int                  `json:"added,omitempty"`
+	Bytes      *int                  `json:"bytes,omitempty"`
+	ErrorCode  *PhotoSourceErrorCode `json:"error_code,omitempty"`
+	Failed     *int                  `json:"failed,omitempty"`
+	FinishedAt *time.Time            `json:"finished_at,omitempty"`
+	Removed    *int                  `json:"removed,omitempty"`
+	Skipped    *int                  `json:"skipped,omitempty"`
+	StartedAt  time.Time             `json:"started_at"`
+
+	// Updated Captions, dates or files changed upstream.
+	Updated *int `json:"updated,omitempty"`
+}
+
+// PhotoSourceStatus `active`: syncing on schedule (a single failed run being retried stays active, with `last_error_code`).
+// `error`: failures expected to pass (unreachable, upstream errors) for 3 runs or 6 hours; retried with backoff.
+// `needs_attention`: only a person can fix it (`last_error_code`); syncing stopped except a daily probe for some
+// codes. `paused`: paused by a manager; imported photos keep showing.
+type PhotoSourceStatus string
+
+// PhotoSourceTarget Where the photos go. Exactly one of `album_id` (with its frame) or `feed_id` is set.
+type PhotoSourceTarget struct {
+	AlbumId   *Id     `json:"album_id,omitempty"`
+	AlbumName *string `json:"album_name,omitempty"`
+	FeedId    *Id     `json:"feed_id,omitempty"`
+	FeedName  *string `json:"feed_name,omitempty"`
+
+	// FrameId The album's frame (albums belong to one frame).
+	FrameId   *Id                   `json:"frame_id,omitempty"`
+	FrameName *string               `json:"frame_name,omitempty"`
+	Kind      PhotoSourceTargetKind `json:"kind"`
+}
+
+// PhotoSourceTargetKind defines model for PhotoSourceTarget.Kind.
+type PhotoSourceTargetKind string
+
+// PhotoSourceTestResult defines model for PhotoSourceTestResult.
+type PhotoSourceTestResult struct {
+	AlbumName *string `json:"album_name,omitempty"`
+
+	// Albums `immich_api` without `immich_album_id`: the albums the key can read.
+	Albums     *[]ImmichAlbum `json:"albums,omitempty"`
+	BestEffort *bool          `json:"best_effort,omitempty"`
+
+	// Error Short English detail.
+	Error     *string               `json:"error,omitempty"`
+	ErrorCode *PhotoSourceErrorCode `json:"error_code,omitempty"`
+
+	// EstimateBytes Size of everything in the album, when the provider tells.
+	EstimateBytes *int `json:"estimate_bytes,omitempty"`
+	Ok            bool `json:"ok"`
+	Photos        *int `json:"photos,omitempty"`
+
+	// ServerVersion Immich only, e.g. `v1.132.3`.
+	ServerVersion *string               `json:"server_version,omitempty"`
+	Videos        *int                  `json:"videos,omitempty"`
+	Warnings      *[]PhotoSourceWarning `json:"warnings,omitempty"`
+}
+
+// PhotoSourceUpdate At least one field. Connection changes are tested first and then synced at once.
+type PhotoSourceUpdate struct {
+	ApiKey        *string `json:"api_key,omitempty"`
+	ImmichAlbumId *string `json:"immich_album_id,omitempty"`
+
+	// IncludeVideos Turning it on imports previously skipped videos in the next run.
+	IncludeVideos *bool   `json:"include_videos,omitempty"`
+	Name          *string `json:"name,omitempty"`
+
+	// NotifyReactions The owner's own switch; only the owner may change it.
+	NotifyReactions *bool `json:"notify_reactions,omitempty"`
+
+	// OnUpstreamDelete What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+	// `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+	// confirmation (`mass_removal`).
+	OnUpstreamDelete *PhotoSourceDeletePolicy `json:"on_upstream_delete,omitempty"`
+
+	// Password null removes the link password.
+	Password *string `json:"password,omitempty"`
+
+	// Paused true pauses, false resumes.
+	Paused    *bool   `json:"paused,omitempty"`
+	ServerUrl *string `json:"server_url,omitempty"`
+
+	// TakeOver The caller becomes the owner (credit for future photos). `immich_api` needs a new `api_key` with it.
+	TakeOver *bool `json:"take_over,omitempty"`
+
+	// Url A new link to the same (or another) outside album.
+	Url *string `json:"url,omitempty"`
+}
+
+// PhotoSourceWarning Conditions that don't stop syncing. `downloads_disabled`: the Immich link doesn't allow downloads, so photos
+// come as previews. `metadata_hidden`: the link hides EXIF (no capture dates or descriptions).
+// `item_limit_reached`: `limits.max_photo_source_items` is reached; newer upstream items are skipped.
+type PhotoSourceWarning string
+
 // PinHash PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
 type PinHash struct {
 	Alg PinHashAlg `json:"alg"`
@@ -3089,7 +4675,7 @@ type PinHash struct {
 	// Iterations Example: 20000
 	Iterations int `json:"iterations"`
 
-	// Salt base64
+	// Salt base64, at least 12 random bytes
 	Salt string `json:"salt"`
 }
 
@@ -3122,8 +4708,17 @@ type Place struct {
 
 // Placement defines model for Placement.
 type Placement struct {
-	AlbumIds      *[]Id       `json:"album_ids,omitempty"`
-	DeliveredAt   *time.Time  `json:"delivered_at,omitempty"`
+	AlbumIds *[]Id `json:"album_ids,omitempty"`
+
+	// Backfill Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
+	// import). Frames don't treat it as new: no "N new" card, no screen wake. `received_at` is then the post time
+	// (for a photo source's first import: when the photo was added upstream, else its capture time).
+	Backfill    *bool      `json:"backfill,omitempty"`
+	DeliveredAt *time.Time `json:"delivered_at,omitempty"`
+
+	// FeedIds Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
+	// Used for feed mode (`slideshow.feed_id`), like `album_ids` for album mode.
+	FeedIds       *[]Id       `json:"feed_ids,omitempty"`
 	FitOverride   *Fit        `json:"fit_override,omitempty"`
 	FocalOverride *FocalPoint `json:"focal_override,omitempty"`
 
@@ -3132,8 +4727,19 @@ type Placement struct {
 	Hidden  bool `json:"hidden"`
 
 	// Id UUIDv7
-	Id                Id         `json:"id"`
-	Item              Item       `json:"item"`
+	Id   Id   `json:"id"`
+	Item Item `json:"item"`
+
+	// Origin How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
+	// frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
+	// `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
+	Origin *PlacementOrigin `json:"origin,omitempty"`
+
+	// OriginFeedId `origin: feed`: the feed that placed it.
+	OriginFeedId *Id `json:"origin_feed_id,omitempty"`
+
+	// OriginFeedName Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
+	OriginFeedName    *string    `json:"origin_feed_name,omitempty"`
 	PendingModeration *bool      `json:"pending_moderation,omitempty"`
 	Reaction          *Reaction  `json:"reaction,omitempty"`
 	ReceivedAt        *time.Time `json:"received_at,omitempty"`
@@ -3156,6 +4762,11 @@ type Placement struct {
 
 // PlacementRotation defines model for Placement.Rotation.
 type PlacementRotation int
+
+// PlacementOrigin How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
+// frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
+// `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
+type PlacementOrigin string
 
 // PlacementStatus defines model for PlacementStatus.
 type PlacementStatus string
@@ -3204,7 +4815,7 @@ type PluginInstanceStatus struct {
 	// picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
 	Entities *[]DiscoveredEntity `json:"entities,omitempty"`
 
-	// Error The last error
+	// Error The last error, null when the last update and render worked.
 	Error      *string    `json:"error,omitempty"`
 	ErrorAt    *time.Time `json:"error_at,omitempty"`
 	InstanceId string     `json:"instance_id"`
@@ -3286,7 +4897,7 @@ type PushEndpoint struct {
 	CreatedAt  time.Time `json:"created_at"`
 	DeviceName *string   `json:"device_name,omitempty"`
 
-	// Endpoint UnifiedPush/WebPush URL
+	// Endpoint UnifiedPush/WebPush URL, or FCM/APNs token
 	Endpoint string `json:"endpoint"`
 
 	// Id UUIDv7
@@ -3306,7 +4917,7 @@ type PushEndpointKind string
 type PushEndpointCreate struct {
 	DeviceName *string `json:"device_name,omitempty"`
 
-	// Endpoint UnifiedPush/WebPush URL
+	// Endpoint UnifiedPush/WebPush URL, or FCM/APNs token
 	Endpoint    string                 `json:"endpoint"`
 	Kind        PushEndpointCreateKind `json:"kind"`
 	Locale      *string                `json:"locale,omitempty"`
@@ -3359,7 +4970,10 @@ type ScreenOrientation string
 type Send struct {
 	CreatedAt time.Time `json:"created_at"`
 
-	// Frames Per-frame delivery for this send.
+	// Feeds The feeds this send was posted to, with receipts (docs/spec/feeds.md §7).
+	Feeds *[]SendFeed `json:"feeds,omitempty"`
+
+	// Frames Per-frame delivery for this send (direct recipients and shares; feed placements are in `feeds`).
 	Frames []struct {
 		// FrameId UUIDv7
 		FrameId    Id     `json:"frame_id"`
@@ -3390,10 +5004,20 @@ type Send struct {
 		Processing *int `json:"processing,omitempty"`
 		Seen       *int `json:"seen,omitempty"`
 	} `json:"summary,omitempty"`
+
+	// Via Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
+	// run or import). Such sends get no `delivered` push.
+	Via *ItemVia `json:"via,omitempty"`
 }
 
-// SendCreate defines model for SendCreate.
+// SendCreate Recipients are `frame_ids` plus `feed_ids`; together they must not be empty (`422 validation_failed` on
+// `frame_ids`). Feeds need membership (any role), frames need `send`. A frame that is a direct recipient and
+// also subscribes to a feed in `feed_ids` gets the item once (docs/spec/feeds.md §6.2).
 type SendCreate struct {
+	// FeedIds Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).
+	FeedIds *[]Id `json:"feed_ids,omitempty"`
+
+	// FrameIds Frames to send to directly. May be empty when `feed_ids` is not.
 	FrameIds []Id `json:"frame_ids"`
 	Items    []struct {
 		Caption *string `json:"caption,omitempty"`
@@ -3430,12 +5054,29 @@ type SendCreate struct {
 			StartMs *int `json:"start_ms,omitempty"`
 		} `json:"trim,omitempty"`
 
-		// UploadId tus upload id
+		// UploadId tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still.
 		UploadId string `json:"upload_id"`
 
 		// Width Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline.
 		Width *int `json:"width,omitempty"`
 	} `json:"items"`
+}
+
+// SendFeed One feed a send was posted to.
+type SendFeed struct {
+	// FeedId UUIDv7
+	FeedId   Id     `json:"feed_id"`
+	FeedName string `json:"feed_name"`
+
+	// PostId UUIDv7
+	PostId Id `json:"post_id"`
+
+	// Removed The post was removed from the feed (unsend or admin).
+	Removed *bool `json:"removed,omitempty"`
+
+	// Summary Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
+	// delivered/seen when every item of the post is. Paused frames are only in `paused`.
+	Summary *FeedReceiptSummary `json:"summary,omitempty"`
 }
 
 // ShareResult defines model for ShareResult.
@@ -3531,7 +5172,7 @@ type ShopProduct struct {
 	// Name Example: kinframe 10.1"
 	Name string `json:"name"`
 
-	// PriceCents Unit price incl. VAT
+	// PriceCents Unit price incl. VAT, in cents
 	PriceCents int `json:"price_cents"`
 
 	// Size Screen size label
@@ -3732,6 +5373,129 @@ type StationSeries struct {
 // StationValues defines model for StationValues.
 type StationValues = []*float32
 
+// Subscription defines model for Subscription.
+type Subscription struct {
+	// ActivatedAt First activation; the history boundary.
+	ActivatedAt *time.Time `json:"activated_at,omitempty"`
+
+	// Backfill Progress of the history backfill or trim after activation, a history change or a resume.
+	Backfill *struct {
+		Placed *int                       `json:"placed,omitempty"`
+		State  *SubscriptionBackfillState `json:"state,omitempty"`
+		Total  *int                       `json:"total,omitempty"`
+	} `json:"backfill,omitempty"`
+
+	// BirthdayCount Approved birthday people of the feed (so frame managers outside the feed see how many).
+	BirthdayCount *int `json:"birthday_count,omitempty"`
+
+	// Birthdays The feed's birthday people are shown on the frame while the subscription is `active` (default true; frame side).
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// CanDecide The caller may approve, reject and remove (feed side).
+	CanDecide *bool `json:"can_decide,omitempty"`
+
+	// CanManage The caller may pause, resume, change history and unsubscribe (frame side).
+	CanManage *bool      `json:"can_manage,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
+	EndedAt   *time.Time `json:"ended_at,omitempty"`
+
+	// Estimate Size of what the current history option places on this frame, for the subscribe dialog.
+	Estimate *struct {
+		Bytes *int `json:"bytes,omitempty"`
+		Items *int `json:"items,omitempty"`
+	} `json:"estimate,omitempty"`
+	Feed struct {
+		// AdminNames Owner first; so the frame side knows whom it subscribes to.
+		AdminNames *[]string `json:"admin_names,omitempty"`
+		CoverUrl   *string   `json:"cover_url,omitempty"`
+
+		// Id UUIDv7
+		Id          Id     `json:"id"`
+		MemberCount *int   `json:"member_count,omitempty"`
+		Name        string `json:"name"`
+	} `json:"feed"`
+	Frame struct {
+		// BirthdaysSupported The frame app shows birthdays (its latest heartbeat lists `birthdays`); false means "update the frame app".
+		BirthdaysSupported *bool `json:"birthdays_supported,omitempty"`
+
+		// Id UUIDv7
+		Id         Id         `json:"id"`
+		LastSeenAt *time.Time `json:"last_seen_at,omitempty"`
+		Location   *string    `json:"location,omitempty"`
+		Name       string     `json:"name"`
+		Online     *bool      `json:"online,omitempty"`
+	} `json:"frame"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History      SubscriptionHistory `json:"history"`
+	HistoryCount *int                `json:"history_count,omitempty"`
+
+	// Id UUIDv7
+	Id            Id                         `json:"id"`
+	PausedAt      *time.Time                 `json:"paused_at,omitempty"`
+	RemovedReason *SubscriptionRemovedReason `json:"removed_reason,omitempty"`
+
+	// RequestedByName Feed owner/admins and frame managers only.
+	RequestedByName *string `json:"requested_by_name,omitempty"`
+
+	// Status `pending`: waiting for a feed admin. `active`: posts are placed on the frame. `paused`: paused by the frame
+	// side; the feed's placements are kept but not shown. `rejected`: declined by a feed admin. `removed`: ended
+	// (see `removed_reason`). Rejected and removed subscriptions are listed for 30 days.
+	Status SubscriptionStatus `json:"status"`
+
+	// ViaInvite Created through a `subscribe` invite.
+	ViaInvite *bool `json:"via_invite,omitempty"`
+}
+
+// SubscriptionBackfillState defines model for Subscription.Backfill.State.
+type SubscriptionBackfillState string
+
+// SubscriptionRemovedReason defines model for Subscription.RemovedReason.
+type SubscriptionRemovedReason string
+
+// SubscriptionHistory What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+// or trims.
+type SubscriptionHistory string
+
+// SubscriptionRequest defines model for SubscriptionRequest.
+type SubscriptionRequest struct {
+	// Birthdays Show the feed's birthday people on the frame.
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId Id `json:"frame_id"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History *SubscriptionHistory `json:"history,omitempty"`
+
+	// HistoryCount Required with `history: last_n`.
+	HistoryCount *int `json:"history_count,omitempty"`
+}
+
+// SubscriptionStatus `pending`: waiting for a feed admin. `active`: posts are placed on the frame. `paused`: paused by the frame
+// side; the feed's placements are kept but not shown. `rejected`: declined by a feed admin. `removed`: ended
+// (see `removed_reason`). Rejected and removed subscriptions are listed for 30 days.
+type SubscriptionStatus string
+
+// SubscriptionUpdate At least one field. Omitting `history` keeps the history option (and starts no backfill or trim).
+type SubscriptionUpdate struct {
+	// Birthdays Show the feed's birthday people on the frame (a `birthdays` change follows).
+	Birthdays *bool `json:"birthdays,omitempty"`
+
+	// History What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+	// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+	// or trims.
+	History *SubscriptionHistory `json:"history,omitempty"`
+
+	// HistoryCount Required with `history: last_n`.
+	HistoryCount *int `json:"history_count,omitempty"`
+}
+
 // TvLink defines model for TvLink.
 type TvLink struct {
 	AlbumId       *openapi_types.UUID `json:"album_id,omitempty"`
@@ -3853,6 +5617,11 @@ type User struct {
 	IsOperator         *bool   `json:"is_operator,omitempty"`
 	Locale             *string `json:"locale,omitempty"`
 	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
+
+	// Timezone IANA time zone reported by the user's apps; null until one did.
+	//
+	// Example: Europe/Brussels
+	Timezone *string `json:"timezone,omitempty"`
 }
 
 // Weather Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -3873,7 +5642,7 @@ type Weather struct {
 		TempC       float32    `json:"temp_c"`
 		Time        *time.Time `json:"time,omitempty"`
 
-		// WindDirDeg Direction the wind comes from
+		// WindDirDeg Direction the wind comes from, 0 = north
 		WindDirDeg *int     `json:"wind_dir_deg,omitempty"`
 		WindKmh    *float32 `json:"wind_kmh,omitempty"`
 	} `json:"current"`
@@ -3930,6 +5699,9 @@ type WeatherUnitsTemperature string
 // WeatherUnitsWindSpeed defines model for Weather.Units.WindSpeed.
 type WeatherUnitsWindSpeed string
 
+// BirthdayId UUIDv7
+type BirthdayId = Id
+
 // CalendarId UUIDv7
 type CalendarId = Id
 
@@ -3942,6 +5714,9 @@ type EndpointId = Id
 // EventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
 type EventId = CalendarEventId
 
+// FeedId UUIDv7
+type FeedId = Id
+
 // FrameId UUIDv7
 type FrameId = Id
 
@@ -3950,6 +5725,9 @@ type IdempotencyKey = string
 
 // IfMatch defines model for IfMatch.
 type IfMatch = string
+
+// ImportId UUIDv7
+type ImportId = Id
 
 // InvitationId UUIDv7
 type InvitationId = Id
@@ -3965,6 +5743,15 @@ type Limit = int
 
 // PlacementId UUIDv7
 type PlacementId = Id
+
+// PostId UUIDv7
+type PostId = Id
+
+// SourceId UUIDv7
+type SourceId = Id
+
+// SubscriptionId UUIDv7
+type SubscriptionId = Id
 
 // UserId UUIDv7
 type UserId = Id
@@ -4087,6 +5874,95 @@ type DeviceTokenJSONBody struct {
 	DeviceSecret string `json:"device_secret"`
 }
 
+// AcceptFeedInviteParams defines parameters for AcceptFeedInvite.
+type AcceptFeedInviteParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// LookupFeedInviteJSONBody defines parameters for LookupFeedInvite.
+type LookupFeedInviteJSONBody struct {
+	// Code 8 Crockford base32 characters, hyphen optional, case-insensitive.
+	Code string `json:"code"`
+}
+
+// CreateFeedParams defines parameters for CreateFeed.
+type CreateFeedParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// ListFeedBirthdayGreetingsParams defines parameters for ListFeedBirthdayGreetings.
+type ListFeedBirthdayGreetingsParams struct {
+	Cursor     *Cursor `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Limit      *Limit  `form:"limit,omitempty" json:"limit,omitempty"`
+	BirthdayId *Id     `form:"birthday_id,omitempty" json:"birthday_id,omitempty"`
+
+	// Date Only greetings for this occurrence date.
+	Date *openapi_types.Date `form:"date,omitempty" json:"date,omitempty"`
+}
+
+// ListFeedBirthdaysParams defines parameters for ListFeedBirthdays.
+type ListFeedBirthdaysParams struct {
+	// Status Only this status (default all the caller may see).
+	Status *BirthdayStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// CreateFeedBirthdayParams defines parameters for CreateFeedBirthday.
+type CreateFeedBirthdayParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// CreateFeedInviteParams defines parameters for CreateFeedInvite.
+type CreateFeedInviteParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// DecideFeedJoinRequestParamsDecision defines parameters for DecideFeedJoinRequest.
+type DecideFeedJoinRequestParamsDecision string
+
+// LeaveFeedJSONBody defines parameters for LeaveFeed.
+type LeaveFeedJSONBody struct {
+	// RemoveMyPosts Also remove your posts from the feed and every subscribed frame.
+	RemoveMyPosts *bool `json:"remove_my_posts,omitempty"`
+}
+
+// RemoveFeedMemberParams defines parameters for RemoveFeedMember.
+type RemoveFeedMemberParams struct {
+	// RemovePosts Also remove the member's posts from the feed and every subscribed frame.
+	RemovePosts *bool `form:"remove_posts,omitempty" json:"remove_posts,omitempty"`
+}
+
+// UpdateFeedMemberJSONBody defines parameters for UpdateFeedMember.
+type UpdateFeedMemberJSONBody struct {
+	Role UpdateFeedMemberJSONBodyRole `json:"role"`
+}
+
+// UpdateFeedMemberJSONBodyRole defines parameters for UpdateFeedMember.
+type UpdateFeedMemberJSONBodyRole string
+
+// ListFeedPostsParams defines parameters for ListFeedPosts.
+type ListFeedPostsParams struct {
+	Cursor   *Cursor `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Limit    *Limit  `form:"limit,omitempty" json:"limit,omitempty"`
+	PosterId *Id     `form:"poster_id,omitempty" json:"poster_id,omitempty"`
+}
+
+// ListFeedSubscriptionsParams defines parameters for ListFeedSubscriptions.
+type ListFeedSubscriptionsParams struct {
+	// Status Only this status (default all the caller may see).
+	Status *SubscriptionStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// RequestSubscriptionParams defines parameters for RequestSubscription.
+type RequestSubscriptionParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// TransferFeedOwnershipJSONBody defines parameters for TransferFeedOwnership.
+type TransferFeedOwnershipJSONBody struct {
+	// UserId UUIDv7
+	UserId Id `json:"user_id"`
+}
+
 // RedeemFrameCodeJSONBody defines parameters for RedeemFrameCode.
 type RedeemFrameCodeJSONBody struct {
 	Code string `json:"code"`
@@ -4107,6 +5983,12 @@ type UpdateFrameJSONBody struct {
 	// Moderation New placements need approval by owner/admin before showing.
 	Moderation *bool   `json:"moderation,omitempty"`
 	Name       *string `json:"name,omitempty"`
+}
+
+// DeleteAlbumParams defines parameters for DeleteAlbum.
+type DeleteAlbumParams struct {
+	// RemoveSourceItems Also remove the photos this album's photo sources imported (clients ask when `photo_source_count` > 0).
+	RemoveSourceItems *bool `form:"remove_source_items,omitempty" json:"remove_source_items,omitempty"`
 }
 
 // UpdateAlbumParams defines parameters for UpdateAlbum.
@@ -4172,6 +6054,9 @@ type ListPlacementsParams struct {
 	Kind       *MediaKind                      `form:"kind,omitempty" json:"kind,omitempty"`
 	AlbumId    *Id                             `form:"album_id,omitempty" json:"album_id,omitempty"`
 
+	// FeedId Only placements held by this feed (`feed_ids`).
+	FeedId *Id `form:"feed_id,omitempty" json:"feed_id,omitempty"`
+
 	// OnThisDay "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
 	// on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
 	OnThisDay *string                   `form:"on_this_day,omitempty" json:"on_this_day,omitempty"`
@@ -4190,7 +6075,7 @@ type UpdatePlacementJSONBody struct {
 	Approved *bool `json:"approved,omitempty"`
 	Hidden   *bool `json:"hidden,omitempty"`
 
-	// Trashed true moves to trash (30 days)
+	// Trashed true moves to trash (30 days), false restores.
 	Trashed *bool `json:"trashed,omitempty"`
 }
 
@@ -4229,6 +6114,12 @@ type UpdateFrameSettingsParams struct {
 	IfMatch IfMatch `json:"If-Match"`
 }
 
+// ListFrameSubscriptionsParams defines parameters for ListFrameSubscriptions.
+type ListFrameSubscriptionsParams struct {
+	// Status Only this status (default all the caller may see).
+	Status *SubscriptionStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
 // TransferOwnershipJSONBody defines parameters for TransferOwnership.
 type TransferOwnershipJSONBody struct {
 	// UserId UUIDv7
@@ -4242,6 +6133,11 @@ type GeocodeParams struct {
 	// Lang Language of place names (ISO 639-1), e.g. `nl`
 	Lang  *string `form:"lang,omitempty" json:"lang,omitempty"`
 	Count *int    `form:"count,omitempty" json:"count,omitempty"`
+}
+
+// StartGoogleImportParams defines parameters for StartGoogleImport.
+type StartGoogleImportParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
 // UpdateItemJSONBody defines parameters for UpdateItem.
@@ -4266,6 +6162,11 @@ type UpdateMeJSONBody struct {
 	// Locale Example: nl-BE
 	Locale             *string `json:"locale,omitempty"`
 	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
+
+	// Timezone IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
+	//
+	// Example: Europe/Brussels
+	Timezone *string `json:"timezone,omitempty"`
 }
 
 // OperatorListReservationsParams defines parameters for OperatorListReservations.
@@ -4278,6 +6179,23 @@ type OperatorUpdateReservationJSONBody struct {
 	// InternalNote Only for the operator; never emailed.
 	InternalNote *string                `json:"internal_note,omitempty"`
 	Status       *ShopReservationStatus `json:"status,omitempty"`
+}
+
+// CreatePhotoSourceParams defines parameters for CreatePhotoSource.
+type CreatePhotoSourceParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// DeletePhotoSourceParams defines parameters for DeletePhotoSource.
+type DeletePhotoSourceParams struct {
+	// RemoveItems Also remove the photos this source imported.
+	RemoveItems bool `form:"remove_items" json:"remove_items"`
+}
+
+// SyncPhotoSourceJSONBody defines parameters for SyncPhotoSource.
+type SyncPhotoSourceJSONBody struct {
+	// ConfirmRemovals Remove the photos that disappeared upstream although there were many.
+	ConfirmRemovals *bool `json:"confirm_removals,omitempty"`
 }
 
 // ListMySendsParams defines parameters for ListMySends.
@@ -4297,7 +6215,9 @@ type CreateSendParams struct {
 
 // ForwardSendJSONBody defines parameters for ForwardSend.
 type ForwardSendJSONBody struct {
-	FrameIds []Id `json:"frame_ids"`
+	// FeedIds Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped.
+	FeedIds  *[]Id `json:"feed_ids,omitempty"`
+	FrameIds []Id  `json:"frame_ids"`
 }
 
 // CancelShopReservationJSONBody defines parameters for CancelShopReservation.
@@ -4349,6 +6269,42 @@ type EnrollDeviceJSONRequestBody = DeviceEnroll
 
 // DeviceTokenJSONRequestBody defines body for DeviceToken for application/json ContentType.
 type DeviceTokenJSONRequestBody DeviceTokenJSONBody
+
+// AcceptFeedInviteJSONRequestBody defines body for AcceptFeedInvite for application/json ContentType.
+type AcceptFeedInviteJSONRequestBody = FeedInviteAccept
+
+// LookupFeedInviteJSONRequestBody defines body for LookupFeedInvite for application/json ContentType.
+type LookupFeedInviteJSONRequestBody LookupFeedInviteJSONBody
+
+// CreateFeedJSONRequestBody defines body for CreateFeed for application/json ContentType.
+type CreateFeedJSONRequestBody = FeedCreate
+
+// UpdateFeedJSONRequestBody defines body for UpdateFeed for application/json ContentType.
+type UpdateFeedJSONRequestBody = FeedUpdate
+
+// CreateFeedBirthdayJSONRequestBody defines body for CreateFeedBirthday for application/json ContentType.
+type CreateFeedBirthdayJSONRequestBody = BirthdayPersonCreate
+
+// UpdateFeedBirthdayJSONRequestBody defines body for UpdateFeedBirthday for application/json ContentType.
+type UpdateFeedBirthdayJSONRequestBody = BirthdayPersonUpdate
+
+// CreateFeedInviteJSONRequestBody defines body for CreateFeedInvite for application/json ContentType.
+type CreateFeedInviteJSONRequestBody = FeedInviteCreate
+
+// LeaveFeedJSONRequestBody defines body for LeaveFeed for application/json ContentType.
+type LeaveFeedJSONRequestBody LeaveFeedJSONBody
+
+// UpdateFeedMemberJSONRequestBody defines body for UpdateFeedMember for application/json ContentType.
+type UpdateFeedMemberJSONRequestBody UpdateFeedMemberJSONBody
+
+// UpdateFeedPreferencesJSONRequestBody defines body for UpdateFeedPreferences for application/json ContentType.
+type UpdateFeedPreferencesJSONRequestBody = FeedPreferencesUpdate
+
+// RequestSubscriptionJSONRequestBody defines body for RequestSubscription for application/json ContentType.
+type RequestSubscriptionJSONRequestBody = SubscriptionRequest
+
+// TransferFeedOwnershipJSONRequestBody defines body for TransferFeedOwnership for application/json ContentType.
+type TransferFeedOwnershipJSONRequestBody TransferFeedOwnershipJSONBody
 
 // RedeemFrameCodeJSONRequestBody defines body for RedeemFrameCode for application/json ContentType.
 type RedeemFrameCodeJSONRequestBody RedeemFrameCodeJSONBody
@@ -4407,6 +6363,9 @@ type TransferOwnershipJSONRequestBody TransferOwnershipJSONBody
 // CreateTvLinkJSONRequestBody defines body for CreateTvLink for application/json ContentType.
 type CreateTvLinkJSONRequestBody = TvLinkCreate
 
+// StartGoogleImportJSONRequestBody defines body for StartGoogleImport for application/json ContentType.
+type StartGoogleImportJSONRequestBody = GoogleImportCreate
+
 // UpdateItemJSONRequestBody defines body for UpdateItem for application/json ContentType.
 type UpdateItemJSONRequestBody UpdateItemJSONBody
 
@@ -4422,6 +6381,21 @@ type OperatorSetLimitsJSONRequestBody = Limits
 // OperatorUpdateReservationJSONRequestBody defines body for OperatorUpdateReservation for application/json ContentType.
 type OperatorUpdateReservationJSONRequestBody OperatorUpdateReservationJSONBody
 
+// CreatePhotoSourceJSONRequestBody defines body for CreatePhotoSource for application/json ContentType.
+type CreatePhotoSourceJSONRequestBody = PhotoSourceCreate
+
+// UpdatePhotoSourceJSONRequestBody defines body for UpdatePhotoSource for application/json ContentType.
+type UpdatePhotoSourceJSONRequestBody = PhotoSourceUpdate
+
+// SyncPhotoSourceJSONRequestBody defines body for SyncPhotoSource for application/json ContentType.
+type SyncPhotoSourceJSONRequestBody SyncPhotoSourceJSONBody
+
+// ListImmichAlbumsJSONRequestBody defines body for ListImmichAlbums for application/json ContentType.
+type ListImmichAlbumsJSONRequestBody = ImmichConnection
+
+// TestPhotoSourceJSONRequestBody defines body for TestPhotoSource for application/json ContentType.
+type TestPhotoSourceJSONRequestBody = PhotoSourceConnection
+
 // CreateSendJSONRequestBody defines body for CreateSend for application/json ContentType.
 type CreateSendJSONRequestBody = SendCreate
 
@@ -4434,6 +6408,9 @@ type CreateShopReservationJSONRequestBody = ShopReservationCreate
 // CancelShopReservationJSONRequestBody defines body for CancelShopReservation for application/json ContentType.
 type CancelShopReservationJSONRequestBody CancelShopReservationJSONBody
 
+// UpdateSubscriptionJSONRequestBody defines body for UpdateSubscription for application/json ContentType.
+type UpdateSubscriptionJSONRequestBody = SubscriptionUpdate
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
@@ -4442,6 +6419,9 @@ type ServerInterface interface {
 
 	// (POST /v1/device/acks)
 	DeviceAck(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /v1/device/birthdays/{birthdayId}/greetings/{date})
+	DeviceGreetBirthday(w http.ResponseWriter, r *http.Request, birthdayId BirthdayId, date openapi_types.Date)
 
 	// (POST /v1/device/calendar/sync)
 	DeviceSyncCalendars(w http.ResponseWriter, r *http.Request)
@@ -4512,6 +6492,114 @@ type ServerInterface interface {
 	// (POST /v1/devices/token)
 	DeviceToken(w http.ResponseWriter, r *http.Request)
 
+	// (GET /v1/feed-invites/{token})
+	PreviewFeedInvite(w http.ResponseWriter, r *http.Request, token InviteToken)
+
+	// (POST /v1/feed-invites/{token}/accept)
+	AcceptFeedInvite(w http.ResponseWriter, r *http.Request, token InviteToken, params AcceptFeedInviteParams)
+
+	// (POST /v1/feed-invites:lookup)
+	LookupFeedInvite(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/feeds)
+	ListMyFeeds(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/feeds)
+	CreateFeed(w http.ResponseWriter, r *http.Request, params CreateFeedParams)
+
+	// (DELETE /v1/feeds/{feedId})
+	DeleteFeed(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId})
+	GetFeed(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (PATCH /v1/feeds/{feedId})
+	UpdateFeed(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId}/birthday-greetings)
+	ListFeedBirthdayGreetings(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedBirthdayGreetingsParams)
+
+	// (GET /v1/feeds/{feedId}/birthdays)
+	ListFeedBirthdays(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedBirthdaysParams)
+
+	// (POST /v1/feeds/{feedId}/birthdays)
+	CreateFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedBirthdayParams)
+
+	// (DELETE /v1/feeds/{feedId}/birthdays/{birthdayId})
+	RemoveFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (GET /v1/feeds/{feedId}/birthdays/{birthdayId})
+	GetFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (PATCH /v1/feeds/{feedId}/birthdays/{birthdayId})
+	UpdateFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/approve)
+	ApproveFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}/photo)
+	DeleteFeedBirthdayPhoto(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
+	RejectFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (GET /v1/feeds/{feedId}/invites)
+	ListFeedInvites(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/feeds/{feedId}/invites)
+	CreateFeedInvite(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedInviteParams)
+
+	// (DELETE /v1/feeds/{feedId}/invites/{inviteId})
+	RevokeFeedInvite(w http.ResponseWriter, r *http.Request, feedId FeedId, inviteId Id)
+
+	// (GET /v1/feeds/{feedId}/join-requests)
+	ListFeedJoinRequests(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision})
+	DecideFeedJoinRequest(w http.ResponseWriter, r *http.Request, feedId FeedId, requestId Id, decision DecideFeedJoinRequestParamsDecision)
+
+	// (POST /v1/feeds/{feedId}/leave)
+	LeaveFeed(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId}/members)
+	ListFeedMembers(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (DELETE /v1/feeds/{feedId}/members/{userId})
+	RemoveFeedMember(w http.ResponseWriter, r *http.Request, feedId FeedId, userId UserId, params RemoveFeedMemberParams)
+
+	// (PATCH /v1/feeds/{feedId}/members/{userId})
+	UpdateFeedMember(w http.ResponseWriter, r *http.Request, feedId FeedId, userId UserId)
+
+	// (GET /v1/feeds/{feedId}/photo-sources)
+	ListFeedPhotoSources(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId}/posts)
+	ListFeedPosts(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedPostsParams)
+
+	// (DELETE /v1/feeds/{feedId}/posts/{postId})
+	RemoveFeedPost(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId)
+
+	// (GET /v1/feeds/{feedId}/posts/{postId})
+	GetFeedPost(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId)
+
+	// (DELETE /v1/feeds/{feedId}/posts/{postId}/items/{itemId})
+	RemoveFeedPostItem(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId, itemId ItemId)
+
+	// (GET /v1/feeds/{feedId}/posts/{postId}/receipts)
+	GetFeedPostReceipts(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId)
+
+	// (PATCH /v1/feeds/{feedId}/preferences)
+	UpdateFeedPreferences(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (GET /v1/feeds/{feedId}/subscriptions)
+	ListFeedSubscriptions(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedSubscriptionsParams)
+
+	// (POST /v1/feeds/{feedId}/subscriptions)
+	RequestSubscription(w http.ResponseWriter, r *http.Request, feedId FeedId, params RequestSubscriptionParams)
+
+	// (POST /v1/feeds/{feedId}/transfer)
+	TransferFeedOwnership(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
 	// (GET /v1/frames)
 	ListMyFrames(w http.ResponseWriter, r *http.Request)
 
@@ -4534,10 +6622,13 @@ type ServerInterface interface {
 	CreateAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
 	// (DELETE /v1/frames/{frameId}/albums/{albumId})
-	DeleteAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id)
+	DeleteAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id, params DeleteAlbumParams)
 
 	// (PATCH /v1/frames/{frameId}/albums/{albumId})
 	UpdateAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id, params UpdateAlbumParams)
+
+	// (GET /v1/frames/{frameId}/albums/{albumId}/photo-sources)
+	ListAlbumPhotoSources(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id)
 
 	// (GET /v1/frames/{frameId}/calendar)
 	GetFrameCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -4635,6 +6726,9 @@ type ServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/settings)
 	UpdateFrameSettings(w http.ResponseWriter, r *http.Request, frameId FrameId, params UpdateFrameSettingsParams)
 
+	// (GET /v1/frames/{frameId}/subscriptions)
+	ListFrameSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId, params ListFrameSubscriptionsParams)
+
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
@@ -4649,6 +6743,18 @@ type ServerInterface interface {
 
 	// (GET /v1/geocode)
 	Geocode(w http.ResponseWriter, r *http.Request, params GeocodeParams)
+
+	// (GET /v1/google-imports)
+	ListMyGoogleImports(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/google-imports)
+	StartGoogleImport(w http.ResponseWriter, r *http.Request, params StartGoogleImportParams)
+
+	// (GET /v1/google-imports/{importId})
+	GetGoogleImport(w http.ResponseWriter, r *http.Request, importId ImportId)
+
+	// (POST /v1/google-imports/{importId}/cancel)
+	CancelGoogleImport(w http.ResponseWriter, r *http.Request, importId ImportId)
 
 	// (GET /v1/invites/{token})
 	PreviewInvite(w http.ResponseWriter, r *http.Request, token InviteToken)
@@ -4695,6 +6801,30 @@ type ServerInterface interface {
 	// (GET /v1/operator/stats)
 	OperatorStats(w http.ResponseWriter, r *http.Request)
 
+	// (GET /v1/photo-sources)
+	ListMyPhotoSources(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/photo-sources)
+	CreatePhotoSource(w http.ResponseWriter, r *http.Request, params CreatePhotoSourceParams)
+
+	// (DELETE /v1/photo-sources/{sourceId})
+	DeletePhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId, params DeletePhotoSourceParams)
+
+	// (GET /v1/photo-sources/{sourceId})
+	GetPhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId)
+
+	// (PATCH /v1/photo-sources/{sourceId})
+	UpdatePhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId)
+
+	// (POST /v1/photo-sources/{sourceId}/sync)
+	SyncPhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId)
+
+	// (POST /v1/photo-sources:immich-albums)
+	ListImmichAlbums(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/photo-sources:test)
+	TestPhotoSource(w http.ResponseWriter, r *http.Request)
+
 	// (GET /v1/sends)
 	ListMySends(w http.ResponseWriter, r *http.Request, params ListMySendsParams)
 
@@ -4724,6 +6854,27 @@ type ServerInterface interface {
 
 	// (GET /v1/stations/{stationId}/public)
 	GetStationPublic(w http.ResponseWriter, r *http.Request, stationId string)
+
+	// (DELETE /v1/subscriptions/{subscriptionId})
+	RemoveSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (GET /v1/subscriptions/{subscriptionId})
+	GetSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (PATCH /v1/subscriptions/{subscriptionId})
+	UpdateSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (POST /v1/subscriptions/{subscriptionId}/approve)
+	ApproveSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (POST /v1/subscriptions/{subscriptionId}/pause)
+	PauseSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (POST /v1/subscriptions/{subscriptionId}/reject)
+	RejectSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (POST /v1/subscriptions/{subscriptionId}/resume)
+	ResumeSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
@@ -4757,6 +6908,41 @@ func (siw *ServerInterfaceWrapper) DeviceAck(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceAck(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceGreetBirthday operation middleware
+func (siw *ServerInterfaceWrapper) DeviceGreetBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "date" -------------
+	var date openapi_types.Date
+
+	err = runtime.BindStyledParameterWithOptions("simple", "date", r.PathValue("date"), &date, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "date", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceGreetBirthday(w, r, birthdayId, date)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5443,6 +7629,1318 @@ func (siw *ServerInterfaceWrapper) DeviceToken(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// PreviewFeedInvite operation middleware
+func (siw *ServerInterfaceWrapper) PreviewFeedInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "token" -------------
+	var token InviteToken
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", r.PathValue("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PreviewFeedInvite(w, r, token)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AcceptFeedInvite operation middleware
+func (siw *ServerInterfaceWrapper) AcceptFeedInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "token" -------------
+	var token InviteToken
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", r.PathValue("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AcceptFeedInviteParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AcceptFeedInvite(w, r, token, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// LookupFeedInvite operation middleware
+func (siw *ServerInterfaceWrapper) LookupFeedInvite(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.LookupFeedInvite(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMyFeeds operation middleware
+func (siw *ServerInterfaceWrapper) ListMyFeeds(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMyFeeds(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFeed operation middleware
+func (siw *ServerInterfaceWrapper) CreateFeed(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFeedParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFeed(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteFeed operation middleware
+func (siw *ServerInterfaceWrapper) DeleteFeed(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteFeed(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeed operation middleware
+func (siw *ServerInterfaceWrapper) GetFeed(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeed(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateFeed operation middleware
+func (siw *ServerInterfaceWrapper) UpdateFeed(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateFeed(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedBirthdayGreetings operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedBirthdayGreetings(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListFeedBirthdayGreetingsParams
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "cursor", r.URL.Query(), &params.Cursor, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "cursor"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "birthday_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "birthday_id", r.URL.Query(), &params.BirthdayId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "birthday_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthday_id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "date" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "date", r.URL.Query(), &params.Date, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "date"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedBirthdayGreetings(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedBirthdays operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedBirthdays(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListFeedBirthdaysParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedBirthdays(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFeedBirthday operation middleware
+func (siw *ServerInterfaceWrapper) CreateFeedBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFeedBirthdayParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFeedBirthday(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveFeedBirthday operation middleware
+func (siw *ServerInterfaceWrapper) RemoveFeedBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveFeedBirthday(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeedBirthday operation middleware
+func (siw *ServerInterfaceWrapper) GetFeedBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeedBirthday(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateFeedBirthday operation middleware
+func (siw *ServerInterfaceWrapper) UpdateFeedBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateFeedBirthday(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ApproveFeedBirthday operation middleware
+func (siw *ServerInterfaceWrapper) ApproveFeedBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ApproveFeedBirthday(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteFeedBirthdayPhoto operation middleware
+func (siw *ServerInterfaceWrapper) DeleteFeedBirthdayPhoto(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteFeedBirthdayPhoto(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RejectFeedBirthday operation middleware
+func (siw *ServerInterfaceWrapper) RejectFeedBirthday(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "birthdayId" -------------
+	var birthdayId BirthdayId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "birthdayId", r.PathValue("birthdayId"), &birthdayId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "birthdayId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RejectFeedBirthday(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedInvites operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedInvites(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedInvites(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFeedInvite operation middleware
+func (siw *ServerInterfaceWrapper) CreateFeedInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFeedInviteParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFeedInvite(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RevokeFeedInvite operation middleware
+func (siw *ServerInterfaceWrapper) RevokeFeedInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "inviteId" -------------
+	var inviteId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "inviteId", r.PathValue("inviteId"), &inviteId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "inviteId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RevokeFeedInvite(w, r, feedId, inviteId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedJoinRequests operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedJoinRequests(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedJoinRequests(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DecideFeedJoinRequest operation middleware
+func (siw *ServerInterfaceWrapper) DecideFeedJoinRequest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "requestId" -------------
+	var requestId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", r.PathValue("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "requestId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "decision" -------------
+	var decision DecideFeedJoinRequestParamsDecision
+
+	err = runtime.BindStyledParameterWithOptions("simple", "decision", r.PathValue("decision"), &decision, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "decision", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DecideFeedJoinRequest(w, r, feedId, requestId, decision)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// LeaveFeed operation middleware
+func (siw *ServerInterfaceWrapper) LeaveFeed(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.LeaveFeed(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedMembers operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedMembers(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedMembers(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveFeedMember operation middleware
+func (siw *ServerInterfaceWrapper) RemoveFeedMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params RemoveFeedMemberParams
+
+	// ------------- Optional query parameter "remove_posts" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "remove_posts", r.URL.Query(), &params.RemovePosts, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "remove_posts"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "remove_posts", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveFeedMember(w, r, feedId, userId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateFeedMember operation middleware
+func (siw *ServerInterfaceWrapper) UpdateFeedMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", r.PathValue("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateFeedMember(w, r, feedId, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedPhotoSources operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedPhotoSources(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedPhotoSources(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedPosts operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedPosts(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListFeedPostsParams
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "cursor", r.URL.Query(), &params.Cursor, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "cursor"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "poster_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "poster_id", r.URL.Query(), &params.PosterId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "poster_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "poster_id", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedPosts(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveFeedPost operation middleware
+func (siw *ServerInterfaceWrapper) RemoveFeedPost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveFeedPost(w, r, feedId, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeedPost operation middleware
+func (siw *ServerInterfaceWrapper) GetFeedPost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeedPost(w, r, feedId, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveFeedPostItem operation middleware
+func (siw *ServerInterfaceWrapper) RemoveFeedPostItem(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "itemId" -------------
+	var itemId ItemId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "itemId", r.PathValue("itemId"), &itemId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "itemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveFeedPostItem(w, r, feedId, postId, itemId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFeedPostReceipts operation middleware
+func (siw *ServerInterfaceWrapper) GetFeedPostReceipts(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "postId" -------------
+	var postId PostId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", r.PathValue("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFeedPostReceipts(w, r, feedId, postId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateFeedPreferences operation middleware
+func (siw *ServerInterfaceWrapper) UpdateFeedPreferences(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateFeedPreferences(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedSubscriptions operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedSubscriptions(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListFeedSubscriptionsParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedSubscriptions(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RequestSubscription operation middleware
+func (siw *ServerInterfaceWrapper) RequestSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params RequestSubscriptionParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RequestSubscription(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TransferFeedOwnership operation middleware
+func (siw *ServerInterfaceWrapper) TransferFeedOwnership(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TransferFeedOwnership(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListMyFrames operation middleware
 func (siw *ServerInterfaceWrapper) ListMyFrames(w http.ResponseWriter, r *http.Request) {
 
@@ -5652,8 +9150,24 @@ func (siw *ServerInterfaceWrapper) DeleteAlbum(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params DeleteAlbumParams
+
+	// ------------- Optional query parameter "remove_source_items" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "remove_source_items", r.URL.Query(), &params.RemoveSourceItems, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "remove_source_items"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "remove_source_items", Err: err})
+		}
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteAlbum(w, r, frameId, albumId)
+		siw.Handler.DeleteAlbum(w, r, frameId, albumId, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5717,6 +9231,41 @@ func (siw *ServerInterfaceWrapper) UpdateAlbum(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateAlbum(w, r, frameId, albumId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListAlbumPhotoSources operation middleware
+func (siw *ServerInterfaceWrapper) ListAlbumPhotoSources(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "albumId" -------------
+	var albumId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "albumId", r.PathValue("albumId"), &albumId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "albumId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListAlbumPhotoSources(w, r, frameId, albumId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -6607,6 +10156,19 @@ func (siw *ServerInterfaceWrapper) ListPlacements(w http.ResponseWriter, r *http
 		return
 	}
 
+	// ------------- Optional query parameter "feed_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "feed_id", r.URL.Query(), &params.FeedId, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "feed_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feed_id", Err: err})
+		}
+		return
+	}
+
 	// ------------- Optional query parameter "on_this_day" -------------
 
 	err = runtime.BindQueryParameterWithOptions("form", true, false, "on_this_day", r.URL.Query(), &params.OnThisDay, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
@@ -6922,6 +10484,48 @@ func (siw *ServerInterfaceWrapper) UpdateFrameSettings(w http.ResponseWriter, r 
 	handler.ServeHTTP(w, r)
 }
 
+// ListFrameSubscriptions operation middleware
+func (siw *ServerInterfaceWrapper) ListFrameSubscriptions(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListFrameSubscriptionsParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFrameSubscriptions(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // TransferOwnership operation middleware
 func (siw *ServerInterfaceWrapper) TransferOwnership(w http.ResponseWriter, r *http.Request) {
 
@@ -7085,6 +10689,113 @@ func (siw *ServerInterfaceWrapper) Geocode(w http.ResponseWriter, r *http.Reques
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Geocode(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMyGoogleImports operation middleware
+func (siw *ServerInterfaceWrapper) ListMyGoogleImports(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMyGoogleImports(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// StartGoogleImport operation middleware
+func (siw *ServerInterfaceWrapper) StartGoogleImport(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params StartGoogleImportParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.StartGoogleImport(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetGoogleImport operation middleware
+func (siw *ServerInterfaceWrapper) GetGoogleImport(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "importId" -------------
+	var importId ImportId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "importId", r.PathValue("importId"), &importId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "importId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetGoogleImport(w, r, importId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CancelGoogleImport operation middleware
+func (siw *ServerInterfaceWrapper) CancelGoogleImport(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "importId" -------------
+	var importId ImportId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "importId", r.PathValue("importId"), &importId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "importId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CancelGoogleImport(w, r, importId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -7393,6 +11104,209 @@ func (siw *ServerInterfaceWrapper) OperatorStats(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OperatorStats(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMyPhotoSources operation middleware
+func (siw *ServerInterfaceWrapper) ListMyPhotoSources(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMyPhotoSources(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreatePhotoSource operation middleware
+func (siw *ServerInterfaceWrapper) CreatePhotoSource(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreatePhotoSourceParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreatePhotoSource(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeletePhotoSource operation middleware
+func (siw *ServerInterfaceWrapper) DeletePhotoSource(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "sourceId" -------------
+	var sourceId SourceId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sourceId", r.PathValue("sourceId"), &sourceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sourceId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params DeletePhotoSourceParams
+
+	// ------------- Required query parameter "remove_items" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "remove_items", r.URL.Query(), &params.RemoveItems, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "remove_items"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "remove_items", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeletePhotoSource(w, r, sourceId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPhotoSource operation middleware
+func (siw *ServerInterfaceWrapper) GetPhotoSource(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "sourceId" -------------
+	var sourceId SourceId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sourceId", r.PathValue("sourceId"), &sourceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sourceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPhotoSource(w, r, sourceId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdatePhotoSource operation middleware
+func (siw *ServerInterfaceWrapper) UpdatePhotoSource(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "sourceId" -------------
+	var sourceId SourceId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sourceId", r.PathValue("sourceId"), &sourceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sourceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdatePhotoSource(w, r, sourceId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SyncPhotoSource operation middleware
+func (siw *ServerInterfaceWrapper) SyncPhotoSource(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "sourceId" -------------
+	var sourceId SourceId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sourceId", r.PathValue("sourceId"), &sourceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sourceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SyncPhotoSource(w, r, sourceId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListImmichAlbums operation middleware
+func (siw *ServerInterfaceWrapper) ListImmichAlbums(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListImmichAlbums(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TestPhotoSource operation middleware
+func (siw *ServerInterfaceWrapper) TestPhotoSource(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TestPhotoSource(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -7716,6 +11630,188 @@ func (siw *ServerInterfaceWrapper) GetStationPublic(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// RemoveSubscription operation middleware
+func (siw *ServerInterfaceWrapper) RemoveSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetSubscription operation middleware
+func (siw *ServerInterfaceWrapper) GetSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateSubscription operation middleware
+func (siw *ServerInterfaceWrapper) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ApproveSubscription operation middleware
+func (siw *ServerInterfaceWrapper) ApproveSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ApproveSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PauseSubscription operation middleware
+func (siw *ServerInterfaceWrapper) PauseSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PauseSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RejectSubscription operation middleware
+func (siw *ServerInterfaceWrapper) RejectSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RejectSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ResumeSubscription operation middleware
+func (siw *ServerInterfaceWrapper) ResumeSubscription(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "subscriptionId" -------------
+	var subscriptionId SubscriptionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "subscriptionId", r.PathValue("subscriptionId"), &subscriptionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "subscriptionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResumeSubscription(w, r, subscriptionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetTvSlideshow operation middleware
 func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
 
@@ -7864,6 +11960,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/.well-known/kinframe", wrapper.GetDiscovery)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/acks", wrapper.DeviceAck)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/birthdays/{birthdayId}/greetings/{date}", wrapper.DeviceGreetBirthday)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/calendar/sync", wrapper.DeviceSyncCalendars)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/changes", wrapper.DeviceGetChanges)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/code", wrapper.DeviceGetCode)
@@ -7887,6 +11984,42 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/state", wrapper.DeviceGetState)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/enroll", wrapper.EnrollDevice)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/token", wrapper.DeviceToken)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feed-invites/{token}", wrapper.PreviewFeedInvite)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feed-invites/{token}/accept", wrapper.AcceptFeedInvite)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feed-invites:lookup", wrapper.LookupFeedInvite)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds", wrapper.ListMyFeeds)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds", wrapper.CreateFeed)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}", wrapper.DeleteFeed)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}", wrapper.GetFeed)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}", wrapper.UpdateFeed)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/birthday-greetings", wrapper.ListFeedBirthdayGreetings)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays", wrapper.ListFeedBirthdays)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays", wrapper.CreateFeedBirthday)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}", wrapper.RemoveFeedBirthday)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}", wrapper.GetFeedBirthday)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}", wrapper.UpdateFeedBirthday)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/approve", wrapper.ApproveFeedBirthday)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/photo", wrapper.DeleteFeedBirthdayPhoto)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/reject", wrapper.RejectFeedBirthday)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/invites", wrapper.ListFeedInvites)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/invites", wrapper.CreateFeedInvite)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/invites/{inviteId}", wrapper.RevokeFeedInvite)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/join-requests", wrapper.ListFeedJoinRequests)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/join-requests/{requestId}/{decision}", wrapper.DecideFeedJoinRequest)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/leave", wrapper.LeaveFeed)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/members", wrapper.ListFeedMembers)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/members/{userId}", wrapper.RemoveFeedMember)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/members/{userId}", wrapper.UpdateFeedMember)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/photo-sources", wrapper.ListFeedPhotoSources)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/posts", wrapper.ListFeedPosts)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/posts/{postId}", wrapper.RemoveFeedPost)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/posts/{postId}", wrapper.GetFeedPost)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/posts/{postId}/items/{itemId}", wrapper.RemoveFeedPostItem)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/posts/{postId}/receipts", wrapper.GetFeedPostReceipts)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/preferences", wrapper.UpdateFeedPreferences)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.ListFeedSubscriptions)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.RequestSubscription)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/transfer", wrapper.TransferFeedOwnership)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames", wrapper.ListMyFrames)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}", wrapper.RemoveFrame)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}", wrapper.GetFrame)
@@ -7895,6 +12028,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/albums", wrapper.CreateAlbum)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}", wrapper.DeleteAlbum)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}", wrapper.UpdateAlbum)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}/photo-sources", wrapper.ListAlbumPhotoSources)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/calendar", wrapper.GetFrameCalendar)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/calendars", wrapper.ListCalendars)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars", wrapper.CreateCalendar)
@@ -7927,12 +12061,17 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/replace-device", wrapper.ReplaceDevice)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/subscriptions", wrapper.ListFrameSubscriptions)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/transfer", wrapper.TransferOwnership)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.ListTvLinks)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.CreateTvLink)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links/{linkId}", wrapper.RevokeTvLink)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/redeem", wrapper.RedeemFrameCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/geocode", wrapper.Geocode)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/google-imports", wrapper.ListMyGoogleImports)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/google-imports", wrapper.StartGoogleImport)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/google-imports/{importId}", wrapper.GetGoogleImport)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/google-imports/{importId}/cancel", wrapper.CancelGoogleImport)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/invites/{token}", wrapper.PreviewInvite)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/invites/{token}/accept", wrapper.AcceptInvite)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/items/{itemId}", wrapper.UpdateItem)
@@ -7948,6 +12087,14 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/operator/reservations/{reservationId}", wrapper.OperatorUpdateReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/stats", wrapper.OperatorStats)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/photo-sources", wrapper.ListMyPhotoSources)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources", wrapper.CreatePhotoSource)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/photo-sources/{sourceId}", wrapper.DeletePhotoSource)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/photo-sources/{sourceId}", wrapper.GetPhotoSource)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/photo-sources/{sourceId}", wrapper.UpdatePhotoSource)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources/{sourceId}/sync", wrapper.SyncPhotoSource)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources:immich-albums", wrapper.ListImmichAlbums)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/photo-sources:test", wrapper.TestPhotoSource)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends", wrapper.ListMySends)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends", wrapper.CreateSend)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.Unsend)
@@ -7958,6 +12105,13 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/{stationId}/public", wrapper.GetStationPublic)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/latest", wrapper.GetStationLatest)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/public", wrapper.ListPublicStations)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}", wrapper.RemoveSubscription)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}", wrapper.GetSubscription)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}", wrapper.UpdateSubscription)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/approve", wrapper.ApproveSubscription)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/pause", wrapper.PauseSubscription)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/reject", wrapper.RejectSubscription)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/resume", wrapper.ResumeSubscription)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
@@ -8000,6 +12154,67 @@ type DeviceAck204Response struct {
 func (response DeviceAck204Response) VisitDeviceAckResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
+}
+
+type DeviceGreetBirthdayRequestObject struct {
+	BirthdayId BirthdayId         `json:"birthdayId"`
+	Date       openapi_types.Date `json:"date"`
+}
+
+type DeviceGreetBirthdayResponseObject interface {
+	VisitDeviceGreetBirthdayResponse(w http.ResponseWriter) error
+}
+
+type DeviceGreetBirthday204Response struct {
+}
+
+func (response DeviceGreetBirthday204Response) VisitDeviceGreetBirthdayResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceGreetBirthday404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DeviceGreetBirthday404ApplicationProblemPlusJSONResponse) VisitDeviceGreetBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceGreetBirthday422ApplicationProblemPlusJSONResponse Problem
+
+func (response DeviceGreetBirthday422ApplicationProblemPlusJSONResponse) VisitDeviceGreetBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceGreetBirthday429ApplicationProblemPlusJSONResponse Problem
+
+func (response DeviceGreetBirthday429ApplicationProblemPlusJSONResponse) VisitDeviceGreetBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type DeviceSyncCalendarsRequestObject struct {
@@ -8590,7 +12805,7 @@ type EnrollDevice201JSONResponse struct {
 	// DeviceId UUIDv7
 	DeviceId Id `json:"device_id"`
 
-	// DeviceSecret 256-bit random
+	// DeviceSecret 256-bit random, base64url. Shown only once.
 	DeviceSecret string `json:"device_secret"`
 }
 
@@ -8661,6 +12876,1574 @@ func (response DeviceToken401ApplicationProblemPlusJSONResponse) VisitDeviceToke
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PreviewFeedInviteRequestObject struct {
+	Token InviteToken `json:"token"`
+}
+
+type PreviewFeedInviteResponseObject interface {
+	VisitPreviewFeedInviteResponse(w http.ResponseWriter) error
+}
+
+type PreviewFeedInvite200JSONResponse FeedInvitePreview
+
+func (response PreviewFeedInvite200JSONResponse) VisitPreviewFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PreviewFeedInvite404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response PreviewFeedInvite404ApplicationProblemPlusJSONResponse) VisitPreviewFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PreviewFeedInvite410ApplicationProblemPlusJSONResponse Problem
+
+func (response PreviewFeedInvite410ApplicationProblemPlusJSONResponse) VisitPreviewFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(410)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AcceptFeedInviteRequestObject struct {
+	Token  InviteToken `json:"token"`
+	Params AcceptFeedInviteParams
+	Body   *AcceptFeedInviteJSONRequestBody
+}
+
+type AcceptFeedInviteResponseObject interface {
+	VisitAcceptFeedInviteResponse(w http.ResponseWriter) error
+}
+
+type AcceptFeedInvite200JSONResponse FeedInviteResult
+
+func (response AcceptFeedInvite200JSONResponse) VisitAcceptFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AcceptFeedInvitedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response AcceptFeedInvitedefaultApplicationProblemPlusJSONResponse) VisitAcceptFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type LookupFeedInviteRequestObject struct {
+	Body *LookupFeedInviteJSONRequestBody
+}
+
+type LookupFeedInviteResponseObject interface {
+	VisitLookupFeedInviteResponse(w http.ResponseWriter) error
+}
+
+type LookupFeedInvite200JSONResponse FeedInvitePreview
+
+func (response LookupFeedInvite200JSONResponse) VisitLookupFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type LookupFeedInvite404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response LookupFeedInvite404ApplicationProblemPlusJSONResponse) VisitLookupFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type LookupFeedInvite410ApplicationProblemPlusJSONResponse Problem
+
+func (response LookupFeedInvite410ApplicationProblemPlusJSONResponse) VisitLookupFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(410)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type LookupFeedInvite429ApplicationProblemPlusJSONResponse Problem
+
+func (response LookupFeedInvite429ApplicationProblemPlusJSONResponse) VisitLookupFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyFeedsRequestObject struct {
+}
+
+type ListMyFeedsResponseObject interface {
+	VisitListMyFeedsResponse(w http.ResponseWriter) error
+}
+
+type ListMyFeeds200JSONResponse []FeedSummary
+
+func (response ListMyFeeds200JSONResponse) VisitListMyFeedsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedRequestObject struct {
+	Params CreateFeedParams
+	Body   *CreateFeedJSONRequestBody
+}
+
+type CreateFeedResponseObject interface {
+	VisitCreateFeedResponse(w http.ResponseWriter) error
+}
+
+type CreateFeed201JSONResponse Feed
+
+func (response CreateFeed201JSONResponse) VisitCreateFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeed409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateFeed409ApplicationProblemPlusJSONResponse) VisitCreateFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeeddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFeeddefaultApplicationProblemPlusJSONResponse) VisitCreateFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteFeedRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type DeleteFeedResponseObject interface {
+	VisitDeleteFeedResponse(w http.ResponseWriter) error
+}
+
+type DeleteFeed204Response struct {
+}
+
+func (response DeleteFeed204Response) VisitDeleteFeedResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteFeeddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteFeeddefaultApplicationProblemPlusJSONResponse) VisitDeleteFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type GetFeedResponseObject interface {
+	VisitGetFeedResponse(w http.ResponseWriter) error
+}
+
+type GetFeed200JSONResponse Feed
+
+func (response GetFeed200JSONResponse) VisitGetFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeeddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeeddefaultApplicationProblemPlusJSONResponse) VisitGetFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *UpdateFeedJSONRequestBody
+}
+
+type UpdateFeedResponseObject interface {
+	VisitUpdateFeedResponse(w http.ResponseWriter) error
+}
+
+type UpdateFeed200JSONResponse Feed
+
+func (response UpdateFeed200JSONResponse) VisitUpdateFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeeddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateFeeddefaultApplicationProblemPlusJSONResponse) VisitUpdateFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedBirthdayGreetingsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params ListFeedBirthdayGreetingsParams
+}
+
+type ListFeedBirthdayGreetingsResponseObject interface {
+	VisitListFeedBirthdayGreetingsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedBirthdayGreetings200JSONResponse struct {
+	Greetings  []FeedBirthdayGreeting `json:"greetings"`
+	NextCursor *string                `json:"next_cursor"`
+}
+
+func (response ListFeedBirthdayGreetings200JSONResponse) VisitListFeedBirthdayGreetingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedBirthdayGreetingsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedBirthdayGreetingsdefaultApplicationProblemPlusJSONResponse) VisitListFeedBirthdayGreetingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedBirthdaysRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params ListFeedBirthdaysParams
+}
+
+type ListFeedBirthdaysResponseObject interface {
+	VisitListFeedBirthdaysResponse(w http.ResponseWriter) error
+}
+
+type ListFeedBirthdays200JSONResponse []BirthdayPerson
+
+func (response ListFeedBirthdays200JSONResponse) VisitListFeedBirthdaysResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedBirthdaysdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedBirthdaysdefaultApplicationProblemPlusJSONResponse) VisitListFeedBirthdaysResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedBirthdayRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params CreateFeedBirthdayParams
+	Body   *CreateFeedBirthdayJSONRequestBody
+}
+
+type CreateFeedBirthdayResponseObject interface {
+	VisitCreateFeedBirthdayResponse(w http.ResponseWriter) error
+}
+
+type CreateFeedBirthday201JSONResponse BirthdayPerson
+
+func (response CreateFeedBirthday201JSONResponse) VisitCreateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedBirthday409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateFeedBirthday409ApplicationProblemPlusJSONResponse) VisitCreateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedBirthday422ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFeedBirthday422ApplicationProblemPlusJSONResponse) VisitCreateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedBirthdaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFeedBirthdaydefaultApplicationProblemPlusJSONResponse) VisitCreateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveFeedBirthdayRequestObject struct {
+	FeedId     FeedId     `json:"feedId"`
+	BirthdayId BirthdayId `json:"birthdayId"`
+}
+
+type RemoveFeedBirthdayResponseObject interface {
+	VisitRemoveFeedBirthdayResponse(w http.ResponseWriter) error
+}
+
+type RemoveFeedBirthday204Response struct {
+}
+
+func (response RemoveFeedBirthday204Response) VisitRemoveFeedBirthdayResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveFeedBirthdaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveFeedBirthdaydefaultApplicationProblemPlusJSONResponse) VisitRemoveFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedBirthdayRequestObject struct {
+	FeedId     FeedId     `json:"feedId"`
+	BirthdayId BirthdayId `json:"birthdayId"`
+}
+
+type GetFeedBirthdayResponseObject interface {
+	VisitGetFeedBirthdayResponse(w http.ResponseWriter) error
+}
+
+type GetFeedBirthday200JSONResponse BirthdayPerson
+
+func (response GetFeedBirthday200JSONResponse) VisitGetFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedBirthdaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeedBirthdaydefaultApplicationProblemPlusJSONResponse) VisitGetFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedBirthdayRequestObject struct {
+	FeedId     FeedId     `json:"feedId"`
+	BirthdayId BirthdayId `json:"birthdayId"`
+	Body       *UpdateFeedBirthdayJSONRequestBody
+}
+
+type UpdateFeedBirthdayResponseObject interface {
+	VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error
+}
+
+type UpdateFeedBirthday200JSONResponse BirthdayPerson
+
+func (response UpdateFeedBirthday200JSONResponse) VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedBirthday409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateFeedBirthday409ApplicationProblemPlusJSONResponse) VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedBirthday422ApplicationProblemPlusJSONResponse Problem
+
+func (response UpdateFeedBirthday422ApplicationProblemPlusJSONResponse) VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedBirthdaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateFeedBirthdaydefaultApplicationProblemPlusJSONResponse) VisitUpdateFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveFeedBirthdayRequestObject struct {
+	FeedId     FeedId     `json:"feedId"`
+	BirthdayId BirthdayId `json:"birthdayId"`
+}
+
+type ApproveFeedBirthdayResponseObject interface {
+	VisitApproveFeedBirthdayResponse(w http.ResponseWriter) error
+}
+
+type ApproveFeedBirthday200JSONResponse BirthdayPerson
+
+func (response ApproveFeedBirthday200JSONResponse) VisitApproveFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveFeedBirthday409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ApproveFeedBirthday409ApplicationProblemPlusJSONResponse) VisitApproveFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveFeedBirthdaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ApproveFeedBirthdaydefaultApplicationProblemPlusJSONResponse) VisitApproveFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteFeedBirthdayPhotoRequestObject struct {
+	FeedId     FeedId     `json:"feedId"`
+	BirthdayId BirthdayId `json:"birthdayId"`
+}
+
+type DeleteFeedBirthdayPhotoResponseObject interface {
+	VisitDeleteFeedBirthdayPhotoResponse(w http.ResponseWriter) error
+}
+
+type DeleteFeedBirthdayPhoto200JSONResponse BirthdayPerson
+
+func (response DeleteFeedBirthdayPhoto200JSONResponse) VisitDeleteFeedBirthdayPhotoResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteFeedBirthdayPhotodefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteFeedBirthdayPhotodefaultApplicationProblemPlusJSONResponse) VisitDeleteFeedBirthdayPhotoResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectFeedBirthdayRequestObject struct {
+	FeedId     FeedId     `json:"feedId"`
+	BirthdayId BirthdayId `json:"birthdayId"`
+}
+
+type RejectFeedBirthdayResponseObject interface {
+	VisitRejectFeedBirthdayResponse(w http.ResponseWriter) error
+}
+
+type RejectFeedBirthday200JSONResponse BirthdayPerson
+
+func (response RejectFeedBirthday200JSONResponse) VisitRejectFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectFeedBirthday409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response RejectFeedBirthday409ApplicationProblemPlusJSONResponse) VisitRejectFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectFeedBirthdaydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RejectFeedBirthdaydefaultApplicationProblemPlusJSONResponse) VisitRejectFeedBirthdayResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedInvitesRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedInvitesResponseObject interface {
+	VisitListFeedInvitesResponse(w http.ResponseWriter) error
+}
+
+type ListFeedInvites200JSONResponse []FeedInvite
+
+func (response ListFeedInvites200JSONResponse) VisitListFeedInvitesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedInvitesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedInvitesdefaultApplicationProblemPlusJSONResponse) VisitListFeedInvitesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedInviteRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params CreateFeedInviteParams
+	Body   *CreateFeedInviteJSONRequestBody
+}
+
+type CreateFeedInviteResponseObject interface {
+	VisitCreateFeedInviteResponse(w http.ResponseWriter) error
+}
+
+type CreateFeedInvite201JSONResponse FeedInvite
+
+func (response CreateFeedInvite201JSONResponse) VisitCreateFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedInvitedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFeedInvitedefaultApplicationProblemPlusJSONResponse) VisitCreateFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RevokeFeedInviteRequestObject struct {
+	FeedId   FeedId `json:"feedId"`
+	InviteId Id     `json:"inviteId"`
+}
+
+type RevokeFeedInviteResponseObject interface {
+	VisitRevokeFeedInviteResponse(w http.ResponseWriter) error
+}
+
+type RevokeFeedInvite204Response struct {
+}
+
+func (response RevokeFeedInvite204Response) VisitRevokeFeedInviteResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RevokeFeedInvitedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RevokeFeedInvitedefaultApplicationProblemPlusJSONResponse) VisitRevokeFeedInviteResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedJoinRequestsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedJoinRequestsResponseObject interface {
+	VisitListFeedJoinRequestsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedJoinRequests200JSONResponse []JoinRequest
+
+func (response ListFeedJoinRequests200JSONResponse) VisitListFeedJoinRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedJoinRequestsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedJoinRequestsdefaultApplicationProblemPlusJSONResponse) VisitListFeedJoinRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DecideFeedJoinRequestRequestObject struct {
+	FeedId    FeedId                              `json:"feedId"`
+	RequestId Id                                  `json:"requestId"`
+	Decision  DecideFeedJoinRequestParamsDecision `json:"decision"`
+}
+
+type DecideFeedJoinRequestResponseObject interface {
+	VisitDecideFeedJoinRequestResponse(w http.ResponseWriter) error
+}
+
+type DecideFeedJoinRequest204Response struct {
+}
+
+func (response DecideFeedJoinRequest204Response) VisitDecideFeedJoinRequestResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DecideFeedJoinRequest409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DecideFeedJoinRequest409ApplicationProblemPlusJSONResponse) VisitDecideFeedJoinRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DecideFeedJoinRequestdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DecideFeedJoinRequestdefaultApplicationProblemPlusJSONResponse) VisitDecideFeedJoinRequestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type LeaveFeedRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *LeaveFeedJSONRequestBody
+}
+
+type LeaveFeedResponseObject interface {
+	VisitLeaveFeedResponse(w http.ResponseWriter) error
+}
+
+type LeaveFeed204Response struct {
+}
+
+func (response LeaveFeed204Response) VisitLeaveFeedResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type LeaveFeeddefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response LeaveFeeddefaultApplicationProblemPlusJSONResponse) VisitLeaveFeedResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedMembersRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedMembersResponseObject interface {
+	VisitListFeedMembersResponse(w http.ResponseWriter) error
+}
+
+type ListFeedMembers200JSONResponse []FeedMember
+
+func (response ListFeedMembers200JSONResponse) VisitListFeedMembersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedMembersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedMembersdefaultApplicationProblemPlusJSONResponse) VisitListFeedMembersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveFeedMemberRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	UserId UserId `json:"userId"`
+	Params RemoveFeedMemberParams
+}
+
+type RemoveFeedMemberResponseObject interface {
+	VisitRemoveFeedMemberResponse(w http.ResponseWriter) error
+}
+
+type RemoveFeedMember204Response struct {
+}
+
+func (response RemoveFeedMember204Response) VisitRemoveFeedMemberResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveFeedMemberdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveFeedMemberdefaultApplicationProblemPlusJSONResponse) VisitRemoveFeedMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedMemberRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	UserId UserId `json:"userId"`
+	Body   *UpdateFeedMemberJSONRequestBody
+}
+
+type UpdateFeedMemberResponseObject interface {
+	VisitUpdateFeedMemberResponse(w http.ResponseWriter) error
+}
+
+type UpdateFeedMember200JSONResponse FeedMember
+
+func (response UpdateFeedMember200JSONResponse) VisitUpdateFeedMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedMemberdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateFeedMemberdefaultApplicationProblemPlusJSONResponse) VisitUpdateFeedMemberResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedPhotoSourcesRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedPhotoSourcesResponseObject interface {
+	VisitListFeedPhotoSourcesResponse(w http.ResponseWriter) error
+}
+
+type ListFeedPhotoSources200JSONResponse []PhotoSource
+
+func (response ListFeedPhotoSources200JSONResponse) VisitListFeedPhotoSourcesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedPhotoSourcesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedPhotoSourcesdefaultApplicationProblemPlusJSONResponse) VisitListFeedPhotoSourcesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedPostsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params ListFeedPostsParams
+}
+
+type ListFeedPostsResponseObject interface {
+	VisitListFeedPostsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedPosts200JSONResponse struct {
+	NextCursor *string    `json:"next_cursor"`
+	Posts      []FeedPost `json:"posts"`
+}
+
+func (response ListFeedPosts200JSONResponse) VisitListFeedPostsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedPostsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedPostsdefaultApplicationProblemPlusJSONResponse) VisitListFeedPostsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveFeedPostRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	PostId PostId `json:"postId"`
+}
+
+type RemoveFeedPostResponseObject interface {
+	VisitRemoveFeedPostResponse(w http.ResponseWriter) error
+}
+
+type RemoveFeedPost204Response struct {
+}
+
+func (response RemoveFeedPost204Response) VisitRemoveFeedPostResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveFeedPostdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveFeedPostdefaultApplicationProblemPlusJSONResponse) VisitRemoveFeedPostResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedPostRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	PostId PostId `json:"postId"`
+}
+
+type GetFeedPostResponseObject interface {
+	VisitGetFeedPostResponse(w http.ResponseWriter) error
+}
+
+type GetFeedPost200JSONResponse FeedPost
+
+func (response GetFeedPost200JSONResponse) VisitGetFeedPostResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedPostdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeedPostdefaultApplicationProblemPlusJSONResponse) VisitGetFeedPostResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveFeedPostItemRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	PostId PostId `json:"postId"`
+	ItemId ItemId `json:"itemId"`
+}
+
+type RemoveFeedPostItemResponseObject interface {
+	VisitRemoveFeedPostItemResponse(w http.ResponseWriter) error
+}
+
+type RemoveFeedPostItem204Response struct {
+}
+
+func (response RemoveFeedPostItem204Response) VisitRemoveFeedPostItemResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveFeedPostItemdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveFeedPostItemdefaultApplicationProblemPlusJSONResponse) VisitRemoveFeedPostItemResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedPostReceiptsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	PostId PostId `json:"postId"`
+}
+
+type GetFeedPostReceiptsResponseObject interface {
+	VisitGetFeedPostReceiptsResponse(w http.ResponseWriter) error
+}
+
+type GetFeedPostReceipts200JSONResponse FeedPostReceipts
+
+func (response GetFeedPostReceipts200JSONResponse) VisitGetFeedPostReceiptsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFeedPostReceiptsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFeedPostReceiptsdefaultApplicationProblemPlusJSONResponse) VisitGetFeedPostReceiptsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedPreferencesRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *UpdateFeedPreferencesJSONRequestBody
+}
+
+type UpdateFeedPreferencesResponseObject interface {
+	VisitUpdateFeedPreferencesResponse(w http.ResponseWriter) error
+}
+
+type UpdateFeedPreferences200JSONResponse Feed
+
+func (response UpdateFeedPreferences200JSONResponse) VisitUpdateFeedPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateFeedPreferencesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateFeedPreferencesdefaultApplicationProblemPlusJSONResponse) VisitUpdateFeedPreferencesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedSubscriptionsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params ListFeedSubscriptionsParams
+}
+
+type ListFeedSubscriptionsResponseObject interface {
+	VisitListFeedSubscriptionsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedSubscriptions200JSONResponse []Subscription
+
+func (response ListFeedSubscriptions200JSONResponse) VisitListFeedSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedSubscriptionsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedSubscriptionsdefaultApplicationProblemPlusJSONResponse) VisitListFeedSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RequestSubscriptionRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params RequestSubscriptionParams
+	Body   *RequestSubscriptionJSONRequestBody
+}
+
+type RequestSubscriptionResponseObject interface {
+	VisitRequestSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type RequestSubscription201JSONResponse Subscription
+
+func (response RequestSubscription201JSONResponse) VisitRequestSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RequestSubscription403ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response RequestSubscription403ApplicationProblemPlusJSONResponse) VisitRequestSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RequestSubscription409ApplicationProblemPlusJSONResponse Problem
+
+func (response RequestSubscription409ApplicationProblemPlusJSONResponse) VisitRequestSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RequestSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RequestSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitRequestSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TransferFeedOwnershipRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Body   *TransferFeedOwnershipJSONRequestBody
+}
+
+type TransferFeedOwnershipResponseObject interface {
+	VisitTransferFeedOwnershipResponse(w http.ResponseWriter) error
+}
+
+type TransferFeedOwnership204Response struct {
+}
+
+func (response TransferFeedOwnership204Response) VisitTransferFeedOwnershipResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type TransferFeedOwnershipdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TransferFeedOwnershipdefaultApplicationProblemPlusJSONResponse) VisitTransferFeedOwnershipResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -8913,6 +14696,7 @@ func (response CreateAlbum201JSONResponse) VisitCreateAlbumResponse(w http.Respo
 type DeleteAlbumRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	AlbumId Id      `json:"albumId"`
+	Params  DeleteAlbumParams
 }
 
 type DeleteAlbumResponseObject interface {
@@ -8964,6 +14748,46 @@ func (response UpdateAlbum412ApplicationProblemPlusJSONResponse) VisitUpdateAlbu
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(412)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListAlbumPhotoSourcesRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	AlbumId Id      `json:"albumId"`
+}
+
+type ListAlbumPhotoSourcesResponseObject interface {
+	VisitListAlbumPhotoSourcesResponse(w http.ResponseWriter) error
+}
+
+type ListAlbumPhotoSources200JSONResponse []PhotoSource
+
+func (response ListAlbumPhotoSources200JSONResponse) VisitListAlbumPhotoSourcesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListAlbumPhotoSourcesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListAlbumPhotoSourcesdefaultApplicationProblemPlusJSONResponse) VisitListAlbumPhotoSourcesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -10213,6 +16037,46 @@ func (response UpdateFrameSettingsdefaultApplicationProblemPlusJSONResponse) Vis
 	return err
 }
 
+type ListFrameSubscriptionsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  ListFrameSubscriptionsParams
+}
+
+type ListFrameSubscriptionsResponseObject interface {
+	VisitListFrameSubscriptionsResponse(w http.ResponseWriter) error
+}
+
+type ListFrameSubscriptions200JSONResponse []Subscription
+
+func (response ListFrameSubscriptions200JSONResponse) VisitListFrameSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameSubscriptionsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFrameSubscriptionsdefaultApplicationProblemPlusJSONResponse) VisitListFrameSubscriptionsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type TransferOwnershipRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *TransferOwnershipJSONRequestBody
@@ -10404,6 +16268,222 @@ type GeocodedefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response GeocodedefaultApplicationProblemPlusJSONResponse) VisitGeocodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyGoogleImportsRequestObject struct {
+}
+
+type ListMyGoogleImportsResponseObject interface {
+	VisitListMyGoogleImportsResponse(w http.ResponseWriter) error
+}
+
+type ListMyGoogleImports200JSONResponse []GoogleImport
+
+func (response ListMyGoogleImports200JSONResponse) VisitListMyGoogleImportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyGoogleImportsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListMyGoogleImportsdefaultApplicationProblemPlusJSONResponse) VisitListMyGoogleImportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type StartGoogleImportRequestObject struct {
+	Params StartGoogleImportParams
+	Body   *StartGoogleImportJSONRequestBody
+}
+
+type StartGoogleImportResponseObject interface {
+	VisitStartGoogleImportResponse(w http.ResponseWriter) error
+}
+
+type StartGoogleImport201JSONResponse GoogleImport
+
+func (response StartGoogleImport201JSONResponse) VisitStartGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type StartGoogleImport422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response StartGoogleImport422ApplicationProblemPlusJSONResponse) VisitStartGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type StartGoogleImport429ApplicationProblemPlusJSONResponse Problem
+
+func (response StartGoogleImport429ApplicationProblemPlusJSONResponse) VisitStartGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type StartGoogleImport503ApplicationProblemPlusJSONResponse Problem
+
+func (response StartGoogleImport503ApplicationProblemPlusJSONResponse) VisitStartGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type StartGoogleImportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response StartGoogleImportdefaultApplicationProblemPlusJSONResponse) VisitStartGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetGoogleImportRequestObject struct {
+	ImportId ImportId `json:"importId"`
+}
+
+type GetGoogleImportResponseObject interface {
+	VisitGetGoogleImportResponse(w http.ResponseWriter) error
+}
+
+type GetGoogleImport200JSONResponse GoogleImport
+
+func (response GetGoogleImport200JSONResponse) VisitGetGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetGoogleImportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetGoogleImportdefaultApplicationProblemPlusJSONResponse) VisitGetGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelGoogleImportRequestObject struct {
+	ImportId ImportId `json:"importId"`
+}
+
+type CancelGoogleImportResponseObject interface {
+	VisitCancelGoogleImportResponse(w http.ResponseWriter) error
+}
+
+type CancelGoogleImport200JSONResponse GoogleImport
+
+func (response CancelGoogleImport200JSONResponse) VisitCancelGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelGoogleImport409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CancelGoogleImport409ApplicationProblemPlusJSONResponse) VisitCancelGoogleImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelGoogleImportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CancelGoogleImportdefaultApplicationProblemPlusJSONResponse) VisitCancelGoogleImportResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -10926,6 +17006,479 @@ func (response OperatorStats200JSONResponse) VisitOperatorStatsResponse(w http.R
 	return err
 }
 
+type ListMyPhotoSourcesRequestObject struct {
+}
+
+type ListMyPhotoSourcesResponseObject interface {
+	VisitListMyPhotoSourcesResponse(w http.ResponseWriter) error
+}
+
+type ListMyPhotoSources200JSONResponse []PhotoSource
+
+func (response ListMyPhotoSources200JSONResponse) VisitListMyPhotoSourcesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListMyPhotoSourcesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListMyPhotoSourcesdefaultApplicationProblemPlusJSONResponse) VisitListMyPhotoSourcesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreatePhotoSourceRequestObject struct {
+	Params CreatePhotoSourceParams
+	Body   *CreatePhotoSourceJSONRequestBody
+}
+
+type CreatePhotoSourceResponseObject interface {
+	VisitCreatePhotoSourceResponse(w http.ResponseWriter) error
+}
+
+type CreatePhotoSource201JSONResponse PhotoSource
+
+func (response CreatePhotoSource201JSONResponse) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreatePhotoSource409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreatePhotoSource409ApplicationProblemPlusJSONResponse) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreatePhotoSource422ApplicationProblemPlusJSONResponse Problem
+
+func (response CreatePhotoSource422ApplicationProblemPlusJSONResponse) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreatePhotoSource429ApplicationProblemPlusJSONResponse Problem
+
+func (response CreatePhotoSource429ApplicationProblemPlusJSONResponse) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreatePhotoSource503ApplicationProblemPlusJSONResponse Problem
+
+func (response CreatePhotoSource503ApplicationProblemPlusJSONResponse) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreatePhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreatePhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitCreatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeletePhotoSourceRequestObject struct {
+	SourceId SourceId `json:"sourceId"`
+	Params   DeletePhotoSourceParams
+}
+
+type DeletePhotoSourceResponseObject interface {
+	VisitDeletePhotoSourceResponse(w http.ResponseWriter) error
+}
+
+type DeletePhotoSource204Response struct {
+}
+
+func (response DeletePhotoSource204Response) VisitDeletePhotoSourceResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeletePhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeletePhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitDeletePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPhotoSourceRequestObject struct {
+	SourceId SourceId `json:"sourceId"`
+}
+
+type GetPhotoSourceResponseObject interface {
+	VisitGetPhotoSourceResponse(w http.ResponseWriter) error
+}
+
+type GetPhotoSource200JSONResponse PhotoSource
+
+func (response GetPhotoSource200JSONResponse) VisitGetPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetPhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitGetPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdatePhotoSourceRequestObject struct {
+	SourceId SourceId `json:"sourceId"`
+	Body     *UpdatePhotoSourceJSONRequestBody
+}
+
+type UpdatePhotoSourceResponseObject interface {
+	VisitUpdatePhotoSourceResponse(w http.ResponseWriter) error
+}
+
+type UpdatePhotoSource200JSONResponse PhotoSource
+
+func (response UpdatePhotoSource200JSONResponse) VisitUpdatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdatePhotoSource422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response UpdatePhotoSource422ApplicationProblemPlusJSONResponse) VisitUpdatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdatePhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdatePhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitUpdatePhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncPhotoSourceRequestObject struct {
+	SourceId SourceId `json:"sourceId"`
+	Body     *SyncPhotoSourceJSONRequestBody
+}
+
+type SyncPhotoSourceResponseObject interface {
+	VisitSyncPhotoSourceResponse(w http.ResponseWriter) error
+}
+
+type SyncPhotoSource202JSONResponse PhotoSource
+
+func (response SyncPhotoSource202JSONResponse) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncPhotoSource409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response SyncPhotoSource409ApplicationProblemPlusJSONResponse) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncPhotoSource429ApplicationProblemPlusJSONResponse Problem
+
+func (response SyncPhotoSource429ApplicationProblemPlusJSONResponse) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncPhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SyncPhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListImmichAlbumsRequestObject struct {
+	Body *ListImmichAlbumsJSONRequestBody
+}
+
+type ListImmichAlbumsResponseObject interface {
+	VisitListImmichAlbumsResponse(w http.ResponseWriter) error
+}
+
+type ListImmichAlbums200JSONResponse ImmichAlbumList
+
+func (response ListImmichAlbums200JSONResponse) VisitListImmichAlbumsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListImmichAlbums429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ListImmichAlbums429ApplicationProblemPlusJSONResponse) VisitListImmichAlbumsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListImmichAlbums503ApplicationProblemPlusJSONResponse Problem
+
+func (response ListImmichAlbums503ApplicationProblemPlusJSONResponse) VisitListImmichAlbumsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListImmichAlbumsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListImmichAlbumsdefaultApplicationProblemPlusJSONResponse) VisitListImmichAlbumsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestPhotoSourceRequestObject struct {
+	Body *TestPhotoSourceJSONRequestBody
+}
+
+type TestPhotoSourceResponseObject interface {
+	VisitTestPhotoSourceResponse(w http.ResponseWriter) error
+}
+
+type TestPhotoSource200JSONResponse PhotoSourceTestResult
+
+func (response TestPhotoSource200JSONResponse) VisitTestPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestPhotoSource429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response TestPhotoSource429ApplicationProblemPlusJSONResponse) VisitTestPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestPhotoSource503ApplicationProblemPlusJSONResponse Problem
+
+func (response TestPhotoSource503ApplicationProblemPlusJSONResponse) VisitTestPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestPhotoSourcedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TestPhotoSourcedefaultApplicationProblemPlusJSONResponse) VisitTestPhotoSourceResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListMySendsRequestObject struct {
 	Params ListMySendsParams
 }
@@ -11319,6 +17872,354 @@ func (response GetStationPublic429ApplicationProblemPlusJSONResponse) VisitGetSt
 	return err
 }
 
+type RemoveSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+}
+
+type RemoveSubscriptionResponseObject interface {
+	VisitRemoveSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type RemoveSubscription204Response struct {
+}
+
+func (response RemoveSubscription204Response) VisitRemoveSubscriptionResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitRemoveSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+}
+
+type GetSubscriptionResponseObject interface {
+	VisitGetSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type GetSubscription200JSONResponse Subscription
+
+func (response GetSubscription200JSONResponse) VisitGetSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitGetSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+	Body           *UpdateSubscriptionJSONRequestBody
+}
+
+type UpdateSubscriptionResponseObject interface {
+	VisitUpdateSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type UpdateSubscription200JSONResponse Subscription
+
+func (response UpdateSubscription200JSONResponse) VisitUpdateSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateSubscription409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateSubscription409ApplicationProblemPlusJSONResponse) VisitUpdateSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitUpdateSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+}
+
+type ApproveSubscriptionResponseObject interface {
+	VisitApproveSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type ApproveSubscription200JSONResponse Subscription
+
+func (response ApproveSubscription200JSONResponse) VisitApproveSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveSubscription409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ApproveSubscription409ApplicationProblemPlusJSONResponse) VisitApproveSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ApproveSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitApproveSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PauseSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+}
+
+type PauseSubscriptionResponseObject interface {
+	VisitPauseSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type PauseSubscription200JSONResponse Subscription
+
+func (response PauseSubscription200JSONResponse) VisitPauseSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PauseSubscription409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response PauseSubscription409ApplicationProblemPlusJSONResponse) VisitPauseSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PauseSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response PauseSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitPauseSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+}
+
+type RejectSubscriptionResponseObject interface {
+	VisitRejectSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type RejectSubscription200JSONResponse Subscription
+
+func (response RejectSubscription200JSONResponse) VisitRejectSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectSubscription409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response RejectSubscription409ApplicationProblemPlusJSONResponse) VisitRejectSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RejectSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitRejectSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResumeSubscriptionRequestObject struct {
+	SubscriptionId SubscriptionId `json:"subscriptionId"`
+}
+
+type ResumeSubscriptionResponseObject interface {
+	VisitResumeSubscriptionResponse(w http.ResponseWriter) error
+}
+
+type ResumeSubscription200JSONResponse Subscription
+
+func (response ResumeSubscription200JSONResponse) VisitResumeSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResumeSubscription409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ResumeSubscription409ApplicationProblemPlusJSONResponse) VisitResumeSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ResumeSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ResumeSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitResumeSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetTvSlideshowRequestObject struct {
 	Token string `json:"token"`
 }
@@ -11366,6 +18267,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/device/acks)
 	DeviceAck(ctx context.Context, request DeviceAckRequestObject) (DeviceAckResponseObject, error)
+
+	// (PUT /v1/device/birthdays/{birthdayId}/greetings/{date})
+	DeviceGreetBirthday(ctx context.Context, request DeviceGreetBirthdayRequestObject) (DeviceGreetBirthdayResponseObject, error)
 
 	// (POST /v1/device/calendar/sync)
 	DeviceSyncCalendars(ctx context.Context, request DeviceSyncCalendarsRequestObject) (DeviceSyncCalendarsResponseObject, error)
@@ -11436,6 +18340,114 @@ type StrictServerInterface interface {
 	// (POST /v1/devices/token)
 	DeviceToken(ctx context.Context, request DeviceTokenRequestObject) (DeviceTokenResponseObject, error)
 
+	// (GET /v1/feed-invites/{token})
+	PreviewFeedInvite(ctx context.Context, request PreviewFeedInviteRequestObject) (PreviewFeedInviteResponseObject, error)
+
+	// (POST /v1/feed-invites/{token}/accept)
+	AcceptFeedInvite(ctx context.Context, request AcceptFeedInviteRequestObject) (AcceptFeedInviteResponseObject, error)
+
+	// (POST /v1/feed-invites:lookup)
+	LookupFeedInvite(ctx context.Context, request LookupFeedInviteRequestObject) (LookupFeedInviteResponseObject, error)
+
+	// (GET /v1/feeds)
+	ListMyFeeds(ctx context.Context, request ListMyFeedsRequestObject) (ListMyFeedsResponseObject, error)
+
+	// (POST /v1/feeds)
+	CreateFeed(ctx context.Context, request CreateFeedRequestObject) (CreateFeedResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId})
+	DeleteFeed(ctx context.Context, request DeleteFeedRequestObject) (DeleteFeedResponseObject, error)
+
+	// (GET /v1/feeds/{feedId})
+	GetFeed(ctx context.Context, request GetFeedRequestObject) (GetFeedResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId})
+	UpdateFeed(ctx context.Context, request UpdateFeedRequestObject) (UpdateFeedResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/birthday-greetings)
+	ListFeedBirthdayGreetings(ctx context.Context, request ListFeedBirthdayGreetingsRequestObject) (ListFeedBirthdayGreetingsResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/birthdays)
+	ListFeedBirthdays(ctx context.Context, request ListFeedBirthdaysRequestObject) (ListFeedBirthdaysResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/birthdays)
+	CreateFeedBirthday(ctx context.Context, request CreateFeedBirthdayRequestObject) (CreateFeedBirthdayResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/birthdays/{birthdayId})
+	RemoveFeedBirthday(ctx context.Context, request RemoveFeedBirthdayRequestObject) (RemoveFeedBirthdayResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/birthdays/{birthdayId})
+	GetFeedBirthday(ctx context.Context, request GetFeedBirthdayRequestObject) (GetFeedBirthdayResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId}/birthdays/{birthdayId})
+	UpdateFeedBirthday(ctx context.Context, request UpdateFeedBirthdayRequestObject) (UpdateFeedBirthdayResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/approve)
+	ApproveFeedBirthday(ctx context.Context, request ApproveFeedBirthdayRequestObject) (ApproveFeedBirthdayResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}/photo)
+	DeleteFeedBirthdayPhoto(ctx context.Context, request DeleteFeedBirthdayPhotoRequestObject) (DeleteFeedBirthdayPhotoResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
+	RejectFeedBirthday(ctx context.Context, request RejectFeedBirthdayRequestObject) (RejectFeedBirthdayResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/invites)
+	ListFeedInvites(ctx context.Context, request ListFeedInvitesRequestObject) (ListFeedInvitesResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/invites)
+	CreateFeedInvite(ctx context.Context, request CreateFeedInviteRequestObject) (CreateFeedInviteResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/invites/{inviteId})
+	RevokeFeedInvite(ctx context.Context, request RevokeFeedInviteRequestObject) (RevokeFeedInviteResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/join-requests)
+	ListFeedJoinRequests(ctx context.Context, request ListFeedJoinRequestsRequestObject) (ListFeedJoinRequestsResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision})
+	DecideFeedJoinRequest(ctx context.Context, request DecideFeedJoinRequestRequestObject) (DecideFeedJoinRequestResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/leave)
+	LeaveFeed(ctx context.Context, request LeaveFeedRequestObject) (LeaveFeedResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/members)
+	ListFeedMembers(ctx context.Context, request ListFeedMembersRequestObject) (ListFeedMembersResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/members/{userId})
+	RemoveFeedMember(ctx context.Context, request RemoveFeedMemberRequestObject) (RemoveFeedMemberResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId}/members/{userId})
+	UpdateFeedMember(ctx context.Context, request UpdateFeedMemberRequestObject) (UpdateFeedMemberResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/photo-sources)
+	ListFeedPhotoSources(ctx context.Context, request ListFeedPhotoSourcesRequestObject) (ListFeedPhotoSourcesResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/posts)
+	ListFeedPosts(ctx context.Context, request ListFeedPostsRequestObject) (ListFeedPostsResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/posts/{postId})
+	RemoveFeedPost(ctx context.Context, request RemoveFeedPostRequestObject) (RemoveFeedPostResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/posts/{postId})
+	GetFeedPost(ctx context.Context, request GetFeedPostRequestObject) (GetFeedPostResponseObject, error)
+
+	// (DELETE /v1/feeds/{feedId}/posts/{postId}/items/{itemId})
+	RemoveFeedPostItem(ctx context.Context, request RemoveFeedPostItemRequestObject) (RemoveFeedPostItemResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/posts/{postId}/receipts)
+	GetFeedPostReceipts(ctx context.Context, request GetFeedPostReceiptsRequestObject) (GetFeedPostReceiptsResponseObject, error)
+
+	// (PATCH /v1/feeds/{feedId}/preferences)
+	UpdateFeedPreferences(ctx context.Context, request UpdateFeedPreferencesRequestObject) (UpdateFeedPreferencesResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/subscriptions)
+	ListFeedSubscriptions(ctx context.Context, request ListFeedSubscriptionsRequestObject) (ListFeedSubscriptionsResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/subscriptions)
+	RequestSubscription(ctx context.Context, request RequestSubscriptionRequestObject) (RequestSubscriptionResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/transfer)
+	TransferFeedOwnership(ctx context.Context, request TransferFeedOwnershipRequestObject) (TransferFeedOwnershipResponseObject, error)
+
 	// (GET /v1/frames)
 	ListMyFrames(ctx context.Context, request ListMyFramesRequestObject) (ListMyFramesResponseObject, error)
 
@@ -11462,6 +18474,9 @@ type StrictServerInterface interface {
 
 	// (PATCH /v1/frames/{frameId}/albums/{albumId})
 	UpdateAlbum(ctx context.Context, request UpdateAlbumRequestObject) (UpdateAlbumResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/albums/{albumId}/photo-sources)
+	ListAlbumPhotoSources(ctx context.Context, request ListAlbumPhotoSourcesRequestObject) (ListAlbumPhotoSourcesResponseObject, error)
 
 	// (GET /v1/frames/{frameId}/calendar)
 	GetFrameCalendar(ctx context.Context, request GetFrameCalendarRequestObject) (GetFrameCalendarResponseObject, error)
@@ -11559,6 +18574,9 @@ type StrictServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/settings)
 	UpdateFrameSettings(ctx context.Context, request UpdateFrameSettingsRequestObject) (UpdateFrameSettingsResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/subscriptions)
+	ListFrameSubscriptions(ctx context.Context, request ListFrameSubscriptionsRequestObject) (ListFrameSubscriptionsResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(ctx context.Context, request TransferOwnershipRequestObject) (TransferOwnershipResponseObject, error)
 
@@ -11573,6 +18591,18 @@ type StrictServerInterface interface {
 
 	// (GET /v1/geocode)
 	Geocode(ctx context.Context, request GeocodeRequestObject) (GeocodeResponseObject, error)
+
+	// (GET /v1/google-imports)
+	ListMyGoogleImports(ctx context.Context, request ListMyGoogleImportsRequestObject) (ListMyGoogleImportsResponseObject, error)
+
+	// (POST /v1/google-imports)
+	StartGoogleImport(ctx context.Context, request StartGoogleImportRequestObject) (StartGoogleImportResponseObject, error)
+
+	// (GET /v1/google-imports/{importId})
+	GetGoogleImport(ctx context.Context, request GetGoogleImportRequestObject) (GetGoogleImportResponseObject, error)
+
+	// (POST /v1/google-imports/{importId}/cancel)
+	CancelGoogleImport(ctx context.Context, request CancelGoogleImportRequestObject) (CancelGoogleImportResponseObject, error)
 
 	// (GET /v1/invites/{token})
 	PreviewInvite(ctx context.Context, request PreviewInviteRequestObject) (PreviewInviteResponseObject, error)
@@ -11619,6 +18649,30 @@ type StrictServerInterface interface {
 	// (GET /v1/operator/stats)
 	OperatorStats(ctx context.Context, request OperatorStatsRequestObject) (OperatorStatsResponseObject, error)
 
+	// (GET /v1/photo-sources)
+	ListMyPhotoSources(ctx context.Context, request ListMyPhotoSourcesRequestObject) (ListMyPhotoSourcesResponseObject, error)
+
+	// (POST /v1/photo-sources)
+	CreatePhotoSource(ctx context.Context, request CreatePhotoSourceRequestObject) (CreatePhotoSourceResponseObject, error)
+
+	// (DELETE /v1/photo-sources/{sourceId})
+	DeletePhotoSource(ctx context.Context, request DeletePhotoSourceRequestObject) (DeletePhotoSourceResponseObject, error)
+
+	// (GET /v1/photo-sources/{sourceId})
+	GetPhotoSource(ctx context.Context, request GetPhotoSourceRequestObject) (GetPhotoSourceResponseObject, error)
+
+	// (PATCH /v1/photo-sources/{sourceId})
+	UpdatePhotoSource(ctx context.Context, request UpdatePhotoSourceRequestObject) (UpdatePhotoSourceResponseObject, error)
+
+	// (POST /v1/photo-sources/{sourceId}/sync)
+	SyncPhotoSource(ctx context.Context, request SyncPhotoSourceRequestObject) (SyncPhotoSourceResponseObject, error)
+
+	// (POST /v1/photo-sources:immich-albums)
+	ListImmichAlbums(ctx context.Context, request ListImmichAlbumsRequestObject) (ListImmichAlbumsResponseObject, error)
+
+	// (POST /v1/photo-sources:test)
+	TestPhotoSource(ctx context.Context, request TestPhotoSourceRequestObject) (TestPhotoSourceResponseObject, error)
+
 	// (GET /v1/sends)
 	ListMySends(ctx context.Context, request ListMySendsRequestObject) (ListMySendsResponseObject, error)
 
@@ -11648,6 +18702,27 @@ type StrictServerInterface interface {
 
 	// (GET /v1/stations/{stationId}/public)
 	GetStationPublic(ctx context.Context, request GetStationPublicRequestObject) (GetStationPublicResponseObject, error)
+
+	// (DELETE /v1/subscriptions/{subscriptionId})
+	RemoveSubscription(ctx context.Context, request RemoveSubscriptionRequestObject) (RemoveSubscriptionResponseObject, error)
+
+	// (GET /v1/subscriptions/{subscriptionId})
+	GetSubscription(ctx context.Context, request GetSubscriptionRequestObject) (GetSubscriptionResponseObject, error)
+
+	// (PATCH /v1/subscriptions/{subscriptionId})
+	UpdateSubscription(ctx context.Context, request UpdateSubscriptionRequestObject) (UpdateSubscriptionResponseObject, error)
+
+	// (POST /v1/subscriptions/{subscriptionId}/approve)
+	ApproveSubscription(ctx context.Context, request ApproveSubscriptionRequestObject) (ApproveSubscriptionResponseObject, error)
+
+	// (POST /v1/subscriptions/{subscriptionId}/pause)
+	PauseSubscription(ctx context.Context, request PauseSubscriptionRequestObject) (PauseSubscriptionResponseObject, error)
+
+	// (POST /v1/subscriptions/{subscriptionId}/reject)
+	RejectSubscription(ctx context.Context, request RejectSubscriptionRequestObject) (RejectSubscriptionResponseObject, error)
+
+	// (POST /v1/subscriptions/{subscriptionId}/resume)
+	ResumeSubscription(ctx context.Context, request ResumeSubscriptionRequestObject) (ResumeSubscriptionResponseObject, error)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
@@ -11740,6 +18815,33 @@ func (sh *strictHandler) DeviceAck(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceAckResponseObject); ok {
 		if err := validResponse.VisitDeviceAckResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceGreetBirthday operation middleware
+func (sh *strictHandler) DeviceGreetBirthday(w http.ResponseWriter, r *http.Request, birthdayId BirthdayId, date openapi_types.Date) {
+	var request DeviceGreetBirthdayRequestObject
+
+	request.BirthdayId = birthdayId
+	request.Date = date
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceGreetBirthday(ctx, request.(DeviceGreetBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceGreetBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceGreetBirthdayResponseObject); ok {
+		if err := validResponse.VisitDeviceGreetBirthdayResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -12408,6 +19510,1053 @@ func (sh *strictHandler) DeviceToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// PreviewFeedInvite operation middleware
+func (sh *strictHandler) PreviewFeedInvite(w http.ResponseWriter, r *http.Request, token InviteToken) {
+	var request PreviewFeedInviteRequestObject
+
+	request.Token = token
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PreviewFeedInvite(ctx, request.(PreviewFeedInviteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PreviewFeedInvite")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PreviewFeedInviteResponseObject); ok {
+		if err := validResponse.VisitPreviewFeedInviteResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AcceptFeedInvite operation middleware
+func (sh *strictHandler) AcceptFeedInvite(w http.ResponseWriter, r *http.Request, token InviteToken, params AcceptFeedInviteParams) {
+	var request AcceptFeedInviteRequestObject
+
+	request.Token = token
+	request.Params = params
+
+	var body AcceptFeedInviteJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AcceptFeedInvite(ctx, request.(AcceptFeedInviteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AcceptFeedInvite")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AcceptFeedInviteResponseObject); ok {
+		if err := validResponse.VisitAcceptFeedInviteResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// LookupFeedInvite operation middleware
+func (sh *strictHandler) LookupFeedInvite(w http.ResponseWriter, r *http.Request) {
+	var request LookupFeedInviteRequestObject
+
+	var body LookupFeedInviteJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.LookupFeedInvite(ctx, request.(LookupFeedInviteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "LookupFeedInvite")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LookupFeedInviteResponseObject); ok {
+		if err := validResponse.VisitLookupFeedInviteResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListMyFeeds operation middleware
+func (sh *strictHandler) ListMyFeeds(w http.ResponseWriter, r *http.Request) {
+	var request ListMyFeedsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListMyFeeds(ctx, request.(ListMyFeedsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListMyFeeds")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListMyFeedsResponseObject); ok {
+		if err := validResponse.VisitListMyFeedsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFeed operation middleware
+func (sh *strictHandler) CreateFeed(w http.ResponseWriter, r *http.Request, params CreateFeedParams) {
+	var request CreateFeedRequestObject
+
+	request.Params = params
+
+	var body CreateFeedJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFeed(ctx, request.(CreateFeedRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFeed")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFeedResponseObject); ok {
+		if err := validResponse.VisitCreateFeedResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteFeed operation middleware
+func (sh *strictHandler) DeleteFeed(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request DeleteFeedRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteFeed(ctx, request.(DeleteFeedRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteFeed")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteFeedResponseObject); ok {
+		if err := validResponse.VisitDeleteFeedResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeed operation middleware
+func (sh *strictHandler) GetFeed(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request GetFeedRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeed(ctx, request.(GetFeedRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeed")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedResponseObject); ok {
+		if err := validResponse.VisitGetFeedResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateFeed operation middleware
+func (sh *strictHandler) UpdateFeed(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request UpdateFeedRequestObject
+
+	request.FeedId = feedId
+
+	var body UpdateFeedJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateFeed(ctx, request.(UpdateFeedRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateFeed")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateFeedResponseObject); ok {
+		if err := validResponse.VisitUpdateFeedResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedBirthdayGreetings operation middleware
+func (sh *strictHandler) ListFeedBirthdayGreetings(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedBirthdayGreetingsParams) {
+	var request ListFeedBirthdayGreetingsRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedBirthdayGreetings(ctx, request.(ListFeedBirthdayGreetingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedBirthdayGreetings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedBirthdayGreetingsResponseObject); ok {
+		if err := validResponse.VisitListFeedBirthdayGreetingsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedBirthdays operation middleware
+func (sh *strictHandler) ListFeedBirthdays(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedBirthdaysParams) {
+	var request ListFeedBirthdaysRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedBirthdays(ctx, request.(ListFeedBirthdaysRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedBirthdays")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedBirthdaysResponseObject); ok {
+		if err := validResponse.VisitListFeedBirthdaysResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFeedBirthday operation middleware
+func (sh *strictHandler) CreateFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedBirthdayParams) {
+	var request CreateFeedBirthdayRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body CreateFeedBirthdayJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFeedBirthday(ctx, request.(CreateFeedBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFeedBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFeedBirthdayResponseObject); ok {
+		if err := validResponse.VisitCreateFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveFeedBirthday operation middleware
+func (sh *strictHandler) RemoveFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId) {
+	var request RemoveFeedBirthdayRequestObject
+
+	request.FeedId = feedId
+	request.BirthdayId = birthdayId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveFeedBirthday(ctx, request.(RemoveFeedBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveFeedBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveFeedBirthdayResponseObject); ok {
+		if err := validResponse.VisitRemoveFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeedBirthday operation middleware
+func (sh *strictHandler) GetFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId) {
+	var request GetFeedBirthdayRequestObject
+
+	request.FeedId = feedId
+	request.BirthdayId = birthdayId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeedBirthday(ctx, request.(GetFeedBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeedBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedBirthdayResponseObject); ok {
+		if err := validResponse.VisitGetFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateFeedBirthday operation middleware
+func (sh *strictHandler) UpdateFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId) {
+	var request UpdateFeedBirthdayRequestObject
+
+	request.FeedId = feedId
+	request.BirthdayId = birthdayId
+
+	var body UpdateFeedBirthdayJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateFeedBirthday(ctx, request.(UpdateFeedBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateFeedBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateFeedBirthdayResponseObject); ok {
+		if err := validResponse.VisitUpdateFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ApproveFeedBirthday operation middleware
+func (sh *strictHandler) ApproveFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId) {
+	var request ApproveFeedBirthdayRequestObject
+
+	request.FeedId = feedId
+	request.BirthdayId = birthdayId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ApproveFeedBirthday(ctx, request.(ApproveFeedBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApproveFeedBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ApproveFeedBirthdayResponseObject); ok {
+		if err := validResponse.VisitApproveFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteFeedBirthdayPhoto operation middleware
+func (sh *strictHandler) DeleteFeedBirthdayPhoto(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId) {
+	var request DeleteFeedBirthdayPhotoRequestObject
+
+	request.FeedId = feedId
+	request.BirthdayId = birthdayId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteFeedBirthdayPhoto(ctx, request.(DeleteFeedBirthdayPhotoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteFeedBirthdayPhoto")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteFeedBirthdayPhotoResponseObject); ok {
+		if err := validResponse.VisitDeleteFeedBirthdayPhotoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RejectFeedBirthday operation middleware
+func (sh *strictHandler) RejectFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId) {
+	var request RejectFeedBirthdayRequestObject
+
+	request.FeedId = feedId
+	request.BirthdayId = birthdayId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RejectFeedBirthday(ctx, request.(RejectFeedBirthdayRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RejectFeedBirthday")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RejectFeedBirthdayResponseObject); ok {
+		if err := validResponse.VisitRejectFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedInvites operation middleware
+func (sh *strictHandler) ListFeedInvites(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedInvitesRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedInvites(ctx, request.(ListFeedInvitesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedInvites")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedInvitesResponseObject); ok {
+		if err := validResponse.VisitListFeedInvitesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFeedInvite operation middleware
+func (sh *strictHandler) CreateFeedInvite(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedInviteParams) {
+	var request CreateFeedInviteRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body CreateFeedInviteJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFeedInvite(ctx, request.(CreateFeedInviteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFeedInvite")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFeedInviteResponseObject); ok {
+		if err := validResponse.VisitCreateFeedInviteResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RevokeFeedInvite operation middleware
+func (sh *strictHandler) RevokeFeedInvite(w http.ResponseWriter, r *http.Request, feedId FeedId, inviteId Id) {
+	var request RevokeFeedInviteRequestObject
+
+	request.FeedId = feedId
+	request.InviteId = inviteId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RevokeFeedInvite(ctx, request.(RevokeFeedInviteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RevokeFeedInvite")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RevokeFeedInviteResponseObject); ok {
+		if err := validResponse.VisitRevokeFeedInviteResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedJoinRequests operation middleware
+func (sh *strictHandler) ListFeedJoinRequests(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedJoinRequestsRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedJoinRequests(ctx, request.(ListFeedJoinRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedJoinRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedJoinRequestsResponseObject); ok {
+		if err := validResponse.VisitListFeedJoinRequestsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DecideFeedJoinRequest operation middleware
+func (sh *strictHandler) DecideFeedJoinRequest(w http.ResponseWriter, r *http.Request, feedId FeedId, requestId Id, decision DecideFeedJoinRequestParamsDecision) {
+	var request DecideFeedJoinRequestRequestObject
+
+	request.FeedId = feedId
+	request.RequestId = requestId
+	request.Decision = decision
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DecideFeedJoinRequest(ctx, request.(DecideFeedJoinRequestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DecideFeedJoinRequest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DecideFeedJoinRequestResponseObject); ok {
+		if err := validResponse.VisitDecideFeedJoinRequestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// LeaveFeed operation middleware
+func (sh *strictHandler) LeaveFeed(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request LeaveFeedRequestObject
+
+	request.FeedId = feedId
+
+	var body LeaveFeedJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.LeaveFeed(ctx, request.(LeaveFeedRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "LeaveFeed")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LeaveFeedResponseObject); ok {
+		if err := validResponse.VisitLeaveFeedResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedMembers operation middleware
+func (sh *strictHandler) ListFeedMembers(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedMembersRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedMembers(ctx, request.(ListFeedMembersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedMembers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedMembersResponseObject); ok {
+		if err := validResponse.VisitListFeedMembersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveFeedMember operation middleware
+func (sh *strictHandler) RemoveFeedMember(w http.ResponseWriter, r *http.Request, feedId FeedId, userId UserId, params RemoveFeedMemberParams) {
+	var request RemoveFeedMemberRequestObject
+
+	request.FeedId = feedId
+	request.UserId = userId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveFeedMember(ctx, request.(RemoveFeedMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveFeedMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveFeedMemberResponseObject); ok {
+		if err := validResponse.VisitRemoveFeedMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateFeedMember operation middleware
+func (sh *strictHandler) UpdateFeedMember(w http.ResponseWriter, r *http.Request, feedId FeedId, userId UserId) {
+	var request UpdateFeedMemberRequestObject
+
+	request.FeedId = feedId
+	request.UserId = userId
+
+	var body UpdateFeedMemberJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateFeedMember(ctx, request.(UpdateFeedMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateFeedMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateFeedMemberResponseObject); ok {
+		if err := validResponse.VisitUpdateFeedMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedPhotoSources operation middleware
+func (sh *strictHandler) ListFeedPhotoSources(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedPhotoSourcesRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedPhotoSources(ctx, request.(ListFeedPhotoSourcesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedPhotoSources")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedPhotoSourcesResponseObject); ok {
+		if err := validResponse.VisitListFeedPhotoSourcesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedPosts operation middleware
+func (sh *strictHandler) ListFeedPosts(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedPostsParams) {
+	var request ListFeedPostsRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedPosts(ctx, request.(ListFeedPostsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedPosts")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedPostsResponseObject); ok {
+		if err := validResponse.VisitListFeedPostsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveFeedPost operation middleware
+func (sh *strictHandler) RemoveFeedPost(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId) {
+	var request RemoveFeedPostRequestObject
+
+	request.FeedId = feedId
+	request.PostId = postId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveFeedPost(ctx, request.(RemoveFeedPostRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveFeedPost")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveFeedPostResponseObject); ok {
+		if err := validResponse.VisitRemoveFeedPostResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeedPost operation middleware
+func (sh *strictHandler) GetFeedPost(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId) {
+	var request GetFeedPostRequestObject
+
+	request.FeedId = feedId
+	request.PostId = postId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeedPost(ctx, request.(GetFeedPostRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeedPost")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedPostResponseObject); ok {
+		if err := validResponse.VisitGetFeedPostResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveFeedPostItem operation middleware
+func (sh *strictHandler) RemoveFeedPostItem(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId, itemId ItemId) {
+	var request RemoveFeedPostItemRequestObject
+
+	request.FeedId = feedId
+	request.PostId = postId
+	request.ItemId = itemId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveFeedPostItem(ctx, request.(RemoveFeedPostItemRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveFeedPostItem")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveFeedPostItemResponseObject); ok {
+		if err := validResponse.VisitRemoveFeedPostItemResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFeedPostReceipts operation middleware
+func (sh *strictHandler) GetFeedPostReceipts(w http.ResponseWriter, r *http.Request, feedId FeedId, postId PostId) {
+	var request GetFeedPostReceiptsRequestObject
+
+	request.FeedId = feedId
+	request.PostId = postId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFeedPostReceipts(ctx, request.(GetFeedPostReceiptsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFeedPostReceipts")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFeedPostReceiptsResponseObject); ok {
+		if err := validResponse.VisitGetFeedPostReceiptsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateFeedPreferences operation middleware
+func (sh *strictHandler) UpdateFeedPreferences(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request UpdateFeedPreferencesRequestObject
+
+	request.FeedId = feedId
+
+	var body UpdateFeedPreferencesJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateFeedPreferences(ctx, request.(UpdateFeedPreferencesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateFeedPreferences")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateFeedPreferencesResponseObject); ok {
+		if err := validResponse.VisitUpdateFeedPreferencesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedSubscriptions operation middleware
+func (sh *strictHandler) ListFeedSubscriptions(w http.ResponseWriter, r *http.Request, feedId FeedId, params ListFeedSubscriptionsParams) {
+	var request ListFeedSubscriptionsRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedSubscriptions(ctx, request.(ListFeedSubscriptionsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedSubscriptions")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedSubscriptionsResponseObject); ok {
+		if err := validResponse.VisitListFeedSubscriptionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RequestSubscription operation middleware
+func (sh *strictHandler) RequestSubscription(w http.ResponseWriter, r *http.Request, feedId FeedId, params RequestSubscriptionParams) {
+	var request RequestSubscriptionRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body RequestSubscriptionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RequestSubscription(ctx, request.(RequestSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RequestSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RequestSubscriptionResponseObject); ok {
+		if err := validResponse.VisitRequestSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TransferFeedOwnership operation middleware
+func (sh *strictHandler) TransferFeedOwnership(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request TransferFeedOwnershipRequestObject
+
+	request.FeedId = feedId
+
+	var body TransferFeedOwnershipJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TransferFeedOwnership(ctx, request.(TransferFeedOwnershipRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TransferFeedOwnership")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TransferFeedOwnershipResponseObject); ok {
+		if err := validResponse.VisitTransferFeedOwnershipResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListMyFrames operation middleware
 func (sh *strictHandler) ListMyFrames(w http.ResponseWriter, r *http.Request) {
 	var request ListMyFramesRequestObject
@@ -12610,11 +20759,12 @@ func (sh *strictHandler) CreateAlbum(w http.ResponseWriter, r *http.Request, fra
 }
 
 // DeleteAlbum operation middleware
-func (sh *strictHandler) DeleteAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id) {
+func (sh *strictHandler) DeleteAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id, params DeleteAlbumParams) {
 	var request DeleteAlbumRequestObject
 
 	request.FrameId = frameId
 	request.AlbumId = albumId
+	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeleteAlbum(ctx, request.(DeleteAlbumRequestObject))
@@ -12664,6 +20814,33 @@ func (sh *strictHandler) UpdateAlbum(w http.ResponseWriter, r *http.Request, fra
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(UpdateAlbumResponseObject); ok {
 		if err := validResponse.VisitUpdateAlbumResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListAlbumPhotoSources operation middleware
+func (sh *strictHandler) ListAlbumPhotoSources(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id) {
+	var request ListAlbumPhotoSourcesRequestObject
+
+	request.FrameId = frameId
+	request.AlbumId = albumId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListAlbumPhotoSources(ctx, request.(ListAlbumPhotoSourcesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListAlbumPhotoSources")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListAlbumPhotoSourcesResponseObject); ok {
+		if err := validResponse.VisitListAlbumPhotoSourcesResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -13617,6 +21794,33 @@ func (sh *strictHandler) UpdateFrameSettings(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+// ListFrameSubscriptions operation middleware
+func (sh *strictHandler) ListFrameSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId, params ListFrameSubscriptionsParams) {
+	var request ListFrameSubscriptionsRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFrameSubscriptions(ctx, request.(ListFrameSubscriptionsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFrameSubscriptions")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFrameSubscriptionsResponseObject); ok {
+		if err := validResponse.VisitListFrameSubscriptionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // TransferOwnership operation middleware
 func (sh *strictHandler) TransferOwnership(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request TransferOwnershipRequestObject
@@ -13755,6 +21959,115 @@ func (sh *strictHandler) Geocode(w http.ResponseWriter, r *http.Request, params 
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GeocodeResponseObject); ok {
 		if err := validResponse.VisitGeocodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListMyGoogleImports operation middleware
+func (sh *strictHandler) ListMyGoogleImports(w http.ResponseWriter, r *http.Request) {
+	var request ListMyGoogleImportsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListMyGoogleImports(ctx, request.(ListMyGoogleImportsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListMyGoogleImports")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListMyGoogleImportsResponseObject); ok {
+		if err := validResponse.VisitListMyGoogleImportsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// StartGoogleImport operation middleware
+func (sh *strictHandler) StartGoogleImport(w http.ResponseWriter, r *http.Request, params StartGoogleImportParams) {
+	var request StartGoogleImportRequestObject
+
+	request.Params = params
+
+	var body StartGoogleImportJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.StartGoogleImport(ctx, request.(StartGoogleImportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "StartGoogleImport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(StartGoogleImportResponseObject); ok {
+		if err := validResponse.VisitStartGoogleImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetGoogleImport operation middleware
+func (sh *strictHandler) GetGoogleImport(w http.ResponseWriter, r *http.Request, importId ImportId) {
+	var request GetGoogleImportRequestObject
+
+	request.ImportId = importId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGoogleImport(ctx, request.(GetGoogleImportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGoogleImport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetGoogleImportResponseObject); ok {
+		if err := validResponse.VisitGetGoogleImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CancelGoogleImport operation middleware
+func (sh *strictHandler) CancelGoogleImport(w http.ResponseWriter, r *http.Request, importId ImportId) {
+	var request CancelGoogleImportRequestObject
+
+	request.ImportId = importId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CancelGoogleImport(ctx, request.(CancelGoogleImportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CancelGoogleImport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CancelGoogleImportResponseObject); ok {
+		if err := validResponse.VisitCancelGoogleImportResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -14171,6 +22484,247 @@ func (sh *strictHandler) OperatorStats(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ListMyPhotoSources operation middleware
+func (sh *strictHandler) ListMyPhotoSources(w http.ResponseWriter, r *http.Request) {
+	var request ListMyPhotoSourcesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListMyPhotoSources(ctx, request.(ListMyPhotoSourcesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListMyPhotoSources")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListMyPhotoSourcesResponseObject); ok {
+		if err := validResponse.VisitListMyPhotoSourcesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreatePhotoSource operation middleware
+func (sh *strictHandler) CreatePhotoSource(w http.ResponseWriter, r *http.Request, params CreatePhotoSourceParams) {
+	var request CreatePhotoSourceRequestObject
+
+	request.Params = params
+
+	var body CreatePhotoSourceJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreatePhotoSource(ctx, request.(CreatePhotoSourceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreatePhotoSource")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreatePhotoSourceResponseObject); ok {
+		if err := validResponse.VisitCreatePhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeletePhotoSource operation middleware
+func (sh *strictHandler) DeletePhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId, params DeletePhotoSourceParams) {
+	var request DeletePhotoSourceRequestObject
+
+	request.SourceId = sourceId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeletePhotoSource(ctx, request.(DeletePhotoSourceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeletePhotoSource")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeletePhotoSourceResponseObject); ok {
+		if err := validResponse.VisitDeletePhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPhotoSource operation middleware
+func (sh *strictHandler) GetPhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId) {
+	var request GetPhotoSourceRequestObject
+
+	request.SourceId = sourceId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPhotoSource(ctx, request.(GetPhotoSourceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPhotoSource")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPhotoSourceResponseObject); ok {
+		if err := validResponse.VisitGetPhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdatePhotoSource operation middleware
+func (sh *strictHandler) UpdatePhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId) {
+	var request UpdatePhotoSourceRequestObject
+
+	request.SourceId = sourceId
+
+	var body UpdatePhotoSourceJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdatePhotoSource(ctx, request.(UpdatePhotoSourceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdatePhotoSource")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdatePhotoSourceResponseObject); ok {
+		if err := validResponse.VisitUpdatePhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SyncPhotoSource operation middleware
+func (sh *strictHandler) SyncPhotoSource(w http.ResponseWriter, r *http.Request, sourceId SourceId) {
+	var request SyncPhotoSourceRequestObject
+
+	request.SourceId = sourceId
+
+	var body SyncPhotoSourceJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SyncPhotoSource(ctx, request.(SyncPhotoSourceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SyncPhotoSource")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SyncPhotoSourceResponseObject); ok {
+		if err := validResponse.VisitSyncPhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListImmichAlbums operation middleware
+func (sh *strictHandler) ListImmichAlbums(w http.ResponseWriter, r *http.Request) {
+	var request ListImmichAlbumsRequestObject
+
+	var body ListImmichAlbumsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListImmichAlbums(ctx, request.(ListImmichAlbumsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListImmichAlbums")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListImmichAlbumsResponseObject); ok {
+		if err := validResponse.VisitListImmichAlbumsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TestPhotoSource operation middleware
+func (sh *strictHandler) TestPhotoSource(w http.ResponseWriter, r *http.Request) {
+	var request TestPhotoSourceRequestObject
+
+	var body TestPhotoSourceJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TestPhotoSource(ctx, request.(TestPhotoSourceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TestPhotoSource")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TestPhotoSourceResponseObject); ok {
+		if err := validResponse.VisitTestPhotoSourceResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListMySends operation middleware
 func (sh *strictHandler) ListMySends(w http.ResponseWriter, r *http.Request, params ListMySendsParams) {
 	var request ListMySendsRequestObject
@@ -14446,6 +23000,195 @@ func (sh *strictHandler) GetStationPublic(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetStationPublicResponseObject); ok {
 		if err := validResponse.VisitGetStationPublicResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveSubscription operation middleware
+func (sh *strictHandler) RemoveSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request RemoveSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveSubscription(ctx, request.(RemoveSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveSubscriptionResponseObject); ok {
+		if err := validResponse.VisitRemoveSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSubscription operation middleware
+func (sh *strictHandler) GetSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request GetSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSubscription(ctx, request.(GetSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSubscriptionResponseObject); ok {
+		if err := validResponse.VisitGetSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateSubscription operation middleware
+func (sh *strictHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request UpdateSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	var body UpdateSubscriptionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateSubscription(ctx, request.(UpdateSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateSubscriptionResponseObject); ok {
+		if err := validResponse.VisitUpdateSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ApproveSubscription operation middleware
+func (sh *strictHandler) ApproveSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request ApproveSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ApproveSubscription(ctx, request.(ApproveSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApproveSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ApproveSubscriptionResponseObject); ok {
+		if err := validResponse.VisitApproveSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PauseSubscription operation middleware
+func (sh *strictHandler) PauseSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request PauseSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PauseSubscription(ctx, request.(PauseSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PauseSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PauseSubscriptionResponseObject); ok {
+		if err := validResponse.VisitPauseSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RejectSubscription operation middleware
+func (sh *strictHandler) RejectSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request RejectSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RejectSubscription(ctx, request.(RejectSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RejectSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RejectSubscriptionResponseObject); ok {
+		if err := validResponse.VisitRejectSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ResumeSubscription operation middleware
+func (sh *strictHandler) ResumeSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId) {
+	var request ResumeSubscriptionRequestObject
+
+	request.SubscriptionId = subscriptionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ResumeSubscription(ctx, request.(ResumeSubscriptionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ResumeSubscription")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ResumeSubscriptionResponseObject); ok {
+		if err := validResponse.VisitResumeSubscriptionResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

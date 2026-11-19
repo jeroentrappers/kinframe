@@ -101,7 +101,17 @@ final class HistoryModel {
                 // A new send (from this or another device): reload the first page.
                 Task { await load() }
             }
-        case .joinRequest, .membershipUpdated, .invitationDecided:
+        case .feedPostUpdated(let feedId, let postId, let summary):
+            // "Peeters kids · seen on 4 of 5": patch the send that made the post.
+            guard let summary else { break }
+            for i in sends.indices {
+                guard let f = sends[i].feeds?.firstIndex(where: { $0.feedId == feedId && $0.postId == postId }) else { continue }
+                sends[i].feeds?[f].summary = summary
+                break
+            }
+        case .joinRequest, .membershipUpdated, .invitationDecided, .feedReaction, .feedReply, .subscriptionRequest, .subscriptionUpdated,
+             .feedJoinRequest, .feedMembershipUpdated, .birthdaySuggested, .birthdayDecided, .birthdayUpdated, .birthdayRemoved,
+             .birthdayToday, .birthdayGreeting, .photoSourceUpdated, .photoSourceRemoved, .googleImportUpdated:
             break
         }
     }
@@ -168,6 +178,11 @@ final class SendDetailModel {
         case .frameStatus(let frameId, let online, _):
             for f in s.frames.indices where s.frames[f].frameId == frameId { s.frames[f].online = online }
             send = s
+        case .feedPostUpdated(let feedId, let postId, let summary):
+            if let summary, let f = s.feeds?.firstIndex(where: { $0.feedId == feedId && $0.postId == postId }) {
+                s.feeds?[f].summary = summary
+                send = s
+            }
         default:
             break
         }
@@ -201,5 +216,10 @@ final class SendDetailModel {
     func unsend() async throws {
         let id = id
         _ = try await api.call { try await $0.unsend(path: .init(sendId: id)).noContent }
+    }
+
+    /// Post this send to feeds as well (no new upload); feeds that already have it are skipped.
+    func forward(toFeeds feedIds: [String]) async throws {
+        send = try await api.forwardSend(id, feedIds: feedIds)
     }
 }

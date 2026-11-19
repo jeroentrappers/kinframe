@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 ¡%1$s cumple %2$d año hoy!</item>
+        <item quantity="many">🎈 ¡%1$s cumple %2$d años hoy!</item>
+        <item quantity="other">🎈 ¡%1$s cumple %2$d años hoy!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 ¡Hoy es el cumpleaños de %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Cumpleaños de hoy</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">y %d más</item>
+        <item quantity="many">y %d más</item>
+        <item quantity="other">y %d más</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s cumple %2$d año</item>
+        <item quantity="many">%1$s cumple %2$d años</item>
+        <item quantity="other">%1$s cumple %2$d años</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Cumpleaños de %1$s</string>
+    <string name="birthday_countdown_two">%1$s y %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s y %2$d más</item>
+        <item quantity="many">%1$s y %2$d más</item>
+        <item quantity="other">%1$s y %2$d más</item>
+    </plurals>
+    <string name="birthday_greet_title">Felicitar desde este marco</string>
+    <string name="birthday_greet_button">Felicitar a %1$s por su cumpleaños</string>
+    <string name="birthday_greet_sent">Enviado ✓ — la familia lo verá</string>
+    <string name="birthday_detail_label">Cumpleaños</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">cumple %d año</item>
+        <item quantity="many">cumple %d años</item>
+        <item quantity="other">cumple %d años</item>
+    </plurals>
+</resources>

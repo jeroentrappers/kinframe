@@ -62,6 +62,8 @@ func newEnv(t *testing.T, opts ...option) *env {
 		UploadExpiry:    24 * time.Hour,
 		JanitorInterval: time.Hour,
 		LogLevel:        slog.LevelWarn,
+		// The httptest fakes (calendars, Immich, iCloud, Google) listen on 127.0.0.1.
+		SourcesPrivateNetworks: "auto", SourcesAllowLoopback: true,
 	}
 	for _, o := range opts {
 		o(cfg)

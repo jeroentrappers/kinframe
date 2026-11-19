@@ -88,7 +88,14 @@ User ─┬─< Membership >─┬─ Frame ──── Device (current credent
       │                │    └─< Album >─< AlbumItem
       ├─< Send ─< SendItem ──> Item ─< Rendition (master, frame_<w>x<h>, thumb_<n>)
       │                         └─< Placement (item × frame) ─ status, hidden, trashed, reaction, reply
-      └─< PushEndpoint
+      ├─< PushEndpoint
+      └─< FeedMembership >─ Feed ─< FeedPost ─< FeedPostItem ──> Item
+          role, prefs         │
+                              ├─< Subscription >── Frame     (status, history, birthdays; delivers placements origin=feed)
+                              └─< BirthdayPerson ─< BirthdayGreeting >── Frame   (birthdays change to frames)
+
+PhotoSource (owner: User) ──▶ Album (of one frame) or Feed      (Immich / iCloud sync: one send per run, Item.via)
+GoogleImport (User) ──▶ Album or Feed                           (one-time copy from Google's picker)
 ```
 
 - **Item**: one photo or video, owned by its sender. It has caption, capture time, focal point and fit mode. The
@@ -96,7 +103,8 @@ User ─┬─< Membership >─┬─ Frame ──── Device (current credent
 - **Placement**: an item on a specific frame. Delivery state (`pending → ready → delivered → seen`), visibility
   (`hidden`), trash and the frame's reaction are per placement. One send to three frames creates one item and three
   placements. A placement **shared** from another frame's library points at the same item and records who shared it
-  (`shared_by_user_id`), so sharing never copies media (§5.3).
+  (`shared_by_user_id`), so sharing never copies media (§5.3). A placement made by a **feed** the frame subscribes to
+  has `origin: feed` (§5.12); a frame never holds two live placements of the same item, whatever the path.
 - **Permissions** per membership:
 
   | Permission | Allows |
@@ -267,7 +275,9 @@ puts photos from one frame's library on other frames without a new upload.
   purge them as usual. The sharer may hide, trash or purge the placements they created (clients undo a share with
   `placements:bulk` `purge`).
 - `POST /v1/sends/{id}/forward` (the sender placing a whole send on more frames) uses the same code path, without
-  `shared_by`.
+  `shared_by`. With `feed_ids` it posts the send to feeds (§5.12).
+
+**Sending to feeds**: `SendCreate.feed_ids` lists feeds next to `frame_ids` (either may be empty, not both). See §5.12.
 
 ### 5.4 Frame synchronization (the change feed)
 
@@ -287,6 +297,7 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `frame` | Name, location, owner name |
   | `weather` | Current conditions and forecast, when enabled (below), or `weather: null` |
   | `calendar` | The frame's merged calendar (§5.8), or `calendar: null` when it has none |
+  | `birthdays` | The frame's birthday people from its feeds (§5.13), or `birthdays: null` when it has none |
   | `reset` | The frame must discard local state and re-sync from 0 |
 
 - **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
@@ -308,6 +319,10 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   - Place search for the settings UI: `GET /v1/geocode?q=&lang=` (user auth, 60/min per user, cached) proxies the
     Open-Meteo geocoding API and returns `Place`s.
   - Attribution (CC BY 4.0): apps that show the data credit "Weather data by Open-Meteo.com".
+- **Feed placements** (§5.12) are ordinary `placement.upsert`/`placement.remove` changes; there is no feed change
+  type. The placement carries `origin`, `origin_feed_id`, `origin_feed_name`, `feed_ids` and `backfill`. Placements of
+  a paused subscription render as `placement.remove` and come back as `placement.upsert` on resume. Frames that don't
+  know these fields show feed posts as normal photos.
 - Clients apply changes in order and persist `next_seq` in the same SQLite transaction as the changes.
 - When the frame is behind more than the server's retention window (default 30 days of changes), it gets a `reset`.
 - **Media download**: `GET /v1/device/media/{placement_id}` serves the frame's rendition. It supports `Range` and
@@ -538,6 +553,229 @@ the operator emails customers when stock is in, with the final price and a payme
 - **Retention**: the maintenance loop deletes reservations `retention_days` (default 365) after their last change,
   and cancelled ones 30 days after the cancellation. No IP addresses are stored; the time of consent is.
 
+### 5.12 Feeds and subscriptions
+
+Product spec: `docs/spec/feeds.md`; tables and the placement algorithm: `docs/spec/feeds-data-model.md`. Discovery
+says `feeds: true` when the server supports them.
+
+**Feeds and members** (`/v1/feeds`)
+- A feed has a name, an optional cover (`cover_item_id`, one of its own items) and members with roles `owner` (one),
+  `admin` and `poster`. Feed membership is independent of frame membership. Unknown feeds and feeds the caller is
+  not a member of both answer `404 not_found`; there is no listing beyond `GET /v1/feeds` (your own feeds).
+- Members: `GET /feeds/{id}/members`, `PATCH …/members/{userId} {role}`, `DELETE …/members/{userId}?remove_posts=`,
+  `POST /feeds/{id}/leave {remove_my_posts}`, `POST /feeds/{id}/transfer {user_id}`. Admins cannot change or remove
+  the owner or other admins (as for frames).
+
+**Feed invites**
+- `POST /v1/feeds/{id}/invites {purpose, max_uses, expires_in_hours, note}` (owner/admin) returns `token`,
+  `url` (`https://<web>/fi/<token>`, shown as QR) and `code` (8 Crockford base32 characters shown as `KF7Q-M2XA`;
+  never all digits, so one "Enter a code" field tells them from 8-digit frame codes).
+- `GET /v1/feed-invites/{token}` previews; `POST /v1/feed-invites:lookup {code}` resolves a code to the same preview
+  including the token; `POST /v1/feed-invites/{token}/accept` redeems. Rate limits as for frame codes.
+- `purpose: join`: the caller becomes a poster, or `pending` (a `JoinRequest`, decided with
+  `POST /feeds/{id}/join-requests/{rid}/{approve|deny}`) when the feed has `invite_requires_approval` (default).
+- `purpose: subscribe`: the caller picks frames they manage (`frame_ids`, plus `history`); the subscriptions are
+  active at once because an admin made the link. The caller does not join the feed.
+
+**Subscriptions**
+- `POST /v1/feeds/{id}/subscriptions {frame_id, history, history_count}`: the caller is a feed member and a frame
+  manager (owner, admin or `change_settings`). `active` at once for feed owners/admins or with
+  `auto_approve_subscriptions`, else `pending` until `POST /v1/subscriptions/{sid}/approve` or `/reject` by a feed
+  owner/admin.
+- Frame side (frame managers): `POST …/pause`, `POST …/resume`, `PATCH /v1/subscriptions/{sid} {history,
+  history_count}`, `DELETE` (unsubscribe, or withdraw a pending request). Feed owners/admins may `DELETE` any
+  subscription. Lists: `GET /v1/feeds/{id}/subscriptions` and `GET /v1/frames/{id}/subscriptions` (`?status=`).
+- States: `pending → active ⇄ paused`, `pending → rejected`, anything live `→ removed`. Repeating the transition
+  the subscription is already in returns it unchanged; impossible ones answer `409 invalid_transition` (approve or
+  reject of a decided request: `409 already_decided`). A second live subscription for the same frame and feed:
+  `409 already_subscribed`.
+- `history`: `none`, `last_n` (`history_count` 1–1000 items) or `all` (capped at `limits.max_feed_backfill_items`),
+  counted back from the first activation (`activated_at`). It is history only, not a rolling limit. Changing it
+  backfills or trims in the background (`Subscription.backfill`); posts after `activated_at` are never trimmed.
+
+**Posting and placements**
+- `POST /v1/sends` with `feed_ids`: one item per upload as always, one **post** per feed, and one placement per item
+  on every `active` subscribed frame (`origin: feed`, `origin_feed_id`). The frame's moderation applies as for direct
+  sends; renditions are made per screen size and reused.
+- One live placement per item and frame: if the item also reaches the frame directly or through another feed, the
+  existing placement is shared and `feed_ids` lists every feed holding it. It leaves the frame only when no path
+  holds it any more.
+- History placements (activation, history change, resume) have `backfill: true` and `received_at` = post time;
+  frames don't show them as new. Frames announce that they handle this with `features: ["feed_backfill"]` in the
+  heartbeat; until a frame's latest heartbeat does, its backfilled placements are withheld from its change feed
+  (older apps would show the whole history as new) and are emitted as soon as it does.
+- Pause: the feed's placements leave the frame (rendered as `placement.remove`) but stay on the server; resume brings
+  them back and quietly adds what was posted meanwhile. Unsubscribe or removal removes them. Placements that the
+  frame purged or whose moderation was rejected are never placed there again.
+- `DELETE /v1/feeds/{id}/posts/{pid}` (poster or feed owner/admin) and `…/items/{itemId}` remove posts everywhere;
+  `DELETE /v1/sends/{id}` removes the send's posts too. Feed renames re-emit the feed's placements (new
+  `origin_feed_name`). Ending a subscription resets `settings.slideshow.feed_id` when it pointed at that feed.
+
+**Receipts and reactions**
+- `GET /v1/feeds/{id}/posts` lists posts (`FeedPost`) newest first. `receipts` (`FeedReceiptSummary`: `frames`,
+  `delivered`, `seen`, `awaiting_approval`, `paused`, `removed`) and `reactions` (with frame names) are filled on the
+  caller's own posts, on all posts for feed owners/admins, and for everyone when `members_see_reactions` is on;
+  otherwise null. `GET …/posts/{pid}/receipts` has the per-frame, per-item detail.
+- `Send.feeds[]` gives the poster the same summary in the sent history; `Send.frames[]` stays the direct
+  recipients.
+- Reactions and quick replies on feed placements are stored per placement and go to the item's sender, as today.
+
+### 5.13 Birthdays
+
+Product spec: `docs/spec/birthdays.md`. Discovery says `birthdays: true` when the server supports them (only with
+`feeds: true`).
+
+**The list** (`/v1/feeds/{id}/birthdays`, tag `feeds`)
+- A `BirthdayPerson` has `display_name`, `day`, `month`, optional `birth_year`, `show_age` (default false), an
+  optional photo and an optional `user_id` (a member of the same feed). People, not accounts.
+- `POST` by the owner or an admin (or a poster when the feed has `posters_can_add_birthdays`) creates it `approved`;
+  any other poster creates a `pending` suggestion, decided with `POST …/birthdays/{bid}/approve` or `/reject` (owner,
+  admin). Repeating the current decision returns the entry; deciding a decided one is `409 already_decided`.
+- `PATCH …/birthdays/{bid}` and `DELETE` follow `birthdays.md` §4.1: admins anything, suggesters their pending
+  suggestion, posters with the setting what they added, the linked member the privacy fields of their own entry
+  (`birth_year`, `show_age`, photo, unlink) and removing it.
+- Photo: `PUT …/birthdays/{bid}/photo` with a JPEG/PNG/WebP body, exactly like `PUT /v1/me/avatar` (square crop,
+  256×256 WebP at a public unguessable URL); `DELETE` falls back to the linked member's avatar.
+- Uniqueness: within a feed, pending and approved entries are unique on normalized name (NFKC, case-folded, without
+  diacritics, collapsed spaces) + day + month: `409 duplicate_birthday` with the existing id in `detail`. Limit
+  `limits.max_birthdays_per_feed` (default 200, pending and approved count): `409 limit_reached`.
+- Dates: 29 February is valid (without a year, or with a leap year); impossible dates answer `422 validation_failed`
+  (`day`), years before 1900 or after this year `422` (`birth_year`).
+- `birth_year` is returned to owner/admins, the entry's creator and the linked member, and to everyone in the feed
+  when `show_age` is on; otherwise it is null. `next_birthday` and `turns` are computed in the caller's
+  `User.timezone`.
+- Feed setting `posters_can_add_birthdays` (`Feed`, `FeedCreate`, `FeedUpdate`); `Feed.birthday_count`,
+  `pending_birthday_count` (owner/admins) and the caller's own `birthday_notifications`, changed with
+  `PATCH /v1/feeds/{id}/preferences {birthday_notifications}` (default true).
+
+**Subscriptions**
+- `Subscription.birthdays` (default true), set in `requestSubscription`, `acceptFeedInvite` (subscribe invites) and
+  `PATCH /v1/subscriptions/{sid} {birthdays}` by the frame side. `history` is no longer required in that patch;
+  omitting it changes nothing about history. A frame shows the approved people of its `active` subscriptions with
+  `birthdays: true`; pending, paused and removed subscriptions contribute nothing.
+- `Subscription.frame.birthdays_supported` is true when the frame's latest heartbeat lists `features: ["birthdays"]`,
+  so apps can say "update the frame app to show birthdays". Nothing is withheld from older apps.
+
+**The `birthdays` change** (schema `FrameBirthdays`)
+- One compacted entry per frame, like `calendar`: `generated_at` and `people`, each a `FrameBirthday` (`id`, `name`,
+  `day`, `month`, `birth_year` only when the age may be shown, `photo_url`, `feed_ids`, `birthday_ids`), sorted by
+  month and day. `birthdays: null` means "drop your birthdays"; snapshots omit it then.
+- People listed by several of the frame's feeds are merged on normalized name + day + month. The primary (`id`,
+  `name`, photo) is the entry with a photo from the earliest-activated subscription (else the earliest-activated one);
+  `birth_year` is present only if every merged entry with a year has `show_age` on and the years agree.
+- Emitted when the content changes: an approved entry is created, edited, removed or its photo changes, a suggestion
+  is approved, a linked member's avatar that serves as photo changes, a subscription becomes active, pauses,
+  resumes, ends or flips `birthdays`, or the feed is deleted. Never daily: the frame computes "today", "in 3 days",
+  ages and the 29 February rule in its own `locale.timezone`, and hides all of it while its clock is not trusted.
+- Photos are public URLs (no device token); the frame caches them by URL and deletes those no entry uses.
+
+**Greetings** (frame → family)
+- `PUT /v1/device/birthdays/{bid}/greetings/{date}` (device token): `bid` is `FrameBirthday.id` (or any of its
+  `birthday_ids`), `date` the frame's local date. Idempotent, one per person, frame and date (`204` when recorded now
+  or before). The server records a `FeedBirthdayGreeting` in every feed that lists the person, with a snapshot of the
+  frame's name and location.
+- `404 not_found` when the person is no longer on the frame; `422 validation_failed` (`date`) when `date` is not
+  their birthday or lies outside the server's UTC date −2 … +1 days; `429` beyond 50 a day per frame. The frame
+  queues greetings offline in its outbox and drops them after two days or on 404/422.
+- `GET /v1/feeds/{id}/birthday-greetings?birthday_id=&date=&cursor=&limit=` lists them for every feed member, newest
+  first (kept 13 months). `BirthdayPerson.greetings_today` counts today's.
+
+**Morning notification**
+- Once per member and local day, at 08:00 in `User.timezone` (set by the apps with `PATCH /v1/me {timezone}`; without
+  one, the most common `locale.timezone` of the feed's subscribed frames, then `Europe/Brussels`), catching up until
+  20:00 if the server was down. It merges the member's birthdays of that day from every feed where their
+  `birthday_notifications` is on, deduplicated like on frames, without the member's own entry.
+
+### 5.14 Photo sources and Google Photos import
+
+Product spec: `docs/spec/photo-sources.md`. Discovery says `photo_sources: true` (with the allowed
+`photo_source_providers`) when albums and feeds can sync from Immich or iCloud, `photo_sources_private_networks` when
+sources may use home-network addresses, and `google_photos_import: true` when the operator configured a Google OAuth
+client. Clients hide what discovery doesn't offer.
+
+**Sources** (`/v1/photo-sources`, tag `photo-sources`)
+- A `PhotoSource` connects one outside album to one target: an **album** (`album_id`; albums belong to one frame, so
+  this is that frame's album; album managers: owner, admin, `manage_library`) or a **feed** (`feed_id`; feed
+  owner/admins). The caller becomes the `owner`: imported photos are sent by them.
+- Providers: `immich_link` (`url` = an Immich shared link `https://<immich>/share/<key>`, optional `password`;
+  recommended), `immich_api` (`server_url` + `api_key` with `album.read`, `asset.read`, `asset.view`,
+  `asset.download`, + `immich_album_id`), `icloud_link` (`url` = `https://www.icloud.com/sharedalbum/#<token>` with
+  Public Website on; `best_effort: true`: show the note).
+- Connect flow: `POST /v1/photo-sources:test` (any provider; for `immich_api` without an album it returns `albums`),
+  or `POST /v1/photo-sources:immich-albums {server_url, api_key}` to list albums; then `POST /v1/photo-sources`
+  (tests again, `422 source_test_failed` with the `PhotoSourceErrorCode` in `detail`). Settings: `history`
+  (`none`/`last_n` + `history_count`/`all`; defaults `all` for albums, `last_n` 20 for feeds), `on_upstream_delete`
+  (`mirror` default for albums, `keep` for feeds), `include_videos`, `notify_reactions`.
+- Secrets (`url`, `api_key`, `password`) are write-only and sealed like calendar credentials; responses carry
+  `url_hint`, `server_url`, `has_api_key`, `has_password`. A blocked private address is `422 validation_failed` on
+  `url`/`server_url`; the same outside album twice on one target `409 duplicate_source`; limits `409 limit_reached`.
+- Lists: `GET /v1/frames/{id}/albums/{aid}/photo-sources` (album managers), `GET /v1/feeds/{id}/photo-sources`
+  (feed owner/admins), `GET /v1/photo-sources` (the sources the caller owns). `Album.photo_source_count` tells every
+  library viewer that an album syncs.
+- Change: `PATCH /v1/photo-sources/{sid}`: `paused` (pause/resume), `name`, connection fields (tested, then synced at
+  once), settings, `take_over` (become owner after `owner_lost_access`; `immich_api` needs a new `api_key`).
+  `POST …/sync` syncs now (at most once per 2 minutes per source, `429`); with `{confirm_removals: true}` it applies
+  removals held back by the mass-removal guard. `DELETE …?remove_items=true|false` stops syncing and keeps or removes
+  the imported photos (clients ask). `deleteAlbum?remove_source_items=` asks the same for an album with sources.
+
+**Status** (`PhotoSource.status`, `running`, `last_error_code`, `warnings`, `counts`, `last_run`, `next_sync_at`)
+- `active` (green; a retried single failure keeps it active with `last_error_code` set), `error` (keeps retrying with
+  backoff up to 6 h), `needs_attention` (a person must act: show the fix for `last_error_code`), `paused`. `running`
+  is a spinner, not a state. Warnings (`downloads_disabled`, `metadata_hidden`, `item_limit_reached`) don't stop
+  syncing. User-facing texts per code: `photo-sources.md` §13.
+- `counts`: `upstream`, `imported`, `duplicates`, `pending` (backlog, "importing 40 of 220"), `skipped`, `failed`,
+  `removed_locally`, `gone_upstream`.
+- `photo_source.updated` (websocket) carries the whole `PhotoSource` when a run starts, when it finished with changes or an error, and on every state change, to the target's
+  managers and the owner; `photo_source.removed` when one is deleted.
+
+**What a sync produces**
+- One **send** by the owner per run with new photos (`Send.via`), placed on the album's frame and appended to the
+  album, or posted to the feed as one post per at most `limits.max_items_per_send` items (`FeedPost.via`). The first
+  run's photos are history (`Placement.backfill: true`). Moderation, renditions, receipts, reactions and unsend are
+  as for any send. Source sends get no `delivered` push.
+- `Item.via` (`ItemVia {service, label, source_id}`) is the credit: "Anna via Immich", "Anna · Peeters kids via
+  Immich". Clients that don't know it show the sender only.
+- Removing a synced photo on kinframe (purge, moderation reject, out of the album, out of the feed post) means it is
+  never imported again from that source.
+
+**Google Photos import** (`/v1/google-imports`)
+
+A one-time copy of photos the person picks in Google's picker (Google offers no library access to apps any more).
+Album managers import into an album; any feed member into a feed.
+
+```
+app/web                                   server                                Google
+ │ POST /v1/google-imports {album_id|feed_id, return_uri}
+ │ ◀── 201 {status: needs_auth, auth_url}        (or status: picking + picker_uri when a fresh token exists)
+ │ open auth_url in a browser session ─────────────────────────────────────────▶ consent
+ │                                     GET /v1/oauth/google/callback ◀──────────── redirect (code, state)
+ │                                     token exchange, picker session ───────────▶
+ │ ◀── 302 return_uri?import_id=…&status=picking
+ │ GET /v1/google-imports/{id} → picker_uri
+ │ open picker_uri ────────────────────────────────────────────────────────────▶ pick, Done
+ │                                     polls the session, downloads the items ──▶
+ │ ◀── ws google_import.updated {status: importing, progress} … {status: done}
+```
+
+- `return_uri` is one of `app.kinframe:/google-import` (Android and iOS), `https://<server>/google-import/return`
+  (app/universal link) or `<web>/google-import/return` (web). The redirect adds only `import_id` and `status`.
+- **Web**: open `auth_url` in a popup; the return page reports to the opener (`postMessage`) and then navigates the
+  same popup to `picker_uri + "/autoclose"`, which closes itself after Done.
+- **Android**: consent in a Custom Tab (Google refuses embedded web views); the custom-scheme redirect brings the app
+  back. Open `picker_uri` with `ACTION_VIEW`: the Google Photos app handles it when installed, else a Custom Tab. When
+  the app resumes, refresh the import (or follow the websocket).
+- **iOS**: consent in `ASWebAuthenticationSession` with callback scheme `app.kinframe`; the redirect ends the
+  session. Open `picker_uri` with `UIApplication.open` (the Google Photos app when installed) or
+  `SFSafariViewController`; refresh on foreground.
+- Clients never call Google's API and never see a Google token. If the app was closed while picking,
+  `GET /v1/google-imports` (last 7 days) finds the import again.
+- `GoogleImport.status`: `needs_auth → picking → importing → done`, or `failed` (`error_code`), `expired` (nothing
+  picked before Google's session ended) and `cancelled` (`POST …/{id}/cancel`; photos already added stay, undo with
+  `DELETE /v1/sends/{id}` for each of `send_ids`). `progress`: `picked`, `imported`, `duplicates`, `skipped`,
+  `failed`, `bytes`. At most `limits.max_google_import_items` per import; posts of at most 200.
+- The server keeps no long-lived Google token: an access token lives on the import for at most 2 hours and is reused
+  by the same user's next import within that hour.
+
 ## 6. Websockets
 
 Both use JSON text frames `{ "type": "...", ... }` and server ping/pong every 25 s. Clients reconnect with
@@ -569,13 +807,27 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `type` | Payload | Meaning |
 |---|---|---|
 | `send.updated` | `send` (summary) | Processing, delivered or seen counts changed |
-| `reaction` | `placement_id`, `frame_id`, `reaction`, `by_frame_name` | New or changed reaction |
-| `reply` | `placement_id`, `frame_id`, `preset` | Quick reply from a frame |
+| `reaction` | `placement_id`, `frame_id`, `reaction`, `by_frame_name`, `feed_id`?, `post_id`? | New or changed reaction (feed ids when the placement came through a feed) |
+| `reply` | `placement_id`, `frame_id`, `preset`, `feed_id`?, `post_id`? | Quick reply from a frame |
 | `share.delivered` | `frame_id`, `frame_name` | Everything the user shared to that frame (`sharePlacements`) arrived |
 | `frame.status` | `frame_id`, `online`, `last_seen_at` | Frame connectivity |
 | `join_request` | `frame_id`, `request` | Approval needed (owner/admin) |
 | `membership.updated` | `frame_id` | Role or permissions changed |
 | `event_invitation.decided` | `frame_id`, `invitation` | The frame accepted or declined an event you sent |
+| `feed_post.updated` | `feed_id`, `post_id`, `summary` (`FeedReceiptSummary`) | Delivery or seen counts of a feed post changed (the poster and feed owner/admins) |
+| `subscription.request` | `feed_id`, `subscription` | A frame asks to subscribe (feed owner/admins) |
+| `subscription.updated` | `feed_id`, `frame_id`, `subscription` | Approved, rejected, paused, resumed, history changed or removed (the requester, feed owner/admins and the frame's managers) |
+| `feed.join_request` | `feed_id`, `request` | Approval needed (feed owner/admins) |
+| `feed.membership_updated` | `feed_id` | Your feed role changed, you were added or removed, or the feed was deleted |
+| `birthday.suggested` | `feed_id`, `birthday` (`BirthdayPerson`) | A poster suggested a birthday person (feed owner/admins) |
+| `birthday.decided` | `feed_id`, `birthday` | Your suggestion was approved or rejected (the suggester) |
+| `birthday.updated` | `feed_id`, `birthday` | A birthday person was added, changed, approved or rejected (feed members who may see it) |
+| `birthday.removed` | `feed_id`, `birthday_id` | A birthday person was removed (feed members who could see it) |
+| `birthday.today` | `date`, `birthdays` (`[{feed_id, birthday_id}]`) | The morning notification (§5.13), on the websocket when one is open |
+| `birthday.greeting` | `feed_id`, `greeting` (`FeedBirthdayGreeting`) | A frame said happy birthday (feed members) |
+| `photo_source.updated` | `source` (`PhotoSource`) | A photo source's status, counts or last run changed (the target's managers and the source owner; §5.14) |
+| `photo_source.removed` | `source_id`, `album_id`?, `feed_id`? | A photo source was deleted, also with its album or feed (the same people) |
+| `google_import.updated` | `import` (`GoogleImport`) | Status or progress of the caller's Google Photos import changed |
 
 ### 6.3 Push
 
@@ -585,8 +837,27 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 - **WebPush** (browsers): subscribe with `PushManager.subscribe({userVisibleOnly: true, applicationServerKey})`
   using discovery's `webpush_public_key` (VAPID, RFC 8292), then register `{kind: "webpush", endpoint,
   webpush_keys: {p256dh, auth}, locale}`. Messages are encrypted with RFC 8291 (`aes128gcm`). The decrypted payload is
-  `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`). Endpoints the
-  push service reports as gone (404/410) are deleted by the server.
+  `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`, `feed_id`,
+  `post_id`, `subscription_id`, `birthday_id`, `greeting_id`, `source_id`, `album_id`, `import_id`). Endpoints the push service reports as gone (404/410) are deleted by the server.
+- Feed keys: `subscription_request` (feed owner/admins), `subscription_decided` (the requester),
+  `subscription_removed` (frame owner/admins, when a feed admin removed it or the feed was deleted),
+  `feed_join_request` (feed owner/admins), `feed_membership` (the member); reactions and replies on feed placements
+  use `reaction`/`reply` with `feed_id` and `post_id`. Feed posts get **no** `delivered` push (it would repeat per
+  subscribed frame); `feed_post.updated` on the websocket and the receipts cover it.
+- Birthday keys (§5.13): `birthday_suggestion` (feed owner/admins), `birthday_decided` (the suggester; texts
+  `birthday_approved`/`birthday_rejected`), `birthday_today` (the morning notification) and `birthday_greeting`
+  (members with `birthday_notifications` on for that feed; one per greeting even for members of several feeds that
+  list the person). `ids` may hold `feed_id`, `birthday_id`, `greeting_id`, `date` (the birthday's local date,
+  `YYYY-MM-DD`) and, for greetings, `frame_id`. Greeting pushes also carry a top-level `tag`
+  (`birthday:<birthday_id>:<date>`, the same for every frame's greeting of that person that day); clients use it as
+  the notification tag (and APNs `apns-collapse-id` / FCM tag, once those exist) so a newer one replaces the older (its body counts the frames: "Opa's frame and 2
+  other frames say happy birthday to Oma"). `birthday.updated`/`birthday.removed` are websocket only.
+- Photo source keys (§5.14): `photo_source_attention` (the source's owner only: it needs attention, or has been in
+  `error` for 3 days; at most once per source and error code per 7 days; `ids`: `source_id` and `frame_id`/`album_id`
+  or `feed_id`) and `google_import_done` (the importer, once, when an import finished while they had no websocket;
+  `ids`: `import_id`). New photos from sources are **never** pushed, and source sends get no `delivered` push.
+  Reactions and replies on source photos go to the owner as `reaction`/`reply`, unless the source has
+  `notify_reactions: false`.
 - `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
   Placements shared from another frame count for the sharer instead: they get `delivered` (event `share.delivered`)
   once everything they shared to a frame has arrived.

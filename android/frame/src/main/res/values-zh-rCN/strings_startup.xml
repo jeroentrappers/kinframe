@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">正在启动…</string>
+    <string name="startup_checking_library">停电后正在检查照片…</string>
+    <string name="startup_checking_update">正在检查应用版本…</string>
+    <string name="startup_loading_photos">正在加载照片…</string>
+    <string name="startup_preparing_photo">正在准备第一张照片…</string>
+    <string name="startup_waiting_wifi">正在等待 Wi-Fi…</string>
+    <string name="startup_setting_clock">正在校准时钟…</string>
+    <string name="startup_connecting">正在连接服务器…</string>
+    <string name="power_cut_title">相框未正常关机就断电了</string>
+    <string name="power_cut_body_ok">已全部检查，一切正常。</string>
+    <string name="power_cut_body_redownload">已全部检查。部分照片正在重新下载。</string>
+    <string name="power_cut_tip">下次请在菜单中选择“%1$s”→“%2$s”，并等到屏幕显示“%3$s”。</string>
+</resources>

@@ -11,6 +11,7 @@ output-options:
   exclude-operation-ids:
     - tusCreateUpload
     - putAvatar
+    - putFeedBirthdayPhoto
     - deviceGetMedia
     - getItemMedia
     # Hand-written: 200-or-204 with header parsing, and binary APK downloads with Range.
@@ -30,3 +31,5 @@ output-options:
     - operatorExportReservations
     # Hand-written: the TV mirror websocket.
     - tvMirror
+    # Hand-written: Google's OAuth redirect (302 to a computed return_uri, or an HTML page).
+    - googleOAuthCallback

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">起動しています…</string>
+    <string name="startup_checking_library">停電後の写真を確認しています…</string>
+    <string name="startup_checking_update">アプリのバージョンを確認しています…</string>
+    <string name="startup_loading_photos">写真を読み込んでいます…</string>
+    <string name="startup_preparing_photo">最初の写真を準備しています…</string>
+    <string name="startup_waiting_wifi">Wi-Fi を待っています…</string>
+    <string name="startup_setting_clock">時計を合わせています…</string>
+    <string name="startup_connecting">サーバーに接続しています…</string>
+    <string name="power_cut_title">シャットダウンせずに電源が切れました</string>
+    <string name="power_cut_body_ok">すべて確認し、問題はありませんでした。</string>
+    <string name="power_cut_body_redownload">すべて確認しました。一部の写真をもう一度ダウンロードしています。</string>
+    <string name="power_cut_tip">次回はメニューで %1$s → %2$s を選び、画面に「%3$s」と表示されるまでお待ちください。</string>
+</resources>

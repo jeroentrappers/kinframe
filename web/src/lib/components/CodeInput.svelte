@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { caretAfterFormatAny, formatEnteredCode, normalizeEnteredCode, parseEnteredCode } from '$lib/codes';
 	import { caretAfterFormat, formatCode, isCompleteCode, normalizeCode } from '$lib/format';
 
 	let {
@@ -7,7 +8,8 @@
 		invalid = false,
 		describedby,
 		oncomplete,
-		disabled = false
+		disabled = false,
+		feeds = false
 	}: {
 		value?: string;
 		id?: string;
@@ -15,16 +17,28 @@
 		describedby?: string;
 		oncomplete?: (code: string) => void;
 		disabled?: boolean;
+		/** Also accept feed invite codes (letters, "KF7Q-M2XA") next to 8-digit frame codes (README §5.12). */
+		feeds?: boolean;
 	} = $props();
 
 	let input: HTMLInputElement | undefined = $state();
-	const display = $derived(formatCode(value));
+	const display = $derived(feeds ? formatEnteredCode(value) : formatCode(value));
 
 	function handleInput(e: Event & { currentTarget: HTMLInputElement }) {
 		const el = e.currentTarget;
 		const raw = el.value;
 		const caret = el.selectionStart ?? raw.length;
 		const before = value;
+		if (feeds) {
+			value = normalizeEnteredCode(raw);
+			const formatted = formatEnteredCode(value);
+			el.value = formatted;
+			const pos = caretAfterFormatAny(raw, caret, formatted);
+			el.setSelectionRange(pos, pos);
+			const p = parseEnteredCode(value);
+			if (p.kind !== 'empty' && p.complete && before !== value) oncomplete?.(value);
+			return;
+		}
 		value = normalizeCode(raw);
 		const formatted = formatCode(value);
 		el.value = formatted;
@@ -43,8 +57,9 @@
 	{id}
 	class="code-input"
 	type="text"
-	inputmode="numeric"
-	autocomplete="one-time-code"
+	inputmode={feeds ? 'text' : 'numeric'}
+	autocapitalize={feeds ? 'characters' : undefined}
+	autocomplete={feeds ? 'off' : 'one-time-code'}
 	enterkeyhint="go"
 	placeholder="0000 0000"
 	maxlength="12"

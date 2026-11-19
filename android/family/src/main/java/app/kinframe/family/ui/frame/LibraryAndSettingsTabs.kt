@@ -102,6 +102,12 @@ class LibraryAlbumActions(
     /** Bulk action on specific placements (from the viewer). */
     val act: (String, List<String>) -> Unit,
     val shareOne: ((String) -> Unit)?,
+    /** "Synced from…" under an open album (album managers); null when the server has no photo sources or Google import. */
+    val sources: (@Composable (Album) -> Unit)? = null,
+    /** Delete asking about the photos the album's sources imported (`remove_source_items`). */
+    val deleteWithSources: ((Album, Boolean) -> Unit)? = null,
+    /** "Only in album mode" (photo-sources.md §9.1). */
+    val onlyInAlbumMode: ((Album, Boolean) -> Unit)? = null,
 )
 
 @OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -154,8 +160,10 @@ fun LibraryTab(
                                 onPlay = { on -> albums.play(if (on) album.id else null) },
                                 onTv = if (canSee && album.placementCount > 0) ({ showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.Album(album.id, album.name))) }) else null,
                                 onArrange = albums.startArranging, onSchedule = { scheduling = album }, onRename = { naming = album }, onDelete = { deleting = album },
+                                onOnlyInAlbumMode = albums.onlyInAlbumMode?.let { set -> { on: Boolean -> set(album, on) } },
                             ),
                         )
+                        if (canManage && arranging == null) albums.sources?.invoke(album)
                         if (arranging != null) {
                             Note(stringResource(R.string.albums_arrange_hint_android))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -285,11 +293,26 @@ fun LibraryTab(
         picking?.let { ids -> AlbumPickerDialog(ids.size, state.albums, { picking = null }) { id, name -> picking = null; albums.addTo(ids, id, name) } }
         scheduling?.let { a -> AlbumScheduleDialog(a, { scheduling = null }) { f, t -> scheduling = null; albums.schedule(a, f, t) } }
         deleting?.let { a ->
+            var removeSynced by remember(a.id) { mutableStateOf(false) }
+            val withSources = a.photoSourceCount > 0 && albums.deleteWithSources != null
             AlertDialog(
                 onDismissRequest = { deleting = null },
                 title = { Text(stringResource(R.string.albums_delete_confirm, a.name)) },
-                text = { Text(stringResource(if (state.playingAlbumId == a.id) R.string.albums_delete_body_playing else R.string.albums_delete_body)) },
-                confirmButton = { TextButton({ deleting = null; albums.delete(a) }) { Text(stringResource(R.string.albums_delete), color = c.danger) } },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(stringResource(if (state.playingAlbumId == a.id) R.string.albums_delete_body_playing else R.string.albums_delete_body))
+                        // The album syncs from Immich or iCloud: keep or remove what it brought in (photo-sources.md §9.1).
+                        if (withSources) {
+                            Text(stringResource(R.string.albums_delete_sources_body), style = Kin.type.caption, color = c.inkSoft)
+                            SwitchRow(stringResource(R.string.albums_delete_sources_remove), removeSynced, { removeSynced = it },
+                                hint = if (!removeSynced) stringResource(R.string.albums_delete_sources_keep) else null)
+                        }
+                    }
+                },
+                confirmButton = { TextButton({
+                    deleting = null
+                    if (withSources) albums.deleteWithSources!!.invoke(a, removeSynced) else albums.delete(a)
+                }) { Text(stringResource(R.string.albums_delete), color = c.danger) } },
                 dismissButton = { TextButton({ deleting = null }) { Text(stringResource(R.string.common_cancel)) } },
             )
         }

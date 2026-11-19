@@ -228,6 +228,14 @@ class DeviceApi(
         if (on) u.put(ByteArray(0).toRequestBody(null)) else u.delete()
     }.expectOk()
 
+    /**
+     * `PUT /device/birthdays/{id}/greetings/{date}`: "Say happy birthday" from the frame on [date] (its local date,
+     * `YYYY-MM-DD`). Idempotent (204 also when it existed); 404 when the person left the frame, 422 for a wrong date.
+     */
+    suspend fun greetBirthday(birthdayId: String, date: String) = authed {
+        url(endpoint("device/birthdays/$birthdayId/greetings/$date")).put(ByteArray(0).toRequestBody(null))
+    }.expectOk()
+
     /** `POST /device/calendar/sync`: "Sync now" for all of the frame's calendars (the server does the work). */
     suspend fun syncCalendars() = authed { url(endpoint("device/calendar/sync")).post(ByteArray(0).toRequestBody(null)) }.expectOk()
 

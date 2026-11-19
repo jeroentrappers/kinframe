@@ -48,6 +48,8 @@ type sendJSON struct {
 	ID        uuid.UUID       `json:"id"`
 	CreatedAt time.Time       `json:"created_at"`
 	Items     []gen.Item      `json:"items"`
+	Via       *gen.ItemVia    `json:"via,omitempty"`
+	Feeds     []sendFeedJSON  `json:"feeds"`
 	Frames    []sendFrameJSON `json:"frames"`
 	Summary   sendSummary     `json:"summary"`
 }
@@ -63,7 +65,15 @@ func (s *Server) renderSends(ctx context.Context, q db.DBTX, sends []store.Send)
 	for i, sd := range sends {
 		ids[i] = sd.ID
 		idx[sd.ID] = i
-		out[i] = sendJSON{ID: sd.ID, CreatedAt: sd.CreatedAt, Items: []gen.Item{}, Frames: []sendFrameJSON{}}
+		out[i] = sendJSON{ID: sd.ID, CreatedAt: sd.CreatedAt, Items: []gen.Item{}, Feeds: []sendFeedJSON{}, Frames: []sendFrameJSON{},
+			Via: viaJSON(sd.Via, sd.PhotoSourceID)}
+	}
+	feeds, err := s.sendFeeds(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	for id, fs := range feeds {
+		out[idx[id]].Feeds = fs
 	}
 	items, err := s.st.SendItemRows(ctx, q, ids)
 	if err != nil {
@@ -392,7 +402,19 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 	if len(req.Body.Items) > limits.MaxItemsPerSend {
 		return nil, problem.New(problem.TooManyItems, "at most %d items per send", limits.MaxItemsPerSend)
 	}
+	var feedIDs []uuid.UUID
+	if req.Body.FeedIds != nil {
+		feedIDs = *req.Body.FeedIds
+	}
+	if len(req.Body.FrameIds) == 0 && len(feedIDs) == 0 {
+		return nil, problem.Validation("frame_ids", "minItems", "choose at least one frame or feed")
+	}
 	frames, members, err := s.sendTargets(ctx, req.Body.FrameIds)
+	if err != nil {
+		return nil, err
+	}
+	// Each feed is one recipient: posting to a feed with 30 frames does not multiply the limits.
+	feeds, err := s.feedTargets(ctx, feedIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +445,7 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 				mediaID = store.NewID()
 				path, mime := p.path, p.mime
 				md := store.Media{
-					ID: mediaID, OwnerUserID: &u.ID, Kind: string(p.kind), SourcePath: &path, SourceMime: &mime,
+					ID: mediaID, OwnerUserID: &u.ID, Kind: string(p.kind), SourcePath: &path, SourceMime: &mime, OriginalSHA256: preparedOriginal(p.upload),
 					TrimStartMS: p.trimS, TrimEndMS: p.trimE, IncludeAudio: p.audio, DurationMS: p.durMS,
 					Prepared: p.upload.Prepared, DeclaredWidth: p.decl.Width, DeclaredHeight: p.decl.Height,
 				}
@@ -471,10 +493,15 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 				toPlace[i].MediaID = p.reuse.MediaID
 			}
 		}
+		// Direct frames first: a frame that also subscribes to one of the feeds
+		// keeps origin "send" and the feed attaches to that placement.
 		if _, _, err := s.placeOnFrames(ctx, tx, toPlace, frames, members, nil, false); err != nil {
 			return err
 		}
 		if err := tx.TouchLastSent(ctx, frames, u.ID); err != nil {
+			return err
+		}
+		if err := createPosts(ctx, s.st, tx, sendID, u.ID, feeds, itemIDs); err != nil {
 			return err
 		}
 		if key != "" {
@@ -608,9 +635,24 @@ func (s *Server) Unsend(ctx context.Context, req gen.UnsendRequestObject) (gen.U
 	}
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
 		// Shared placements carry the original send too; matching the send's
-		// items as well keeps every copy covered.
-		_, err := tx.RemovePlacements(ctx, `p.send_id = $1 OR p.item_id IN (SELECT item_id FROM send_items WHERE send_id = $1)`, req.SendId)
-		return err
+		// items as well keeps every copy covered (feed placements included).
+		if _, err := tx.RemovePlacements(ctx, `p.send_id = $1 OR p.item_id IN (SELECT item_id FROM send_items WHERE send_id = $1)`, req.SendId); err != nil {
+			return err
+		}
+		// The send's posts leave every feed.
+		posts, err := s.st.LivePostIDs(ctx, tx, nil, nil, &req.SendId)
+		if err != nil {
+			return err
+		}
+		var sweeps []uuid.UUID
+		for _, p := range posts {
+			_, subs, err := tx.RemovePostItems(ctx, p, nil, &me(ctx).ID)
+			if err != nil {
+				return err
+			}
+			sweeps = append(sweeps, subs...)
+		}
+		return enqueueSweeps(ctx, tx, sweeps)
 	})
 	if err != nil {
 		return nil, err
@@ -623,7 +665,18 @@ func (s *Server) ForwardSend(ctx context.Context, req gen.ForwardSendRequestObje
 	if _, err := s.ownSend(ctx, req.SendId); err != nil {
 		return nil, err
 	}
+	var feedIDs []uuid.UUID
+	if req.Body.FeedIds != nil {
+		feedIDs = *req.Body.FeedIds
+	}
+	if len(req.Body.FrameIds) == 0 && len(feedIDs) == 0 {
+		return nil, problem.Validation("frame_ids", "minItems", "choose at least one frame or feed")
+	}
 	frames, members, err := s.sendTargets(ctx, req.Body.FrameIds)
+	if err != nil {
+		return nil, err
+	}
+	feeds, err := s.feedTargets(ctx, feedIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -643,7 +696,14 @@ func (s *Server) ForwardSend(ctx context.Context, req gen.ForwardSendRequestObje
 		if err := ensureRenditionsFor(ctx, tx, created); err != nil {
 			return err
 		}
-		return tx.TouchLastSent(ctx, frames, me(ctx).ID)
+		if err := tx.TouchLastSent(ctx, frames, me(ctx).ID); err != nil {
+			return err
+		}
+		itemIDs := make([]uuid.UUID, len(rows))
+		for i, r := range rows {
+			itemIDs[i] = r.ItemID
+		}
+		return createPosts(ctx, s.st, tx, req.SendId, me(ctx).ID, feeds, itemIDs)
 	})
 	if err != nil {
 		return nil, err
@@ -838,12 +898,15 @@ func (s *Server) PlacementsChanged(changes []store.StatusChange) {
 
 func (s *Server) placementsChanged(ctx context.Context, changes []store.StatusChange, pushes map[uuid.UUID]*notify.Push) {
 	sends := map[uuid.UUID]uuid.UUID{}
+	var feedPlacements []uuid.UUID
 	for _, c := range changes {
 		if c.SendID != nil && c.SenderID != nil {
 			sends[*c.SendID] = *c.SenderID
 		}
+		feedPlacements = append(feedPlacements, c.PlacementID)
 	}
 	s.publishSendUpdatesWith(ctx, sends, "", pushes)
+	s.publishFeedPostsOf(ctx, feedPlacements)
 }
 
 // deliveredPushes returns a "delivered" push for every send that this ack
@@ -854,7 +917,9 @@ func (s *Server) deliveredPushes(ctx context.Context, f *store.Frame, changes []
 	checked := map[uuid.UUID]bool{}
 	for _, c := range changes {
 		// Shared placements notify the sharer instead (sharedDeliveredPushes).
-		if !c.NewlyDelivered || c.SendID == nil || c.SenderID == nil || c.SharedByID != nil || checked[*c.SendID] {
+		// Feed placements get no per-frame push (it would repeat for every subscribed frame).
+		// Photo source and Google import sends get none either (one per run and frame would be noise).
+		if !c.NewlyDelivered || c.SendID == nil || c.SenderID == nil || c.SharedByID != nil || c.Origin == "feed" || c.SourceSend || checked[*c.SendID] {
 			continue
 		}
 		checked[*c.SendID] = true
@@ -875,7 +940,7 @@ func (s *Server) deliveredPushes(ctx context.Context, f *store.Frame, changes []
 func (s *Server) MediaFailed(mediaID uuid.UUID) {
 	ctx := context.Background()
 	rows, err := s.st.Pool.Query(ctx, `SELECT DISTINCT si.send_id, s.sender_user_id FROM send_items si
-		JOIN items i ON i.id = si.item_id JOIN sends s ON s.id = si.send_id WHERE i.media_id = $1`, mediaID)
+		JOIN items i ON i.id = si.item_id JOIN sends s ON s.id = si.send_id WHERE i.media_id = $1 AND s.via IS NULL`, mediaID)
 	if err != nil {
 		s.log.Warn("media failed lookup", "err", err)
 		return
@@ -889,4 +954,13 @@ func (s *Server) MediaFailed(mediaID uuid.UUID) {
 	}
 	rows.Close()
 	s.publishSendUpdates(ctx, sends, "failed")
+}
+
+// preparedOriginal is the client-declared sha256 of a prepared upload's
+// original file (photo-sources.md §8.1: synced copies of it are duplicates).
+func preparedOriginal(up *store.Upload) *string {
+	if up == nil || up.Prepared == nil || up.SHA256 == nil || *up.SHA256 == "" {
+		return nil
+	}
+	return up.SHA256
 }

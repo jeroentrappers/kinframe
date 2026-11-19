@@ -49,6 +49,27 @@ remote management, web upload, album sync, an owner role and home-automation hoo
 - **Item**: a photo or video on a frame, with a sender, caption, capture time, focal point and fit mode.
 - **Album**: a named, ordered set of items. Albums live on the server and can be shared across a member's frames.
 - **Rendition**: a frame-sized version of an item made by the server, plus thumbnails.
+- **Feed**: a private, named channel (optional cover) that people post to and frames subscribe to, like a family
+  Instagram account without followers or discovery. Items posted to a feed are stored once and placed on every
+  subscribed frame. Direct sends to frames stay as they are. See `feeds.md`.
+- **Feed membership**: links an account to a feed with a role, separate from frame membership: `owner` (one; transfer,
+  delete), `admin` (members, invites, subscriptions, remove any post) and `poster` (post, edit and unsend own posts).
+- **Subscription**: connects a frame to a feed. Requested by the frame's owner/admin (or a member with *change
+  settings*), approved by a feed admin unless the requester is one or the feed auto-approves. It has a status
+  (`pending`, `active`, `paused`, `rejected`, `removed`) and a history option (only new posts, the last N items, or
+  all).
+- **Birthday person**: someone on a feed's birthday list: a name, day and month, optionally a birth year (with *show
+  age*, off by default), a photo and a link to a feed member. People, not accounts: Oma and the baby need none.
+  Owner and admins manage the list; posters suggest additions. Every frame subscribed to the feed (with *birthdays*
+  on, the default) counts down from a week before and shows a card on the day, where a tap sends a greeting back to
+  the family. See `birthdays.md`.
+- **Photo source**: a connection from an outside album to a kinframe **album** (on its frame) or a **feed**, synced by
+  the server about every 30 minutes: an Immich album (a shared link, recommended, or an API key) or an iCloud shared
+  album's public link (best effort, no official API). New photos arrive as a send by the person who set it up
+  ("Anna via Immich"); removals follow for albums, not for feeds, by default. See `photo-sources.md`.
+- **Google Photos import**: "Add from Google Photos" copies the photos someone picks in Google's own picker into an
+  album or a feed, once. Google no longer lets apps read a library or album, so it is not a sync. See
+  `photo-sources.md` §7.
 
 ## 4. Feature specification
 
@@ -86,6 +107,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Per send | 10 photos (Free) / 100 (Plus). One video. No mixing. | **No paywall.** Default limit 200 items per send, set by the operator. Photos and videos can be mixed. | M |
 | Video length | 15 s / 2 min | Default max **5 min**, set by the operator. Trimming in the app (min 3 s). "Include audio" toggle. | P |
 | Recipients | Several frames per send | Same, with online/offline state and last seen. | M |
+| Feeds as recipients | None | A send can also go to **feeds** (next to frames): posted once, placed on every frame subscribed to the feed, with "seen on 4 of 5 frames" and reactions per frame for the poster. See `feeds.md`. | + |
 | Caption | 140 characters, one per photo or "apply to all" | **280 characters**, per item or apply to all. Emoji supported (the frame bundles an emoji font, since Android 6 has old emoji). | M |
 | Adjust | Fill/fit, focal point by drag, landscape and portrait preview, face auto-centre | Same. Face auto-centre is computed on the **server** (on-device in the app is optional), so the web gets it too. | P |
 | Web upload | None | Drag and drop, folder upload, paste from clipboard. Resumable uploads. | M |
@@ -132,6 +154,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Gallery | Grid, multi-select, sort, filter by sender/type/source/visibility | Same on the frame. The same library is also browsable in app and web for members with *see library*. | P |
 | Albums | Frame-local only | **Server-side albums**, editable from frame, app and web. An album can be shown on several frames. | P |
 | Storage | Warn below 256 MB, refuse below 128 MB, no auto-delete | The frame cache is managed automatically. Least-recently-shown items are evicted from the frame when space runs low and re-downloaded on demand. The owner sees storage in the app. Nothing is lost because the server keeps everything. | P |
+| Feeds | None | Frames can **subscribe** to family feeds (pause, history: none / last N / all, unsubscribe), and play one feed like an album. Feed posts behave like any item on the frame; the credit reads "Anna · <feed name>". See `feeds.md`. Albums are not merged into feeds for now. | + |
 | Share to another frame | None | From a frame's library (single or multi-select) or the sent history: **"Share to another frame"** puts the same photos on other frames you can send to, without uploading again (the server reuses the stored media). Needs *see library* on the source (or being the sender) and *send* on the target; the target's moderation applies and frames that already have it are skipped. The original sender keeps the credit and hears about reactions; frames show "Anna · shared by Ben". Undo, the target's owner/admins, the sharer and the original sender's unsend can remove it again. | + |
 
 ### 4.7 Frame: power, sleep, brightness, presence
@@ -163,6 +186,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 |---|---|---|---|
 | Weather | Proxy to a commercial API, auto or manual location | **Open-Meteo** (no API key), fetched by the server and cached for all frames. Location set by the owner. | P |
 | Calendar | ICS/Google/Outlook/iCloud; 4-day, week and month views; hybrid sidebar; countdowns; timed view. Limits per tier. | ICS and CalDAV synced by the server (not the frame), with no limits. Views and hybrid sidebar as Frameo. Countdowns and "send event to frame" free. Google and Microsoft OAuth later. | + |
+| Birthdays | None | From the frame's feeds: "Oma turns 80 in 3 days" among the countdowns, a birthday card on the day ("🎈 Oma is 80 today!") with balloons on first appearance and hourly, never waking the screen; tap to send "happy birthday" to the family; also in the calendar views. Family members get a morning notification. See `birthdays.md`. | + |
 
 ### 4.10 Frame: external media, backup, updates, recovery
 
@@ -184,12 +208,14 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Feature | Phase |
 |---|---|
 | Home Assistant integration (MQTT discovery or REST): screen on/off, brightness, next/previous, show item, presence wake, frame state as entities | + (1) |
-| Album sync sources per frame or album: Immich album, Google Photos shared album (as far as the API permits), WebDAV/Nextcloud folder, iCloud shared album link | + (2) |
+| Photo sources (`photo-sources.md`): sync an Immich album (shared link or API key) or an iCloud shared album link (best effort) into an album or a feed; one-time "Add from Google Photos" through Google's picker (the only official route since 31 March 2025). WebDAV/Nextcloud folders, Immich people albums and two-way sync later | + (2) |
 | Email-to-frame inbox | + (3) |
 | "On this day" and scheduled albums | + (4) |
 | Moderation queue: the owner approves items before they show (useful for frames in care homes) | + (5) |
 | Google Cast / DLNA: show a frame's library on a TV, mirror a frame live, or use a TV or browser as a frame of its own (see kinframe-additions, "TV modes") | + (6) |
 | Optional pre-order shop for operators who sell frames: product cards on the landing page, reservations without payment, operator list and CSV export (API README §5.11). Off unless configured; open-source servers have no shop | + (7) |
+| Feeds and subscriptions: private family channels that frames subscribe to (`feeds.md`) | + (8) |
+| Birthdays: a birthday list per feed, shown on every subscribed frame, with greetings and morning notifications (`birthdays.md`) | + (9) |
 
 ## 5. Non-functional requirements
 
@@ -264,6 +290,16 @@ The defaults are Frameo's, except the last three rows.
    albums, collage, video options, Wi-Fi details, weather, SD import/export, self-update, diagnostics, replacing a frame.
 3. **v1.0 And more**: everything marked **+**, in the order of 4.11, then calendar, smart portrait pairing, Ken Burns,
    moderation.
+4. **v1.1 Feeds** (`feeds.md` §10): server and web first (feeds, members, invites, subscriptions, send to feeds,
+   receipts), then the family apps, then the frame (feed credit, quiet history, feed mode). Older frames already show
+   feed posts as normal photos.
+5. **v1.2 Birthdays** (`birthdays.md` §13): server and web first (birthday lists, suggestions, the `birthdays` change,
+   greetings, morning notifications), then the family apps, then the frame (card, balloons, countdowns, greeting).
+   Older frames show nothing and lose nothing.
+6. **v1.3 Photo sources** (`photo-sources.md` §16): server and web first (network guard, Immich link and API-key
+   sources on albums and feeds), then Google Photos import (server, web, operator docs), then the family apps, then
+   iCloud shared albums (best effort, all clients), then the frame's "via Immich" credit. Older frames show synced
+   photos as normal photos.
 
 ## 8. Decisions
 
@@ -282,3 +318,30 @@ Decided by the project owner on 2026-10-22.
      as usual (API README §5.3, "Prepared uploads").
 3. **One server can host several unrelated families.** Frames and memberships isolate them. There is no extra tenant
    concept, and the operator role can see everything.
+
+Decided by the project owner on 2026-11-18.
+
+4. **Feeds are a separate entity**, next to direct sends (`feeds.md`). A feed has its own members and roles (owner,
+   admin, poster) and its own invites; frames subscribe to it with both sides' consent (frame manager requests, feed
+   admin approves unless auto-approve). No public feeds, no discovery, no follower counts. Media is stored once and
+   materialized as placements (`origin: feed`) on every active subscribed frame; the frame's own moderation applies.
+   Albums are not merged into feeds now; that may come later as a simplification.
+
+Decided by the project owner on 2026-11-19.
+
+5. **Birthdays belong to feeds** (`birthdays.md`). A feed (the family) keeps a list of birthday *people*, not accounts,
+   managed by its owner and admins, with suggestions from posters (or direct adds with *posters can add birthdays*).
+   Every active subscription shows them unless the frame side turns *birthdays* off for it; the same person in two
+   feeds shows once. The birth year reaches frames only with *show age*. The frame decides "today" in its own time
+   zone from a `birthdays` change; greetings go from the frame to the feed once per person, frame and day. Per-frame
+   birthday lists, photo tagging and imports from contacts or calendars are phase 2.
+6. **Photo sources fill albums or feeds** (`photo-sources.md`). Album sources are managed by the album's managers,
+   feed sources by the feed's owner and admins; imported photos are sent by whoever set the source up, credited
+   "via Immich", one send (one feed post per 200) per sync run, never pushed. Immich (shared link recommended, or an
+   API key) is the best-supported provider; iCloud shared albums use the endpoints of Apple's public album page and are
+   marked best effort. **Google Photos is an import, not a sync**: since 31 March 2025 the Library API only returns
+   what an app uploaded itself, so the Photos Picker API (the person picks, the server copies once) is the only
+   official route; the server holds an operator-configured OAuth client and keeps no long-lived Google tokens.
+   Credentials are sealed like calendar credentials and write-only; user-supplied URLs go through a network guard
+   (private networks only where the operator allows them). WebDAV/Nextcloud, Immich people albums, two-way sync,
+   Google shared-album links and frame-local sources are later.

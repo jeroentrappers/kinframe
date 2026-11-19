@@ -131,6 +131,27 @@ class Outbox(
         kick()
     }
 
+    /**
+     * "Say happy birthday" to [birthdayId] on [date] (the frame's local date, birthdays.md §7). Recorded locally at
+     * once (the button shows "Sent ✓" for the rest of the day) and queued; false when it was already sent that day,
+     * so a second tap sends nothing.
+     */
+    suspend fun birthdayGreeting(birthdayId: String, date: String): Boolean {
+        val queued = db.tx {
+            if (db.birthdayGreetings().insert(app.kinframe.frame.data.BirthdayGreetingEntity(birthdayId, date, now())) == -1L) return@tx false
+            db.outbox().insert(
+                OutboxEntity(
+                    kind = OutboxEntity.BIRTHDAY_GREETING, placementId = birthdayId,
+                    payload = buildJsonObject { put("date", JsonPrimitive(date)) }.toString(), notBefore = now(), createdAt = now(),
+                ),
+            )
+            db.birthdayGreetings().prune(now() - GREETING_MARK_KEEP_MS)
+            true
+        }
+        if (queued) kick()
+        return queued
+    }
+
     /** Merges [patch] into the single pending settings patch. */
     suspend fun settingsPatch(patch: JsonObject) {
         db.tx {
@@ -197,6 +218,10 @@ class Outbox(
             OutboxEntity.JOIN_DECISION -> api.decideJoin(o.placementId!!, payload["approve"]!!.jsonPrimitive.content == "true")
             OutboxEntity.INVITATION_DECISION -> api.decideInvitation(o.placementId!!, payload["accept"]!!.jsonPrimitive.content == "true")
             OutboxEntity.COUNTDOWN -> api.setCountdown(o.placementId!!, payload["on"]!!.jsonPrimitive.content == "true")
+            // Older than two days the server would refuse the date anyway: dropped silently (the button showed "Sent").
+            OutboxEntity.BIRTHDAY_GREETING -> if (now() - o.createdAt <= GREETING_MAX_AGE_MS) {
+                api.greetBirthday(o.placementId!!, payload["date"]!!.jsonPrimitive.content)
+            } else Log.i(TAG, "dropping a greeting queued more than two days ago")
             OutboxEntity.SETTINGS_PATCH -> {
                 val version = currentSettingsVersion()
                 val result = api.patchSettings(version, payload)
@@ -216,5 +241,10 @@ class Outbox(
         return runCatching { KinJson.parseToJsonElement(s).jsonObject["version"]?.jsonPrimitive?.int ?: 0 }.getOrDefault(0)
     }
 
-    private companion object { const val TAG = "KinOutbox" }
+    companion object {
+        private const val TAG = "KinOutbox"
+        /** Queued greetings older than this are dropped (birthdays.md §7). */
+        const val GREETING_MAX_AGE_MS = 2 * 24 * 3_600_000L
+        private const val GREETING_MARK_KEEP_MS = 7 * 24 * 3_600_000L
+    }
 }

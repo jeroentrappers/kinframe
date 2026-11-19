@@ -5,7 +5,7 @@ import { Adb, AdbDaemonTransport } from '@yume-chan/adb';
 import AdbWebCredentialStore from '@yume-chan/adb-credential-web';
 import { AdbDaemonWebUsbDevice, AdbDaemonWebUsbDeviceManager } from '@yume-chan/adb-daemon-webusb';
 import { ReadableStream } from '@yume-chan/stream-extra';
-import type { FrameShell } from './runner';
+import type { FrameShell, RemoteEntry } from './runner';
 
 /** Whether this browser can talk to USB devices (Chrome, Edge, Opera; not Firefox or Safari). */
 export function webUsbSupported(): boolean {
@@ -126,6 +126,15 @@ export class WebUsbFrame implements FrameShell {
 				o += c.length;
 			}
 			return out;
+		} finally {
+			await sync.dispose();
+		}
+	}
+
+	async list(remote: string): Promise<RemoteEntry[]> {
+		const sync = await this.adb.sync();
+		try {
+			return (await sync.readdir(remote)).map((e) => ({ name: e.name, mode: e.mode, size: Number(e.size), mtime: Number(e.mtime) }));
 		} finally {
 			await sync.dispose();
 		}

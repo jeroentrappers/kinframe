@@ -96,7 +96,9 @@ func (s *Server) RemoveFrame(ctx context.Context, req gen.RemoveFrameRequestObje
 	}
 	var deviceID *uuid.UUID
 	var members []uuid.UUID
+	var ended []store.Subscription
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
+		members = nil
 		f, err := tx.LockFrame(ctx, req.FrameId)
 		if err != nil {
 			return notFound(err, "frame")
@@ -108,6 +110,10 @@ func (s *Server) RemoveFrame(ctx context.Context, req gen.RemoveFrameRequestObje
 			}
 		}
 		if _, err := tx.Exec(ctx, `UPDATE placements SET removed_at = now() WHERE frame_id = $1 AND removed_at IS NULL`, f.ID); err != nil {
+			return err
+		}
+		// Its feed subscriptions end ("Frame removed" for the feeds' admins).
+		if ended, err = tx.EndFrameSubscriptions(ctx, f.ID); err != nil {
 			return err
 		}
 		rows, err := tx.Query(ctx, `DELETE FROM memberships WHERE frame_id = $1 RETURNING user_id`, f.ID)
@@ -136,6 +142,9 @@ func (s *Server) RemoveFrame(ctx context.Context, req gen.RemoveFrameRequestObje
 		s.hub.Revoke(*deviceID)
 	}
 	s.notify.Users(members, notify.Event{"type": "membership.updated", "frame_id": req.FrameId}, nil)
+	for _, sub := range ended {
+		s.publishSubscription(ctx, sub.ID, nil)
+	}
 	return noContent(), nil
 }
 

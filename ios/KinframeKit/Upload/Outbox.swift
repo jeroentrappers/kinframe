@@ -83,6 +83,9 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
     public var server: URL
     public var frameIds: [String]
     public var frameNames: [String]
+    /// Feeds to post to (`feed_ids`). Optional so jobs saved by an older version still load.
+    public var feedIds: [String]?
+    public var feedNames: [String]?
     public var items: [OutboxItem]
     /// Sent with `POST /v1/sends`, stable across retries so a retry never creates a second send.
     public var idempotencyKey: String
@@ -90,17 +93,23 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
     public var lease: Lease?
     public var attempts: Int
 
-    public init(id: UUID = UUID(), server: URL, frameIds: [String], frameNames: [String], items: [OutboxItem]) {
+    public init(id: UUID = UUID(), server: URL, frameIds: [String], frameNames: [String], feedIds: [String] = [], feedNames: [String] = [],
+                items: [OutboxItem]) {
         self.id = id
         createdAt = Date()
         self.server = server
         self.frameIds = frameIds
         self.frameNames = frameNames
+        self.feedIds = feedIds.isEmpty ? nil : feedIds
+        self.feedNames = feedNames.isEmpty ? nil : feedNames
         self.items = items
         idempotencyKey = UUID().uuidString.lowercased()
         state = .uploading
         attempts = 0
     }
+
+    /// Frames and feeds, for the "sending" card ("Oma's frame, Peeters kids").
+    public var recipientNames: [String] { frameNames + (feedNames ?? []) }
 
     public var totalBytes: Int64 { items.reduce(0) { $0 + $1.totalBytes } }
     public var doneBytes: Int64 { items.reduce(0) { $0 + $1.doneBytes } }
@@ -149,6 +158,7 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
                 var live_video_upload_id: String?
             }
             var frame_ids: [String]
+            var feed_ids: [String]?
             var items: [Item]
         }
         let iso = ISO8601DateFormatter()
@@ -182,7 +192,8 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
         }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(Body(frame_ids: frameIds, items: items))
+        let feeds = feedIds ?? []
+        return try encoder.encode(Body(frame_ids: frameIds, feed_ids: feeds.isEmpty ? nil : feeds, items: items))
     }
 }
 

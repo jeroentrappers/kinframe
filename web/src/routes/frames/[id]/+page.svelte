@@ -16,9 +16,10 @@
 	import FramePeople from '$components/frame/FramePeople.svelte';
 	import FrameSettingsForm from '$components/frame/FrameSettingsForm.svelte';
 	import FrameCalendar from '$components/frame/calendar/FrameCalendar.svelte';
+	import FrameFeeds from '$components/frame/FrameFeeds.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 
-	type Tab = 'overview' | 'library' | 'people' | 'calendar' | 'settings';
+	type Tab = 'overview' | 'library' | 'people' | 'feeds' | 'calendar' | 'settings';
 
 	let frame = $state<Frame | null>(null);
 	let error = $state<unknown>(null);
@@ -55,6 +56,8 @@
 			{ id: 'library', label: 'frame.tabLibrary', icon: 'image' },
 			{ id: 'people', label: 'frame.tabPeople', icon: 'users' }
 		];
+		// Feeds the frame subscribes to (docs/spec/feeds.md §4.2): managers manage, members see the active ones.
+		if (discovery.feeds) list.push({ id: 'feeds', label: 'frame.tabFeeds', icon: 'feed' });
 		if (discovery.doc?.calendar && (can(frame, 'change_settings') || can(frame, 'send')))
 			list.push({ id: 'calendar', label: 'frame.tabCalendar', icon: 'calendar' });
 		if (can(frame, 'change_settings')) list.push({ id: 'settings', label: 'frame.tabSettings', icon: 'settings' });
@@ -156,6 +159,8 @@
 				<FrameLibrary {frame} />
 			{:else if tab === 'people'}
 				<FramePeople {frame} manage={canManage(frame)} onchanged={() => void load(frame!.id)} />
+			{:else if tab === 'feeds'}
+				<FrameFeeds {frame} />
 			{:else if tab === 'calendar'}
 				<FrameCalendar {frame} />
 			{:else if tab === 'settings'}

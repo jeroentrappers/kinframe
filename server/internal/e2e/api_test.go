@@ -482,6 +482,7 @@ func TestSendValidation(t *testing.T) {
 	_, otherFrame := e.claim(other)
 
 	txt := e.upload(owner, []byte(strings.Repeat("not a photo\n", 100)), "notes.txt", "text/plain")
+	otherFeed := e.expect(req{method: "POST", path: "/v1/feeds", token: other.token, body: map[string]any{"name": "Theirs"}}, 201).m(t)["id"].(string)
 	tests := []struct {
 		name   string
 		body   map[string]any
@@ -493,12 +494,18 @@ func TestSendValidation(t *testing.T) {
 		{"not my frame", map[string]any{"frame_ids": []string{otherFrame}, "items": []map[string]any{{"upload_id": txt}}}, 404, "not_found"},
 		{"caption too long", map[string]any{"frame_ids": []string{frameID}, "items": []map[string]any{{"upload_id": txt, "caption": strings.Repeat("a", 281)}}}, 422, "validation_failed"},
 		{"no frames", map[string]any{"frame_ids": []string{}, "items": []map[string]any{{"upload_id": txt}}}, 422, "validation_failed"},
+		{"no frames or feeds", map[string]any{"frame_ids": []string{}, "feed_ids": []string{}, "items": []map[string]any{{"upload_id": txt}}}, 422, "validation_failed"},
+		{"not my feed", map[string]any{"frame_ids": []string{frameID}, "feed_ids": []string{otherFeed}, "items": []map[string]any{{"upload_id": txt}}}, 404, "not_found"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := e.do(req{method: "POST", path: "/v1/sends", token: owner.token, body: tt.body})
 			if r.StatusCode != tt.status || r.code() != tt.code {
 				t.Fatalf("got %d %s: %s", r.StatusCode, r.code(), r.body)
+			}
+			// Empty recipients are reported on frame_ids.
+			if strings.HasPrefix(tt.name, "no frames") && !strings.Contains(string(r.body), `"field":"frame_ids"`) {
+				t.Fatalf("field: %s", r.body)
 			}
 		})
 	}
@@ -537,7 +544,7 @@ func TestSPA(t *testing.T) {
 	if js := e.get("/_app/immutable/app.js", ""); js.Header.Get("Access-Control-Allow-Origin") != "" {
 		t.Fatalf("CORS on a non-font asset: %v", js.Header)
 	}
-	for _, p := range []string{"/", "/f/12345678", "/i/abcdefghijklmnopqrstuvwxyz", "/frames/x/settings"} {
+	for _, p := range []string{"/", "/f/12345678", "/i/abcdefghijklmnopqrstuvwxyz", "/fi/abcdefghijklmnopqrstuvwxyz", "/frames/x/settings"} {
 		r := e.get(p, "")
 		if !strings.Contains(string(r.body), "<title>kinframe</title>") {
 			t.Fatalf("%s: %s", p, r.body)

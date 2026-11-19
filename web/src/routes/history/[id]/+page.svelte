@@ -8,6 +8,7 @@
 	import { followSends } from '$lib/sendsLive';
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, kindSummary, t, tn } from '$lib/i18n/index.svelte';
+	import { summaryVia } from '$lib/sender';
 	import Icon from '$components/Icon.svelte';
 	import PushOffer from '$components/PushOffer.svelte';
 	import { push } from '$lib/push.svelte';
@@ -18,6 +19,10 @@
 	import StagePill from '$components/StagePill.svelte';
 	import Thumb from '$components/Thumb.svelte';
 	import TvDialog from '$components/TvDialog.svelte';
+	import { discovery } from '$lib/discovery.svelte';
+	import { feeds } from '$lib/feeds.svelte';
+	import ForwardToFeedDialog from '$components/feed/ForwardToFeedDialog.svelte';
+	import ReceiptSummary from '$components/feed/ReceiptSummary.svelte';
 
 	let send = $state<Send | null>(null);
 	let error = $state<unknown>(null);
@@ -114,6 +119,11 @@
 	});
 	const tvSingleVideo = $derived(!!send && tvFrame?.ids.length === 1 && send.items.find((i) => i.status === 'ready')?.kind === 'video');
 
+	// ---- post to a feed (forward without a new upload)
+	let forwardOpen = $state(false);
+	$effect(() => void feeds.load());
+	const canForward = $derived(discovery.feeds && feeds.list.length > 0 && !!send && send.items.some((i) => i.status !== 'failed'));
+
 	// ---- unsend (undo instead of "are you sure")
 	function unsend() {
 		if (!send) return;
@@ -156,7 +166,7 @@
 		<header class="page-header">
 			<div>
 				<h1>
-					{kindSummary(kinds)}
+					{summaryVia(kindSummary(kinds), send.via)}
 				</h1>
 				<p class="lede">{t('detail.sentAt', { when: formatDateTime(send.created_at, i18n.tag) })}</p>
 			</div>
@@ -166,6 +176,9 @@
 				{/if}
 				{#if tvFrame}
 					<button class="btn" onclick={() => (tvOpen = true)}><Icon name="tv" size={18} />{t('tv.show')}</button>
+				{/if}
+				{#if canForward}
+					<button class="btn" onclick={() => (forwardOpen = true)}><Icon name="feed" size={18} />{t('forward.action')}</button>
 				{/if}
 				<button class="btn btn-danger-ghost" onclick={unsend}><Icon name="trash" size={18} />{t('detail.unsend')}</button>
 			</div>
@@ -178,6 +191,7 @@
 			<PushOffer />
 		{/if}
 
+		{#if deliveries.length > 0}
 		<section class="card card-pad frames" aria-label={t('detail.deliveryLabel')}>
 			{#each deliveries as d (d.frameId)}
 				<div class="frame-sum">
@@ -195,6 +209,23 @@
 				</div>
 			{/each}
 		</section>
+		{/if}
+
+		{#if (send.feeds ?? []).length > 0}
+			<section class="card card-pad feeds" aria-label={t('detail.feedsLabel')}>
+				{#each send.feeds ?? [] as f (f.post_id)}
+					<div class="feed-sum">
+						<div class="row">
+							<Icon name="feed" size={16} />
+							<a class="fname" href="/feeds/{f.feed_id}?post={f.post_id}">{f.feed_name}</a>
+							<span class="spacer"></span>
+							{#if f.removed}<span class="badge">{t('history.feedRemoved')}</span>{/if}
+						</div>
+						{#if !f.removed}<ReceiptSummary summary={f.summary} />{/if}
+					</div>
+				{/each}
+			</section>
+		{/if}
 
 		<ul class="items" role="list">
 			{#each send.items as item, i (item.id)}
@@ -275,6 +306,10 @@
 	{/if}
 </div>
 
+{#if send && discovery.feeds}
+	<ForwardToFeedDialog bind:open={forwardOpen} {send} onforwarded={(s) => (send = s)} />
+{/if}
+
 {#if shareFrom}
 	<ShareDialog bind:open={shareOpen} frameId={shareFrom.frameId} placementIds={shareFrom.placementIds} />
 {/if}
@@ -301,6 +336,25 @@
 		.frames {
 			grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 		}
+	}
+	.feeds {
+		display: grid;
+		gap: var(--s-4);
+		margin-bottom: var(--s-5);
+	}
+	@media (min-width: 640px) {
+		.feeds {
+			grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		}
+	}
+	.feed-sum {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.feed-sum a {
+		color: inherit;
+		font-weight: 650;
 	}
 	.frame-sum {
 		display: flex;

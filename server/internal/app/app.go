@@ -23,6 +23,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
+	"github.com/jeroentrappers/kinframe/server/internal/netguard"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/registry"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
@@ -146,6 +147,14 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			},
 		}
 	}
+	// Requests to user-entered URLs (calendars, photo sources) go through the SSRF guard.
+	guard, err := netguard.New(netguard.Config{
+		PrivateNetworks: cfg.SourcesPrivateNetworks, AllowedHosts: cfg.SourcesAllowedHosts, CAFile: cfg.SourcesCAFile,
+		PublicURL: cfg.PublicURL, AllowLoopback: cfg.SourcesAllowLoopback,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("network guard: %w", err)
+	}
 	var cal *calendar.Service
 	if cfg.CalendarEnabled {
 		sealer, err := calendar.NewSealer(cfg.SecretsKey, cfg.SigningKey)
@@ -157,11 +166,11 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			Interval: cfg.CalendarSync, Jitter: 3 * time.Minute,
 			Fetcher: &calendar.Fetcher{
 				UserAgent: "kinframe/" + cfg.Version + " (+https://github.com/jeroentrappers/kinframe)",
-				HTTP:      &http.Client{Timeout: 30 * time.Second},
+				HTTP:      guard.Client(netguard.Options{Timeout: 30 * time.Second}),
 			},
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg})
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg, Guard: guard})
 	if err != nil {
 		return nil, err
 	}
@@ -173,6 +182,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 		Store: st, Blob: store, Scratch: scratch, Tools: tools, Log: log.With("component", "worker"), Events: srv, Workers: cfg.Workers,
 		MaxVideoMS:   func(ctx context.Context) int { return srv.Limits(ctx).MaxVideoSeconds * 1000 },
 		RemoveSource: srv.RemoveUpload,
+		Jobs:         srv.RunJob,
 	}
 	st.OnFeed = srv.FeedChanged
 	st.OnJob = w.Wake
@@ -187,6 +197,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	wg.Add(2)
 	go func() { defer wg.Done(); a.Worker.Run(ctx) }()
 	go func() { defer wg.Done(); a.maintain(ctx) }()
+	wg.Add(1)
+	go func() { defer wg.Done(); a.API.RunBirthdayMornings(ctx) }()
+	wg.Add(1)
+	go func() { defer wg.Done(); a.API.RunPhotoSources(ctx) }()
 	if a.Releases != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
@@ -267,6 +281,15 @@ func (a *App) Maintain(ctx context.Context) {
 		} else if n > 0 {
 			log.Info("deleted old shop reservations", "count", n)
 		}
+	}
+	if err := a.API.PruneBirthdays(ctx); err != nil {
+		log.Error("prune birthdays", "err", err)
+	}
+	if err := a.API.PruneGoogleImports(ctx); err != nil {
+		log.Error("prune google imports", "err", err)
+	}
+	if _, err := a.Store.PruneSubscriptions(ctx); err != nil {
+		log.Error("prune ended subscriptions", "err", err)
 	}
 	if err := a.Store.PruneIdempotency(ctx); err != nil {
 		log.Error("prune idempotency keys", "err", err)

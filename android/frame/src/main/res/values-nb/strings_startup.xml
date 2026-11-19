@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Starter…</string>
+    <string name="startup_checking_library">Sjekker bildene etter et strømbrudd…</string>
+    <string name="startup_checking_update">Sjekker appversjonen…</string>
+    <string name="startup_loading_photos">Laster inn bildene…</string>
+    <string name="startup_preparing_photo">Gjør klar det første bildet…</string>
+    <string name="startup_waiting_wifi">Venter på Wi-Fi…</string>
+    <string name="startup_setting_clock">Stiller klokken…</string>
+    <string name="startup_connecting">Kobler til serveren…</string>
+    <string name="power_cut_title">Slått av uten å avslutte</string>
+    <string name="power_cut_body_ok">Alt er sjekket og i orden.</string>
+    <string name="power_cut_body_redownload">Alt er sjekket. Noen bilder lastes ned på nytt.</string>
+    <string name="power_cut_tip">Neste gang velger du %1$s → %2$s i menyen og venter til det står «%3$s» på skjermen.</string>
+</resources>

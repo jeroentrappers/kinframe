@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Démarrage…</string>
+    <string name="startup_checking_library">Vérification de vos photos après une coupure de courant…</string>
+    <string name="startup_checking_update">Vérification de la version de l\'appli…</string>
+    <string name="startup_loading_photos">Chargement de vos photos…</string>
+    <string name="startup_preparing_photo">Préparation de la première photo…</string>
+    <string name="startup_waiting_wifi">En attente du Wi-Fi…</string>
+    <string name="startup_setting_clock">Réglage de l\'horloge…</string>
+    <string name="startup_connecting">Connexion au serveur…</string>
+    <string name="power_cut_title">Le cadre a été éteint sans être arrêté</string>
+    <string name="power_cut_body_ok">Tout a été vérifié et tout va bien.</string>
+    <string name="power_cut_body_redownload">Tout a été vérifié. Certaines photos sont téléchargées à nouveau.</string>
+    <string name="power_cut_tip">La prochaine fois, choisissez %1$s → %2$s dans le menu et attendez que l\'écran affiche « %3$s ».</string>
+</resources>

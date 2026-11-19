@@ -75,6 +75,11 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
                 // New accounts start with a placeholder; the Logto ID token usually has the real name.
                 graph.auth.idTokenName()?.take(40)?.let { n -> me = runCatching { api.updateMe(displayName = n) }.getOrDefault(me) }
             }
+            // The device's time zone goes to the server automatically (birthday morning notices at 08:00 local).
+            val tz = java.time.ZoneId.systemDefault().id
+            if (graph.servers.current.value?.discovery?.birthdays == true && me.timezone != tz) {
+                me = runCatching { api.updateMe(timezone = tz) }.getOrDefault(me)
+            }
             graph.me.value = me
             profile.update { it.copy(loading = false, nameDraft = if (me.displayName == User.PLACEHOLDER_NAME) "" else me.displayName) }
         } catch (e: Exception) {

@@ -22,6 +22,10 @@ data class Album(
     val placementIds: List<String> = emptyList(),
     val coverPlacementId: String? = null,
     val schedule: AlbumSchedule? = null,
+    /** Photo sources syncing into this album; details for album managers in `listAlbumPhotoSources`. */
+    val photoSourceCount: Int = 0,
+    /** Its photos play only when the frame plays this album (album mode or its schedule), not in "all" (photo-sources.md §9.1). */
+    val onlyInAlbumMode: Boolean = false,
 )
 
 /** A calendar on a frame: an ICS/webcal link, a CalDAV calendar, or the local received-events calendar. */
@@ -174,3 +178,14 @@ data class TvLinkCreate(
     val albumId: String? = null,
     val placementIds: List<String>? = null,
 )
+
+/**
+ * `AlbumWrite` fields for `PATCH /frames/{id}/albums/{aid}` (with `If-Match`) that have a typed builder; the rest of
+ * the album patch (order, cover, schedule) is built where it is used. Omitted fields are kept.
+ */
+data class AlbumWrite(val name: String? = null, val onlyInAlbumMode: Boolean? = null) {
+    fun toJson(): kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.buildJsonObject {
+        name?.trim()?.takeIf { it.isNotEmpty() }?.let { put("name", kotlinx.serialization.json.JsonPrimitive(it)) }
+        onlyInAlbumMode?.let { put("only_in_album_mode", kotlinx.serialization.json.JsonPrimitive(it)) }
+    }
+}

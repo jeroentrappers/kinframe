@@ -11,6 +11,8 @@ import app.kinframe.core.api.ProblemCode
 import app.kinframe.core.api.RedeemResult
 import app.kinframe.family.R
 import app.kinframe.family.ui.Load
+import app.kinframe.core.api.FeedCodes
+import app.kinframe.family.util.EnteredCode
 import app.kinframe.family.util.FrameCodes
 import app.kinframe.family.util.Problems
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,13 +35,25 @@ data class AddFrameState(
     val saving: Boolean = false,
     @StringRes val saveError: Int? = null,
     val named: Frame? = null,
+    /** A feed invite code (letters, `KF7Q-M2XA`) instead of frame digits; empty for frame codes. */
+    val feedCode: String = "",
+    /** The feed invite to open (from a code lookup or a pasted `/fi/` link). */
+    val feedInviteToken: String? = null,
+    /** The server has feeds: the field also takes feed codes. */
+    val feeds: Boolean = false,
 ) {
-    val complete: Boolean get() = digits.length == FrameCodes.LENGTH
+    val isFeed: Boolean get() = feedCode.isNotEmpty()
+    /** What the code field shows. */
+    val fieldText: String get() = if (isFeed) feedCode else digits
+    val complete: Boolean get() = if (isFeed) FeedCodes.normalize(feedCode) != null else digits.length == FrameCodes.LENGTH
 }
 
-/** Claim or join a frame with the code it shows (README §5.1). */
-class AddFrameViewModel(private val api: KinApi, initialCode: String? = null) : ViewModel() {
-    private val _state = MutableStateFlow(AddFrameState(digits = initialCode?.let(FrameCodes::digits).orEmpty()))
+/**
+ * Claim or join a frame with the code it shows (README §5.1). With [feeds] on, the same field takes feed invite codes
+ * (letters) and links, which are looked up and opened as a feed invite (README §5.12).
+ */
+class AddFrameViewModel(private val api: KinApi, initialCode: String? = null, feeds: Boolean = false) : ViewModel() {
+    private val _state = MutableStateFlow(initial(initialCode, feeds))
     val state: StateFlow<AddFrameState> = _state.asStateFlow()
 
     /** One idempotency key per code, so a retry after a dropped connection returns the first result. */
@@ -50,17 +64,31 @@ class AddFrameViewModel(private val api: KinApi, initialCode: String? = null) : 
         if (state.value.complete) submit()
     }
 
+    private fun initial(code: String?, feeds: Boolean): AddFrameState = when (val c = EnteredCode.parse(code.orEmpty(), feeds)) {
+        is EnteredCode.Feed -> AddFrameState(feedCode = c.code, feeds = feeds)
+        is EnteredCode.FeedLink -> AddFrameState(feedInviteToken = c.token, feeds = feeds)
+        is EnteredCode.Frame -> AddFrameState(digits = c.digits, feeds = feeds)
+    }
+
     /** Typing or pasting; a whole code (or join link) pasted at once is submitted right away. */
     fun onInput(text: String) {
-        val before = state.value.digits
-        val d = FrameCodes.digits(text)
-        _state.update { it.copy(digits = d, error = null) }
-        if (d.length == FrameCodes.LENGTH && d.length - before.length > 1) submit()
+        val before = state.value.fieldText
+        when (val c = EnteredCode.parse(text, state.value.feeds)) {
+            is EnteredCode.FeedLink -> { _state.update { it.copy(feedInviteToken = c.token, error = null) }; return }
+            is EnteredCode.Feed -> _state.update { it.copy(feedCode = c.code, digits = "", error = null) }
+            is EnteredCode.Frame -> _state.update { it.copy(digits = c.digits, feedCode = "", error = null) }
+        }
+        val now = state.value
+        if (now.complete && now.fieldText.length - before.length > 1) submit()
     }
+
+    /** The feed invite screen was opened; a back press returns to an empty field. */
+    fun feedInviteOpened() = _state.update { it.copy(feedInviteToken = null, feedCode = "") }
 
     fun submit() {
         val s = state.value
         if (!s.complete || s.submitting) return
+        if (s.isFeed) { lookupFeed(FeedCodes.normalize(s.feedCode)!!); return }
         if (keyFor != s.digits) {
             key = UUID.randomUUID().toString()
             keyFor = s.digits
@@ -99,7 +127,26 @@ class AddFrameViewModel(private val api: KinApi, initialCode: String? = null) : 
         }
     }
 
-    fun reset() = _state.update { AddFrameState() }
+    private fun lookupFeed(code: String) {
+        _state.update { it.copy(submitting = true, error = null) }
+        viewModelScope.launch {
+            try {
+                val p = api.lookupFeedInvite(code)
+                _state.update { it.copy(submitting = false, feedInviteToken = p.token) }
+            } catch (e: Exception) {
+                val invalid = e is ApiException && (e.status == 404 || e.status == 410 || e.code == ProblemCode.INVITE_INVALID || e.code == ProblemCode.INVITE_EXPIRED)
+                _state.update {
+                    it.copy(submitting = false, error = when {
+                        !invalid -> Problems.message(e)
+                        e is ApiException && (e.status == 410 || e.code == ProblemCode.INVITE_EXPIRED) -> R.string.problem_invite_expired
+                        else -> R.string.feed_code_invalid
+                    })
+                }
+            }
+        }
+    }
+
+    fun reset() = _state.update { AddFrameState(feeds = it.feeds) }
 }
 
 data class InviteState(

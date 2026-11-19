@@ -121,7 +121,7 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 	if b.Website != nil && strings.TrimSpace(*b.Website) != "" {
 		// Honeypot: a bot filled the hidden field. Look successful, keep nothing.
 		s.log.Info("shop reservation dropped by the honeypot", "ip", clientIP(ctx))
-		return created(gen.ShopReservationReceipt{Reference: shop.NewReference(c.ReferencePrefix), Status: gen.New,
+		return created(gen.ShopReservationReceipt{Reference: shop.NewReference(c.ReferencePrefix), Status: gen.ShopReservationStatusNew,
 			Email: b.Email, Items: []gen.ShopLine{}, Currency: c.Currency}), nil
 	}
 

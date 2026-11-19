@@ -36,6 +36,8 @@ data class CalEvent(
     /** The source's display name; empty for the received-events calendar (shown localised). */
     val sourceName: String = "",
     val local: Boolean = false,
+    /** A birthday computed on the frame (birthdays.md §6.6): not editable, no countdown toggle. */
+    val birthday: app.kinframe.frame.birthdays.BirthdayOccurrence? = null,
 ) {
     val multiDay: Boolean get() = lastDay.isAfter(firstDay)
 
@@ -52,8 +54,18 @@ data class CalEvent(
         end?.let { it.toInstant().toEpochMilli() <= nowMs } ?: Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate().isAfter(lastDay)
 }
 
-/** A countdown resolved for display. */
-data class CountdownItem(val eventId: String, val title: String, val day: LocalDate, val start: ZonedDateTime?, val color: String)
+/**
+ * A countdown resolved for display. A birthday tile (docs/spec/birthdays.md §6.6) carries the day's [birthdays] and is
+ * worded by the view ("Oma turns 80"); event countdowns leave it empty.
+ */
+data class CountdownItem(
+    val eventId: String,
+    val title: String,
+    val day: LocalDate,
+    val start: ZonedDateTime?,
+    val color: String,
+    val birthdays: List<app.kinframe.frame.birthdays.BirthdayOccurrence> = emptyList(),
+)
 
 /**
  * The merged calendar ready for display: events resolved in [zone] and indexed per day once, so views only look
@@ -104,8 +116,35 @@ class CalendarData(
     }
 
     companion object {
-        val DAY_ORDER: Comparator<CalEvent> = compareBy<CalEvent>({ if (it.spans) 0 else 1 }, { it.firstDay }, { -(it.lastDay.toEpochDay() - it.firstDay.toEpochDay()) })
+        val DAY_ORDER: Comparator<CalEvent> = compareBy<CalEvent>({ if (it.spans) 0 else 1 }, { if (it.birthday != null) 0 else 1 }, { it.firstDay }, { -(it.lastDay.toEpochDay() - it.firstDay.toEpochDay()) })
             .thenBy { it.sortKey }.thenBy { it.title }.thenBy { it.id }
+
+        /** Birthday entries are computed for this many years around today (the calendar rarely looks further). */
+        private const val BIRTHDAY_YEARS_BACK = 1L
+        private const val BIRTHDAY_YEARS_AHEAD = 2L
+        const val BIRTHDAY_SOURCE = "birthdays"
+
+        /**
+         * [base] (or an empty calendar) with every birthday from [people] as an all-day entry "🎈 Oma (80)" in `rose`
+         * around [today]. Null when there is neither a calendar nor a birthday.
+         */
+        fun withBirthdays(base: CalendarData?, people: List<app.kinframe.core.api.FrameBirthday>, today: LocalDate?, zone: ZoneId): CalendarData? {
+            if (people.isEmpty() || today == null) return base
+            val from = LocalDate.of(today.year, 1, 1).minusYears(BIRTHDAY_YEARS_BACK)
+            val to = LocalDate.of(today.year, 12, 31).plusYears(BIRTHDAY_YEARS_AHEAD)
+            val extra = app.kinframe.frame.birthdays.BirthdayLogic.occurrences(people, from, to).map { o ->
+                CalEvent(
+                    id = "birthday:${o.id}:${o.date}", sourceId = BIRTHDAY_SOURCE,
+                    title = "\uD83C\uDF88 ${o.name}" + (o.age?.let { " ($it)" } ?: ""),
+                    allDay = true, start = null, end = null, firstDay = o.date, lastDay = o.date,
+                    color = app.kinframe.frame.birthdays.BirthdayLogic.COLOR, birthday = o,
+                )
+            }
+            if (extra.isEmpty()) return base
+            val b = base ?: CalendarData(emptyList(), emptyList(), emptyList(), zone, null, null)
+            val events = (b.events + extra).sortedWith(compareBy<CalEvent>({ it.firstDay }, { if (it.spans) 0 else 1 }, { if (it.birthday != null) 0 else 1 }, { it.sortKey }))
+            return CalendarData(events, b.sources, b.countdowns, b.zone, b.windowFrom, b.windowTo)
+        }
 
         val EMPTY = CalendarData(emptyList(), emptyList(), emptyList(), ZoneId.of("UTC"), null, null)
 

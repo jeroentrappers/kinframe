@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Indítás…</string>
+    <string name="startup_checking_library">Fotók ellenőrzése áramszünet után…</string>
+    <string name="startup_checking_update">Az alkalmazás verziójának ellenőrzése…</string>
+    <string name="startup_loading_photos">Fotók betöltése…</string>
+    <string name="startup_preparing_photo">Az első fotó előkészítése…</string>
+    <string name="startup_waiting_wifi">Várakozás Wi-Fi-re…</string>
+    <string name="startup_setting_clock">Az óra beállítása…</string>
+    <string name="startup_connecting">Csatlakozás a szerverhez…</string>
+    <string name="power_cut_title">Leállítás nélkül lett kikapcsolva</string>
+    <string name="power_cut_body_ok">Minden ellenőrizve, minden rendben van.</string>
+    <string name="power_cut_body_redownload">Minden ellenőrizve. Néhány fotó újra letöltődik.</string>
+    <string name="power_cut_tip">Legközelebb válaszd a menüben a(z) %1$s → %2$s lehetőséget, és várd meg, amíg a képernyőn megjelenik: „%3$s”.</string>
+</resources>

@@ -35,7 +35,8 @@ class SessionExpiredException(problem: Problem? = null) : ApiException(401, prob
  */
 interface KinApi {
     suspend fun me(): User
-    suspend fun updateMe(displayName: String? = null, locale: String? = null): User
+    /** [timezone]: the device's IANA zone, set automatically (birthday morning notifications at 08:00 local). */
+    suspend fun updateMe(displayName: String? = null, locale: String? = null, timezone: String? = null): User
     suspend fun deleteMe(removeItems: Boolean)
     /** `PUT /me/avatar` (JPEG, PNG or WebP; the server crops to 256×256). */
     suspend fun putAvatar(bytes: ByteArray, mime: String): User
@@ -72,8 +73,8 @@ interface KinApi {
     suspend fun send(sendId: String): Send
     suspend fun createSend(request: SendCreate, idempotencyKey: String): Send
     suspend fun unsend(sendId: String)
-    /** Place the items of a send on more frames, without uploading again. */
-    suspend fun forwardSend(sendId: String, frameIds: List<String>): Send
+    /** Place the items of a send on more frames, or post them to feeds, without uploading again. */
+    suspend fun forwardSend(sendId: String, frameIds: List<String>, feedIds: List<String> = emptyList()): Send
     /** `PATCH /items/{id}`; a JSON null caption clears it. */
     suspend fun updateItem(itemId: String, patch: JsonObject): Item
 
@@ -102,7 +103,8 @@ interface KinApi {
     suspend fun createAlbum(frameId: String, name: String, placementIds: List<String> = emptyList()): Album
     /** `PATCH` with `If-Match: "<version>"`: name, placement_ids, cover_placement_id, schedule (JSON null clears it). */
     suspend fun updateAlbum(frameId: String, albumId: String, version: Int, patch: JsonObject): Album
-    suspend fun deleteAlbum(frameId: String, albumId: String)
+    /** [removeSourceItems]: also remove the photos the album's photo sources imported (asked when `photo_source_count` > 0). */
+    suspend fun deleteAlbum(frameId: String, albumId: String, removeSourceItems: Boolean = false)
 
     /** The merged calendar the frame shows, plus its weather (needs change_settings). */
     suspend fun frameCalendar(frameId: String): CalendarView
@@ -126,6 +128,96 @@ interface KinApi {
     suspend fun tvLinks(frameId: String): List<TvLink>
     suspend fun createTvLink(frameId: String, request: TvLinkCreate): TvLink
     suspend fun revokeTvLink(frameId: String, linkId: String)
+
+    // ---- feeds (README §5.12, docs/spec/feeds.md)
+
+    /** Feeds the caller is a member of (summaries). */
+    suspend fun feeds(): List<Feed>
+    suspend fun createFeed(request: FeedCreate, idempotencyKey: String): Feed
+    suspend fun feed(feedId: String): Feed
+    /** `PATCH /feeds/{id}`: name, cover_item_id (JSON null removes it), and the four settings. */
+    suspend fun updateFeed(feedId: String, patch: JsonObject): Feed
+    suspend fun deleteFeed(feedId: String)
+    suspend fun leaveFeed(feedId: String, removeMyPosts: Boolean)
+    suspend fun transferFeed(feedId: String, userId: String)
+    suspend fun feedMembers(feedId: String): List<FeedMember>
+    suspend fun updateFeedMember(feedId: String, userId: String, role: String): FeedMember
+    suspend fun removeFeedMember(feedId: String, userId: String, removePosts: Boolean)
+    suspend fun feedJoinRequests(feedId: String): List<JoinRequest>
+    suspend fun decideFeedJoinRequest(feedId: String, requestId: String, approve: Boolean)
+    suspend fun feedInvites(feedId: String): List<FeedInvite>
+    suspend fun createFeedInvite(feedId: String, request: FeedInviteCreate, idempotencyKey: String): FeedInvite
+    suspend fun revokeFeedInvite(feedId: String, inviteId: String)
+    /** `POST /feed-invites:lookup`: a short code typed into "Enter a code" → the preview with its token. */
+    suspend fun lookupFeedInvite(code: String): FeedInvitePreview
+    suspend fun previewFeedInvite(token: String): FeedInvitePreview
+    suspend fun acceptFeedInvite(token: String, accept: FeedInviteAccept?, idempotencyKey: String): FeedInviteResult
+    suspend fun feedPosts(feedId: String, cursor: String? = null, limit: Int = 30, posterId: String? = null): FeedPostsPage
+    suspend fun feedPost(feedId: String, postId: String): FeedPost
+    /** Unsend (the poster) or remove (owner/admin) a post from the feed and every subscribed frame. */
+    suspend fun removeFeedPost(feedId: String, postId: String)
+    suspend fun removeFeedPostItem(feedId: String, postId: String, itemId: String)
+    suspend fun feedPostReceipts(feedId: String, postId: String): FeedPostReceipts
+
+    // ---- subscriptions
+
+    suspend fun feedSubscriptions(feedId: String, status: String? = null): List<Subscription>
+    suspend fun requestSubscription(feedId: String, request: SubscriptionRequest, idempotencyKey: String): Subscription
+    suspend fun frameSubscriptions(frameId: String, status: String? = null): List<Subscription>
+    suspend fun subscription(subscriptionId: String): Subscription
+    suspend fun updateSubscription(subscriptionId: String, update: SubscriptionUpdate): Subscription
+    /** Unsubscribe, withdraw a pending request, or (feed side) remove. */
+    suspend fun removeSubscription(subscriptionId: String)
+    suspend fun approveSubscription(subscriptionId: String): Subscription
+    suspend fun rejectSubscription(subscriptionId: String): Subscription
+    suspend fun pauseSubscription(subscriptionId: String): Subscription
+    suspend fun resumeSubscription(subscriptionId: String): Subscription
+
+    // ---- birthdays (README §5.13, docs/spec/birthdays.md)
+
+    /** The feed's birthday people the caller may see, sorted by next birthday; [status] limits to one status. */
+    suspend fun feedBirthdays(feedId: String, status: String? = null): List<BirthdayPerson>
+    /** Approved at once for owner/admins (and posters with `posters_can_add_birthdays`), else a pending suggestion. */
+    suspend fun createFeedBirthday(feedId: String, request: BirthdayPersonCreate, idempotencyKey: String): BirthdayPerson
+    suspend fun feedBirthday(feedId: String, birthdayId: String): BirthdayPerson
+    suspend fun updateFeedBirthday(feedId: String, birthdayId: String, update: BirthdayPersonUpdate): BirthdayPerson
+    suspend fun removeFeedBirthday(feedId: String, birthdayId: String)
+    suspend fun approveFeedBirthday(feedId: String, birthdayId: String): BirthdayPerson
+    suspend fun rejectFeedBirthday(feedId: String, birthdayId: String): BirthdayPerson
+    /** JPEG, PNG or WebP; the server crops to 256×256 like an avatar. */
+    suspend fun putFeedBirthdayPhoto(feedId: String, birthdayId: String, bytes: ByteArray, mime: String): BirthdayPerson
+    suspend fun deleteFeedBirthdayPhoto(feedId: String, birthdayId: String): BirthdayPerson
+    suspend fun feedBirthdayGreetings(
+        feedId: String, birthdayId: String? = null, date: String? = null, cursor: String? = null, limit: Int = 50,
+    ): FeedBirthdayGreetingsPage
+    /** The caller's own preferences in a feed (`birthday_notifications`). */
+    suspend fun updateFeedPreferences(feedId: String, update: FeedPreferencesUpdate): Feed
+
+    // ---- photo sources and Google Photos import (README §5.14, docs/spec/photo-sources.md)
+
+    /** The album's sources (album managers), oldest first. */
+    suspend fun albumPhotoSources(frameId: String, albumId: String): List<PhotoSource>
+    /** The feed's sources (feed owner/admins), oldest first. */
+    suspend fun feedPhotoSources(feedId: String): List<PhotoSource>
+    /** The sources the caller owns, across albums and feeds, newest first. */
+    suspend fun myPhotoSources(): List<PhotoSource>
+    /** Tests, then creates; `422 source_test_failed` with the error code in `detail`. */
+    suspend fun createPhotoSource(request: PhotoSourceCreate, idempotencyKey: String): PhotoSource
+    /** Tries a connection without saving it; for `immich_api` without an album it lists the albums. */
+    suspend fun testPhotoSource(connection: PhotoSourceConnection): PhotoSourceTestResult
+    suspend fun immichAlbums(serverUrl: String, apiKey: String): ImmichAlbumList
+    suspend fun photoSource(sourceId: String): PhotoSource
+    /** Pause/resume, rename, settings, new credentials, take over. Omitted fields are kept. */
+    suspend fun updatePhotoSource(sourceId: String, update: PhotoSourceUpdate): PhotoSource
+    /** Stop syncing; [removeItems] also removes the photos it imported. */
+    suspend fun deletePhotoSource(sourceId: String, removeItems: Boolean)
+    /** Sync now (`202`, `running: true`); [confirmRemovals] applies removals held back by the mass-removal guard. */
+    suspend fun syncPhotoSource(sourceId: String, confirmRemovals: Boolean = false): PhotoSource
+    /** The caller's imports of the last 7 days, newest first. */
+    suspend fun myGoogleImports(): List<GoogleImport>
+    suspend fun startGoogleImport(request: GoogleImportCreate, idempotencyKey: String): GoogleImport
+    suspend fun googleImport(importId: String): GoogleImport
+    suspend fun cancelGoogleImport(importId: String): GoogleImport
 
     /** The user websocket, `GET /v1/ws?access_token=…` (README §6.2). */
     suspend fun webSocketRequest(): Request
@@ -193,10 +285,11 @@ class HttpKinApi(
 
     override suspend fun me(): User = call { url(ep("me")).get() }.decode(User.serializer())
 
-    override suspend fun updateMe(displayName: String?, locale: String?): User = call {
+    override suspend fun updateMe(displayName: String?, locale: String?, timezone: String?): User = call {
         url(ep("me")).patch(json(buildJsonObject {
             displayName?.let { put("display_name", JsonPrimitive(it)) }
             locale?.let { put("locale", JsonPrimitive(it)) }
+            timezone?.let { put("timezone", JsonPrimitive(it)) }
         }))
     }.decode(User.serializer())
 
@@ -303,9 +396,10 @@ class HttpKinApi(
 
     override suspend fun unsend(sendId: String) = call { url(ep("sends/$sendId")).delete() }.expectOk()
 
-    override suspend fun forwardSend(sendId: String, frameIds: List<String>): Send = call {
+    override suspend fun forwardSend(sendId: String, frameIds: List<String>, feedIds: List<String>): Send = call {
         url(ep("sends/$sendId/forward")).post(json(buildJsonObject {
             put("frame_ids", kotlinx.serialization.json.JsonArray(frameIds.map { JsonPrimitive(it) }))
+            if (feedIds.isNotEmpty()) put("feed_ids", kotlinx.serialization.json.JsonArray(feedIds.map { JsonPrimitive(it) }))
         }))
     }.decode(Send.serializer())
 
@@ -369,7 +463,9 @@ class HttpKinApi(
     override suspend fun updateAlbum(frameId: String, albumId: String, version: Int, patch: JsonObject): Album =
         call { url(ep("frames/$frameId/albums/$albumId")).header("If-Match", "\"$version\"").patch(json(patch)) }.decode(Album.serializer())
 
-    override suspend fun deleteAlbum(frameId: String, albumId: String) = call { url(ep("frames/$frameId/albums/$albumId")).delete() }.expectOk()
+    override suspend fun deleteAlbum(frameId: String, albumId: String, removeSourceItems: Boolean) = call {
+        url(ep("frames/$frameId/albums/$albumId", mapOf("remove_source_items" to if (removeSourceItems) "true" else null))).delete()
+    }.expectOk()
 
     // ------------------------------------------------------------------ calendars and sent events
 
@@ -432,6 +528,209 @@ class HttpKinApi(
 
     override suspend fun revokeTvLink(frameId: String, linkId: String) =
         call { url(ep("frames/$frameId/tv-links/$linkId")).delete() }.expectOk()
+
+    // ------------------------------------------------------------------ feeds
+
+    override suspend fun feeds(): List<Feed> = call { url(ep("feeds")).get() }.decode(ListSerializer(Feed.serializer()))
+
+    override suspend fun createFeed(request: FeedCreate, idempotencyKey: String): Feed = call {
+        url(ep("feeds")).header("Idempotency-Key", idempotencyKey).post(json(request, FeedCreate.serializer()))
+    }.decode(Feed.serializer())
+
+    override suspend fun feed(feedId: String): Feed = call { url(ep("feeds/$feedId")).get() }.decode(Feed.serializer())
+
+    override suspend fun updateFeed(feedId: String, patch: JsonObject): Feed =
+        call { url(ep("feeds/$feedId")).patch(json(patch)) }.decode(Feed.serializer())
+
+    override suspend fun deleteFeed(feedId: String) = call { url(ep("feeds/$feedId")).delete() }.expectOk()
+
+    override suspend fun leaveFeed(feedId: String, removeMyPosts: Boolean) = call {
+        url(ep("feeds/$feedId/leave")).post(json(buildJsonObject { put("remove_my_posts", JsonPrimitive(removeMyPosts)) }))
+    }.expectOk()
+
+    override suspend fun transferFeed(feedId: String, userId: String) = call {
+        url(ep("feeds/$feedId/transfer")).post(json(buildJsonObject { put("user_id", JsonPrimitive(userId)) }))
+    }.expectOk()
+
+    override suspend fun feedMembers(feedId: String): List<FeedMember> =
+        call { url(ep("feeds/$feedId/members")).get() }.decode(ListSerializer(FeedMember.serializer()))
+
+    override suspend fun updateFeedMember(feedId: String, userId: String, role: String): FeedMember = call {
+        url(ep("feeds/$feedId/members/$userId")).patch(json(buildJsonObject { put("role", JsonPrimitive(role)) }))
+    }.decode(FeedMember.serializer())
+
+    override suspend fun removeFeedMember(feedId: String, userId: String, removePosts: Boolean) =
+        call { url(ep("feeds/$feedId/members/$userId", mapOf("remove_posts" to removePosts.toString()))).delete() }.expectOk()
+
+    override suspend fun feedJoinRequests(feedId: String): List<JoinRequest> =
+        call { url(ep("feeds/$feedId/join-requests")).get() }.decode(ListSerializer(JoinRequest.serializer()))
+
+    override suspend fun decideFeedJoinRequest(feedId: String, requestId: String, approve: Boolean) =
+        call { url(ep("feeds/$feedId/join-requests/$requestId/${if (approve) "approve" else "deny"}")).post(empty) }.expectOk()
+
+    override suspend fun feedInvites(feedId: String): List<FeedInvite> =
+        call { url(ep("feeds/$feedId/invites")).get() }.decode(ListSerializer(FeedInvite.serializer()))
+
+    override suspend fun createFeedInvite(feedId: String, request: FeedInviteCreate, idempotencyKey: String): FeedInvite = call {
+        // max_uses null means unlimited, so it is always sent explicitly.
+        val body = buildJsonObject {
+            put("purpose", JsonPrimitive(request.purpose))
+            put("max_uses", request.maxUses?.let { JsonPrimitive(it) } ?: JsonNull)
+            put("expires_in_hours", JsonPrimitive(request.expiresInHours))
+            request.note?.takeIf { it.isNotBlank() }?.let { put("note", JsonPrimitive(it)) }
+        }
+        url(ep("feeds/$feedId/invites")).header("Idempotency-Key", idempotencyKey).post(json(body))
+    }.decode(FeedInvite.serializer())
+
+    override suspend fun revokeFeedInvite(feedId: String, inviteId: String) =
+        call { url(ep("feeds/$feedId/invites/$inviteId")).delete() }.expectOk()
+
+    override suspend fun lookupFeedInvite(code: String): FeedInvitePreview = call {
+        // Like placements:bulk, the colon stays in the path segment.
+        url(ep("feed-invites:lookup")).post(json(buildJsonObject { put("code", JsonPrimitive(code)) }))
+    }.decode(FeedInvitePreview.serializer())
+
+    override suspend fun previewFeedInvite(token: String): FeedInvitePreview =
+        call { url(ep("feed-invites/$token")).get() }.decode(FeedInvitePreview.serializer())
+
+    override suspend fun acceptFeedInvite(token: String, accept: FeedInviteAccept?, idempotencyKey: String): FeedInviteResult = call {
+        url(ep("feed-invites/$token/accept")).header("Idempotency-Key", idempotencyKey)
+            .post(if (accept == null) empty else json(accept, FeedInviteAccept.serializer()))
+    }.decode(FeedInviteResult.serializer())
+
+    override suspend fun feedPosts(feedId: String, cursor: String?, limit: Int, posterId: String?): FeedPostsPage = call {
+        url(ep("feeds/$feedId/posts", mapOf("cursor" to cursor, "limit" to limit.toString(), "poster_id" to posterId))).get()
+    }.decode(FeedPostsPage.serializer())
+
+    override suspend fun feedPost(feedId: String, postId: String): FeedPost =
+        call { url(ep("feeds/$feedId/posts/$postId")).get() }.decode(FeedPost.serializer())
+
+    override suspend fun removeFeedPost(feedId: String, postId: String) =
+        call { url(ep("feeds/$feedId/posts/$postId")).delete() }.expectOk()
+
+    override suspend fun removeFeedPostItem(feedId: String, postId: String, itemId: String) =
+        call { url(ep("feeds/$feedId/posts/$postId/items/$itemId")).delete() }.expectOk()
+
+    override suspend fun feedPostReceipts(feedId: String, postId: String): FeedPostReceipts =
+        call { url(ep("feeds/$feedId/posts/$postId/receipts")).get() }.decode(FeedPostReceipts.serializer())
+
+    // ------------------------------------------------------------------ subscriptions
+
+    override suspend fun feedSubscriptions(feedId: String, status: String?): List<Subscription> =
+        call { url(ep("feeds/$feedId/subscriptions", mapOf("status" to status))).get() }.decode(ListSerializer(Subscription.serializer()))
+
+    override suspend fun requestSubscription(feedId: String, request: SubscriptionRequest, idempotencyKey: String): Subscription = call {
+        url(ep("feeds/$feedId/subscriptions")).header("Idempotency-Key", idempotencyKey).post(json(request, SubscriptionRequest.serializer()))
+    }.decode(Subscription.serializer())
+
+    override suspend fun frameSubscriptions(frameId: String, status: String?): List<Subscription> =
+        call { url(ep("frames/$frameId/subscriptions", mapOf("status" to status))).get() }.decode(ListSerializer(Subscription.serializer()))
+
+    override suspend fun subscription(subscriptionId: String): Subscription =
+        call { url(ep("subscriptions/$subscriptionId")).get() }.decode(Subscription.serializer())
+
+    override suspend fun updateSubscription(subscriptionId: String, update: SubscriptionUpdate): Subscription =
+        call { url(ep("subscriptions/$subscriptionId")).patch(json(update, SubscriptionUpdate.serializer())) }.decode(Subscription.serializer())
+
+    override suspend fun removeSubscription(subscriptionId: String) =
+        call { url(ep("subscriptions/$subscriptionId")).delete() }.expectOk()
+
+    private suspend fun subscriptionAction(subscriptionId: String, action: String): Subscription =
+        call { url(ep("subscriptions/$subscriptionId/$action")).post(empty) }.decode(Subscription.serializer())
+
+    override suspend fun approveSubscription(subscriptionId: String) = subscriptionAction(subscriptionId, "approve")
+    override suspend fun rejectSubscription(subscriptionId: String) = subscriptionAction(subscriptionId, "reject")
+    override suspend fun pauseSubscription(subscriptionId: String) = subscriptionAction(subscriptionId, "pause")
+    override suspend fun resumeSubscription(subscriptionId: String) = subscriptionAction(subscriptionId, "resume")
+
+    // ------------------------------------------------------------------ birthdays
+
+    override suspend fun feedBirthdays(feedId: String, status: String?): List<BirthdayPerson> =
+        call { url(ep("feeds/$feedId/birthdays", mapOf("status" to status))).get() }.decode(ListSerializer(BirthdayPerson.serializer()))
+
+    override suspend fun createFeedBirthday(feedId: String, request: BirthdayPersonCreate, idempotencyKey: String): BirthdayPerson = call {
+        url(ep("feeds/$feedId/birthdays")).header("Idempotency-Key", idempotencyKey).post(json(request, BirthdayPersonCreate.serializer()))
+    }.decode(BirthdayPerson.serializer())
+
+    override suspend fun feedBirthday(feedId: String, birthdayId: String): BirthdayPerson =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId")).get() }.decode(BirthdayPerson.serializer())
+
+    override suspend fun updateFeedBirthday(feedId: String, birthdayId: String, update: BirthdayPersonUpdate): BirthdayPerson =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId")).patch(json(update.toJson())) }.decode(BirthdayPerson.serializer())
+
+    override suspend fun removeFeedBirthday(feedId: String, birthdayId: String) =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId")).delete() }.expectOk()
+
+    override suspend fun approveFeedBirthday(feedId: String, birthdayId: String): BirthdayPerson =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId/approve")).post(empty) }.decode(BirthdayPerson.serializer())
+
+    override suspend fun rejectFeedBirthday(feedId: String, birthdayId: String): BirthdayPerson =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId/reject")).post(empty) }.decode(BirthdayPerson.serializer())
+
+    override suspend fun putFeedBirthdayPhoto(feedId: String, birthdayId: String, bytes: ByteArray, mime: String): BirthdayPerson =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId/photo")).put(bytes.toRequestBody(mime.toMediaType())) }.decode(BirthdayPerson.serializer())
+
+    override suspend fun deleteFeedBirthdayPhoto(feedId: String, birthdayId: String): BirthdayPerson =
+        call { url(ep("feeds/$feedId/birthdays/$birthdayId/photo")).delete() }.decode(BirthdayPerson.serializer())
+
+    override suspend fun feedBirthdayGreetings(feedId: String, birthdayId: String?, date: String?, cursor: String?, limit: Int): FeedBirthdayGreetingsPage = call {
+        url(ep("feeds/$feedId/birthday-greetings", mapOf("birthday_id" to birthdayId, "date" to date, "cursor" to cursor, "limit" to limit.toString()))).get()
+    }.decode(FeedBirthdayGreetingsPage.serializer())
+
+    override suspend fun updateFeedPreferences(feedId: String, update: FeedPreferencesUpdate): Feed =
+        call { url(ep("feeds/$feedId/preferences")).patch(json(update, FeedPreferencesUpdate.serializer())) }.decode(Feed.serializer())
+
+    // ------------------------------------------------------------------ photo sources
+
+    override suspend fun albumPhotoSources(frameId: String, albumId: String): List<PhotoSource> =
+        call { url(ep("frames/$frameId/albums/$albumId/photo-sources")).get() }.decode(ListSerializer(PhotoSource.serializer()))
+
+    override suspend fun feedPhotoSources(feedId: String): List<PhotoSource> =
+        call { url(ep("feeds/$feedId/photo-sources")).get() }.decode(ListSerializer(PhotoSource.serializer()))
+
+    override suspend fun myPhotoSources(): List<PhotoSource> =
+        call { url(ep("photo-sources")).get() }.decode(ListSerializer(PhotoSource.serializer()))
+
+    override suspend fun createPhotoSource(request: PhotoSourceCreate, idempotencyKey: String): PhotoSource = call {
+        url(ep("photo-sources")).header("Idempotency-Key", idempotencyKey).post(json(request.toJson()))
+    }.decode(PhotoSource.serializer())
+
+    override suspend fun testPhotoSource(connection: PhotoSourceConnection): PhotoSourceTestResult = call {
+        // Like placements:bulk, the colon stays in the path segment.
+        url(ep("photo-sources:test")).post(json(connection.toJson()))
+    }.decode(PhotoSourceTestResult.serializer())
+
+    override suspend fun immichAlbums(serverUrl: String, apiKey: String): ImmichAlbumList = call {
+        url(ep("photo-sources:immich-albums")).post(json(buildJsonObject {
+            put("server_url", JsonPrimitive(serverUrl.trim())); put("api_key", JsonPrimitive(apiKey.trim()))
+        }))
+    }.decode(ImmichAlbumList.serializer())
+
+    override suspend fun photoSource(sourceId: String): PhotoSource =
+        call { url(ep("photo-sources/$sourceId")).get() }.decode(PhotoSource.serializer())
+
+    override suspend fun updatePhotoSource(sourceId: String, update: PhotoSourceUpdate): PhotoSource =
+        call { url(ep("photo-sources/$sourceId")).patch(json(update.toJson())) }.decode(PhotoSource.serializer())
+
+    override suspend fun deletePhotoSource(sourceId: String, removeItems: Boolean) =
+        call { url(ep("photo-sources/$sourceId", mapOf("remove_items" to removeItems.toString()))).delete() }.expectOk()
+
+    override suspend fun syncPhotoSource(sourceId: String, confirmRemovals: Boolean): PhotoSource = call {
+        url(ep("photo-sources/$sourceId/sync")).post(json(buildJsonObject { if (confirmRemovals) put("confirm_removals", JsonPrimitive(true)) }))
+    }.decode(PhotoSource.serializer())
+
+    override suspend fun myGoogleImports(): List<GoogleImport> =
+        call { url(ep("google-imports")).get() }.decode(ListSerializer(GoogleImport.serializer()))
+
+    override suspend fun startGoogleImport(request: GoogleImportCreate, idempotencyKey: String): GoogleImport = call {
+        url(ep("google-imports")).header("Idempotency-Key", idempotencyKey).post(json(request, GoogleImportCreate.serializer()))
+    }.decode(GoogleImport.serializer())
+
+    override suspend fun googleImport(importId: String): GoogleImport =
+        call { url(ep("google-imports/$importId")).get() }.decode(GoogleImport.serializer())
+
+    override suspend fun cancelGoogleImport(importId: String): GoogleImport =
+        call { url(ep("google-imports/$importId/cancel")).post(empty) }.decode(GoogleImport.serializer())
 
     override suspend fun webSocketRequest(): Request {
         val token = tokens.accessToken()

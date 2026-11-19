@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -40,6 +41,16 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.DevAuth = ptr(s.dev != nil)
 	d.Weather = ptr(s.weather != nil)
 	d.Calendar = ptr(s.calendar != nil)
+	d.Feeds = ptr(true)
+	d.Birthdays = ptr(true)
+	providers := []gen.PhotoSourceProvider{}
+	for _, p := range s.providersEnabled() {
+		providers = append(providers, gen.PhotoSourceProvider(p))
+	}
+	d.PhotoSources = ptr(len(providers) > 0)
+	d.PhotoSourceProviders = &providers
+	d.PhotoSourcesPrivateNetworks = ptr(len(providers) > 0 && s.guard.PrivateAllowed())
+	d.GooglePhotosImport = ptr(s.ps.google.Configured())
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
 	}
@@ -53,6 +64,11 @@ func limitsJSON(l config.Limits) gen.Limits {
 	return gen.Limits{
 		MaxItemsPerSend: l.MaxItemsPerSend, MaxVideoSeconds: l.MaxVideoSeconds,
 		MaxUploadBytes: int(l.MaxUploadBytes), TrashRetentionDays: ptr(l.TrashRetentionDays),
+		MaxFeedsPerUser: ptr(l.MaxFeedsPerUser), MaxSubscriptionsPerFeed: ptr(l.MaxSubscriptionsPerFeed),
+		MaxFeedBackfillItems: ptr(l.MaxFeedBackfillItems), MaxBirthdaysPerFeed: ptr(l.MaxBirthdaysPerFeed),
+		MaxPhotoSourcesPerTarget: ptr(l.MaxPhotoSourcesPerTarget), MaxPhotoSourcesPerUser: ptr(l.MaxPhotoSourcesPerUser),
+		MaxPhotoSourceItems: ptr(l.MaxPhotoSourceItems), MaxPhotoSourceRunBytes: ptr(int(l.MaxPhotoSourceRunBytes)),
+		MaxGoogleImportItems: ptr(l.MaxGoogleImportItems),
 	}
 }
 
@@ -98,6 +114,13 @@ func (s *Server) GetMe(ctx context.Context, _ gen.GetMeRequestObject) (gen.GetMe
 func (s *Server) UpdateMe(ctx context.Context, req gen.UpdateMeRequestObject) (gen.UpdateMeResponseObject, error) {
 	b := req.Body
 	p := store.UserPatch{ShareLocationNames: b.ShareLocationNames, Locale: b.Locale}
+	if b.Timezone != nil {
+		tz := strings.TrimSpace(*b.Timezone)
+		if _, err := time.LoadLocation(tz); err != nil || tz == "" || tz == "Local" {
+			return nil, problem.Validation("timezone", "format", "not a valid time zone")
+		}
+		p.Timezone = &tz
+	}
 	if b.DisplayName != nil {
 		name := strings.TrimSpace(*b.DisplayName)
 		if name == "" {
@@ -147,10 +170,48 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 				return problem.New(problem.OwnerCannotLeave, "transfer or remove your frames before deleting your account")
 			}
 		}
+		fms, err := s.st.FeedMembershipsOfUser(ctx, tx, u.ID)
+		if err != nil {
+			return err
+		}
+		for _, m := range fms {
+			if m.Role == "owner" {
+				return problem.New(problem.OwnerCannotLeave, "transfer or delete your feeds before deleting your account")
+			}
+		}
 		if req.Params.RemoveItems {
 			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1) OR p.shared_by_user_id = $1`, u.ID); err != nil {
 				return err
 			}
+			// ... and their posts leave every feed.
+			posts, err := s.st.LivePostIDs(ctx, tx, nil, &u.ID, nil)
+			if err != nil {
+				return err
+			}
+			var sweeps []uuid.UUID
+			for _, p := range posts {
+				_, subs, err := tx.RemovePostItems(ctx, p, nil, &u.ID)
+				if err != nil {
+					return err
+				}
+				sweeps = append(sweeps, subs...)
+			}
+			if err := enqueueSweeps(ctx, tx, sweeps); err != nil {
+				return err
+			}
+		}
+		if _, err := tx.Exec(ctx, `DELETE FROM feed_members WHERE user_id = $1`, u.ID); err != nil {
+			return err
+		}
+		// With "remove my items" their photo sources go too; otherwise they wait for a take-over (owner_lost_access).
+		if req.Params.RemoveItems {
+			if _, err := tx.Exec(ctx, `DELETE FROM photo_sources WHERE owner_user_id = $1`, u.ID); err != nil {
+				return err
+			}
+		}
+		// Birthday entries linked to them stay, unlinked (birthdays.md §10).
+		if _, err := tx.UnlinkBirthdays(ctx, nil, u.ID); err != nil {
+			return err
 		}
 		for _, m := range ms {
 			if err := tx.RemoveMember(ctx, m.FrameID, u.ID); err != nil {
@@ -236,6 +297,10 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 		s.writeError(w, r, err)
 		return
 	}
+	if err := s.syncAvatarBirthdays(ctx, u.ID); err != nil {
+		s.writeError(w, r, err)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(s.userJSON(ctx, nu))
 }
@@ -248,6 +313,9 @@ func (s *Server) DeleteAvatar(ctx context.Context, _ gen.DeleteAvatarRequestObje
 	if u.AvatarKey != nil {
 		s.deleteBlob(ctx, *u.AvatarKey)
 		if err := s.bumpMemberEverywhere(ctx, u.ID); err != nil {
+			return nil, err
+		}
+		if err := s.syncAvatarBirthdays(ctx, u.ID); err != nil {
 			return nil, err
 		}
 	}
@@ -364,10 +432,39 @@ func (s *Server) OperatorSetLimits(ctx context.Context, req gen.OperatorSetLimit
 		return nil, err
 	}
 	b := req.Body
+	cur := s.Limits(ctx)
 	l := config.Limits{MaxItemsPerSend: b.MaxItemsPerSend, MaxVideoSeconds: b.MaxVideoSeconds, MaxUploadBytes: int64(b.MaxUploadBytes),
-		TrashRetentionDays: s.Limits(ctx).TrashRetentionDays}
+		TrashRetentionDays: cur.TrashRetentionDays, MaxFeedsPerUser: cur.MaxFeedsPerUser,
+		MaxSubscriptionsPerFeed: cur.MaxSubscriptionsPerFeed, MaxFeedBackfillItems: cur.MaxFeedBackfillItems,
+		MaxBirthdaysPerFeed: cur.MaxBirthdaysPerFeed, MaxPhotoSourcesPerTarget: cur.MaxPhotoSourcesPerTarget,
+		MaxPhotoSourcesPerUser: cur.MaxPhotoSourcesPerUser, MaxPhotoSourceItems: cur.MaxPhotoSourceItems,
+		MaxPhotoSourceRunBytes: cur.MaxPhotoSourceRunBytes, MaxGoogleImportItems: cur.MaxGoogleImportItems}
+	setPos := func(dst *int, src *int) {
+		if src != nil && *src > 0 {
+			*dst = *src
+		}
+	}
+	setPos(&l.MaxPhotoSourcesPerTarget, b.MaxPhotoSourcesPerTarget)
+	setPos(&l.MaxPhotoSourcesPerUser, b.MaxPhotoSourcesPerUser)
+	setPos(&l.MaxPhotoSourceItems, b.MaxPhotoSourceItems)
+	setPos(&l.MaxGoogleImportItems, b.MaxGoogleImportItems)
+	if b.MaxPhotoSourceRunBytes != nil && *b.MaxPhotoSourceRunBytes > 0 {
+		l.MaxPhotoSourceRunBytes = int64(*b.MaxPhotoSourceRunBytes)
+	}
 	if b.TrashRetentionDays != nil {
 		l.TrashRetentionDays = *b.TrashRetentionDays
+	}
+	if b.MaxFeedsPerUser != nil {
+		l.MaxFeedsPerUser = *b.MaxFeedsPerUser
+	}
+	if b.MaxSubscriptionsPerFeed != nil {
+		l.MaxSubscriptionsPerFeed = *b.MaxSubscriptionsPerFeed
+	}
+	if b.MaxFeedBackfillItems != nil {
+		l.MaxFeedBackfillItems = *b.MaxFeedBackfillItems
+	}
+	if b.MaxBirthdaysPerFeed != nil {
+		l.MaxBirthdaysPerFeed = *b.MaxBirthdaysPerFeed
 	}
 	p := problem.New(problem.ValidationFailed, "limits must be positive")
 	if l.MaxItemsPerSend < 1 {

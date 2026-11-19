@@ -286,6 +286,7 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 	}
 	owner, _ := s.st.FrameOwnerName(ctx, s.st.Q(), f.ID)
 	target := deviceTarget(d)
+	withholdBackfill := s.withholdsBackfill(d)
 
 	out := make([]any, 0, len(entries))
 	remove := func(e store.FeedEntry, typ string) {
@@ -297,7 +298,10 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 		switch e.Kind {
 		case store.FeedPlacement:
 			p, found := placements[e.EntityID]
-			if e.Removed || !found || p.RemovedAt != nil || p.PendingModeration || p.Status == "failed" || p.FrameID != f.ID {
+			// Placements of paused feed subscriptions are not on the frame; feed
+			// history is withheld from frame apps that would show it as new.
+			if e.Removed || !found || p.RemovedAt != nil || p.PendingModeration || p.Status == "failed" || p.FrameID != f.ID ||
+				p.FeedSuspended || (p.Backfill && withholdBackfill) {
 				remove(e, "placement.remove")
 				continue
 			}
@@ -369,6 +373,15 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				continue
 			}
 			out = append(out, map[string]any{"seq": e.Seq, "type": "calendar", "calendar": c})
+		case store.FeedBirthdays:
+			b, err := s.frameBirthdays(ctx, f)
+			if err != nil {
+				return nil, err
+			}
+			if b == nil && snapshot {
+				continue
+			}
+			out = append(out, map[string]any{"seq": e.Seq, "type": "birthdays", "birthdays": b})
 		case store.FeedFrame:
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,
@@ -564,10 +577,44 @@ func (s *Server) DeviceHeartbeat(ctx context.Context, req gen.DeviceHeartbeatReq
 		return nil, err
 	}
 	unclean := req.Body.LastShutdownClean != nil && !*req.Body.LastShutdownClean
-	if err := s.st.RecordHeartbeat(ctx, d.ID, raw, req.Body.AppVersion, req.Body.AppVersionCode, unclean); err != nil {
+	var features []string
+	if req.Body.Features != nil {
+		features = *req.Body.Features
+	}
+	if err := s.st.RecordHeartbeat(ctx, d.ID, raw, req.Body.AppVersion, req.Body.AppVersionCode, unclean, features); err != nil {
 		return nil, err
 	}
+	// A frame app that now handles feed history quietly gets the backfill it was not sent.
+	upgraded := *d
+	upgraded.Features = features
+	if d.FrameID != nil && s.withholdsBackfill(d) && !s.withholdsBackfill(&upgraded) {
+		err := s.st.InTx(ctx, func(tx *store.Tx) error {
+			if _, err := tx.LockFrame(ctx, *d.FrameID); err != nil {
+				return notFound(err, "frame")
+			}
+			_, err := tx.ReleaseBackfill(ctx, *d.FrameID)
+			return err
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return noContent(), nil
+}
+
+// featureFeedBackfill (Heartbeat.features): the frame app shows backfilled
+// feed placements quietly.
+const featureFeedBackfill = "feed_backfill"
+
+// featureBirthdays (Heartbeat.features): the frame app shows the `birthdays`
+// change. Informational only (Subscription.frame.birthdays_supported).
+const featureBirthdays = "birthdays"
+
+// withholdsBackfill: the frame's latest heartbeat did not say it handles
+// Placement.backfill, so feed history would show as new photos there
+// (README §5.12). Browser frames are always current.
+func (s *Server) withholdsBackfill(d *store.Device) bool {
+	return !d.IsBrowser() && !d.HasFeature(featureFeedBackfill)
 }
 
 // ---------------------------------------------------------------- frame-side actions
@@ -628,17 +675,20 @@ func (s *Server) DeviceSetReaction(ctx context.Context, req gen.DeviceSetReactio
 	}
 	if p.SenderUserID != nil {
 		var push *notify.Push
+		ids := s.placementPushIDs(ctx, p, f)
 		if reaction != nil {
-			push = &notify.Push{Key: "reaction", Args: map[string]string{"frame": f.Name},
-				IDs: placementIDs(p, f)}
+			push = &notify.Push{Key: "reaction", Args: map[string]string{"frame": f.Name}, IDs: ids}
 		}
-		s.notify.User(*p.SenderUserID, notify.Event{
-			"type": "reaction", "placement_id": p.Placement.ID, "frame_id": f.ID, "reaction": reaction, "by_frame_name": f.Name,
-		}, push)
+		ev := notify.Event{"type": "reaction", "placement_id": p.Placement.ID, "frame_id": f.ID, "reaction": reaction, "by_frame_name": f.Name}
+		addFeedIDs(ev, ids)
+		if s.reactionsOn(ctx, p.ItemRow.ItemID) {
+			s.notify.User(*p.SenderUserID, ev, push)
+		}
 		if p.SendID != nil {
 			s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{*p.SendID: *p.SenderUserID}, "")
 		}
 	}
+	s.publishFeedPostsOf(ctx, []uuid.UUID{p.Placement.ID})
 	return noContent(), nil
 }
 
@@ -658,9 +708,13 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 		return nil, err
 	}
 	if p.SenderUserID != nil {
-		s.notify.User(*p.SenderUserID, notify.Event{"type": "reply", "placement_id": p.Placement.ID, "frame_id": f.ID, "preset": preset},
-			&notify.Push{Key: "reply", Args: map[string]string{"frame": f.Name, "preset": preset},
-				IDs: placementIDs(p, f)})
+		ids := s.placementPushIDs(ctx, p, f)
+		ev := notify.Event{"type": "reply", "placement_id": p.Placement.ID, "frame_id": f.ID, "preset": preset}
+		addFeedIDs(ev, ids)
+		if s.reactionsOn(ctx, p.ItemRow.ItemID) {
+			s.notify.User(*p.SenderUserID, ev, &notify.Push{Key: "reply", Args: map[string]string{"frame": f.Name, "preset": preset}, IDs: ids})
+		}
+		defer s.publishFeedPostsOf(ctx, []uuid.UUID{p.Placement.ID})
 		if p.SendID != nil {
 			s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{*p.SendID: *p.SenderUserID}, "")
 		}
@@ -785,7 +839,7 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 	mediaID, itemID, placementID := store.NewID(), store.NewID(), store.NewID()
 	m := store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true, SourceSHA256: &sha}
 	it := store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, Caption: caption, CapturedHint: req.Params.XCapturedAt}
-	pl := store.Placement{ID: placementID, FrameID: f.ID, ItemID: itemID, Status: "pending"}
+	pl := store.Placement{ID: placementID, FrameID: f.ID, ItemID: itemID, Status: "pending", Origin: "import"}
 	if req.Params.Fit != nil {
 		it.Fit = ptr(string(*req.Params.Fit))
 	}

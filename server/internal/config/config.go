@@ -106,6 +106,24 @@ type Config struct {
 	CalendarSync    time.Duration
 	SecretsKey      []byte
 
+	// Photo sources (docs/spec/photo-sources.md §11). PhotoSources turns
+	// Immich and iCloud sources on, ICloudSources iCloud links on their own;
+	// PhotoSourceSync is the sync interval (iCloud at least an hour).
+	PhotoSources    bool
+	ICloudSources   bool
+	PhotoSourceSync time.Duration
+	// SourcesPrivateNetworks is auto, on or off (§12.3); SourcesAllowedHosts
+	// are host names or CIDRs always allowed; SourcesCAFile adds trusted CAs.
+	SourcesPrivateNetworks string
+	SourcesAllowedHosts    []string
+	SourcesCAFile          string
+	// SourcesAllowLoopback lets the guard reach 127.0.0.1 (tests with
+	// httptest fakes only; there is no environment variable for it).
+	SourcesAllowLoopback bool
+	// Google Photos import (§7.5): off without a client id and secret.
+	GoogleClientID     string
+	GoogleClientSecret string
+
 	// SMTP for the server's own mail (shop reservations); nil when
 	// KINFRAME_SMTP_HOST is unset. The same settings configure Logto's
 	// sign-in mails (bootstrap-logto).
@@ -120,6 +138,64 @@ type Limits struct {
 	MaxVideoSeconds    int   `json:"max_video_seconds"`
 	MaxUploadBytes     int64 `json:"max_upload_bytes"`
 	TrashRetentionDays int   `json:"trash_retention_days"`
+	// Feeds (docs/spec/feeds.md §6.6). Zero means the default.
+	MaxFeedsPerUser         int `json:"max_feeds_per_user,omitempty"`
+	MaxSubscriptionsPerFeed int `json:"max_subscriptions_per_feed,omitempty"`
+	MaxFeedBackfillItems    int `json:"max_feed_backfill_items,omitempty"`
+	// Birthdays (docs/spec/birthdays.md §12): pending and approved people per feed.
+	MaxBirthdaysPerFeed int `json:"max_birthdays_per_feed,omitempty"`
+	// Photo sources (docs/spec/photo-sources.md §11). Zero means the default.
+	MaxPhotoSourcesPerTarget int   `json:"max_photo_sources_per_target,omitempty"`
+	MaxPhotoSourcesPerUser   int   `json:"max_photo_sources_per_user,omitempty"`
+	MaxPhotoSourceItems      int   `json:"max_photo_source_items,omitempty"`
+	MaxPhotoSourceRunBytes   int64 `json:"max_photo_source_run_bytes,omitempty"`
+	MaxGoogleImportItems     int   `json:"max_google_import_items,omitempty"`
+}
+
+// Feed limit defaults.
+const (
+	DefaultMaxFeedsPerUser         = 20
+	DefaultMaxSubscriptionsPerFeed = 100
+	DefaultMaxFeedBackfillItems    = 5000
+	DefaultMaxBirthdaysPerFeed     = 200
+
+	DefaultMaxPhotoSourcesPerTarget       = 5
+	DefaultMaxPhotoSourcesPerUser         = 20
+	DefaultMaxPhotoSourceItems            = 10000
+	DefaultMaxPhotoSourceRunBytes   int64 = 2 << 30
+	DefaultMaxGoogleImportItems           = 500
+)
+
+// WithDefaults fills unset (zero) feed limits with their defaults.
+func (l Limits) WithDefaults() Limits {
+	if l.MaxFeedsPerUser <= 0 {
+		l.MaxFeedsPerUser = DefaultMaxFeedsPerUser
+	}
+	if l.MaxSubscriptionsPerFeed <= 0 {
+		l.MaxSubscriptionsPerFeed = DefaultMaxSubscriptionsPerFeed
+	}
+	if l.MaxFeedBackfillItems <= 0 {
+		l.MaxFeedBackfillItems = DefaultMaxFeedBackfillItems
+	}
+	if l.MaxBirthdaysPerFeed <= 0 {
+		l.MaxBirthdaysPerFeed = DefaultMaxBirthdaysPerFeed
+	}
+	if l.MaxPhotoSourcesPerTarget <= 0 {
+		l.MaxPhotoSourcesPerTarget = DefaultMaxPhotoSourcesPerTarget
+	}
+	if l.MaxPhotoSourcesPerUser <= 0 {
+		l.MaxPhotoSourcesPerUser = DefaultMaxPhotoSourcesPerUser
+	}
+	if l.MaxPhotoSourceItems <= 0 {
+		l.MaxPhotoSourceItems = DefaultMaxPhotoSourceItems
+	}
+	if l.MaxPhotoSourceRunBytes <= 0 {
+		l.MaxPhotoSourceRunBytes = DefaultMaxPhotoSourceRunBytes
+	}
+	if l.MaxGoogleImportItems <= 0 {
+		l.MaxGoogleImportItems = DefaultMaxGoogleImportItems
+	}
+	return l
 }
 
 func (c *Config) Production() bool { return c.Env == "production" }
@@ -183,10 +259,19 @@ func load(get func(string) string) (*Config, error) {
 		MinFrameAppVersion: intv("KINFRAME_MIN_FRAME_APP_VERSION_CODE", 0),
 		CommandTimeout:     time.Duration(intv("KINFRAME_COMMAND_TIMEOUT_SECONDS", 10)) * time.Second,
 		DefaultLimits: Limits{
-			MaxItemsPerSend:    intv("KINFRAME_MAX_ITEMS_PER_SEND", 200),
-			MaxVideoSeconds:    intv("KINFRAME_MAX_VIDEO_SECONDS", 300),
-			MaxUploadBytes:     int64(intv("KINFRAME_MAX_UPLOAD_MB", 2048)) << 20,
-			TrashRetentionDays: intv("KINFRAME_TRASH_RETENTION_DAYS", 30),
+			MaxItemsPerSend:          intv("KINFRAME_MAX_ITEMS_PER_SEND", 200),
+			MaxVideoSeconds:          intv("KINFRAME_MAX_VIDEO_SECONDS", 300),
+			MaxUploadBytes:           int64(intv("KINFRAME_MAX_UPLOAD_MB", 2048)) << 20,
+			TrashRetentionDays:       intv("KINFRAME_TRASH_RETENTION_DAYS", 30),
+			MaxFeedsPerUser:          intv("KINFRAME_MAX_FEEDS_PER_USER", DefaultMaxFeedsPerUser),
+			MaxSubscriptionsPerFeed:  intv("KINFRAME_MAX_SUBSCRIPTIONS_PER_FEED", DefaultMaxSubscriptionsPerFeed),
+			MaxFeedBackfillItems:     intv("KINFRAME_MAX_FEED_BACKFILL_ITEMS", DefaultMaxFeedBackfillItems),
+			MaxBirthdaysPerFeed:      intv("KINFRAME_MAX_BIRTHDAYS_PER_FEED", DefaultMaxBirthdaysPerFeed),
+			MaxPhotoSourcesPerTarget: intv("KINFRAME_MAX_PHOTO_SOURCES_PER_TARGET", DefaultMaxPhotoSourcesPerTarget),
+			MaxPhotoSourcesPerUser:   intv("KINFRAME_MAX_PHOTO_SOURCES_PER_USER", DefaultMaxPhotoSourcesPerUser),
+			MaxPhotoSourceItems:      intv("KINFRAME_MAX_PHOTO_SOURCE_ITEMS", DefaultMaxPhotoSourceItems),
+			MaxPhotoSourceRunBytes:   int64(intv("KINFRAME_MAX_PHOTO_SOURCE_RUN_MB", int(DefaultMaxPhotoSourceRunBytes>>20))) << 20,
+			MaxGoogleImportItems:     intv("KINFRAME_MAX_GOOGLE_IMPORT_ITEMS", DefaultMaxGoogleImportItems),
 		},
 		LogJSON:         env("KINFRAME_LOG_FORMAT", "text") == "json",
 		PushEnabled:     !boolv("KINFRAME_PUSH_DISABLED"),
@@ -222,6 +307,42 @@ func load(get func(string) string) (*Config, error) {
 	}
 	if c.CalendarSync < 5*time.Minute {
 		errs = append(errs, errors.New("KINFRAME_CALENDAR_SYNC_MINUTES must be at least 5"))
+	}
+	onOff := func(k string) bool {
+		switch strings.ToLower(env(k, "on")) {
+		case "0", "off", "false", "no":
+			return false
+		}
+		return true
+	}
+	c.PhotoSources = onOff("KINFRAME_PHOTO_SOURCES")
+	c.ICloudSources = onOff("KINFRAME_ICLOUD_SOURCES")
+	c.PhotoSourceSync = time.Duration(intv("KINFRAME_PHOTO_SOURCE_SYNC_MINUTES", 30)) * time.Minute
+	if c.PhotoSourceSync < 10*time.Minute {
+		errs = append(errs, errors.New("KINFRAME_PHOTO_SOURCE_SYNC_MINUTES must be at least 10"))
+	}
+	c.SourcesPrivateNetworks = strings.ToLower(env("KINFRAME_SOURCES_PRIVATE_NETWORKS", "auto"))
+	switch c.SourcesPrivateNetworks {
+	case "auto", "on", "off":
+	case "1", "true", "yes":
+		c.SourcesPrivateNetworks = "on"
+	case "0", "false", "no":
+		c.SourcesPrivateNetworks = "off"
+	default:
+		errs = append(errs, fmt.Errorf("KINFRAME_SOURCES_PRIVATE_NETWORKS must be auto, on or off, got %q", c.SourcesPrivateNetworks))
+	}
+	for _, h := range strings.Split(env("KINFRAME_SOURCES_ALLOWED_HOSTS", ""), ",") {
+		if h = strings.TrimSpace(h); h != "" {
+			c.SourcesAllowedHosts = append(c.SourcesAllowedHosts, h)
+		}
+	}
+	c.SourcesCAFile = env("KINFRAME_SOURCES_CA_FILE", "")
+	c.GoogleClientID = env("KINFRAME_GOOGLE_CLIENT_ID", "")
+	if c.GoogleClientSecret, err = secretValue(get, "KINFRAME_GOOGLE_CLIENT_SECRET"); err != nil {
+		errs = append(errs, err)
+	}
+	if (c.GoogleClientID == "") != (c.GoogleClientSecret == "") {
+		errs = append(errs, errors.New("set both KINFRAME_GOOGLE_CLIENT_ID and KINFRAME_GOOGLE_CLIENT_SECRET (or _FILE), or neither"))
 	}
 	if sk, err := parseKey(env("KINFRAME_SECRETS_KEY", "")); err != nil {
 		errs = append(errs, fmt.Errorf("KINFRAME_SECRETS_KEY: %w", err))
@@ -427,3 +548,20 @@ const (
 	DefaultPluginRegistryURL = "https://github.com/jeroentrappers/kinframe-plugins/releases/download/registry"
 	DefaultPluginRegistryKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt0Z/3gbK9h78oVewOrMVTasFYG4af/w1D3eXmNJk2gCHgw8rEsrammSJXnMu6VXjp0rkz87UXXVOzaAep6fB+Q=="
 )
+
+// secretValue reads a secret from k, or from the file named by k_FILE
+// (Docker secrets); surrounding whitespace is trimmed.
+func secretValue(get func(string) string, k string) (string, error) {
+	if v := strings.TrimSpace(get(k)); v != "" {
+		return v, nil
+	}
+	f := strings.TrimSpace(get(k + "_FILE"))
+	if f == "" {
+		return "", nil
+	}
+	b, err := os.ReadFile(f)
+	if err != nil {
+		return "", fmt.Errorf("%s_FILE: %w", k, err)
+	}
+	return strings.TrimSpace(string(b)), nil
+}

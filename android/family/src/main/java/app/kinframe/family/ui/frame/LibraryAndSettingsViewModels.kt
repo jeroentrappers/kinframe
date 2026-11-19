@@ -210,6 +210,11 @@ class LibraryViewModel(
         _events.tryEmit(if (from == null || to == null) LibraryEvent.Message(R.string.albums_schedule_cleared) else LibraryEvent.Message(R.string.albums_schedule_saved, listOf(from, to)))
     }
 
+    /** "Only in album mode" (photo-sources.md §9.1): the album's photos stay out of the normal slideshow. */
+    fun setOnlyInAlbumMode(a: Album, on: Boolean) = patchAlbum(a, app.kinframe.core.api.AlbumWrite(onlyInAlbumMode = on).toJson()) {
+        _events.tryEmit(LibraryEvent.Message(if (on) R.string.albums_only_mode_on else R.string.albums_only_mode_off, listOf(a.name)))
+    }
+
     fun makeCover(a: Album, placementId: String) = patchAlbum(a, buildJsonObject { put("cover_placement_id", JsonPrimitive(placementId)) }) {
         _state.update { it.copy(selected = emptySet()) }
         _events.tryEmit(LibraryEvent.Message(R.string.albums_cover_set))
@@ -241,9 +246,10 @@ class LibraryViewModel(
         }
     }
 
-    fun deleteAlbum(a: Album) = viewModelScope.launch {
+    /** [removeSourceItems]: also remove the photos the album's photo sources imported. */
+    fun deleteAlbum(a: Album, removeSourceItems: Boolean = false) = viewModelScope.launch {
         try {
-            api.deleteAlbum(frameId, a.id)
+            api.deleteAlbum(frameId, a.id, removeSourceItems)
             _state.update { s -> s.copy(albums = s.albums.filter { it.id != a.id }, playingAlbumId = s.playingAlbumId.takeIf { it != a.id }) }
             if (state.value.albumId == a.id) selectAlbum(null)
             _events.tryEmit(LibraryEvent.Message(R.string.albums_deleted, listOf(a.name)))

@@ -2,7 +2,8 @@ import KinframeKit
 import SwiftUI
 
 /// Adding a frame with the 8-digit code: claim an unowned frame, join an owned one, or wait for approval
-/// (`POST /v1/frames/redeem`, docs/api/README.md §5.1).
+/// (`POST /v1/frames/redeem`, docs/api/README.md §5.1). When the server has feeds the same field takes feed invite
+/// codes (letters, `KF7Q-M2XA`), which are looked up (`POST /v1/feed-invites:lookup`) and shown as a feed invite.
 @MainActor
 @Observable
 final class AddFrameModel {
@@ -10,6 +11,7 @@ final class AddFrameModel {
         case entering
         case checking
         case done(RedeemResult)
+        case feedInvite(FeedInvitePreview)
     }
 
     private(set) var digits = ""
@@ -21,25 +23,35 @@ final class AddFrameModel {
 
     private let api: API
     private var idempotencyKey = UUID().uuidString
+    /// Feed codes are accepted too (discovery `feeds`).
+    let allowsLetters: Bool
 
-    init(api: API, prefill: String? = nil) {
+    init(api: API, prefill: String? = nil, allowsLetters: Bool = false) {
         self.api = api
-        if let prefill { digits = Format.normalizeCode(prefill) }
+        self.allowsLetters = allowsLetters
+        if let prefill { digits = CodeEntry.normalize(prefill, allowLetters: allowsLetters) }
     }
 
-    /// "4821 3907" as shown in the field.
-    var formatted: String { Format.formatCode(digits) }
-    var isComplete: Bool { Format.isCompleteCode(digits) }
+    /// "4821 3907" or "KF7Q-M2XA" as shown in the field.
+    var formatted: String { CodeEntry.format(digits) }
+    var isComplete: Bool { allowsLetters ? CodeEntry.classify(digits) != nil : Format.isCompleteCode(digits) }
     var canSubmit: Bool { isComplete && state == .entering }
+    /// The code typed so far has letters: it's a feed invite code.
+    var isFeedCode: Bool { CodeEntry.isFeed(digits) }
+
+    var feedPreview: FeedInvitePreview? {
+        if case .feedInvite(let p) = state { return p }
+        return nil
+    }
 
     var result: RedeemResult? {
         if case .done(let r) = state { return r }
         return nil
     }
 
-    /// Accepts typing and pasting ("Code: 4821-3907"); keeps 8 digits.
+    /// Accepts typing and pasting ("Code: 4821-3907", "KF7Q-M2XA"); keeps 8 characters.
     func setCode(_ input: String) {
-        let next = Format.normalizeCode(input)
+        let next = CodeEntry.normalize(input, allowLetters: allowsLetters)
         guard next != digits else { return }
         digits = next
         error = nil
@@ -50,6 +62,15 @@ final class AddFrameModel {
         guard canSubmit else { return nil }
         state = .checking
         error = nil
+        if case .feed(let code)? = CodeEntry.classify(digits), allowsLetters {
+            do {
+                state = .feedInvite(try await api.lookupFeedInvite(code: code))
+            } catch {
+                self.error = errorMessage(error)
+                state = .entering
+            }
+            return nil
+        }
         do {
             let code = digits
             let key = idempotencyKey

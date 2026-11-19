@@ -107,6 +107,37 @@ func (tx *Tx) FeedPutMany(ctx context.Context, frameIDs []uuid.UUID, kind string
 	return nil
 }
 
+// FeedPutEntities is FeedPut for many entities of one frame in two
+// statements (backfills and pauses touch thousands of placements).
+func (tx *Tx) FeedPutEntities(ctx context.Context, frameID uuid.UUID, kind string, entityIDs []uuid.UUID, removed bool) error {
+	seen := make(map[uuid.UUID]bool, len(entityIDs))
+	ids := make([]uuid.UUID, 0, len(entityIDs))
+	for _, id := range entityIDs {
+		if !seen[id] {
+			seen[id] = true
+			ids = append(ids, id)
+		}
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	var head int64
+	if err := tx.QueryRow(ctx, `UPDATE frames SET latest_seq = latest_seq + $2 WHERE id = $1 RETURNING latest_seq`, frameID, len(ids)).Scan(&head); err != nil {
+		return fmt.Errorf("bump seq: %w", err)
+	}
+	base := head - int64(len(ids))
+	_, err := tx.Exec(ctx, `
+		INSERT INTO feed (frame_id, kind, entity_id, seq, removed, updated_at)
+		SELECT $1, $2, e.id, $3 + e.ord, $4, now() FROM unnest($5::uuid[]) WITH ORDINALITY AS e(id, ord)
+		ON CONFLICT (frame_id, kind, entity_id) DO UPDATE SET seq = EXCLUDED.seq, removed = EXCLUDED.removed, updated_at = now()`,
+		frameID, kind, base, removed, ids)
+	if err != nil {
+		return err
+	}
+	tx.touched[frameID] = head
+	return nil
+}
+
 // FeedEntry is one row of the compacted feed.
 type FeedEntry struct {
 	Kind     string    `db:"kind"`
@@ -145,6 +176,10 @@ const (
 	JobProcessMedia     = "process_media"
 	JobEnsureRenditions = "ensure_renditions"
 	JobThumbs           = "thumbs"
+	// Feeds (docs/spec/feeds-data-model.md §2.3); run by the API's job handler.
+	JobFeedFanout    = "feed_fanout"    // {post_id}: place a new post on every active subscription
+	JobFeedReconcile = "feed_reconcile" // {subscription_id, version, start}: backfill or trim history
+	JobFeedSweep     = "feed_sweep"     // {subscription_id}: unplace what a removed post or subscription left
 )
 
 type Job struct {

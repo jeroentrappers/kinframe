@@ -7,7 +7,8 @@ import SwiftUI
 ///
 /// - `-kfReset YES`: forget the server, session and onboarding progress.
 /// - `-kfServer <url>` with `-kfDevEmail <email>` [`-kfDevName <name>`]: sign in with a dev token (dev servers only).
-/// - `-kfStep welcome|server|signIn`: onboarding step.  `-kfTab frames|send|history|settings`: tab.
+/// - `-kfStep welcome|server|signIn`: onboarding step.  `-kfTab frames|feeds|send|history|settings`: tab.
+/// - `-kfFeed <id> [-kfFeedSection posts|members|frames|birthdays|settings]`: open a feed.
 /// - `-kfLanguage en|nl|system`.  `-kfOpen <url>`: open a link as if tapped.  `-kfFrame <id>`: open a frame.
 /// - `-kfScrollTo plugins|details|ownership`: scroll the frame page there (`signOut`: the end of Settings).
 /// - `-kfSheet share|pluginAdd|pluginEdit|transfer|leave|replace|member|reservations`: open that sheet (`-kfTransferConfirm YES`:
@@ -72,6 +73,7 @@ enum DebugLaunch {
     static func afterLaunch(_ app: AppModel) {
         switch args.string(forKey: "kfTab") {
         case "frames": app.tab = .frames
+        case "feeds": app.tab = .feeds
         case "send": app.tab = .send
         case "history": app.tab = .history
         case "settings": app.tab = .settings
@@ -85,6 +87,9 @@ enum DebugLaunch {
         }
         if let id = args.string(forKey: "kfFrame") {
             app.framesPath = NavigationPath([FrameRoute(id: id, section: args.string(forKey: "kfSection").flatMap(FrameSection.init(rawValue:)) ?? .overview)])
+        }
+        if let id = args.string(forKey: "kfFeed") {
+            app.openFeed(id, section: args.string(forKey: "kfFeedSection").flatMap(FeedSection.init(rawValue:)) ?? .posts)
         }
         if let link = args.string(forKey: "kfOpen").flatMap(URL.init(string:)) {
             app.open(link)

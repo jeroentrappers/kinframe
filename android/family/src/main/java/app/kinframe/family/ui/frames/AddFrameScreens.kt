@@ -51,6 +51,7 @@ import app.kinframe.family.ui.PrimaryButton
 import app.kinframe.family.ui.QuietButton
 import app.kinframe.family.ui.SecondaryButton
 import app.kinframe.family.ui.SkeletonList
+import app.kinframe.family.util.EnteredCode
 import app.kinframe.family.util.FrameCodes
 import kotlinx.coroutines.launch
 
@@ -66,9 +67,12 @@ fun AddFrameScreen(
     onSend: (String) -> Unit,
     onViewFrame: (String) -> Unit,
     onDone: () -> Unit,
+    /** A feed invite code or link was entered: open it (feeds.md §10). */
+    onFeedInvite: (String) -> Unit = {},
 ) {
+    LaunchedEffect(state.feedInviteToken) { state.feedInviteToken?.let(onFeedInvite) }
     Column(Modifier.fillMaxSize().background(Kin.colors.paper)) {
-        KinTopBar(stringResource(R.string.add_title), onBack = onBack)
+        KinTopBar(stringResource(if (state.feeds) R.string.add_title_code else R.string.add_title), onBack = onBack)
         Box(Modifier.weight(1f).imePadding()) {
             val r = state.result
             if (r == null) CodeEntry(state, onInput, onSubmit)
@@ -84,20 +88,24 @@ private fun CodeEntry(state: AddFrameState, onInput: (String) -> Unit, onSubmit:
     val scope = rememberCoroutineScope()
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
-    val spoken = FrameCodes.spoken(state.digits)
+    val spoken = if (state.isFeed) state.feedCode.toList().joinToString(" ") else FrameCodes.spoken(state.digits)
     PageColumn {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { FrameArt(width = 150.dp) }
-        Text(stringResource(R.string.add_body), style = Kin.type.body, color = c.inkSoft)
+        Text(stringResource(if (state.feeds) R.string.add_body_feeds else R.string.add_body), style = Kin.type.body, color = c.inkSoft)
         KinTextField(
-            value = state.digits,
+            value = state.fieldText,
             onValueChange = onInput,
             label = stringResource(R.string.add_code_label),
-            placeholder = "1234 5678",
-            supporting = stringResource(R.string.add_code_hint),
+            placeholder = if (state.isFeed) "KF7Q-M2XA" else "1234 5678",
+            supporting = stringResource(if (state.isFeed) R.string.add_code_hint_feed else R.string.add_code_hint),
             error = state.error?.let { stringResource(it) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Go),
+            // Feed codes have letters, so the field offers the full keyboard when the server has feeds.
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (state.feeds) KeyboardType.Ascii else KeyboardType.Number,
+                capitalization = KeyboardCapitalization.Characters, autoCorrectEnabled = false, imeAction = ImeAction.Go,
+            ),
             keyboardActions = KeyboardActions(onGo = { onSubmit() }),
-            visualTransformation = FrameCodes.visualTransformation,
+            visualTransformation = EnteredCode.visualTransformation,
             textStyle = Kin.type.code.copy(fontFamily = FontFamily.Monospace, fontSize = 30.sp, letterSpacing = 4.sp),
             modifier = Modifier.focusRequester(focus).semantics { stateDescription = spoken },
             trailing = {

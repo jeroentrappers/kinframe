@@ -29,6 +29,18 @@ struct SettingsTab: View {
                     profile
                     preferences
                     notifications
+                    if app.photoSources.sources, let api = app.api {
+                        Section {
+                            NavigationLink {
+                                MyPhotoSourcesView(api: api)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(L("ios.ps.mine"))
+                                    Text(L("ios.ps.mineLinkHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                                }
+                            }
+                        }
+                    }
                     if app.me?.isOperator == true, app.discovery?.shop == true, let api = app.api {
                         Section {
                             NavigationLink {
@@ -93,6 +105,9 @@ struct SettingsTab: View {
                 if DebugLaunch.takeSheet("reservations") { debugReservations = true }
             }
             #endif
+            .navigationDestination(isPresented: Binding(get: { app.showMyPhotoSources }, set: { app.showMyPhotoSources = $0 })) {
+                if let api = app.api { MyPhotoSourcesView(api: api) }
+            }
             .onAppear { name = app.me?.displayName ?? "" }
             .onChange(of: app.me?.displayName) { name = app.me?.displayName ?? "" }
             .onChange(of: avatarPick) { _, item in

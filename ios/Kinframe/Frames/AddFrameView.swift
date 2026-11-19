@@ -1,7 +1,8 @@
 import KinframeKit
 import SwiftUI
 
-/// Enter the code shown on a frame. Used from the Frames tab, from onboarding and for `/f/<code>` links.
+/// Enter the code shown on a frame. Used from the Frames tab, from onboarding and for `/f/<code>` links. When the
+/// server has feeds it also takes feed invite codes (letters, `KF7Q-M2XA`) and continues as a feed invite.
 struct AddFrameView: View {
     enum Context {
         case sheet, onboarding
@@ -14,13 +15,25 @@ struct AddFrameView: View {
     /// Onboarding: continue (to Send when `send` is true).
     var onFinish: ((_ send: Bool) -> Void)?
 
+    private let api: API
+
     init(api: API, prefill: String? = nil, context: Context = .sheet, onFinish: ((Bool) -> Void)? = nil) {
-        _model = State(initialValue: AddFrameModel(api: api, prefill: prefill))
+        let feeds = ServerStore.load()?.discovery.feeds == true
+        _model = State(initialValue: AddFrameModel(api: api, prefill: prefill, allowsLetters: feeds))
+        self.api = api
         self.context = context
         self.onFinish = onFinish
     }
 
     var body: some View {
+        if let preview = model.feedPreview {
+            FeedInviteView(api: api, source: .preview(preview), onBack: { model.reset() })
+        } else {
+            codeEntry
+        }
+    }
+
+    private var codeEntry: some View {
         ScrollView {
             VStack(spacing: 20) {
                 if let result = model.result {
@@ -65,6 +78,12 @@ struct AddFrameView: View {
             Text(L("add.body"))
                 .foregroundStyle(Palette.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
+            if model.allowsLetters {
+                Text(L("ios.feeds.codeHint"))
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             CodeField(model: model, onComplete: { Task { await submit() } })
 
@@ -85,7 +104,7 @@ struct AddFrameView: View {
                         ProgressView().tint(Palette.onPrimary)
                         Text(L("add.checking"))
                     } else {
-                        Text(L("add.submit"))
+                        Text(model.isFeedCode ? L("ios.feeds.codeSubmit") : L("add.submit"))
                     }
                 }
             }
@@ -244,8 +263,9 @@ private struct ResultPanel: View {
     }
 }
 
-/// Eight digit boxes in two groups over a hidden text field: tap to type, long-press or use Paste.
-/// What the 8-digit code field edits: adding a frame, or moving one to a new device.
+/// Eight boxes in two groups over a hidden text field: tap to type, long-press or use Paste.
+/// What the 8-character code field edits: adding a frame (or a feed code, letters allowed), or moving a frame to a
+/// new device (digits only).
 @MainActor
 protocol CodeEntryModel: AnyObject, Observable {
     var digits: String { get }
@@ -253,7 +273,13 @@ protocol CodeEntryModel: AnyObject, Observable {
     var isComplete: Bool { get }
     var error: String? { get }
     var isBusy: Bool { get }
+    /// Feed invite codes (letters) are accepted besides 8-digit frame codes.
+    var allowsLetters: Bool { get }
     func setCode(_ input: String)
+}
+
+extension CodeEntryModel {
+    var allowsLetters: Bool { false }
 }
 
 extension AddFrameModel: CodeEntryModel {
@@ -264,6 +290,8 @@ struct CodeField<Model: CodeEntryModel>: View {
     let model: Model
     var onComplete: () -> Void
     @FocusState private var focused: Bool
+    /// The letter keyboard, for feed codes; frame codes use the number pad.
+    @State private var letters = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -273,7 +301,9 @@ struct CodeField<Model: CodeEntryModel>: View {
                     model.setCode(new)
                     if model.isComplete, !wasComplete { onComplete() }
                 }))
-                .keyboardType(.numberPad)
+                .keyboardType(letters ? .asciiCapable : .numberPad)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
                 .textContentType(.none)
                 .focused($focused)
                 .opacity(0.02)
@@ -307,10 +337,23 @@ struct CodeField<Model: CodeEntryModel>: View {
                 .foregroundStyle(Palette.primarySoftText)
                 .controlSize(.regular)
                 Spacer()
+                if model.allowsLetters {
+                    // Switch between the number pad (frame codes) and letters (feed codes like KF7Q-M2XA).
+                    Button {
+                        letters.toggle()
+                        focused = false
+                        Task { @MainActor in focused = true }
+                    } label: {
+                        Label(letters ? L("ios.feeds.codeDigits") : L("ios.feeds.codeLetters"), systemImage: letters ? "number" : "textformat.abc")
+                    }
+                    .buttonStyle(.kf(.ghost))
+                    .accessibilityHint(L("ios.feeds.codeKeyboardHint"))
+                }
             }
         }
         .onAppear {
             if model.digits.isEmpty { focused = true }
+            if CodeEntry.isFeed(model.digits) { letters = true }
         }
     }
 

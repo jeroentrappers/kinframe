@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Startar…</string>
+    <string name="startup_checking_library">Kontrollerar fotona efter ett strömavbrott…</string>
+    <string name="startup_checking_update">Kontrollerar appversionen…</string>
+    <string name="startup_loading_photos">Läser in fotona…</string>
+    <string name="startup_preparing_photo">Förbereder det första fotot…</string>
+    <string name="startup_waiting_wifi">Väntar på wifi…</string>
+    <string name="startup_setting_clock">Ställer klockan…</string>
+    <string name="startup_connecting">Ansluter till servern…</string>
+    <string name="power_cut_title">Avstängd utan att stängas ned</string>
+    <string name="power_cut_body_ok">Allt har kontrollerats och är i ordning.</string>
+    <string name="power_cut_body_redownload">Allt har kontrollerats. Några foton laddas ned igen.</string>
+    <string name="power_cut_tip">Välj nästa gång %1$s → %2$s i menyn och vänta tills det står ”%3$s” på skärmen.</string>
+</resources>

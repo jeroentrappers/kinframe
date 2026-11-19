@@ -35,7 +35,8 @@ open class TimeSync(
     private val servers: List<String> = SERVERS,
     private val wallMs: () -> Long = System::currentTimeMillis,
 ) {
-    private val _clockWrong = MutableStateFlow(false)
+    // Checked at once, so a frame that starts at its factory date never shows that date before the first sync round.
+    private val _clockWrong = MutableStateFlow(wallMs() < maxOf(FLOOR_MS, prefs.getLong(KEY_LAST_GOOD, 0)))
     /** The clock is before the last time the frame knew it was right (or before [FLOOR_MS]): it was reset. */
     val clockWrong: StateFlow<Boolean> = _clockWrong
     private val lock = Mutex()

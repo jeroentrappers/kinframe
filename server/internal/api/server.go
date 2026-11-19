@@ -21,6 +21,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/calendar"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
+	"github.com/jeroentrappers/kinframe/server/internal/netguard"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
@@ -86,6 +87,37 @@ type Server struct {
 	pluginSealer *secrets.Sealer
 
 	mirror mirrorHub // TV mirror: the latest now_showing per frame and its viewers
+
+	birthdayUser *ratelimit.Limiter // creating and suggesting birthday people
+
+	// Photo sources and Google imports (docs/spec/photo-sources.md).
+	guard            *netguard.Guard
+	ps               *photoSources
+	psSealer         *secrets.Sealer
+	gi               *googleImports
+	sourceTestUser   *ratelimit.Limiter // test and Immich album listing, together
+	sourceCreateUser *ratelimit.Limiter
+	sourceSyncUser   *ratelimit.Limiter
+	googleStartUser  *ratelimit.Limiter
+	clockMu          sync.RWMutex
+	clock            func() time.Time // nil: time.Now (tests inject one with SetClock)
+}
+
+// now is the server's clock (birthday dates and windows).
+func (s *Server) now() time.Time {
+	s.clockMu.RLock()
+	defer s.clockMu.RUnlock()
+	if s.clock != nil {
+		return s.clock()
+	}
+	return time.Now()
+}
+
+// SetClock replaces the clock used for birthday dates (tests); nil restores time.Now.
+func (s *Server) SetClock(f func() time.Time) {
+	s.clockMu.Lock()
+	s.clock = f
+	s.clockMu.Unlock()
 }
 
 // Deps are the collaborators a Server needs.
@@ -104,6 +136,8 @@ type Deps struct {
 	Weather  *weather.Service  // nil disables weather and /v1/geocode
 	Calendar *calendar.Service // nil disables calendars
 	Registry *registry.Mirror  // community plugin registry; nil disables it
+	// Guard is the SSRF guard for user-entered URLs (photo sources).
+	Guard *netguard.Guard
 	// Mailer sends the server's own email (shop); defaults to SMTP from the
 	// config, nil when SMTP is not configured.
 	Mailer shop.Mailer
@@ -132,6 +166,7 @@ func New(d Deps) (*Server, error) {
 		tokenIP:          ratelimit.New(120, time.Hour),
 		devTokenIP:       ratelimit.New(120, time.Hour),
 		inviteUser:       ratelimit.New(60, time.Hour),
+		birthdayUser:     ratelimit.New(60, time.Hour),
 		geocodeUser:      ratelimit.New(60, time.Minute),
 		calendarTestUser: ratelimit.New(30, time.Minute),
 		tvUser:           ratelimit.New(60, time.Hour),
@@ -157,6 +192,9 @@ func New(d Deps) (*Server, error) {
 		return nil, fmt.Errorf("plugin secrets: %w", err)
 	}
 	s.pluginSealer = ps
+	if err := s.setupPhotoSources(d.Guard); err != nil {
+		return nil, err
+	}
 	if err := s.setupTus(); err != nil {
 		return nil, err
 	}
@@ -175,10 +213,11 @@ func (s *Server) Limits(ctx context.Context) config.Limits {
 	l := s.cfg.DefaultLimits
 	if ok, err := s.st.GetServerSetting(ctx, "limits", &l); err != nil {
 		s.log.Warn("load limits", "err", err)
-		return s.cfg.DefaultLimits
+		return s.cfg.DefaultLimits.WithDefaults()
 	} else if !ok {
 		l = s.cfg.DefaultLimits
 	}
+	l = l.WithDefaults()
 	s.limits = &l
 	return l
 }
@@ -344,6 +383,14 @@ func notFound(err error, what string) error {
 	switch what {
 	case "album":
 		return problem.New(problem.NotFound, "album not found")
+	case "birthday":
+		return problem.New(problem.NotFound, "birthday not found")
+	case "feed":
+		return problem.New(problem.NotFound, "feed not found")
+	case "post":
+		return problem.New(problem.NotFound, "post not found")
+	case "subscription":
+		return problem.New(problem.NotFound, "subscription not found")
 	case "frame":
 		return problem.New(problem.NotFound, "frame not found")
 	case "invite":

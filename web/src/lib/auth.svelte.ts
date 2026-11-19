@@ -1,5 +1,6 @@
 import LogtoClient from '@logto/browser';
 import { api, apiUrl, call, configureApi, type User } from './api/client';
+import { browserTimeZone, timezoneUpdate } from './birthdays';
 import { discovery } from './discovery.svelte';
 import { hasSavedLocale, i18n } from './i18n/index.svelte';
 import { matchLocale } from './i18n/locales';
@@ -78,14 +79,19 @@ class Auth {
 	async loadMe(): Promise<boolean> {
 		try {
 			this.me = await call(api.GET('/v1/me'));
+			const update: { locale?: string; timezone?: string } = {};
 			if (this.me?.locale && !hasSavedLocale()) {
 				// A profile language set elsewhere (another browser, the phone app) wins over browser detection.
 				const l = matchLocale(this.me.locale);
 				if (l && l !== i18n.locale) void i18n.set(l);
 			} else if (this.me && !this.me.locale) {
 				// First sign-in: tell the server our language so notifications match.
-				void call(api.PATCH('/v1/me', { body: { locale: i18n.locale } })).then((u) => (this.me = u), () => {});
+				update.locale = i18n.locale;
 			}
+			// The birthday morning notification comes at 08:00 in the user's own zone (birthdays.md §8.1).
+			const zone = discovery.birthdays ? timezoneUpdate(this.me, browserTimeZone()) : null;
+			if (zone) update.timezone = zone;
+			if (Object.keys(update).length) void call(api.PATCH('/v1/me', { body: update })).then((u) => (this.me = u), () => {});
 			return true;
 		} catch {
 			return false;

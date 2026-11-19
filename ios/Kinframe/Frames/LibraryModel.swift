@@ -237,6 +237,11 @@ final class LibraryModel {
         }
     }
 
+    /// "Only in album mode": the album's photos leave the normal slideshow (docs/spec/photo-sources.md §9.1).
+    func setOnlyInAlbumMode(_ album: Album, _ on: Bool) async throws {
+        try await writeAlbum(album, AlbumLogic.onlyInAlbumModeBody(on))
+    }
+
     /// Save the arranged order: the shown photos first, then members this view doesn't show.
     func saveOrder(_ album: Album, shown: [String]) async throws {
         let ids = AlbumLogic.arrangedIds(shown: shown, album: album.placementIds ?? [])
@@ -244,9 +249,10 @@ final class LibraryModel {
         placements = AlbumLogic.ordered(placements, by: a.placementIds ?? ids)
     }
 
-    func deleteAlbum(_ album: Album) async throws {
-        let id = frameId, albumId = album.id
-        _ = try await api.call { try await $0.deleteAlbum(path: .init(frameId: id, albumId: albumId)).noContent }
+    /// `removeSourceItems`: also remove the photos the album's photo sources imported (asked when it has any).
+    func deleteAlbum(_ album: Album, removeSourceItems: Bool = false) async throws {
+        let albumId = album.id
+        try await api.deleteAlbum(frameId: frameId, albumId: albumId, removeSourceItems: removeSourceItems)
         albums.removeAll { $0.id == albumId }
         if playingId == albumId { playingId = nil }
         select(album: nil)

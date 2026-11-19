@@ -116,6 +116,12 @@ extension Components {
             case upstreamUnavailable = "upstream_unavailable"
             case featureDisabled = "feature_disabled"
             case alreadyDecided = "already_decided"
+            case alreadySubscribed = "already_subscribed"
+            case invalidTransition = "invalid_transition"
+            case limitReached = "limit_reached"
+            case duplicateBirthday = "duplicate_birthday"
+            case duplicateSource = "duplicate_source"
+            case sourceTestFailed = "source_test_failed"
             case serverError = "server_error"
         }
         /// - Remark: Generated from `#/components/schemas/Discovery`.
@@ -189,6 +195,32 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/calendar`.
             public var calendar: Swift.Bool?
+            /// True when the server supports feeds and subscriptions (docs/spec/feeds.md).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/feeds`.
+            public var feeds: Swift.Bool?
+            /// True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// True when albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/photo_sources`.
+            public var photoSources: Swift.Bool?
+            /// The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/photo_source_providers`.
+            public var photoSourceProviders: [Components.Schemas.PhotoSourceProvider]?
+            /// True when sources may reach private network addresses (a home-network Immich such as
+            /// `http://192.168.1.10:2283`). False: the connect sheet asks for a public address (docs/spec/photo-sources.md §12.3).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/photo_sources_private_networks`.
+            public var photoSourcesPrivateNetworks: Swift.Bool?
+            /// True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/google_photos_import`.
+            public var googlePhotosImport: Swift.Bool?
             /// VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             /// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
             ///
@@ -209,6 +241,12 @@ extension Components {
             ///   - devAuth: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
             ///   - weather: True when the server fetches weather for frames and serves `/v1/geocode`.
             ///   - calendar: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+            ///   - feeds: True when the server supports feeds and subscriptions (docs/spec/feeds.md).
+            ///   - birthdays: True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
+            ///   - photoSources: True when albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md).
+            ///   - photoSourceProviders: The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
+            ///   - photoSourcesPrivateNetworks: True when sources may reach private network addresses (a home-network Immich such as
+            ///   - googlePhotosImport: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
             ///   - webpushPublicKey: VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             ///   - shop:
             public init(
@@ -221,6 +259,12 @@ extension Components {
                 devAuth: Swift.Bool? = nil,
                 weather: Swift.Bool? = nil,
                 calendar: Swift.Bool? = nil,
+                feeds: Swift.Bool? = nil,
+                birthdays: Swift.Bool? = nil,
+                photoSources: Swift.Bool? = nil,
+                photoSourceProviders: [Components.Schemas.PhotoSourceProvider]? = nil,
+                photoSourcesPrivateNetworks: Swift.Bool? = nil,
+                googlePhotosImport: Swift.Bool? = nil,
                 webpushPublicKey: Swift.String? = nil,
                 shop: Components.Schemas.Shop? = nil
             ) {
@@ -233,6 +277,12 @@ extension Components {
                 self.devAuth = devAuth
                 self.weather = weather
                 self.calendar = calendar
+                self.feeds = feeds
+                self.birthdays = birthdays
+                self.photoSources = photoSources
+                self.photoSourceProviders = photoSourceProviders
+                self.photoSourcesPrivateNetworks = photoSourcesPrivateNetworks
+                self.googlePhotosImport = googlePhotosImport
                 self.webpushPublicKey = webpushPublicKey
                 self.shop = shop
             }
@@ -246,6 +296,12 @@ extension Components {
                 case devAuth = "dev_auth"
                 case weather
                 case calendar
+                case feeds
+                case birthdays
+                case photoSources = "photo_sources"
+                case photoSourceProviders = "photo_source_providers"
+                case photoSourcesPrivateNetworks = "photo_sources_private_networks"
+                case googlePhotosImport = "google_photos_import"
                 case webpushPublicKey = "webpush_public_key"
                 case shop
             }
@@ -402,7 +458,7 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ShopProduct/size`.
             public var size: Swift.String?
-            /// Unit price incl. VAT
+            /// Unit price incl. VAT, in cents
             ///
             /// - Remark: Generated from `#/components/schemas/ShopProduct/price_cents`.
             public var priceCents: Swift.Int
@@ -442,7 +498,7 @@ extension Components {
             ///   - id:
             ///   - name:
             ///   - size: Screen size label
-            ///   - priceCents: Unit price incl. VAT
+            ///   - priceCents: Unit price incl. VAT, in cents
             ///   - maxQty:
             ///   - image: Illustration key: frame-10 or frame-15
             ///   - specs: Language code → short spec bullets; `en` is the fallback.
@@ -838,6 +894,40 @@ extension Components {
             public var maxUploadBytes: Swift.Int
             /// - Remark: Generated from `#/components/schemas/Limits/trash_retention_days`.
             public var trashRetentionDays: Swift.Int?
+            /// Feeds one account may own.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_feeds_per_user`.
+            public var maxFeedsPerUser: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/Limits/max_subscriptions_per_feed`.
+            public var maxSubscriptionsPerFeed: Swift.Int?
+            /// Cap of `history: all` per subscription (newest first).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_feed_backfill_items`.
+            public var maxFeedBackfillItems: Swift.Int?
+            /// Birthday people per feed (pending and approved).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_birthdays_per_feed`.
+            public var maxBirthdaysPerFeed: Swift.Int?
+            /// Photo sources per album or feed.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_photo_sources_per_target`.
+            public var maxPhotoSourcesPerTarget: Swift.Int?
+            /// Photo sources one account owns.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_photo_sources_per_user`.
+            public var maxPhotoSourcesPerUser: Swift.Int?
+            /// Live imported items per photo source; newer upstream items beyond it are skipped.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_photo_source_items`.
+            public var maxPhotoSourceItems: Swift.Int?
+            /// Bytes one sync run downloads; the rest follows in the next runs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_photo_source_run_bytes`.
+            public var maxPhotoSourceRunBytes: Swift.Int?
+            /// Items per Google Photos import (the picker's own maximum is 2000).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_google_import_items`.
+            public var maxGoogleImportItems: Swift.Int?
             /// Creates a new `Limits`.
             ///
             /// - Parameters:
@@ -845,22 +935,58 @@ extension Components {
             ///   - maxVideoSeconds:
             ///   - maxUploadBytes:
             ///   - trashRetentionDays:
+            ///   - maxFeedsPerUser: Feeds one account may own.
+            ///   - maxSubscriptionsPerFeed:
+            ///   - maxFeedBackfillItems: Cap of `history: all` per subscription (newest first).
+            ///   - maxBirthdaysPerFeed: Birthday people per feed (pending and approved).
+            ///   - maxPhotoSourcesPerTarget: Photo sources per album or feed.
+            ///   - maxPhotoSourcesPerUser: Photo sources one account owns.
+            ///   - maxPhotoSourceItems: Live imported items per photo source; newer upstream items beyond it are skipped.
+            ///   - maxPhotoSourceRunBytes: Bytes one sync run downloads; the rest follows in the next runs.
+            ///   - maxGoogleImportItems: Items per Google Photos import (the picker's own maximum is 2000).
             public init(
                 maxItemsPerSend: Swift.Int,
                 maxVideoSeconds: Swift.Int,
                 maxUploadBytes: Swift.Int,
-                trashRetentionDays: Swift.Int? = nil
+                trashRetentionDays: Swift.Int? = nil,
+                maxFeedsPerUser: Swift.Int? = nil,
+                maxSubscriptionsPerFeed: Swift.Int? = nil,
+                maxFeedBackfillItems: Swift.Int? = nil,
+                maxBirthdaysPerFeed: Swift.Int? = nil,
+                maxPhotoSourcesPerTarget: Swift.Int? = nil,
+                maxPhotoSourcesPerUser: Swift.Int? = nil,
+                maxPhotoSourceItems: Swift.Int? = nil,
+                maxPhotoSourceRunBytes: Swift.Int? = nil,
+                maxGoogleImportItems: Swift.Int? = nil
             ) {
                 self.maxItemsPerSend = maxItemsPerSend
                 self.maxVideoSeconds = maxVideoSeconds
                 self.maxUploadBytes = maxUploadBytes
                 self.trashRetentionDays = trashRetentionDays
+                self.maxFeedsPerUser = maxFeedsPerUser
+                self.maxSubscriptionsPerFeed = maxSubscriptionsPerFeed
+                self.maxFeedBackfillItems = maxFeedBackfillItems
+                self.maxBirthdaysPerFeed = maxBirthdaysPerFeed
+                self.maxPhotoSourcesPerTarget = maxPhotoSourcesPerTarget
+                self.maxPhotoSourcesPerUser = maxPhotoSourcesPerUser
+                self.maxPhotoSourceItems = maxPhotoSourceItems
+                self.maxPhotoSourceRunBytes = maxPhotoSourceRunBytes
+                self.maxGoogleImportItems = maxGoogleImportItems
             }
             public enum CodingKeys: String, CodingKey {
                 case maxItemsPerSend = "max_items_per_send"
                 case maxVideoSeconds = "max_video_seconds"
                 case maxUploadBytes = "max_upload_bytes"
                 case trashRetentionDays = "trash_retention_days"
+                case maxFeedsPerUser = "max_feeds_per_user"
+                case maxSubscriptionsPerFeed = "max_subscriptions_per_feed"
+                case maxFeedBackfillItems = "max_feed_backfill_items"
+                case maxBirthdaysPerFeed = "max_birthdays_per_feed"
+                case maxPhotoSourcesPerTarget = "max_photo_sources_per_target"
+                case maxPhotoSourcesPerUser = "max_photo_sources_per_user"
+                case maxPhotoSourceItems = "max_photo_source_items"
+                case maxPhotoSourceRunBytes = "max_photo_source_run_bytes"
+                case maxGoogleImportItems = "max_google_import_items"
             }
         }
         /// A geocoding result (Open-Meteo geocoding API).
@@ -936,6 +1062,10 @@ extension Components {
             public var shareLocationNames: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/User/locale`.
             public var locale: Swift.String?
+            /// IANA time zone reported by the user's apps; null until one did.
+            ///
+            /// - Remark: Generated from `#/components/schemas/User/timezone`.
+            public var timezone: Swift.String?
             /// - Remark: Generated from `#/components/schemas/User/is_operator`.
             public var isOperator: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/User/created_at`.
@@ -949,6 +1079,7 @@ extension Components {
             ///   - avatarUrl:
             ///   - shareLocationNames:
             ///   - locale:
+            ///   - timezone: IANA time zone reported by the user's apps; null until one did.
             ///   - isOperator:
             ///   - createdAt:
             public init(
@@ -958,6 +1089,7 @@ extension Components {
                 avatarUrl: Swift.String? = nil,
                 shareLocationNames: Swift.Bool? = nil,
                 locale: Swift.String? = nil,
+                timezone: Swift.String? = nil,
                 isOperator: Swift.Bool? = nil,
                 createdAt: Foundation.Date? = nil
             ) {
@@ -967,6 +1099,7 @@ extension Components {
                 self.avatarUrl = avatarUrl
                 self.shareLocationNames = shareLocationNames
                 self.locale = locale
+                self.timezone = timezone
                 self.isOperator = isOperator
                 self.createdAt = createdAt
             }
@@ -977,6 +1110,7 @@ extension Components {
                 case avatarUrl = "avatar_url"
                 case shareLocationNames = "share_location_names"
                 case locale
+                case timezone
                 case isOperator = "is_operator"
                 case createdAt = "created_at"
             }
@@ -992,7 +1126,7 @@ extension Components {
             }
             /// - Remark: Generated from `#/components/schemas/PushEndpointCreate/kind`.
             public var kind: Components.Schemas.PushEndpointCreate.KindPayload
-            /// UnifiedPush/WebPush URL
+            /// UnifiedPush/WebPush URL, or FCM/APNs token
             ///
             /// - Remark: Generated from `#/components/schemas/PushEndpointCreate/endpoint`.
             public var endpoint: Swift.String
@@ -1029,7 +1163,7 @@ extension Components {
             ///
             /// - Parameters:
             ///   - kind:
-            ///   - endpoint: UnifiedPush/WebPush URL
+            ///   - endpoint: UnifiedPush/WebPush URL, or FCM/APNs token
             ///   - webpushKeys:
             ///   - deviceName:
             ///   - locale:
@@ -1397,6 +1531,15 @@ extension Components {
             public var appVersionCode: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/Heartbeat/android_sdk`.
             public var androidSdk: Swift.Int?
+            /// Optional capabilities of the frame app. `feed_backfill`: the frame shows `Placement.backfill` placements
+            /// quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
+            /// backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
+            /// the `birthdays` change (informational only: nothing is withheld; apps use it for
+            /// `Subscription.frame.birthdays_supported`).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Heartbeat/features`.
+            public var features: [Swift.String]?
             /// - Remark: Generated from `#/components/schemas/Heartbeat/uptime_s`.
             public var uptimeS: Swift.Int
             /// - Remark: Generated from `#/components/schemas/Heartbeat/wifi_ssid`.
@@ -1483,6 +1626,7 @@ extension Components {
             ///   - appVersion:
             ///   - appVersionCode:
             ///   - androidSdk:
+            ///   - features: Optional capabilities of the frame app. `feed_backfill`: the frame shows `Placement.backfill` placements
             ///   - uptimeS:
             ///   - wifiSsid:
             ///   - wifiRssiDbm:
@@ -1505,6 +1649,7 @@ extension Components {
                 appVersion: Swift.String,
                 appVersionCode: Swift.Int? = nil,
                 androidSdk: Swift.Int? = nil,
+                features: [Swift.String]? = nil,
                 uptimeS: Swift.Int,
                 wifiSsid: Swift.String? = nil,
                 wifiRssiDbm: Swift.Int? = nil,
@@ -1527,6 +1672,7 @@ extension Components {
                 self.appVersion = appVersion
                 self.appVersionCode = appVersionCode
                 self.androidSdk = androidSdk
+                self.features = features
                 self.uptimeS = uptimeS
                 self.wifiSsid = wifiSsid
                 self.wifiRssiDbm = wifiRssiDbm
@@ -1550,6 +1696,7 @@ extension Components {
                 case appVersion = "app_version"
                 case appVersionCode = "app_version_code"
                 case androidSdk = "android_sdk"
+                case features
                 case uptimeS = "uptime_s"
                 case wifiSsid = "wifi_ssid"
                 case wifiRssiDbm = "wifi_rssi_dbm"
@@ -1995,13 +2142,24 @@ extension Components {
             case missYou = "miss_you"
             case thanks = "thanks"
         }
+        /// Recipients are `frame_ids` plus `feed_ids`; together they must not be empty (`422 validation_failed` on
+        /// `frame_ids`). Feeds need membership (any role), frames need `send`. A frame that is a direct recipient and
+        /// also subscribes to a feed in `feed_ids` gets the item once (docs/spec/feeds.md §6.2).
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/SendCreate`.
         public struct SendCreate: Codable, Hashable, Sendable {
+            /// Frames to send to directly. May be empty when `feed_ids` is not.
+            ///
             /// - Remark: Generated from `#/components/schemas/SendCreate/frame_ids`.
             public var frameIds: [Components.Schemas.Id]
+            /// Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/SendCreate/feed_ids`.
+            public var feedIds: [Components.Schemas.Id]?
             /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload`.
             public struct ItemsPayloadPayload: Codable, Hashable, Sendable {
-                /// tus upload id
+                /// tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still.
                 ///
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/upload_id`.
                 public var uploadId: Swift.String
@@ -2078,7 +2236,7 @@ extension Components {
                 /// Creates a new `ItemsPayloadPayload`.
                 ///
                 /// - Parameters:
-                ///   - uploadId: tus upload id
+                ///   - uploadId: tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still.
                 ///   - caption:
                 ///   - focalPoint:
                 ///   - fit:
@@ -2139,17 +2297,21 @@ extension Components {
             /// Creates a new `SendCreate`.
             ///
             /// - Parameters:
-            ///   - frameIds:
+            ///   - frameIds: Frames to send to directly. May be empty when `feed_ids` is not.
+            ///   - feedIds: Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).
             ///   - items:
             public init(
                 frameIds: [Components.Schemas.Id],
+                feedIds: [Components.Schemas.Id]? = nil,
                 items: Components.Schemas.SendCreate.ItemsPayload
             ) {
                 self.frameIds = frameIds
+                self.feedIds = feedIds
                 self.items = items
             }
             public enum CodingKeys: String, CodingKey {
                 case frameIds = "frame_ids"
+                case feedIds = "feed_ids"
                 case items
             }
         }
@@ -2205,6 +2367,13 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Item/imported_sender_name`.
             public var importedSenderName: Swift.String?
+            /// Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
+            /// sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
+            /// for feed placements). Optional: clients that don't know it show the sender only.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/via`.
+            public var via: Components.Schemas.ItemVia?
             /// Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
             /// `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
             ///
@@ -2237,6 +2406,7 @@ extension Components {
             ///   - createdAt:
             ///   - importedFrom: Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
             ///   - importedSenderName: The original sender's display name in that app, when known.
+            ///   - via: Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
             ///   - motion: Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
             ///   - thumbUrl: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
             public init(
@@ -2259,6 +2429,7 @@ extension Components {
                 createdAt: Foundation.Date,
                 importedFrom: Components.Schemas.ItemOrigin? = nil,
                 importedSenderName: Swift.String? = nil,
+                via: Components.Schemas.ItemVia? = nil,
                 motion: Components.Schemas.ItemMotion? = nil,
                 thumbUrl: Swift.String? = nil
             ) {
@@ -2281,6 +2452,7 @@ extension Components {
                 self.createdAt = createdAt
                 self.importedFrom = importedFrom
                 self.importedSenderName = importedSenderName
+                self.via = via
                 self.motion = motion
                 self.thumbUrl = thumbUrl
             }
@@ -2304,6 +2476,7 @@ extension Components {
                 case createdAt = "created_at"
                 case importedFrom = "imported_from"
                 case importedSenderName = "imported_sender_name"
+                case via
                 case motion
                 case thumbUrl = "thumb_url"
             }
@@ -2313,6 +2486,43 @@ extension Components {
         /// - Remark: Generated from `#/components/schemas/ItemOrigin`.
         @frozen public enum ItemOrigin: String, Codable, Hashable, Sendable, CaseIterable {
             case frameo = "frameo"
+        }
+        /// The outside service a photo came from.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoService`.
+        public typealias PhotoService = Swift.String
+        /// - Remark: Generated from `#/components/schemas/ItemVia`.
+        public struct ItemVia: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ItemVia/service`.
+            public var service: Components.Schemas.PhotoService
+            /// Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+            ///
+            /// - Remark: Generated from `#/components/schemas/ItemVia/label`.
+            public var label: Swift.String
+            /// The photo source that synced it, while it exists (null for Google imports and deleted sources).
+            ///
+            /// - Remark: Generated from `#/components/schemas/ItemVia/source_id`.
+            public var sourceId: Components.Schemas.Id?
+            /// Creates a new `ItemVia`.
+            ///
+            /// - Parameters:
+            ///   - service:
+            ///   - label: Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+            ///   - sourceId: The photo source that synced it, while it exists (null for Google imports and deleted sources).
+            public init(
+                service: Components.Schemas.PhotoService,
+                label: Swift.String,
+                sourceId: Components.Schemas.Id? = nil
+            ) {
+                self.service = service
+                self.label = label
+                self.sourceId = sourceId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case service
+                case label
+                case sourceId = "source_id"
+            }
         }
         /// - Remark: Generated from `#/components/schemas/ItemMotion`.
         public struct ItemMotion: Codable, Hashable, Sendable {
@@ -2445,6 +2655,29 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Placement/shared_by_name`.
             public var sharedByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Placement/origin`.
+            public var origin: Components.Schemas.PlacementOrigin?
+            /// `origin: feed`: the feed that placed it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/origin_feed_id`.
+            public var originFeedId: Components.Schemas.Id?
+            /// Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/origin_feed_name`.
+            public var originFeedName: Swift.String?
+            /// Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
+            /// Used for feed mode (`slideshow.feed_id`), like `album_ids` for album mode.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/feed_ids`.
+            public var feedIds: [Components.Schemas.Id]?
+            /// Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
+            /// import). Frames don't treat it as new: no "N new" card, no screen wake. `received_at` is then the post time
+            /// (for a photo source's first import: when the photo was added upstream, else its capture time).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/backfill`.
+            public var backfill: Swift.Bool?
             /// Creates a new `Placement`.
             ///
             /// - Parameters:
@@ -2467,6 +2700,11 @@ extension Components {
             ///   - albumIds:
             ///   - sharedByUserId: The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
             ///   - sharedByName: Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+            ///   - origin:
+            ///   - originFeedId: `origin: feed`: the feed that placed it.
+            ///   - originFeedName: Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
+            ///   - feedIds: Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
+            ///   - backfill: Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
             public init(
                 id: Components.Schemas.Id,
                 frameId: Components.Schemas.Id,
@@ -2486,7 +2724,12 @@ extension Components {
                 receivedAt: Foundation.Date? = nil,
                 albumIds: [Components.Schemas.Id]? = nil,
                 sharedByUserId: Components.Schemas.Id? = nil,
-                sharedByName: Swift.String? = nil
+                sharedByName: Swift.String? = nil,
+                origin: Components.Schemas.PlacementOrigin? = nil,
+                originFeedId: Components.Schemas.Id? = nil,
+                originFeedName: Swift.String? = nil,
+                feedIds: [Components.Schemas.Id]? = nil,
+                backfill: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.frameId = frameId
@@ -2507,6 +2750,11 @@ extension Components {
                 self.albumIds = albumIds
                 self.sharedByUserId = sharedByUserId
                 self.sharedByName = sharedByName
+                self.origin = origin
+                self.originFeedId = originFeedId
+                self.originFeedName = originFeedName
+                self.feedIds = feedIds
+                self.backfill = backfill
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -2528,6 +2776,11 @@ extension Components {
                 case albumIds = "album_ids"
                 case sharedByUserId = "shared_by_user_id"
                 case sharedByName = "shared_by_name"
+                case origin
+                case originFeedId = "origin_feed_id"
+                case originFeedName = "origin_feed_name"
+                case feedIds = "feed_ids"
+                case backfill
             }
         }
         /// - Remark: Generated from `#/components/schemas/ShareResult`.
@@ -2608,6 +2861,16 @@ extension Components {
             public var createdAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/Send/items`.
             public var items: [Components.Schemas.Item]
+            /// Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
+            /// run or import). Such sends get no `delivered` push.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Send/via`.
+            public var via: Components.Schemas.ItemVia?
+            /// The feeds this send was posted to, with receipts (docs/spec/feeds.md §7).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Send/feeds`.
+            public var feeds: [Components.Schemas.SendFeed]?
             /// - Remark: Generated from `#/components/schemas/Send/FramesPayload`.
             public struct FramesPayloadPayload: Codable, Hashable, Sendable {
                 /// - Remark: Generated from `#/components/schemas/Send/FramesPayload/frame_id`.
@@ -2694,11 +2957,11 @@ extension Components {
                     case placements
                 }
             }
-            /// Per-frame delivery for this send.
+            /// Per-frame delivery for this send (direct recipients and shares; feed placements are in `feeds`).
             ///
             /// - Remark: Generated from `#/components/schemas/Send/frames`.
             public typealias FramesPayload = [Components.Schemas.Send.FramesPayloadPayload]
-            /// Per-frame delivery for this send.
+            /// Per-frame delivery for this send (direct recipients and shares; feed placements are in `feeds`).
             ///
             /// - Remark: Generated from `#/components/schemas/Send/frames`.
             public var frames: Components.Schemas.Send.FramesPayload
@@ -2751,18 +3014,24 @@ extension Components {
             ///   - id:
             ///   - createdAt:
             ///   - items:
-            ///   - frames: Per-frame delivery for this send.
+            ///   - via: Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
+            ///   - feeds: The feeds this send was posted to, with receipts (docs/spec/feeds.md §7).
+            ///   - frames: Per-frame delivery for this send (direct recipients and shares; feed placements are in `feeds`).
             ///   - summary:
             public init(
                 id: Components.Schemas.Id,
                 createdAt: Foundation.Date,
                 items: [Components.Schemas.Item],
+                via: Components.Schemas.ItemVia? = nil,
+                feeds: [Components.Schemas.SendFeed]? = nil,
                 frames: Components.Schemas.Send.FramesPayload,
                 summary: Components.Schemas.Send.SummaryPayload? = nil
             ) {
                 self.id = id
                 self.createdAt = createdAt
                 self.items = items
+                self.via = via
+                self.feeds = feeds
                 self.frames = frames
                 self.summary = summary
             }
@@ -2770,6 +3039,8 @@ extension Components {
                 case id
                 case createdAt = "created_at"
                 case items
+                case via
+                case feeds
                 case frames
                 case summary
             }
@@ -2790,6 +3061,14 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Album/placement_ids`.
             public var placementIds: [Components.Schemas.Id]?
+            /// Photo sources syncing into this album (docs/spec/photo-sources.md); details for album managers in `listAlbumPhotoSources`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Album/photo_source_count`.
+            public var photoSourceCount: Swift.Int?
+            /// Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Album/only_in_album_mode`.
+            public var onlyInAlbumMode: Swift.Bool?
             /// Play this album automatically between dates each year (e.g. December).
             ///
             /// - Remark: Generated from `#/components/schemas/Album/schedule`.
@@ -2828,6 +3107,8 @@ extension Components {
             ///   - placementCount:
             ///   - coverPlacementId:
             ///   - placementIds: Ordered.
+            ///   - photoSourceCount: Photo sources syncing into this album (docs/spec/photo-sources.md); details for album managers in `listAlbumPhotoSources`.
+            ///   - onlyInAlbumMode: Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
             ///   - schedule: Play this album automatically between dates each year (e.g. December).
             public init(
                 id: Components.Schemas.Id,
@@ -2836,6 +3117,8 @@ extension Components {
                 placementCount: Swift.Int,
                 coverPlacementId: Components.Schemas.Id? = nil,
                 placementIds: [Components.Schemas.Id]? = nil,
+                photoSourceCount: Swift.Int? = nil,
+                onlyInAlbumMode: Swift.Bool? = nil,
                 schedule: Components.Schemas.Album.SchedulePayload? = nil
             ) {
                 self.id = id
@@ -2844,6 +3127,8 @@ extension Components {
                 self.placementCount = placementCount
                 self.coverPlacementId = coverPlacementId
                 self.placementIds = placementIds
+                self.photoSourceCount = photoSourceCount
+                self.onlyInAlbumMode = onlyInAlbumMode
                 self.schedule = schedule
             }
             public enum CodingKeys: String, CodingKey {
@@ -2853,6 +3138,8 @@ extension Components {
                 case placementCount = "placement_count"
                 case coverPlacementId = "cover_placement_id"
                 case placementIds = "placement_ids"
+                case photoSourceCount = "photo_source_count"
+                case onlyInAlbumMode = "only_in_album_mode"
                 case schedule
             }
         }
@@ -2893,6 +3180,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/AlbumWrite/schedule`.
             public var schedule: Components.Schemas.AlbumWrite.SchedulePayload?
+            /// Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
+            ///
+            /// - Remark: Generated from `#/components/schemas/AlbumWrite/only_in_album_mode`.
+            public var onlyInAlbumMode: Swift.Bool?
             /// Creates a new `AlbumWrite`.
             ///
             /// - Parameters:
@@ -2900,22 +3191,3195 @@ extension Components {
             ///   - placementIds:
             ///   - coverPlacementId:
             ///   - schedule: Play this album automatically between dates each year (e.g. December).
+            ///   - onlyInAlbumMode: Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
             public init(
                 name: Swift.String? = nil,
                 placementIds: [Components.Schemas.Id]? = nil,
                 coverPlacementId: Components.Schemas.Id? = nil,
-                schedule: Components.Schemas.AlbumWrite.SchedulePayload? = nil
+                schedule: Components.Schemas.AlbumWrite.SchedulePayload? = nil,
+                onlyInAlbumMode: Swift.Bool? = nil
             ) {
                 self.name = name
                 self.placementIds = placementIds
                 self.coverPlacementId = coverPlacementId
                 self.schedule = schedule
+                self.onlyInAlbumMode = onlyInAlbumMode
             }
             public enum CodingKeys: String, CodingKey {
                 case name
                 case placementIds = "placement_ids"
                 case coverPlacementId = "cover_placement_id"
                 case schedule
+                case onlyInAlbumMode = "only_in_album_mode"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedRole`.
+        @frozen public enum FeedRole: String, Codable, Hashable, Sendable, CaseIterable {
+            case owner = "owner"
+            case admin = "admin"
+            case poster = "poster"
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedSummary`.
+        public struct FeedSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/name`.
+            public var name: Swift.String
+            /// Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/cover_url`.
+            public var coverUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/role`.
+            public var role: Components.Schemas.FeedRole
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/member_count`.
+            public var memberCount: Swift.Int
+            /// Active and paused subscriptions.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/subscription_count`.
+            public var subscriptionCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/last_post_at`.
+            public var lastPostAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/created_at`.
+            public var createdAt: Foundation.Date?
+            /// Creates a new `FeedSummary`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - name:
+            ///   - coverUrl: Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
+            ///   - role:
+            ///   - memberCount:
+            ///   - subscriptionCount: Active and paused subscriptions.
+            ///   - lastPostAt:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                name: Swift.String,
+                coverUrl: Swift.String? = nil,
+                role: Components.Schemas.FeedRole,
+                memberCount: Swift.Int,
+                subscriptionCount: Swift.Int,
+                lastPostAt: Foundation.Date? = nil,
+                createdAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.name = name
+                self.coverUrl = coverUrl
+                self.role = role
+                self.memberCount = memberCount
+                self.subscriptionCount = subscriptionCount
+                self.lastPostAt = lastPostAt
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case coverUrl = "cover_url"
+                case role
+                case memberCount = "member_count"
+                case subscriptionCount = "subscription_count"
+                case lastPostAt = "last_post_at"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/Feed`.
+        public struct Feed: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Feed/value1`.
+            public var value1: Components.Schemas.FeedSummary
+            /// - Remark: Generated from `#/components/schemas/Feed/value2`.
+            public struct Value2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/owner_name`.
+                public var ownerName: Swift.String?
+                /// An item of a live post of this feed.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/cover_item_id`.
+                public var coverItemId: Components.Schemas.Id?
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/auto_approve_subscriptions`.
+                public var autoApproveSubscriptions: Swift.Bool?
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/invite_requires_approval`.
+                public var inviteRequiresApproval: Swift.Bool?
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/members_see_reactions`.
+                public var membersSeeReactions: Swift.Bool?
+                /// Posters may create `join` invites and revoke their own.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/posters_can_invite`.
+                public var postersCanInvite: Swift.Bool?
+                /// Posters add birthday people directly instead of suggesting them.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/posters_can_add_birthdays`.
+                public var postersCanAddBirthdays: Swift.Bool?
+                /// The caller's own preference (`updateFeedPreferences`): morning and greeting notifications for this feed's birthdays.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/birthday_notifications`.
+                public var birthdayNotifications: Swift.Bool?
+                /// Approved birthday people.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/birthday_count`.
+                public var birthdayCount: Swift.Int?
+                /// Suggestions waiting; owner and admins only (0 for posters).
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/pending_birthday_count`.
+                public var pendingBirthdayCount: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/post_count`.
+                public var postCount: Swift.Int?
+                /// Owner and admins only (0 for posters).
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/pending_subscription_count`.
+                public var pendingSubscriptionCount: Swift.Int?
+                /// Owner and admins only (0 for posters).
+                ///
+                /// - Remark: Generated from `#/components/schemas/Feed/value2/pending_join_request_count`.
+                public var pendingJoinRequestCount: Swift.Int?
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - ownerName:
+                ///   - coverItemId: An item of a live post of this feed.
+                ///   - autoApproveSubscriptions:
+                ///   - inviteRequiresApproval:
+                ///   - membersSeeReactions:
+                ///   - postersCanInvite: Posters may create `join` invites and revoke their own.
+                ///   - postersCanAddBirthdays: Posters add birthday people directly instead of suggesting them.
+                ///   - birthdayNotifications: The caller's own preference (`updateFeedPreferences`): morning and greeting notifications for this feed's birthdays.
+                ///   - birthdayCount: Approved birthday people.
+                ///   - pendingBirthdayCount: Suggestions waiting; owner and admins only (0 for posters).
+                ///   - postCount:
+                ///   - pendingSubscriptionCount: Owner and admins only (0 for posters).
+                ///   - pendingJoinRequestCount: Owner and admins only (0 for posters).
+                public init(
+                    ownerName: Swift.String? = nil,
+                    coverItemId: Components.Schemas.Id? = nil,
+                    autoApproveSubscriptions: Swift.Bool? = nil,
+                    inviteRequiresApproval: Swift.Bool? = nil,
+                    membersSeeReactions: Swift.Bool? = nil,
+                    postersCanInvite: Swift.Bool? = nil,
+                    postersCanAddBirthdays: Swift.Bool? = nil,
+                    birthdayNotifications: Swift.Bool? = nil,
+                    birthdayCount: Swift.Int? = nil,
+                    pendingBirthdayCount: Swift.Int? = nil,
+                    postCount: Swift.Int? = nil,
+                    pendingSubscriptionCount: Swift.Int? = nil,
+                    pendingJoinRequestCount: Swift.Int? = nil
+                ) {
+                    self.ownerName = ownerName
+                    self.coverItemId = coverItemId
+                    self.autoApproveSubscriptions = autoApproveSubscriptions
+                    self.inviteRequiresApproval = inviteRequiresApproval
+                    self.membersSeeReactions = membersSeeReactions
+                    self.postersCanInvite = postersCanInvite
+                    self.postersCanAddBirthdays = postersCanAddBirthdays
+                    self.birthdayNotifications = birthdayNotifications
+                    self.birthdayCount = birthdayCount
+                    self.pendingBirthdayCount = pendingBirthdayCount
+                    self.postCount = postCount
+                    self.pendingSubscriptionCount = pendingSubscriptionCount
+                    self.pendingJoinRequestCount = pendingJoinRequestCount
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case ownerName = "owner_name"
+                    case coverItemId = "cover_item_id"
+                    case autoApproveSubscriptions = "auto_approve_subscriptions"
+                    case inviteRequiresApproval = "invite_requires_approval"
+                    case membersSeeReactions = "members_see_reactions"
+                    case postersCanInvite = "posters_can_invite"
+                    case postersCanAddBirthdays = "posters_can_add_birthdays"
+                    case birthdayNotifications = "birthday_notifications"
+                    case birthdayCount = "birthday_count"
+                    case pendingBirthdayCount = "pending_birthday_count"
+                    case postCount = "post_count"
+                    case pendingSubscriptionCount = "pending_subscription_count"
+                    case pendingJoinRequestCount = "pending_join_request_count"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/Feed/value2`.
+            public var value2: Components.Schemas.Feed.Value2Payload
+            /// Creates a new `Feed`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            ///   - value2:
+            public init(
+                value1: Components.Schemas.FeedSummary,
+                value2: Components.Schemas.Feed.Value2Payload
+            ) {
+                self.value1 = value1
+                self.value2 = value2
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedCreate`.
+        public struct FeedCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/auto_approve_subscriptions`.
+            public var autoApproveSubscriptions: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/invite_requires_approval`.
+            public var inviteRequiresApproval: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/members_see_reactions`.
+            public var membersSeeReactions: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/posters_can_invite`.
+            public var postersCanInvite: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedCreate/posters_can_add_birthdays`.
+            public var postersCanAddBirthdays: Swift.Bool?
+            /// Creates a new `FeedCreate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - autoApproveSubscriptions:
+            ///   - inviteRequiresApproval:
+            ///   - membersSeeReactions:
+            ///   - postersCanInvite:
+            ///   - postersCanAddBirthdays:
+            public init(
+                name: Swift.String,
+                autoApproveSubscriptions: Swift.Bool? = nil,
+                inviteRequiresApproval: Swift.Bool? = nil,
+                membersSeeReactions: Swift.Bool? = nil,
+                postersCanInvite: Swift.Bool? = nil,
+                postersCanAddBirthdays: Swift.Bool? = nil
+            ) {
+                self.name = name
+                self.autoApproveSubscriptions = autoApproveSubscriptions
+                self.inviteRequiresApproval = inviteRequiresApproval
+                self.membersSeeReactions = membersSeeReactions
+                self.postersCanInvite = postersCanInvite
+                self.postersCanAddBirthdays = postersCanAddBirthdays
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case autoApproveSubscriptions = "auto_approve_subscriptions"
+                case inviteRequiresApproval = "invite_requires_approval"
+                case membersSeeReactions = "members_see_reactions"
+                case postersCanInvite = "posters_can_invite"
+                case postersCanAddBirthdays = "posters_can_add_birthdays"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedUpdate`.
+        public struct FeedUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/name`.
+            public var name: Swift.String?
+            /// An item of a live post of this feed; null removes the cover.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/cover_item_id`.
+            public var coverItemId: Components.Schemas.Id?
+            /// Requests by non-admin members become active without approval.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/auto_approve_subscriptions`.
+            public var autoApproveSubscriptions: Swift.Bool?
+            /// Join invites need an admin's approval.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/invite_requires_approval`.
+            public var inviteRequiresApproval: Swift.Bool?
+            /// Every member sees receipts and reactions of every post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/members_see_reactions`.
+            public var membersSeeReactions: Swift.Bool?
+            /// Posters may create `join` invites (and list and revoke their own).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/posters_can_invite`.
+            public var postersCanInvite: Swift.Bool?
+            /// Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedUpdate/posters_can_add_birthdays`.
+            public var postersCanAddBirthdays: Swift.Bool?
+            /// Creates a new `FeedUpdate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - coverItemId: An item of a live post of this feed; null removes the cover.
+            ///   - autoApproveSubscriptions: Requests by non-admin members become active without approval.
+            ///   - inviteRequiresApproval: Join invites need an admin's approval.
+            ///   - membersSeeReactions: Every member sees receipts and reactions of every post.
+            ///   - postersCanInvite: Posters may create `join` invites (and list and revoke their own).
+            ///   - postersCanAddBirthdays: Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them.
+            public init(
+                name: Swift.String? = nil,
+                coverItemId: Components.Schemas.Id? = nil,
+                autoApproveSubscriptions: Swift.Bool? = nil,
+                inviteRequiresApproval: Swift.Bool? = nil,
+                membersSeeReactions: Swift.Bool? = nil,
+                postersCanInvite: Swift.Bool? = nil,
+                postersCanAddBirthdays: Swift.Bool? = nil
+            ) {
+                self.name = name
+                self.coverItemId = coverItemId
+                self.autoApproveSubscriptions = autoApproveSubscriptions
+                self.inviteRequiresApproval = inviteRequiresApproval
+                self.membersSeeReactions = membersSeeReactions
+                self.postersCanInvite = postersCanInvite
+                self.postersCanAddBirthdays = postersCanAddBirthdays
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case coverItemId = "cover_item_id"
+                case autoApproveSubscriptions = "auto_approve_subscriptions"
+                case inviteRequiresApproval = "invite_requires_approval"
+                case membersSeeReactions = "members_see_reactions"
+                case postersCanInvite = "posters_can_invite"
+                case postersCanAddBirthdays = "posters_can_add_birthdays"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedMember`.
+        public struct FeedMember: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedMember/user_id`.
+            public var userId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedMember/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedMember/avatar_url`.
+            public var avatarUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedMember/role`.
+            public var role: Components.Schemas.FeedRole
+            /// - Remark: Generated from `#/components/schemas/FeedMember/joined_at`.
+            public var joinedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/FeedMember/last_posted_at`.
+            public var lastPostedAt: Foundation.Date?
+            /// Creates a new `FeedMember`.
+            ///
+            /// - Parameters:
+            ///   - userId:
+            ///   - displayName:
+            ///   - avatarUrl:
+            ///   - role:
+            ///   - joinedAt:
+            ///   - lastPostedAt:
+            public init(
+                userId: Components.Schemas.Id,
+                displayName: Swift.String,
+                avatarUrl: Swift.String? = nil,
+                role: Components.Schemas.FeedRole,
+                joinedAt: Foundation.Date? = nil,
+                lastPostedAt: Foundation.Date? = nil
+            ) {
+                self.userId = userId
+                self.displayName = displayName
+                self.avatarUrl = avatarUrl
+                self.role = role
+                self.joinedAt = joinedAt
+                self.lastPostedAt = lastPostedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userId = "user_id"
+                case displayName = "display_name"
+                case avatarUrl = "avatar_url"
+                case role
+                case joinedAt = "joined_at"
+                case lastPostedAt = "last_posted_at"
+            }
+        }
+        /// `join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.
+        ///
+        /// - Remark: Generated from `#/components/schemas/FeedInvitePurpose`.
+        @frozen public enum FeedInvitePurpose: String, Codable, Hashable, Sendable, CaseIterable {
+            case join = "join"
+            case subscribe = "subscribe"
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedInviteCreate`.
+        public struct FeedInviteCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedInviteCreate/purpose`.
+            public var purpose: Components.Schemas.FeedInvitePurpose
+            /// null = unlimited
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteCreate/max_uses`.
+            public var maxUses: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FeedInviteCreate/expires_in_hours`.
+            public var expiresInHours: Swift.Int?
+            /// Shown to admins when approving a join request.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteCreate/note`.
+            public var note: Swift.String?
+            /// Creates a new `FeedInviteCreate`.
+            ///
+            /// - Parameters:
+            ///   - purpose:
+            ///   - maxUses: null = unlimited
+            ///   - expiresInHours:
+            ///   - note: Shown to admins when approving a join request.
+            public init(
+                purpose: Components.Schemas.FeedInvitePurpose,
+                maxUses: Swift.Int? = nil,
+                expiresInHours: Swift.Int? = nil,
+                note: Swift.String? = nil
+            ) {
+                self.purpose = purpose
+                self.maxUses = maxUses
+                self.expiresInHours = expiresInHours
+                self.note = note
+            }
+            public enum CodingKeys: String, CodingKey {
+                case purpose
+                case maxUses = "max_uses"
+                case expiresInHours = "expires_in_hours"
+                case note
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedInvite`.
+        public struct FeedInvite: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/purpose`.
+            public var purpose: Components.Schemas.FeedInvitePurpose
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/token`.
+            public var token: Swift.String
+            /// Short code for "Enter a code", shown as `KF7Q-M2XA`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/code`.
+            public var code: Swift.String
+            /// https://<web>/fi/<token>; also shown as QR.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/url`.
+            public var url: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/created_by_name`.
+            public var createdByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/max_uses`.
+            public var maxUses: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/uses`.
+            public var uses: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/note`.
+            public var note: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedInvite/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// Creates a new `FeedInvite`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - purpose:
+            ///   - token:
+            ///   - code: Short code for "Enter a code", shown as `KF7Q-M2XA`.
+            ///   - url: https://<web>/fi/<token>; also shown as QR.
+            ///   - createdByName:
+            ///   - maxUses:
+            ///   - uses:
+            ///   - note:
+            ///   - expiresAt:
+            public init(
+                id: Components.Schemas.Id,
+                purpose: Components.Schemas.FeedInvitePurpose,
+                token: Swift.String,
+                code: Swift.String,
+                url: Swift.String,
+                createdByName: Swift.String? = nil,
+                maxUses: Swift.Int? = nil,
+                uses: Swift.Int? = nil,
+                note: Swift.String? = nil,
+                expiresAt: Foundation.Date
+            ) {
+                self.id = id
+                self.purpose = purpose
+                self.token = token
+                self.code = code
+                self.url = url
+                self.createdByName = createdByName
+                self.maxUses = maxUses
+                self.uses = uses
+                self.note = note
+                self.expiresAt = expiresAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case purpose
+                case token
+                case code
+                case url
+                case createdByName = "created_by_name"
+                case maxUses = "max_uses"
+                case uses
+                case note
+                case expiresAt = "expires_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedInvitePreview`.
+        public struct FeedInvitePreview: Codable, Hashable, Sendable {
+            /// For `acceptFeedInvite` (also after a code lookup).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/token`.
+            public var token: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/purpose`.
+            public var purpose: Components.Schemas.FeedInvitePurpose
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/feed_name`.
+            public var feedName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/cover_url`.
+            public var coverUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/owner_name`.
+            public var ownerName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/invited_by_name`.
+            public var invitedByName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/member_count`.
+            public var memberCount: Swift.Int?
+            /// `join` only: the request waits for an admin.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/requires_approval`.
+            public var requiresApproval: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/already_member`.
+            public var alreadyMember: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/FramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/FramesPayload/subscription_status`.
+                public var subscriptionStatus: Components.Schemas.SubscriptionStatus?
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - subscriptionStatus:
+                public init(
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    subscriptionStatus: Components.Schemas.SubscriptionStatus? = nil
+                ) {
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.subscriptionStatus = subscriptionStatus
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case subscriptionStatus = "subscription_status"
+                }
+            }
+            /// `subscribe` only: the frames the caller manages (owner, admin or `change_settings`), and whether each already
+            /// has a live subscription to this feed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/frames`.
+            public typealias FramesPayload = [Components.Schemas.FeedInvitePreview.FramesPayloadPayload]
+            /// `subscribe` only: the frames the caller manages (owner, admin or `change_settings`), and whether each already
+            /// has a live subscription to this feed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInvitePreview/frames`.
+            public var frames: Components.Schemas.FeedInvitePreview.FramesPayload?
+            /// Creates a new `FeedInvitePreview`.
+            ///
+            /// - Parameters:
+            ///   - token: For `acceptFeedInvite` (also after a code lookup).
+            ///   - purpose:
+            ///   - feedName:
+            ///   - coverUrl:
+            ///   - ownerName:
+            ///   - invitedByName:
+            ///   - memberCount:
+            ///   - requiresApproval: `join` only: the request waits for an admin.
+            ///   - alreadyMember:
+            ///   - frames: `subscribe` only: the frames the caller manages (owner, admin or `change_settings`), and whether each already
+            public init(
+                token: Swift.String,
+                purpose: Components.Schemas.FeedInvitePurpose,
+                feedName: Swift.String,
+                coverUrl: Swift.String? = nil,
+                ownerName: Swift.String? = nil,
+                invitedByName: Swift.String,
+                memberCount: Swift.Int? = nil,
+                requiresApproval: Swift.Bool,
+                alreadyMember: Swift.Bool? = nil,
+                frames: Components.Schemas.FeedInvitePreview.FramesPayload? = nil
+            ) {
+                self.token = token
+                self.purpose = purpose
+                self.feedName = feedName
+                self.coverUrl = coverUrl
+                self.ownerName = ownerName
+                self.invitedByName = invitedByName
+                self.memberCount = memberCount
+                self.requiresApproval = requiresApproval
+                self.alreadyMember = alreadyMember
+                self.frames = frames
+            }
+            public enum CodingKeys: String, CodingKey {
+                case token
+                case purpose
+                case feedName = "feed_name"
+                case coverUrl = "cover_url"
+                case ownerName = "owner_name"
+                case invitedByName = "invited_by_name"
+                case memberCount = "member_count"
+                case requiresApproval = "requires_approval"
+                case alreadyMember = "already_member"
+                case frames
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedInviteAccept`.
+        public struct FeedInviteAccept: Codable, Hashable, Sendable {
+            /// `subscribe` invites (required there): the frames to subscribe.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteAccept/frame_ids`.
+            public var frameIds: [Components.Schemas.Id]?
+            /// - Remark: Generated from `#/components/schemas/FeedInviteAccept/history`.
+            public var history: Components.Schemas.SubscriptionHistory?
+            /// Required with `history: last_n`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteAccept/history_count`.
+            public var historyCount: Swift.Int?
+            /// Show the feed's birthday people on the frames.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteAccept/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// Creates a new `FeedInviteAccept`.
+            ///
+            /// - Parameters:
+            ///   - frameIds: `subscribe` invites (required there): the frames to subscribe.
+            ///   - history:
+            ///   - historyCount: Required with `history: last_n`.
+            ///   - birthdays: Show the feed's birthday people on the frames.
+            public init(
+                frameIds: [Components.Schemas.Id]? = nil,
+                history: Components.Schemas.SubscriptionHistory? = nil,
+                historyCount: Swift.Int? = nil,
+                birthdays: Swift.Bool? = nil
+            ) {
+                self.frameIds = frameIds
+                self.history = history
+                self.historyCount = historyCount
+                self.birthdays = birthdays
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frameIds = "frame_ids"
+                case history
+                case historyCount = "history_count"
+                case birthdays
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedInviteResult`.
+        public struct FeedInviteResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedInviteResult/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case joined = "joined"
+                case pending = "pending"
+                case alreadyMember = "already_member"
+                case subscribed = "subscribed"
+            }
+            /// - Remark: Generated from `#/components/schemas/FeedInviteResult/status`.
+            public var status: Components.Schemas.FeedInviteResult.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/FeedInviteResult/feed`.
+            public var feed: Components.Schemas.FeedSummary
+            /// - Remark: Generated from `#/components/schemas/FeedInviteResult/join_request_id`.
+            public var joinRequestId: Components.Schemas.Id?
+            /// `subscribed`: one per requested frame (existing live subscriptions are returned as they are).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedInviteResult/subscriptions`.
+            public var subscriptions: [Components.Schemas.Subscription]?
+            /// Creates a new `FeedInviteResult`.
+            ///
+            /// - Parameters:
+            ///   - status:
+            ///   - feed:
+            ///   - joinRequestId:
+            ///   - subscriptions: `subscribed`: one per requested frame (existing live subscriptions are returned as they are).
+            public init(
+                status: Components.Schemas.FeedInviteResult.StatusPayload,
+                feed: Components.Schemas.FeedSummary,
+                joinRequestId: Components.Schemas.Id? = nil,
+                subscriptions: [Components.Schemas.Subscription]? = nil
+            ) {
+                self.status = status
+                self.feed = feed
+                self.joinRequestId = joinRequestId
+                self.subscriptions = subscriptions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case status
+                case feed
+                case joinRequestId = "join_request_id"
+                case subscriptions
+            }
+        }
+        /// `pending`: waiting for a feed admin. `active`: posts are placed on the frame. `paused`: paused by the frame
+        /// side; the feed's placements are kept but not shown. `rejected`: declined by a feed admin. `removed`: ended
+        /// (see `removed_reason`). Rejected and removed subscriptions are listed for 30 days.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/SubscriptionStatus`.
+        @frozen public enum SubscriptionStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case pending = "pending"
+            case active = "active"
+            case paused = "paused"
+            case rejected = "rejected"
+            case removed = "removed"
+        }
+        /// What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+        /// `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+        /// or trims.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/SubscriptionHistory`.
+        @frozen public enum SubscriptionHistory: String, Codable, Hashable, Sendable, CaseIterable {
+            case none = "none"
+            case lastN = "last_n"
+            case all = "all"
+        }
+        /// - Remark: Generated from `#/components/schemas/SubscriptionRequest`.
+        public struct SubscriptionRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRequest/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRequest/history`.
+            public var history: Components.Schemas.SubscriptionHistory?
+            /// Required with `history: last_n`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRequest/history_count`.
+            public var historyCount: Swift.Int?
+            /// Show the feed's birthday people on the frame.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionRequest/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// Creates a new `SubscriptionRequest`.
+            ///
+            /// - Parameters:
+            ///   - frameId:
+            ///   - history:
+            ///   - historyCount: Required with `history: last_n`.
+            ///   - birthdays: Show the feed's birthday people on the frame.
+            public init(
+                frameId: Components.Schemas.Id,
+                history: Components.Schemas.SubscriptionHistory? = nil,
+                historyCount: Swift.Int? = nil,
+                birthdays: Swift.Bool? = nil
+            ) {
+                self.frameId = frameId
+                self.history = history
+                self.historyCount = historyCount
+                self.birthdays = birthdays
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frameId = "frame_id"
+                case history
+                case historyCount = "history_count"
+                case birthdays
+            }
+        }
+        /// At least one field. Omitting `history` keeps the history option (and starts no backfill or trim).
+        ///
+        /// - Remark: Generated from `#/components/schemas/SubscriptionUpdate`.
+        public struct SubscriptionUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SubscriptionUpdate/history`.
+            public var history: Components.Schemas.SubscriptionHistory?
+            /// Required with `history: last_n`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionUpdate/history_count`.
+            public var historyCount: Swift.Int?
+            /// Show the feed's birthday people on the frame (a `birthdays` change follows).
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionUpdate/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// Creates a new `SubscriptionUpdate`.
+            ///
+            /// - Parameters:
+            ///   - history:
+            ///   - historyCount: Required with `history: last_n`.
+            ///   - birthdays: Show the feed's birthday people on the frame (a `birthdays` change follows).
+            public init(
+                history: Components.Schemas.SubscriptionHistory? = nil,
+                historyCount: Swift.Int? = nil,
+                birthdays: Swift.Bool? = nil
+            ) {
+                self.history = history
+                self.historyCount = historyCount
+                self.birthdays = birthdays
+            }
+            public enum CodingKeys: String, CodingKey {
+                case history
+                case historyCount = "history_count"
+                case birthdays
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/Subscription`.
+        public struct Subscription: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Subscription/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/Subscription/status`.
+            public var status: Components.Schemas.SubscriptionStatus
+            /// - Remark: Generated from `#/components/schemas/Subscription/history`.
+            public var history: Components.Schemas.SubscriptionHistory
+            /// - Remark: Generated from `#/components/schemas/Subscription/history_count`.
+            public var historyCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/Subscription/feed`.
+            public struct FeedPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Subscription/feed/id`.
+                public var id: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Subscription/feed/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/Subscription/feed/cover_url`.
+                public var coverUrl: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/Subscription/feed/member_count`.
+                public var memberCount: Swift.Int?
+                /// Owner first; so the frame side knows whom it subscribes to.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Subscription/feed/admin_names`.
+                public var adminNames: [Swift.String]?
+                /// Creates a new `FeedPayload`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - name:
+                ///   - coverUrl:
+                ///   - memberCount:
+                ///   - adminNames: Owner first; so the frame side knows whom it subscribes to.
+                public init(
+                    id: Components.Schemas.Id,
+                    name: Swift.String,
+                    coverUrl: Swift.String? = nil,
+                    memberCount: Swift.Int? = nil,
+                    adminNames: [Swift.String]? = nil
+                ) {
+                    self.id = id
+                    self.name = name
+                    self.coverUrl = coverUrl
+                    self.memberCount = memberCount
+                    self.adminNames = adminNames
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case id
+                    case name
+                    case coverUrl = "cover_url"
+                    case memberCount = "member_count"
+                    case adminNames = "admin_names"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/Subscription/feed`.
+            public var feed: Components.Schemas.Subscription.FeedPayload
+            /// - Remark: Generated from `#/components/schemas/Subscription/frame`.
+            public struct FramePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Subscription/frame/id`.
+                public var id: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/Subscription/frame/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/Subscription/frame/location`.
+                public var location: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/Subscription/frame/online`.
+                public var online: Swift.Bool?
+                /// - Remark: Generated from `#/components/schemas/Subscription/frame/last_seen_at`.
+                public var lastSeenAt: Foundation.Date?
+                /// The frame app shows birthdays (its latest heartbeat lists `birthdays`); false means "update the frame app".
+                ///
+                /// - Remark: Generated from `#/components/schemas/Subscription/frame/birthdays_supported`.
+                public var birthdaysSupported: Swift.Bool?
+                /// Creates a new `FramePayload`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - name:
+                ///   - location:
+                ///   - online:
+                ///   - lastSeenAt:
+                ///   - birthdaysSupported: The frame app shows birthdays (its latest heartbeat lists `birthdays`); false means "update the frame app".
+                public init(
+                    id: Components.Schemas.Id,
+                    name: Swift.String,
+                    location: Swift.String? = nil,
+                    online: Swift.Bool? = nil,
+                    lastSeenAt: Foundation.Date? = nil,
+                    birthdaysSupported: Swift.Bool? = nil
+                ) {
+                    self.id = id
+                    self.name = name
+                    self.location = location
+                    self.online = online
+                    self.lastSeenAt = lastSeenAt
+                    self.birthdaysSupported = birthdaysSupported
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case id
+                    case name
+                    case location
+                    case online
+                    case lastSeenAt = "last_seen_at"
+                    case birthdaysSupported = "birthdays_supported"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/Subscription/frame`.
+            public var frame: Components.Schemas.Subscription.FramePayload
+            /// Feed owner/admins and frame managers only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/requested_by_name`.
+            public var requestedByName: Swift.String?
+            /// Created through a `subscribe` invite.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/via_invite`.
+            public var viaInvite: Swift.Bool?
+            /// The feed's birthday people are shown on the frame while the subscription is `active` (default true; frame side).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/birthdays`.
+            public var birthdays: Swift.Bool?
+            /// Approved birthday people of the feed (so frame managers outside the feed see how many).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/birthday_count`.
+            public var birthdayCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/Subscription/created_at`.
+            public var createdAt: Foundation.Date
+            /// First activation; the history boundary.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/activated_at`.
+            public var activatedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/Subscription/paused_at`.
+            public var pausedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/Subscription/ended_at`.
+            public var endedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/Subscription/removed_reason`.
+            @frozen public enum RemovedReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case unsubscribed = "unsubscribed"
+                case removedByFeed = "removed_by_feed"
+                case frameRemoved = "frame_removed"
+                case feedDeleted = "feed_deleted"
+                case withdrawn = "withdrawn"
+            }
+            /// - Remark: Generated from `#/components/schemas/Subscription/removed_reason`.
+            public var removedReason: Components.Schemas.Subscription.RemovedReasonPayload?
+            /// Progress of the history backfill or trim after activation, a history change or a resume.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/backfill`.
+            public struct BackfillPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Subscription/backfill/state`.
+                @frozen public enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case idle = "idle"
+                    case queued = "queued"
+                    case running = "running"
+                }
+                /// - Remark: Generated from `#/components/schemas/Subscription/backfill/state`.
+                public var state: Components.Schemas.Subscription.BackfillPayload.StatePayload?
+                /// - Remark: Generated from `#/components/schemas/Subscription/backfill/placed`.
+                public var placed: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/Subscription/backfill/total`.
+                public var total: Swift.Int?
+                /// Creates a new `BackfillPayload`.
+                ///
+                /// - Parameters:
+                ///   - state:
+                ///   - placed:
+                ///   - total:
+                public init(
+                    state: Components.Schemas.Subscription.BackfillPayload.StatePayload? = nil,
+                    placed: Swift.Int? = nil,
+                    total: Swift.Int? = nil
+                ) {
+                    self.state = state
+                    self.placed = placed
+                    self.total = total
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case state
+                    case placed
+                    case total
+                }
+            }
+            /// Progress of the history backfill or trim after activation, a history change or a resume.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/backfill`.
+            public var backfill: Components.Schemas.Subscription.BackfillPayload?
+            /// Size of what the current history option places on this frame, for the subscribe dialog.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/estimate`.
+            public struct EstimatePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Subscription/estimate/items`.
+                public var items: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/Subscription/estimate/bytes`.
+                public var bytes: Swift.Int?
+                /// Creates a new `EstimatePayload`.
+                ///
+                /// - Parameters:
+                ///   - items:
+                ///   - bytes:
+                public init(
+                    items: Swift.Int? = nil,
+                    bytes: Swift.Int? = nil
+                ) {
+                    self.items = items
+                    self.bytes = bytes
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case items
+                    case bytes
+                }
+            }
+            /// Size of what the current history option places on this frame, for the subscribe dialog.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/estimate`.
+            public var estimate: Components.Schemas.Subscription.EstimatePayload?
+            /// The caller may pause, resume, change history and unsubscribe (frame side).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/can_manage`.
+            public var canManage: Swift.Bool?
+            /// The caller may approve, reject and remove (feed side).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/can_decide`.
+            public var canDecide: Swift.Bool?
+            /// Creates a new `Subscription`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - status:
+            ///   - history:
+            ///   - historyCount:
+            ///   - feed:
+            ///   - frame:
+            ///   - requestedByName: Feed owner/admins and frame managers only.
+            ///   - viaInvite: Created through a `subscribe` invite.
+            ///   - birthdays: The feed's birthday people are shown on the frame while the subscription is `active` (default true; frame side).
+            ///   - birthdayCount: Approved birthday people of the feed (so frame managers outside the feed see how many).
+            ///   - createdAt:
+            ///   - activatedAt: First activation; the history boundary.
+            ///   - pausedAt:
+            ///   - endedAt:
+            ///   - removedReason:
+            ///   - backfill: Progress of the history backfill or trim after activation, a history change or a resume.
+            ///   - estimate: Size of what the current history option places on this frame, for the subscribe dialog.
+            ///   - canManage: The caller may pause, resume, change history and unsubscribe (frame side).
+            ///   - canDecide: The caller may approve, reject and remove (feed side).
+            public init(
+                id: Components.Schemas.Id,
+                status: Components.Schemas.SubscriptionStatus,
+                history: Components.Schemas.SubscriptionHistory,
+                historyCount: Swift.Int? = nil,
+                feed: Components.Schemas.Subscription.FeedPayload,
+                frame: Components.Schemas.Subscription.FramePayload,
+                requestedByName: Swift.String? = nil,
+                viaInvite: Swift.Bool? = nil,
+                birthdays: Swift.Bool? = nil,
+                birthdayCount: Swift.Int? = nil,
+                createdAt: Foundation.Date,
+                activatedAt: Foundation.Date? = nil,
+                pausedAt: Foundation.Date? = nil,
+                endedAt: Foundation.Date? = nil,
+                removedReason: Components.Schemas.Subscription.RemovedReasonPayload? = nil,
+                backfill: Components.Schemas.Subscription.BackfillPayload? = nil,
+                estimate: Components.Schemas.Subscription.EstimatePayload? = nil,
+                canManage: Swift.Bool? = nil,
+                canDecide: Swift.Bool? = nil
+            ) {
+                self.id = id
+                self.status = status
+                self.history = history
+                self.historyCount = historyCount
+                self.feed = feed
+                self.frame = frame
+                self.requestedByName = requestedByName
+                self.viaInvite = viaInvite
+                self.birthdays = birthdays
+                self.birthdayCount = birthdayCount
+                self.createdAt = createdAt
+                self.activatedAt = activatedAt
+                self.pausedAt = pausedAt
+                self.endedAt = endedAt
+                self.removedReason = removedReason
+                self.backfill = backfill
+                self.estimate = estimate
+                self.canManage = canManage
+                self.canDecide = canDecide
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case status
+                case history
+                case historyCount = "history_count"
+                case feed
+                case frame
+                case requestedByName = "requested_by_name"
+                case viaInvite = "via_invite"
+                case birthdays
+                case birthdayCount = "birthday_count"
+                case createdAt = "created_at"
+                case activatedAt = "activated_at"
+                case pausedAt = "paused_at"
+                case endedAt = "ended_at"
+                case removedReason = "removed_reason"
+                case backfill
+                case estimate
+                case canManage = "can_manage"
+                case canDecide = "can_decide"
+            }
+        }
+        /// Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
+        /// delivered/seen when every item of the post is. Paused frames are only in `paused`.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary`.
+        public struct FeedReceiptSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary/frames`.
+            public var frames: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary/delivered`.
+            public var delivered: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary/seen`.
+            public var seen: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary/awaiting_approval`.
+            public var awaitingApproval: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary/paused`.
+            public var paused: Swift.Int?
+            /// Frames whose moderation rejected the post or that deleted it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedReceiptSummary/removed`.
+            public var removed: Swift.Int?
+            /// Creates a new `FeedReceiptSummary`.
+            ///
+            /// - Parameters:
+            ///   - frames:
+            ///   - delivered:
+            ///   - seen:
+            ///   - awaitingApproval:
+            ///   - paused:
+            ///   - removed: Frames whose moderation rejected the post or that deleted it.
+            public init(
+                frames: Swift.Int,
+                delivered: Swift.Int,
+                seen: Swift.Int,
+                awaitingApproval: Swift.Int? = nil,
+                paused: Swift.Int? = nil,
+                removed: Swift.Int? = nil
+            ) {
+                self.frames = frames
+                self.delivered = delivered
+                self.seen = seen
+                self.awaitingApproval = awaitingApproval
+                self.paused = paused
+                self.removed = removed
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frames
+                case delivered
+                case seen
+                case awaitingApproval = "awaiting_approval"
+                case paused
+                case removed
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedReaction`.
+        public struct FeedReaction: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/frame_name`.
+            public var frameName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/item_id`.
+            public var itemId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/placement_id`.
+            public var placementId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/reaction`.
+            public var reaction: Components.Schemas.Reaction?
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/replies`.
+            public var replies: [Components.Schemas.ReplyPreset]?
+            /// - Remark: Generated from `#/components/schemas/FeedReaction/at`.
+            public var at: Foundation.Date?
+            /// Creates a new `FeedReaction`.
+            ///
+            /// - Parameters:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - itemId:
+            ///   - placementId:
+            ///   - reaction:
+            ///   - replies:
+            ///   - at:
+            public init(
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                itemId: Components.Schemas.Id,
+                placementId: Components.Schemas.Id,
+                reaction: Components.Schemas.Reaction? = nil,
+                replies: [Components.Schemas.ReplyPreset]? = nil,
+                at: Foundation.Date? = nil
+            ) {
+                self.frameId = frameId
+                self.frameName = frameName
+                self.itemId = itemId
+                self.placementId = placementId
+                self.reaction = reaction
+                self.replies = replies
+                self.at = at
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case itemId = "item_id"
+                case placementId = "placement_id"
+                case reaction
+                case replies
+                case at
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedPost`.
+        public struct FeedPost: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedPost/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedPost/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedPost/poster`.
+            public struct PosterPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FeedPost/poster/user_id`.
+                public var userId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FeedPost/poster/display_name`.
+                public var displayName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FeedPost/poster/avatar_url`.
+                public var avatarUrl: Swift.String?
+                /// Creates a new `PosterPayload`.
+                ///
+                /// - Parameters:
+                ///   - userId:
+                ///   - displayName:
+                ///   - avatarUrl:
+                public init(
+                    userId: Components.Schemas.Id,
+                    displayName: Swift.String,
+                    avatarUrl: Swift.String? = nil
+                ) {
+                    self.userId = userId
+                    self.displayName = displayName
+                    self.avatarUrl = avatarUrl
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case userId = "user_id"
+                    case displayName = "display_name"
+                    case avatarUrl = "avatar_url"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FeedPost/poster`.
+            public var poster: Components.Schemas.FeedPost.PosterPayload
+            /// The poster's send (own posts only).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/send_id`.
+            public var sendId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/FeedPost/created_at`.
+            public var createdAt: Foundation.Date
+            /// Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/via`.
+            public var via: Components.Schemas.ItemVia?
+            /// Live items in send order.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/items`.
+            public var items: [Components.Schemas.Item]
+            /// Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/receipts`.
+            public var receipts: Components.Schemas.FeedReceiptSummary?
+            /// Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPost/reactions`.
+            public var reactions: [Components.Schemas.FeedReaction]?
+            /// Creates a new `FeedPost`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - feedId:
+            ///   - poster:
+            ///   - sendId: The poster's send (own posts only).
+            ///   - createdAt:
+            ///   - via: Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".
+            ///   - items: Live items in send order.
+            ///   - receipts: Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+            ///   - reactions: Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+            public init(
+                id: Components.Schemas.Id,
+                feedId: Components.Schemas.Id,
+                poster: Components.Schemas.FeedPost.PosterPayload,
+                sendId: Components.Schemas.Id? = nil,
+                createdAt: Foundation.Date,
+                via: Components.Schemas.ItemVia? = nil,
+                items: [Components.Schemas.Item],
+                receipts: Components.Schemas.FeedReceiptSummary? = nil,
+                reactions: [Components.Schemas.FeedReaction]? = nil
+            ) {
+                self.id = id
+                self.feedId = feedId
+                self.poster = poster
+                self.sendId = sendId
+                self.createdAt = createdAt
+                self.via = via
+                self.items = items
+                self.receipts = receipts
+                self.reactions = reactions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case feedId = "feed_id"
+                case poster
+                case sendId = "send_id"
+                case createdAt = "created_at"
+                case via
+                case items
+                case receipts
+                case reactions
+            }
+        }
+        /// One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
+        /// `suspended` (subscription paused) or `removed` (rejected or deleted on that frame).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FeedDeliveryStatus`.
+        @frozen public enum FeedDeliveryStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case pending = "pending"
+            case ready = "ready"
+            case delivered = "delivered"
+            case seen = "seen"
+            case failed = "failed"
+            case awaitingApproval = "awaiting_approval"
+            case suspended = "suspended"
+            case removed = "removed"
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedPostReceipts`.
+        public struct FeedPostReceipts: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/post_id`.
+            public var postId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/summary`.
+            public var summary: Components.Schemas.FeedReceiptSummary
+            /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload`.
+            public struct FramesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/subscription_id`.
+                public var subscriptionId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/frame_name`.
+                public var frameName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/frame_location`.
+                public var frameLocation: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/online`.
+                public var online: Swift.Bool?
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/last_seen_at`.
+                public var lastSeenAt: Foundation.Date?
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/subscription_status`.
+                @frozen public enum SubscriptionStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case active = "active"
+                    case paused = "paused"
+                }
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/subscription_status`.
+                public var subscriptionStatus: Components.Schemas.FeedPostReceipts.FramesPayloadPayload.SubscriptionStatusPayload
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload`.
+                public struct ItemsPayloadPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/item_id`.
+                    public var itemId: Components.Schemas.Id
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/placement_id`.
+                    public var placementId: Components.Schemas.Id?
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/status`.
+                    public var status: Components.Schemas.FeedDeliveryStatus
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/delivered_at`.
+                    public var deliveredAt: Foundation.Date?
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/seen_at`.
+                    public var seenAt: Foundation.Date?
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/reaction`.
+                    public var reaction: Components.Schemas.Reaction?
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/RepliesPayload`.
+                    public struct RepliesPayloadPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/RepliesPayload/preset`.
+                        public var preset: Components.Schemas.ReplyPreset?
+                        /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/RepliesPayload/at`.
+                        public var at: Foundation.Date?
+                        /// Creates a new `RepliesPayloadPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - preset:
+                        ///   - at:
+                        public init(
+                            preset: Components.Schemas.ReplyPreset? = nil,
+                            at: Foundation.Date? = nil
+                        ) {
+                            self.preset = preset
+                            self.at = at
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case preset
+                            case at
+                        }
+                    }
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/replies`.
+                    public typealias RepliesPayload = [Components.Schemas.FeedPostReceipts.FramesPayloadPayload.ItemsPayloadPayload.RepliesPayloadPayload]
+                    /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/ItemsPayload/replies`.
+                    public var replies: Components.Schemas.FeedPostReceipts.FramesPayloadPayload.ItemsPayloadPayload.RepliesPayload?
+                    /// Creates a new `ItemsPayloadPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - itemId:
+                    ///   - placementId:
+                    ///   - status:
+                    ///   - deliveredAt:
+                    ///   - seenAt:
+                    ///   - reaction:
+                    ///   - replies:
+                    public init(
+                        itemId: Components.Schemas.Id,
+                        placementId: Components.Schemas.Id? = nil,
+                        status: Components.Schemas.FeedDeliveryStatus,
+                        deliveredAt: Foundation.Date? = nil,
+                        seenAt: Foundation.Date? = nil,
+                        reaction: Components.Schemas.Reaction? = nil,
+                        replies: Components.Schemas.FeedPostReceipts.FramesPayloadPayload.ItemsPayloadPayload.RepliesPayload? = nil
+                    ) {
+                        self.itemId = itemId
+                        self.placementId = placementId
+                        self.status = status
+                        self.deliveredAt = deliveredAt
+                        self.seenAt = seenAt
+                        self.reaction = reaction
+                        self.replies = replies
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case itemId = "item_id"
+                        case placementId = "placement_id"
+                        case status
+                        case deliveredAt = "delivered_at"
+                        case seenAt = "seen_at"
+                        case reaction
+                        case replies
+                    }
+                }
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/items`.
+                public typealias ItemsPayload = [Components.Schemas.FeedPostReceipts.FramesPayloadPayload.ItemsPayloadPayload]
+                /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/FramesPayload/items`.
+                public var items: Components.Schemas.FeedPostReceipts.FramesPayloadPayload.ItemsPayload
+                /// Creates a new `FramesPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                ///   - frameId:
+                ///   - frameName:
+                ///   - frameLocation:
+                ///   - online:
+                ///   - lastSeenAt:
+                ///   - subscriptionStatus:
+                ///   - items:
+                public init(
+                    subscriptionId: Components.Schemas.Id,
+                    frameId: Components.Schemas.Id,
+                    frameName: Swift.String,
+                    frameLocation: Swift.String? = nil,
+                    online: Swift.Bool? = nil,
+                    lastSeenAt: Foundation.Date? = nil,
+                    subscriptionStatus: Components.Schemas.FeedPostReceipts.FramesPayloadPayload.SubscriptionStatusPayload,
+                    items: Components.Schemas.FeedPostReceipts.FramesPayloadPayload.ItemsPayload
+                ) {
+                    self.subscriptionId = subscriptionId
+                    self.frameId = frameId
+                    self.frameName = frameName
+                    self.frameLocation = frameLocation
+                    self.online = online
+                    self.lastSeenAt = lastSeenAt
+                    self.subscriptionStatus = subscriptionStatus
+                    self.items = items
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case subscriptionId = "subscription_id"
+                    case frameId = "frame_id"
+                    case frameName = "frame_name"
+                    case frameLocation = "frame_location"
+                    case online
+                    case lastSeenAt = "last_seen_at"
+                    case subscriptionStatus = "subscription_status"
+                    case items
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/frames`.
+            public typealias FramesPayload = [Components.Schemas.FeedPostReceipts.FramesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/FeedPostReceipts/frames`.
+            public var frames: Components.Schemas.FeedPostReceipts.FramesPayload
+            /// Creates a new `FeedPostReceipts`.
+            ///
+            /// - Parameters:
+            ///   - postId:
+            ///   - summary:
+            ///   - frames:
+            public init(
+                postId: Components.Schemas.Id,
+                summary: Components.Schemas.FeedReceiptSummary,
+                frames: Components.Schemas.FeedPostReceipts.FramesPayload
+            ) {
+                self.postId = postId
+                self.summary = summary
+                self.frames = frames
+            }
+            public enum CodingKeys: String, CodingKey {
+                case postId = "post_id"
+                case summary
+                case frames
+            }
+        }
+        /// One feed a send was posted to.
+        ///
+        /// - Remark: Generated from `#/components/schemas/SendFeed`.
+        public struct SendFeed: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SendFeed/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/SendFeed/feed_name`.
+            public var feedName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/SendFeed/post_id`.
+            public var postId: Components.Schemas.Id
+            /// The post was removed from the feed (unsend or admin).
+            ///
+            /// - Remark: Generated from `#/components/schemas/SendFeed/removed`.
+            public var removed: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/SendFeed/summary`.
+            public var summary: Components.Schemas.FeedReceiptSummary?
+            /// Creates a new `SendFeed`.
+            ///
+            /// - Parameters:
+            ///   - feedId:
+            ///   - feedName:
+            ///   - postId:
+            ///   - removed: The post was removed from the feed (unsend or admin).
+            ///   - summary:
+            public init(
+                feedId: Components.Schemas.Id,
+                feedName: Swift.String,
+                postId: Components.Schemas.Id,
+                removed: Swift.Bool? = nil,
+                summary: Components.Schemas.FeedReceiptSummary? = nil
+            ) {
+                self.feedId = feedId
+                self.feedName = feedName
+                self.postId = postId
+                self.removed = removed
+                self.summary = summary
+            }
+            public enum CodingKeys: String, CodingKey {
+                case feedId = "feed_id"
+                case feedName = "feed_name"
+                case postId = "post_id"
+                case removed
+                case summary
+            }
+        }
+        /// `pending`: a poster's suggestion waiting for the feed's owner or an admin. `approved`: on the list and on
+        /// frames. `rejected`: declined; listed for the suggester and admins for 30 days.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/BirthdayStatus`.
+        @frozen public enum BirthdayStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case pending = "pending"
+            case approved = "approved"
+            case rejected = "rejected"
+        }
+        /// A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
+        /// a feed member.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/BirthdayPerson`.
+        public struct BirthdayPerson: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/status`.
+            public var status: Components.Schemas.BirthdayStatus
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/day`.
+            public var day: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/month`.
+            public var month: Swift.Int
+            /// Null when unknown or when the caller may not see it: shown to owner/admins, whoever added the entry and
+            /// the linked member; to other members only with `show_age`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/birth_year`.
+            public var birthYear: Swift.Int?
+            /// Frames and notifications show the age (needs `birth_year`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/show_age`.
+            public var showAge: Swift.Bool
+            /// 256x256 WebP, public at an unguessable URL like avatars. The uploaded photo, else the linked member's avatar.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/photo_url`.
+            public var photoUrl: Swift.String?
+            /// `photo_url` is an uploaded photo, not the linked member's avatar.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/has_own_photo`.
+            public var hasOwnPhoto: Swift.Bool?
+            /// The linked feed member; cleared when they leave the feed or delete their account.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/user_id`.
+            public var userId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/linked_member_name`.
+            public var linkedMemberName: Swift.String?
+            /// Null when that account is gone.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/created_by_name`.
+            public var createdByName: Swift.String?
+            /// Account id of whoever added or suggested it ("added by me"); null when that account is gone.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/created_by_id`.
+            public var createdById: Components.Schemas.Id?
+            /// Created as a poster's suggestion (also after approval).
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/suggested`.
+            public var suggested: Swift.Bool?
+            /// Suggestions only; owner/admins and the suggester.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/decided_by_name`.
+            public var decidedByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/decided_at`.
+            public var decidedAt: Foundation.Date?
+            /// The next occurrence on or after today in the caller's time zone (`User.timezone`); 29 February becomes 28 February in non-leap years.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/next_birthday`.
+            public var nextBirthday: Swift.String?
+            /// Age on `next_birthday`, when `birth_year` is visible to the caller.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/turns`.
+            public var turns: Swift.Int?
+            /// Frames that sent a greeting for today's occurrence (0 on other days).
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/greetings_today`.
+            public var greetingsToday: Swift.Int?
+            /// The caller may change this entry (some fields only, for the linked member).
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/can_edit`.
+            public var canEdit: Swift.Bool?
+            /// The caller may approve or reject it (pending, owner/admin).
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/can_decide`.
+            public var canDecide: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/BirthdayPerson/updated_at`.
+            public var updatedAt: Foundation.Date?
+            /// Creates a new `BirthdayPerson`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - feedId:
+            ///   - status:
+            ///   - displayName:
+            ///   - day:
+            ///   - month:
+            ///   - birthYear: Null when unknown or when the caller may not see it: shown to owner/admins, whoever added the entry and
+            ///   - showAge: Frames and notifications show the age (needs `birth_year`).
+            ///   - photoUrl: 256x256 WebP, public at an unguessable URL like avatars. The uploaded photo, else the linked member's avatar.
+            ///   - hasOwnPhoto: `photo_url` is an uploaded photo, not the linked member's avatar.
+            ///   - userId: The linked feed member; cleared when they leave the feed or delete their account.
+            ///   - linkedMemberName:
+            ///   - createdByName: Null when that account is gone.
+            ///   - createdById: Account id of whoever added or suggested it ("added by me"); null when that account is gone.
+            ///   - suggested: Created as a poster's suggestion (also after approval).
+            ///   - decidedByName: Suggestions only; owner/admins and the suggester.
+            ///   - decidedAt:
+            ///   - nextBirthday: The next occurrence on or after today in the caller's time zone (`User.timezone`); 29 February becomes 28 February in non-leap years.
+            ///   - turns: Age on `next_birthday`, when `birth_year` is visible to the caller.
+            ///   - greetingsToday: Frames that sent a greeting for today's occurrence (0 on other days).
+            ///   - canEdit: The caller may change this entry (some fields only, for the linked member).
+            ///   - canDecide: The caller may approve or reject it (pending, owner/admin).
+            ///   - createdAt:
+            ///   - updatedAt:
+            public init(
+                id: Components.Schemas.Id,
+                feedId: Components.Schemas.Id,
+                status: Components.Schemas.BirthdayStatus,
+                displayName: Swift.String,
+                day: Swift.Int,
+                month: Swift.Int,
+                birthYear: Swift.Int? = nil,
+                showAge: Swift.Bool,
+                photoUrl: Swift.String? = nil,
+                hasOwnPhoto: Swift.Bool? = nil,
+                userId: Components.Schemas.Id? = nil,
+                linkedMemberName: Swift.String? = nil,
+                createdByName: Swift.String? = nil,
+                createdById: Components.Schemas.Id? = nil,
+                suggested: Swift.Bool? = nil,
+                decidedByName: Swift.String? = nil,
+                decidedAt: Foundation.Date? = nil,
+                nextBirthday: Swift.String? = nil,
+                turns: Swift.Int? = nil,
+                greetingsToday: Swift.Int? = nil,
+                canEdit: Swift.Bool? = nil,
+                canDecide: Swift.Bool? = nil,
+                createdAt: Foundation.Date,
+                updatedAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.feedId = feedId
+                self.status = status
+                self.displayName = displayName
+                self.day = day
+                self.month = month
+                self.birthYear = birthYear
+                self.showAge = showAge
+                self.photoUrl = photoUrl
+                self.hasOwnPhoto = hasOwnPhoto
+                self.userId = userId
+                self.linkedMemberName = linkedMemberName
+                self.createdByName = createdByName
+                self.createdById = createdById
+                self.suggested = suggested
+                self.decidedByName = decidedByName
+                self.decidedAt = decidedAt
+                self.nextBirthday = nextBirthday
+                self.turns = turns
+                self.greetingsToday = greetingsToday
+                self.canEdit = canEdit
+                self.canDecide = canDecide
+                self.createdAt = createdAt
+                self.updatedAt = updatedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case feedId = "feed_id"
+                case status
+                case displayName = "display_name"
+                case day
+                case month
+                case birthYear = "birth_year"
+                case showAge = "show_age"
+                case photoUrl = "photo_url"
+                case hasOwnPhoto = "has_own_photo"
+                case userId = "user_id"
+                case linkedMemberName = "linked_member_name"
+                case createdByName = "created_by_name"
+                case createdById = "created_by_id"
+                case suggested
+                case decidedByName = "decided_by_name"
+                case decidedAt = "decided_at"
+                case nextBirthday = "next_birthday"
+                case turns
+                case greetingsToday = "greetings_today"
+                case canEdit = "can_edit"
+                case canDecide = "can_decide"
+                case createdAt = "created_at"
+                case updatedAt = "updated_at"
+            }
+        }
+        /// `day`/`month` must form a real date (29 February is allowed, and with `birth_year` only in leap years).
+        /// `birth_year` from 1900 to the current year.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate`.
+        public struct BirthdayPersonCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate/day`.
+            public var day: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate/month`.
+            public var month: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate/birth_year`.
+            public var birthYear: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate/show_age`.
+            public var showAge: Swift.Bool?
+            /// Link to a member of this feed who has no entry yet ("Add my birthday" sends the caller's id).
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonCreate/user_id`.
+            public var userId: Components.Schemas.Id?
+            /// Creates a new `BirthdayPersonCreate`.
+            ///
+            /// - Parameters:
+            ///   - displayName:
+            ///   - day:
+            ///   - month:
+            ///   - birthYear:
+            ///   - showAge:
+            ///   - userId: Link to a member of this feed who has no entry yet ("Add my birthday" sends the caller's id).
+            public init(
+                displayName: Swift.String,
+                day: Swift.Int,
+                month: Swift.Int,
+                birthYear: Swift.Int? = nil,
+                showAge: Swift.Bool? = nil,
+                userId: Components.Schemas.Id? = nil
+            ) {
+                self.displayName = displayName
+                self.day = day
+                self.month = month
+                self.birthYear = birthYear
+                self.showAge = showAge
+                self.userId = userId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case displayName = "display_name"
+                case day
+                case month
+                case birthYear = "birth_year"
+                case showAge = "show_age"
+                case userId = "user_id"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate`.
+        public struct BirthdayPersonUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate/display_name`.
+            public var displayName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate/day`.
+            public var day: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate/month`.
+            public var month: Swift.Int?
+            /// null clears the year.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate/birth_year`.
+            public var birthYear: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate/show_age`.
+            public var showAge: Swift.Bool?
+            /// null unlinks.
+            ///
+            /// - Remark: Generated from `#/components/schemas/BirthdayPersonUpdate/user_id`.
+            public var userId: Components.Schemas.Id?
+            /// Creates a new `BirthdayPersonUpdate`.
+            ///
+            /// - Parameters:
+            ///   - displayName:
+            ///   - day:
+            ///   - month:
+            ///   - birthYear: null clears the year.
+            ///   - showAge:
+            ///   - userId: null unlinks.
+            public init(
+                displayName: Swift.String? = nil,
+                day: Swift.Int? = nil,
+                month: Swift.Int? = nil,
+                birthYear: Swift.Int? = nil,
+                showAge: Swift.Bool? = nil,
+                userId: Components.Schemas.Id? = nil
+            ) {
+                self.displayName = displayName
+                self.day = day
+                self.month = month
+                self.birthYear = birthYear
+                self.showAge = showAge
+                self.userId = userId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case displayName = "display_name"
+                case day
+                case month
+                case birthYear = "birth_year"
+                case showAge = "show_age"
+                case userId = "user_id"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/FeedPreferencesUpdate`.
+        public struct FeedPreferencesUpdate: Codable, Hashable, Sendable {
+            /// Morning notification and greetings for this feed's birthdays.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedPreferencesUpdate/birthday_notifications`.
+            public var birthdayNotifications: Swift.Bool?
+            /// Creates a new `FeedPreferencesUpdate`.
+            ///
+            /// - Parameters:
+            ///   - birthdayNotifications: Morning notification and greetings for this feed's birthdays.
+            public init(birthdayNotifications: Swift.Bool? = nil) {
+                self.birthdayNotifications = birthdayNotifications
+            }
+            public enum CodingKeys: String, CodingKey {
+                case birthdayNotifications = "birthday_notifications"
+            }
+        }
+        /// A frame said happy birthday to a person of this feed on their day. One per person, frame and date; recorded
+        /// in every feed that lists the person. Also the payload of the `birthday.greeting` websocket event.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting`.
+        public struct FeedBirthdayGreeting: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/feed_id`.
+            public var feedId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/birthday_id`.
+            public var birthdayId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/birthday_name`.
+            public var birthdayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// The frame's name when it sent the greeting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/frame_name`.
+            public var frameName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/frame_location`.
+            public var frameLocation: Swift.String?
+            /// The occurrence date (the frame's local date).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/date`.
+            public var date: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FeedBirthdayGreeting/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `FeedBirthdayGreeting`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - feedId:
+            ///   - birthdayId:
+            ///   - birthdayName:
+            ///   - frameId:
+            ///   - frameName: The frame's name when it sent the greeting.
+            ///   - frameLocation:
+            ///   - date: The occurrence date (the frame's local date).
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                feedId: Components.Schemas.Id,
+                birthdayId: Components.Schemas.Id,
+                birthdayName: Swift.String,
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                frameLocation: Swift.String? = nil,
+                date: Swift.String,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.feedId = feedId
+                self.birthdayId = birthdayId
+                self.birthdayName = birthdayName
+                self.frameId = frameId
+                self.frameName = frameName
+                self.frameLocation = frameLocation
+                self.date = date
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case feedId = "feed_id"
+                case birthdayId = "birthday_id"
+                case birthdayName = "birthday_name"
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case frameLocation = "frame_location"
+                case date
+                case createdAt = "created_at"
+            }
+        }
+        /// One person on the frame, merged across the frame's birthday subscriptions on normalized name + day + month
+        /// (docs/spec/birthdays.md §6.5). The frame computes today, countdowns and ages in its own time zone.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FrameBirthday`.
+        public struct FrameBirthday: Codable, Hashable, Sendable {
+            /// The primary entry (a `BirthdayPerson` id); use it for `deviceGreetBirthday`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/id`.
+            public var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/day`.
+            public var day: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/month`.
+            public var month: Swift.Int
+            /// Present only when the age may be shown (`show_age` on for every merged entry that has a year, and the
+            /// years agree). Absent otherwise: show no age.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/birth_year`.
+            public var birthYear: Swift.Int?
+            /// 256x256 WebP (public, unguessable, cacheable by URL).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/photo_url`.
+            public var photoUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/feed_ids`.
+            public var feedIds: [Components.Schemas.Id]
+            /// Every merged `BirthdayPerson` id.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameBirthday/birthday_ids`.
+            public var birthdayIds: [Components.Schemas.Id]
+            /// Creates a new `FrameBirthday`.
+            ///
+            /// - Parameters:
+            ///   - id: The primary entry (a `BirthdayPerson` id); use it for `deviceGreetBirthday`.
+            ///   - name:
+            ///   - day:
+            ///   - month:
+            ///   - birthYear: Present only when the age may be shown (`show_age` on for every merged entry that has a year, and the
+            ///   - photoUrl: 256x256 WebP (public, unguessable, cacheable by URL).
+            ///   - feedIds:
+            ///   - birthdayIds: Every merged `BirthdayPerson` id.
+            public init(
+                id: Swift.String,
+                name: Swift.String,
+                day: Swift.Int,
+                month: Swift.Int,
+                birthYear: Swift.Int? = nil,
+                photoUrl: Swift.String? = nil,
+                feedIds: [Components.Schemas.Id],
+                birthdayIds: [Components.Schemas.Id]
+            ) {
+                self.id = id
+                self.name = name
+                self.day = day
+                self.month = month
+                self.birthYear = birthYear
+                self.photoUrl = photoUrl
+                self.feedIds = feedIds
+                self.birthdayIds = birthdayIds
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case day
+                case month
+                case birthYear = "birth_year"
+                case photoUrl = "photo_url"
+                case feedIds = "feed_ids"
+                case birthdayIds = "birthday_ids"
+            }
+        }
+        /// Payload of the `birthdays` change (docs/api/README.md §5.13): the approved people of every feed the frame has
+        /// an `active` subscription with `birthdays: true` to, merged, sorted by month and day. Nothing in it depends on
+        /// today, so it is emitted only when the list changes.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FrameBirthdays`.
+        public struct FrameBirthdays: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FrameBirthdays/generated_at`.
+            public var generatedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/FrameBirthdays/people`.
+            public var people: [Components.Schemas.FrameBirthday]
+            /// Creates a new `FrameBirthdays`.
+            ///
+            /// - Parameters:
+            ///   - generatedAt:
+            ///   - people:
+            public init(
+                generatedAt: Foundation.Date,
+                people: [Components.Schemas.FrameBirthday]
+            ) {
+                self.generatedAt = generatedAt
+                self.people = people
+            }
+            public enum CodingKeys: String, CodingKey {
+                case generatedAt = "generated_at"
+                case people
+            }
+        }
+        /// How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
+        /// frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
+        /// `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PlacementOrigin`.
+        @frozen public enum PlacementOrigin: String, Codable, Hashable, Sendable, CaseIterable {
+            case send = "send"
+            case share = "share"
+            case feed = "feed"
+            case _import = "import"
+        }
+        /// `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+        /// `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+        /// public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceProvider`.
+        public typealias PhotoSourceProvider = Swift.String
+        /// `active`: syncing on schedule (a single failed run being retried stays active, with `last_error_code`).
+        /// `error`: failures expected to pass (unreachable, upstream errors) for 3 runs or 6 hours; retried with backoff.
+        /// `needs_attention`: only a person can fix it (`last_error_code`); syncing stopped except a daily probe for some
+        /// codes. `paused`: paused by a manager; imported photos keep showing.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceStatus`.
+        public typealias PhotoSourceStatus = Swift.String
+        /// Why the last run (or a test) failed; user-facing texts are in docs/spec/photo-sources.md §13.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceErrorCode`.
+        public typealias PhotoSourceErrorCode = Swift.String
+        /// Conditions that don't stop syncing. `downloads_disabled`: the Immich link doesn't allow downloads, so photos
+        /// come as previews. `metadata_hidden`: the link hides EXIF (no capture dates or descriptions).
+        /// `item_limit_reached`: `limits.max_photo_source_items` is reached; newer upstream items are skipped.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceWarning`.
+        public typealias PhotoSourceWarning = Swift.String
+        /// What the first run imports: `none` (only photos added from now on), `last_n` (the `history_count` newest by
+        /// capture date) or `all` (up to `limits.max_photo_source_items`). Imported quietly (`Placement.backfill`).
+        /// Defaults: `all` for albums, `last_n` with 20 for feeds.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceHistory`.
+        public typealias PhotoSourceHistory = Swift.String
+        /// What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+        /// `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+        /// confirmation (`mass_removal`).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceDeletePolicy`.
+        public typealias PhotoSourceDeletePolicy = Swift.String
+        /// Where the photos go. Exactly one of `album_id` (with its frame) or `feed_id` is set.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget`.
+        public struct PhotoSourceTarget: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/kind`.
+            @frozen public enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case album = "album"
+                case feed = "feed"
+            }
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/kind`.
+            public var kind: Components.Schemas.PhotoSourceTarget.KindPayload
+            /// The album's frame (albums belong to one frame).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/frame_name`.
+            public var frameName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/album_id`.
+            public var albumId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/album_name`.
+            public var albumName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTarget/feed_name`.
+            public var feedName: Swift.String?
+            /// Creates a new `PhotoSourceTarget`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - frameId: The album's frame (albums belong to one frame).
+            ///   - frameName:
+            ///   - albumId:
+            ///   - albumName:
+            ///   - feedId:
+            ///   - feedName:
+            public init(
+                kind: Components.Schemas.PhotoSourceTarget.KindPayload,
+                frameId: Components.Schemas.Id? = nil,
+                frameName: Swift.String? = nil,
+                albumId: Components.Schemas.Id? = nil,
+                albumName: Swift.String? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                feedName: Swift.String? = nil
+            ) {
+                self.kind = kind
+                self.frameId = frameId
+                self.frameName = frameName
+                self.albumId = albumId
+                self.albumName = albumName
+                self.feedId = feedId
+                self.feedName = feedName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case kind
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case albumId = "album_id"
+                case albumName = "album_name"
+                case feedId = "feed_id"
+                case feedName = "feed_name"
+            }
+        }
+        /// How to reach the outside album. `immich_link` and `icloud_link` need `url` (and `password` for a protected
+        /// Immich link); `immich_api` needs `server_url`, `api_key` and, to create, `immich_album_id`. Secrets are
+        /// write-only: they are sealed at rest and never returned.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection`.
+        public struct PhotoSourceConnection: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection/provider`.
+            public var provider: Components.Schemas.PhotoSourceProvider
+            /// The shared link (links only). It is the secret; responses carry `url_hint`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection/url`.
+            public var url: Swift.String?
+            /// `immich_api` only: the Immich server, e.g. `https://photos.example.org` (an `/api` suffix is tolerated).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection/server_url`.
+            public var serverUrl: Swift.String?
+            /// `immich_api` only. Needs album.read, asset.read, asset.view and asset.download.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection/api_key`.
+            public var apiKey: Swift.String?
+            /// `immich_link` only: the link password.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection/password`.
+            public var password: Swift.String?
+            /// `immich_api` only: the album, from `listImmichAlbums`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceConnection/immich_album_id`.
+            public var immichAlbumId: Swift.String?
+            /// Creates a new `PhotoSourceConnection`.
+            ///
+            /// - Parameters:
+            ///   - provider:
+            ///   - url: The shared link (links only). It is the secret; responses carry `url_hint`.
+            ///   - serverUrl: `immich_api` only: the Immich server, e.g. `https://photos.example.org` (an `/api` suffix is tolerated).
+            ///   - apiKey: `immich_api` only. Needs album.read, asset.read, asset.view and asset.download.
+            ///   - password: `immich_link` only: the link password.
+            ///   - immichAlbumId: `immich_api` only: the album, from `listImmichAlbums`.
+            public init(
+                provider: Components.Schemas.PhotoSourceProvider,
+                url: Swift.String? = nil,
+                serverUrl: Swift.String? = nil,
+                apiKey: Swift.String? = nil,
+                password: Swift.String? = nil,
+                immichAlbumId: Swift.String? = nil
+            ) {
+                self.provider = provider
+                self.url = url
+                self.serverUrl = serverUrl
+                self.apiKey = apiKey
+                self.password = password
+                self.immichAlbumId = immichAlbumId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case provider
+                case url
+                case serverUrl = "server_url"
+                case apiKey = "api_key"
+                case password
+                case immichAlbumId = "immich_album_id"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate`.
+        public struct PhotoSourceCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value1`.
+            public var value1: Components.Schemas.PhotoSourceConnection
+            /// Exactly one of `album_id` or `feed_id` (`422 validation_failed` otherwise).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2`.
+            public struct Value2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/album_id`.
+                public var albumId: Components.Schemas.Id?
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/feed_id`.
+                public var feedId: Components.Schemas.Id?
+                /// Display name; defaults to the outside album's name.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/name`.
+                public var name: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/history`.
+                public var history: Components.Schemas.PhotoSourceHistory?
+                /// Required with `history: last_n`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/history_count`.
+                public var historyCount: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/on_upstream_delete`.
+                public var onUpstreamDelete: Components.Schemas.PhotoSourceDeletePolicy?
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/include_videos`.
+                public var includeVideos: Swift.Bool?
+                /// The owner gets reaction and reply notifications for this source's photos.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2/notify_reactions`.
+                public var notifyReactions: Swift.Bool?
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - albumId:
+                ///   - feedId:
+                ///   - name: Display name; defaults to the outside album's name.
+                ///   - history:
+                ///   - historyCount: Required with `history: last_n`.
+                ///   - onUpstreamDelete:
+                ///   - includeVideos:
+                ///   - notifyReactions: The owner gets reaction and reply notifications for this source's photos.
+                public init(
+                    albumId: Components.Schemas.Id? = nil,
+                    feedId: Components.Schemas.Id? = nil,
+                    name: Swift.String? = nil,
+                    history: Components.Schemas.PhotoSourceHistory? = nil,
+                    historyCount: Swift.Int? = nil,
+                    onUpstreamDelete: Components.Schemas.PhotoSourceDeletePolicy? = nil,
+                    includeVideos: Swift.Bool? = nil,
+                    notifyReactions: Swift.Bool? = nil
+                ) {
+                    self.albumId = albumId
+                    self.feedId = feedId
+                    self.name = name
+                    self.history = history
+                    self.historyCount = historyCount
+                    self.onUpstreamDelete = onUpstreamDelete
+                    self.includeVideos = includeVideos
+                    self.notifyReactions = notifyReactions
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case albumId = "album_id"
+                    case feedId = "feed_id"
+                    case name
+                    case history
+                    case historyCount = "history_count"
+                    case onUpstreamDelete = "on_upstream_delete"
+                    case includeVideos = "include_videos"
+                    case notifyReactions = "notify_reactions"
+                }
+            }
+            /// Exactly one of `album_id` or `feed_id` (`422 validation_failed` otherwise).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCreate/value2`.
+            public var value2: Components.Schemas.PhotoSourceCreate.Value2Payload
+            /// Creates a new `PhotoSourceCreate`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            ///   - value2: Exactly one of `album_id` or `feed_id` (`422 validation_failed` otherwise).
+            public init(
+                value1: Components.Schemas.PhotoSourceConnection,
+                value2: Components.Schemas.PhotoSourceCreate.Value2Payload
+            ) {
+                self.value1 = value1
+                self.value2 = value2
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
+            }
+        }
+        /// At least one field. Connection changes are tested first and then synced at once.
+        ///
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate`.
+        public struct PhotoSourceUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/name`.
+            public var name: Swift.String?
+            /// true pauses, false resumes.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/paused`.
+            public var paused: Swift.Bool?
+            /// A new link to the same (or another) outside album.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/url`.
+            public var url: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/server_url`.
+            public var serverUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/api_key`.
+            public var apiKey: Swift.String?
+            /// null removes the link password.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/password`.
+            public var password: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/immich_album_id`.
+            public var immichAlbumId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/on_upstream_delete`.
+            public var onUpstreamDelete: Components.Schemas.PhotoSourceDeletePolicy?
+            /// Turning it on imports previously skipped videos in the next run.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/include_videos`.
+            public var includeVideos: Swift.Bool?
+            /// The owner's own switch; only the owner may change it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/notify_reactions`.
+            public var notifyReactions: Swift.Bool?
+            /// The caller becomes the owner (credit for future photos). `immich_api` needs a new `api_key` with it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceUpdate/take_over`.
+            public var takeOver: Swift.Bool?
+            /// Creates a new `PhotoSourceUpdate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - paused: true pauses, false resumes.
+            ///   - url: A new link to the same (or another) outside album.
+            ///   - serverUrl:
+            ///   - apiKey:
+            ///   - password: null removes the link password.
+            ///   - immichAlbumId:
+            ///   - onUpstreamDelete:
+            ///   - includeVideos: Turning it on imports previously skipped videos in the next run.
+            ///   - notifyReactions: The owner's own switch; only the owner may change it.
+            ///   - takeOver: The caller becomes the owner (credit for future photos). `immich_api` needs a new `api_key` with it.
+            public init(
+                name: Swift.String? = nil,
+                paused: Swift.Bool? = nil,
+                url: Swift.String? = nil,
+                serverUrl: Swift.String? = nil,
+                apiKey: Swift.String? = nil,
+                password: Swift.String? = nil,
+                immichAlbumId: Swift.String? = nil,
+                onUpstreamDelete: Components.Schemas.PhotoSourceDeletePolicy? = nil,
+                includeVideos: Swift.Bool? = nil,
+                notifyReactions: Swift.Bool? = nil,
+                takeOver: Swift.Bool? = nil
+            ) {
+                self.name = name
+                self.paused = paused
+                self.url = url
+                self.serverUrl = serverUrl
+                self.apiKey = apiKey
+                self.password = password
+                self.immichAlbumId = immichAlbumId
+                self.onUpstreamDelete = onUpstreamDelete
+                self.includeVideos = includeVideos
+                self.notifyReactions = notifyReactions
+                self.takeOver = takeOver
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case paused
+                case url
+                case serverUrl = "server_url"
+                case apiKey = "api_key"
+                case password
+                case immichAlbumId = "immich_album_id"
+                case onUpstreamDelete = "on_upstream_delete"
+                case includeVideos = "include_videos"
+                case notifyReactions = "notify_reactions"
+                case takeOver = "take_over"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts`.
+        public struct PhotoSourceCounts: Codable, Hashable, Sendable {
+            /// Photos and videos in the outside album at the last listing.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/upstream`.
+            public var upstream: Swift.Int?
+            /// Live items this source created.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/imported`.
+            public var imported: Swift.Int
+            /// Upstream photos the target already had.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/duplicates`.
+            public var duplicates: Swift.Int?
+            /// Waiting to be downloaded (backlog).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/pending`.
+            public var pending: Swift.Int
+            /// Not imported on purpose (videos off, too long, too large, unsupported, over the limit, before the first import's cut).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/skipped`.
+            public var skipped: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/failed`.
+            public var failed: Swift.Int?
+            /// Removed on kinframe; never imported again.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/removed_locally`.
+            public var removedLocally: Swift.Int?
+            /// No longer in the outside album (kept with `keep`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceCounts/gone_upstream`.
+            public var goneUpstream: Swift.Int?
+            /// Creates a new `PhotoSourceCounts`.
+            ///
+            /// - Parameters:
+            ///   - upstream: Photos and videos in the outside album at the last listing.
+            ///   - imported: Live items this source created.
+            ///   - duplicates: Upstream photos the target already had.
+            ///   - pending: Waiting to be downloaded (backlog).
+            ///   - skipped: Not imported on purpose (videos off, too long, too large, unsupported, over the limit, before the first import's cut).
+            ///   - failed:
+            ///   - removedLocally: Removed on kinframe; never imported again.
+            ///   - goneUpstream: No longer in the outside album (kept with `keep`).
+            public init(
+                upstream: Swift.Int? = nil,
+                imported: Swift.Int,
+                duplicates: Swift.Int? = nil,
+                pending: Swift.Int,
+                skipped: Swift.Int? = nil,
+                failed: Swift.Int? = nil,
+                removedLocally: Swift.Int? = nil,
+                goneUpstream: Swift.Int? = nil
+            ) {
+                self.upstream = upstream
+                self.imported = imported
+                self.duplicates = duplicates
+                self.pending = pending
+                self.skipped = skipped
+                self.failed = failed
+                self.removedLocally = removedLocally
+                self.goneUpstream = goneUpstream
+            }
+            public enum CodingKeys: String, CodingKey {
+                case upstream
+                case imported
+                case duplicates
+                case pending
+                case skipped
+                case failed
+                case removedLocally = "removed_locally"
+                case goneUpstream = "gone_upstream"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceRun`.
+        public struct PhotoSourceRun: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/started_at`.
+            public var startedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/finished_at`.
+            public var finishedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/added`.
+            public var added: Swift.Int?
+            /// Captions, dates or files changed upstream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/updated`.
+            public var updated: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/removed`.
+            public var removed: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/skipped`.
+            public var skipped: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/failed`.
+            public var failed: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/bytes`.
+            public var bytes: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceRun/error_code`.
+            public var errorCode: Components.Schemas.PhotoSourceErrorCode?
+            /// Creates a new `PhotoSourceRun`.
+            ///
+            /// - Parameters:
+            ///   - startedAt:
+            ///   - finishedAt:
+            ///   - added:
+            ///   - updated: Captions, dates or files changed upstream.
+            ///   - removed:
+            ///   - skipped:
+            ///   - failed:
+            ///   - bytes:
+            ///   - errorCode:
+            public init(
+                startedAt: Foundation.Date,
+                finishedAt: Foundation.Date? = nil,
+                added: Swift.Int? = nil,
+                updated: Swift.Int? = nil,
+                removed: Swift.Int? = nil,
+                skipped: Swift.Int? = nil,
+                failed: Swift.Int? = nil,
+                bytes: Swift.Int? = nil,
+                errorCode: Components.Schemas.PhotoSourceErrorCode? = nil
+            ) {
+                self.startedAt = startedAt
+                self.finishedAt = finishedAt
+                self.added = added
+                self.updated = updated
+                self.removed = removed
+                self.skipped = skipped
+                self.failed = failed
+                self.bytes = bytes
+                self.errorCode = errorCode
+            }
+            public enum CodingKeys: String, CodingKey {
+                case startedAt = "started_at"
+                case finishedAt = "finished_at"
+                case added
+                case updated
+                case removed
+                case skipped
+                case failed
+                case bytes
+                case errorCode = "error_code"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PhotoSource`.
+        public struct PhotoSource: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/provider`.
+            public var provider: Components.Schemas.PhotoSourceProvider
+            /// The outside album's name (or the name given at creation).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/target`.
+            public var target: Components.Schemas.PhotoSourceTarget
+            /// Who set it up; imported photos are sent by them. Null when that account is gone.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/owner`.
+            public struct OwnerPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PhotoSource/owner/user_id`.
+                public var userId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/PhotoSource/owner/display_name`.
+                public var displayName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/PhotoSource/owner/avatar_url`.
+                public var avatarUrl: Swift.String?
+                /// Creates a new `OwnerPayload`.
+                ///
+                /// - Parameters:
+                ///   - userId:
+                ///   - displayName:
+                ///   - avatarUrl:
+                public init(
+                    userId: Components.Schemas.Id,
+                    displayName: Swift.String,
+                    avatarUrl: Swift.String? = nil
+                ) {
+                    self.userId = userId
+                    self.displayName = displayName
+                    self.avatarUrl = avatarUrl
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case userId = "user_id"
+                    case displayName = "display_name"
+                    case avatarUrl = "avatar_url"
+                }
+            }
+            /// Who set it up; imported photos are sent by them. Null when that account is gone.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/owner`.
+            public var owner: Components.Schemas.PhotoSource.OwnerPayload?
+            /// True for `icloud_link`: no official API; clients show the best-effort note.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/best_effort`.
+            public var bestEffort: Swift.Bool?
+            /// Redacted link for display (links only).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/url_hint`.
+            public var urlHint: Swift.String?
+            /// `immich_api` only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/server_url`.
+            public var serverUrl: Swift.String?
+            /// `immich_api` only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/immich_album_id`.
+            public var immichAlbumId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/has_api_key`.
+            public var hasApiKey: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/has_password`.
+            public var hasPassword: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/status`.
+            public var status: Components.Schemas.PhotoSourceStatus
+            /// A run is in progress.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/running`.
+            public var running: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/warnings`.
+            public var warnings: [Components.Schemas.PhotoSourceWarning]?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/last_error_code`.
+            public var lastErrorCode: Components.Schemas.PhotoSourceErrorCode?
+            /// Short English detail for support; clients show their own text for `last_error_code`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/last_error`.
+            public var lastError: Swift.String?
+            /// First failure of the current streak.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/error_since`.
+            public var errorSince: Foundation.Date?
+            /// Removals held back by the mass-removal guard; confirm with `syncPhotoSource {confirm_removals: true}`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/pending_removals`.
+            public var pendingRemovals: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/history`.
+            public var history: Components.Schemas.PhotoSourceHistory
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/history_count`.
+            public var historyCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/on_upstream_delete`.
+            public var onUpstreamDelete: Components.Schemas.PhotoSourceDeletePolicy
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/include_videos`.
+            public var includeVideos: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/notify_reactions`.
+            public var notifyReactions: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/counts`.
+            public var counts: Components.Schemas.PhotoSourceCounts
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/last_run`.
+            public var lastRun: Components.Schemas.PhotoSourceRun?
+            /// Last successful run.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/last_synced_at`.
+            public var lastSyncedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/last_attempt_at`.
+            public var lastAttemptAt: Foundation.Date?
+            /// Null while paused or waiting for a person.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/next_sync_at`.
+            public var nextSyncAt: Foundation.Date?
+            /// The caller may pause, change and delete it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/can_manage`.
+            public var canManage: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/is_owner`.
+            public var isOwner: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/PhotoSource/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `PhotoSource`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - provider:
+            ///   - name: The outside album's name (or the name given at creation).
+            ///   - target:
+            ///   - owner: Who set it up; imported photos are sent by them. Null when that account is gone.
+            ///   - bestEffort: True for `icloud_link`: no official API; clients show the best-effort note.
+            ///   - urlHint: Redacted link for display (links only).
+            ///   - serverUrl: `immich_api` only.
+            ///   - immichAlbumId: `immich_api` only.
+            ///   - hasApiKey:
+            ///   - hasPassword:
+            ///   - status:
+            ///   - running: A run is in progress.
+            ///   - warnings:
+            ///   - lastErrorCode:
+            ///   - lastError: Short English detail for support; clients show their own text for `last_error_code`.
+            ///   - errorSince: First failure of the current streak.
+            ///   - pendingRemovals: Removals held back by the mass-removal guard; confirm with `syncPhotoSource {confirm_removals: true}`.
+            ///   - history:
+            ///   - historyCount:
+            ///   - onUpstreamDelete:
+            ///   - includeVideos:
+            ///   - notifyReactions:
+            ///   - counts:
+            ///   - lastRun:
+            ///   - lastSyncedAt: Last successful run.
+            ///   - lastAttemptAt:
+            ///   - nextSyncAt: Null while paused or waiting for a person.
+            ///   - canManage: The caller may pause, change and delete it.
+            ///   - isOwner:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                provider: Components.Schemas.PhotoSourceProvider,
+                name: Swift.String,
+                target: Components.Schemas.PhotoSourceTarget,
+                owner: Components.Schemas.PhotoSource.OwnerPayload? = nil,
+                bestEffort: Swift.Bool? = nil,
+                urlHint: Swift.String? = nil,
+                serverUrl: Swift.String? = nil,
+                immichAlbumId: Swift.String? = nil,
+                hasApiKey: Swift.Bool? = nil,
+                hasPassword: Swift.Bool? = nil,
+                status: Components.Schemas.PhotoSourceStatus,
+                running: Swift.Bool,
+                warnings: [Components.Schemas.PhotoSourceWarning]? = nil,
+                lastErrorCode: Components.Schemas.PhotoSourceErrorCode? = nil,
+                lastError: Swift.String? = nil,
+                errorSince: Foundation.Date? = nil,
+                pendingRemovals: Swift.Int? = nil,
+                history: Components.Schemas.PhotoSourceHistory,
+                historyCount: Swift.Int? = nil,
+                onUpstreamDelete: Components.Schemas.PhotoSourceDeletePolicy,
+                includeVideos: Swift.Bool,
+                notifyReactions: Swift.Bool? = nil,
+                counts: Components.Schemas.PhotoSourceCounts,
+                lastRun: Components.Schemas.PhotoSourceRun? = nil,
+                lastSyncedAt: Foundation.Date? = nil,
+                lastAttemptAt: Foundation.Date? = nil,
+                nextSyncAt: Foundation.Date? = nil,
+                canManage: Swift.Bool? = nil,
+                isOwner: Swift.Bool? = nil,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.provider = provider
+                self.name = name
+                self.target = target
+                self.owner = owner
+                self.bestEffort = bestEffort
+                self.urlHint = urlHint
+                self.serverUrl = serverUrl
+                self.immichAlbumId = immichAlbumId
+                self.hasApiKey = hasApiKey
+                self.hasPassword = hasPassword
+                self.status = status
+                self.running = running
+                self.warnings = warnings
+                self.lastErrorCode = lastErrorCode
+                self.lastError = lastError
+                self.errorSince = errorSince
+                self.pendingRemovals = pendingRemovals
+                self.history = history
+                self.historyCount = historyCount
+                self.onUpstreamDelete = onUpstreamDelete
+                self.includeVideos = includeVideos
+                self.notifyReactions = notifyReactions
+                self.counts = counts
+                self.lastRun = lastRun
+                self.lastSyncedAt = lastSyncedAt
+                self.lastAttemptAt = lastAttemptAt
+                self.nextSyncAt = nextSyncAt
+                self.canManage = canManage
+                self.isOwner = isOwner
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case provider
+                case name
+                case target
+                case owner
+                case bestEffort = "best_effort"
+                case urlHint = "url_hint"
+                case serverUrl = "server_url"
+                case immichAlbumId = "immich_album_id"
+                case hasApiKey = "has_api_key"
+                case hasPassword = "has_password"
+                case status
+                case running
+                case warnings
+                case lastErrorCode = "last_error_code"
+                case lastError = "last_error"
+                case errorSince = "error_since"
+                case pendingRemovals = "pending_removals"
+                case history
+                case historyCount = "history_count"
+                case onUpstreamDelete = "on_upstream_delete"
+                case includeVideos = "include_videos"
+                case notifyReactions = "notify_reactions"
+                case counts
+                case lastRun = "last_run"
+                case lastSyncedAt = "last_synced_at"
+                case lastAttemptAt = "last_attempt_at"
+                case nextSyncAt = "next_sync_at"
+                case canManage = "can_manage"
+                case isOwner = "is_owner"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult`.
+        public struct PhotoSourceTestResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/ok`.
+            public var ok: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/error_code`.
+            public var errorCode: Components.Schemas.PhotoSourceErrorCode?
+            /// Short English detail.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/error`.
+            public var error: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/album_name`.
+            public var albumName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/photos`.
+            public var photos: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/videos`.
+            public var videos: Swift.Int?
+            /// Size of everything in the album, when the provider tells.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/estimate_bytes`.
+            public var estimateBytes: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/warnings`.
+            public var warnings: [Components.Schemas.PhotoSourceWarning]?
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/best_effort`.
+            public var bestEffort: Swift.Bool?
+            /// Immich only, e.g. `v1.132.3`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/server_version`.
+            public var serverVersion: Swift.String?
+            /// `immich_api` without `immich_album_id`: the albums the key can read.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PhotoSourceTestResult/albums`.
+            public var albums: [Components.Schemas.ImmichAlbum]?
+            /// Creates a new `PhotoSourceTestResult`.
+            ///
+            /// - Parameters:
+            ///   - ok:
+            ///   - errorCode:
+            ///   - error: Short English detail.
+            ///   - albumName:
+            ///   - photos:
+            ///   - videos:
+            ///   - estimateBytes: Size of everything in the album, when the provider tells.
+            ///   - warnings:
+            ///   - bestEffort:
+            ///   - serverVersion: Immich only, e.g. `v1.132.3`.
+            ///   - albums: `immich_api` without `immich_album_id`: the albums the key can read.
+            public init(
+                ok: Swift.Bool,
+                errorCode: Components.Schemas.PhotoSourceErrorCode? = nil,
+                error: Swift.String? = nil,
+                albumName: Swift.String? = nil,
+                photos: Swift.Int? = nil,
+                videos: Swift.Int? = nil,
+                estimateBytes: Swift.Int? = nil,
+                warnings: [Components.Schemas.PhotoSourceWarning]? = nil,
+                bestEffort: Swift.Bool? = nil,
+                serverVersion: Swift.String? = nil,
+                albums: [Components.Schemas.ImmichAlbum]? = nil
+            ) {
+                self.ok = ok
+                self.errorCode = errorCode
+                self.error = error
+                self.albumName = albumName
+                self.photos = photos
+                self.videos = videos
+                self.estimateBytes = estimateBytes
+                self.warnings = warnings
+                self.bestEffort = bestEffort
+                self.serverVersion = serverVersion
+                self.albums = albums
+            }
+            public enum CodingKeys: String, CodingKey {
+                case ok
+                case errorCode = "error_code"
+                case error
+                case albumName = "album_name"
+                case photos
+                case videos
+                case estimateBytes = "estimate_bytes"
+                case warnings
+                case bestEffort = "best_effort"
+                case serverVersion = "server_version"
+                case albums
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ImmichConnection`.
+        public struct ImmichConnection: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ImmichConnection/server_url`.
+            public var serverUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ImmichConnection/api_key`.
+            public var apiKey: Swift.String
+            /// Creates a new `ImmichConnection`.
+            ///
+            /// - Parameters:
+            ///   - serverUrl:
+            ///   - apiKey:
+            public init(
+                serverUrl: Swift.String,
+                apiKey: Swift.String
+            ) {
+                self.serverUrl = serverUrl
+                self.apiKey = apiKey
+            }
+            public enum CodingKeys: String, CodingKey {
+                case serverUrl = "server_url"
+                case apiKey = "api_key"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ImmichAlbum`.
+        public struct ImmichAlbum: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/id`.
+            public var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/asset_count`.
+            public var assetCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/updated_at`.
+            public var updatedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/owner_name`.
+            public var ownerName: Swift.String?
+            /// Shared with the key's account by someone else.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/shared`.
+            public var shared: Swift.Bool?
+            /// A short-lived kinframe URL of the album thumbnail (proxied; the key never reaches the client).
+            ///
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbum/thumbnail_url`.
+            public var thumbnailUrl: Swift.String?
+            /// Creates a new `ImmichAlbum`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - name:
+            ///   - assetCount:
+            ///   - updatedAt:
+            ///   - ownerName:
+            ///   - shared: Shared with the key's account by someone else.
+            ///   - thumbnailUrl: A short-lived kinframe URL of the album thumbnail (proxied; the key never reaches the client).
+            public init(
+                id: Swift.String,
+                name: Swift.String,
+                assetCount: Swift.Int,
+                updatedAt: Foundation.Date? = nil,
+                ownerName: Swift.String? = nil,
+                shared: Swift.Bool? = nil,
+                thumbnailUrl: Swift.String? = nil
+            ) {
+                self.id = id
+                self.name = name
+                self.assetCount = assetCount
+                self.updatedAt = updatedAt
+                self.ownerName = ownerName
+                self.shared = shared
+                self.thumbnailUrl = thumbnailUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case assetCount = "asset_count"
+                case updatedAt = "updated_at"
+                case ownerName = "owner_name"
+                case shared
+                case thumbnailUrl = "thumbnail_url"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ImmichAlbumList`.
+        public struct ImmichAlbumList: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbumList/ok`.
+            public var ok: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbumList/error_code`.
+            public var errorCode: Components.Schemas.PhotoSourceErrorCode?
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbumList/error`.
+            public var error: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbumList/server_version`.
+            public var serverVersion: Swift.String?
+            /// Own albums first, then shared ones, by name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ImmichAlbumList/albums`.
+            public var albums: [Components.Schemas.ImmichAlbum]
+            /// Creates a new `ImmichAlbumList`.
+            ///
+            /// - Parameters:
+            ///   - ok:
+            ///   - errorCode:
+            ///   - error:
+            ///   - serverVersion:
+            ///   - albums: Own albums first, then shared ones, by name.
+            public init(
+                ok: Swift.Bool,
+                errorCode: Components.Schemas.PhotoSourceErrorCode? = nil,
+                error: Swift.String? = nil,
+                serverVersion: Swift.String? = nil,
+                albums: [Components.Schemas.ImmichAlbum]
+            ) {
+                self.ok = ok
+                self.errorCode = errorCode
+                self.error = error
+                self.serverVersion = serverVersion
+                self.albums = albums
+            }
+            public enum CodingKeys: String, CodingKey {
+                case ok
+                case errorCode = "error_code"
+                case error
+                case serverVersion = "server_version"
+                case albums
+            }
+        }
+        /// `needs_auth`: open `auth_url`. `picking`: open `picker_uri`; the server waits for Google. `importing`: copying
+        /// (`progress`). `done` (possibly with `progress.failed` > 0), `failed` (`error_code`), `expired` (nothing picked
+        /// before Google's session ended) and `cancelled` are final.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/GoogleImportStatus`.
+        public typealias GoogleImportStatus = Swift.String
+        /// - Remark: Generated from `#/components/schemas/GoogleImportErrorCode`.
+        public typealias GoogleImportErrorCode = Swift.String
+        /// Exactly one of `album_id` or `feed_id`.
+        ///
+        /// - Remark: Generated from `#/components/schemas/GoogleImportCreate`.
+        public struct GoogleImportCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/GoogleImportCreate/album_id`.
+            public var albumId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/GoogleImportCreate/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// Where the browser goes after consent, with `?import_id=…&status=…` added.
+            ///
+            /// - Remark: Generated from `#/components/schemas/GoogleImportCreate/return_uri`.
+            public var returnUri: Swift.String
+            /// Creates a new `GoogleImportCreate`.
+            ///
+            /// - Parameters:
+            ///   - albumId:
+            ///   - feedId:
+            ///   - returnUri: Where the browser goes after consent, with `?import_id=…&status=…` added.
+            public init(
+                albumId: Components.Schemas.Id? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                returnUri: Swift.String
+            ) {
+                self.albumId = albumId
+                self.feedId = feedId
+                self.returnUri = returnUri
+            }
+            public enum CodingKeys: String, CodingKey {
+                case albumId = "album_id"
+                case feedId = "feed_id"
+                case returnUri = "return_uri"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/GoogleImport`.
+        public struct GoogleImport: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/status`.
+            public var status: Components.Schemas.GoogleImportStatus
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/target`.
+            public var target: Components.Schemas.PhotoSourceTarget
+            /// `needs_auth` only: Google's consent page, to open in a browser session (never an embedded web view).
+            ///
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/auth_url`.
+            public var authUrl: Swift.String?
+            /// `picking` only: Google's picker. Web clients append `/autoclose`; on Android the Google Photos app can handle it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/picker_uri`.
+            public var pickerUri: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/picker_expires_at`.
+            public var pickerExpiresAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/progress`.
+            public struct ProgressPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/GoogleImport/progress/picked`.
+                public var picked: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/GoogleImport/progress/imported`.
+                public var imported: Swift.Int
+                /// Already in the album or feed.
+                ///
+                /// - Remark: Generated from `#/components/schemas/GoogleImport/progress/duplicates`.
+                public var duplicates: Swift.Int?
+                /// Too long, too large or unsupported.
+                ///
+                /// - Remark: Generated from `#/components/schemas/GoogleImport/progress/skipped`.
+                public var skipped: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/GoogleImport/progress/failed`.
+                public var failed: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/GoogleImport/progress/bytes`.
+                public var bytes: Swift.Int?
+                /// Creates a new `ProgressPayload`.
+                ///
+                /// - Parameters:
+                ///   - picked:
+                ///   - imported:
+                ///   - duplicates: Already in the album or feed.
+                ///   - skipped: Too long, too large or unsupported.
+                ///   - failed:
+                ///   - bytes:
+                public init(
+                    picked: Swift.Int,
+                    imported: Swift.Int,
+                    duplicates: Swift.Int? = nil,
+                    skipped: Swift.Int? = nil,
+                    failed: Swift.Int? = nil,
+                    bytes: Swift.Int? = nil
+                ) {
+                    self.picked = picked
+                    self.imported = imported
+                    self.duplicates = duplicates
+                    self.skipped = skipped
+                    self.failed = failed
+                    self.bytes = bytes
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case picked
+                    case imported
+                    case duplicates
+                    case skipped
+                    case failed
+                    case bytes
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/progress`.
+            public var progress: Components.Schemas.GoogleImport.ProgressPayload
+            /// The sends (and thus posts) the import made; unsend them to undo.
+            ///
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/send_ids`.
+            public var sendIds: [Components.Schemas.Id]?
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/error_code`.
+            public var errorCode: Components.Schemas.GoogleImportErrorCode?
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/updated_at`.
+            public var updatedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/GoogleImport/finished_at`.
+            public var finishedAt: Foundation.Date?
+            /// Creates a new `GoogleImport`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - status:
+            ///   - target:
+            ///   - authUrl: `needs_auth` only: Google's consent page, to open in a browser session (never an embedded web view).
+            ///   - pickerUri: `picking` only: Google's picker. Web clients append `/autoclose`; on Android the Google Photos app can handle it.
+            ///   - pickerExpiresAt:
+            ///   - progress:
+            ///   - sendIds: The sends (and thus posts) the import made; unsend them to undo.
+            ///   - errorCode:
+            ///   - createdAt:
+            ///   - updatedAt:
+            ///   - finishedAt:
+            public init(
+                id: Components.Schemas.Id,
+                status: Components.Schemas.GoogleImportStatus,
+                target: Components.Schemas.PhotoSourceTarget,
+                authUrl: Swift.String? = nil,
+                pickerUri: Swift.String? = nil,
+                pickerExpiresAt: Foundation.Date? = nil,
+                progress: Components.Schemas.GoogleImport.ProgressPayload,
+                sendIds: [Components.Schemas.Id]? = nil,
+                errorCode: Components.Schemas.GoogleImportErrorCode? = nil,
+                createdAt: Foundation.Date,
+                updatedAt: Foundation.Date? = nil,
+                finishedAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.status = status
+                self.target = target
+                self.authUrl = authUrl
+                self.pickerUri = pickerUri
+                self.pickerExpiresAt = pickerExpiresAt
+                self.progress = progress
+                self.sendIds = sendIds
+                self.errorCode = errorCode
+                self.createdAt = createdAt
+                self.updatedAt = updatedAt
+                self.finishedAt = finishedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case status
+                case target
+                case authUrl = "auth_url"
+                case pickerUri = "picker_uri"
+                case pickerExpiresAt = "picker_expires_at"
+                case progress
+                case sendIds = "send_ids"
+                case errorCode = "error_code"
+                case createdAt = "created_at"
+                case updatedAt = "updated_at"
+                case finishedAt = "finished_at"
             }
         }
         /// - Remark: Generated from `#/components/schemas/TvLinkCreate`.
@@ -3910,10 +7374,17 @@ extension Components {
                 public var collage: Swift.Bool?
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/collage_max`.
                 public var collageMax: Swift.Int?
-                /// null = all photos
+                /// null = all photos. Setting it clears `feed_id`.
                 ///
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/album_id`.
                 public var albumId: Swift.String?
+                /// Feed mode: play only placements of this subscribed feed (`Placement.feed_ids`); null = all photos.
+                /// Setting it clears `album_id`. Reset to null when the subscription ends. An empty or unknown feed plays
+                /// everything.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/feed_id`.
+                public var feedId: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/on_this_day`.
                 public var onThisDay: Swift.Bool?
                 /// Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
@@ -3946,7 +7417,8 @@ extension Components {
                 ///   - pairPortraits:
                 ///   - collage:
                 ///   - collageMax:
-                ///   - albumId: null = all photos
+                ///   - albumId: null = all photos. Setting it clears `feed_id`.
+                ///   - feedId: Feed mode: play only placements of this subscribed feed (`Placement.feed_ids`); null = all photos.
                 ///   - onThisDay:
                 ///   - livePhotos: Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
                 public init(
@@ -3962,6 +7434,7 @@ extension Components {
                     collage: Swift.Bool? = nil,
                     collageMax: Swift.Int? = nil,
                     albumId: Swift.String? = nil,
+                    feedId: Swift.String? = nil,
                     onThisDay: Swift.Bool? = nil,
                     livePhotos: Components.Schemas.FrameSettings.SlideshowPayload.LivePhotosPayload? = nil
                 ) {
@@ -3977,6 +7450,7 @@ extension Components {
                     self.collage = collage
                     self.collageMax = collageMax
                     self.albumId = albumId
+                    self.feedId = feedId
                     self.onThisDay = onThisDay
                     self.livePhotos = livePhotos
                 }
@@ -3993,6 +7467,7 @@ extension Components {
                     case collage
                     case collageMax = "collage_max"
                     case albumId = "album_id"
+                    case feedId = "feed_id"
                     case onThisDay = "on_this_day"
                     case livePhotos = "live_photos"
                 }
@@ -4019,7 +7494,7 @@ extension Components {
                 ///
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/widgets/calendar_sidebar`.
                 public var calendarSidebar: Swift.Bool?
-                /// Countdown widgets on the slideshow (the nearest three).
+                /// Countdown widgets on the slideshow (the nearest three): marked events and, from 7 days before, feed birthdays (docs/spec/birthdays.md §6.6). The birthday card on the day itself does not depend on it.
                 ///
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/widgets/countdowns`.
                 public var countdowns: Swift.Bool?
@@ -4033,7 +7508,7 @@ extension Components {
                 ///   - weather: Current weather widget; needs `location`.
                 ///   - clock24h:
                 ///   - calendarSidebar: Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
-                ///   - countdowns: Countdown widgets on the slideshow (the nearest three).
+                ///   - countdowns: Countdown widgets on the slideshow (the nearest three): marked events and, from 7 days before, feed birthdays (docs/spec/birthdays.md §6.6). The birthday card on the day itself does not depend on it.
                 public init(
                     caption: Swift.Bool? = nil,
                     avatar: Swift.Bool? = nil,
@@ -4860,7 +8335,7 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/running`.
             public var running: Swift.Bool?
-            /// The last error
+            /// The last error, null when the last update and render worked.
             ///
             /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/error`.
             public var error: Swift.String?
@@ -4936,7 +8411,7 @@ extension Components {
             /// - Parameters:
             ///   - instanceId:
             ///   - running: The instance started on the frame.
-            ///   - error: The last error
+            ///   - error: The last error, null when the last update and render worked.
             ///   - errorAt:
             ///   - updatedAt: When the last update succeeded.
             ///   - version: The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).
@@ -5635,7 +9110,7 @@ extension Components {
             public var alg: Components.Schemas.PinHash.AlgPayload
             /// - Remark: Generated from `#/components/schemas/PinHash/iterations`.
             public var iterations: Swift.Int
-            /// base64
+            /// base64, at least 12 random bytes
             ///
             /// - Remark: Generated from `#/components/schemas/PinHash/salt`.
             public var salt: Swift.String
@@ -5648,7 +9123,7 @@ extension Components {
             /// - Parameters:
             ///   - alg:
             ///   - iterations:
-            ///   - salt: base64
+            ///   - salt: base64, at least 12 random bytes
             ///   - hash: base64 of 32 bytes
             public init(
                 alg: Components.Schemas.PinHash.AlgPayload,
@@ -6029,6 +9504,7 @@ extension Components {
                 case frame = "frame"
                 case weather = "weather"
                 case calendar = "calendar"
+                case birthdays = "birthdays"
                 case reset = "reset"
             }
             /// - Remark: Generated from `#/components/schemas/Change/type`.
@@ -6289,6 +9765,10 @@ extension Components {
             public var weather: Components.Schemas.Weather?
             /// - Remark: Generated from `#/components/schemas/Change/calendar`.
             public var calendar: Components.Schemas.Calendar?
+            /// The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Change/birthdays`.
+            public var birthdays: Components.Schemas.FrameBirthdays?
             /// Creates a new `Change`.
             ///
             /// - Parameters:
@@ -6302,6 +9782,7 @@ extension Components {
             ///   - frame:
             ///   - weather:
             ///   - calendar:
+            ///   - birthdays: The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it.
             public init(
                 seq: Swift.Int,
                 _type: Components.Schemas.Change._TypePayload,
@@ -6312,7 +9793,8 @@ extension Components {
                 member: Components.Schemas.Change.MemberPayload? = nil,
                 frame: Components.Schemas.Change.FramePayload? = nil,
                 weather: Components.Schemas.Weather? = nil,
-                calendar: Components.Schemas.Calendar? = nil
+                calendar: Components.Schemas.Calendar? = nil,
+                birthdays: Components.Schemas.FrameBirthdays? = nil
             ) {
                 self.seq = seq
                 self._type = _type
@@ -6324,6 +9806,7 @@ extension Components {
                 self.frame = frame
                 self.weather = weather
                 self.calendar = calendar
+                self.birthdays = birthdays
             }
             public enum CodingKeys: String, CodingKey {
                 case seq
@@ -6336,6 +9819,7 @@ extension Components {
                 case frame
                 case weather
                 case calendar
+                case birthdays
             }
         }
         /// Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -6447,7 +9931,7 @@ extension Components {
                 public var isDay: Swift.Bool
                 /// - Remark: Generated from `#/components/schemas/Weather/current/wind_kmh`.
                 public var windKmh: Swift.Double?
-                /// Direction the wind comes from
+                /// Direction the wind comes from, 0 = north
                 ///
                 /// - Remark: Generated from `#/components/schemas/Weather/current/wind_dir_deg`.
                 public var windDirDeg: Swift.Int?
@@ -6464,7 +9948,7 @@ extension Components {
                 ///   - code: WMO weather code (0–99)
                 ///   - isDay:
                 ///   - windKmh:
-                ///   - windDirDeg: Direction the wind comes from
+                ///   - windDirDeg: Direction the wind comes from, 0 = north
                 ///   - humidityPct:
                 ///   - precipMm:
                 public init(
@@ -6826,7 +10310,7 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/url`.
             public var url: Swift.String
-            /// Defaults to the calendar's own name
+            /// Defaults to the calendar's own name, else the host.
             ///
             /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/name`.
             public var name: Swift.String?
@@ -6851,7 +10335,7 @@ extension Components {
             /// - Parameters:
             ///   - kind:
             ///   - url: `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.
-            ///   - name: Defaults to the calendar's own name
+            ///   - name: Defaults to the calendar's own name, else the host.
             ///   - color:
             ///   - enabled:
             ///   - username: CalDAV only.
@@ -6954,7 +10438,7 @@ extension Components {
             public var status: Components.Schemas.CalendarTestResult.StatusPayload
             /// - Remark: Generated from `#/components/schemas/CalendarTestResult/error`.
             public var error: Swift.String?
-            /// The calendar's own name
+            /// The calendar's own name, if it has one.
             ///
             /// - Remark: Generated from `#/components/schemas/CalendarTestResult/calendar_name`.
             public var calendarName: Swift.String?
@@ -6968,7 +10452,7 @@ extension Components {
                 public var url: Swift.String
                 /// - Remark: Generated from `#/components/schemas/CalendarTestResult/CalendarsPayload/name`.
                 public var name: Swift.String
-                /// The server's colour (hex)
+                /// The server's colour (hex), as a hint.
                 ///
                 /// - Remark: Generated from `#/components/schemas/CalendarTestResult/CalendarsPayload/color`.
                 public var color: Swift.String?
@@ -6977,7 +10461,7 @@ extension Components {
                 /// - Parameters:
                 ///   - url:
                 ///   - name:
-                ///   - color: The server's colour (hex)
+                ///   - color: The server's colour (hex), as a hint.
                 public init(
                     url: Swift.String,
                     name: Swift.String,
@@ -7007,7 +10491,7 @@ extension Components {
             ///   - ok:
             ///   - status:
             ///   - error:
-            ///   - calendarName: The calendar's own name
+            ///   - calendarName: The calendar's own name, if it has one.
             ///   - eventCount: Events in the next 30 days.
             ///   - calendars: CalDAV only. Calendars on the account that hold events.
             public init(

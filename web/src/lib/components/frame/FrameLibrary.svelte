@@ -20,7 +20,12 @@
 	import AlbumPickerDialog from './AlbumPickerDialog.svelte';
 	import AlbumScheduleDialog from './AlbumScheduleDialog.svelte';
 	import Memories from './Memories.svelte';
-	import { senderLabel } from '$lib/sender';
+	import { placementCredit } from '$lib/sender';
+	import { page } from '$app/state';
+	import GoogleImport from '../sources/GoogleImport.svelte';
+	import PhotoSources from '../sources/PhotoSources.svelte';
+	import { discovery } from '$lib/discovery.svelte';
+	import type { Subscription } from '$lib/api/client';
 
 	type View = 'visible' | 'hidden' | 'trashed';
 	type Action = 'hide' | 'unhide' | 'trash' | 'restore';
@@ -28,6 +33,9 @@
 	let { frame }: { frame: Frame } = $props();
 
 	let view = $state<View>('visible');
+	/** Only placements held by this feed (`feed_id` filter, feeds.md §3); null = everything. */
+	let feedFilter = $state<string | null>(null);
+	let feedSubs = $state<Subscription[]>([]);
 	let items = $state<Placement[]>([]);
 	let counts = $state<{ photos?: number; videos?: number; hidden?: number; trashed?: number }>({});
 	let cursor = $state<string | null>(null);
@@ -55,7 +63,8 @@
 
 	// ---------------------------------------------------------------- albums
 	let albums = $state<Album[]>([]);
-	let albumId = $state<string | null>(null);
+	// `?album=` opens an album (links from photo source notifications and "My photo sources").
+	let albumId = $state<string | null>(page.url.searchParams.get('album'));
 	let playingId = $state<string | null>(null);
 	let settingsVersion = $state<number | undefined>(undefined);
 	const album = $derived(albums.find((a) => a.id === albumId) ?? null);
@@ -115,7 +124,7 @@
 					api.GET('/v1/frames/{frameId}/placements', {
 						params: {
 							path: { frameId: frame.id },
-							query: { visibility: view, limit: 60, ...(reset || !cursor ? {} : { cursor }) }
+							query: { visibility: view, limit: 60, ...(feedFilter ? { feed_id: feedFilter } : {}), ...(reset || !cursor ? {} : { cursor }) }
 						}
 					})
 				);
@@ -142,7 +151,18 @@
 		void frame.id;
 		void view;
 		void albumId;
+		void feedFilter;
 		void load();
+	});
+
+	$effect(() => {
+		void frame.id;
+		feedFilter = null;
+		feedSubs = [];
+		if (!discovery.feeds) return;
+		call(api.GET('/v1/frames/{frameId}/subscriptions', { params: { path: { frameId: frame.id } } }))
+			.then((s) => (feedSubs = s.filter((x) => x.status === 'active' || x.status === 'paused')))
+			.catch(() => (feedSubs = []));
 	});
 
 	function selectAlbum(id: string | null) {
@@ -217,6 +237,9 @@
 	let renameOpen = $state(false);
 	let scheduleOpen = $state(false);
 	let deleteOpen = $state(false);
+	$effect(() => {
+		if (deleteOpen) removeSourceItems = false;
+	});
 	let pickerOpen = $state(false);
 	let pickerIds = $state<string[]>([]);
 
@@ -237,7 +260,7 @@
 	}
 
 	/** PATCH an album with its version; on a conflict reload it and tell the user. */
-	async function writeAlbum(a: Album, body: { name?: string; placement_ids?: string[]; cover_placement_id?: string; schedule?: AlbumSchedule | null }) {
+	async function writeAlbum(a: Album, body: { name?: string; placement_ids?: string[]; cover_placement_id?: string; schedule?: AlbumSchedule | null; only_in_album_mode?: boolean }) {
 		try {
 			const updated = await call(
 				api.PATCH('/v1/frames/{frameId}/albums/{albumId}', {
@@ -337,12 +360,40 @@
 	}
 
 	let deleting = $state(false);
+	/** Also remove what the album's photo sources imported (deleteAlbum `remove_source_items`, §9.1). */
+	let removeSourceItems = $state(false);
+	let syncWizard = $state(false);
+	const sourcesOn = $derived(discovery.photoSources && manage);
+
+	/** "Only in album mode" (§9.1): the album's photos leave the everyday slideshow. */
+	let onlyBusy = $state(false);
+	async function setAlbumOnly(a: Album, on: boolean) {
+		onlyBusy = true;
+		try {
+			await writeAlbum(a, { only_in_album_mode: on });
+			toasts.success(on ? t('albums.onlyOn', { name: a.name }) : t('albums.onlyOff', { name: a.name }));
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		} finally {
+			onlyBusy = false;
+		}
+	}
+
+	function setSourceCount(n: number) {
+		const a = album;
+		if (a) upsertAlbum({ ...a, photo_source_count: n });
+	}
+
 	async function deleteAlbum() {
 		const a = album;
 		if (!a) return;
 		deleting = true;
 		try {
-			await call(api.DELETE('/v1/frames/{frameId}/albums/{albumId}', { params: { path: { frameId: frame.id, albumId: a.id } } }));
+			await call(
+				api.DELETE('/v1/frames/{frameId}/albums/{albumId}', {
+					params: { path: { frameId: frame.id, albumId: a.id }, query: a.photo_source_count ? { remove_source_items: removeSourceItems } : {} }
+				})
+			);
 			albums = albums.filter((x) => x.id !== a.id);
 			if (playingId === a.id) playingId = null;
 			albumId = null;
@@ -473,6 +524,8 @@
 						<span class="chip-name">{a.name}</span>
 						<span class="chip-count num">{a.placement_count}</span>
 						{#if a.schedule}<Icon name="calendar" size={14} label={t('albums.scheduled')} />{/if}
+						{#if discovery.photoSources && a.photo_source_count}<Icon name="refresh" size={13} label={t('sources.albumSyncs')} />{/if}
+						{#if a.only_in_album_mode}<Icon name="eyeOff" size={13} label={t('albums.onlyInAlbumMode')} />{/if}
 					</button>
 				</li>
 			{/each}
@@ -500,6 +553,12 @@
 			<div class="badges">
 				{#if playing(album)}
 					<span class="badge badge-play"><Icon name="play" size={11} stroke={0} />{t('albums.playingBadge')}</span>
+				{/if}
+				{#if discovery.photoSources && album.photo_source_count}
+					<span class="badge"><Icon name="refresh" size={13} />{t('sources.albumSyncs')}</span>
+				{/if}
+				{#if album.only_in_album_mode && !manage}
+					<span class="badge"><Icon name="eyeOff" size={13} />{t('albums.onlyInAlbumMode')}</span>
 				{/if}
 				{#if album.schedule?.from_month_day && album.schedule.to_month_day}
 					<span class="badge" class:badge-on={scheduledNow(album)}>
@@ -529,6 +588,16 @@
 						<Icon name="tv" size={16} />{t('tv.show')}
 					</button>
 				{/if}
+				{#if sourcesOn}
+					<button class="btn btn-sm" onclick={() => (syncWizard = true)}><Icon name="refresh" size={16} />{t('sources.syncFrom')}</button>
+				{/if}
+				{#if manage && discovery.googlePhotosImport}
+					<GoogleImport
+						target={{ kind: 'album', frameId: frame.id, albumId: album.id, name: album.name }}
+						backPath="/frames/{frame.id}?tab=library&album={album.id}"
+						onfinished={(i) => i.status === 'done' && i.progress.imported > 0 && (void load(), void loadAlbums())}
+					/>
+				{/if}
 				{#if manage}
 					<span class="icon-tools">
 					<button class="btn btn-ghost btn-icon btn-sm" onclick={startArranging} disabled={items.length < 2} aria-label={t('albums.arrange')} title={t('albums.arrange')}><Icon name="grip" size={18} /></button>
@@ -539,10 +608,30 @@
 				{/if}
 			{/if}
 		</div>
+		{#if manage && !arranging}
+			<label class="switch album-only">
+				<input type="checkbox" checked={album.only_in_album_mode === true} disabled={onlyBusy} onchange={(e) => album && setAlbumOnly(album, e.currentTarget.checked)} />
+				<span><span class="s-label">{t('albums.onlyInAlbumMode')}</span><span class="hint">{t('albums.onlyInAlbumModeHint')}</span></span>
+			</label>
+		{/if}
 		{#if arranging}
 			<p class="arrange-hint small" role="status"><Icon name="info" size={16} />{t('albums.arrangeHint')}</p>
 		{/if}
 	</section>
+	{#if sourcesOn}
+		{#key album.id}
+			<PhotoSources
+				target={{ kind: 'album', frameId: frame.id, albumId: album.id, name: album.name, onlyInAlbumMode: album.only_in_album_mode === true }}
+				onalbumonly={async () => {
+					const a = albums.find((x) => x.id === album?.id);
+					if (a) await setAlbumOnly(a, true);
+				}}
+				hideEmpty
+				bind:openWizard={syncWizard}
+				onchange={setSourceCount}
+			/>
+		{/key}
+	{/if}
 {:else}
 	{#if view === 'visible'}
 		<Memories {frame} onopen={(p) => open(p)} />
@@ -561,6 +650,15 @@
 			<p class="muted small num">
 				{tn('history.photos', counts.photos ?? 0)}{#if counts.videos}, {tn('history.videos', counts.videos)}{/if}
 			</p>
+		{/if}
+		{#if feedSubs.length > 0}
+			<div class="feed-filter">
+				<label for="lib-feed" class="visually-hidden">{t('library.feedFilter')}</label>
+				<select id="lib-feed" class="select select-sm" bind:value={feedFilter}>
+					<option value={null}>{t('library.allSources')}</option>
+					{#each feedSubs as s (s.id)}<option value={s.feed.id}>{t('library.fromFeed', { feed: s.feed.name })}</option>{/each}
+				</select>
+			</div>
 		{/if}
 		{#if view === 'visible' && seeAll && items.length > 0}
 			<button class="btn btn-sm tv-btn" onclick={() => showOnTv({ kind: 'all' })}><Icon name="tv" size={16} />{t('tv.show')}</button>
@@ -619,7 +717,7 @@
 				data-index={i}
 				animate:flip={{ duration: reducedMotion() ? 0 : 180 }}
 			>
-				<button class="tile-btn" onclick={() => open(p)} tabindex={arranging ? -1 : 0} aria-label={p.item.caption ?? t('library.itemBy', { name: senderLabel(p.item) })}>
+				<button class="tile-btn" onclick={() => open(p)} tabindex={arranging ? -1 : 0} aria-label={p.item.caption ?? t('library.itemBy', { name: placementCredit(p) })}>
 					<Thumb itemId={p.item.id} variant="thumb_256" kind={p.item.kind} radius="0" />
 				</button>
 				{#if arranging}
@@ -704,13 +802,16 @@
 	</div>
 {/if}
 
-<Dialog bind:open={viewerOpen} title={viewing && senderLabel(viewing.item) ? t('library.from', { name: senderLabel(viewing.item) }) : t('library.photo')} size="md">
+<Dialog bind:open={viewerOpen} title={viewing && placementCredit(viewing) ? t('library.from', { name: placementCredit(viewing) }) : t('library.photo')} size="md">
 	{#if viewing}
 		<div class="viewer stack">
 			<div class="big">
 				<Thumb itemId={viewing.item.id} variant={viewing.item.kind === 'video' ? 'poster' : 'master'} kind={viewing.item.kind} alt={viewing.item.caption ?? ''} />
 			</div>
 			{#if viewing.item.caption}<p>{viewing.item.caption}</p>{/if}
+			{#if viewing.origin === 'feed' && viewing.origin_feed_name}
+				<p class="shared-by small"><Icon name="feed" size={14} />{t('library.viaFeedLine', { feed: viewing.origin_feed_name })}</p>
+			{/if}
 			{#if viewing.shared_by_name}
 				<p class="shared-by small"><Icon name="share" size={14} />{t('share.sharedBy', { name: viewing.shared_by_name })}</p>
 			{/if}
@@ -769,6 +870,12 @@
 
 <Dialog bind:open={deleteOpen} title={t('albums.deleteConfirm', { name: album?.name ?? '' })}>
 	<p class="muted">{album && playing(album) ? t('albums.deleteBodyPlaying') : t('albums.deleteBody')}</p>
+	{#if album?.photo_source_count}
+		<label class="switch remove-synced">
+			<input type="checkbox" bind:checked={removeSourceItems} />
+			<span><span class="s-label">{t('sources.albumDeleteRemove')}</span><span class="hint">{t('sources.albumDeleteHint')}</span></span>
+		</label>
+	{/if}
 	{#snippet footer()}
 		<button class="btn btn-ghost" onclick={() => (deleteOpen = false)}>{t('common.cancel')}</button>
 		<button class="btn btn-danger" onclick={deleteAlbum} disabled={deleting}>
@@ -778,6 +885,25 @@
 </Dialog>
 
 <style>
+	.album-only {
+		grid-column: 1 / -1;
+		width: 100%;
+	}
+	.album-only > span {
+		display: flex;
+		flex-direction: column;
+	}
+	.remove-synced {
+		margin-top: var(--s-3);
+	}
+	.remove-synced > span {
+		display: flex;
+		flex-direction: column;
+	}
+	.feed-filter .select {
+		min-height: 36px;
+		padding-block: 4px;
+	}
 	.albums {
 		margin: 0 calc(-1 * var(--s-4)) var(--s-4);
 		min-width: 0;

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Εκκίνηση…</string>
+    <string name="startup_checking_library">Έλεγχος των φωτογραφιών μετά από διακοπή ρεύματος…</string>
+    <string name="startup_checking_update">Έλεγχος έκδοσης εφαρμογής…</string>
+    <string name="startup_loading_photos">Φόρτωση των φωτογραφιών…</string>
+    <string name="startup_preparing_photo">Προετοιμασία της πρώτης φωτογραφίας…</string>
+    <string name="startup_waiting_wifi">Αναμονή για Wi-Fi…</string>
+    <string name="startup_setting_clock">Ρύθμιση του ρολογιού…</string>
+    <string name="startup_connecting">Σύνδεση με τον διακομιστή…</string>
+    <string name="power_cut_title">Η κορνίζα έκλεισε χωρίς τερματισμό</string>
+    <string name="power_cut_body_ok">Όλα ελέγχθηκαν και είναι εντάξει.</string>
+    <string name="power_cut_body_redownload">Όλα ελέγχθηκαν. Ορισμένες φωτογραφίες λαμβάνονται ξανά.</string>
+    <string name="power_cut_tip">Την επόμενη φορά, επιλέξτε %1$s → %2$s στο μενού και περιμένετε μέχρι να εμφανιστεί στην οθόνη «%3$s».</string>
+</resources>

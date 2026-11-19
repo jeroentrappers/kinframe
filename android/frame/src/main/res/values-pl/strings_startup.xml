@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Uruchamianie…</string>
+    <string name="startup_checking_library">Sprawdzanie zdjęć po przerwie w zasilaniu…</string>
+    <string name="startup_checking_update">Sprawdzanie wersji aplikacji…</string>
+    <string name="startup_loading_photos">Wczytywanie zdjęć…</string>
+    <string name="startup_preparing_photo">Przygotowywanie pierwszego zdjęcia…</string>
+    <string name="startup_waiting_wifi">Czekanie na Wi-Fi…</string>
+    <string name="startup_setting_clock">Ustawianie zegara…</string>
+    <string name="startup_connecting">Łączenie z serwerem…</string>
+    <string name="power_cut_title">Wyłączono bez zamknięcia systemu</string>
+    <string name="power_cut_body_ok">Wszystko sprawdzone i w porządku.</string>
+    <string name="power_cut_body_redownload">Wszystko sprawdzone. Część zdjęć jest pobierana ponownie.</string>
+    <string name="power_cut_tip">Następnym razem wybierz w menu %1$s → %2$s i poczekaj, aż na ekranie pojawi się „%3$s”.</string>
+</resources>

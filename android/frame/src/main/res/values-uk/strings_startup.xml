@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Запуск…</string>
+    <string name="startup_checking_library">Перевірка фото після вимкнення світла…</string>
+    <string name="startup_checking_update">Перевірка версії застосунку…</string>
+    <string name="startup_loading_photos">Завантаження фото…</string>
+    <string name="startup_preparing_photo">Підготовка першого фото…</string>
+    <string name="startup_waiting_wifi">Очікування Wi-Fi…</string>
+    <string name="startup_setting_clock">Налаштування годинника…</string>
+    <string name="startup_connecting">Підключення до сервера…</string>
+    <string name="power_cut_title">Рамку вимкнули без завершення роботи</string>
+    <string name="power_cut_body_ok">Усе перевірено, усе гаразд.</string>
+    <string name="power_cut_body_redownload">Усе перевірено. Деякі фото завантажуються знову.</string>
+    <string name="power_cut_tip">Наступного разу виберіть у меню %1$s → %2$s і зачекайте, доки на екрані з’явиться «%3$s».</string>
+</resources>

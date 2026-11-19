@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">शुरू हो रहा है…</string>
+    <string name="startup_checking_library">बिजली जाने के बाद आपकी फ़ोटो जाँची जा रही हैं…</string>
+    <string name="startup_checking_update">ऐप का वर्शन जाँचा जा रहा है…</string>
+    <string name="startup_loading_photos">आपकी फ़ोटो लोड हो रही हैं…</string>
+    <string name="startup_preparing_photo">पहली फ़ोटो तैयार की जा रही है…</string>
+    <string name="startup_waiting_wifi">वाई-फ़ाई का इंतज़ार है…</string>
+    <string name="startup_setting_clock">घड़ी सेट की जा रही है…</string>
+    <string name="startup_connecting">सर्वर से कनेक्ट हो रहा है…</string>
+    <string name="power_cut_title">फ़्रेम ठीक से बंद किए बिना बंद हो गया</string>
+    <string name="power_cut_body_ok">सब कुछ जाँच लिया गया है और ठीक है।</string>
+    <string name="power_cut_body_redownload">सब कुछ जाँच लिया गया है। कुछ फ़ोटो फिर से डाउनलोड हो रही हैं।</string>
+    <string name="power_cut_tip">अगली बार मेन्यू में %1$s → %2$s चुनें और स्क्रीन पर “%3$s” दिखने तक इंतज़ार करें।</string>
+</resources>

@@ -63,6 +63,9 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_WORKERS` | CPUs/2 | Media worker goroutines |
 | `KINFRAME_VIPS`, `KINFRAME_VIPSHEADER`, `KINFRAME_FFMPEG`, `KINFRAME_FFPROBE` | names on `$PATH` | Tool binaries |
 | `KINFRAME_MAX_ITEMS_PER_SEND` | `200` | Default limit (operator can change it at runtime) |
+| `KINFRAME_MAX_FEEDS_PER_USER` | `20` | Feeds one account may own (operator can change it at runtime) |
+| `KINFRAME_MAX_SUBSCRIPTIONS_PER_FEED` | `100` | Frames one feed may be shown on (operator can change it at runtime) |
+| `KINFRAME_MAX_FEED_BACKFILL_ITEMS` | `5000` | Cap of a subscription's `history: all` (operator can change it at runtime) |
 | `KINFRAME_MAX_VIDEO_SECONDS` | `300` | Default limit, after trim |
 | `KINFRAME_MAX_UPLOAD_MB` | `2048` | Default tus upload limit |
 | `KINFRAME_TRASH_RETENTION_DAYS` | `30` | Default trash retention |
@@ -103,7 +106,18 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_SHOP_FILE` | — | Optional pre-order shop config (YAML or JSON, see `docs/deploy.md` → *Pre-order shop*). Unset = no shop. Validated at startup |
 | `KINFRAME_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` | port `587` | The server's own mail (shop confirmations); the same variables configure Logto's sign-in mails. 465 = implicit TLS, 587 = STARTTLS required, other ports STARTTLS if offered. `_FROM` is required with `_HOST` |
 | `KINFRAME_CALENDAR_SYNC_MINUTES` | `15` | Interval between syncs of each ICS/CalDAV source (minimum 5); up to 3 min jitter, back-off to 2 h on errors |
-| `KINFRAME_SECRETS_KEY` | derived from `KINFRAME_SIGNING_KEY` | 32+ bytes (hex or base64) that encrypt stored calendar links and CalDAV passwords (AES-256-GCM). When unset, a key is derived from the signing key with HKDF, so rotating the signing key then also invalidates stored calendar credentials: affected calendars show `auth_failed` until the link or password is entered again. Set a dedicated key to rotate them independently |
+| `KINFRAME_SECRETS_KEY` | derived from `KINFRAME_SIGNING_KEY` | 32+ bytes (hex or base64) that encrypt stored calendar links and CalDAV passwords, photo source links, passwords and API keys and Google access tokens (AES-256-GCM, a separate HKDF key per kind). When unset, a key is derived from the signing key with HKDF, so rotating the signing key then also invalidates stored calendar credentials: affected calendars show `auth_failed` until the link or password is entered again. Set a dedicated key to rotate them independently |
+| `KINFRAME_PHOTO_SOURCES` | `on` | `off` disables Immich and iCloud photo sources (discovery `photo_sources: false`; docs/spec/photo-sources.md) |
+| `KINFRAME_ICLOUD_SOURCES` | `on` | `off` disables iCloud shared-album links only (best effort, unofficial endpoints) |
+| `KINFRAME_PHOTO_SOURCE_SYNC_MINUTES` | `30` | Interval between syncs of each photo source (minimum 10; iCloud at least 60); up to 5 min jitter, back-off from 1 min to 6 h on errors |
+| `KINFRAME_SOURCES_PRIVATE_NETWORKS` | `auto` | Whether user-entered URLs (photo sources **and calendars**) may reach private networks (RFC 1918, `fc00::/7`, CGNAT): `auto` only when the public URL's host is `localhost` or resolves to private addresses, `on` always (home server with Immich on the LAN), `off` never. Loopback and link-local (cloud metadata) are always blocked; plain `http://` only for allowed private addresses |
+| `KINFRAME_SOURCES_ALLOWED_HOSTS` | — | Comma-separated host names, IPs or CIDRs that may use private addresses and `http://` regardless (`immich.lan,192.168.1.20`) |
+| `KINFRAME_SOURCES_CA_FILE` | — | Extra trusted CA certificates (PEM) for a LAN Immich with a private CA (TLS is always verified) |
+| `KINFRAME_MAX_PHOTO_SOURCES_PER_TARGET` / `KINFRAME_MAX_PHOTO_SOURCES_PER_USER` | `5` / `20` | Photo sources per album or feed, and per owner (operator can change them at runtime) |
+| `KINFRAME_MAX_PHOTO_SOURCE_ITEMS` | `10000` | Live items per photo source; newer upstream items beyond it are skipped |
+| `KINFRAME_MAX_PHOTO_SOURCE_RUN_MB` | `2048` | Bytes one sync run downloads; the rest follows 2 minutes later |
+| `KINFRAME_GOOGLE_CLIENT_ID` / `KINFRAME_GOOGLE_CLIENT_SECRET` (or `KINFRAME_GOOGLE_CLIENT_SECRET_FILE`) | — | Google Cloud OAuth client (Web application) with the Photos Picker API enabled and the redirect URI `<public URL>/v1/oauth/google/callback`; enables "Add from Google Photos" (discovery `google_photos_import`). Set both or neither |
+| `KINFRAME_MAX_GOOGLE_IMPORT_ITEMS` | `500` | Items per Google Photos import (the picker caps at 2000) |
 
 ### Calendars
 

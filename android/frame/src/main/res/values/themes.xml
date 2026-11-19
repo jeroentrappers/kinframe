@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+        The window starts in the boot animation's background colour, so nothing black shows between Android's boot
+        animation and the app's first frame (the start-up splash, ui/BootSplash.kt). windowDisablePreview stays on:
+        without a preview window Android keeps the boot animation running until that first frame is drawn, instead
+        of ending it for a plain, logo-less window.
+    -->
     <style name="Theme.Kinframe" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
-        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowBackground">@color/kin_boot_background</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowDisablePreview">true</item>
-        <item name="android:statusBarColor">@android:color/black</item>
-        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:statusBarColor">@color/kin_boot_background</item>
+        <item name="android:navigationBarColor">@color/kin_boot_background</item>
     </style>
 </resources>

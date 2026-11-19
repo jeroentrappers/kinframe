@@ -27,6 +27,12 @@ tags:
   - name: sends
   - name: library
   - name: albums
+  - name: feeds
+    description: Private family channels that frames subscribe to (docs/spec/feeds.md). Members, invites, posts, receipts and birthdays (docs/spec/birthdays.md).
+  - name: subscriptions
+    description: A frame subscribing to a feed, managed from both sides.
+  - name: photo-sources
+    description: Immich and iCloud albums synced into an album or a feed, and one-time imports from Google Photos (docs/spec/photo-sources.md).
   - name: settings
   - name: tv
     description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
@@ -112,6 +118,10 @@ paths:
                 display_name: { type: string, minLength: 1, maxLength: 40 }
                 share_location_names: { type: boolean }
                 locale: { type: string, examples: [nl-BE] }
+                timezone:
+                  type: string
+                  description: IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
+                  examples: [Europe/Brussels]
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
         default: { $ref: '#/components/responses/Problem' }
@@ -528,8 +538,10 @@ paths:
       tags: [sends]
       operationId: forwardSend
       description: |
-        Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
-        renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+        Place the same items on additional frames, or post them to feeds. Uses the same path as `sharePlacements`:
+        no new upload or master, renditions only for screen sizes that have none yet, and frames that already hold an
+        item are skipped (a placement that was only there through a feed becomes held directly, so unsubscribing no
+        longer removes it).
       parameters: [ { name: sendId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } } ]
       requestBody:
         required: true
@@ -538,8 +550,14 @@ paths:
             schema:
               type: object
               required: [frame_ids]
+              description: '`frame_ids` and `feed_ids` together must not be empty.'
               properties:
-                frame_ids: { type: array, minItems: 1, items: { $ref: '#/components/schemas/Id' } }
+                frame_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+                feed_ids:
+                  type: array
+                  maxItems: 20
+                  description: Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped.
+                  items: { $ref: '#/components/schemas/Id' }
       responses:
         '202': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/Send' } } } }
 
@@ -593,6 +611,7 @@ paths:
         - { name: sender_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
         - { name: kind, in: query, schema: { $ref: '#/components/schemas/MediaKind' } }
         - { name: album_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: feed_id, in: query, description: Only placements held by this feed (`feed_ids`)., schema: { $ref: '#/components/schemas/Id' } }
         - name: on_this_day
           in: query
           description: |
@@ -635,7 +654,7 @@ paths:
               type: object
               properties:
                 hidden: { type: boolean }
-                trashed: { type: boolean, description: true moves to trash (30 days), false restores. }
+                trashed: { type: boolean, description: 'true moves to trash (30 days), false restores.' }
                 approved: { type: boolean, description: Moderation decision (owner/admin). }
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
@@ -758,9 +777,910 @@ paths:
     delete:
       tags: [albums]
       operationId: deleteAlbum
-      description: Placements stay on the frame.
+      description: |
+        Placements stay on the frame, unless `remove_source_items` is true: then the photos the album's photo sources
+        imported are removed too (docs/spec/photo-sources.md §9.1). The album's photo sources are deleted either way.
+      parameters:
+        - name: remove_source_items
+          in: query
+          description: Also remove the photos this album's photo sources imported (clients ask when `photo_source_count` > 0).
+          schema: { type: boolean, default: false }
       responses:
         '204': { description: Deleted }
+
+  /v1/frames/{frameId}/albums/{albumId}/photo-sources:
+    get:
+      tags: [photo-sources]
+      operationId: listAlbumPhotoSources
+      description: The album's photo sources with their status (album managers, i.e. owner, admin or manage_library; `403 missing_permission` otherwise).
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { name: albumId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '200':
+          description: Sources, oldest first
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/PhotoSource' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- feeds
+  /v1/feeds:
+    get:
+      tags: [feeds]
+      operationId: listMyFeeds
+      description: Feeds the caller is a member of (any role). See docs/spec/feeds.md.
+      responses:
+        '200':
+          description: Feeds
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/FeedSummary' } }
+    post:
+      tags: [feeds]
+      operationId: createFeed
+      description: The caller becomes the feed's owner. At most `limits.max_feeds_per_user` owned feeds (`409 limit_reached`).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FeedCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Feed' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [feeds]
+      operationId: getFeed
+      description: Feed members only; everyone else gets `404 not_found` (feeds are never discoverable).
+      responses:
+        '200': { description: Feed, content: { application/json: { schema: { $ref: '#/components/schemas/Feed' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [feeds]
+      operationId: updateFeed
+      description: |
+        Owner or admin. Renaming re-emits the feed's placements on every subscribed frame so their credit follows.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FeedUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Feed' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [feeds]
+      operationId: deleteFeed
+      description: |
+        Owner only. Removes every post from every subscribed frame (placements that also reached a frame directly
+        stay), ends all subscriptions (`removed`, reason `feed_deleted`) and notifies the frames' owners and admins.
+        Items stay in the posters' sent history. Runs in the background; the feed is gone for clients at once.
+      responses:
+        '204': { description: Deleted }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/leave:
+    post:
+      tags: [feeds]
+      operationId: leaveFeed
+      description: Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                remove_my_posts: { type: boolean, default: false, description: Also remove your posts from the feed and every subscribed frame. }
+      responses:
+        '204': { description: Left }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/transfer:
+    post:
+      tags: [feeds]
+      operationId: transferFeedOwnership
+      description: Owner only. The new owner must be a member; the previous owner becomes admin.
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { $ref: '#/components/schemas/Id' }
+      responses:
+        '204': { description: Transferred }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/members:
+    get:
+      tags: [feeds]
+      operationId: listFeedMembers
+      description: Any feed member.
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      responses:
+        '200':
+          description: Members
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/FeedMember' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/members/{userId}:
+    parameters:
+      - { $ref: '#/components/parameters/FeedId' }
+      - { $ref: '#/components/parameters/UserId' }
+    patch:
+      tags: [feeds]
+      operationId: updateFeedMember
+      description: Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [admin, poster] }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/FeedMember' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [feeds]
+      operationId: removeFeedMember
+      description: Owner or admin (admins cannot remove the owner or other admins).
+      parameters:
+        - name: remove_posts
+          in: query
+          description: Also remove the member's posts from the feed and every subscribed frame.
+          schema: { type: boolean, default: false }
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/join-requests:
+    get:
+      tags: [feeds]
+      operationId: listFeedJoinRequests
+      description: Owner or admin. Pending requests from join invites (`via` is always `invite`).
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      responses:
+        '200':
+          description: Pending requests
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/JoinRequest' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/join-requests/{requestId}/{decision}:
+    post:
+      tags: [feeds]
+      operationId: decideFeedJoinRequest
+      description: Owner or admin. Approved requesters become posters.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { name: requestId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: decision, in: path, required: true, schema: { type: string, enum: [approve, deny] } }
+      responses:
+        '204': { description: Decided }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/invites:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [feeds]
+      operationId: listFeedInvites
+      description: |
+        Owner or admin: all active (not expired, revoked or used up) invites. Posters, when the feed has
+        `posters_can_invite`: their own active invites.
+      responses:
+        '200':
+          description: Active invites
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/FeedInvite' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [feeds]
+      operationId: createFeedInvite
+      description: |
+        Owner or admin, or any member when the feed has `posters_can_invite` (default off) for `join` invites;
+        `subscribe` invites are pre-approved and stay owner/admin only (`403 forbidden`). Returns a link (`https://<web>/fi/<token>`, also shown as QR) and a short code for the
+        app's "Enter a code" field. `join` invites make the redeemer a poster (after approval unless the feed's
+        `invite_requires_approval` is off); `subscribe` invites let the redeemer subscribe frames they manage,
+        pre-approved, without joining.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FeedInviteCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/FeedInvite' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/invites/{inviteId}:
+    delete:
+      tags: [feeds]
+      operationId: revokeFeedInvite
+      description: Owner or admin, or the poster who created it.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { name: inviteId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '204': { description: Revoked }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feed-invites:lookup:
+    post:
+      tags: [feeds]
+      operationId: lookupFeedInvite
+      description: |
+        Resolve a short feed invite code (typed into "Enter a code"; codes contain letters, frame codes are 8 digits)
+        to its preview, including the token for `acceptFeedInvite`. Rate-limited like code redemption; unknown codes
+        answer `404 invite_invalid`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, pattern: '^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{4}-?[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{4}$', description: '8 Crockford base32 characters, hyphen optional, case-insensitive.' }
+      responses:
+        '200': { description: Preview, content: { application/json: { schema: { $ref: '#/components/schemas/FeedInvitePreview' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+        '410': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /v1/feed-invites/{token}:
+    get:
+      tags: [feeds]
+      operationId: previewFeedInvite
+      description: Requires sign-in so tokens can't be enumerated anonymously.
+      parameters: [ { $ref: '#/components/parameters/InviteToken' } ]
+      responses:
+        '200': { description: Preview, content: { application/json: { schema: { $ref: '#/components/schemas/FeedInvitePreview' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+        '410': { $ref: '#/components/responses/Problem' }
+
+  /v1/feed-invites/{token}/accept:
+    post:
+      tags: [feeds]
+      operationId: acceptFeedInvite
+      description: |
+        `join` invites: no body needed; the caller joins as poster or a join request is created. `subscribe` invites:
+        `frame_ids` (frames the caller manages: owner, admin or `change_settings`) are subscribed and active at once;
+        frames that already have a live subscription to the feed are reported with their existing one.
+      parameters:
+        - { $ref: '#/components/parameters/InviteToken' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody:
+        content: { application/json: { schema: { $ref: '#/components/schemas/FeedInviteAccept' } } }
+      responses:
+        '200': { description: Result, content: { application/json: { schema: { $ref: '#/components/schemas/FeedInviteResult' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- feed posts
+  /v1/feeds/{feedId}/posts:
+    get:
+      tags: [feeds]
+      operationId: listFeedPosts
+      description: |
+        Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
+        for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
+        they are null. Post as a feed is done with `createSend` (`feed_ids`).
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/Cursor' }
+        - { $ref: '#/components/parameters/Limit' }
+        - { name: poster_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '200':
+          description: Page of posts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [posts, next_cursor]
+                properties:
+                  posts: { type: array, items: { $ref: '#/components/schemas/FeedPost' } }
+                  next_cursor: { type: [string, 'null'] }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/posts/{postId}:
+    parameters:
+      - { $ref: '#/components/parameters/FeedId' }
+      - { $ref: '#/components/parameters/PostId' }
+    get:
+      tags: [feeds]
+      operationId: getFeedPost
+      responses:
+        '200': { description: Post, content: { application/json: { schema: { $ref: '#/components/schemas/FeedPost' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [feeds]
+      operationId: removeFeedPost
+      description: |
+        The poster (unsend) or an owner/admin of the feed. Removes the post from the feed and its placements from every
+        subscribed frame, except placements that also reached a frame directly or through another feed. The send and its
+        direct placements are untouched. Never needs a frame to be online.
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/posts/{postId}/items/{itemId}:
+    delete:
+      tags: [feeds]
+      operationId: removeFeedPostItem
+      description: Like `removeFeedPost` for one item. Removing the last item removes the post.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/PostId' }
+        - { $ref: '#/components/parameters/ItemId' }
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/posts/{postId}/receipts:
+    get:
+      tags: [feeds]
+      operationId: getFeedPostReceipts
+      description: |
+        Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
+        (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+        for direct sends; who moderated is never revealed.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/PostId' }
+      responses:
+        '200': { description: Receipts, content: { application/json: { schema: { $ref: '#/components/schemas/FeedPostReceipts' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- feed birthdays
+  /v1/feeds/{feedId}/birthdays:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [feeds]
+      operationId: listFeedBirthdays
+      description: |
+        The feed's birthday people (docs/spec/birthdays.md), sorted by the next birthday in the caller's time zone.
+        Any feed member sees `approved` ones; owner and admins also see `pending` and `rejected` ones (rejected for 30
+        days), posters their own suggestions. `birth_year` is null unless the caller may see it (owner/admin, whoever
+        added the entry, the linked member, or `show_age` on).
+      parameters:
+        - name: status
+          in: query
+          description: Only this status (default all the caller may see).
+          schema: { $ref: '#/components/schemas/BirthdayStatus' }
+      responses:
+        '200':
+          description: Birthday people
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [feeds]
+      operationId: createFeedBirthday
+      description: |
+        Add a birthday person. Owner, admins and (with the feed's `posters_can_add_birthdays`) posters add it as
+        `approved`: it reaches every frame with a birthday subscription. Other posters create a `pending` suggestion
+        and the feed's owner and admins are notified (`birthday.suggested`, push `birthday_suggestion`).
+        `409 duplicate_birthday` (existing entry's id in `detail`) when a pending or approved entry of this feed has
+        the same normalized name, day and month; `409 limit_reached` beyond `limits.max_birthdays_per_feed`
+        (pending and approved count); `422 validation_failed` for an impossible date (`day`) or year (`birth_year`).
+        `user_id` must be a member of this feed without another entry. The photo is uploaded afterwards with
+        `putFeedBirthdayPhoto`.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPersonCreate' } } }
+      responses:
+        '201': { description: Created (approved or pending), content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/birthdays/{birthdayId}:
+    parameters:
+      - { $ref: '#/components/parameters/FeedId' }
+      - { $ref: '#/components/parameters/BirthdayId' }
+    get:
+      tags: [feeds]
+      operationId: getFeedBirthday
+      description: Same visibility and field rules as `listFeedBirthdays`.
+      responses:
+        '200': { description: Birthday person, content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [feeds]
+      operationId: updateFeedBirthday
+      description: |
+        Owner and admins: any field of any entry (also of a pending suggestion before approving it). The suggester:
+        their pending suggestion. Posters with `posters_can_add_birthdays`: entries they added. The linked member:
+        `birth_year`, `show_age` and unlinking (`user_id: null`) of their own entry. Other fields answer
+        `403 forbidden`. Omitted fields are kept; `birth_year: null` clears the year. Changes to approved entries
+        reach the frames with a `birthdays` change. Same `409`/`422` rules as `createFeedBirthday`.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPersonUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [feeds]
+      operationId: removeFeedBirthday
+      description: |
+        Owner and admins (any entry), the suggester (withdraw a pending suggestion), posters with
+        `posters_can_add_birthdays` (entries they added) and the linked member (their own entry). Deletes the entry,
+        its photo and its greetings; frames drop the person with the next `birthdays` change. Not reversible on the
+        server: clients offer Undo by creating it again.
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/birthdays/{birthdayId}/approve:
+    post:
+      tags: [feeds]
+      operationId: approveFeedBirthday
+      description: |
+        Owner or admin; `pending` → `approved`. Notifies the suggester (`birthday.decided`, push `birthday_decided`)
+        and puts the person on the frames. Repeating it on an approved entry returns it unchanged;
+        `409 already_decided` on a rejected one; `409 duplicate_birthday` when an approved entry with the same name
+        and date appeared meanwhile.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/BirthdayId' }
+      responses:
+        '200': { description: Approved, content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/birthdays/{birthdayId}/reject:
+    post:
+      tags: [feeds]
+      operationId: rejectFeedBirthday
+      description: |
+        Owner or admin; `pending` → `rejected`. Notifies the suggester. The entry stays visible to the suggester and
+        admins for 30 days, then it is deleted; a new suggestion for the same person is allowed at once. Repeating it
+        returns the entry unchanged; `409 already_decided` on an approved one (remove it instead).
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/BirthdayId' }
+      responses:
+        '200': { description: Rejected, content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/birthdays/{birthdayId}/photo:
+    parameters:
+      - { $ref: '#/components/parameters/FeedId' }
+      - { $ref: '#/components/parameters/BirthdayId' }
+    put:
+      tags: [feeds]
+      operationId: putFeedBirthdayPhoto
+      description: |
+        Set the person's photo, like `putAvatar`: the server crops to a centred square, stores 256x256 WebP at a new
+        unguessable URL and deletes the previous file. Whoever may edit the entry's photo (see `updateFeedBirthday`;
+        the linked member too).
+      requestBody:
+        required: true
+        content:
+          image/jpeg: { schema: { type: string, contentMediaType: image/jpeg } }
+          image/png: { schema: { type: string, contentMediaType: image/png } }
+          image/webp: { schema: { type: string, contentMediaType: image/webp } }
+      responses:
+        '200': { description: Stored, content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [feeds]
+      operationId: deleteFeedBirthdayPhoto
+      description: Remove the uploaded photo; the linked member's avatar (if any) is used instead.
+      responses:
+        '200': { description: Removed, content: { application/json: { schema: { $ref: '#/components/schemas/BirthdayPerson' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/birthday-greetings:
+    get:
+      tags: [feeds]
+      operationId: listFeedBirthdayGreetings
+      description: |
+        Greetings frames sent for this feed's birthday people ("Opa's frame says happy birthday to Oma"), newest
+        first, kept 13 months. Any feed member.
+      parameters:
+        - { $ref: '#/components/parameters/FeedId' }
+        - { $ref: '#/components/parameters/Cursor' }
+        - { $ref: '#/components/parameters/Limit' }
+        - { name: birthday_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: date, in: query, description: Only greetings for this occurrence date., schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: Page of greetings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [greetings, next_cursor]
+                properties:
+                  greetings: { type: array, items: { $ref: '#/components/schemas/FeedBirthdayGreeting' } }
+                  next_cursor: { type: [string, 'null'] }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/preferences:
+    patch:
+      tags: [feeds]
+      operationId: updateFeedPreferences
+      description: |
+        The caller's own preferences in this feed (any member). `birthday_notifications` (default true): the morning
+        notification on a birthday day and greeting notifications for this feed's people.
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FeedPreferencesUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Feed' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- subscriptions
+  /v1/feeds/{feedId}/subscriptions:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [subscriptions]
+      operationId: listFeedSubscriptions
+      description: |
+        Owner and admins see every status, including who requested. Other members see `active` and `paused`
+        subscriptions only, without `requested_by_name`. Rejected and removed ones are listed for 30 days.
+      parameters:
+        - name: status
+          in: query
+          description: Only this status (default all the caller may see).
+          schema: { $ref: '#/components/schemas/SubscriptionStatus' }
+      responses:
+        '200':
+          description: Subscriptions
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Subscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [subscriptions]
+      operationId: requestSubscription
+      description: |
+        Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
+        `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
+        has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+        `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
+        this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/SubscriptionRequest' } } }
+      responses:
+        '201': { description: Created (pending or active), content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/subscriptions:
+    get:
+      tags: [subscriptions]
+      operationId: listFrameSubscriptions
+      description: |
+        The feeds a frame subscribes to. Frame managers (owner, admin, `change_settings`) see every status; other
+        members see `active` and `paused` ones.
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - name: status
+          in: query
+          description: Only this status (default all the caller may see).
+          schema: { $ref: '#/components/schemas/SubscriptionStatus' }
+      responses:
+        '200':
+          description: Subscriptions
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Subscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/subscriptions/{subscriptionId}:
+    parameters: [ { $ref: '#/components/parameters/SubscriptionId' } ]
+    get:
+      tags: [subscriptions]
+      operationId: getSubscription
+      description: Visible to the frame's members and the feed's members, with the same field rules as the lists.
+      responses:
+        '200': { description: Subscription, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [subscriptions]
+      operationId: updateSubscription
+      description: |
+        Frame managers only. Changing the history option backfills (quietly) or trims feed-only placements of
+        history items; posts made after `activated_at` are never trimmed. Allowed in `pending`, `active` and
+        `paused`.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/SubscriptionUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [subscriptions]
+      operationId: removeSubscription
+      description: |
+        Ends a subscription (`removed`): frame managers unsubscribe (or withdraw a pending request), the requester may
+        withdraw their pending request, and feed owners/admins remove any subscription. Feed-only placements leave the
+        frame; `slideshow.feed_id` resets to null if it pointed at this feed. The other side is notified.
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/subscriptions/{subscriptionId}/approve:
+    post:
+      tags: [subscriptions]
+      operationId: approveSubscription
+      description: Feed owner or admin; `pending` → `active`. Starts the history backfill and notifies the requester.
+      parameters: [ { $ref: '#/components/parameters/SubscriptionId' } ]
+      responses:
+        '200': { description: Approved, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/subscriptions/{subscriptionId}/reject:
+    post:
+      tags: [subscriptions]
+      operationId: rejectSubscription
+      description: Feed owner or admin; `pending` → `rejected`. Notifies the requester.
+      parameters: [ { $ref: '#/components/parameters/SubscriptionId' } ]
+      responses:
+        '200': { description: Rejected, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/subscriptions/{subscriptionId}/pause:
+    post:
+      tags: [subscriptions]
+      operationId: pauseSubscription
+      description: |
+        Frame managers; `active` → `paused`. The feed's placements leave the frame (kept on the server, restored on
+        resume) unless they also reached it directly or through another active feed. No new posts are placed.
+      parameters: [ { $ref: '#/components/parameters/SubscriptionId' } ]
+      responses:
+        '200': { description: Paused, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/subscriptions/{subscriptionId}/resume:
+    post:
+      tags: [subscriptions]
+      operationId: resumeSubscription
+      description: |
+        Frame managers; `paused` → `active`. Restores the feed's placements and quietly places the posts made while
+        paused.
+      parameters: [ { $ref: '#/components/parameters/SubscriptionId' } ]
+      responses:
+        '200': { description: Resumed, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- photo sources (docs/spec/photo-sources.md)
+  /v1/feeds/{feedId}/photo-sources:
+    get:
+      tags: [photo-sources]
+      operationId: listFeedPhotoSources
+      description: The feed's photo sources with their status (feed owner and admins; posters get `403 missing_permission`).
+      parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+      responses:
+        '200':
+          description: Sources, oldest first
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/PhotoSource' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/photo-sources:
+    get:
+      tags: [photo-sources]
+      operationId: listMyPhotoSources
+      description: Sources the caller owns (set up), across all albums and feeds, for Settings → Photo sources.
+      responses:
+        '200':
+          description: Sources, newest first
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/PhotoSource' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [photo-sources]
+      operationId: createPhotoSource
+      description: |
+        Connect an outside album to a kinframe album (`album_id`: album managers of its frame) or a feed (`feed_id`:
+        feed owner/admins). The caller becomes the source's owner: imported photos are sent by them. The server tests
+        the connection first (`422 source_test_failed` with the `PhotoSourceErrorCode` in `detail`; a blocked private
+        address is `422 validation_failed` on `url`/`server_url`), then starts the first run (`running: true`).
+        Secrets (`url`, `api_key`, `password`) are sealed at rest and never returned. `409 duplicate_source` when the
+        same outside album already feeds this target (`detail`: its id), `409 limit_reached` beyond
+        `limits.max_photo_sources_per_target` or `max_photo_sources_per_user`, `503 feature_disabled` when the server
+        has photo sources (or this provider) turned off. Rate-limited (30/h per user).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSourceCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSource' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/photo-sources:test:
+    post:
+      tags: [photo-sources]
+      operationId: testPhotoSource
+      description: |
+        Try a connection without saving it: reads the outside album's name and size, and the warnings the source would
+        have (`downloads_disabled`, `metadata_hidden`). `ok: false` with `error_code` when it cannot be read. For
+        `immich_api` without `immich_album_id`, `albums` lists the account's albums (like `listImmichAlbums`).
+        Rate-limited together with `listImmichAlbums` (30/h per user).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSourceConnection' } } }
+      responses:
+        '200': { description: Outcome, content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSourceTestResult' } } } }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/photo-sources:immich-albums:
+    post:
+      tags: [photo-sources]
+      operationId: listImmichAlbums
+      description: |
+        The albums an Immich API key can read (own and shared with that account), before creating an `immich_api`
+        source, so the client can let the person pick one. Nothing is saved. Failures answer `200` with `ok: false`
+        and `error_code`, like `testPhotoSource`. Rate-limited together with `testPhotoSource`.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ImmichConnection' } } }
+      responses:
+        '200': { description: Albums, content: { application/json: { schema: { $ref: '#/components/schemas/ImmichAlbumList' } } } }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/photo-sources/{sourceId}:
+    parameters: [ { $ref: '#/components/parameters/SourceId' } ]
+    get:
+      tags: [photo-sources]
+      operationId: getPhotoSource
+      description: Managers of the target (album managers, feed owner/admins) and the owner. Others get `404 not_found`.
+      responses:
+        '200': { description: Source, content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSource' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [photo-sources]
+      operationId: updatePhotoSource
+      description: |
+        Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op).
+        Changing the link, server URL, key, password or album tests it first (`422 source_test_failed`) and then
+        syncs at once; success returns an `error`/`needs_attention` source to `active`. `take_over: true` makes the
+        caller the owner (needed after `owner_lost_access`; for `immich_api` together with a new `api_key`).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSourceUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSource' } } } }
+        '422': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [photo-sources]
+      operationId: deletePhotoSource
+      description: |
+        Stop syncing (managers of the target). With `remove_items` the photos this source imported are removed from
+        the frame (album) or from the feed's posts, like an unsend, in the background; without it they stay as the
+        owner's ordinary photos (still credited "via …"). Clients ask which, showing `counts.imported`.
+      parameters:
+        - name: remove_items
+          in: query
+          required: true
+          description: Also remove the photos this source imported.
+          schema: { type: boolean }
+      responses:
+        '204': { description: Deleted }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/photo-sources/{sourceId}/sync:
+    post:
+      tags: [photo-sources]
+      operationId: syncPhotoSource
+      description: |
+        Sync now (managers of the target). Returns at once with `running: true`. At most once per 2 minutes per source
+        and 30 per hour per user (`429` with `Retry-After`). A paused source answers `409 invalid_transition`.
+        `confirm_removals: true` applies removals held back by the mass-removal guard (`pending_removals`,
+        `last_error_code: mass_removal`).
+      parameters: [ { $ref: '#/components/parameters/SourceId' } ]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirm_removals: { type: boolean, default: false, description: Remove the photos that disappeared upstream although there were many. }
+      responses:
+        '202': { description: Sync started, content: { application/json: { schema: { $ref: '#/components/schemas/PhotoSource' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- Google Photos import
+  /v1/google-imports:
+    get:
+      tags: [photo-sources]
+      operationId: listMyGoogleImports
+      description: The caller's imports of the last 7 days, newest first (so an app that was closed while the picker was open can resume).
+      responses:
+        '200':
+          description: Imports
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/GoogleImport' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [photo-sources]
+      operationId: startGoogleImport
+      description: |
+        "Add from Google Photos" into an album (album managers) or a feed (any feed member). Answers `needs_auth` with
+        `auth_url` (open it in a browser session; Google redirects to `googleOAuthCallback`, which redirects to
+        `return_uri`), or directly `picking` with `picker_uri` when the caller's previous import left a token with more
+        than 10 minutes to live. `503 feature_disabled` when the server has no Google OAuth client (discovery
+        `google_photos_import: false`). `return_uri` must be `app.kinframe:/google-import`,
+        `<public URL>/google-import/return` or `<web>/google-import/return` (`422 validation_failed`). Rate-limited
+        (20/h per user).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/GoogleImportCreate' } } }
+      responses:
+        '201': { description: Started, content: { application/json: { schema: { $ref: '#/components/schemas/GoogleImport' } } } }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/google-imports/{importId}:
+    get:
+      tags: [photo-sources]
+      operationId: getGoogleImport
+      description: The importer only. Poll while `picking` or `importing` (every 2–5 s, or follow `google_import.updated`).
+      parameters: [ { $ref: '#/components/parameters/ImportId' } ]
+      responses:
+        '200': { description: Import, content: { application/json: { schema: { $ref: '#/components/schemas/GoogleImport' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/google-imports/{importId}/cancel:
+    post:
+      tags: [photo-sources]
+      operationId: cancelGoogleImport
+      description: |
+        Cancel (the importer). From `needs_auth` or `picking` the picker session is deleted; from `importing` the server
+        stops after the current file and keeps what was added (undo is `unsend` of `send_ids`). A finished import
+        answers `409 invalid_transition`; cancelling a cancelled one returns it unchanged.
+      parameters: [ { $ref: '#/components/parameters/ImportId' } ]
+      responses:
+        '200': { description: Cancelled, content: { application/json: { schema: { $ref: '#/components/schemas/GoogleImport' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/oauth/google/callback:
+    get:
+      tags: [photo-sources]
+      operationId: googleOAuthCallback
+      security: []
+      description: |
+        Google's OAuth redirect (registered by the operator as `<public URL>/v1/oauth/google/callback`). Opened by the
+        browser, never called by clients. Checks `state` (single use, 15 minutes), exchanges `code` with the PKCE
+        verifier, creates the picker session and answers `302` to the import's `return_uri` with
+        `?import_id=<id>&status=<GoogleImportStatus>` (`picking`, or `failed` after a denied or failed consent).
+        An unknown, expired or reused `state` gets a small HTML page instead of a redirect.
+      parameters:
+        - { name: state, in: query, required: true, schema: { type: string, maxLength: 200 } }
+        - { name: code, in: query, schema: { type: string, maxLength: 2048 } }
+        - { name: error, in: query, description: Set by Google when consent failed (e.g. `access_denied`)., schema: { type: string, maxLength: 200 } }
+        - { name: scope, in: query, schema: { type: string, maxLength: 2048 } }
+      responses:
+        '302': { description: Redirect to the import's `return_uri` }
+        '400': { description: 'Unknown, expired or reused state (HTML page)', content: { text/html: { schema: { type: string } } } }
 
   # ---------------------------------------------------------------- settings
   # ---------------------------------------------------------------- tv
@@ -1130,7 +2050,7 @@ paths:
                 required: [device_id, device_secret]
                 properties:
                   device_id: { $ref: '#/components/schemas/Id' }
-                  device_secret: { type: string, description: 256-bit random, base64url. Shown only once. }
+                  device_secret: { type: string, description: '256-bit random, base64url. Shown only once.' }
         '429': { $ref: '#/components/responses/Problem' }
 
   /v1/devices/token:
@@ -1598,6 +2518,29 @@ paths:
         '304': { description: Not modified }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /v1/device/birthdays/{birthdayId}/greetings/{date}:
+    put:
+      tags: [device]
+      operationId: deviceGreetBirthday
+      security: [ { deviceAuth: [] } ]
+      description: |
+        "Say happy birthday" on the frame's birthday card (docs/spec/birthdays.md §7). `birthdayId` is a
+        `FrameBirthday.id` (or any of its `birthday_ids`), `date` the frame's local date. Idempotent: one greeting per
+        person, frame and date, recorded once in every feed that lists the person; `204` also when it existed.
+        Feed members get `birthday.greeting` (push `birthday_greeting` with `birthday_notifications`).
+        `404 not_found` when the person is not on this frame (removed, subscription paused or birthdays off);
+        `422 validation_failed` (field `date`) when `date` is not the person's birthday (29 February counts on
+        28 February in non-leap years) or lies outside the server's UTC date −2 … +1 days. At most 50 a day per frame
+        (`429 rate_limited`).
+      parameters:
+        - { $ref: '#/components/parameters/BirthdayId' }
+        - { name: date, in: path, required: true, schema: { type: string, format: date } }
+      responses:
+        '204': { description: Recorded }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
   /v1/device/update:
     get:
       tags: [device]
@@ -1855,6 +2798,12 @@ components:
     InvitationId: { name: invitationId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     EventId: { name: eventId, in: path, required: true, schema: { $ref: '#/components/schemas/CalendarEventId' } }
     EndpointId: { name: endpointId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    FeedId: { name: feedId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    PostId: { name: postId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    SubscriptionId: { name: subscriptionId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    BirthdayId: { name: birthdayId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    SourceId: { name: sourceId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    ImportId: { name: importId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     InviteToken: { name: token, in: path, required: true, schema: { type: string, minLength: 22, maxLength: 64 } }
     Cursor: { name: cursor, in: query, schema: { type: string } }
     Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
@@ -1923,6 +2872,12 @@ components:
         - upstream_unavailable
         - feature_disabled
         - already_decided
+        - already_subscribed
+        - invalid_transition
+        - limit_reached
+        - duplicate_birthday
+        - duplicate_source
+        - source_test_failed
         - server_error
 
     Discovery:
@@ -1959,6 +2914,32 @@ components:
           type: boolean
           default: false
           description: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+        feeds:
+          type: boolean
+          default: false
+          description: True when the server supports feeds and subscriptions (docs/spec/feeds.md).
+        birthdays:
+          type: boolean
+          default: false
+          description: True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
+        photo_sources:
+          type: boolean
+          default: false
+          description: True when albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md).
+        photo_source_providers:
+          type: array
+          description: The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
+          items: { $ref: '#/components/schemas/PhotoSourceProvider' }
+        photo_sources_private_networks:
+          type: boolean
+          default: false
+          description: |
+            True when sources may reach private network addresses (a home-network Immich such as
+            `http://192.168.1.10:2283`). False: the connect sheet asks for a public address (docs/spec/photo-sources.md §12.3).
+        google_photos_import:
+          type: boolean
+          default: false
+          description: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
         webpush_public_key:
           type: [string, 'null']
           description: |
@@ -2016,7 +2997,7 @@ components:
         id: { type: string, examples: [frame-10] }
         name: { type: string, examples: ['kinframe 10.1"'] }
         size: { type: string, description: Screen size label, examples: ['10.1"'] }
-        price_cents: { type: integer, description: Unit price incl. VAT, in cents }
+        price_cents: { type: integer, description: 'Unit price incl. VAT, in cents' }
         max_qty: { type: integer, minimum: 1 }
         image: { type: string, description: 'Illustration key: frame-10 or frame-15', examples: [frame-10] }
         specs:
@@ -2112,6 +3093,15 @@ components:
         max_video_seconds: { type: integer, default: 300 }
         max_upload_bytes: { type: integer, default: 2147483648 }
         trash_retention_days: { type: integer, default: 30 }
+        max_feeds_per_user: { type: integer, default: 20, description: Feeds one account may own. }
+        max_subscriptions_per_feed: { type: integer, default: 100 }
+        max_feed_backfill_items: { type: integer, default: 5000, description: 'Cap of `history: all` per subscription (newest first).' }
+        max_birthdays_per_feed: { type: integer, default: 200, description: Birthday people per feed (pending and approved). }
+        max_photo_sources_per_target: { type: integer, default: 5, description: Photo sources per album or feed. }
+        max_photo_sources_per_user: { type: integer, default: 20, description: Photo sources one account owns. }
+        max_photo_source_items: { type: integer, default: 10000, description: Live imported items per photo source; newer upstream items beyond it are skipped. }
+        max_photo_source_run_bytes: { type: integer, default: 2147483648, description: Bytes one sync run downloads; the rest follows in the next runs. }
+        max_google_import_items: { type: integer, default: 500, description: Items per Google Photos import (the picker's own maximum is 2000). }
 
     Place:
       type: object
@@ -2136,6 +3126,7 @@ components:
         avatar_url: { type: [string, 'null'], format: uri }
         share_location_names: { type: boolean }
         locale: { type: [string, 'null'] }
+        timezone: { type: [string, 'null'], description: IANA time zone reported by the user's apps; null until one did., examples: [Europe/Brussels] }
         is_operator: { type: boolean }
         created_at: { type: string, format: date-time }
 
@@ -2144,7 +3135,7 @@ components:
       required: [kind, endpoint]
       properties:
         kind: { type: string, enum: [unifiedpush, fcm, apns, webpush] }
-        endpoint: { type: string, description: UnifiedPush/WebPush URL, or FCM/APNs token }
+        endpoint: { type: string, description: 'UnifiedPush/WebPush URL, or FCM/APNs token' }
         webpush_keys:
           type: object
           properties:
@@ -2230,6 +3221,15 @@ components:
         app_version: { type: string }
         app_version_code: { type: integer }
         android_sdk: { type: integer }
+        features:
+          type: array
+          description: |
+            Optional capabilities of the frame app. `feed_backfill`: the frame shows `Placement.backfill` placements
+            quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
+            backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
+            the `birthdays` change (informational only: nothing is withheld; apps use it for
+            `Subscription.frame.birthdays_supported`).
+          items: { type: string }
         uptime_s: { type: integer }
         wifi_ssid: { type: [string, 'null'] }
         wifi_rssi_dbm: { type: [integer, 'null'] }
@@ -2374,9 +3374,21 @@ components:
 
     SendCreate:
       type: object
+      description: |
+        Recipients are `frame_ids` plus `feed_ids`; together they must not be empty (`422 validation_failed` on
+        `frame_ids`). Feeds need membership (any role), frames need `send`. A frame that is a direct recipient and
+        also subscribes to a feed in `feed_ids` gets the item once (docs/spec/feeds.md §6.2).
       required: [frame_ids, items]
       properties:
-        frame_ids: { type: array, minItems: 1, items: { $ref: '#/components/schemas/Id' } }
+        frame_ids:
+          type: array
+          description: Frames to send to directly. May be empty when `feed_ids` is not.
+          items: { $ref: '#/components/schemas/Id' }
+        feed_ids:
+          type: array
+          maxItems: 20
+          description: 'Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`).'
+          items: { $ref: '#/components/schemas/Id' }
         items:
           type: array
           minItems: 1
@@ -2384,7 +3396,7 @@ components:
             type: object
             required: [upload_id]
             properties:
-              upload_id: { type: string, description: tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still. }
+              upload_id: { type: string, description: 'tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still.' }
               caption: { type: [string, 'null'], maxLength: 280 }
               focal_point: { $ref: '#/components/schemas/FocalPoint' }
               fit: { $ref: '#/components/schemas/Fit' }
@@ -2458,6 +3470,12 @@ components:
         imported_sender_name:
           type: [string, 'null']
           description: The original sender's display name in that app, when known.
+        via:
+          description: |
+            Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
+            sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
+            for feed placements). Optional: clients that don't know it show the sender only.
+          oneOf: [ { $ref: '#/components/schemas/ItemVia' }, { type: 'null' } ]
         motion:
           description: |
             Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
@@ -2474,6 +3492,21 @@ components:
       type: string
       enum: [frameo]
       description: An app a frame can import leftover photos from.
+
+    PhotoService:
+      type: string
+      description: The outside service a photo came from.
+      enum: [immich, icloud, google_photos]
+
+    ItemVia:
+      type: object
+      required: [service, label]
+      properties:
+        service: { $ref: '#/components/schemas/PhotoService' }
+        label: { type: string, description: 'Service name to show, not translated: "Immich", "iCloud", "Google Photos".', examples: [Immich] }
+        source_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: The photo source that synced it, while it exists (null for Google imports and deleted sources).
 
     ItemMotion:
       type: object
@@ -2522,6 +3555,26 @@ components:
         shared_by_name:
           type: [string, 'null']
           description: Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+        origin: { $ref: '#/components/schemas/PlacementOrigin' }
+        origin_feed_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: '`origin: feed`: the feed that placed it.'
+        origin_feed_name:
+          type: [string, 'null']
+          description: Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by").
+        feed_ids:
+          type: array
+          description: |
+            Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
+            Used for feed mode (`slideshow.feed_id`), like `album_ids` for album mode.
+          items: { $ref: '#/components/schemas/Id' }
+        backfill:
+          type: boolean
+          default: false
+          description: |
+            Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
+            import). Frames don't treat it as new: no "N new" card, no screen wake. `received_at` is then the post time
+            (for a photo source's first import: when the photo was added upstream, else its capture time).
 
     ShareResult:
       type: object
@@ -2550,9 +3603,18 @@ components:
         id: { $ref: '#/components/schemas/Id' }
         created_at: { type: string, format: date-time }
         items: { type: array, items: { $ref: '#/components/schemas/Item' } }
+        via:
+          description: |
+            Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
+            run or import). Such sends get no `delivered` push.
+          oneOf: [ { $ref: '#/components/schemas/ItemVia' }, { type: 'null' } ]
+        feeds:
+          type: array
+          description: The feeds this send was posted to, with receipts (docs/spec/feeds.md §7).
+          items: { $ref: '#/components/schemas/SendFeed' }
         frames:
           type: array
-          description: Per-frame delivery for this send.
+          description: Per-frame delivery for this send (direct recipients and shares; feed placements are in `feeds`).
           items:
             type: object
             required: [frame_id, frame_name, placements]
@@ -2591,6 +3653,14 @@ components:
         placement_count: { type: integer }
         cover_placement_id: { $ref: '#/components/schemas/Id' }
         placement_ids: { type: array, items: { $ref: '#/components/schemas/Id' }, description: Ordered. }
+        photo_source_count: { type: integer, description: Photo sources syncing into this album (docs/spec/photo-sources.md); details for album managers in `listAlbumPhotoSources`. }
+        only_in_album_mode:
+          type: boolean
+          default: false
+          description: >-
+            Only play this album's photos when the frame plays this album (album mode or its schedule), not in the
+            normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with
+            this flag and in no album without it. Frames that don't know the flag show everything as before.
         schedule:
           type: [object, 'null']
           description: Play this album automatically between dates each year (e.g. December).
@@ -2605,6 +3675,828 @@ components:
         placement_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
         cover_placement_id: { $ref: '#/components/schemas/Id' }
         schedule: { $ref: '#/components/schemas/Album/properties/schedule' }
+        only_in_album_mode: { $ref: '#/components/schemas/Album/properties/only_in_album_mode' }
+
+    # ---------------------------------------------------------------- feeds (docs/spec/feeds.md)
+    FeedRole:
+      type: string
+      enum: [owner, admin, poster]
+
+    FeedSummary:
+      type: object
+      required: [id, name, role, member_count, subscription_count]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        name: { type: string }
+        cover_url:
+          type: [string, 'null']
+          format: uri
+          description: Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
+        role: { $ref: '#/components/schemas/FeedRole' }
+        member_count: { type: integer }
+        subscription_count: { type: integer, description: Active and paused subscriptions. }
+        last_post_at: { type: [string, 'null'], format: date-time }
+        created_at: { type: string, format: date-time }
+
+    Feed:
+      allOf:
+        - $ref: '#/components/schemas/FeedSummary'
+        - type: object
+          properties:
+            owner_name: { type: string }
+            cover_item_id:
+              oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+              description: An item of a live post of this feed.
+            auto_approve_subscriptions: { type: boolean }
+            invite_requires_approval: { type: boolean }
+            members_see_reactions: { type: boolean }
+            posters_can_invite: { type: boolean, description: Posters may create `join` invites and revoke their own. }
+            posters_can_add_birthdays: { type: boolean, description: Posters add birthday people directly instead of suggesting them. }
+            birthday_notifications: { type: boolean, description: 'The caller''s own preference (`updateFeedPreferences`): morning and greeting notifications for this feed''s birthdays.' }
+            birthday_count: { type: integer, description: Approved birthday people. }
+            pending_birthday_count: { type: integer, description: Suggestions waiting; owner and admins only (0 for posters). }
+            post_count: { type: integer }
+            pending_subscription_count: { type: integer, description: Owner and admins only (0 for posters). }
+            pending_join_request_count: { type: integer, description: Owner and admins only (0 for posters). }
+
+    FeedCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+        auto_approve_subscriptions: { type: boolean, default: false }
+        invite_requires_approval: { type: boolean, default: true }
+        members_see_reactions: { type: boolean, default: false }
+        posters_can_invite: { type: boolean, default: false }
+        posters_can_add_birthdays: { type: boolean, default: false }
+
+    FeedUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+        cover_item_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: An item of a live post of this feed; null removes the cover.
+        auto_approve_subscriptions: { type: boolean, description: Requests by non-admin members become active without approval. }
+        invite_requires_approval: { type: boolean, description: Join invites need an admin's approval. }
+        members_see_reactions: { type: boolean, description: Every member sees receipts and reactions of every post. }
+        posters_can_invite: { type: boolean, description: 'Posters may create `join` invites (and list and revoke their own).' }
+        posters_can_add_birthdays: { type: boolean, description: Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them. }
+
+    FeedMember:
+      type: object
+      required: [user_id, display_name, role]
+      properties:
+        user_id: { $ref: '#/components/schemas/Id' }
+        display_name: { type: string }
+        avatar_url: { type: [string, 'null'], format: uri }
+        role: { $ref: '#/components/schemas/FeedRole' }
+        joined_at: { type: string, format: date-time }
+        last_posted_at: { type: [string, 'null'], format: date-time }
+
+    FeedInvitePurpose:
+      type: string
+      description: '`join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.'
+      enum: [join, subscribe]
+
+    FeedInviteCreate:
+      type: object
+      required: [purpose]
+      properties:
+        purpose: { $ref: '#/components/schemas/FeedInvitePurpose' }
+        max_uses: { type: [integer, 'null'], minimum: 1, description: null = unlimited }
+        expires_in_hours: { type: integer, minimum: 1, maximum: 720, default: 168 }
+        note: { type: string, maxLength: 80, description: Shown to admins when approving a join request. }
+
+    FeedInvite:
+      type: object
+      required: [id, purpose, token, code, url, expires_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        purpose: { $ref: '#/components/schemas/FeedInvitePurpose' }
+        token: { type: string }
+        code: { type: string, description: 'Short code for "Enter a code", shown as `KF7Q-M2XA`.', examples: [KF7QM2XA] }
+        url: { type: string, format: uri, description: 'https://<web>/fi/<token>; also shown as QR.' }
+        created_by_name: { type: string }
+        max_uses: { type: [integer, 'null'] }
+        uses: { type: integer }
+        note: { type: [string, 'null'] }
+        expires_at: { type: string, format: date-time }
+
+    FeedInvitePreview:
+      type: object
+      required: [token, purpose, feed_name, invited_by_name, requires_approval]
+      properties:
+        token: { type: string, description: For `acceptFeedInvite` (also after a code lookup). }
+        purpose: { $ref: '#/components/schemas/FeedInvitePurpose' }
+        feed_name: { type: string }
+        cover_url: { type: [string, 'null'], format: uri }
+        owner_name: { type: string }
+        invited_by_name: { type: string }
+        member_count: { type: integer }
+        requires_approval: { type: boolean, description: '`join` only: the request waits for an admin.' }
+        already_member: { type: boolean }
+        frames:
+          type: array
+          description: |
+            `subscribe` only: the frames the caller manages (owner, admin or `change_settings`), and whether each already
+            has a live subscription to this feed.
+          items:
+            type: object
+            required: [frame_id, frame_name]
+            properties:
+              frame_id: { $ref: '#/components/schemas/Id' }
+              frame_name: { type: string }
+              subscription_status: { oneOf: [ { $ref: '#/components/schemas/SubscriptionStatus' }, { type: 'null' } ] }
+
+    FeedInviteAccept:
+      type: object
+      properties:
+        frame_ids:
+          type: array
+          minItems: 1
+          maxItems: 50
+          description: '`subscribe` invites (required there): the frames to subscribe.'
+          items: { $ref: '#/components/schemas/Id' }
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: integer, minimum: 1, maximum: 1000, description: 'Required with `history: last_n`.' }
+        birthdays: { type: boolean, default: true, description: Show the feed's birthday people on the frames. }
+
+    FeedInviteResult:
+      type: object
+      required: [status, feed]
+      properties:
+        status: { type: string, enum: [joined, pending, already_member, subscribed] }
+        feed: { $ref: '#/components/schemas/FeedSummary' }
+        join_request_id: { $ref: '#/components/schemas/Id' }
+        subscriptions:
+          type: array
+          description: '`subscribed`: one per requested frame (existing live subscriptions are returned as they are).'
+          items: { $ref: '#/components/schemas/Subscription' }
+
+    SubscriptionStatus:
+      type: string
+      description: |
+        `pending`: waiting for a feed admin. `active`: posts are placed on the frame. `paused`: paused by the frame
+        side; the feed's placements are kept but not shown. `rejected`: declined by a feed admin. `removed`: ended
+        (see `removed_reason`). Rejected and removed subscriptions are listed for 30 days.
+      enum: [pending, active, paused, rejected, removed]
+
+    SubscriptionHistory:
+      type: string
+      description: |
+        What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+        `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+        or trims.
+      enum: [none, last_n, all]
+      default: none
+
+    SubscriptionRequest:
+      type: object
+      required: [frame_id]
+      properties:
+        frame_id: { $ref: '#/components/schemas/Id' }
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: integer, minimum: 1, maximum: 1000, description: 'Required with `history: last_n`.' }
+        birthdays: { type: boolean, default: true, description: Show the feed's birthday people on the frame. }
+
+    SubscriptionUpdate:
+      type: object
+      description: At least one field. Omitting `history` keeps the history option (and starts no backfill or trim).
+      properties:
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: integer, minimum: 1, maximum: 1000, description: 'Required with `history: last_n`.' }
+        birthdays: { type: boolean, description: Show the feed's birthday people on the frame (a `birthdays` change follows). }
+
+    Subscription:
+      type: object
+      required: [id, status, history, feed, frame, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        status: { $ref: '#/components/schemas/SubscriptionStatus' }
+        history: { $ref: '#/components/schemas/SubscriptionHistory' }
+        history_count: { type: [integer, 'null'] }
+        feed:
+          type: object
+          required: [id, name]
+          properties:
+            id: { $ref: '#/components/schemas/Id' }
+            name: { type: string }
+            cover_url: { type: [string, 'null'], format: uri }
+            member_count: { type: integer }
+            admin_names: { type: array, items: { type: string }, description: Owner first; so the frame side knows whom it subscribes to. }
+        frame:
+          type: object
+          required: [id, name]
+          properties:
+            id: { $ref: '#/components/schemas/Id' }
+            name: { type: string }
+            location: { type: [string, 'null'] }
+            online: { type: boolean }
+            last_seen_at: { type: [string, 'null'], format: date-time }
+            birthdays_supported: { type: boolean, description: 'The frame app shows birthdays (its latest heartbeat lists `birthdays`); false means "update the frame app".' }
+        requested_by_name: { type: [string, 'null'], description: Feed owner/admins and frame managers only. }
+        via_invite: { type: boolean, description: Created through a `subscribe` invite. }
+        birthdays: { type: boolean, description: 'The feed''s birthday people are shown on the frame while the subscription is `active` (default true; frame side).' }
+        birthday_count: { type: integer, description: Approved birthday people of the feed (so frame managers outside the feed see how many). }
+        created_at: { type: string, format: date-time }
+        activated_at: { type: [string, 'null'], format: date-time, description: First activation; the history boundary. }
+        paused_at: { type: [string, 'null'], format: date-time }
+        ended_at: { type: [string, 'null'], format: date-time }
+        removed_reason:
+          oneOf:
+            - { type: string, enum: [unsubscribed, removed_by_feed, frame_removed, feed_deleted, withdrawn] }
+            - { type: 'null' }
+        backfill:
+          type: object
+          description: Progress of the history backfill or trim after activation, a history change or a resume.
+          properties:
+            state: { type: string, enum: [idle, queued, running] }
+            placed: { type: integer }
+            total: { type: integer }
+        estimate:
+          type: object
+          description: Size of what the current history option places on this frame, for the subscribe dialog.
+          properties:
+            items: { type: integer }
+            bytes: { type: integer }
+        can_manage: { type: boolean, description: 'The caller may pause, resume, change history and unsubscribe (frame side).' }
+        can_decide: { type: boolean, description: 'The caller may approve, reject and remove (feed side).' }
+
+    FeedReceiptSummary:
+      type: object
+      description: |
+        Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
+        delivered/seen when every item of the post is. Paused frames are only in `paused`.
+      required: [frames, delivered, seen]
+      properties:
+        frames: { type: integer }
+        delivered: { type: integer }
+        seen: { type: integer }
+        awaiting_approval: { type: integer }
+        paused: { type: integer }
+        removed: { type: integer, description: Frames whose moderation rejected the post or that deleted it. }
+
+    FeedReaction:
+      type: object
+      required: [frame_id, frame_name, item_id, placement_id]
+      properties:
+        frame_id: { $ref: '#/components/schemas/Id' }
+        frame_name: { type: string }
+        item_id: { $ref: '#/components/schemas/Id' }
+        placement_id: { $ref: '#/components/schemas/Id' }
+        reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
+        replies: { type: array, items: { $ref: '#/components/schemas/ReplyPreset' } }
+        at: { type: string, format: date-time }
+
+    FeedPost:
+      type: object
+      required: [id, feed_id, poster, created_at, items]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        feed_id: { $ref: '#/components/schemas/Id' }
+        poster:
+          type: object
+          required: [user_id, display_name]
+          properties:
+            user_id: { $ref: '#/components/schemas/Id' }
+            display_name: { type: string }
+            avatar_url: { type: [string, 'null'], format: uri }
+        send_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: The poster's send (own posts only).
+        created_at: { type: string, format: date-time }
+        via:
+          description: 'Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".'
+          oneOf: [ { $ref: '#/components/schemas/ItemVia' }, { type: 'null' } ]
+        items: { type: array, description: Live items in send order., items: { $ref: '#/components/schemas/Item' } }
+        receipts:
+          description: Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
+          oneOf: [ { $ref: '#/components/schemas/FeedReceiptSummary' }, { type: 'null' } ]
+        reactions:
+          type: [array, 'null']
+          description: Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
+          items: { $ref: '#/components/schemas/FeedReaction' }
+
+    FeedDeliveryStatus:
+      type: string
+      description: |
+        One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
+        `suspended` (subscription paused) or `removed` (rejected or deleted on that frame).
+      enum: [pending, ready, delivered, seen, failed, awaiting_approval, suspended, removed]
+
+    FeedPostReceipts:
+      type: object
+      required: [post_id, summary, frames]
+      properties:
+        post_id: { $ref: '#/components/schemas/Id' }
+        summary: { $ref: '#/components/schemas/FeedReceiptSummary' }
+        frames:
+          type: array
+          items:
+            type: object
+            required: [subscription_id, frame_id, frame_name, subscription_status, items]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/Id' }
+              frame_id: { $ref: '#/components/schemas/Id' }
+              frame_name: { type: string }
+              frame_location: { type: [string, 'null'] }
+              online: { type: boolean }
+              last_seen_at: { type: [string, 'null'], format: date-time }
+              subscription_status: { type: string, enum: [active, paused] }
+              items:
+                type: array
+                items:
+                  type: object
+                  required: [item_id, status]
+                  properties:
+                    item_id: { $ref: '#/components/schemas/Id' }
+                    placement_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+                    status: { $ref: '#/components/schemas/FeedDeliveryStatus' }
+                    delivered_at: { type: [string, 'null'], format: date-time }
+                    seen_at: { type: [string, 'null'], format: date-time }
+                    reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
+                    replies:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          preset: { $ref: '#/components/schemas/ReplyPreset' }
+                          at: { type: string, format: date-time }
+
+    SendFeed:
+      type: object
+      description: One feed a send was posted to.
+      required: [feed_id, feed_name, post_id]
+      properties:
+        feed_id: { $ref: '#/components/schemas/Id' }
+        feed_name: { type: string }
+        post_id: { $ref: '#/components/schemas/Id' }
+        removed: { type: boolean, description: The post was removed from the feed (unsend or admin). }
+        summary: { $ref: '#/components/schemas/FeedReceiptSummary' }
+
+    BirthdayStatus:
+      type: string
+      description: |
+        `pending`: a poster's suggestion waiting for the feed's owner or an admin. `approved`: on the list and on
+        frames. `rejected`: declined; listed for the suggester and admins for 30 days.
+      enum: [pending, approved, rejected]
+
+    BirthdayPerson:
+      type: object
+      description: |
+        A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
+        a feed member.
+      required: [id, feed_id, status, display_name, day, month, show_age, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        feed_id: { $ref: '#/components/schemas/Id' }
+        status: { $ref: '#/components/schemas/BirthdayStatus' }
+        display_name: { type: string, examples: [Oma] }
+        day: { type: integer, minimum: 1, maximum: 31, examples: [12] }
+        month: { type: integer, minimum: 1, maximum: 12, examples: [3] }
+        birth_year:
+          type: [integer, 'null']
+          description: |
+            Null when unknown or when the caller may not see it: shown to owner/admins, whoever added the entry and
+            the linked member; to other members only with `show_age`.
+          examples: [1946]
+        show_age: { type: boolean, description: Frames and notifications show the age (needs `birth_year`). }
+        photo_url:
+          type: [string, 'null']
+          format: uri
+          description: 256x256 WebP, public at an unguessable URL like avatars. The uploaded photo, else the linked member's avatar.
+        has_own_photo: { type: boolean, description: '`photo_url` is an uploaded photo, not the linked member''s avatar.' }
+        user_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: The linked feed member; cleared when they leave the feed or delete their account.
+        linked_member_name: { type: [string, 'null'] }
+        created_by_name: { type: [string, 'null'], description: Null when that account is gone. }
+        created_by_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: Account id of whoever added or suggested it ("added by me"); null when that account is gone.
+        suggested: { type: boolean, description: Created as a poster's suggestion (also after approval). }
+        decided_by_name: { type: [string, 'null'], description: Suggestions only; owner/admins and the suggester. }
+        decided_at: { type: [string, 'null'], format: date-time }
+        next_birthday:
+          type: string
+          format: date
+          description: The next occurrence on or after today in the caller's time zone (`User.timezone`); 29 February becomes 28 February in non-leap years.
+        turns:
+          type: [integer, 'null']
+          description: Age on `next_birthday`, when `birth_year` is visible to the caller.
+        greetings_today: { type: integer, description: Frames that sent a greeting for today's occurrence (0 on other days). }
+        can_edit: { type: boolean, description: 'The caller may change this entry (some fields only, for the linked member).' }
+        can_decide: { type: boolean, description: 'The caller may approve or reject it (pending, owner/admin).' }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    BirthdayPersonCreate:
+      type: object
+      description: |
+        `day`/`month` must form a real date (29 February is allowed, and with `birth_year` only in leap years).
+        `birth_year` from 1900 to the current year.
+      required: [display_name, day, month]
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 40 }
+        day: { type: integer, minimum: 1, maximum: 31 }
+        month: { type: integer, minimum: 1, maximum: 12 }
+        birth_year: { type: [integer, 'null'], minimum: 1900 }
+        show_age: { type: boolean, default: false }
+        user_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: Link to a member of this feed who has no entry yet ("Add my birthday" sends the caller's id).
+
+    BirthdayPersonUpdate:
+      type: object
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 40 }
+        day: { type: integer, minimum: 1, maximum: 31 }
+        month: { type: integer, minimum: 1, maximum: 12 }
+        birth_year: { type: [integer, 'null'], minimum: 1900, description: null clears the year. }
+        show_age: { type: boolean }
+        user_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: null unlinks.
+
+    FeedPreferencesUpdate:
+      type: object
+      properties:
+        birthday_notifications: { type: boolean, description: Morning notification and greetings for this feed's birthdays. }
+
+    FeedBirthdayGreeting:
+      type: object
+      description: |
+        A frame said happy birthday to a person of this feed on their day. One per person, frame and date; recorded
+        in every feed that lists the person. Also the payload of the `birthday.greeting` websocket event.
+      required: [id, feed_id, birthday_id, birthday_name, frame_id, frame_name, date, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        feed_id: { $ref: '#/components/schemas/Id' }
+        birthday_id: { $ref: '#/components/schemas/Id' }
+        birthday_name: { type: string, examples: [Oma] }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        frame_name: { type: string, description: The frame's name when it sent the greeting., examples: [Opa's frame] }
+        frame_location: { type: [string, 'null'] }
+        date: { type: string, format: date, description: The occurrence date (the frame's local date). }
+        created_at: { type: string, format: date-time }
+
+    FrameBirthday:
+      type: object
+      description: |
+        One person on the frame, merged across the frame's birthday subscriptions on normalized name + day + month
+        (docs/spec/birthdays.md §6.5). The frame computes today, countdowns and ages in its own time zone.
+      required: [id, name, day, month, feed_ids, birthday_ids]
+      properties:
+        id: { type: string, format: uuid, description: 'The primary entry (a `BirthdayPerson` id); use it for `deviceGreetBirthday`.' }
+        name: { type: string, examples: [Oma] }
+        day: { type: integer, minimum: 1, maximum: 31 }
+        month: { type: integer, minimum: 1, maximum: 12 }
+        birth_year:
+          type: integer
+          description: |
+            Present only when the age may be shown (`show_age` on for every merged entry that has a year, and the
+            years agree). Absent otherwise: show no age.
+        photo_url:
+          type: [string, 'null']
+          format: uri
+          description: 256x256 WebP (public, unguessable, cacheable by URL).
+        feed_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+        birthday_ids: { type: array, description: Every merged `BirthdayPerson` id., items: { $ref: '#/components/schemas/Id' } }
+
+    FrameBirthdays:
+      type: object
+      description: |
+        Payload of the `birthdays` change (docs/api/README.md §5.13): the approved people of every feed the frame has
+        an `active` subscription with `birthdays: true` to, merged, sorted by month and day. Nothing in it depends on
+        today, so it is emitted only when the list changes.
+      required: [generated_at, people]
+      properties:
+        generated_at: { type: string, format: date-time }
+        people: { type: array, items: { $ref: '#/components/schemas/FrameBirthday' } }
+
+    PlacementOrigin:
+      type: string
+      description: |
+        How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
+        frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
+        `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
+      enum: [send, share, feed, import]
+
+    # ---------------------------------------------------------------- photo sources (docs/spec/photo-sources.md)
+    PhotoSourceProvider:
+      type: string
+      description: |
+        `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+        `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+        public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+      enum: [immich_link, immich_api, icloud_link]
+
+    PhotoSourceStatus:
+      type: string
+      description: |
+        `active`: syncing on schedule (a single failed run being retried stays active, with `last_error_code`).
+        `error`: failures expected to pass (unreachable, upstream errors) for 3 runs or 6 hours; retried with backoff.
+        `needs_attention`: only a person can fix it (`last_error_code`); syncing stopped except a daily probe for some
+        codes. `paused`: paused by a manager; imported photos keep showing.
+      enum: [active, paused, error, needs_attention]
+
+    PhotoSourceErrorCode:
+      type: string
+      description: Why the last run (or a test) failed; user-facing texts are in docs/spec/photo-sources.md §13.
+      enum:
+        - unreachable
+        - tls_error
+        - private_address_blocked
+        - auth_failed
+        - password_required
+        - permission_missing
+        - link_not_found
+        - link_expired
+        - album_not_found
+        - unsupported_link
+        - too_large
+        - format_changed
+        - rate_limited_upstream
+        - upstream_error
+        - owner_lost_access
+        - credentials_unreadable
+        - mass_removal
+
+    PhotoSourceWarning:
+      type: string
+      description: |
+        Conditions that don't stop syncing. `downloads_disabled`: the Immich link doesn't allow downloads, so photos
+        come as previews. `metadata_hidden`: the link hides EXIF (no capture dates or descriptions).
+        `item_limit_reached`: `limits.max_photo_source_items` is reached; newer upstream items are skipped.
+      enum: [downloads_disabled, metadata_hidden, item_limit_reached]
+
+    PhotoSourceHistory:
+      type: string
+      description: |
+        What the first run imports: `none` (only photos added from now on), `last_n` (the `history_count` newest by
+        capture date) or `all` (up to `limits.max_photo_source_items`). Imported quietly (`Placement.backfill`).
+        Defaults: `all` for albums, `last_n` with 20 for feeds.
+      enum: [none, last_n, all]
+
+    PhotoSourceDeletePolicy:
+      type: string
+      description: |
+        What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+        `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+        confirmation (`mass_removal`).
+      enum: [mirror, keep]
+
+    PhotoSourceTarget:
+      type: object
+      description: Where the photos go. Exactly one of `album_id` (with its frame) or `feed_id` is set.
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [album, feed] }
+        frame_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: The album's frame (albums belong to one frame).
+        frame_name: { type: [string, 'null'] }
+        album_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        album_name: { type: [string, 'null'] }
+        feed_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        feed_name: { type: [string, 'null'] }
+
+    PhotoSourceConnection:
+      type: object
+      description: |
+        How to reach the outside album. `immich_link` and `icloud_link` need `url` (and `password` for a protected
+        Immich link); `immich_api` needs `server_url`, `api_key` and, to create, `immich_album_id`. Secrets are
+        write-only: they are sealed at rest and never returned.
+      required: [provider]
+      properties:
+        provider: { $ref: '#/components/schemas/PhotoSourceProvider' }
+        url:
+          type: string
+          minLength: 8
+          maxLength: 2048
+          writeOnly: true
+          description: The shared link (links only). It is the secret; responses carry `url_hint`.
+          examples: ['https://photos.example.org/share/0d1e…', 'https://www.icloud.com/sharedalbum/#B0aGWZuqDGxyz']
+        server_url:
+          type: string
+          minLength: 8
+          maxLength: 2048
+          description: '`immich_api` only: the Immich server, e.g. `https://photos.example.org` (an `/api` suffix is tolerated).'
+        api_key: { type: string, minLength: 8, maxLength: 200, writeOnly: true, description: '`immich_api` only. Needs album.read, asset.read, asset.view and asset.download.' }
+        password: { type: string, maxLength: 200, writeOnly: true, description: '`immich_link` only: the link password.' }
+        immich_album_id: { type: string, maxLength: 64, description: '`immich_api` only: the album, from `listImmichAlbums`.' }
+
+    PhotoSourceCreate:
+      allOf:
+        - $ref: '#/components/schemas/PhotoSourceConnection'
+        - type: object
+          description: Exactly one of `album_id` or `feed_id` (`422 validation_failed` otherwise).
+          properties:
+            album_id: { $ref: '#/components/schemas/Id' }
+            feed_id: { $ref: '#/components/schemas/Id' }
+            name: { type: string, maxLength: 60, description: Display name; defaults to the outside album's name. }
+            history: { $ref: '#/components/schemas/PhotoSourceHistory' }
+            history_count: { type: integer, minimum: 1, maximum: 10000, description: 'Required with `history: last_n`.' }
+            on_upstream_delete: { $ref: '#/components/schemas/PhotoSourceDeletePolicy' }
+            include_videos: { type: boolean, default: true }
+            notify_reactions: { type: boolean, default: true, description: The owner gets reaction and reply notifications for this source's photos. }
+
+    PhotoSourceUpdate:
+      type: object
+      description: At least one field. Connection changes are tested first and then synced at once.
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60 }
+        paused: { type: boolean, description: 'true pauses, false resumes.' }
+        url: { type: string, minLength: 8, maxLength: 2048, writeOnly: true, description: A new link to the same (or another) outside album. }
+        server_url: { type: string, minLength: 8, maxLength: 2048 }
+        api_key: { type: string, minLength: 8, maxLength: 200, writeOnly: true }
+        password: { type: [string, 'null'], maxLength: 200, writeOnly: true, description: null removes the link password. }
+        immich_album_id: { type: string, maxLength: 64 }
+        on_upstream_delete: { $ref: '#/components/schemas/PhotoSourceDeletePolicy' }
+        include_videos: { type: boolean, description: Turning it on imports previously skipped videos in the next run. }
+        notify_reactions: { type: boolean, description: The owner's own switch; only the owner may change it. }
+        take_over: { type: boolean, description: 'The caller becomes the owner (credit for future photos). `immich_api` needs a new `api_key` with it.' }
+
+    PhotoSourceCounts:
+      type: object
+      required: [imported, pending]
+      properties:
+        upstream: { type: integer, description: Photos and videos in the outside album at the last listing. }
+        imported: { type: integer, description: Live items this source created. }
+        duplicates: { type: integer, description: Upstream photos the target already had. }
+        pending: { type: integer, description: Waiting to be downloaded (backlog). }
+        skipped: { type: integer, description: "Not imported on purpose (videos off, too long, too large, unsupported, over the limit, before the first import's cut)." }
+        failed: { type: integer }
+        removed_locally: { type: integer, description: Removed on kinframe; never imported again. }
+        gone_upstream: { type: integer, description: No longer in the outside album (kept with `keep`). }
+
+    PhotoSourceRun:
+      type: object
+      required: [started_at]
+      properties:
+        started_at: { type: string, format: date-time }
+        finished_at: { type: [string, 'null'], format: date-time }
+        added: { type: integer }
+        updated: { type: integer, description: 'Captions, dates or files changed upstream.' }
+        removed: { type: integer }
+        skipped: { type: integer }
+        failed: { type: integer }
+        bytes: { type: integer }
+        error_code:
+          oneOf: [ { $ref: '#/components/schemas/PhotoSourceErrorCode' }, { type: 'null' } ]
+
+    PhotoSource:
+      type: object
+      required: [id, provider, name, target, status, running, history, on_upstream_delete, include_videos, counts, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        provider: { $ref: '#/components/schemas/PhotoSourceProvider' }
+        name: { type: string, description: The outside album's name (or the name given at creation). }
+        target: { $ref: '#/components/schemas/PhotoSourceTarget' }
+        owner:
+          description: Who set it up; imported photos are sent by them. Null when that account is gone.
+          oneOf:
+            - type: object
+              required: [user_id, display_name]
+              properties:
+                user_id: { $ref: '#/components/schemas/Id' }
+                display_name: { type: string }
+                avatar_url: { type: [string, 'null'], format: uri }
+            - { type: 'null' }
+        best_effort: { type: boolean, description: 'True for `icloud_link`: no official API; clients show the best-effort note.' }
+        url_hint: { type: [string, 'null'], description: 'Redacted link for display (links only).', examples: ['https://photos.example.org/share/…'] }
+        server_url: { type: [string, 'null'], description: '`immich_api` only.' }
+        immich_album_id: { type: [string, 'null'], description: '`immich_api` only.' }
+        has_api_key: { type: boolean }
+        has_password: { type: boolean }
+        status: { $ref: '#/components/schemas/PhotoSourceStatus' }
+        running: { type: boolean, description: A run is in progress. }
+        warnings: { type: array, items: { $ref: '#/components/schemas/PhotoSourceWarning' } }
+        last_error_code:
+          oneOf: [ { $ref: '#/components/schemas/PhotoSourceErrorCode' }, { type: 'null' } ]
+        last_error: { type: [string, 'null'], description: Short English detail for support; clients show their own text for `last_error_code`. }
+        error_since: { type: [string, 'null'], format: date-time, description: First failure of the current streak. }
+        pending_removals: { type: integer, description: 'Removals held back by the mass-removal guard; confirm with `syncPhotoSource {confirm_removals: true}`.' }
+        history: { $ref: '#/components/schemas/PhotoSourceHistory' }
+        history_count: { type: [integer, 'null'] }
+        on_upstream_delete: { $ref: '#/components/schemas/PhotoSourceDeletePolicy' }
+        include_videos: { type: boolean }
+        notify_reactions: { type: boolean }
+        counts: { $ref: '#/components/schemas/PhotoSourceCounts' }
+        last_run:
+          oneOf: [ { $ref: '#/components/schemas/PhotoSourceRun' }, { type: 'null' } ]
+        last_synced_at: { type: [string, 'null'], format: date-time, description: Last successful run. }
+        last_attempt_at: { type: [string, 'null'], format: date-time }
+        next_sync_at: { type: [string, 'null'], format: date-time, description: Null while paused or waiting for a person. }
+        can_manage: { type: boolean, description: 'The caller may pause, change and delete it.' }
+        is_owner: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    PhotoSourceTestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        error_code:
+          oneOf: [ { $ref: '#/components/schemas/PhotoSourceErrorCode' }, { type: 'null' } ]
+        error: { type: [string, 'null'], description: Short English detail. }
+        album_name: { type: [string, 'null'] }
+        photos: { type: [integer, 'null'] }
+        videos: { type: [integer, 'null'] }
+        estimate_bytes: { type: [integer, 'null'], description: 'Size of everything in the album, when the provider tells.' }
+        warnings: { type: array, items: { $ref: '#/components/schemas/PhotoSourceWarning' } }
+        best_effort: { type: boolean }
+        server_version: { type: [string, 'null'], description: 'Immich only, e.g. `v1.132.3`.' }
+        albums:
+          type: array
+          description: '`immich_api` without `immich_album_id`: the albums the key can read.'
+          items: { $ref: '#/components/schemas/ImmichAlbum' }
+
+    ImmichConnection:
+      type: object
+      required: [server_url, api_key]
+      properties:
+        server_url: { type: string, minLength: 8, maxLength: 2048 }
+        api_key: { type: string, minLength: 8, maxLength: 200, writeOnly: true }
+
+    ImmichAlbum:
+      type: object
+      required: [id, name, asset_count]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        asset_count: { type: integer }
+        updated_at: { type: [string, 'null'], format: date-time }
+        owner_name: { type: [string, 'null'] }
+        shared: { type: boolean, description: Shared with the key's account by someone else. }
+        thumbnail_url: { type: [string, 'null'], format: uri, description: 'A short-lived kinframe URL of the album thumbnail (proxied; the key never reaches the client).' }
+
+    ImmichAlbumList:
+      type: object
+      required: [ok, albums]
+      properties:
+        ok: { type: boolean }
+        error_code:
+          oneOf: [ { $ref: '#/components/schemas/PhotoSourceErrorCode' }, { type: 'null' } ]
+        error: { type: [string, 'null'] }
+        server_version: { type: [string, 'null'] }
+        albums: { type: array, items: { $ref: '#/components/schemas/ImmichAlbum' }, description: 'Own albums first, then shared ones, by name.' }
+
+    GoogleImportStatus:
+      type: string
+      description: |
+        `needs_auth`: open `auth_url`. `picking`: open `picker_uri`; the server waits for Google. `importing`: copying
+        (`progress`). `done` (possibly with `progress.failed` > 0), `failed` (`error_code`), `expired` (nothing picked
+        before Google's session ended) and `cancelled` are final.
+      enum: [needs_auth, picking, importing, done, failed, cancelled, expired]
+
+    GoogleImportErrorCode:
+      type: string
+      enum: [consent_denied, auth_failed, picker_expired, google_unavailable, target_gone, download_failed, server_error]
+
+    GoogleImportCreate:
+      type: object
+      required: [return_uri]
+      description: Exactly one of `album_id` or `feed_id`.
+      properties:
+        album_id: { $ref: '#/components/schemas/Id' }
+        feed_id: { $ref: '#/components/schemas/Id' }
+        return_uri:
+          type: string
+          maxLength: 512
+          description: Where the browser goes after consent, with `?import_id=…&status=…` added.
+          examples: ['app.kinframe:/google-import', 'https://kinframe.appmire.be/google-import/return']
+
+    GoogleImport:
+      type: object
+      required: [id, status, target, progress, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        status: { $ref: '#/components/schemas/GoogleImportStatus' }
+        target: { $ref: '#/components/schemas/PhotoSourceTarget' }
+        auth_url: { type: [string, 'null'], format: uri, description: '`needs_auth` only: Google''s consent page, to open in a browser session (never an embedded web view).' }
+        picker_uri:
+          type: [string, 'null']
+          format: uri
+          description: '`picking` only: Google''s picker. Web clients append `/autoclose`; on Android the Google Photos app can handle it.'
+        picker_expires_at: { type: [string, 'null'], format: date-time }
+        progress:
+          type: object
+          required: [picked, imported]
+          properties:
+            picked: { type: integer }
+            imported: { type: integer }
+            duplicates: { type: integer, description: Already in the album or feed. }
+            skipped: { type: integer, description: 'Too long, too large or unsupported.' }
+            failed: { type: integer }
+            bytes: { type: integer }
+        send_ids: { type: array, description: The sends (and thus posts) the import made; unsend them to undo., items: { $ref: '#/components/schemas/Id' } }
+        error_code:
+          oneOf: [ { $ref: '#/components/schemas/GoogleImportErrorCode' }, { type: 'null' } ]
+        created_at: { type: string, format: date-time }
+        updated_at: { type: [string, 'null'], format: date-time }
+        finished_at: { type: [string, 'null'], format: date-time }
 
     TvLinkCreate:
       type: object
@@ -2813,7 +4705,13 @@ components:
             pair_portraits: { type: boolean, default: true }
             collage: { type: boolean, default: false }
             collage_max: { type: integer, minimum: 2, maximum: 6, default: 3 }
-            album_id: { type: [string, 'null'], description: null = all photos }
+            album_id: { type: [string, 'null'], description: null = all photos. Setting it clears `feed_id`. }
+            feed_id:
+              type: [string, 'null']
+              description: |
+                Feed mode: play only placements of this subscribed feed (`Placement.feed_ids`); null = all photos.
+                Setting it clears `album_id`. Reset to null when the subscription ends. An empty or unknown feed plays
+                everything.
             on_this_day: { type: boolean, default: false }
             live_photos:
               type: string
@@ -2832,7 +4730,7 @@ components:
             weather: { type: boolean, default: false, description: Current weather widget; needs `location`. }
             clock_24h: { type: boolean, default: true }
             calendar_sidebar: { type: boolean, default: false, description: 'Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).' }
-            countdowns: { type: boolean, default: true, description: Countdown widgets on the slideshow (the nearest three). }
+            countdowns: { type: boolean, default: true, description: 'Countdown widgets on the slideshow (the nearest three): marked events and, from 7 days before, feed birthdays (docs/spec/birthdays.md §6.6). The birthday card on the day itself does not depend on it.' }
         video:
           type: object
           properties:
@@ -3006,7 +4904,7 @@ components:
       properties:
         instance_id: { type: string }
         running: { type: boolean, description: The instance started on the frame. }
-        error: { type: [string, 'null'], maxLength: 300, description: The last error, null when the last update and render worked. }
+        error: { type: [string, 'null'], maxLength: 300, description: 'The last error, null when the last update and render worked.' }
         error_at: { type: [string, 'null'], format: date-time }
         updated_at: { type: [string, 'null'], format: date-time, description: When the last update succeeded. }
         version: { type: [string, 'null'], description: 'The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).' }
@@ -3184,7 +5082,7 @@ components:
       properties:
         alg: { type: string, enum: [pbkdf2-sha256] }
         iterations: { type: integer, minimum: 1000, maximum: 1000000, examples: [20000] }
-        salt: { type: string, minLength: 16, maxLength: 64, description: base64, at least 12 random bytes }
+        salt: { type: string, minLength: 16, maxLength: 64, description: 'base64, at least 12 random bytes' }
         hash: { type: string, minLength: 44, maxLength: 44, description: base64 of 32 bytes }
 
     FrameUpdate:
@@ -3274,7 +5172,7 @@ components:
         seq: { type: integer }
         type:
           type: string
-          enum: [placement.upsert, placement.remove, settings, album.upsert, album.remove, member.upsert, member.remove, frame, weather, calendar, reset]
+          enum: [placement.upsert, placement.remove, settings, album.upsert, album.remove, member.upsert, member.remove, frame, weather, calendar, birthdays, reset]
         placement:
           allOf:
             - $ref: '#/components/schemas/Placement'
@@ -3328,6 +5226,11 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Calendar'
             - { type: 'null' }
+        birthdays:
+          description: The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it.
+          oneOf:
+            - $ref: '#/components/schemas/FrameBirthdays'
+            - { type: 'null' }
 
     Weather:
       type: [object, 'null']
@@ -3364,7 +5267,7 @@ components:
             code: { type: integer, description: WMO weather code (0–99) }
             is_day: { type: boolean }
             wind_kmh: { type: [number, 'null'] }
-            wind_dir_deg: { type: [integer, 'null'], description: Direction the wind comes from, 0 = north }
+            wind_dir_deg: { type: [integer, 'null'], description: 'Direction the wind comes from, 0 = north' }
             humidity_pct: { type: [integer, 'null'] }
             precip_mm: { type: [number, 'null'] }
         hourly:
@@ -3442,7 +5345,7 @@ components:
           minLength: 8
           maxLength: 2048
           description: '`https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.'
-        name: { type: string, maxLength: 60, description: Defaults to the calendar's own name, else the host. }
+        name: { type: string, maxLength: 60, description: 'Defaults to the calendar''s own name, else the host.' }
         color: { $ref: '#/components/schemas/CalendarColor' }
         enabled: { type: boolean, default: true }
         username: { type: string, maxLength: 200, description: CalDAV only. }
@@ -3467,7 +5370,7 @@ components:
         ok: { type: boolean }
         status: { type: string, enum: [ok, failed, auth_failed] }
         error: { type: [string, 'null'] }
-        calendar_name: { type: [string, 'null'], description: The calendar's own name, if it has one. }
+        calendar_name: { type: [string, 'null'], description: 'The calendar''s own name, if it has one.' }
         event_count: { type: [integer, 'null'], description: Events in the next 30 days. }
         calendars:
           type: array
@@ -3478,7 +5381,7 @@ components:
             properties:
               url: { type: string }
               name: { type: string }
-              color: { type: [string, 'null'], description: The server's colour (hex), as a hint. }
+              color: { type: [string, 'null'], description: 'The server''s colour (hex), as a hint.' }
 
     CalendarEventId:
       type: string

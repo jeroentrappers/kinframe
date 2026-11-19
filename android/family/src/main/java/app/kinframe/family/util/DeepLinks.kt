@@ -3,13 +3,17 @@ package app.kinframe.family.util
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-/** Links the app opens: a frame's QR code (`https://<server>/f/<code>`) and invite links (`/i/<token>`). */
+/**
+ * Links the app opens: a frame's QR code (`https://<server>/f/<code>`), invite links (`/i/<token>`) and feed invite
+ * links (`/fi/<token>`, README §5.12).
+ */
 sealed interface DeepLink {
     /** The server the link belongs to (with a trailing slash, possibly below a path prefix). */
     val server: HttpUrl
 
     data class FrameCode(override val server: HttpUrl, val code: String) : DeepLink
     data class Invite(override val server: HttpUrl, val token: String) : DeepLink
+    data class FeedInvite(override val server: HttpUrl, val token: String) : DeepLink
 }
 
 object DeepLinks {
@@ -30,6 +34,7 @@ object DeepLinks {
             kind == "f" && CODE.matches(value) -> DeepLink.FrameCode(server, value)
             kind == "f" -> FrameCodes.digits(value).takeIf { it.length == FrameCodes.LENGTH }?.let { DeepLink.FrameCode(server, it) }
             kind == "i" && TOKEN.matches(value) -> DeepLink.Invite(server, value)
+            kind == "fi" && TOKEN.matches(value) -> DeepLink.FeedInvite(server, value)
             else -> null
         }
     }

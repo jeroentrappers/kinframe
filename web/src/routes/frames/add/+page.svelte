@@ -4,7 +4,9 @@
 	import { page } from '$app/state';
 	import { api, call, type RedeemResult } from '$lib/api/client';
 	import { frames } from '$lib/frames.svelte';
-	import { isCompleteCode, normalizeCode } from '$lib/format';
+	import { normalizeEnteredCode, parseEnteredCode } from '$lib/codes';
+	import { discovery } from '$lib/discovery.svelte';
+	import { normalizeCode } from '$lib/format';
 	import { newIdempotencyKey } from '$lib/logic';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
@@ -21,23 +23,29 @@
 	let input: CodeInput | undefined = $state();
 	let idemKey = newIdempotencyKey();
 
+	// One "Enter a code" field for frame codes (8 digits) and, when the server has feeds, feed codes (letters).
+	const withFeeds = $derived(discovery.feeds);
+	const entered = $derived(parseEnteredCode(code, withFeeds));
+	const complete = $derived(entered.kind !== 'empty' && entered.complete);
+
 	// Naming step after a claim.
 	let name = $state('');
 	let location = $state('');
 	let saving = $state(false);
 
 	onMount(() => {
-		const prefill = normalizeCode(page.url.searchParams.get('code') ?? '');
+		const prefill = normalizeEnteredCode(page.url.searchParams.get('code') ?? '', discovery.feeds);
 		if (prefill) {
 			code = prefill;
-			if (isCompleteCode(prefill)) void redeem();
+			if (complete) void redeem();
 		} else {
 			input?.focus();
 		}
 	});
 
 	async function redeem() {
-		if (!isCompleteCode(code) || busy) return;
+		if (!complete || busy) return;
+		if (entered.kind === 'feed') return lookupFeedCode(entered.code);
 		busy = true;
 		error = null;
 		try {
@@ -58,6 +66,24 @@
 		}
 		if (error) {
 			// The input was disabled while checking; give focus back so the code can be fixed.
+			await tick();
+			input?.focus();
+		}
+	}
+
+	/** A feed code resolves to its invite; the invite page does the rest (join, or subscribe frames). */
+	async function lookupFeedCode(feedCode: string) {
+		busy = true;
+		error = null;
+		try {
+			const preview = await call(api.POST('/v1/feed-invites:lookup', { body: { code: feedCode } }));
+			await goto(`/fi/${encodeURIComponent(preview.token)}`);
+		} catch (e) {
+			error = problemMessage(e);
+		} finally {
+			busy = false;
+		}
+		if (error) {
 			await tick();
 			input?.focus();
 		}
@@ -118,13 +144,14 @@
 					describedby="code-help"
 					oncomplete={() => void redeem()}
 					disabled={busy}
+					feeds={withFeeds}
 				/>
 				{#if error}
 					<p class="error-text" role="alert" id="code-help">{error}</p>
 				{:else}
-					<p class="hint" id="code-help">{t('add.codeHint')}</p>
+					<p class="hint" id="code-help">{withFeeds ? t('add.codeHintFeeds') : t('add.codeHint')}</p>
 				{/if}
-				<button class="btn btn-primary btn-lg" type="submit" disabled={!isCompleteCode(code) || busy}>
+				<button class="btn btn-primary btn-lg" type="submit" disabled={!complete || busy}>
 					{#if busy}<span class="spinner" aria-hidden="true"></span>{t('add.checking')}{:else}{t('add.submit')}{/if}
 				</button>
 			</form>

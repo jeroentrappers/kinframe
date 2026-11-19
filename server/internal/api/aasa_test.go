@@ -38,7 +38,7 @@ func TestAASAHandler(t *testing.T) {
 	for _, c := range d.Components {
 		paths[c["/"]] = true
 	}
-	if !paths["/f/*"] || !paths["/i/*"] || len(paths) != 2 {
+	if !paths["/f/*"] || !paths["/i/*"] || !paths["/fi/*"] || len(paths) != 3 {
 		t.Fatalf("components = %v", d.Components)
 	}
 }

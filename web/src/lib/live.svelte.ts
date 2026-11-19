@@ -1,15 +1,53 @@
-import { apiUrl, type EventInvitation, type JoinRequest, type ReplyPreset, type Send } from './api/client';
+import {
+	apiUrl,
+	type BirthdayPerson,
+	type EventInvitation,
+	type FeedBirthdayGreeting,
+	type FeedReceiptSummary,
+	type GoogleImport,
+	type JoinRequest,
+	type PhotoSource,
+	type ReplyPreset,
+	type Send,
+	type Subscription
+} from './api/client';
 import { backoffDelay, type Reaction } from './logic';
 
 /** User websocket events (README §6.2). Unknown types are ignored. */
 export type LiveEvent =
 	| { type: 'send.updated'; send: Partial<Send> & { id: string } }
-	| { type: 'reaction'; placement_id: string; frame_id: string; reaction: Reaction | null; by_frame_name?: string }
-	| { type: 'reply'; placement_id: string; frame_id: string; preset: ReplyPreset }
+	| {
+			type: 'reaction';
+			placement_id: string;
+			frame_id: string;
+			reaction: Reaction | null;
+			by_frame_name?: string;
+			/** Set when the placement came through a feed (README §6.2). */
+			feed_id?: string;
+			post_id?: string;
+	  }
+	| { type: 'reply'; placement_id: string; frame_id: string; preset: ReplyPreset; feed_id?: string; post_id?: string }
 	| { type: 'frame.status'; frame_id: string; online: boolean; last_seen_at: string | null }
 	| { type: 'join_request'; frame_id: string; request: JoinRequest }
 	| { type: 'membership.updated'; frame_id: string }
-	| { type: 'event_invitation.decided'; frame_id: string; invitation: EventInvitation };
+	| { type: 'event_invitation.decided'; frame_id: string; invitation: EventInvitation }
+	// Feeds (docs/spec/feeds.md §8)
+	| { type: 'feed_post.updated'; feed_id: string; post_id: string; summary: FeedReceiptSummary }
+	| { type: 'subscription.request'; feed_id: string; subscription: Subscription }
+	| { type: 'subscription.updated'; feed_id: string; frame_id: string; subscription: Subscription }
+	| { type: 'feed.join_request'; feed_id: string; request: JoinRequest }
+	| { type: 'feed.membership_updated'; feed_id: string }
+	// Birthdays (docs/spec/birthdays.md §8)
+	| { type: 'birthday.suggested'; feed_id: string; birthday: BirthdayPerson }
+	| { type: 'birthday.decided'; feed_id: string; birthday: BirthdayPerson }
+	| { type: 'birthday.updated'; feed_id: string; birthday: BirthdayPerson }
+	| { type: 'birthday.removed'; feed_id: string; birthday_id: string }
+	| { type: 'birthday.today'; date: string; birthdays: { feed_id: string; birthday_id: string }[] }
+	| { type: 'birthday.greeting'; feed_id: string; greeting: FeedBirthdayGreeting }
+	// Photo sources and Google Photos import (docs/spec/photo-sources.md §10)
+	| { type: 'photo_source.updated'; source: PhotoSource }
+	| { type: 'photo_source.removed'; source_id: string; album_id?: string; feed_id?: string }
+	| { type: 'google_import.updated'; import: GoogleImport };
 
 type Handler = (e: LiveEvent) => void;
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s fyller %2$d i dag!</item>
+        <item quantity="other">🎈 %1$s fyller %2$d i dag!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s har bursdag i dag!</string>
+    <string name="birthday_card_title_many">🎈 Bursdager i dag</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">og %d til</item>
+        <item quantity="other">og %d til</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s fyller %2$d</item>
+        <item quantity="other">%1$s fyller %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s har bursdag</string>
+    <string name="birthday_countdown_two">%1$s og %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s og %2$d til</item>
+        <item quantity="other">%1$s og %2$d til</item>
+    </plurals>
+    <string name="birthday_greet_title">Si gratulerer med dagen fra denne fotorammen</string>
+    <string name="birthday_greet_button">Si gratulerer til %1$s</string>
+    <string name="birthday_greet_sent">Sendt ✓ – familien får se det</string>
+    <string name="birthday_detail_label">Bursdag</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">fyller %d</item>
+        <item quantity="other">fyller %d</item>
+    </plurals>
+</resources>

@@ -92,6 +92,12 @@ object Delivery {
 
     fun applyReply(send: Send, placementId: String, preset: String): Send? = update(send, placementId) { it.copy(replies = it.replies + preset) }
 
+    /** A `feed_post.updated` summary applied to the send that made that post; null when it isn't this send's. */
+    fun applyFeedSummary(send: Send, postId: String, summary: app.kinframe.core.api.FeedReceiptSummary): Send? {
+        if (send.feeds.none { it.postId == postId }) return null
+        return send.copy(feeds = send.feeds.map { if (it.postId == postId) it.copy(summary = summary) else it })
+    }
+
     private fun update(send: Send, placementId: String, f: (app.kinframe.core.api.SendPlacement) -> app.kinframe.core.api.SendPlacement): Send? {
         if (send.frames.none { fr -> fr.placements.any { it.placementId == placementId } }) return null
         return send.copy(frames = send.frames.map { fr -> fr.copy(placements = fr.placements.map { if (it.placementId == placementId) f(it) else it }) })

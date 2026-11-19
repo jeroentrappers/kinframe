@@ -1,0 +1,934 @@
+{
+  "ios.feeds.act.history": {
+    "en": "History",
+    "nl": "Geschiedenis"
+  },
+  "ios.feeds.act.pause": {
+    "en": "Pause",
+    "nl": "Pauzeren"
+  },
+  "ios.feeds.act.remove": {
+    "en": "Remove",
+    "nl": "Verwijderen"
+  },
+  "ios.feeds.act.resume": {
+    "en": "Resume",
+    "nl": "Hervatten"
+  },
+  "ios.feeds.act.unsubscribe": {
+    "en": "Stop showing",
+    "nl": "Niet meer tonen"
+  },
+  "ios.feeds.act.withdraw": {
+    "en": "Withdraw",
+    "nl": "Intrekken"
+  },
+  "ios.feeds.addFeed": {
+    "en": "Add a feed",
+    "nl": "Feed toevoegen"
+  },
+  "ios.feeds.addFromMine": {
+    "en": "One of my feeds",
+    "nl": "Een van mijn feeds"
+  },
+  "ios.feeds.adminHint": {
+    "en": "Admins manage members, invites, frames and settings, and can remove any post.",
+    "nl": "Beheerders beheren leden, uitnodigingen, kaders en instellingen, en kunnen elk bericht verwijderen."
+  },
+  "ios.feeds.approvedMember": {
+    "en": "{name} can now post to this feed",
+    "nl": "{name} kan nu in deze feed plaatsen"
+  },
+  "ios.feeds.backfill": {
+    "en": "Adding earlier photos · {placed} of {total}",
+    "nl": "Eerdere foto’s toevoegen · {placed} van {total}"
+  },
+  "ios.feeds.byAdmins": {
+    "en": "Run by {names}",
+    "nl": "Beheerd door {names}"
+  },
+  "ios.feeds.code": {
+    "en": "Code",
+    "nl": "Code"
+  },
+  "ios.feeds.codeAgain": {
+    "en": "Enter another code",
+    "nl": "Een andere code invullen"
+  },
+  "ios.feeds.codeCopied": {
+    "en": "Code copied",
+    "nl": "Code gekopieerd"
+  },
+  "ios.feeds.codeDigits": {
+    "en": "Numbers",
+    "nl": "Cijfers"
+  },
+  "ios.feeds.codeHint": {
+    "en": "Got a feed code with letters, like KF7Q-M2XA? Enter it here too.",
+    "nl": "Heb je een feedcode met letters, zoals KF7Q-M2XA? Die vul je hier ook in."
+  },
+  "ios.feeds.codeKeyboardHint": {
+    "en": "Switches between the number pad for frame codes and letters for feed codes.",
+    "nl": "Wisselt tussen cijfers voor kadercodes en letters voor feedcodes."
+  },
+  "ios.feeds.codeLetters": {
+    "en": "Letters",
+    "nl": "Letters"
+  },
+  "ios.feeds.codeSubmit": {
+    "en": "Look up feed",
+    "nl": "Feed opzoeken"
+  },
+  "ios.feeds.confirm.pauseBody": {
+    "en": "Its photos leave {frame} until you resume. Nothing is lost.",
+    "nl": "De foto’s verdwijnen van {frame} tot je hervat. Er gaat niets verloren."
+  },
+  "ios.feeds.confirm.pauseTitle": {
+    "en": "Pause {feed}?",
+    "nl": "{feed} pauzeren?"
+  },
+  "ios.feeds.confirm.removeBody": {
+    "en": "Photos that came only through {feed} leave the frame. Its managers are told.",
+    "nl": "Foto’s die alleen via {feed} kwamen, verdwijnen van het kader. De beheerders krijgen een bericht."
+  },
+  "ios.feeds.confirm.removeTitle": {
+    "en": "Remove {frame} from this feed?",
+    "nl": "{frame} uit deze feed halen?"
+  },
+  "ios.feeds.confirm.unsubscribeBody": {
+    "en": "Photos that came only through this feed leave {frame}.",
+    "nl": "Foto’s die alleen via deze feed kwamen, verdwijnen van {frame}."
+  },
+  "ios.feeds.confirm.unsubscribeTitle": {
+    "en": "Stop showing {feed}?",
+    "nl": "{feed} niet meer tonen?"
+  },
+  "ios.feeds.copyCode": {
+    "en": "Copy code",
+    "nl": "Code kopiëren"
+  },
+  "ios.feeds.cover": {
+    "en": "Cover",
+    "nl": "Omslag"
+  },
+  "ios.feeds.coverChoose": {
+    "en": "Choose a photo",
+    "nl": "Kies een foto"
+  },
+  "ios.feeds.coverHint": {
+    "en": "Post a photo first, then pick it as the cover.",
+    "nl": "Plaats eerst een foto, dan kun je die als omslag kiezen."
+  },
+  "ios.feeds.coverRemove": {
+    "en": "Remove",
+    "nl": "Verwijderen"
+  },
+  "ios.feeds.create": {
+    "en": "Create",
+    "nl": "Aanmaken"
+  },
+  "ios.feeds.delete": {
+    "en": "Delete feed",
+    "nl": "Feed verwijderen"
+  },
+  "ios.feeds.deleteBody": {
+    "en": "Every post disappears from every frame that shows this feed. The photos stay in each poster’s history.",
+    "nl": "Elk bericht verdwijnt van elk kader dat deze feed toont. De foto’s blijven in de geschiedenis van wie ze plaatste."
+  },
+  "ios.feeds.deleteConfirm": {
+    "en": "Delete {name} for everyone?",
+    "nl": "{name} voor iedereen verwijderen?"
+  },
+  "ios.feeds.deleteType": {
+    "en": "Type “{name}” to confirm",
+    "nl": "Typ “{name}” om te bevestigen"
+  },
+  "ios.feeds.deleted": {
+    "en": "{name} was deleted",
+    "nl": "{name} is verwijderd"
+  },
+  "ios.feeds.delivery.awaiting_approval": {
+    "en": "Awaiting approval",
+    "nl": "Wacht op goedkeuring"
+  },
+  "ios.feeds.delivery.delivered": {
+    "en": "Delivered",
+    "nl": "Afgeleverd"
+  },
+  "ios.feeds.delivery.failed": {
+    "en": "Failed",
+    "nl": "Mislukt"
+  },
+  "ios.feeds.delivery.pending": {
+    "en": "Processing",
+    "nl": "Bezig"
+  },
+  "ios.feeds.delivery.ready": {
+    "en": "On its way",
+    "nl": "Onderweg"
+  },
+  "ios.feeds.delivery.removed": {
+    "en": "Removed",
+    "nl": "Verwijderd"
+  },
+  "ios.feeds.delivery.seen": {
+    "en": "Seen",
+    "nl": "Bekeken"
+  },
+  "ios.feeds.delivery.suspended": {
+    "en": "Paused",
+    "nl": "Gepauzeerd"
+  },
+  "ios.feeds.deliveryLabel": {
+    "en": "Delivery per feed",
+    "nl": "Aflevering per feed"
+  },
+  "ios.feeds.done.approved": {
+    "en": "{frame} now shows this feed",
+    "nl": "{frame} toont nu deze feed"
+  },
+  "ios.feeds.done.history": {
+    "en": "History of {feed} updated",
+    "nl": "Geschiedenis van {feed} aangepast"
+  },
+  "ios.feeds.done.paused": {
+    "en": "{feed} is paused",
+    "nl": "{feed} is gepauzeerd"
+  },
+  "ios.feeds.done.rejected": {
+    "en": "Declined {frame}",
+    "nl": "{frame} geweigerd"
+  },
+  "ios.feeds.done.removed": {
+    "en": "{feed} is no longer on {frame}",
+    "nl": "{feed} staat niet meer op {frame}"
+  },
+  "ios.feeds.done.resumed": {
+    "en": "{feed} is back",
+    "nl": "{feed} is terug"
+  },
+  "ios.feeds.done.withdrawn": {
+    "en": "Request withdrawn",
+    "nl": "Verzoek ingetrokken"
+  },
+  "ios.feeds.emptyBody": {
+    "en": "A feed is a private channel for your family. Post once, and every frame that follows it gets the photos.",
+    "nl": "Een feed is een privékanaal voor je familie. Je plaatst je foto’s één keer, en elk kader dat de feed volgt krijgt de foto’s."
+  },
+  "ios.feeds.emptyTitle": {
+    "en": "No feeds yet",
+    "nl": "Nog geen feeds"
+  },
+  "ios.feeds.ended": {
+    "en": "Ended",
+    "nl": "Gestopt"
+  },
+  "ios.feeds.endedCount.one": {
+    "en": "{count} ended",
+    "nl": "{count} gestopt"
+  },
+  "ios.feeds.endedCount.other": {
+    "en": "{count} ended",
+    "nl": "{count} gestopt"
+  },
+  "ios.feeds.enterCode": {
+    "en": "Enter a code",
+    "nl": "Code invullen"
+  },
+  "ios.feeds.forward": {
+    "en": "Post to a feed",
+    "nl": "In een feed plaatsen"
+  },
+  "ios.feeds.forwardButton": {
+    "en": "Post",
+    "nl": "Plaatsen"
+  },
+  "ios.feeds.forwardHint": {
+    "en": "The same photos go to the feeds you pick, without uploading them again.",
+    "nl": "Dezelfde foto’s gaan naar de feeds die je kiest, zonder ze opnieuw te uploaden."
+  },
+  "ios.feeds.forwarded.one": {
+    "en": "Posted to the feed",
+    "nl": "In de feed geplaatst"
+  },
+  "ios.feeds.forwarded.other": {
+    "en": "Posted to {count} feeds",
+    "nl": "In {count} feeds geplaatst"
+  },
+  "ios.feeds.frameCount.one": {
+    "en": "{count} frame",
+    "nl": "{count} kader"
+  },
+  "ios.feeds.frameCount.other": {
+    "en": "{count} frames",
+    "nl": "{count} kaders"
+  },
+  "ios.feeds.frameNone": {
+    "en": "{frame} doesn’t follow any feed yet.",
+    "nl": "{frame} volgt nog geen feed."
+  },
+  "ios.feeds.framesLede": {
+    "en": "These frames show the feed. Everyone in the feed sees their names.",
+    "nl": "Deze kaders tonen de feed. Iedereen in de feed ziet hun namen."
+  },
+  "ios.feeds.history.all": {
+    "en": "Everything so far",
+    "nl": "Alles tot nu toe"
+  },
+  "ios.feeds.history.allHint": {
+    "en": "Every photo posted so far, newest first, up to {max}.",
+    "nl": "Elke foto die al geplaatst is, nieuwste eerst, tot {max}."
+  },
+  "ios.feeds.history.allShort": {
+    "en": "All",
+    "nl": "Alles"
+  },
+  "ios.feeds.history.changeBody": {
+    "en": "Choose which earlier photos of {feed} show on {frame}. New posts always arrive.",
+    "nl": "Kies welke eerdere foto’s van {feed} op {frame} komen. Nieuwe berichten komen er altijd bij."
+  },
+  "ios.feeds.history.lastN.one": {
+    "en": "The last photo",
+    "nl": "De laatste foto"
+  },
+  "ios.feeds.history.lastN.other": {
+    "en": "The last {count} photos",
+    "nl": "De laatste {count} foto’s"
+  },
+  "ios.feeds.history.lastNHint": {
+    "en": "Counted from when the frame started following. Later posts are never taken off.",
+    "nl": "Geteld vanaf het moment dat het kader de feed volgt. Latere berichten worden nooit weggehaald."
+  },
+  "ios.feeds.history.lastNShort": {
+    "en": "The last",
+    "nl": "De laatste"
+  },
+  "ios.feeds.history.none": {
+    "en": "Only new posts",
+    "nl": "Alleen nieuwe berichten"
+  },
+  "ios.feeds.history.noneHint": {
+    "en": "The frame gets what’s posted from now on.",
+    "nl": "Het kader krijgt wat er vanaf nu geplaatst wordt."
+  },
+  "ios.feeds.history.noneShort": {
+    "en": "Only new",
+    "nl": "Alleen nieuwe"
+  },
+  "ios.feeds.history.storage": {
+    "en": "This frame is almost full. Older photos are swapped in as they come up.",
+    "nl": "Dit kader is bijna vol. Oudere foto’s worden opgehaald wanneer ze aan de beurt zijn."
+  },
+  "ios.feeds.history.title": {
+    "en": "Earlier photos",
+    "nl": "Eerdere foto’s"
+  },
+  "ios.feeds.invite.already": {
+    "en": "You’re already in this feed.",
+    "nl": "Je zit al in deze feed."
+  },
+  "ios.feeds.invite.instant": {
+    "en": "Once you join, you can post right away.",
+    "nl": "Zodra je meedoet, kun je meteen plaatsen."
+  },
+  "ios.feeds.invite.join": {
+    "en": "Join feed",
+    "nl": "Meedoen"
+  },
+  "ios.feeds.invite.joinBody": {
+    "en": "You can post photos to it. Frames that follow it show them.",
+    "nl": "Je kunt er foto’s in plaatsen. Kaders die de feed volgen, tonen ze."
+  },
+  "ios.feeds.invite.joinTitle": {
+    "en": "Join {name}",
+    "nl": "Doe mee met {name}"
+  },
+  "ios.feeds.invite.joined": {
+    "en": "You’re in {name}",
+    "nl": "Je zit in {name}"
+  },
+  "ios.feeds.invite.joinedBody": {
+    "en": "Pick it under Send to post photos to every frame that follows it.",
+    "nl": "Kies de feed bij Sturen om foto’s te plaatsen naar elk kader dat de feed volgt."
+  },
+  "ios.feeds.invite.needsApproval": {
+    "en": "{owner} approves new members before they can post.",
+    "nl": "{owner} keurt nieuwe leden goed voor ze kunnen plaatsen."
+  },
+  "ios.feeds.invite.owner": {
+    "en": "Started by {name}",
+    "nl": "Gestart door {name}"
+  },
+  "ios.feeds.invite.pendingBody": {
+    "en": "An admin of {name} will see your request. We’ll let you know when you’re in.",
+    "nl": "Een beheerder van {name} ziet je verzoek. We laten je weten wanneer je erin zit."
+  },
+  "ios.feeds.invite.subscribeBody": {
+    "en": "Pick the frames that should show this feed. You don’t join the feed and can stop any time.",
+    "nl": "Kies de kaders die deze feed moeten tonen. Je wordt geen lid van de feed en je kunt altijd stoppen."
+  },
+  "ios.feeds.invite.subscribeTitle": {
+    "en": "Show {name} on your frame",
+    "nl": "Toon {name} op je kader"
+  },
+  "ios.feeds.invite.subscribed": {
+    "en": "{name} is on its way",
+    "nl": "{name} komt eraan"
+  },
+  "ios.feeds.invite.subscribedBody": {
+    "en": "You can pause it, change the earlier photos or stop it in the frame’s settings.",
+    "nl": "Je kunt de feed pauzeren, de eerdere foto’s aanpassen of stoppen in de instellingen van het kader."
+  },
+  "ios.feeds.inviteHint": {
+    "en": "Share a link or code. Anyone who opens it and signs in can post.",
+    "nl": "Deel een link of code. Wie die opent en zich aanmeldt, kan plaatsen."
+  },
+  "ios.feeds.inviteHintApproval": {
+    "en": "Share a link or code. You approve people before they can post.",
+    "nl": "Deel een link of code. Jij keurt mensen goed voor ze kunnen plaatsen."
+  },
+  "ios.feeds.inviteJoin": {
+    "en": "Invite to post",
+    "nl": "Uitnodigen om te plaatsen"
+  },
+  "ios.feeds.inviteJoinExplain": {
+    "en": "Whoever opens this joins {name} and can post to it.",
+    "nl": "Wie dit opent, doet mee met {name} en kan erin plaatsen."
+  },
+  "ios.feeds.inviteJoinShort": {
+    "en": "Post",
+    "nl": "Plaatsen"
+  },
+  "ios.feeds.invitePurpose": {
+    "en": "Invite to",
+    "nl": "Uitnodigen om"
+  },
+  "ios.feeds.inviteShowQr": {
+    "en": "Shows the QR code and the code",
+    "nl": "Toont de QR-code en de code"
+  },
+  "ios.feeds.inviteSubscribe": {
+    "en": "Invite a frame",
+    "nl": "Een kader uitnodigen"
+  },
+  "ios.feeds.inviteSubscribeExplain": {
+    "en": "Whoever opens this can show {name} on frames they manage, right away, without joining.",
+    "nl": "Wie dit opent, kan {name} meteen tonen op kaders die hij of zij beheert, zonder lid te worden."
+  },
+  "ios.feeds.inviteSubscribeHint": {
+    "en": "For someone who looks after a frame but isn’t in the feed, like a care home. Their frames start showing it at once.",
+    "nl": "Voor wie een kader beheert maar niet in de feed zit, zoals een woonzorgcentrum. Hun kaders tonen de feed meteen."
+  },
+  "ios.feeds.inviteSubscribeShort": {
+    "en": "Show on a frame",
+    "nl": "Op een kader tonen"
+  },
+  "ios.feeds.itemRemoved": {
+    "en": "Photo removed from every frame",
+    "nl": "Foto van elk kader verwijderd"
+  },
+  "ios.feeds.joined": {
+    "en": "Joined {when}",
+    "nl": "Lid sinds {when}"
+  },
+  "ios.feeds.lastPost": {
+    "en": "Last post {when}",
+    "nl": "Laatste bericht {when}"
+  },
+  "ios.feeds.lastPosted": {
+    "en": "Last posted {when}",
+    "nl": "Laatst geplaatst {when}"
+  },
+  "ios.feeds.lastSeen": {
+    "en": "last seen {when}",
+    "nl": "laatst gezien {when}"
+  },
+  "ios.feeds.leave": {
+    "en": "Leave feed",
+    "nl": "Feed verlaten"
+  },
+  "ios.feeds.leaveBody": {
+    "en": "Your posts stay in the feed.",
+    "nl": "Je berichten blijven in de feed."
+  },
+  "ios.feeds.leaveBodyPosts": {
+    "en": "Your posts are removed from the feed and every frame.",
+    "nl": "Je berichten worden uit de feed en van elk kader verwijderd."
+  },
+  "ios.feeds.leaveConfirm": {
+    "en": "Leave {name}?",
+    "nl": "{name} verlaten?"
+  },
+  "ios.feeds.lede": {
+    "en": "Private family channels. Post once, and every frame that follows the feed gets the photos.",
+    "nl": "Privékanalen voor je familie. Je plaatst je foto’s één keer, en elk kader dat de feed volgt krijgt de foto’s."
+  },
+  "ios.feeds.left": {
+    "en": "You left {name}",
+    "nl": "Je hebt {name} verlaten"
+  },
+  "ios.feeds.live.approved": {
+    "en": "{feed} now shows on {frame}",
+    "nl": "{feed} staat nu op {frame}"
+  },
+  "ios.feeds.live.joinRequest": {
+    "en": "{name} wants to join {feed}",
+    "nl": "{name} wil meedoen met {feed}"
+  },
+  "ios.feeds.live.rejected": {
+    "en": "{feed} declined {frame}",
+    "nl": "{feed} heeft {frame} geweigerd"
+  },
+  "ios.feeds.live.subscriptionRequest": {
+    "en": "{frame} wants to show {feed}",
+    "nl": "{frame} wil {feed} tonen"
+  },
+  "ios.feeds.memberCount.one": {
+    "en": "{count} member",
+    "nl": "{count} lid"
+  },
+  "ios.feeds.memberCount.other": {
+    "en": "{count} members",
+    "nl": "{count} leden"
+  },
+  "ios.feeds.name": {
+    "en": "Name",
+    "nl": "Naam"
+  },
+  "ios.feeds.namePlaceholder": {
+    "en": "Peeters kids",
+    "nl": "Kleinkinderen Peeters"
+  },
+  "ios.feeds.neverPosted": {
+    "en": "Hasn’t posted yet",
+    "nl": "Heeft nog niets geplaatst"
+  },
+  "ios.feeds.new": {
+    "en": "New feed",
+    "nl": "Nieuwe feed"
+  },
+  "ios.feeds.newHint": {
+    "en": "You can invite people and frames once it’s made.",
+    "nl": "Daarna kun je mensen en kaders uitnodigen."
+  },
+  "ios.feeds.noFrames": {
+    "en": "No frame shows this feed yet.",
+    "nl": "Nog geen enkel kader toont deze feed."
+  },
+  "ios.feeds.noPostsBody": {
+    "en": "Post photos and every frame that follows the feed shows them.",
+    "nl": "Plaats foto’s en elk kader dat de feed volgt, toont ze."
+  },
+  "ios.feeds.noPostsTitle": {
+    "en": "Nothing posted yet",
+    "nl": "Nog niets geplaatst"
+  },
+  "ios.feeds.notePlaceholder": {
+    "en": "For aunt Lisa",
+    "nl": "Voor tante Lisa"
+  },
+  "ios.feeds.onFrames": {
+    "en": "On frames",
+    "nl": "Op kaders"
+  },
+  "ios.feeds.open": {
+    "en": "Open feed",
+    "nl": "Feed openen"
+  },
+  "ios.feeds.ownerLeaveHint": {
+    "en": "You own this feed. Make someone else the owner first (in Members), then you can leave.",
+    "nl": "Jij bent eigenaar van deze feed. Maak eerst iemand anders eigenaar (bij Leden), daarna kun je vertrekken."
+  },
+  "ios.feeds.pausedHint": {
+    "en": "A paused feed’s photos are off the frame until you resume.",
+    "nl": "De foto’s van een gepauzeerde feed staan niet op het kader tot je hervat."
+  },
+  "ios.feeds.pickRecipient": {
+    "en": "Choose at least one frame or feed.",
+    "nl": "Kies minstens één kader of feed."
+  },
+  "ios.feeds.playFeed": {
+    "en": "Play one feed",
+    "nl": "Eén feed afspelen"
+  },
+  "ios.feeds.playFeedHint": {
+    "en": "The frame shows only this feed’s photos. Playing an album ends it.",
+    "nl": "Het kader toont alleen de foto’s van deze feed. Een album afspelen stopt dit."
+  },
+  "ios.feeds.post": {
+    "en": "Post",
+    "nl": "Plaatsen"
+  },
+  "ios.feeds.postActions": {
+    "en": "Post options",
+    "nl": "Opties voor dit bericht"
+  },
+  "ios.feeds.postCount.one": {
+    "en": "{count} post",
+    "nl": "{count} bericht"
+  },
+  "ios.feeds.postCount.other": {
+    "en": "{count} posts",
+    "nl": "{count} berichten"
+  },
+  "ios.feeds.postFirst": {
+    "en": "Post photos",
+    "nl": "Foto’s plaatsen"
+  },
+  "ios.feeds.postRemoved": {
+    "en": "Post removed from every frame",
+    "nl": "Bericht van elk kader verwijderd"
+  },
+  "ios.feeds.postRemovedNote": {
+    "en": "Removed from the feed",
+    "nl": "Uit de feed verwijderd"
+  },
+  "ios.feeds.postedByYou": {
+    "en": "You",
+    "nl": "Jij"
+  },
+  "ios.feeds.posterHint": {
+    "en": "Members can post, and edit or unsend their own posts.",
+    "nl": "Leden kunnen plaatsen, en hun eigen berichten aanpassen of terugnemen."
+  },
+  "ios.feeds.qrLabel": {
+    "en": "QR code for the invite link",
+    "nl": "QR-code voor de uitnodigingslink"
+  },
+  "ios.feeds.receipts": {
+    "en": "Receipts",
+    "nl": "Ontvangst"
+  },
+  "ios.feeds.receipts.allPaused.one": {
+    "en": "Paused on {count} frame",
+    "nl": "Gepauzeerd op {count} kader"
+  },
+  "ios.feeds.receipts.allPaused.other": {
+    "en": "Paused on {count} frames",
+    "nl": "Gepauzeerd op {count} kaders"
+  },
+  "ios.feeds.receipts.awaiting.one": {
+    "en": "{count} awaiting approval",
+    "nl": "{count} wacht op goedkeuring"
+  },
+  "ios.feeds.receipts.awaiting.other": {
+    "en": "{count} awaiting approval",
+    "nl": "{count} wachten op goedkeuring"
+  },
+  "ios.feeds.receipts.delivered.one": {
+    "en": "Delivered to {n} of {count} frame",
+    "nl": "Afgeleverd op {n} van {count} kader"
+  },
+  "ios.feeds.receipts.delivered.other": {
+    "en": "Delivered to {n} of {count} frames",
+    "nl": "Afgeleverd op {n} van {count} kaders"
+  },
+  "ios.feeds.receipts.noFrames": {
+    "en": "No frame follows this feed yet",
+    "nl": "Nog geen kader volgt deze feed"
+  },
+  "ios.feeds.receipts.onItsWay.one": {
+    "en": "On its way to {count} frame",
+    "nl": "Onderweg naar {count} kader"
+  },
+  "ios.feeds.receipts.onItsWay.other": {
+    "en": "On its way to {count} frames",
+    "nl": "Onderweg naar {count} kaders"
+  },
+  "ios.feeds.receipts.paused.one": {
+    "en": "{count} paused",
+    "nl": "{count} gepauzeerd"
+  },
+  "ios.feeds.receipts.paused.other": {
+    "en": "{count} paused",
+    "nl": "{count} gepauzeerd"
+  },
+  "ios.feeds.receipts.removed.one": {
+    "en": "removed on {count}",
+    "nl": "verwijderd op {count}"
+  },
+  "ios.feeds.receipts.removed.other": {
+    "en": "removed on {count}",
+    "nl": "verwijderd op {count}"
+  },
+  "ios.feeds.receipts.seen.one": {
+    "en": "Seen on {n} of {count} frame",
+    "nl": "Bekeken op {n} van {count} kader"
+  },
+  "ios.feeds.receipts.seen.other": {
+    "en": "Seen on {n} of {count} frames",
+    "nl": "Bekeken op {n} van {count} kaders"
+  },
+  "ios.feeds.receiptsOpen": {
+    "en": "Shows delivery per frame",
+    "nl": "Toont de aflevering per kader"
+  },
+  "ios.feeds.removeBody": {
+    "en": "Their posts stay in the feed.",
+    "nl": "Hun berichten blijven in de feed."
+  },
+  "ios.feeds.removeBodyPosts": {
+    "en": "Their posts are removed from the feed and every frame.",
+    "nl": "Hun berichten worden uit de feed en van elk kader verwijderd."
+  },
+  "ios.feeds.removeMember": {
+    "en": "Remove from feed",
+    "nl": "Uit de feed verwijderen"
+  },
+  "ios.feeds.removeMyPosts": {
+    "en": "Also remove my posts",
+    "nl": "Ook mijn berichten verwijderen"
+  },
+  "ios.feeds.removeOne": {
+    "en": "Remove one photo",
+    "nl": "Eén foto verwijderen"
+  },
+  "ios.feeds.removePost": {
+    "en": "Remove post",
+    "nl": "Bericht verwijderen"
+  },
+  "ios.feeds.removePosts": {
+    "en": "Also remove their posts",
+    "nl": "Ook hun berichten verwijderen"
+  },
+  "ios.feeds.removedReason.feed_deleted": {
+    "en": "The feed was deleted",
+    "nl": "De feed is verwijderd"
+  },
+  "ios.feeds.removedReason.frame_removed": {
+    "en": "The frame was removed",
+    "nl": "Het kader is verwijderd"
+  },
+  "ios.feeds.removedReason.removed_by_feed": {
+    "en": "Removed by the feed",
+    "nl": "Door de feed verwijderd"
+  },
+  "ios.feeds.removedReason.unsubscribed": {
+    "en": "Stopped by the frame",
+    "nl": "Door het kader gestopt"
+  },
+  "ios.feeds.removedReason.withdrawn": {
+    "en": "Request withdrawn",
+    "nl": "Verzoek ingetrokken"
+  },
+  "ios.feeds.requestedBy": {
+    "en": "asked by {name}",
+    "nl": "gevraagd door {name}"
+  },
+  "ios.feeds.rolePoster": {
+    "en": "Member",
+    "nl": "Lid"
+  },
+  "ios.feeds.rolesHint": {
+    "en": "Everyone in a feed can post. The audience is the frames, not the people.",
+    "nl": "Iedereen in een feed kan plaatsen. Het publiek zijn de kaders, niet de mensen."
+  },
+  "ios.feeds.sections": {
+    "en": "Feed sections",
+    "nl": "Onderdelen van de feed"
+  },
+  "ios.feeds.sendHint": {
+    "en": "One post per feed. Every frame that follows it gets the photos.",
+    "nl": "Eén bericht per feed. Elk kader dat de feed volgt, krijgt de foto’s."
+  },
+  "ios.feeds.sendToFeeds": {
+    "en": "Or post to a feed",
+    "nl": "Of plaats in een feed"
+  },
+  "ios.feeds.setAutoApprove": {
+    "en": "Approve frames automatically",
+    "nl": "Kaders automatisch goedkeuren"
+  },
+  "ios.feeds.setAutoApproveHint": {
+    "en": "When members ask to show this feed on their frame, it starts at once.",
+    "nl": "Als leden de feed op hun kader willen tonen, start dat meteen."
+  },
+  "ios.feeds.setInviteApproval": {
+    "en": "New members need approval",
+    "nl": "Nieuwe leden goedkeuren"
+  },
+  "ios.feeds.setInviteApprovalHint": {
+    "en": "People who open an invite wait for an admin.",
+    "nl": "Wie een uitnodiging opent, wacht op een beheerder."
+  },
+  "ios.feeds.setPostersInvite": {
+    "en": "Members can invite",
+    "nl": "Leden mogen uitnodigen"
+  },
+  "ios.feeds.setPostersInviteHint": {
+    "en": "Members can make invite links to post, not to add frames.",
+    "nl": "Leden kunnen uitnodigingslinks maken om te plaatsen, niet om kaders toe te voegen."
+  },
+  "ios.feeds.setSeeReactions": {
+    "en": "Members see reactions",
+    "nl": "Leden zien reacties"
+  },
+  "ios.feeds.setSeeReactionsHint": {
+    "en": "Everyone sees when every post was seen and how the frames reacted.",
+    "nl": "Iedereen ziet wanneer elk bericht bekeken werd en hoe de kaders reageerden."
+  },
+  "ios.feeds.settingsFrames": {
+    "en": "Frames",
+    "nl": "Kaders"
+  },
+  "ios.feeds.settingsMembers": {
+    "en": "Members",
+    "nl": "Leden"
+  },
+  "ios.feeds.shareJoinText": {
+    "en": "Join {name} so you can post photos to it. Code: {code}",
+    "nl": "Doe mee met {name} zodat je er foto’s in kunt plaatsen. Code: {code}"
+  },
+  "ios.feeds.shareJoinTitle": {
+    "en": "Join {name} on kinframe",
+    "nl": "Doe mee met {name} op kinframe"
+  },
+  "ios.feeds.shareSubscribeText": {
+    "en": "Show {name} on your frame. Code: {code}",
+    "nl": "Toon {name} op je kader. Code: {code}"
+  },
+  "ios.feeds.shareSubscribeTitle": {
+    "en": "Show {name} on your kinframe",
+    "nl": "Toon {name} op je kinframe"
+  },
+  "ios.feeds.showOnFrame": {
+    "en": "Show on a frame",
+    "nl": "Op een kader tonen"
+  },
+  "ios.feeds.status.active": {
+    "en": "Showing",
+    "nl": "Wordt getoond"
+  },
+  "ios.feeds.status.paused": {
+    "en": "Paused",
+    "nl": "Gepauzeerd"
+  },
+  "ios.feeds.status.pending": {
+    "en": "Waiting",
+    "nl": "Wacht"
+  },
+  "ios.feeds.status.rejected": {
+    "en": "Declined",
+    "nl": "Geweigerd"
+  },
+  "ios.feeds.status.removed": {
+    "en": "Stopped",
+    "nl": "Gestopt"
+  },
+  "ios.feeds.subscribe.active": {
+    "en": "{feed} now shows on {frame}",
+    "nl": "{feed} staat nu op {frame}"
+  },
+  "ios.feeds.subscribe.already": {
+    "en": "Already shows this feed",
+    "nl": "Toont deze feed al"
+  },
+  "ios.feeds.subscribe.instant": {
+    "en": "It starts right away.",
+    "nl": "Het start meteen."
+  },
+  "ios.feeds.subscribe.introFeed": {
+    "en": "Pick a frame you manage to show {feed} on.",
+    "nl": "Kies een kader dat je beheert om {feed} op te tonen."
+  },
+  "ios.feeds.subscribe.introFrame": {
+    "en": "Pick one of your feeds to show on {frame}.",
+    "nl": "Kies een van je feeds om op {frame} te tonen."
+  },
+  "ios.feeds.subscribe.needsApproval": {
+    "en": "An admin of the feed approves it first.",
+    "nl": "Een beheerder van de feed keurt het eerst goed."
+  },
+  "ios.feeds.subscribe.noFeeds": {
+    "en": "You’re not in a feed yet. Use a code from someone who runs one.",
+    "nl": "Je zit nog niet in een feed. Gebruik een code van iemand die er een beheert."
+  },
+  "ios.feeds.subscribe.noFrames": {
+    "en": "You don’t manage a frame. The owner of a frame, or someone allowed to change its settings, can do this.",
+    "nl": "Je beheert geen kader. De eigenaar van een kader, of wie de instellingen mag wijzigen, kan dit doen."
+  },
+  "ios.feeds.subscribe.privacy": {
+    "en": "Members of {feed} will see this frame’s name, and posters will see when their photos were seen and how the frame reacted.",
+    "nl": "Leden van {feed} zien de naam van dit kader, en wie plaatst, ziet wanneer de foto’s bekeken werden en hoe het kader reageerde."
+  },
+  "ios.feeds.subscribe.requested": {
+    "en": "Asked {feed}. You’ll hear when it’s approved.",
+    "nl": "Gevraagd aan {feed}. Je hoort het wanneer het goedgekeurd is."
+  },
+  "ios.feeds.subscribe.submit": {
+    "en": "Show",
+    "nl": "Tonen"
+  },
+  "ios.feeds.subscribe.submitN.one": {
+    "en": "Show on this frame",
+    "nl": "Op dit kader tonen"
+  },
+  "ios.feeds.subscribe.submitN.other": {
+    "en": "Show on {count} frames",
+    "nl": "Op {count} kaders tonen"
+  },
+  "ios.feeds.subscribe.title": {
+    "en": "Show on a frame",
+    "nl": "Op een kader tonen"
+  },
+  "ios.feeds.subscribe.whichFrames": {
+    "en": "Which frames?",
+    "nl": "Welke kaders?"
+  },
+  "ios.feeds.subscribe.withCode": {
+    "en": "I have a code",
+    "nl": "Ik heb een code"
+  },
+  "ios.feeds.tabFrames": {
+    "en": "Frames",
+    "nl": "Kaders"
+  },
+  "ios.feeds.tabMembers": {
+    "en": "Members",
+    "nl": "Leden"
+  },
+  "ios.feeds.tabPosts": {
+    "en": "Posts",
+    "nl": "Berichten"
+  },
+  "ios.feeds.title": {
+    "en": "Feeds",
+    "nl": "Feeds"
+  },
+  "ios.feeds.tooManyFeeds": {
+    "en": "You can post to up to {max} feeds at a time.",
+    "nl": "Je kunt in maximaal {max} feeds tegelijk plaatsen."
+  },
+  "ios.feeds.transferBody": {
+    "en": "You become an admin. Only the owner can delete the feed or hand it over.",
+    "nl": "Jij wordt beheerder. Alleen de eigenaar kan de feed verwijderen of overdragen."
+  },
+  "ios.feeds.transferConfirm": {
+    "en": "Make {name} the owner?",
+    "nl": "{name} eigenaar maken?"
+  },
+  "ios.feeds.transferHint": {
+    "en": "{name} gets the feed; you stay on as admin.",
+    "nl": "{name} krijgt de feed; jij blijft beheerder."
+  },
+  "ios.feeds.transferred": {
+    "en": "{name} now owns this feed",
+    "nl": "{name} is nu eigenaar van deze feed"
+  },
+  "ios.feeds.unknownFeed": {
+    "en": "A feed that ended",
+    "nl": "Een gestopte feed"
+  },
+  "ios.feeds.unsent": {
+    "en": "Removed from every frame",
+    "nl": "Van elk kader verwijderd"
+  },
+  "ios.feeds.viaInvite": {
+    "en": "through an invite",
+    "nl": "via een uitnodiging"
+  },
+  "ios.feeds.waiting": {
+    "en": "Waiting for approval",
+    "nl": "Wacht op goedkeuring"
+  }
+}

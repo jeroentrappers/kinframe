@@ -15,10 +15,16 @@ class FakeServer : Dispatcher() {
     val media = mutableMapOf<String, ByteArray>()
     val requests = CopyOnWriteArrayList<RecordedRequest>()
     var settingsStatus = 200
+    /** Path → HTTP status (with a problem body) for any other endpoint. */
+    val status = mutableMapOf<String, Int>()
 
     override fun dispatch(request: RecordedRequest): MockResponse {
         requests += request
         val path = request.url.encodedPath
+        status[path]?.let { code ->
+            return MockResponse.Builder().code(code).addHeader("Content-Type", "application/problem+json")
+                .body("""{"type":"x","title":"x","status":$code,"code":"not_found"}""").build()
+        }
         return when {
             path.endsWith("/devices/token") -> json("""{"access_token":"tok","expires_in":3600}""")
             path.endsWith("/device/changes") -> {

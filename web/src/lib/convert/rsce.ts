@@ -184,6 +184,18 @@ export function bmpInfo(b: Uint8Array): BmpInfo | null {
 /** The logo entries the convert tool replaces, when the image has them. */
 export const LOGO_ENTRIES = ['logo.bmp', 'logo_kernel.bmp'] as const;
 
+/** The format of the frame's own boot logo (the first logo entry that is a BMP), or null. */
+export function resourceLogoFormat(img: Uint8Array): BmpInfo | null {
+	if (resourceProblem(img)) return null;
+	const p = parseResource(img);
+	for (const name of LOGO_ENTRIES) {
+		const e = resourceEntry(img, p, name);
+		const info = e && bmpInfo(e);
+		if (info) return info;
+	}
+	return null;
+}
+
 /**
  * Puts our logo in place of the frame's boot logos. Refuses (ResourceError) when the image has no device tree or no
  * logo, or when our logo's size, depth or compression differs from the frame's: the bootloader only shows what it

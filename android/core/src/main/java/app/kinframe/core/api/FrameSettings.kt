@@ -47,7 +47,10 @@ data class SlideshowSettings(
     val pairPortraits: Boolean = true,
     val collage: Boolean = false,
     val collageMax: Int = 3,
+    /** Album mode; null = all photos. Setting it clears [feedId]. */
     val albumId: String? = null,
+    /** Feed mode: only placements of this subscribed feed (`Placement.feed_ids`); null = all. Clears [albumId]. */
+    val feedId: String? = null,
     val onThisDay: Boolean = false,
     /** Live/Motion Photos: [LivePhotos.ON] (play once when shown, and on tap), [LivePhotos.TAP] or [LivePhotos.OFF]. */
     val livePhotos: String = LivePhotos.ON,

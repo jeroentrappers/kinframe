@@ -472,25 +472,33 @@ public enum Operations {
                     public var shareLocationNames: Swift.Bool?
                     /// - Remark: Generated from `#/paths/v1/me/PATCH/requestBody/json/locale`.
                     public var locale: Swift.String?
+                    /// IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/me/PATCH/requestBody/json/timezone`.
+                    public var timezone: Swift.String?
                     /// Creates a new `JsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - displayName:
                     ///   - shareLocationNames:
                     ///   - locale:
+                    ///   - timezone: IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
                     public init(
                         displayName: Swift.String? = nil,
                         shareLocationNames: Swift.Bool? = nil,
-                        locale: Swift.String? = nil
+                        locale: Swift.String? = nil,
+                        timezone: Swift.String? = nil
                     ) {
                         self.displayName = displayName
                         self.shareLocationNames = shareLocationNames
                         self.locale = locale
+                        self.timezone = timezone
                     }
                     public enum CodingKeys: String, CodingKey {
                         case displayName = "display_name"
                         case shareLocationNames = "share_location_names"
                         case locale
+                        case timezone
                     }
                 }
                 /// - Remark: Generated from `#/paths/v1/me/PATCH/requestBody/content/application\/json`.
@@ -5177,8 +5185,10 @@ public enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
     }
-    /// Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
-    /// renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+    /// Place the same items on additional frames, or post them to feeds. Uses the same path as `sharePlacements`:
+    /// no new upload or master, renditions only for screen sizes that have none yet, and frames that already hold an
+    /// item are skipped (a placement that was only there through a feed becomes held directly, so unsubscribing no
+    /// longer removes it).
     ///
     ///
     /// - Remark: HTTP `POST /v1/sends/{sendId}/forward`.
@@ -5213,19 +5223,31 @@ public enum Operations {
             public var headers: Operations.ForwardSend.Input.Headers
             /// - Remark: Generated from `#/paths/v1/sends/{sendId}/forward/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
+                /// `frame_ids` and `feed_ids` together must not be empty.
+                ///
                 /// - Remark: Generated from `#/paths/v1/sends/{sendId}/forward/POST/requestBody/json`.
                 public struct JsonPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/paths/v1/sends/{sendId}/forward/POST/requestBody/json/frame_ids`.
                     public var frameIds: [Components.Schemas.Id]
+                    /// Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/sends/{sendId}/forward/POST/requestBody/json/feed_ids`.
+                    public var feedIds: [Components.Schemas.Id]?
                     /// Creates a new `JsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - frameIds:
-                    public init(frameIds: [Components.Schemas.Id]) {
+                    ///   - feedIds: Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped.
+                    public init(
+                        frameIds: [Components.Schemas.Id],
+                        feedIds: [Components.Schemas.Id]? = nil
+                    ) {
                         self.frameIds = frameIds
+                        self.feedIds = feedIds
                     }
                     public enum CodingKeys: String, CodingKey {
                         case frameIds = "frame_ids"
+                        case feedIds = "feed_ids"
                     }
                 }
                 /// - Remark: Generated from `#/paths/v1/sends/{sendId}/forward/POST/requestBody/content/application\/json`.
@@ -5712,6 +5734,10 @@ public enum Operations {
                 public var kind: Components.Schemas.MediaKind?
                 /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/GET/query/album_id`.
                 public var albumId: Components.Schemas.Id?
+                /// Only placements held by this feed (`feed_ids`).
+                ///
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/GET/query/feed_id`.
+                public var feedId: Components.Schemas.Id?
                 /// "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
                 /// on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
                 ///
@@ -5736,6 +5762,7 @@ public enum Operations {
                 ///   - senderId:
                 ///   - kind:
                 ///   - albumId:
+                ///   - feedId: Only placements held by this feed (`feed_ids`).
                 ///   - onThisDay: "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
                 ///   - sort:
                 public init(
@@ -5745,6 +5772,7 @@ public enum Operations {
                     senderId: Components.Schemas.Id? = nil,
                     kind: Components.Schemas.MediaKind? = nil,
                     albumId: Components.Schemas.Id? = nil,
+                    feedId: Components.Schemas.Id? = nil,
                     onThisDay: Swift.String? = nil,
                     sort: Operations.ListPlacements.Input.Query.SortPayload? = nil
                 ) {
@@ -5754,6 +5782,7 @@ public enum Operations {
                     self.senderId = senderId
                     self.kind = kind
                     self.albumId = albumId
+                    self.feedId = feedId
                     self.onThisDay = onThisDay
                     self.sort = sort
                 }
@@ -5979,7 +6008,7 @@ public enum Operations {
                 public struct JsonPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/{placementId}/PATCH/requestBody/json/hidden`.
                     public var hidden: Swift.Bool?
-                    /// true moves to trash (30 days)
+                    /// true moves to trash (30 days), false restores.
                     ///
                     /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/{placementId}/PATCH/requestBody/json/trashed`.
                     public var trashed: Swift.Bool?
@@ -5991,7 +6020,7 @@ public enum Operations {
                     ///
                     /// - Parameters:
                     ///   - hidden:
-                    ///   - trashed: true moves to trash (30 days)
+                    ///   - trashed: true moves to trash (30 days), false restores.
                     ///   - approved: Moderation decision (owner/admin).
                     public init(
                         hidden: Swift.Bool? = nil,
@@ -7141,7 +7170,9 @@ public enum Operations {
             }
         }
     }
-    /// Placements stay on the frame.
+    /// Placements stay on the frame, unless `remove_source_items` is true: then the photos the album's photo sources
+    /// imported are removed too (docs/spec/photo-sources.md §9.1). The album's photo sources are deleted either way.
+    ///
     ///
     /// - Remark: HTTP `DELETE /v1/frames/{frameId}/albums/{albumId}`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/delete(deleteAlbum)`.
@@ -7168,12 +7199,32 @@ public enum Operations {
                 }
             }
             public var path: Operations.DeleteAlbum.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/DELETE/query`.
+            public struct Query: Sendable, Hashable {
+                /// Also remove the photos this album's photo sources imported (clients ask when `photo_source_count` > 0).
+                ///
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/DELETE/query/remove_source_items`.
+                public var removeSourceItems: Swift.Bool?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - removeSourceItems: Also remove the photos this album's photo sources imported (clients ask when `photo_source_count` > 0).
+                public init(removeSourceItems: Swift.Bool? = nil) {
+                    self.removeSourceItems = removeSourceItems
+                }
+            }
+            public var query: Operations.DeleteAlbum.Input.Query
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            public init(path: Operations.DeleteAlbum.Input.Path) {
+            ///   - query:
+            public init(
+                path: Operations.DeleteAlbum.Input.Path,
+                query: Operations.DeleteAlbum.Input.Query = .init()
+            ) {
                 self.path = path
+                self.query = query
             }
         }
         @frozen public enum Output: Sendable, Hashable {
@@ -7216,6 +7267,10176 @@ public enum Operations {
             ///
             /// A response with a code that is not documented in the OpenAPI document.
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+    }
+    /// The album's photo sources with their status (album managers, i.e. owner, admin or manage_library; `403 missing_permission` otherwise).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/albums/{albumId}/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/photo-sources/get(listAlbumPhotoSources)`.
+    public enum ListAlbumPhotoSources {
+        public static let id: Swift.String = "listAlbumPhotoSources"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/photo-sources/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/photo-sources/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/photo-sources/GET/path/albumId`.
+                public var albumId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - albumId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    albumId: Components.Schemas.Id
+                ) {
+                    self.frameId = frameId
+                    self.albumId = albumId
+                }
+            }
+            public var path: Operations.ListAlbumPhotoSources.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/photo-sources/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListAlbumPhotoSources.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListAlbumPhotoSources.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListAlbumPhotoSources.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListAlbumPhotoSources.Input.Path,
+                headers: Operations.ListAlbumPhotoSources.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/photo-sources/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/albums/{albumId}/photo-sources/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.PhotoSource])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.PhotoSource] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListAlbumPhotoSources.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListAlbumPhotoSources.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Sources, oldest first
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/photo-sources/get(listAlbumPhotoSources)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListAlbumPhotoSources.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListAlbumPhotoSources.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/photo-sources/get(listAlbumPhotoSources)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Feeds the caller is a member of (any role). See docs/spec/feeds.md.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds`.
+    /// - Remark: Generated from `#/paths//v1/feeds/get(listMyFeeds)`.
+    public enum ListMyFeeds {
+        public static let id: Swift.String = "listMyFeeds"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyFeeds.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyFeeds.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListMyFeeds.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.ListMyFeeds.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.FeedSummary])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.FeedSummary] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListMyFeeds.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListMyFeeds.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Feeds
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/get(listMyFeeds)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListMyFeeds.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListMyFeeds.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// The caller becomes the feed's owner. At most `limits.max_feeds_per_user` owned feeds (`409 limit_reached`).
+    ///
+    /// - Remark: HTTP `POST /v1/feeds`.
+    /// - Remark: Generated from `#/paths//v1/feeds/post(createFeed)`.
+    public enum CreateFeed {
+        public static let id: Swift.String = "createFeed"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeed.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeed.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFeed.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.FeedCreate)
+            }
+            public var body: Operations.CreateFeed.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CreateFeed.Input.Headers = .init(),
+                body: Operations.CreateFeed.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.Feed)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Feed {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFeed.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFeed.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/post(createFeed)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFeed.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFeed.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/post(createFeed)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/post(createFeed)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Feed members only; everyone else gets `404 not_found` (feeds are never discoverable).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/get(getFeed)`.
+    public enum GetFeed {
+        public static let id: Swift.String = "getFeed"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.GetFeed.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeed.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeed.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFeed.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFeed.Input.Path,
+                headers: Operations.GetFeed.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Feed)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Feed {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFeed.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFeed.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Feed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/get(getFeed)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFeed.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFeed.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/get(getFeed)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin. Renaming re-emits the feed's placements on every subscribed frame so their credit follows.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/patch(updateFeed)`.
+    public enum UpdateFeed {
+        public static let id: Swift.String = "updateFeed"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.UpdateFeed.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeed.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeed.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateFeed.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.FeedUpdate)
+            }
+            public var body: Operations.UpdateFeed.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateFeed.Input.Path,
+                headers: Operations.UpdateFeed.Input.Headers = .init(),
+                body: Operations.UpdateFeed.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Feed)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Feed {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateFeed.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateFeed.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/patch(updateFeed)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateFeed.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateFeed.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/patch(updateFeed)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner only. Removes every post from every subscribed frame (placements that also reached a frame directly
+    /// stay), ends all subscriptions (`removed`, reason `feed_deleted`) and notifies the frames' owners and admins.
+    /// Items stay in the posters' sent history. Runs in the background; the feed is gone for clients at once.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)`.
+    public enum DeleteFeed {
+        public static let id: Swift.String = "deleteFeed"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.DeleteFeed.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteFeed.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteFeed.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteFeed.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteFeed.Input.Path,
+                headers: Operations.DeleteFeed.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeleteFeed.Output.NoContent)
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeleteFeed.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/delete(deleteFeed)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`).
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/leave`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)`.
+    public enum LeaveFeed {
+        public static let id: Swift.String = "leaveFeed"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.LeaveFeed.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LeaveFeed.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LeaveFeed.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.LeaveFeed.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// Also remove your posts from the feed and every subscribed frame.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/requestBody/json/remove_my_posts`.
+                    public var removeMyPosts: Swift.Bool?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - removeMyPosts: Also remove your posts from the feed and every subscribed frame.
+                    public init(removeMyPosts: Swift.Bool? = nil) {
+                        self.removeMyPosts = removeMyPosts
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case removeMyPosts = "remove_my_posts"
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/leave/POST/requestBody/content/application\/json`.
+                case json(Operations.LeaveFeed.Input.Body.JsonPayload)
+            }
+            public var body: Operations.LeaveFeed.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.LeaveFeed.Input.Path,
+                headers: Operations.LeaveFeed.Input.Headers = .init(),
+                body: Operations.LeaveFeed.Input.Body? = nil
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Left
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.LeaveFeed.Output.NoContent)
+            /// Left
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.LeaveFeed.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/leave/post(leaveFeed)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner only. The new owner must be a member; the previous owner becomes admin.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/transfer`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/transfer/post(transferFeedOwnership)`.
+    public enum TransferFeedOwnership {
+        public static let id: Swift.String = "transferFeedOwnership"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.TransferFeedOwnership.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TransferFeedOwnership.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TransferFeedOwnership.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.TransferFeedOwnership.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/requestBody/json/user_id`.
+                    public var userId: Components.Schemas.Id
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - userId:
+                    public init(userId: Components.Schemas.Id) {
+                        self.userId = userId
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case userId = "user_id"
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/transfer/POST/requestBody/content/application\/json`.
+                case json(Operations.TransferFeedOwnership.Input.Body.JsonPayload)
+            }
+            public var body: Operations.TransferFeedOwnership.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.TransferFeedOwnership.Input.Path,
+                headers: Operations.TransferFeedOwnership.Input.Headers = .init(),
+                body: Operations.TransferFeedOwnership.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Transferred
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/transfer/post(transferFeedOwnership)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.TransferFeedOwnership.Output.NoContent)
+            /// Transferred
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/transfer/post(transferFeedOwnership)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.TransferFeedOwnership.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/transfer/post(transferFeedOwnership)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Any feed member.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/members`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/get(listFeedMembers)`.
+    public enum ListFeedMembers {
+        public static let id: Swift.String = "listFeedMembers"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedMembers.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedMembers.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedMembers.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedMembers.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedMembers.Input.Path,
+                headers: Operations.ListFeedMembers.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.FeedMember])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.FeedMember] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedMembers.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedMembers.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Members
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/get(listFeedMembers)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedMembers.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedMembers.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/get(listFeedMembers)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)`.
+    public enum UpdateFeedMember {
+        public static let id: Swift.String = "updateFeedMember"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/path/userId`.
+                public var userId: Components.Parameters.UserId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - userId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    userId: Components.Parameters.UserId
+                ) {
+                    self.feedId = feedId
+                    self.userId = userId
+                }
+            }
+            public var path: Operations.UpdateFeedMember.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeedMember.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeedMember.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateFeedMember.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/requestBody/json/role`.
+                    @frozen public enum RolePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case admin = "admin"
+                        case poster = "poster"
+                    }
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/requestBody/json/role`.
+                    public var role: Operations.UpdateFeedMember.Input.Body.JsonPayload.RolePayload
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - role:
+                    public init(role: Operations.UpdateFeedMember.Input.Body.JsonPayload.RolePayload) {
+                        self.role = role
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case role
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/requestBody/content/application\/json`.
+                case json(Operations.UpdateFeedMember.Input.Body.JsonPayload)
+            }
+            public var body: Operations.UpdateFeedMember.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateFeedMember.Input.Path,
+                headers: Operations.UpdateFeedMember.Input.Headers = .init(),
+                body: Operations.UpdateFeedMember.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FeedMember)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedMember {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateFeedMember.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateFeedMember.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateFeedMember.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateFeedMember.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin (admins cannot remove the owner or other admins).
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)`.
+    public enum RemoveFeedMember {
+        public static let id: Swift.String = "removeFeedMember"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/DELETE/path/userId`.
+                public var userId: Components.Parameters.UserId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - userId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    userId: Components.Parameters.UserId
+                ) {
+                    self.feedId = feedId
+                    self.userId = userId
+                }
+            }
+            public var path: Operations.RemoveFeedMember.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/DELETE/query`.
+            public struct Query: Sendable, Hashable {
+                /// Also remove the member's posts from the feed and every subscribed frame.
+                ///
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/DELETE/query/remove_posts`.
+                public var removePosts: Swift.Bool?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - removePosts: Also remove the member's posts from the feed and every subscribed frame.
+                public init(removePosts: Swift.Bool? = nil) {
+                    self.removePosts = removePosts
+                }
+            }
+            public var query: Operations.RemoveFeedMember.Input.Query
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/members/{userId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedMember.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedMember.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RemoveFeedMember.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.RemoveFeedMember.Input.Path,
+                query: Operations.RemoveFeedMember.Input.Query = .init(),
+                headers: Operations.RemoveFeedMember.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RemoveFeedMember.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RemoveFeedMember.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin. Pending requests from join invites (`via` is always `invite`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
+    public enum ListFeedJoinRequests {
+        public static let id: Swift.String = "listFeedJoinRequests"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedJoinRequests.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedJoinRequests.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedJoinRequests.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedJoinRequests.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedJoinRequests.Input.Path,
+                headers: Operations.ListFeedJoinRequests.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.JoinRequest])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.JoinRequest] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedJoinRequests.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedJoinRequests.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Pending requests
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedJoinRequests.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedJoinRequests.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin. Approved requesters become posters.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)`.
+    public enum DecideFeedJoinRequest {
+        public static let id: Swift.String = "decideFeedJoinRequest"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/{requestId}/{decision}/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/{requestId}/{decision}/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/{requestId}/{decision}/POST/path/requestId`.
+                public var requestId: Components.Schemas.Id
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/{requestId}/{decision}/POST/path/decision`.
+                @frozen public enum DecisionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case approve = "approve"
+                    case deny = "deny"
+                }
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/{requestId}/{decision}/POST/path/decision`.
+                public var decision: Operations.DecideFeedJoinRequest.Input.Path.DecisionPayload
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - requestId:
+                ///   - decision:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    requestId: Components.Schemas.Id,
+                    decision: Operations.DecideFeedJoinRequest.Input.Path.DecisionPayload
+                ) {
+                    self.feedId = feedId
+                    self.requestId = requestId
+                    self.decision = decision
+                }
+            }
+            public var path: Operations.DecideFeedJoinRequest.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/join-requests/{requestId}/{decision}/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DecideFeedJoinRequest.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DecideFeedJoinRequest.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DecideFeedJoinRequest.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DecideFeedJoinRequest.Input.Path,
+                headers: Operations.DecideFeedJoinRequest.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Decided
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DecideFeedJoinRequest.Output.NoContent)
+            /// Decided
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DecideFeedJoinRequest.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin: all active (not expired, revoked or used up) invites. Posters, when the feed has
+    /// `posters_can_invite`: their own active invites.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/invites`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/get(listFeedInvites)`.
+    public enum ListFeedInvites {
+        public static let id: Swift.String = "listFeedInvites"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedInvites.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedInvites.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedInvites.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedInvites.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedInvites.Input.Path,
+                headers: Operations.ListFeedInvites.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.FeedInvite])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.FeedInvite] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedInvites.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedInvites.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Active invites
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/get(listFeedInvites)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedInvites.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedInvites.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/get(listFeedInvites)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin, or any member when the feed has `posters_can_invite` (default off) for `join` invites;
+    /// `subscribe` invites are pre-approved and stay owner/admin only (`403 forbidden`). Returns a link (`https://<web>/fi/<token>`, also shown as QR) and a short code for the
+    /// app's "Enter a code" field. `join` invites make the redeemer a poster (after approval unless the feed's
+    /// `invite_requires_approval` is off); `subscribe` invites let the redeemer subscribe frames they manage,
+    /// pre-approved, without joining.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/invites`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/post(createFeedInvite)`.
+    public enum CreateFeedInvite {
+        public static let id: Swift.String = "createFeedInvite"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.CreateFeedInvite.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedInvite.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedInvite.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFeedInvite.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.FeedInviteCreate)
+            }
+            public var body: Operations.CreateFeedInvite.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateFeedInvite.Input.Path,
+                headers: Operations.CreateFeedInvite.Input.Headers = .init(),
+                body: Operations.CreateFeedInvite.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.FeedInvite)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedInvite {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFeedInvite.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFeedInvite.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/post(createFeedInvite)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFeedInvite.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFeedInvite.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/post(createFeedInvite)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin, or the poster who created it.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/invites/{inviteId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/{inviteId}/delete(revokeFeedInvite)`.
+    public enum RevokeFeedInvite {
+        public static let id: Swift.String = "revokeFeedInvite"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/{inviteId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/{inviteId}/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/{inviteId}/DELETE/path/inviteId`.
+                public var inviteId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - inviteId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    inviteId: Components.Schemas.Id
+                ) {
+                    self.feedId = feedId
+                    self.inviteId = inviteId
+                }
+            }
+            public var path: Operations.RevokeFeedInvite.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/invites/{inviteId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeFeedInvite.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeFeedInvite.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RevokeFeedInvite.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RevokeFeedInvite.Input.Path,
+                headers: Operations.RevokeFeedInvite.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Revoked
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/{inviteId}/delete(revokeFeedInvite)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RevokeFeedInvite.Output.NoContent)
+            /// Revoked
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/{inviteId}/delete(revokeFeedInvite)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RevokeFeedInvite.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/invites/{inviteId}/delete(revokeFeedInvite)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Resolve a short feed invite code (typed into "Enter a code"; codes contain letters, frame codes are 8 digits)
+    /// to its preview, including the token for `acceptFeedInvite`. Rate-limited like code redemption; unknown codes
+    /// answer `404 invite_invalid`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feed-invites:lookup`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)`.
+    public enum LookupFeedInvite {
+        public static let id: Swift.String = "lookupFeedInvite"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LookupFeedInvite.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LookupFeedInvite.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.LookupFeedInvite.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// 8 Crockford base32 characters, hyphen optional, case-insensitive.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/requestBody/json/code`.
+                    public var code: Swift.String
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - code: 8 Crockford base32 characters, hyphen optional, case-insensitive.
+                    public init(code: Swift.String) {
+                        self.code = code
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case code
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/requestBody/content/application\/json`.
+                case json(Operations.LookupFeedInvite.Input.Body.JsonPayload)
+            }
+            public var body: Operations.LookupFeedInvite.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.LookupFeedInvite.Input.Headers = .init(),
+                body: Operations.LookupFeedInvite.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feed-invites:lookup/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FeedInvitePreview)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedInvitePreview {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.LookupFeedInvite.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.LookupFeedInvite.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Preview
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.LookupFeedInvite.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.LookupFeedInvite.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)/responses/410`.
+            ///
+            /// HTTP response code: `410 gone`.
+            case gone(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.gone`.
+            ///
+            /// - Throws: An error if `self` is not `.gone`.
+            /// - SeeAlso: `.gone`.
+            public var gone: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .gone(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "gone",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites:lookup/post(lookupFeedInvite)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Requires sign-in so tokens can't be enumerated anonymously.
+    ///
+    /// - Remark: HTTP `GET /v1/feed-invites/{token}`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/get(previewFeedInvite)`.
+    public enum PreviewFeedInvite {
+        public static let id: Swift.String = "previewFeedInvite"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/GET/path/token`.
+                public var token: Components.Parameters.InviteToken
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - token:
+                public init(token: Components.Parameters.InviteToken) {
+                    self.token = token
+                }
+            }
+            public var path: Operations.PreviewFeedInvite.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PreviewFeedInvite.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PreviewFeedInvite.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.PreviewFeedInvite.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.PreviewFeedInvite.Input.Path,
+                headers: Operations.PreviewFeedInvite.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FeedInvitePreview)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedInvitePreview {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PreviewFeedInvite.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PreviewFeedInvite.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Preview
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/get(previewFeedInvite)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.PreviewFeedInvite.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.PreviewFeedInvite.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/get(previewFeedInvite)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/get(previewFeedInvite)/responses/410`.
+            ///
+            /// HTTP response code: `410 gone`.
+            case gone(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.gone`.
+            ///
+            /// - Throws: An error if `self` is not `.gone`.
+            /// - SeeAlso: `.gone`.
+            public var gone: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .gone(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "gone",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// `join` invites: no body needed; the caller joins as poster or a join request is created. `subscribe` invites:
+    /// `frame_ids` (frames the caller manages: owner, admin or `change_settings`) are subscribed and active at once;
+    /// frames that already have a live subscription to the feed are reported with their existing one.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feed-invites/{token}/accept`.
+    /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/accept/post(acceptFeedInvite)`.
+    public enum AcceptFeedInvite {
+        public static let id: Swift.String = "acceptFeedInvite"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/path/token`.
+                public var token: Components.Parameters.InviteToken
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - token:
+                public init(token: Components.Parameters.InviteToken) {
+                    self.token = token
+                }
+            }
+            public var path: Operations.AcceptFeedInvite.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.AcceptFeedInvite.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.AcceptFeedInvite.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.AcceptFeedInvite.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.FeedInviteAccept)
+            }
+            public var body: Operations.AcceptFeedInvite.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.AcceptFeedInvite.Input.Path,
+                headers: Operations.AcceptFeedInvite.Input.Headers = .init(),
+                body: Operations.AcceptFeedInvite.Input.Body? = nil
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feed-invites/{token}/accept/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FeedInviteResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedInviteResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.AcceptFeedInvite.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.AcceptFeedInvite.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Result
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/accept/post(acceptFeedInvite)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.AcceptFeedInvite.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.AcceptFeedInvite.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/accept/post(acceptFeedInvite)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
+    /// for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
+    /// they are null. Post as a feed is done with `createSend` (`feed_ids`).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/get(listFeedPosts)`.
+    public enum ListFeedPosts {
+        public static let id: Swift.String = "listFeedPosts"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedPosts.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/query/cursor`.
+                public var cursor: Components.Parameters.Cursor?
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/query/limit`.
+                public var limit: Components.Parameters.Limit?
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/query/poster_id`.
+                public var posterId: Components.Schemas.Id?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - cursor:
+                ///   - limit:
+                ///   - posterId:
+                public init(
+                    cursor: Components.Parameters.Cursor? = nil,
+                    limit: Components.Parameters.Limit? = nil,
+                    posterId: Components.Schemas.Id? = nil
+                ) {
+                    self.cursor = cursor
+                    self.limit = limit
+                    self.posterId = posterId
+                }
+            }
+            public var query: Operations.ListFeedPosts.Input.Query
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedPosts.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedPosts.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedPosts.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedPosts.Input.Path,
+                query: Operations.ListFeedPosts.Input.Query = .init(),
+                headers: Operations.ListFeedPosts.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/responses/200/content/json/posts`.
+                        public var posts: [Components.Schemas.FeedPost]
+                        /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/responses/200/content/json/next_cursor`.
+                        public var nextCursor: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - posts:
+                        ///   - nextCursor:
+                        public init(
+                            posts: [Components.Schemas.FeedPost],
+                            nextCursor: Swift.String? = nil
+                        ) {
+                            self.posts = posts
+                            self.nextCursor = nextCursor
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case posts
+                            case nextCursor = "next_cursor"
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/GET/responses/200/content/application\/json`.
+                    case json(Operations.ListFeedPosts.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.ListFeedPosts.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedPosts.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedPosts.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Page of posts
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/get(listFeedPosts)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedPosts.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedPosts.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/get(listFeedPosts)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/get(getFeedPost)`.
+    public enum GetFeedPost {
+        public static let id: Swift.String = "getFeedPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/GET/path/postId`.
+                public var postId: Components.Parameters.PostId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - postId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    postId: Components.Parameters.PostId
+                ) {
+                    self.feedId = feedId
+                    self.postId = postId
+                }
+            }
+            public var path: Operations.GetFeedPost.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeedPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeedPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFeedPost.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFeedPost.Input.Path,
+                headers: Operations.GetFeedPost.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FeedPost)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedPost {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFeedPost.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFeedPost.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Post
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/get(getFeedPost)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFeedPost.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFeedPost.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/get(getFeedPost)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The poster (unsend) or an owner/admin of the feed. Removes the post from the feed and its placements from every
+    /// subscribed frame, except placements that also reached a frame directly or through another feed. The send and its
+    /// direct placements are untouched. Never needs a frame to be online.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/delete(removeFeedPost)`.
+    public enum RemoveFeedPost {
+        public static let id: Swift.String = "removeFeedPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/DELETE/path/postId`.
+                public var postId: Components.Parameters.PostId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - postId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    postId: Components.Parameters.PostId
+                ) {
+                    self.feedId = feedId
+                    self.postId = postId
+                }
+            }
+            public var path: Operations.RemoveFeedPost.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RemoveFeedPost.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RemoveFeedPost.Input.Path,
+                headers: Operations.RemoveFeedPost.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/delete(removeFeedPost)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RemoveFeedPost.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/delete(removeFeedPost)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RemoveFeedPost.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/delete(removeFeedPost)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Like `removeFeedPost` for one item. Removing the last item removes the post.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/posts/{postId}/items/{itemId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)`.
+    public enum RemoveFeedPostItem {
+        public static let id: Swift.String = "removeFeedPostItem"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/items/{itemId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/items/{itemId}/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/items/{itemId}/DELETE/path/postId`.
+                public var postId: Components.Parameters.PostId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/items/{itemId}/DELETE/path/itemId`.
+                public var itemId: Components.Parameters.ItemId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - postId:
+                ///   - itemId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    postId: Components.Parameters.PostId,
+                    itemId: Components.Parameters.ItemId
+                ) {
+                    self.feedId = feedId
+                    self.postId = postId
+                    self.itemId = itemId
+                }
+            }
+            public var path: Operations.RemoveFeedPostItem.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/items/{itemId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedPostItem.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedPostItem.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RemoveFeedPostItem.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RemoveFeedPostItem.Input.Path,
+                headers: Operations.RemoveFeedPostItem.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RemoveFeedPostItem.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RemoveFeedPostItem.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
+    /// (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+    /// for direct sends; who moderated is never revealed.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts/{postId}/receipts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/receipts/get(getFeedPostReceipts)`.
+    public enum GetFeedPostReceipts {
+        public static let id: Swift.String = "getFeedPostReceipts"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/receipts/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/receipts/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/receipts/GET/path/postId`.
+                public var postId: Components.Parameters.PostId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - postId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    postId: Components.Parameters.PostId
+                ) {
+                    self.feedId = feedId
+                    self.postId = postId
+                }
+            }
+            public var path: Operations.GetFeedPostReceipts.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/receipts/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeedPostReceipts.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeedPostReceipts.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFeedPostReceipts.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFeedPostReceipts.Input.Path,
+                headers: Operations.GetFeedPostReceipts.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/receipts/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/posts/{postId}/receipts/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FeedPostReceipts)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FeedPostReceipts {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFeedPostReceipts.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFeedPostReceipts.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Receipts
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/receipts/get(getFeedPostReceipts)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFeedPostReceipts.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFeedPostReceipts.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/receipts/get(getFeedPostReceipts)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The feed's birthday people (docs/spec/birthdays.md), sorted by the next birthday in the caller's time zone.
+    /// Any feed member sees `approved` ones; owner and admins also see `pending` and `rejected` ones (rejected for 30
+    /// days), posters their own suggestions. `birth_year` is null unless the caller may see it (owner/admin, whoever
+    /// added the entry, the linked member, or `show_age` on).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthdays`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/get(listFeedBirthdays)`.
+    public enum ListFeedBirthdays {
+        public static let id: Swift.String = "listFeedBirthdays"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedBirthdays.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// Only this status (default all the caller may see).
+                ///
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/query/status`.
+                public var status: Components.Schemas.BirthdayStatus?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - status: Only this status (default all the caller may see).
+                public init(status: Components.Schemas.BirthdayStatus? = nil) {
+                    self.status = status
+                }
+            }
+            public var query: Operations.ListFeedBirthdays.Input.Query
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedBirthdays.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedBirthdays.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedBirthdays.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedBirthdays.Input.Path,
+                query: Operations.ListFeedBirthdays.Input.Query = .init(),
+                headers: Operations.ListFeedBirthdays.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.BirthdayPerson])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.BirthdayPerson] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedBirthdays.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedBirthdays.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Birthday people
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/get(listFeedBirthdays)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedBirthdays.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedBirthdays.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/get(listFeedBirthdays)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Add a birthday person. Owner, admins and (with the feed's `posters_can_add_birthdays`) posters add it as
+    /// `approved`: it reaches every frame with a birthday subscription. Other posters create a `pending` suggestion
+    /// and the feed's owner and admins are notified (`birthday.suggested`, push `birthday_suggestion`).
+    /// `409 duplicate_birthday` (existing entry's id in `detail`) when a pending or approved entry of this feed has
+    /// the same normalized name, day and month; `409 limit_reached` beyond `limits.max_birthdays_per_feed`
+    /// (pending and approved count); `422 validation_failed` for an impossible date (`day`) or year (`birth_year`).
+    /// `user_id` must be a member of this feed without another entry. The photo is uploaded afterwards with
+    /// `putFeedBirthdayPhoto`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)`.
+    public enum CreateFeedBirthday {
+        public static let id: Swift.String = "createFeedBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.CreateFeedBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedBirthday.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFeedBirthday.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.BirthdayPersonCreate)
+            }
+            public var body: Operations.CreateFeedBirthday.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateFeedBirthday.Input.Path,
+                headers: Operations.CreateFeedBirthday.Input.Headers = .init(),
+                body: Operations.CreateFeedBirthday.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFeedBirthday.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFeedBirthday.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created (approved or pending)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFeedBirthday.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFeedBirthday.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/post(createFeedBirthday)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Same visibility and field rules as `listFeedBirthdays`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/get(getFeedBirthday)`.
+    public enum GetFeedBirthday {
+        public static let id: Swift.String = "getFeedBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/GET/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.GetFeedBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeedBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFeedBirthday.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFeedBirthday.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFeedBirthday.Input.Path,
+                headers: Operations.GetFeedBirthday.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFeedBirthday.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFeedBirthday.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Birthday person
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/get(getFeedBirthday)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFeedBirthday.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFeedBirthday.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/get(getFeedBirthday)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner and admins: any field of any entry (also of a pending suggestion before approving it). The suggester:
+    /// their pending suggestion. Posters with `posters_can_add_birthdays`: entries they added. The linked member:
+    /// `birth_year`, `show_age` and unlinking (`user_id: null`) of their own entry. Other fields answer
+    /// `403 forbidden`. Omitted fields are kept; `birth_year: null` clears the year. Changes to approved entries
+    /// reach the frames with a `birthdays` change. Same `409`/`422` rules as `createFeedBirthday`.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)`.
+    public enum UpdateFeedBirthday {
+        public static let id: Swift.String = "updateFeedBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.UpdateFeedBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeedBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeedBirthday.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateFeedBirthday.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.BirthdayPersonUpdate)
+            }
+            public var body: Operations.UpdateFeedBirthday.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateFeedBirthday.Input.Path,
+                headers: Operations.UpdateFeedBirthday.Input.Headers = .init(),
+                body: Operations.UpdateFeedBirthday.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateFeedBirthday.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateFeedBirthday.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateFeedBirthday.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateFeedBirthday.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/patch(updateFeedBirthday)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner and admins (any entry), the suggester (withdraw a pending suggestion), posters with
+    /// `posters_can_add_birthdays` (entries they added) and the linked member (their own entry). Deletes the entry,
+    /// its photo and its greetings; frames drop the person with the next `birthdays` change. Not reversible on the
+    /// server: clients offer Undo by creating it again.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/delete(removeFeedBirthday)`.
+    public enum RemoveFeedBirthday {
+        public static let id: Swift.String = "removeFeedBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/DELETE/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.RemoveFeedBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveFeedBirthday.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RemoveFeedBirthday.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RemoveFeedBirthday.Input.Path,
+                headers: Operations.RemoveFeedBirthday.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/delete(removeFeedBirthday)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RemoveFeedBirthday.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/delete(removeFeedBirthday)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RemoveFeedBirthday.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/delete(removeFeedBirthday)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin; `pending` → `approved`. Notifies the suggester (`birthday.decided`, push `birthday_decided`)
+    /// and puts the person on the frames. Repeating it on an approved entry returns it unchanged;
+    /// `409 already_decided` on a rejected one; `409 duplicate_birthday` when an approved entry with the same name
+    /// and date appeared meanwhile.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays/{birthdayId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/approve/post(approveFeedBirthday)`.
+    public enum ApproveFeedBirthday {
+        public static let id: Swift.String = "approveFeedBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/approve/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/approve/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/approve/POST/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.ApproveFeedBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/approve/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ApproveFeedBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ApproveFeedBirthday.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ApproveFeedBirthday.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ApproveFeedBirthday.Input.Path,
+                headers: Operations.ApproveFeedBirthday.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/approve/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/approve/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ApproveFeedBirthday.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ApproveFeedBirthday.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Approved
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/approve/post(approveFeedBirthday)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ApproveFeedBirthday.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ApproveFeedBirthday.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/approve/post(approveFeedBirthday)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/approve/post(approveFeedBirthday)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner or admin; `pending` → `rejected`. Notifies the suggester. The entry stays visible to the suggester and
+    /// admins for 30 days, then it is deleted; a new suggestion for the same person is allowed at once. Repeating it
+    /// returns the entry unchanged; `409 already_decided` on an approved one (remove it instead).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/reject/post(rejectFeedBirthday)`.
+    public enum RejectFeedBirthday {
+        public static let id: Swift.String = "rejectFeedBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/reject/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/reject/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/reject/POST/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.RejectFeedBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/reject/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RejectFeedBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RejectFeedBirthday.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RejectFeedBirthday.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RejectFeedBirthday.Input.Path,
+                headers: Operations.RejectFeedBirthday.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/reject/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/reject/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.RejectFeedBirthday.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.RejectFeedBirthday.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Rejected
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/reject/post(rejectFeedBirthday)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RejectFeedBirthday.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.RejectFeedBirthday.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/reject/post(rejectFeedBirthday)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/reject/post(rejectFeedBirthday)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Set the person's photo, like `putAvatar`: the server crops to a centred square, stores 256x256 WebP at a new
+    /// unguessable URL and deletes the previous file. Whoever may edit the entry's photo (see `updateFeedBirthday`;
+    /// the linked member too).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/feeds/{feedId}/birthdays/{birthdayId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/put(putFeedBirthdayPhoto)`.
+    public enum PutFeedBirthdayPhoto {
+        public static let id: Swift.String = "putFeedBirthdayPhoto"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.PutFeedBirthdayPhoto.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PutFeedBirthdayPhoto.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PutFeedBirthdayPhoto.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.PutFeedBirthdayPhoto.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/requestBody/content/image\/jpeg`.
+                case jpeg(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/requestBody/content/image\/png`.
+                case png(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/requestBody/content/image\/webp`.
+                case imageWebp(OpenAPIRuntime.HTTPBody)
+            }
+            public var body: Operations.PutFeedBirthdayPhoto.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.PutFeedBirthdayPhoto.Input.Path,
+                headers: Operations.PutFeedBirthdayPhoto.Input.Headers = .init(),
+                body: Operations.PutFeedBirthdayPhoto.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/PUT/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PutFeedBirthdayPhoto.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PutFeedBirthdayPhoto.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Stored
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/put(putFeedBirthdayPhoto)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.PutFeedBirthdayPhoto.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.PutFeedBirthdayPhoto.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/put(putFeedBirthdayPhoto)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Remove the uploaded photo; the linked member's avatar (if any) is used instead.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/birthdays/{birthdayId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/delete(deleteFeedBirthdayPhoto)`.
+    public enum DeleteFeedBirthdayPhoto {
+        public static let id: Swift.String = "deleteFeedBirthdayPhoto"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/DELETE/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/DELETE/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                ///   - birthdayId:
+                public init(
+                    feedId: Components.Parameters.FeedId,
+                    birthdayId: Components.Parameters.BirthdayId
+                ) {
+                    self.feedId = feedId
+                    self.birthdayId = birthdayId
+                }
+            }
+            public var path: Operations.DeleteFeedBirthdayPhoto.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteFeedBirthdayPhoto.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteFeedBirthdayPhoto.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteFeedBirthdayPhoto.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteFeedBirthdayPhoto.Input.Path,
+                headers: Operations.DeleteFeedBirthdayPhoto.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/DELETE/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthdays/{birthdayId}/photo/DELETE/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BirthdayPerson)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BirthdayPerson {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeleteFeedBirthdayPhoto.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeleteFeedBirthdayPhoto.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/delete(deleteFeedBirthdayPhoto)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeleteFeedBirthdayPhoto.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeleteFeedBirthdayPhoto.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthdays/{birthdayId}/photo/delete(deleteFeedBirthdayPhoto)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Greetings frames sent for this feed's birthday people ("Opa's frame says happy birthday to Oma"), newest
+    /// first, kept 13 months. Any feed member.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/birthday-greetings`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthday-greetings/get(listFeedBirthdayGreetings)`.
+    public enum ListFeedBirthdayGreetings {
+        public static let id: Swift.String = "listFeedBirthdayGreetings"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedBirthdayGreetings.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/query/cursor`.
+                public var cursor: Components.Parameters.Cursor?
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/query/limit`.
+                public var limit: Components.Parameters.Limit?
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/query/birthday_id`.
+                public var birthdayId: Components.Schemas.Id?
+                /// Only greetings for this occurrence date.
+                ///
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/query/date`.
+                public var date: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - cursor:
+                ///   - limit:
+                ///   - birthdayId:
+                ///   - date: Only greetings for this occurrence date.
+                public init(
+                    cursor: Components.Parameters.Cursor? = nil,
+                    limit: Components.Parameters.Limit? = nil,
+                    birthdayId: Components.Schemas.Id? = nil,
+                    date: Swift.String? = nil
+                ) {
+                    self.cursor = cursor
+                    self.limit = limit
+                    self.birthdayId = birthdayId
+                    self.date = date
+                }
+            }
+            public var query: Operations.ListFeedBirthdayGreetings.Input.Query
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedBirthdayGreetings.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedBirthdayGreetings.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedBirthdayGreetings.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedBirthdayGreetings.Input.Path,
+                query: Operations.ListFeedBirthdayGreetings.Input.Query = .init(),
+                headers: Operations.ListFeedBirthdayGreetings.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/responses/200/content/json/greetings`.
+                        public var greetings: [Components.Schemas.FeedBirthdayGreeting]
+                        /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/responses/200/content/json/next_cursor`.
+                        public var nextCursor: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - greetings:
+                        ///   - nextCursor:
+                        public init(
+                            greetings: [Components.Schemas.FeedBirthdayGreeting],
+                            nextCursor: Swift.String? = nil
+                        ) {
+                            self.greetings = greetings
+                            self.nextCursor = nextCursor
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case greetings
+                            case nextCursor = "next_cursor"
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/birthday-greetings/GET/responses/200/content/application\/json`.
+                    case json(Operations.ListFeedBirthdayGreetings.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.ListFeedBirthdayGreetings.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedBirthdayGreetings.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedBirthdayGreetings.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Page of greetings
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthday-greetings/get(listFeedBirthdayGreetings)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedBirthdayGreetings.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedBirthdayGreetings.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/birthday-greetings/get(listFeedBirthdayGreetings)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The caller's own preferences in this feed (any member). `birthday_notifications` (default true): the morning
+    /// notification on a birthday day and greeting notifications for this feed's people.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/preferences`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/preferences/patch(updateFeedPreferences)`.
+    public enum UpdateFeedPreferences {
+        public static let id: Swift.String = "updateFeedPreferences"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.UpdateFeedPreferences.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeedPreferences.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateFeedPreferences.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateFeedPreferences.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.FeedPreferencesUpdate)
+            }
+            public var body: Operations.UpdateFeedPreferences.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateFeedPreferences.Input.Path,
+                headers: Operations.UpdateFeedPreferences.Input.Headers = .init(),
+                body: Operations.UpdateFeedPreferences.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/preferences/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Feed)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Feed {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateFeedPreferences.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateFeedPreferences.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/preferences/patch(updateFeedPreferences)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateFeedPreferences.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateFeedPreferences.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/preferences/patch(updateFeedPreferences)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner and admins see every status, including who requested. Other members see `active` and `paused`
+    /// subscriptions only, without `requested_by_name`. Rejected and removed ones are listed for 30 days.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/get(listFeedSubscriptions)`.
+    public enum ListFeedSubscriptions {
+        public static let id: Swift.String = "listFeedSubscriptions"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedSubscriptions.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// Only this status (default all the caller may see).
+                ///
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/query/status`.
+                public var status: Components.Schemas.SubscriptionStatus?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - status: Only this status (default all the caller may see).
+                public init(status: Components.Schemas.SubscriptionStatus? = nil) {
+                    self.status = status
+                }
+            }
+            public var query: Operations.ListFeedSubscriptions.Input.Query
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedSubscriptions.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedSubscriptions.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedSubscriptions.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedSubscriptions.Input.Path,
+                query: Operations.ListFeedSubscriptions.Input.Query = .init(),
+                headers: Operations.ListFeedSubscriptions.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.Subscription])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.Subscription] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedSubscriptions.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedSubscriptions.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Subscriptions
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/get(listFeedSubscriptions)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedSubscriptions.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedSubscriptions.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/get(listFeedSubscriptions)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
+    /// `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
+    /// has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+    /// `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
+    /// this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)`.
+    public enum RequestSubscription {
+        public static let id: Swift.String = "requestSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.RequestSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RequestSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RequestSubscription.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RequestSubscription.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.SubscriptionRequest)
+            }
+            public var body: Operations.RequestSubscription.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.RequestSubscription.Input.Path,
+                headers: Operations.RequestSubscription.Input.Headers = .init(),
+                body: Operations.RequestSubscription.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/subscriptions/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.RequestSubscription.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.RequestSubscription.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created (pending or active)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.RequestSubscription.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.RequestSubscription.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/post(requestSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The feeds a frame subscribes to. Frame managers (owner, admin, `change_settings`) see every status; other
+    /// members see `active` and `paused` ones.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/subscriptions`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/subscriptions/get(listFrameSubscriptions)`.
+    public enum ListFrameSubscriptions {
+        public static let id: Swift.String = "listFrameSubscriptions"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.ListFrameSubscriptions.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// Only this status (default all the caller may see).
+                ///
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/query/status`.
+                public var status: Components.Schemas.SubscriptionStatus?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - status: Only this status (default all the caller may see).
+                public init(status: Components.Schemas.SubscriptionStatus? = nil) {
+                    self.status = status
+                }
+            }
+            public var query: Operations.ListFrameSubscriptions.Input.Query
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFrameSubscriptions.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFrameSubscriptions.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFrameSubscriptions.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.ListFrameSubscriptions.Input.Path,
+                query: Operations.ListFrameSubscriptions.Input.Query = .init(),
+                headers: Operations.ListFrameSubscriptions.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/subscriptions/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.Subscription])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.Subscription] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFrameSubscriptions.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFrameSubscriptions.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Subscriptions
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/subscriptions/get(listFrameSubscriptions)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFrameSubscriptions.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFrameSubscriptions.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/subscriptions/get(listFrameSubscriptions)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Visible to the frame's members and the feed's members, with the same field rules as the lists.
+    ///
+    /// - Remark: HTTP `GET /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/get(getSubscription)`.
+    public enum GetSubscription {
+        public static let id: Swift.String = "getSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/GET/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.GetSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetSubscription.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetSubscription.Input.Path,
+                headers: Operations.GetSubscription.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetSubscription.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetSubscription.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Subscription
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/get(getSubscription)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetSubscription.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetSubscription.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/get(getSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Frame managers only. Changing the history option backfills (quietly) or trims feed-only placements of
+    /// history items; posts made after `activated_at` are never trimmed. Allowed in `pending`, `active` and
+    /// `paused`.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/patch(updateSubscription)`.
+    public enum UpdateSubscription {
+        public static let id: Swift.String = "updateSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.UpdateSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateSubscription.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.SubscriptionUpdate)
+            }
+            public var body: Operations.UpdateSubscription.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateSubscription.Input.Path,
+                headers: Operations.UpdateSubscription.Input.Headers = .init(),
+                body: Operations.UpdateSubscription.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateSubscription.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateSubscription.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/patch(updateSubscription)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateSubscription.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateSubscription.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/patch(updateSubscription)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/patch(updateSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Ends a subscription (`removed`): frame managers unsubscribe (or withdraw a pending request), the requester may
+    /// withdraw their pending request, and feed owners/admins remove any subscription. Feed-only placements leave the
+    /// frame; `slideshow.feed_id` resets to null if it pointed at this feed. The other side is notified.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/subscriptions/{subscriptionId}`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/delete(removeSubscription)`.
+    public enum RemoveSubscription {
+        public static let id: Swift.String = "removeSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/DELETE/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.RemoveSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RemoveSubscription.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RemoveSubscription.Input.Path,
+                headers: Operations.RemoveSubscription.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/delete(removeSubscription)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RemoveSubscription.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/delete(removeSubscription)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RemoveSubscription.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/delete(removeSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Feed owner or admin; `pending` → `active`. Starts the history backfill and notifies the requester.
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/approve/post(approveSubscription)`.
+    public enum ApproveSubscription {
+        public static let id: Swift.String = "approveSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/approve/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/approve/POST/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.ApproveSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/approve/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ApproveSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ApproveSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ApproveSubscription.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ApproveSubscription.Input.Path,
+                headers: Operations.ApproveSubscription.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/approve/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/approve/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ApproveSubscription.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ApproveSubscription.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Approved
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/approve/post(approveSubscription)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ApproveSubscription.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ApproveSubscription.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/approve/post(approveSubscription)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/approve/post(approveSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Feed owner or admin; `pending` → `rejected`. Notifies the requester.
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/reject/post(rejectSubscription)`.
+    public enum RejectSubscription {
+        public static let id: Swift.String = "rejectSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/reject/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/reject/POST/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.RejectSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/reject/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RejectSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RejectSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RejectSubscription.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RejectSubscription.Input.Path,
+                headers: Operations.RejectSubscription.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/reject/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/reject/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.RejectSubscription.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.RejectSubscription.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Rejected
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/reject/post(rejectSubscription)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RejectSubscription.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.RejectSubscription.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/reject/post(rejectSubscription)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/reject/post(rejectSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Frame managers; `active` → `paused`. The feed's placements leave the frame (kept on the server, restored on
+    /// resume) unless they also reached it directly or through another active feed. No new posts are placed.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/pause`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/pause/post(pauseSubscription)`.
+    public enum PauseSubscription {
+        public static let id: Swift.String = "pauseSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/pause/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/pause/POST/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.PauseSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/pause/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PauseSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PauseSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.PauseSubscription.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.PauseSubscription.Input.Path,
+                headers: Operations.PauseSubscription.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/pause/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/pause/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PauseSubscription.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PauseSubscription.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Paused
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/pause/post(pauseSubscription)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.PauseSubscription.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.PauseSubscription.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/pause/post(pauseSubscription)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/pause/post(pauseSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Frame managers; `paused` → `active`. Restores the feed's placements and quietly places the posts made while
+    /// paused.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/subscriptions/{subscriptionId}/resume`.
+    /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/resume/post(resumeSubscription)`.
+    public enum ResumeSubscription {
+        public static let id: Swift.String = "resumeSubscription"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/resume/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/resume/POST/path/subscriptionId`.
+                public var subscriptionId: Components.Parameters.SubscriptionId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionId:
+                public init(subscriptionId: Components.Parameters.SubscriptionId) {
+                    self.subscriptionId = subscriptionId
+                }
+            }
+            public var path: Operations.ResumeSubscription.Input.Path
+            /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/resume/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ResumeSubscription.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ResumeSubscription.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ResumeSubscription.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ResumeSubscription.Input.Path,
+                headers: Operations.ResumeSubscription.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/resume/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/subscriptions/{subscriptionId}/resume/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Subscription)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Subscription {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ResumeSubscription.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ResumeSubscription.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Resumed
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/resume/post(resumeSubscription)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ResumeSubscription.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ResumeSubscription.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/resume/post(resumeSubscription)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/subscriptions/{subscriptionId}/resume/post(resumeSubscription)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The feed's photo sources with their status (feed owner and admins; posters get `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/photo-sources/get(listFeedPhotoSources)`.
+    public enum ListFeedPhotoSources {
+        public static let id: Swift.String = "listFeedPhotoSources"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/photo-sources/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/photo-sources/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedPhotoSources.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/photo-sources/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedPhotoSources.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedPhotoSources.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedPhotoSources.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedPhotoSources.Input.Path,
+                headers: Operations.ListFeedPhotoSources.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/photo-sources/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/photo-sources/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.PhotoSource])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.PhotoSource] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedPhotoSources.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedPhotoSources.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Sources, oldest first
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/photo-sources/get(listFeedPhotoSources)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedPhotoSources.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedPhotoSources.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/photo-sources/get(listFeedPhotoSources)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Sources the caller owns (set up), across all albums and feeds, for Settings → Photo sources.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/get(listMyPhotoSources)`.
+    public enum ListMyPhotoSources {
+        public static let id: Swift.String = "listMyPhotoSources"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyPhotoSources.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyPhotoSources.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListMyPhotoSources.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.ListMyPhotoSources.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.PhotoSource])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.PhotoSource] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListMyPhotoSources.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListMyPhotoSources.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Sources, newest first
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/get(listMyPhotoSources)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListMyPhotoSources.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListMyPhotoSources.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/get(listMyPhotoSources)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Connect an outside album to a kinframe album (`album_id`: album managers of its frame) or a feed (`feed_id`:
+    /// feed owner/admins). The caller becomes the source's owner: imported photos are sent by them. The server tests
+    /// the connection first (`422 source_test_failed` with the `PhotoSourceErrorCode` in `detail`; a blocked private
+    /// address is `422 validation_failed` on `url`/`server_url`), then starts the first run (`running: true`).
+    /// Secrets (`url`, `api_key`, `password`) are sealed at rest and never returned. `409 duplicate_source` when the
+    /// same outside album already feeds this target (`detail`: its id), `409 limit_reached` beyond
+    /// `limits.max_photo_sources_per_target` or `max_photo_sources_per_user`, `503 feature_disabled` when the server
+    /// has photo sources (or this provider) turned off. Rate-limited (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)`.
+    public enum CreatePhotoSource {
+        public static let id: Swift.String = "createPhotoSource"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreatePhotoSource.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreatePhotoSource.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreatePhotoSource.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/photo-sources/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.PhotoSourceCreate)
+            }
+            public var body: Operations.CreatePhotoSource.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CreatePhotoSource.Input.Headers = .init(),
+                body: Operations.CreatePhotoSource.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.PhotoSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PhotoSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreatePhotoSource.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreatePhotoSource.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreatePhotoSource.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreatePhotoSource.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/post(createPhotoSource)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Try a connection without saving it: reads the outside album's name and size, and the warnings the source would
+    /// have (`downloads_disabled`, `metadata_hidden`). `ok: false` with `error_code` when it cannot be read. For
+    /// `immich_api` without `immich_album_id`, `albums` lists the account's albums (like `listImmichAlbums`).
+    /// Rate-limited together with `listImmichAlbums` (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources:test`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)`.
+    public enum TestPhotoSource {
+        public static let id: Swift.String = "testPhotoSource"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources:test/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TestPhotoSource.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TestPhotoSource.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.TestPhotoSource.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/photo-sources:test/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources:test/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.PhotoSourceConnection)
+            }
+            public var body: Operations.TestPhotoSource.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.TestPhotoSource.Input.Headers = .init(),
+                body: Operations.TestPhotoSource.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources:test/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources:test/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PhotoSourceTestResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PhotoSourceTestResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.TestPhotoSource.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.TestPhotoSource.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Outcome
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.TestPhotoSource.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.TestPhotoSource.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:test/post(testPhotoSource)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The albums an Immich API key can read (own and shared with that account), before creating an `immich_api`
+    /// source, so the client can let the person pick one. Nothing is saved. Failures answer `200` with `ok: false`
+    /// and `error_code`, like `testPhotoSource`. Rate-limited together with `testPhotoSource`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources:immich-albums`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)`.
+    public enum ListImmichAlbums {
+        public static let id: Swift.String = "listImmichAlbums"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources:immich-albums/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListImmichAlbums.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListImmichAlbums.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListImmichAlbums.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/photo-sources:immich-albums/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources:immich-albums/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.ImmichConnection)
+            }
+            public var body: Operations.ListImmichAlbums.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.ListImmichAlbums.Input.Headers = .init(),
+                body: Operations.ListImmichAlbums.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources:immich-albums/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources:immich-albums/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ImmichAlbumList)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ImmichAlbumList {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListImmichAlbums.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListImmichAlbums.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Albums
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListImmichAlbums.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListImmichAlbums.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources:immich-albums/post(listImmichAlbums)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target (album managers, feed owner/admins) and the owner. Others get `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/get(getPhotoSource)`.
+    public enum GetPhotoSource {
+        public static let id: Swift.String = "getPhotoSource"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/GET/path/sourceId`.
+                public var sourceId: Components.Parameters.SourceId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - sourceId:
+                public init(sourceId: Components.Parameters.SourceId) {
+                    self.sourceId = sourceId
+                }
+            }
+            public var path: Operations.GetPhotoSource.Input.Path
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetPhotoSource.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetPhotoSource.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetPhotoSource.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetPhotoSource.Input.Path,
+                headers: Operations.GetPhotoSource.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PhotoSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PhotoSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetPhotoSource.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetPhotoSource.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Source
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/get(getPhotoSource)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetPhotoSource.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetPhotoSource.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/get(getPhotoSource)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op).
+    /// Changing the link, server URL, key, password or album tests it first (`422 source_test_failed`) and then
+    /// syncs at once; success returns an `error`/`needs_attention` source to `active`. `take_over: true` makes the
+    /// caller the owner (needed after `owner_lost_access`; for `immich_api` together with a new `api_key`).
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/patch(updatePhotoSource)`.
+    public enum UpdatePhotoSource {
+        public static let id: Swift.String = "updatePhotoSource"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/path/sourceId`.
+                public var sourceId: Components.Parameters.SourceId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - sourceId:
+                public init(sourceId: Components.Parameters.SourceId) {
+                    self.sourceId = sourceId
+                }
+            }
+            public var path: Operations.UpdatePhotoSource.Input.Path
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdatePhotoSource.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdatePhotoSource.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdatePhotoSource.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.PhotoSourceUpdate)
+            }
+            public var body: Operations.UpdatePhotoSource.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdatePhotoSource.Input.Path,
+                headers: Operations.UpdatePhotoSource.Input.Headers = .init(),
+                body: Operations.UpdatePhotoSource.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PhotoSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PhotoSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdatePhotoSource.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdatePhotoSource.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/patch(updatePhotoSource)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdatePhotoSource.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdatePhotoSource.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/patch(updatePhotoSource)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/patch(updatePhotoSource)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Stop syncing (managers of the target). With `remove_items` the photos this source imported are removed from
+    /// the frame (album) or from the feed's posts, like an unsend, in the background; without it they stay as the
+    /// owner's ordinary photos (still credited "via …"). Clients ask which, showing `counts.imported`.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/photo-sources/{sourceId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/delete(deletePhotoSource)`.
+    public enum DeletePhotoSource {
+        public static let id: Swift.String = "deletePhotoSource"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/DELETE/path/sourceId`.
+                public var sourceId: Components.Parameters.SourceId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - sourceId:
+                public init(sourceId: Components.Parameters.SourceId) {
+                    self.sourceId = sourceId
+                }
+            }
+            public var path: Operations.DeletePhotoSource.Input.Path
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/DELETE/query`.
+            public struct Query: Sendable, Hashable {
+                /// Also remove the photos this source imported.
+                ///
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/DELETE/query/remove_items`.
+                public var removeItems: Swift.Bool
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - removeItems: Also remove the photos this source imported.
+                public init(removeItems: Swift.Bool) {
+                    self.removeItems = removeItems
+                }
+            }
+            public var query: Operations.DeletePhotoSource.Input.Query
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeletePhotoSource.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeletePhotoSource.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeletePhotoSource.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.DeletePhotoSource.Input.Path,
+                query: Operations.DeletePhotoSource.Input.Query,
+                headers: Operations.DeletePhotoSource.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/delete(deletePhotoSource)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeletePhotoSource.Output.NoContent)
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/delete(deletePhotoSource)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeletePhotoSource.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/delete(deletePhotoSource)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Sync now (managers of the target). Returns at once with `running: true`. At most once per 2 minutes per source
+    /// and 30 per hour per user (`429` with `Retry-After`). A paused source answers `409 invalid_transition`.
+    /// `confirm_removals: true` applies removals held back by the mass-removal guard (`pending_removals`,
+    /// `last_error_code: mass_removal`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/photo-sources/{sourceId}/sync`.
+    /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)`.
+    public enum SyncPhotoSource {
+        public static let id: Swift.String = "syncPhotoSource"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/path/sourceId`.
+                public var sourceId: Components.Parameters.SourceId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - sourceId:
+                public init(sourceId: Components.Parameters.SourceId) {
+                    self.sourceId = sourceId
+                }
+            }
+            public var path: Operations.SyncPhotoSource.Input.Path
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SyncPhotoSource.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SyncPhotoSource.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.SyncPhotoSource.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// Remove the photos that disappeared upstream although there were many.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/requestBody/json/confirm_removals`.
+                    public var confirmRemovals: Swift.Bool?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - confirmRemovals: Remove the photos that disappeared upstream although there were many.
+                    public init(confirmRemovals: Swift.Bool? = nil) {
+                        self.confirmRemovals = confirmRemovals
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case confirmRemovals = "confirm_removals"
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/requestBody/content/application\/json`.
+                case json(Operations.SyncPhotoSource.Input.Body.JsonPayload)
+            }
+            public var body: Operations.SyncPhotoSource.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.SyncPhotoSource.Input.Path,
+                headers: Operations.SyncPhotoSource.Input.Headers = .init(),
+                body: Operations.SyncPhotoSource.Input.Body? = nil
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Accepted: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/responses/202/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/photo-sources/{sourceId}/sync/POST/responses/202/content/application\/json`.
+                    case json(Components.Schemas.PhotoSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PhotoSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.SyncPhotoSource.Output.Accepted.Body
+                /// Creates a new `Accepted`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.SyncPhotoSource.Output.Accepted.Body) {
+                    self.body = body
+                }
+            }
+            /// Sync started
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)/responses/202`.
+            ///
+            /// HTTP response code: `202 accepted`.
+            case accepted(Operations.SyncPhotoSource.Output.Accepted)
+            /// The associated value of the enum case if `self` is `.accepted`.
+            ///
+            /// - Throws: An error if `self` is not `.accepted`.
+            /// - SeeAlso: `.accepted`.
+            public var accepted: Operations.SyncPhotoSource.Output.Accepted {
+                get throws {
+                    switch self {
+                    case let .accepted(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "accepted",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/photo-sources/{sourceId}/sync/post(syncPhotoSource)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The caller's imports of the last 7 days, newest first (so an app that was closed while the picker was open can resume).
+    ///
+    /// - Remark: HTTP `GET /v1/google-imports`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/get(listMyGoogleImports)`.
+    public enum ListMyGoogleImports {
+        public static let id: Swift.String = "listMyGoogleImports"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/google-imports/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyGoogleImports.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyGoogleImports.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListMyGoogleImports.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.ListMyGoogleImports.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/google-imports/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.GoogleImport])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.GoogleImport] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListMyGoogleImports.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListMyGoogleImports.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Imports
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/get(listMyGoogleImports)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListMyGoogleImports.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListMyGoogleImports.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/get(listMyGoogleImports)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// "Add from Google Photos" into an album (album managers) or a feed (any feed member). Answers `needs_auth` with
+    /// `auth_url` (open it in a browser session; Google redirects to `googleOAuthCallback`, which redirects to
+    /// `return_uri`), or directly `picking` with `picker_uri` when the caller's previous import left a token with more
+    /// than 10 minutes to live. `503 feature_disabled` when the server has no Google OAuth client (discovery
+    /// `google_photos_import: false`). `return_uri` must be `app.kinframe:/google-import`,
+    /// `<public URL>/google-import/return` or `<web>/google-import/return` (`422 validation_failed`). Rate-limited
+    /// (20/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/google-imports`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)`.
+    public enum StartGoogleImport {
+        public static let id: Swift.String = "startGoogleImport"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/google-imports/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.StartGoogleImport.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.StartGoogleImport.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.StartGoogleImport.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/google-imports/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.GoogleImportCreate)
+            }
+            public var body: Operations.StartGoogleImport.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.StartGoogleImport.Input.Headers = .init(),
+                body: Operations.StartGoogleImport.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/google-imports/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.GoogleImport)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.GoogleImport {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.StartGoogleImport.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.StartGoogleImport.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Started
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.StartGoogleImport.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.StartGoogleImport.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/post(startGoogleImport)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The importer only. Poll while `picking` or `importing` (every 2–5 s, or follow `google_import.updated`).
+    ///
+    /// - Remark: HTTP `GET /v1/google-imports/{importId}`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/get(getGoogleImport)`.
+    public enum GetGoogleImport {
+        public static let id: Swift.String = "getGoogleImport"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/GET/path/importId`.
+                public var importId: Components.Parameters.ImportId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - importId:
+                public init(importId: Components.Parameters.ImportId) {
+                    self.importId = importId
+                }
+            }
+            public var path: Operations.GetGoogleImport.Input.Path
+            /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetGoogleImport.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetGoogleImport.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetGoogleImport.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetGoogleImport.Input.Path,
+                headers: Operations.GetGoogleImport.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.GoogleImport)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.GoogleImport {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetGoogleImport.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetGoogleImport.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Import
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/get(getGoogleImport)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetGoogleImport.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetGoogleImport.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/get(getGoogleImport)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Cancel (the importer). From `needs_auth` or `picking` the picker session is deleted; from `importing` the server
+    /// stops after the current file and keeps what was added (undo is `unsend` of `send_ids`). A finished import
+    /// answers `409 invalid_transition`; cancelling a cancelled one returns it unchanged.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/google-imports/{importId}/cancel`.
+    /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/cancel/post(cancelGoogleImport)`.
+    public enum CancelGoogleImport {
+        public static let id: Swift.String = "cancelGoogleImport"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/cancel/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/cancel/POST/path/importId`.
+                public var importId: Components.Parameters.ImportId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - importId:
+                public init(importId: Components.Parameters.ImportId) {
+                    self.importId = importId
+                }
+            }
+            public var path: Operations.CancelGoogleImport.Input.Path
+            /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/cancel/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CancelGoogleImport.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CancelGoogleImport.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CancelGoogleImport.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.CancelGoogleImport.Input.Path,
+                headers: Operations.CancelGoogleImport.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/cancel/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/google-imports/{importId}/cancel/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.GoogleImport)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.GoogleImport {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CancelGoogleImport.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CancelGoogleImport.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Cancelled
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/cancel/post(cancelGoogleImport)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.CancelGoogleImport.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.CancelGoogleImport.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/cancel/post(cancelGoogleImport)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/google-imports/{importId}/cancel/post(cancelGoogleImport)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Google's OAuth redirect (registered by the operator as `<public URL>/v1/oauth/google/callback`). Opened by the
+    /// browser, never called by clients. Checks `state` (single use, 15 minutes), exchanges `code` with the PKCE
+    /// verifier, creates the picker session and answers `302` to the import's `return_uri` with
+    /// `?import_id=<id>&status=<GoogleImportStatus>` (`picking`, or `failed` after a denied or failed consent).
+    /// An unknown, expired or reused `state` gets a small HTML page instead of a redirect.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/oauth/google/callback`.
+    /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)`.
+    public enum GoogleOAuthCallback {
+        public static let id: Swift.String = "googleOAuthCallback"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/query/state`.
+                public var state: Swift.String
+                /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/query/code`.
+                public var code: Swift.String?
+                /// Set by Google when consent failed (e.g. `access_denied`).
+                ///
+                /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/query/error`.
+                public var error: Swift.String?
+                /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/query/scope`.
+                public var scope: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - state:
+                ///   - code:
+                ///   - error: Set by Google when consent failed (e.g. `access_denied`).
+                ///   - scope:
+                public init(
+                    state: Swift.String,
+                    code: Swift.String? = nil,
+                    error: Swift.String? = nil,
+                    scope: Swift.String? = nil
+                ) {
+                    self.state = state
+                    self.code = code
+                    self.error = error
+                    self.scope = scope
+                }
+            }
+            public var query: Operations.GoogleOAuthCallback.Input.Query
+            /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GoogleOAuthCallback.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GoogleOAuthCallback.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GoogleOAuthCallback.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.GoogleOAuthCallback.Input.Query,
+                headers: Operations.GoogleOAuthCallback.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Found: Sendable, Hashable {
+                /// Creates a new `Found`.
+                public init() {}
+            }
+            /// Redirect to the import's `return_uri`
+            ///
+            /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)/responses/302`.
+            ///
+            /// HTTP response code: `302 found`.
+            case found(Operations.GoogleOAuthCallback.Output.Found)
+            /// Redirect to the import's `return_uri`
+            ///
+            /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)/responses/302`.
+            ///
+            /// HTTP response code: `302 found`.
+            public static var found: Self {
+                .found(.init())
+            }
+            /// The associated value of the enum case if `self` is `.found`.
+            ///
+            /// - Throws: An error if `self` is not `.found`.
+            /// - SeeAlso: `.found`.
+            public var found: Operations.GoogleOAuthCallback.Output.Found {
+                get throws {
+                    switch self {
+                    case let .found(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "found",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/responses/400/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/oauth/google/callback/GET/responses/400/content/text\/html`.
+                    case html(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.html`.
+                    ///
+                    /// - Throws: An error if `self` is not `.html`.
+                    /// - SeeAlso: `.html`.
+                    public var html: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .html(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GoogleOAuthCallback.Output.BadRequest.Body
+                /// Creates a new `BadRequest`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GoogleOAuthCallback.Output.BadRequest.Body) {
+                    self.body = body
+                }
+            }
+            /// Unknown, expired or reused state (HTML page)
+            ///
+            /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.GoogleOAuthCallback.Output.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.GoogleOAuthCallback.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case html
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "text/html":
+                    self = .html
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .html:
+                    return "text/html"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .html
+                ]
+            }
         }
     }
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
@@ -11299,7 +21520,7 @@ public enum Operations {
                     public struct JsonPayload: Codable, Hashable, Sendable {
                         /// - Remark: Generated from `#/paths/v1/devices/enroll/POST/responses/201/content/json/device_id`.
                         public var deviceId: Components.Schemas.Id
-                        /// 256-bit random
+                        /// 256-bit random, base64url. Shown only once.
                         ///
                         /// - Remark: Generated from `#/paths/v1/devices/enroll/POST/responses/201/content/json/device_secret`.
                         public var deviceSecret: Swift.String
@@ -11307,7 +21528,7 @@ public enum Operations {
                         ///
                         /// - Parameters:
                         ///   - deviceId:
-                        ///   - deviceSecret: 256-bit random
+                        ///   - deviceSecret: 256-bit random, base64url. Shown only once.
                         public init(
                             deviceId: Components.Schemas.Id,
                             deviceSecret: Swift.String
@@ -15041,6 +25262,202 @@ public enum Operations {
             public static var allCases: [Self] {
                 [
                     .imageWebp,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// "Say happy birthday" on the frame's birthday card (docs/spec/birthdays.md §7). `birthdayId` is a
+    /// `FrameBirthday.id` (or any of its `birthday_ids`), `date` the frame's local date. Idempotent: one greeting per
+    /// person, frame and date, recorded once in every feed that lists the person; `204` also when it existed.
+    /// Feed members get `birthday.greeting` (push `birthday_greeting` with `birthday_notifications`).
+    /// `404 not_found` when the person is not on this frame (removed, subscription paused or birthdays off);
+    /// `422 validation_failed` (field `date`) when `date` is not the person's birthday (29 February counts on
+    /// 28 February in non-leap years) or lies outside the server's UTC date −2 … +1 days. At most 50 a day per frame
+    /// (`429 rate_limited`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/device/birthdays/{birthdayId}/greetings/{date}`.
+    /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)`.
+    public enum DeviceGreetBirthday {
+        public static let id: Swift.String = "deviceGreetBirthday"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/birthdays/{birthdayId}/greetings/{date}/PUT/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/birthdays/{birthdayId}/greetings/{date}/PUT/path/birthdayId`.
+                public var birthdayId: Components.Parameters.BirthdayId
+                /// - Remark: Generated from `#/paths/v1/device/birthdays/{birthdayId}/greetings/{date}/PUT/path/date`.
+                public var date: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - birthdayId:
+                ///   - date:
+                public init(
+                    birthdayId: Components.Parameters.BirthdayId,
+                    date: Swift.String
+                ) {
+                    self.birthdayId = birthdayId
+                    self.date = date
+                }
+            }
+            public var path: Operations.DeviceGreetBirthday.Input.Path
+            /// - Remark: Generated from `#/paths/v1/device/birthdays/{birthdayId}/greetings/{date}/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGreetBirthday.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGreetBirthday.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceGreetBirthday.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeviceGreetBirthday.Input.Path,
+                headers: Operations.DeviceGreetBirthday.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Recorded
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeviceGreetBirthday.Output.NoContent)
+            /// Recorded
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeviceGreetBirthday.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
                     .applicationProblemJson
                 ]
             }

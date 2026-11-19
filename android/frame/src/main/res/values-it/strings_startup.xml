@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Avvio…</string>
+    <string name="startup_checking_library">Controllo delle foto dopo un\'interruzione di corrente…</string>
+    <string name="startup_checking_update">Controllo della versione dell\'app…</string>
+    <string name="startup_loading_photos">Caricamento delle foto…</string>
+    <string name="startup_preparing_photo">Preparazione della prima foto…</string>
+    <string name="startup_waiting_wifi">In attesa del Wi-Fi…</string>
+    <string name="startup_setting_clock">Impostazione dell\'orologio…</string>
+    <string name="startup_connecting">Connessione al server…</string>
+    <string name="power_cut_title">Spenta senza arresto corretto</string>
+    <string name="power_cut_body_ok">È stato controllato tutto ed è tutto a posto.</string>
+    <string name="power_cut_body_redownload">È stato controllato tutto. Alcune foto vengono scaricate di nuovo.</string>
+    <string name="power_cut_tip">La prossima volta scegli %1$s → %2$s nel menu e attendi che sullo schermo compaia «%3$s».</string>
+</resources>

@@ -1,6 +1,7 @@
 import { api, call, type Schemas, type Send } from './api/client';
 import { discovery } from './discovery.svelte';
 import { CAPTION_MAX, graphemeLength } from './format';
+import { recipientProblem, recipientsBody } from './feeds';
 import {
 	acceptFiles,
 	itemIssue,
@@ -82,6 +83,8 @@ export type Phase = 'compose' | 'uploading' | 'sending';
 class Compose {
 	items = $state<DraftItem[]>([]);
 	frameIds = $state<string[]>([]);
+	/** Feeds to post to (docs/spec/feeds.md §6.1): one send can go to frames and feeds at once. */
+	feedIds = $state<string[]>([]);
 	phase = $state<Phase>('compose');
 	error = $state<unknown>(null);
 
@@ -113,7 +116,7 @@ class Compose {
 		return (
 			this.phase === 'compose' &&
 			this.items.length > 0 &&
-			this.frameIds.length > 0 &&
+			recipientProblem(this.frameIds, this.feedIds) === null &&
 			this.issues.length === 0 &&
 			!this.captionsTooLong
 		);
@@ -311,6 +314,15 @@ class Compose {
 		this.frameIds = this.frameIds.includes(id) ? this.frameIds.filter((f) => f !== id) : [...this.frameIds, id];
 	}
 
+	toggleFeed(id: string) {
+		this.feedIds = this.feedIds.includes(id) ? this.feedIds.filter((f) => f !== id) : [...this.feedIds, id];
+	}
+
+	/** At least one frame or feed is picked. */
+	get hasRecipients() {
+		return this.frameIds.length + this.feedIds.length > 0;
+	}
+
 	/**
 	 * Makes the item's video master in a worker (WebCodecs). Without one, the original goes up only when it is
 	 * within the limits; otherwise this throws and the item shows why.
@@ -457,7 +469,7 @@ class Compose {
 
 		this.phase = 'sending';
 		const body = {
-			frame_ids: [...this.frameIds],
+			...recipientsBody(this.frameIds, this.feedIds),
 			items: this.items.map(
 				(i) =>
 					sendItemBody({

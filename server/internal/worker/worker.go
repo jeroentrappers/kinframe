@@ -53,6 +53,9 @@ type Worker struct {
 	MaxVideoMS func(ctx context.Context) int
 	// RemoveSource deletes an upload's bytes once the master exists.
 	RemoveSource func(path string)
+	// Jobs runs job kinds other than the media pipeline's (feeds); handled is
+	// false for kinds it does not know.
+	Jobs func(ctx context.Context, job *store.Job) (handled bool, err error)
 
 	Lease       time.Duration
 	PollEvery   time.Duration
@@ -179,6 +182,11 @@ func (w *Worker) handle(ctx context.Context, job *store.Job) error {
 			return err
 		}
 		return w.thumbs(ctx, p.ItemID)
+	}
+	if w.Jobs != nil {
+		if handled, err := w.Jobs(ctx, job); handled {
+			return err
+		}
 	}
 	return fmt.Errorf("unknown job kind %q", job.Kind)
 }

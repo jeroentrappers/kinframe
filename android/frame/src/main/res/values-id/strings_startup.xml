@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Memulai…</string>
+    <string name="startup_checking_library">Memeriksa foto Anda setelah listrik padam…</string>
+    <string name="startup_checking_update">Memeriksa versi aplikasi…</string>
+    <string name="startup_loading_photos">Memuat foto Anda…</string>
+    <string name="startup_preparing_photo">Menyiapkan foto pertama…</string>
+    <string name="startup_waiting_wifi">Menunggu Wi-Fi…</string>
+    <string name="startup_setting_clock">Mengatur jam…</string>
+    <string name="startup_connecting">Menghubungkan ke server…</string>
+    <string name="power_cut_title">Bingkai mati tanpa dimatikan dengan benar</string>
+    <string name="power_cut_body_ok">Semuanya sudah diperiksa dan aman.</string>
+    <string name="power_cut_body_redownload">Semuanya sudah diperiksa. Beberapa foto sedang diunduh ulang.</string>
+    <string name="power_cut_tip">Lain kali, pilih %1$s → %2$s di menu dan tunggu hingga layar menampilkan “%3$s”.</string>
+</resources>

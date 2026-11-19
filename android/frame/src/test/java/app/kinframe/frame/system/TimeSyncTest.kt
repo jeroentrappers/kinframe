@@ -50,6 +50,22 @@ class TimeSyncTest {
         assertFalse(t.clockWrong.value)
     }
 
+    @Test fun aResetClockIsReportedBeforeTheFirstRound() {
+        wall = 1_621_036_800_000L // 2021-05-15, as the Denver boots
+        assertTrue(sync(root(true), ntp()).clockWrong.value)
+        wall = trueNow
+        assertFalse(sync(root(true), ntp()).clockWrong.value)
+    }
+
+    @Test fun androidSettingTheClockClearsTheFlag() {
+        wall = 1_621_036_800_000L
+        val t = sync(root(true), ntp())
+        assertTrue(t.clockWrong.value)
+        wall = trueNow // Android's own NTP sets the clock; the slideshow calls checkPlausible on ACTION_TIME_CHANGED
+        assertTrue(t.checkPlausible())
+        assertFalse(t.clockWrong.value)
+    }
+
     @Test fun aResetClockIsSetOnceTwoServersAgree() = runTest {
         wall = 1_621_036_800_000L // 2021-05-15, as the Denver boots
         val off = trueNow - wall

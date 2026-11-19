@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="source_credit_via">%1$s via %2$s</string>
+
+    <string name="source_provider_immich_link">Gedeelde Immich-link</string>
+    <string name="source_provider_immich_api">Immich-server</string>
+    <string name="source_provider_icloud">Gedeeld iCloud-album</string>
+    <string name="source_provider_immich_link_hint">Plak de link van één gedeeld album. Minste toegang: alleen dat album, en je trekt hem in Immich met één tik weer in.</string>
+    <string name="source_provider_immich_api_hint">Je Immich-adres en een API-sleutel; kies een album uit je eigen en gedeelde albums.</string>
+    <string name="source_provider_icloud_hint">De link van de openbare website van een gedeeld album op een iPhone, iPad of Mac.</string>
+    <string name="source_provider_intro">Waar staan de foto\'s? kinframe kijkt regelmatig in het album en brengt nieuwe foto\'s naar de fotolijst, zodat niemand ze opnieuw hoeft te sturen.</string>
+    <string name="source_recommended">Aanbevolen</string>
+    <string name="source_best_effort">Zonder garantie</string>
+    <string name="source_best_effort_note">Zonder garantie: Apple biedt hier geen officiële manier voor. Het kan zonder waarschuwing stoppen met werken; we laten het je weten als dat gebeurt.</string>
+    <string name="source_best_effort_short">iCloud werkt zonder garantie: het kan zonder waarschuwing stoppen.</string>
+
+    <string name="source_section_title">Gesynchroniseerd vanuit</string>
+    <string name="source_section_empty_album">Dit album synchroniseert nog nergens vandaan. Koppel een Immich- of iCloud-album en nieuwe foto\'s komen vanzelf.</string>
+    <string name="source_section_empty_feed">Deze feed synchroniseert nog nergens vandaan. Koppel een Immich- of iCloud-album en de nieuwe foto\'s worden voor je gepost.</string>
+    <string name="source_add_album">Synchroniseren vanuit…</string>
+    <string name="source_add_feed">Bron toevoegen</string>
+    <string name="source_feed_intro">Foto\'s uit deze albums worden in jouw naam in de feed gepost. Nieuwe foto\'s worden één bericht zodra het album 30 minuten stil is (uiterlijk 3 uur na de eerste nieuwe foto), dus een drukke avond is één bericht, geen tien. Niemand krijgt er een melding van.</string>
+    <string name="source_mine_title">Mijn fotobronnen</string>
+    <string name="source_mine_intro">De externe albums die je gekoppeld hebt, op elke fotolijst en feed. Foto\'s die ze binnenbrengen worden in jouw naam gestuurd.</string>
+    <string name="source_mine_empty_title">Nog geen fotobronnen</string>
+    <string name="source_mine_empty_body">Open een album in de bibliotheek van een fotolijst, of het tabblad Bronnen van een feed, en kies \"Synchroniseren vanuit…\".</string>
+    <string name="source_settings_title">Fotobronnen</string>
+    <string name="source_settings_open">Mijn fotobronnen</string>
+    <string name="source_settings_hint">Immich- en iCloud-albums die je synchroniseert naar albums en feeds.</string>
+    <string name="source_into_album">Naar %1$s op %2$s</string>
+    <string name="source_into_feed">Naar de feed %1$s</string>
+    <string name="source_owner">Ingesteld door %1$s</string>
+    <string name="source_owner_you">Ingesteld door jou</string>
+    <string name="source_owner_gone">De persoon die dit instelde is er niet meer</string>
+    <string name="source_more">Meer voor deze bron</string>
+    <plurals name="source_count_imported">
+        <item quantity="one">%d foto binnengehaald</item>
+        <item quantity="other">%d foto\'s binnengehaald</item>
+    </plurals>
+    <plurals name="source_count_skipped">
+        <item quantity="one">%d overgeslagen</item>
+        <item quantity="other">%d overgeslagen</item>
+    </plurals>
+    <plurals name="source_count_failed">
+        <item quantity="one">%d kon niet gekopieerd worden</item>
+        <item quantity="other">%d konden niet gekopieerd worden</item>
+    </plurals>
+    <plurals name="source_album_badge">
+        <item quantity="one">Synchroniseert vanuit een extern album</item>
+        <item quantity="other">Synchroniseert vanuit %d externe albums</item>
+    </plurals>
+
+    <string name="source_status_active">Synchroniseert</string>
+    <string name="source_status_error">Synchroniseert niet</string>
+    <string name="source_status_attention">Actie nodig</string>
+    <string name="source_status_paused">Gepauzeerd</string>
+    <string name="source_line_paused">Gepauzeerd. De foto\'s die er al zijn blijven zichtbaar.</string>
+    <string name="source_line_running">Bezig met synchroniseren…</string>
+    <string name="source_line_importing">%1$d van %2$d binnengehaald</string>
+    <string name="source_line_synced">Gesynchroniseerd %1$s</string>
+    <string name="source_line_synced_next">Gesynchroniseerd %1$s · volgende %2$s</string>
+    <string name="source_line_waiting">Wacht op de eerste synchronisatie</string>
+    <string name="source_line_failing">We blijven het proberen.</string>
+    <string name="source_line_failing_since">Synchroniseert niet sinds %1$s. We blijven het proberen.</string>
+    <string name="source_line_needs_you">Synchroniseren staat stil tot dit opgelost is.</string>
+    <string name="source_retrying">De laatste poging mislukte, we proberen opnieuw: %1$s</string>
+    <string name="source_warn_downloads">Foto\'s komen in lagere kwaliteit omdat de link geen downloads toestaat.</string>
+    <string name="source_warn_metadata">De link verbergt fotogegevens, dus datums en beschrijvingen ontbreken.</string>
+    <string name="source_warn_limit">Alleen de nieuwste foto\'s worden gesynchroniseerd: de limiet per bron is bereikt.</string>
+
+    <string name="source_err_unreachable">%1$s is niet bereikbaar. Staat de server aan? We blijven het proberen.</string>
+    <string name="source_err_unreachable_generic">De server is niet bereikbaar. Staat hij aan? We blijven het proberen.</string>
+    <string name="source_err_tls">Het certificaat van %1$s wordt niet vertrouwd. Controleer de HTTPS-instellingen.</string>
+    <string name="source_err_tls_generic">Het certificaat van de server wordt niet vertrouwd. Controleer de HTTPS-instellingen.</string>
+    <string name="source_err_private">Deze server mag geen adressen op een privénetwerk bereiken. Gebruik het openbare adres van Immich, of vraag het aan de beheerder van de server.</string>
+    <string name="source_err_auth_key">Immich weigerde de API-sleutel. Vul hem opnieuw in.</string>
+    <string name="source_err_auth_password">Immich weigerde het wachtwoord van de link. Vul het opnieuw in.</string>
+    <string name="source_err_password_required">De link heeft een wachtwoord nodig.</string>
+    <string name="source_err_permission">De API-sleutel mist een recht. Hij heeft album.read, asset.read, asset.view en asset.download nodig.</string>
+    <string name="source_err_link_not_found">De link werkt niet meer. Misschien is hij verwijderd, of staat Openbare website uit.</string>
+    <string name="source_err_link_expired">De Immich-link is verlopen. Maak een nieuwe en plak die hier.</string>
+    <string name="source_err_album_not_found">Het album bestaat niet meer.</string>
+    <string name="source_err_unsupported_link">Dit is een iCloud-link voor een paar foto\'s, geen gedeeld album. Deel een album met Openbare website aan.</string>
+    <string name="source_err_too_large">Dit album is te groot om in één keer te lezen. Gebruik een kleiner album.</string>
+    <string name="source_err_format">Het album antwoordde op een manier die we niet begrijpen. We blijven één keer per dag kijken.</string>
+    <string name="source_err_format_icloud">iCloud antwoordde op een manier die we niet begrijpen. Dat kan gebeuren omdat Apple hier geen officiële manier voor biedt. We blijven één keer per dag kijken.</string>
+    <string name="source_err_rate_limited">De dienst vroeg ons om het rustiger aan te doen. We proberen het later opnieuw.</string>
+    <string name="source_err_upstream">%1$s had een probleem. We blijven het proberen.</string>
+    <string name="source_err_upstream_generic">De server had een probleem. We blijven het proberen.</string>
+    <string name="source_err_owner_lost_album">%1$s kan dit album niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren.</string>
+    <string name="source_err_owner_lost_feed">%1$s kan deze feed niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren.</string>
+    <string name="source_err_credentials">De bewaarde sleutel kan niet meer gelezen worden (de geheime sleutel van de server is veranderd). Vul hem opnieuw in.</string>
+    <string name="source_err_mass_removal">%1$d foto\'s zijn uit het album verdwenen. Hier ook verwijderen?</string>
+    <string name="source_err_unknown">Er ging iets mis met deze bron.</string>
+    <string name="source_problem_duplicate">Dit album synchroniseert hier al.</string>
+    <string name="source_problem_limit">Je hebt het aantal fotobronnen bereikt dat deze server toestaat.</string>
+    <string name="source_problem_paused">Hervat de bron eerst.</string>
+    <string name="source_problem_disabled">Deze server synchroniseert geen fotobronnen.</string>
+    <string name="source_problem_address">Controleer het adres: deze server kan het niet gebruiken.</string>
+    <string name="source_problem_rate_limited">Net gesynchroniseerd. Probeer het over een paar minuten opnieuw.</string>
+
+    <string name="source_sync_now">Nu synchroniseren</string>
+    <string name="source_pause">Pauzeren</string>
+    <string name="source_resume">Hervatten</string>
+    <string name="source_edit">Wijzigen</string>
+    <string name="source_delete">Stoppen met synchroniseren</string>
+    <string name="source_take_over">Overnemen</string>
+    <string name="source_fix_link">Nieuwe link plakken</string>
+    <string name="source_fix_password">Wachtwoord invullen</string>
+    <string name="source_fix_key">Nieuwe API-sleutel invullen</string>
+    <string name="source_fix_removals">Verwijderingen bekijken</string>
+    <string name="source_sync_started">%1$s wordt gesynchroniseerd…</string>
+    <string name="source_removals_confirmed">De foto\'s worden uit %1$s verwijderd.</string>
+    <string name="source_paused_done">%1$s is gepauzeerd</string>
+    <string name="source_resumed_done">%1$s synchroniseert weer</string>
+    <string name="source_taken_over">%1$s is nu van jou. Nieuwe foto\'s worden in jouw naam gestuurd.</string>
+    <string name="source_deleted_kept">%1$s synchroniseert niet meer. De foto\'s blijven.</string>
+    <string name="source_deleted_removed">%1$s synchroniseert niet meer. De foto\'s worden verwijderd.</string>
+    <string name="source_created">%1$s is gekoppeld. De eerste synchronisatie is gestart.</string>
+
+    <string name="source_edit_title">%1$s wijzigen</string>
+    <string name="source_name">Naam</string>
+    <string name="source_connection">Verbinding</string>
+    <string name="source_current_link">Huidige link: %1$s</string>
+    <string name="source_new_link">Nieuwe link (leeg laten om te houden)</string>
+    <string name="source_password">Wachtwoord van de link</string>
+    <string name="source_password_hint">Alleen als de link met een wachtwoord beveiligd is.</string>
+    <string name="source_password_has">Er is een wachtwoord ingesteld. Typ een nieuw om het te wijzigen.</string>
+    <string name="source_password_remove">De link heeft geen wachtwoord meer</string>
+    <string name="source_server">Immich-adres</string>
+    <string name="source_api_key">API-sleutel</string>
+    <string name="source_new_key">Nieuwe API-sleutel</string>
+    <string name="source_key_permissions">In Immich: Accountinstellingen → API-sleutels → Nieuw. Vink album.read, asset.read, asset.view en asset.download aan.</string>
+    <string name="source_take_over_title">%1$s overnemen?</string>
+    <string name="source_take_over_body">Je wordt de eigenaar: nieuwe foto\'s worden in jouw naam gestuurd en reacties komen naar jou. Foto\'s die er al zijn houden hun afzender.</string>
+    <string name="source_take_over_key">De oude sleutel hoort bij het Immich-account van iemand anders. Vul je eigen sleutel in.</string>
+    <string name="source_delete_title">Stoppen met synchroniseren van %1$s?</string>
+    <string name="source_delete_body_album">Er komen geen nieuwe foto\'s meer. Wat met de foto\'s die al op de fotolijst staan?</string>
+    <string name="source_delete_body_feed">Er worden geen nieuwe foto\'s meer gepost. Wat met de foto\'s die al gepost zijn?</string>
+    <plurals name="source_delete_keep">
+        <item quantity="one">De foto houden</item>
+        <item quantity="other">De %d foto\'s houden</item>
+    </plurals>
+    <plurals name="source_delete_remove">
+        <item quantity="one">De foto verwijderen</item>
+        <item quantity="other">De %d foto\'s verwijderen</item>
+    </plurals>
+    <plurals name="source_removals_title">
+        <item quantity="one">%1$d foto verdween uit het %2$s-album</item>
+        <item quantity="other">%1$d foto\'s verdwenen uit het %2$s-album</item>
+    </plurals>
+    <string name="source_removals_body">Dat zijn er veel tegelijk, dus er is nog niets verwijderd. Hier ook verwijderen, of houden (de bron houdt dan voortaan foto\'s die verdwijnen)?</string>
+    <string name="source_removals_remove">Verwijderen</string>
+    <string name="source_removals_keep">Houden</string>
+
+    <string name="source_add_title_album">Synchroniseren naar %1$s</string>
+    <string name="source_add_title_feed">Bron toevoegen aan %1$s</string>
+    <string name="source_immich_link_how">Open het album in Immich, tik op Delen → Link maken, sta downloads toe en plak de link hier.</string>
+    <string name="source_immich_api_how">Vul je Immich-adres en een API-sleutel in. Daarna kies je een van je eigen of gedeelde albums.</string>
+    <string name="source_icloud_how">Open het gedeelde album op de iPhone, tik op het personen-icoon, zet Openbare website aan, kies Deel link → Kopieer en plak hem hier.</string>
+    <string name="source_link">Link</string>
+    <string name="source_need_link">Plak de link van het album.</string>
+    <string name="source_need_server">Vul je Immich-adres in.</string>
+    <string name="source_need_key">Vul een API-sleutel in (minstens 8 tekens).</string>
+    <string name="source_need_provider">Kies waar de foto\'s staan.</string>
+    <string name="source_link_invalid">Dat lijkt geen link die we kunnen gebruiken.</string>
+    <string name="source_link_not_immich">Dat is geen gedeelde Immich-link. Die ziet eruit als https://photos.example.org/share/….</string>
+    <string name="source_link_not_icloud">Dat is geen link van een gedeeld iCloud-album. Die ziet eruit als https://www.icloud.com/sharedalbum/#….</string>
+    <string name="source_link_is_icloud">Dat is een iCloud-link. Ga terug en kies Gedeeld iCloud-album.</string>
+    <string name="source_link_is_immich">Dat is een Immich-link. Ga terug en kies Gedeelde Immich-link.</string>
+    <string name="source_link_icloud_incomplete">Het stuk na # ontbreekt in de link. Kopieer hem opnieuw uit het album.</string>
+    <string name="source_server_invalid">Dat is geen webadres.</string>
+    <string name="source_server_https">Gebruik https:// voor een adres op het internet.</string>
+    <string name="source_private_hint">Dit lijkt een adres op je thuisnetwerk. Deze server kan die niet bereiken; gebruik het openbare adres van Immich of vraag het aan de beheerder van de server.</string>
+    <string name="source_test">Verbinding testen</string>
+    <string name="source_pick_album">Welk album?</string>
+    <string name="source_server_version">Immich %1$s</string>
+    <string name="source_no_albums">Deze sleutel ziet geen albums. Maak of deel er eerst een in Immich.</string>
+    <plurals name="source_album_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="source_album_shared_by">gedeeld door %1$s</string>
+    <string name="source_about_size">ongeveer %1$s</string>
+    <string name="source_history_title">Wat nu binnenhalen</string>
+    <string name="source_history_all">Alles in het album</string>
+    <string name="source_history_last_n">De nieuwste %1$d</string>
+    <string name="source_history_count">Hoeveel</string>
+    <string name="source_history_none">Alleen foto\'s die vanaf nu toegevoegd worden</string>
+    <string name="source_history_quiet">Die komen stil in de diavoorstelling, zonder \"nieuwe foto\'s\"-kaart.</string>
+    <string name="source_delete_policy_title">Als een foto in %1$s verwijderd wordt</string>
+    <string name="source_policy_mirror">Hier ook verwijderen</string>
+    <string name="source_policy_keep">Hier houden</string>
+    <string name="source_policy_default">Aanbevolen</string>
+    <string name="source_include_videos">Video\'s meenemen</string>
+    <string name="source_notify_reactions">Laat me reacties weten</string>
+    <string name="source_notify_reactions_hint">Foto\'s worden in jouw naam gestuurd, dus reacties komen naar jou. Zet uit voor een druk album.</string>
+    <string name="source_who_sees_album">Iedereen die %1$s kan zien, ziet de foto\'s van dit album, ook nieuwe die later toegevoegd worden.</string>
+    <string name="source_who_sees_feed">Iedereen die de fotolijsten van %1$s kan zien, ziet de foto\'s van dit album, ook nieuwe die later toegevoegd worden.</string>
+    <string name="source_cadence_album">kinframe kijkt ongeveer elke 30 minuten in het album (iCloud: elk uur). Nu synchroniseren doet het meteen.</string>
+    <string name="source_cadence_feed">kinframe kijkt ongeveer elke 30 minuten in het album (iCloud: elk uur). Nieuwe foto\'s worden één bericht zodra het album 30 minuten stil is, uiterlijk 3 uur na de eerste.</string>
+    <string name="source_connect">Koppelen</string>
+
+    <string name="share_text_label">Synchroniseren met kinframe</string>
+    <string name="source_shared_title">Dit %1$s-album synchroniseren naar…</string>
+    <string name="source_shared_body">Nieuwe foto\'s in het album komen vanzelf.</string>
+    <string name="source_shared_none">Er is geen album of feed waarnaar je kunt synchroniseren. Maak eerst een album in de bibliotheek van een fotolijst die je beheert.</string>
+    <string name="source_shared_album_choice">%1$s op %2$s</string>
+    <string name="source_shared_feed_choice">Feed: %1$s</string>
+    <string name="source_shared_not_supported">Dat is geen link van een gedeeld Immich- of iCloud-album.</string>
+
+    <string name="google_add">Toevoegen uit Google Foto\'s</string>
+    <string name="google_title">Google Foto\'s</string>
+    <string name="google_into">Naar %1$s</string>
+    <string name="google_starting">Google wordt geopend…</string>
+    <string name="google_consent">Meld je in de browser aan bij Google en geef kinframe toegang tot de foto\'s die je kiest. kinframe ziet nooit de rest van je bibliotheek.</string>
+    <string name="google_picking">Wachten op Google Foto\'s… Kies je foto\'s, tik op Klaar en kom dan terug.</string>
+    <plurals name="google_importing">
+        <item quantity="one">%1$d foto uit Google Foto\'s toevoegen… %2$d van %1$d</item>
+        <item quantity="other">%1$d foto\'s uit Google Foto\'s toevoegen… %2$d van %1$d</item>
+    </plurals>
+    <string name="google_importing_start">Je foto\'s uit Google Foto\'s worden toegevoegd…</string>
+    <string name="google_importing_hint">Je mag dit sluiten; de foto\'s komen gewoon door.</string>
+    <plurals name="google_done">
+        <item quantity="one">%d foto toegevoegd</item>
+        <item quantity="other">%d foto\'s toegevoegd</item>
+    </plurals>
+    <plurals name="google_cancelled">
+        <item quantity="one">Gestopt. %d foto was al toegevoegd en blijft.</item>
+        <item quantity="other">Gestopt. %d foto\'s waren al toegevoegd en blijven.</item>
+    </plurals>
+    <plurals name="google_duplicates">
+        <item quantity="one">%d stond er al</item>
+        <item quantity="other">%d stonden er al</item>
+    </plurals>
+    <plurals name="google_failed">
+        <item quantity="one">%d kon niet gekopieerd worden</item>
+        <item quantity="other">%d konden niet gekopieerd worden</item>
+    </plurals>
+    <string name="google_done_feed">Ze zijn in de feed gepost.</string>
+    <string name="google_undone">Ongedaan gemaakt: de foto\'s zijn weer verwijderd.</string>
+    <string name="google_open_signin">Google openen</string>
+    <string name="google_open_picker">Google Foto\'s openen</string>
+    <string name="google_hide">Verbergen</string>
+    <string name="google_try_again">Opnieuw proberen</string>
+    <string name="google_error_disabled">Deze server biedt Google Foto\'s niet aan.</string>
+    <string name="google_error_consent">Je hebt geen toegang gegeven.</string>
+    <string name="google_error_expired">Google Foto\'s sloot voordat er iets gekozen was. Probeer het opnieuw.</string>
+    <string name="google_error_target_gone">Het album of de feed is intussen verwijderd.</string>
+    <string name="google_error_download">Geen enkele foto kon gekopieerd worden.</string>
+    <string name="google_error_unavailable">Google Foto\'s is nu niet beschikbaar. Probeer het later opnieuw.</string>
+    <string name="google_error_auth">Aanmelden bij Google lukte niet. Probeer het opnieuw.</string>
+    <string name="google_error_generic">Er ging iets mis met Google Foto\'s.</string>
+
+    <string name="feed_tab_sources">Bronnen</string>
+    <string name="albums_delete_sources_body">Dit album synchroniseert vanuit een extern album. Verwijderen stopt het synchroniseren.</string>
+    <string name="albums_delete_sources_keep">De gesynchroniseerde foto\'s op de fotolijst houden</string>
+    <string name="albums_delete_sources_remove">Ook de foto\'s verwijderen die naar dit album gesynchroniseerd zijn</string>
+
+    <string name="notif_photo_source_title">Een fotobron heeft je nodig</string>
+    <string name="notif_google_done_title">Import uit Google Foto\'s klaar</string>
+    <string name="albums_only_mode">Alleen in albummodus</string>
+    <string name="albums_only_mode_hint">De foto\'s spelen alleen als de fotolijst dit album afspeelt (of tijdens de planning), niet in de gewone diavoorstelling. Foto\'s die ook in een ander album zitten blijven spelen.</string>
+    <string name="albums_only_mode_badge">Alleen albummodus</string>
+    <string name="albums_only_mode_on">%1$s speelt nu alleen in albummodus</string>
+    <string name="albums_only_mode_off">%1$s speelt weer in de gewone diavoorstelling</string>
+    <string name="source_album_only_suggest">De eerste synchronisatie brengt ongeveer %1$d foto\'s binnen. Dat is veel voor de gewone diavoorstelling: alleen afspelen als de fotolijst dit album afspeelt?</string>
+</resources>

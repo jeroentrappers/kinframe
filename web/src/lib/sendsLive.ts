@@ -32,6 +32,15 @@ export function followSends(get: () => Send[], replace: (s: Send) => void): () =
 					? { placement_id: e.placement_id, reaction: e.reaction as Reaction | null }
 					: { placement_id: e.placement_id, preset: e.preset };
 			for (const s of get()) if (applyPlacementEvent(s as Parameters<typeof applyPlacementEvent>[0], ev)) break;
+		} else if (e.type === 'feed_post.updated') {
+			// A post of one of these sends got delivered or seen on a subscribed frame (feeds.md §7).
+			for (const s of get()) {
+				const f = s.feeds?.find((x) => x.post_id === e.post_id);
+				if (f) {
+					f.summary = e.summary;
+					break;
+				}
+			}
 		} else if (e.type === 'frame.status') {
 			for (const s of get()) for (const f of s.frames) if (f.frame_id === e.frame_id) f.online = e.online;
 		}

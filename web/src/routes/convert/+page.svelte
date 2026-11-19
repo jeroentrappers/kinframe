@@ -5,7 +5,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { i18n, LOCALES, t, type Locale, type MessageKey } from '$lib/i18n/index.svelte';
 	import { toasts } from '$lib/toast.svelte';
-	import { checkApk, formatFingerprint, isZip, sha256Hex } from '$lib/convert/apk';
+	import { checkApk, formatFingerprint, isZip } from '$lib/convert/apk';
 	import { resourceProblem } from '$lib/convert/rsce';
 	import {
 		BOOT_ASSETS,
@@ -15,20 +15,25 @@
 		FRAMEO_PACKAGE,
 		RELEASE_CERT_SHA256,
 		RELEASES_REPO,
+		ROOT_CERT_ASSETS,
+		ROOT_CERT_FILE,
 		bootAnimationPossible,
 		bootLogoPossible,
 		canConvert,
+		extrasToDisable,
+		updatePending,
 		canRevert,
 		normalizeServerUrl,
 		planConvert,
 		planRevert,
+		type BootManifest,
 		type Identification,
 		type Issue,
 		type PackageState,
 		type Step,
 		type StepId
 	} from '$lib/convert/plan';
-	import { identifyFrame, runPlan, type BootAssets, type StepStatus } from '$lib/convert/runner';
+	import { identifyFrame, runPlan, type BootSource, type StepStatus } from '$lib/convert/runner';
 	import type { WebUsbFrame } from '$lib/convert/adb';
 	import Icon from '$components/Icon.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
@@ -65,6 +70,7 @@
 	let restoreFile = $state<File | null>(null);
 	let restoreBytes = $state.raw<Uint8Array | undefined>(undefined);
 	let bootBranding = $state(true);
+	let extras = $state(true);
 	let resourceFile = $state<File | null>(null);
 	let resourceBytes = $state.raw<Uint8Array | undefined>(undefined);
 	let animFile = $state<File | null>(null);
@@ -209,20 +215,27 @@
 		return bytes;
 	}
 
-	/** The start-up branding from this server's static files, checked against its manifest. */
-	async function fetchBoot(): Promise<BootAssets> {
+	/** The start-up branding in this server's static files: its manifest, and its files (the runner checks their sha256). */
+	async function fetchBoot(): Promise<BootSource> {
 		const base = `${BOOT_ASSETS}/${BOOT_BRAND}`;
 		const res = await fetch(`${base}/manifest.json`, { cache: 'no-store' });
 		if (!res.ok) throw new Error(`boot branding: HTTP ${res.status}`);
-		const manifest = (await res.json()) as Record<'logo' | 'bootanimation', { file: string; sha256: string }>;
-		const get = async (entry: { file: string; sha256: string }) => {
-			const r = await fetch(`${base}/${entry.file}`);
-			if (!r.ok) throw new Error(`boot branding: HTTP ${r.status}`);
-			const bytes = new Uint8Array(await r.arrayBuffer());
-			if ((await sha256Hex(bytes)) !== entry.sha256) throw new Error(`boot branding: ${entry.file} does not match its sha256`);
-			return bytes;
+		const manifest = (await res.json()) as BootManifest;
+		return {
+			manifest,
+			get: async (file: string) => {
+				const r = await fetch(`${base}/${file}`, { cache: 'no-store' });
+				if (!r.ok) throw new Error(`boot branding: HTTP ${r.status}`);
+				return new Uint8Array(await r.arrayBuffer());
+			}
 		};
-		return { logo: await get(manifest.logo), bootanimation: await get(manifest.bootanimation) };
+	}
+
+	/** The Let's Encrypt root certificate from this server's static files (the runner checks its pinned sha256). */
+	async function fetchRootCert(): Promise<Uint8Array> {
+		const r = await fetch(`${ROOT_CERT_ASSETS}/${ROOT_CERT_FILE}`, { cache: 'no-store' });
+		if (!r.ok) throw new Error(`HTTP ${r.status}`);
+		return new Uint8Array(await r.arrayBuffer());
 	}
 
 	async function start() {
@@ -231,7 +244,7 @@
 		const current = frame;
 		steps =
 			mode === 'convert'
-				? planConvert(id, { server: server!, language: language || undefined, backup, bootBranding: bootBranding && bootPossible })
+				? planConvert(id, { server: server!, language: language || undefined, backup, bootBranding: bootBranding && bootPossible, extras })
 				: planRevert(id, { keepData, restoreFrameo: Boolean(restoreBytes), restoreBootLogo: Boolean(resourceBytes), restoreBootAnimation: Boolean(animBytes) });
 		statuses = Object.fromEntries(steps.map((s) => [s.id, { status: 'pending' as StepStatus }]));
 		outcome = null;
@@ -250,6 +263,7 @@
 					fetchRelease,
 					restoreApk: () => restoreBytes,
 					fetchBoot,
+					fetchRootCert,
 					restoreBoot: () => ({ resource: resourceBytes, bootanimation: animBytes }),
 					reconnect: async () => {
 						const next = await a.reconnect(current.serial);
@@ -399,7 +413,14 @@
 							<dd>{pkgText(id.facts.packages[FRAMEO_PACKAGE])}</dd>
 							<dt>{t('convert.factKinframe')}</dt>
 							<dd>{pkgText(id.facts.packages[FRAME_PACKAGE])}</dd>
+							{#if id.facts.displayId}
+								<dt>{t('convert.factFirmware')}</dt>
+								<dd>{id.facts.displayId}</dd>
+							{/if}
 						</dl>
+						{#if mode === 'convert' && updatePending(id.facts.updater)}
+							<p class="callout callout-warn"><Icon name="alert" size={20} />{t('convert.updatePending')}</p>
+						{/if}
 						{#if mode === 'convert'}
 							{#if id.verdict === 'supported'}
 								<p class="callout callout-ok"><Icon name="check" size={20} />{t('convert.verdictSupported')}</p>
@@ -467,6 +488,12 @@
 										<label class="check"><input type="checkbox" bind:checked={backup} />{t('convert.backup')}</label>
 										<p class="hint indent">{t('convert.backupHint')}</p>
 									</div>
+									{#if extrasToDisable(id.facts).length}
+										<div>
+											<label class="check"><input type="checkbox" bind:checked={extras} />{t('convert.step.extras')}</label>
+											<p class="hint indent">{t('convert.extrasHint')}</p>
+										</div>
+									{/if}
 									{#if bootPossible}
 										<div>
 											<label class="check"><input type="checkbox" bind:checked={bootBranding} />{t('convert.bootBranding')}</label>
@@ -552,6 +579,7 @@
 						<h2>{t('convert.doneTitle')}</h2>
 						<p>{t('convert.doneBody')}</p>
 						<p>{t('convert.doneImport')}</p>
+						<p class="hint">{t('convert.factoryReset')}</p>
 						<a class="btn btn-primary btn-lg" href={addUrl}><Icon name="plus" size={18} />{t('convert.doneAdd')}</a>
 					{:else if outcome.ok}
 						<span class="big-icon ok"><Icon name="check" size={30} /></span>

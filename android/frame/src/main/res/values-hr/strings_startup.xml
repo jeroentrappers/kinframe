@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Pokretanje…</string>
+    <string name="startup_checking_library">Provjera fotografija nakon nestanka struje…</string>
+    <string name="startup_checking_update">Provjera verzije aplikacije…</string>
+    <string name="startup_loading_photos">Učitavanje fotografija…</string>
+    <string name="startup_preparing_photo">Priprema prve fotografije…</string>
+    <string name="startup_waiting_wifi">Čeka se Wi-Fi…</string>
+    <string name="startup_setting_clock">Namještanje sata…</string>
+    <string name="startup_connecting">Povezivanje s poslužiteljem…</string>
+    <string name="power_cut_title">Okvir je isključen bez gašenja</string>
+    <string name="power_cut_body_ok">Sve je provjereno i u redu je.</string>
+    <string name="power_cut_body_redownload">Sve je provjereno. Neke se fotografije ponovno preuzimaju.</string>
+    <string name="power_cut_tip">Sljedeći put u izborniku odaberite %1$s → %2$s i pričekajte da se na zaslonu pojavi „%3$s”.</string>
+</resources>

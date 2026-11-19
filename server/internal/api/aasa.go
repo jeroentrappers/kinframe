@@ -28,6 +28,7 @@ func aasaHandler(appIDs []string) http.Handler {
 		Components: []component{
 			{Path: "/f/*", Comment: "Frame code"},
 			{Path: "/i/*", Comment: "Invite link"},
+			{Path: "/fi/*", Comment: "Feed invite link"},
 		},
 	}}
 	body, _ := json.Marshal(doc)

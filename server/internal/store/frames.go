@@ -129,7 +129,7 @@ const frameViewSelect = `
 		ou.display_name AS owner_name, ou.id AS owner_id,
 		d.app_version, d.app_version_code, d.screen_w, d.screen_h, d.density_dpi, d.orientation, d.last_seen_at, d.kind AS device_kind,
 		(SELECT count(*) FROM memberships mm WHERE mm.frame_id = f.id)::int AS member_count,
-		(SELECT count(*) FROM placements p WHERE p.frame_id = f.id AND p.removed_at IS NULL)::int AS placement_count
+		(SELECT count(*) FROM placements p WHERE p.frame_id = f.id AND p.removed_at IS NULL AND NOT p.feed_suspended)::int AS placement_count
 	FROM frames f
 	JOIN memberships m ON m.frame_id = f.id AND m.user_id = $1
 	LEFT JOIN memberships om ON om.frame_id = f.id AND om.role = 'owner'
@@ -253,6 +253,17 @@ func (s *Store) MemberIDs(ctx context.Context, frameID uuid.UUID, managersOnly b
 		out = append(out, id)
 	}
 	return out, rows.Err()
+}
+
+// FrameManagerIDs lists the members who manage a frame's settings (owner,
+// admins and members with change_settings): the frame side of subscriptions.
+func (s *Store) FrameManagerIDs(ctx context.Context, frameID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := s.Pool.Query(ctx, `SELECT user_id FROM memberships WHERE frame_id = $1
+		AND (role IN ('owner', 'admin') OR (permissions->>'change_settings')::boolean) ORDER BY user_id`, frameID)
+	if err != nil {
+		return nil, err
+	}
+	return collectIDs(rows)
 }
 
 // FramesOfUser lists frame IDs where the user is a member, with role.

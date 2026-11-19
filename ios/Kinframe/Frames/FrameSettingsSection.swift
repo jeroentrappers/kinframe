@@ -8,6 +8,8 @@ struct FrameSettingsSection: View {
     @State private var model: FrameSettingsModel
     @State private var pickingPlace = false
     @State private var albums: [Album] = []
+    /// The feeds this frame subscribes to (when the server has feeds).
+    @State private var subscriptions: [FeedSubscription] = []
 
     init(api: API, frame: FrameSummary) {
         self.frame = frame
@@ -27,6 +29,9 @@ struct FrameSettingsSection: View {
             } else {
                 if !frame.online { Callout(L("settingsForm.offlineNote")) }
                 if model.conflict { Callout(L("settingsForm.conflict"), kind: .warn) }
+                if app.feedsEnabled {
+                    FrameFeedsCard(api: model.api, frame: frame, subscriptions: $subscriptions).id("feeds")
+                }
                 slideshow
                 display.id("display")
                 sleep
@@ -41,6 +46,9 @@ struct FrameSettingsSection: View {
             await model.load()
             let id = frame.id
             albums = (try? await model.api.call { try await $0.listAlbums(path: .init(frameId: id)).ok.body.json }) ?? []
+            if app.feedsEnabled {
+                subscriptions = SubscriptionLogic.sorted((try? await model.api.frameSubscriptions(id)) ?? [])
+            }
         }
         .sheet(isPresented: $pickingPlace) {
             LocationPicker(api: model.api) { place in
@@ -128,6 +136,23 @@ struct FrameSettingsSection: View {
                     .padding(.vertical, 8)
                 }
             }
+            if app.feedsEnabled, !playableFeeds.isEmpty || model.value("slideshow.feed_id")?.stringValue != nil {
+                row {
+                    VStack(alignment: .leading, spacing: 4) {
+                        LabeledContent(L("ios.feeds.playFeed")) {
+                            Picker(L("ios.feeds.playFeed"), selection: feedBinding) {
+                                Text(L("settingsForm.allPhotos")).tag("")
+                                ForEach(playableFeeds) { Text($0.name).tag($0.id) }
+                                let current = feedBinding.wrappedValue
+                                if !current.isEmpty, !playableFeeds.contains(where: { $0.id == current }) { Text(L("ios.feeds.unknownFeed")).tag(current) }
+                            }
+                            .labelsHidden()
+                        }
+                        Text(L("ios.feeds.playFeedHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
             row {
                 Toggle(isOn: model.bool("slideshow.on_this_day", false)) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -142,10 +167,32 @@ struct FrameSettingsSection: View {
         }
     }
 
-    /// `slideshow.album_id`: "" stands for all photos (null).
+    /// `slideshow.album_id`: "" stands for all photos (null). Playing an album ends feed mode.
     private var albumBinding: Binding<String> {
         Binding(get: { model.value("slideshow.album_id")?.stringValue ?? "" },
-                set: { model.set("slideshow.album_id", $0.isEmpty ? .null : .string($0)) })
+                set: {
+                    model.set("slideshow.album_id", $0.isEmpty ? .null : .string($0))
+                    if !$0.isEmpty, model.value("slideshow.feed_id")?.stringValue != nil { model.set("slideshow.feed_id", .null) }
+                })
+    }
+
+    /// Feed mode, `slideshow.feed_id`: "" stands for all photos (null). Playing a feed ends album mode.
+    private var feedBinding: Binding<String> {
+        Binding(get: { model.value("slideshow.feed_id")?.stringValue ?? "" },
+                set: {
+                    model.set("slideshow.feed_id", $0.isEmpty ? .null : .string($0))
+                    if !$0.isEmpty, model.value("slideshow.album_id")?.stringValue != nil { model.set("slideshow.album_id", .null) }
+                })
+    }
+
+    private struct PlayableFeed: Identifiable {
+        let id: String
+        let name: String
+    }
+
+    /// Feeds the frame shows right now (active subscriptions).
+    private var playableFeeds: [PlayableFeed] {
+        subscriptions.filter { $0.status == .active }.map { PlayableFeed(id: $0.feed.id, name: $0.feed.name) }
     }
 
     private var hasLocale: Bool { model.value("locale")?.object != nil }

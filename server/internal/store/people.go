@@ -21,11 +21,12 @@ type User struct {
 	AvatarKey          *string    `db:"avatar_key"`
 	ShareLocationNames bool       `db:"share_location_names"`
 	Locale             *string    `db:"locale"`
+	Timezone           *string    `db:"timezone"` // IANA zone reported by the apps
 	CreatedAt          time.Time  `db:"created_at"`
 	DeletedAt          *time.Time `db:"deleted_at"`
 }
 
-const userCols = `id, sub, email, display_name, avatar_key, share_location_names, locale, created_at, deleted_at`
+const userCols = `id, sub, email, display_name, avatar_key, share_location_names, locale, timezone, created_at, deleted_at`
 
 // DefaultDisplayName derives a display name from token claims (README §3.1).
 func DefaultDisplayName(name, email string) string {
@@ -70,14 +71,16 @@ type UserPatch struct {
 	DisplayName        *string
 	ShareLocationNames *bool
 	Locale             *string
+	Timezone           *string
 }
 
 func (s *Store) UpdateUser(ctx context.Context, q db.DBTX, id uuid.UUID, p UserPatch) (*User, error) {
 	return one[User](q.Query(ctx, `
 		UPDATE users SET display_name = COALESCE($2, display_name),
 			share_location_names = COALESCE($3, share_location_names),
-			locale = COALESCE($4, locale)
-		WHERE id = $1 RETURNING `+userCols, id, p.DisplayName, p.ShareLocationNames, p.Locale))
+			locale = COALESCE($4, locale),
+			timezone = COALESCE($5, timezone)
+		WHERE id = $1 RETURNING `+userCols, id, p.DisplayName, p.ShareLocationNames, p.Locale, p.Timezone))
 }
 
 func (s *Store) SetAvatar(ctx context.Context, id uuid.UUID, key *string) (*User, error) {
@@ -155,6 +158,18 @@ type Device struct {
 	LastUncleanShutdownAt *time.Time      `db:"last_unclean_shutdown_at"`
 	// Kind is "android" (the frame app) or "browser" (a virtual frame in a web browser).
 	Kind string `db:"kind"`
+	// Features the frame app reported in its latest heartbeat (e.g. "feed_backfill").
+	Features []string `db:"features"`
+}
+
+// HasFeature reports whether the latest heartbeat listed the capability.
+func (d *Device) HasFeature(f string) bool {
+	for _, x := range d.Features {
+		if x == f {
+			return true
+		}
+	}
+	return false
 }
 
 // IsBrowser reports whether the device is a web browser enrolled as a virtual frame.
@@ -162,7 +177,7 @@ func (d *Device) IsBrowser() bool { return d.Kind == "browser" }
 
 const deviceCols = `id, secret_hash, frame_id, hardware, screen_w, screen_h, density_dpi, orientation, decode_w, decode_h,
 	app_version, app_version_code, app_channel, locale, timezone, created_at, revoked_at, last_seen_at,
-	last_heartbeat, last_heartbeat_at, last_unclean_shutdown_at, kind`
+	last_heartbeat, last_heartbeat_at, last_unclean_shutdown_at, kind, features`
 
 func (s *Store) CreateDevice(ctx context.Context, d Device) (*Device, error) {
 	return one[Device](s.Pool.Query(ctx, `
@@ -189,12 +204,17 @@ func (s *Store) SetDeviceSeen(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-func (s *Store) RecordHeartbeat(ctx context.Context, id uuid.UUID, hb json.RawMessage, appVersion string, appVersionCode *int, unclean bool) error {
+// RecordHeartbeat stores a heartbeat; features replaces the reported capabilities.
+func (s *Store) RecordHeartbeat(ctx context.Context, id uuid.UUID, hb json.RawMessage, appVersion string, appVersionCode *int, unclean bool, features []string) error {
+	if features == nil {
+		features = []string{}
+	}
 	_, err := s.Pool.Exec(ctx, `
 		UPDATE devices SET last_heartbeat = $2, last_heartbeat_at = now(), last_seen_at = now(),
 			app_version = $3, app_version_code = COALESCE($4, app_version_code),
-			last_unclean_shutdown_at = CASE WHEN $5 THEN now() ELSE last_unclean_shutdown_at END
-		WHERE id = $1`, id, hb, appVersion, appVersionCode, unclean)
+			last_unclean_shutdown_at = CASE WHEN $5 THEN now() ELSE last_unclean_shutdown_at END,
+			features = $6
+		WHERE id = $1`, id, hb, appVersion, appVersionCode, unclean, features)
 	return err
 }
 

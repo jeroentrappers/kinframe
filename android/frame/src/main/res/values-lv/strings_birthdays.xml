@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="zero">🎈 %1$s: šodien %2$d. dzimšanas diena!</item>
+        <item quantity="one">🎈 %1$s: šodien %2$d. dzimšanas diena!</item>
+        <item quantity="other">🎈 %1$s: šodien %2$d. dzimšanas diena!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Šodien dzimšanas diena: %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Šodienas dzimšanas dienas</string>
+    <plurals name="birthday_card_more">
+        <item quantity="zero">un vēl %d</item>
+        <item quantity="one">un vēl %d</item>
+        <item quantity="other">un vēl %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="zero">%1$s: %2$d. dzimšanas diena</item>
+        <item quantity="one">%1$s: %2$d. dzimšanas diena</item>
+        <item quantity="other">%1$s: %2$d. dzimšanas diena</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Dzimšanas diena: %1$s</string>
+    <string name="birthday_countdown_two">%1$s un %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="zero">%1$s un vēl %2$d</item>
+        <item quantity="one">%1$s un vēl %2$d</item>
+        <item quantity="other">%1$s un vēl %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Apsveikt dzimšanas dienā no šī rāmja</string>
+    <string name="birthday_greet_button">Apsveikt: %1$s</string>
+    <string name="birthday_greet_sent">Nosūtīts ✓ — ģimene to redzēs</string>
+    <string name="birthday_detail_label">Dzimšanas diena</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="zero">%d. dzimšanas diena</item>
+        <item quantity="one">%d. dzimšanas diena</item>
+        <item quantity="other">%d. dzimšanas diena</item>
+    </plurals>
+</resources>

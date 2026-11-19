@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s wird heute %2$d!</item>
+        <item quantity="other">🎈 %1$s wird heute %2$d!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s hat heute Geburtstag!</string>
+    <string name="birthday_card_title_many">🎈 Heute Geburtstag</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">und %d weitere</item>
+        <item quantity="other">und %d weitere</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s wird %2$d</item>
+        <item quantity="other">%1$s wird %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s hat Geburtstag</string>
+    <string name="birthday_countdown_two">%1$s und %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s und %2$d weitere</item>
+        <item quantity="other">%1$s und %2$d weitere</item>
+    </plurals>
+    <string name="birthday_greet_title">Von diesem Bilderrahmen aus gratulieren</string>
+    <string name="birthday_greet_button">%1$s zum Geburtstag gratulieren</string>
+    <string name="birthday_greet_sent">Gesendet ✓ – die Familie sieht es</string>
+    <string name="birthday_detail_label">Geburtstag</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">wird %d</item>
+        <item quantity="other">wird %d</item>
+    </plurals>
+</resources>

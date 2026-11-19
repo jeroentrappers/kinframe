@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">시작하는 중…</string>
+    <string name="startup_checking_library">정전 후 사진을 확인하는 중…</string>
+    <string name="startup_checking_update">앱 버전을 확인하는 중…</string>
+    <string name="startup_loading_photos">사진을 불러오는 중…</string>
+    <string name="startup_preparing_photo">첫 사진을 준비하는 중…</string>
+    <string name="startup_waiting_wifi">Wi-Fi를 기다리는 중…</string>
+    <string name="startup_setting_clock">시계를 맞추는 중…</string>
+    <string name="startup_connecting">서버에 연결하는 중…</string>
+    <string name="power_cut_title">종료하지 않고 전원이 꺼졌어요</string>
+    <string name="power_cut_body_ok">모두 확인했고 문제없어요.</string>
+    <string name="power_cut_body_redownload">모두 확인했어요. 일부 사진을 다시 다운로드하고 있어요.</string>
+    <string name="power_cut_tip">다음에는 메뉴에서 %1$s → %2$s을(를) 선택하고 화면에 ‘%3$s’ 문구가 나올 때까지 기다리세요.</string>
+</resources>

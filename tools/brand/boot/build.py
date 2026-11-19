@@ -4,18 +4,23 @@
 #   uv run --no-project --with resvg-py==0.5.0 --with pillow==12.0.0 \
 #     tools/brand/boot/build.py --brand kinframe --out web/static/frame-boot
 #
-# Writes <out>/<brand>/logo.bmp, bootanimation.zip, preview.png and manifest.json. The output is byte-for-byte
-# reproducible (fixed zip timestamps, no PNG metadata, deterministic quantization), so a rebuild with the same
-# versions only shows up in git when the design changes.
+# Writes <out>/<brand>/ with one boot logo per frame panel, one boot animation per screen size, a preview per screen
+# size and manifest.json, which lists every file with its format and sha256 (one entry per line, so the convert
+# script can read it without a JSON parser). The convert tools pick the logo whose format (size, depth, compression)
+# and panel rotation match the frame's own logo exactly, and the animation made for the frame's screen size
+# (`wm size`); without a match they refuse. The output is byte-for-byte reproducible (fixed zip timestamps, no PNG
+# metadata, deterministic quantization), so a rebuild with the same versions only shows up in git when the design
+# changes.
 #
-# Formats (docs/hardware/denver-pff-1024.md, "Boot chain"):
-# - logo.bmp: what the Rockchip bootloader and kernel show from the resource partition. Windows BMP, 800×1280
-#   (the panel's native portrait orientation; the frame shows it rotated to 1280×800 landscape), 8 bits per pixel
-#   with a 256-colour palette, BI_RLE8 compression using only encoded runs, an end-of-line marker after every row and
-#   an end-of-bitmap marker, bottom-up rows. The convert tool checks the frame's own logo has the same size, depth
-#   and compression before it replaces it.
-# - bootanimation.zip: Android 6 boot animation. Stored (uncompressed) zip with desc.txt and one looping part, drawn
-#   centred on the part's background colour until the frame has booted.
+# Formats (docs/hardware/denver-pff-1024.md and denver-pff-1515.md, "Boot chain"):
+# - logo-<w>x<h>-r<rotation>.bmp: what the Rockchip bootloader and kernel show from the resource partition. Windows
+#   BMP in the panel's native scan-out orientation: Android rotates its picture by ro.sf.hwrotation, the bootloader
+#   does not, so the landscape screen is stored turned back by that rotation (PFF-1024: 800x1280, rotation 270;
+#   PFF-1515: 1920x1080, rotation 180, upside down). 8 bits per pixel with a 256-colour palette, BI_RLE8 compression
+#   using only encoded runs, an end-of-line marker after every row and an end-of-bitmap marker, bottom-up rows.
+# - bootanimation-<w>x<h>.zip: Android 6 boot animation for a <w>x<h> screen. Stored (uncompressed) zip with desc.txt
+#   and one looping part, drawn centred on the part's background colour until the frame has booted. The frame is
+#   smaller than the screen; it is made per screen size so the wordmark keeps the size and place it has in the logo.
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import argparse
@@ -43,14 +48,38 @@ BRANDS = {
     },
 }
 
-# Screen as Android draws it (landscape) and the panel's native scan-out (portrait).
-SCREEN_W, SCREEN_H = 1280, 800
-LOGO_W = 562  # the wordmark's width on screen (2× its 281-unit viewBox)
+# The frame panels we build for: the screen as Android draws it (landscape, what `wm size` reports) and how the panel
+# is mounted (ro.sf.hwrotation). A new panel adds an entry; the 1280x800 one is the reference layout.
+TARGETS = [
+    {"screen": (1280, 800), "hwrotation": 270},  # Denver PFF-1024 (10.1")
+    {"screen": (1920, 1080), "hwrotation": 180},  # Denver PFF-1515 (15.6")
+]
+
+# The reference layout (1280x800); other screens scale it by their height.
+REF_H = 800
+LOGO_W = 562  # the wordmark's width on screen (2x its 281-unit viewBox)
 # The animation frame: centred on the screen like the boot logo, so the wordmark doesn't move between the two.
 ANIM_W, ANIM_H = 720, 336
 ANIM_FPS = 20
 ANIM_FRAMES = 24  # 1.2 s loop
-DOTS, DOT_R, DOT_GAP = 3, 6, 30
+DOTS, DOT_R, DOT_GAP, DOT_DY = 3, 6, 30, 56
+
+# Turns the landscape screen into the panel's scan-out for a given ro.sf.hwrotation (PIL's ROTATE_* turn
+# counter-clockwise): Android rotates by hwrotation, so the stored picture is turned back by it.
+PANEL_TURN = {0: None, 90: Image.Transpose.ROTATE_270, 180: Image.Transpose.ROTATE_180, 270: Image.Transpose.ROTATE_90}
+
+
+class Layout:
+    """Sizes for one screen: the reference layout scaled by the screen height."""
+
+    def __init__(self, screen):
+        self.w, self.h = screen
+        s = self.h / REF_H
+        self.scale = s
+        self.logo_w = round(LOGO_W * s)
+        self.anim_w = 2 * round(ANIM_W * s / 2)
+        self.anim_h = 2 * round(ANIM_H * s / 2)
+        self.dot_r, self.dot_gap, self.dot_dy = DOT_R * s, DOT_GAP * s, round(DOT_DY * s)
 
 
 def rgb(hex_colour):
@@ -63,10 +92,10 @@ def wordmark(path, width):
     return Image.open(io.BytesIO(bytes(png))).convert("RGBA")
 
 
-def screen(brand, mark):
+def screen(brand, mark, lay):
     """The landscape start-up screen: the wordmark centred on the brand background."""
-    img = Image.new("RGB", (SCREEN_W, SCREEN_H), rgb(brand["background"]))
-    img.paste(mark, ((SCREEN_W - mark.width) // 2, (SCREEN_H - mark.height) // 2), mark)
+    img = Image.new("RGB", (lay.w, lay.h), rgb(brand["background"]))
+    img.paste(mark, ((lay.w - mark.width) // 2, (lay.h - mark.height) // 2), mark)
     return img
 
 
@@ -105,12 +134,12 @@ def bmp_rle8(img):
     return file_header + info + palette + data
 
 
-def boot_logo(brand, mark):
-    land = screen(brand, mark)
-    portrait = land.transpose(Image.Transpose.ROTATE_90)  # counter-clockwise: the panel is mounted rotated
-    assert portrait.size == (SCREEN_H, SCREEN_W)
-    pal = portrait.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
-    return bmp_rle8(pal), land
+def boot_logo(land, hwrotation):
+    """The panel's picture of the landscape screen `land`, as an RLE8 BMP."""
+    turn = PANEL_TURN[hwrotation]
+    panel = land.transpose(turn) if turn is not None else land
+    pal = panel.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    return bmp_rle8(pal), panel.size
 
 
 # ---------------------------------------------------------------- boot animation
@@ -120,25 +149,25 @@ def mix(a, b, t):
     return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
 
-def anim_frame(brand, mark, i):
+def anim_frame(brand, mark, lay, i):
     """One frame: the wordmark where the boot logo has it, and three dots pulsing in turn below it."""
     s = 4  # supersampling for smooth dots
     bg, accent, dim = rgb(brand["background"]), rgb(brand["accent"]), rgb(brand["dim"])
-    img = Image.new("RGB", (ANIM_W * s, ANIM_H * s), bg)
+    img = Image.new("RGB", (lay.anim_w * s, lay.anim_h * s), bg)
     d = ImageDraw.Draw(img)
-    cy = (ANIM_H // 2 + mark.height // 2 + 56) * s
-    cx0 = ANIM_W // 2 - DOT_GAP * (DOTS - 1) / 2
+    cy = (lay.anim_h // 2 + mark.height // 2 + lay.dot_dy) * s
+    cx0 = lay.anim_w // 2 - lay.dot_gap * (DOTS - 1) / 2
     for k in range(DOTS):
         phase = (i / ANIM_FRAMES - k / (DOTS * 2)) % 1.0
         glow = max(0.0, math.cos(2 * math.pi * phase)) ** 2
-        r = (DOT_R * (0.85 + 0.15 * glow)) * s
-        cx = (cx0 + k * DOT_GAP) * s
+        r = (lay.dot_r * (0.85 + 0.15 * glow)) * s
+        cx = (cx0 + k * lay.dot_gap) * s
         d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=mix(dim, accent, glow))
-    img = img.resize((ANIM_W, ANIM_H), Image.Resampling.LANCZOS)
+    img = img.resize((lay.anim_w, lay.anim_h), Image.Resampling.LANCZOS)
     # The wordmark at exactly its boot-logo position (the frame is centred on the screen).
-    ox = (SCREEN_W - ANIM_W) // 2
-    oy = (SCREEN_H - ANIM_H) // 2
-    img.paste(mark, ((SCREEN_W - mark.width) // 2 - ox, (SCREEN_H - mark.height) // 2 - oy), mark)
+    ox = (lay.w - lay.anim_w) // 2
+    oy = (lay.h - lay.anim_h) // 2
+    img.paste(mark, ((lay.w - mark.width) // 2 - ox, (lay.h - mark.height) // 2 - oy), mark)
     return img
 
 
@@ -148,10 +177,10 @@ def png_bytes(img):
     return buf.getvalue()
 
 
-def boot_animation(brand, mark):
-    desc = f"{ANIM_W} {ANIM_H} {ANIM_FPS}\np 0 0 part0 {brand['background'].upper()}\n"
+def boot_animation(brand, mark, lay):
+    desc = f"{lay.anim_w} {lay.anim_h} {ANIM_FPS}\np 0 0 part0 {brand['background'].upper()}\n"
     files = [("desc.txt", desc.encode()), ("part0/", b"")]
-    files += [(f"part0/{i:03d}.png", png_bytes(anim_frame(brand, mark, i))) for i in range(ANIM_FRAMES)]
+    files += [(f"part0/{i:03d}.png", png_bytes(anim_frame(brand, mark, lay, i))) for i in range(ANIM_FRAMES)]
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
         for name, data in files:
@@ -163,30 +192,55 @@ def boot_animation(brand, mark):
     return buf.getvalue()
 
 
+def entry(fields):
+    """One manifest entry on one line."""
+    return json.dumps(fields, separators=(", ", ": "))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--brand", default="kinframe", choices=sorted(BRANDS))
     ap.add_argument("--out", default=str(ROOT / "web/static/frame-boot"))
     args = ap.parse_args()
     brand = BRANDS[args.brand]
-    mark = wordmark(brand["logo_svg"], LOGO_W)
 
     out = Path(args.out) / args.brand
     out.mkdir(parents=True, exist_ok=True)
-    logo, land = boot_logo(brand, mark)
-    anim = boot_animation(brand, mark)
-    (out / "logo.bmp").write_bytes(logo)
-    (out / "bootanimation.zip").write_bytes(anim)
-    prev = io.BytesIO()
-    land.resize((SCREEN_W // 2, SCREEN_H // 2), Image.Resampling.LANCZOS).save(prev, "PNG", optimize=True)
-    (out / "preview.png").write_bytes(prev.getvalue())
-    manifest = {
-        "brand": args.brand,
-        "logo": {"file": "logo.bmp", "size": len(logo), "sha256": hashlib.sha256(logo).hexdigest(), "width": SCREEN_H, "height": SCREEN_W, "bpp": 8, "compression": "rle8"},
-        "bootanimation": {"file": "bootanimation.zip", "size": len(anim), "sha256": hashlib.sha256(anim).hexdigest(), "frame": [ANIM_W, ANIM_H], "fps": ANIM_FPS},
-    }
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(json.dumps(manifest, indent=2))
+    for old in list(out.glob("logo*.bmp")) + list(out.glob("bootanimation*.zip")) + list(out.glob("preview*.png")):
+        old.unlink()
+    logos, anims, done = [], [], set()
+    for t in TARGETS:
+        lay = Layout(t["screen"])
+        mark = wordmark(brand["logo_svg"], lay.logo_w)
+        land = screen(brand, mark, lay)
+        logo, (pw, ph) = boot_logo(land, t["hwrotation"])
+        name = f"logo-{pw}x{ph}-r{t['hwrotation']}.bmp"
+        (out / name).write_bytes(logo)
+        logos.append({"file": name, "width": pw, "height": ph, "bpp": 8, "compression": 1, "hwrotation": t["hwrotation"], "size": len(logo), "sha256": hashlib.sha256(logo).hexdigest()})
+        size = f"{lay.w}x{lay.h}"
+        if size in done:
+            continue
+        done.add(size)
+        anim = boot_animation(brand, mark, lay)
+        name = f"bootanimation-{size}.zip"
+        (out / name).write_bytes(anim)
+        anims.append({"file": name, "screen": size, "frame": f"{lay.anim_w}x{lay.anim_h}", "fps": ANIM_FPS, "size": len(anim), "sha256": hashlib.sha256(anim).hexdigest()})
+        prev = io.BytesIO()
+        land.resize((lay.w // 2, lay.h // 2), Image.Resampling.LANCZOS).save(prev, "PNG", optimize=True)
+        (out / f"preview-{size}.png").write_bytes(prev.getvalue())
+    manifest = (
+        "{\n"
+        + f'  "brand": {json.dumps(args.brand)},\n'
+        + '  "logos": [\n'
+        + ",\n".join(f"    {entry(e)}" for e in logos)
+        + "\n  ],\n"
+        + '  "bootanimations": [\n'
+        + ",\n".join(f"    {entry(e)}" for e in anims)
+        + "\n  ]\n}\n"
+    )
+    json.loads(manifest)  # well-formed
+    (out / "manifest.json").write_text(manifest)
+    print(manifest, end="")
 
 
 if __name__ == "__main__":

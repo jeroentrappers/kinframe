@@ -169,7 +169,7 @@ fun OutboxCard(o: OutboxSend, p: OutboxProgress?, onRetry: () -> Unit, onDiscard
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Thumb(o.items.firstOrNull()?.let { it.localPath?.let { p -> java.io.File(p) } ?: android.net.Uri.parse(it.uri) }, null, Modifier.size(56.dp))
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.notif_sending_title, o.frameNames.joinToString(", ")), style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.notif_sending_title, o.recipientNames.joinToString(", ")), style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 val text = when {
                     o.state == OutboxState.FAILED -> stringResource(Problems.byCode(o.error) ?: R.string.outbox_failed)
                     p != null && p.preparing -> stringResource(R.string.outbox_preparing, p.itemIndex + 1, p.itemCount, (p.fraction * 100).toInt())
@@ -219,13 +219,14 @@ fun SendCard(send: Send, onOpen: () -> Unit) {
             repeat((4 - send.items.size).coerceAtLeast(0)) { Box(Modifier.weight(1f)) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(kinds, style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
+            Text(send.via?.let { stringResource(R.string.source_credit_via, kinds, it.displayLabel) } ?: kinds, style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
             Text(Format.time(send.createdAt), style = Kin.type.caption, color = c.inkSoft, modifier = Modifier.semantics { contentDescriptionOf(label) })
         }
         send.items.firstOrNull { !it.caption.isNullOrBlank() }?.caption?.let {
             Text("“$it”", style = Kin.type.body, color = c.inkSoft, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         deliveries.forEach { d -> DeliveryRow(d, compact = true) }
+        send.feeds.forEach { f -> app.kinframe.family.ui.feeds.SendFeedRow(f) }
     }
 }
 
@@ -307,6 +308,10 @@ fun SendDetailScreen(
     onShare: ((List<String>) -> Unit)? = null,
     /** "Show on TV" for the send's photos on the first frame that still shows them; null when there is none. */
     onShowOnTv: (() -> Unit)? = null,
+    /** "Post to a feed" (forward without a new upload); null when you are in no feed or feeds are off. */
+    onPostToFeed: (() -> Unit)? = null,
+    /** Opens a feed this send was posted to (its receipts). */
+    onOpenFeed: ((app.kinframe.core.api.SendFeed) -> Unit)? = null,
 ) {
     val c = Kin.colors
     var confirm by rememberSaveable { mutableStateOf(false) }
@@ -321,7 +326,7 @@ fun SendDetailScreen(
                     Text(stringResource(R.string.detail_sent_at, Format.date(send.createdAt) + " " + Format.time(send.createdAt)), style = Kin.type.caption, color = c.inkSoft)
                     if (state.unsent) Note(stringResource(R.string.detail_unsent), tone = NoteTone.Good, icon = KinIcons.Check)
                     send.items.forEachIndexed { i, item -> ItemRow(i, item, state, onEditCaption, onCaption, onSaveCaption, onCancelEdit) }
-                    SectionTitle(stringResource(R.string.detail_delivery_label))
+                    if (send.frames.isNotEmpty() || send.feeds.isEmpty()) SectionTitle(stringResource(R.string.detail_delivery_label))
                     Delivery.frames(send).forEach { d ->
                         Surface(Modifier.fillMaxWidth()) {
                             DeliveryRow(d, compact = false)
@@ -329,7 +334,14 @@ fun SendDetailScreen(
                                 style = Kin.type.caption, color = c.inkSoft)
                         }
                     }
+                    if (send.feeds.isNotEmpty()) {
+                        SectionTitle(stringResource(R.string.detail_feeds_label))
+                        send.feeds.forEach { f ->
+                            Surface(Modifier.fillMaxWidth(), onClick = onOpenFeed?.let { open -> { open(f) } }) { app.kinframe.family.ui.feeds.SendFeedRow(f) }
+                        }
+                    }
                     state.error?.let { Note(stringResource(it), tone = NoteTone.Danger) }
+                    if (!state.unsent && onPostToFeed != null) SecondaryButton(stringResource(R.string.detail_post_to_feed), onPostToFeed, icon = KinIcons.People)
                     val shareable = send.items.filter { it.status != "failed" }.map { it.id }
                     if (!state.unsent && onShare != null && shareable.isNotEmpty()) {
                         SecondaryButton(stringResource(R.string.share_action), { onShare(shareable) }, icon = KinIcons.Share)

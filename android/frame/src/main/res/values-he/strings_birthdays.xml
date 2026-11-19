@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 היום יום הולדת %2$d ל־%1$s!</item>
+        <item quantity="two">🎈 היום יום הולדת %2$d ל־%1$s!</item>
+        <item quantity="other">🎈 היום יום הולדת %2$d ל־%1$s!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 היום יום ההולדת של %1$s!</string>
+    <string name="birthday_card_title_many">🎈 ימי הולדת היום</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">ועוד %d</item>
+        <item quantity="two">ועוד %d</item>
+        <item quantity="other">ועוד %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s: יום הולדת %2$d</item>
+        <item quantity="two">%1$s: יום הולדת %2$d</item>
+        <item quantity="other">%1$s: יום הולדת %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">יום ההולדת של %1$s</string>
+    <string name="birthday_countdown_two">%1$s ו־%2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s ועוד %2$d</item>
+        <item quantity="two">%1$s ועוד %2$d</item>
+        <item quantity="other">%1$s ועוד %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">לאחל יום הולדת שמח מהמסגרת הזו</string>
+    <string name="birthday_greet_button">לאחל יום הולדת שמח ל־%1$s</string>
+    <string name="birthday_greet_sent">נשלח ✓ — המשפחה תראה</string>
+    <string name="birthday_detail_label">יום הולדת</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">יום הולדת %d</item>
+        <item quantity="two">יום הולדת %d</item>
+        <item quantity="other">יום הולדת %d</item>
+    </plurals>
+</resources>

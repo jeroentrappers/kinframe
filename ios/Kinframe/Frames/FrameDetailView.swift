@@ -136,7 +136,7 @@ struct FrameDetailView: View {
                         sectionPicker(frame)
                         switch section {
                         case .overview: FrameOverviewSection(model: model)
-                        case .photos: FrameLibrarySection(api: model.api, frame: frame)
+                        case .photos: FrameLibrarySection(api: model.api, frame: frame, albumId: route.albumId)
                         case .people: FramePeopleSection(api: model.api, frame: model.frame!)
                         case .calendar: FrameCalendarSection(api: model.api, frame: frame)
                         case .settings: FrameSettingsSection(api: model.api, frame: frame)

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s κλείνει σήμερα τα %2$d!</item>
+        <item quantity="other">🎈 %1$s κλείνει σήμερα τα %2$d!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Σήμερα έχει γενέθλια: %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Γενέθλια σήμερα</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">και άλλοι %d</item>
+        <item quantity="other">και άλλοι %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s κλείνει τα %2$d</item>
+        <item quantity="other">%1$s κλείνει τα %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Γενέθλια: %1$s</string>
+    <string name="birthday_countdown_two">%1$s και %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s και άλλοι %2$d</item>
+        <item quantity="other">%1$s και άλλοι %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Ευχηθείτε χρόνια πολλά από αυτή την κορνίζα</string>
+    <string name="birthday_greet_button">Χρόνια πολλά, %1$s!</string>
+    <string name="birthday_greet_sent">Στάλθηκε ✓ — η οικογένεια θα το δει</string>
+    <string name="birthday_detail_label">Γενέθλια</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">κλείνει τα %d</item>
+        <item quantity="other">κλείνει τα %d</item>
+    </plurals>
+</resources>

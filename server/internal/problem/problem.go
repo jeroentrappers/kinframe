@@ -45,6 +45,12 @@ const (
 	UpstreamUnavailable Code = "upstream_unavailable"
 	FeatureDisabled     Code = "feature_disabled"
 	AlreadyDecided      Code = "already_decided"
+	AlreadySubscribed   Code = "already_subscribed"
+	InvalidTransition   Code = "invalid_transition"
+	LimitReached        Code = "limit_reached"
+	DuplicateBirthday   Code = "duplicate_birthday"
+	DuplicateSource     Code = "duplicate_source"
+	SourceTestFailed    Code = "source_test_failed"
 	ServerError         Code = "server_error"
 )
 
@@ -81,6 +87,12 @@ var defaults = map[Code]struct {
 	UpstreamUnavailable: {502, "An external service is not reachable right now"},
 	FeatureDisabled:     {503, "This feature is turned off on this server"},
 	AlreadyDecided:      {409, "This was already answered"},
+	AlreadySubscribed:   {409, "This frame already shows this feed"},
+	InvalidTransition:   {409, "That isn't possible in the current state"},
+	LimitReached:        {409, "A limit was reached"},
+	DuplicateBirthday:   {409, "This birthday is already on the list"},
+	DuplicateSource:     {409, "This album already syncs from that outside album"},
+	SourceTestFailed:    {422, "The outside album could not be read"},
 	ServerError:         {500, "Something went wrong on the server"},
 }
 

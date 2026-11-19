@@ -1,20 +1,22 @@
 import Foundation
 
-/// Links that open the app: frame codes and invites.
+/// Links that open the app: frame codes, frame invites and feed invites.
 ///
-/// - Universal Links: `https://<server>/f/<code>` and `https://<server>/i/<token>` (the QR on a frame, invite links).
+/// - Universal Links: `https://<server>/f/<code>`, `https://<server>/i/<token>` (the QR on a frame, invite links) and
+///   `https://<server>/fi/<token>` (feed invites: join a feed, or subscribe frames to it).
 /// - Custom scheme fallback, for servers whose domain the app can't claim:
-///   `app.kinframe://f/<code>?server=<url>`, `app.kinframe://i/<token>?server=<url>`, or
-///   `app.kinframe://open?url=<https link>`.
+///   `app.kinframe://f/<code>?server=<url>`, `app.kinframe://i/<token>?server=<url>`,
+///   `app.kinframe://fi/<token>?server=<url>`, or `app.kinframe://open?url=<https link>`.
 public enum DeepLink: Equatable, Sendable {
     case frameCode(server: URL?, code: String)
     case invite(server: URL?, token: String)
+    case feedInvite(server: URL?, token: String)
 
     public static let scheme = "app.kinframe"
 
     public var server: URL? {
         switch self {
-        case .frameCode(let server, _), .invite(let server, _): server
+        case .frameCode(let server, _), .invite(let server, _), .feedInvite(let server, _): server
         }
     }
 
@@ -50,13 +52,19 @@ public enum DeepLink: Equatable, Sendable {
             guard digits.count == Format.codeLength, digits.allSatisfy(\.isASCII), digits.allSatisfy(\.isNumber) else { return nil }
             return .frameCode(server: server, code: digits)
         case "i":
-            let token = parts[1]
-            let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
-            guard (22...64).contains(token.count), token.unicodeScalars.allSatisfy({ $0.isASCII && allowed.contains($0) }) else { return nil }
-            return .invite(server: server, token: token)
+            return validToken(parts[1]).map { .invite(server: server, token: $0) }
+        case "fi":
+            return validToken(parts[1]).map { .feedInvite(server: server, token: $0) }
         default:
             return nil
         }
+    }
+
+    /// Invite tokens are 22 to 64 URL-safe characters (`InviteToken` in the spec).
+    static func validToken(_ token: String) -> String? {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        guard (22...64).contains(token.count), token.unicodeScalars.allSatisfy({ $0.isASCII && allowed.contains($0) }) else { return nil }
+        return token
     }
 
     /// Whether this link points at a server other than `current` (then the app asks before switching).

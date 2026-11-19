@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Iniciando…</string>
+    <string name="startup_checking_library">Revisando tus fotos tras un corte de luz…</string>
+    <string name="startup_checking_update">Comprobando la versión de la app…</string>
+    <string name="startup_loading_photos">Cargando tus fotos…</string>
+    <string name="startup_preparing_photo">Preparando la primera foto…</string>
+    <string name="startup_waiting_wifi">Esperando al Wi-Fi…</string>
+    <string name="startup_setting_clock">Poniendo el reloj en hora…</string>
+    <string name="startup_connecting">Conectando con el servidor…</string>
+    <string name="power_cut_title">Se desconectó sin apagarse correctamente</string>
+    <string name="power_cut_body_ok">Se ha revisado todo y está bien.</string>
+    <string name="power_cut_body_redownload">Se ha revisado todo. Algunas fotos se están descargando de nuevo.</string>
+    <string name="power_cut_tip">La próxima vez, elige %1$s → %2$s en el menú y espera hasta que la pantalla diga «%3$s».</string>
+</resources>

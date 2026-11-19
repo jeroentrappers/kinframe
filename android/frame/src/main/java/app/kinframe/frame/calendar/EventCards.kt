@@ -114,8 +114,30 @@ fun EventDetailSheet(e: CalEvent, photo: ImageBitmap?, h24: Boolean, onCountdown
     val context = LocalContext.current
     val locale = currentLocale()
     val sw = CalendarPalette.of(e.color)
+    val birthday = e.birthday
     Column(Modifier.fillMaxSize().background(Kin.colors.paper)) {
         Box(Modifier.fillMaxWidth().height(8.dp).background(sw.strong))
+        if (birthday != null) {
+            // A birthday on another day (birthdays.md §6.6): "Oma · 12 March · turns 80"; not editable, no countdown.
+            Column(Modifier.weight(1f).padding(start = 36.dp, end = 24.dp, top = 22.dp, bottom = 28.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                        app.kinframe.frame.birthdays.BalloonGlyph(sw.strong, Modifier.size(width = 14.dp, height = 20.dp))
+                        Text(stringResource(R.string.birthday_detail_label), style = Kin.type.label, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 10.dp))
+                    }
+                    Box(Modifier.size(56.dp).clip(CircleShape).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
+                        KinIcon(KinIcons.Close, stringResource(R.string.action_close), size = 26.dp)
+                    }
+                }
+                Text(birthday.name, style = Kin.type.headline, color = Kin.colors.ink, modifier = Modifier.padding(top = 14.dp))
+                Spacer(Modifier.height(18.dp))
+                DetailRow(KinIcons.Clock) {
+                    Text(CalendarFormat.dayMonth(birthday.date, locale), style = Kin.type.bodyStrong, color = Kin.colors.ink)
+                    birthday.age?.let { Text(androidx.compose.ui.res.pluralStringResource(R.plurals.birthday_detail_turns, it, it), style = Kin.type.body, color = Kin.colors.inkSoft) }
+                }
+            }
+            return@Column
+        }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 36.dp, end = 24.dp, top = 22.dp, bottom = 28.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {

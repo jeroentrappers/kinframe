@@ -8,7 +8,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/** Where the app can be. The four tabs are roots; everything else is pushed on top of one. */
+/** Where the app can be. The tabs are roots; everything else is pushed on top of one. */
 sealed interface Route {
     data object Frames : Route
     data object Send : Route
@@ -18,11 +18,21 @@ sealed interface Route {
     data class AddFrame(val code: String? = null) : Route
     data class Invite(val token: String) : Route
     data class SendDetail(val sendId: String, val highlightPlacement: String? = null) : Route
+    /** The Feeds tab; only when the server has feeds (discovery `feeds`). */
+    data object Feeds : Route
+    data class FeedDetail(val feedId: String, val tab: FeedTab = FeedTab.Posts, val postId: String? = null) : Route
+    data class FeedInvite(val token: String) : Route
+    /** Settings → My photo sources (docs/spec/photo-sources.md). */
+    data object PhotoSources : Route
+    /** "Sync from…" into an album or a feed; [link] when an Immich or iCloud link was shared into the app. */
+    data class AddPhotoSource(val target: app.kinframe.family.ui.sources.SourceTarget, val link: String? = null) : Route
 
-    val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Settings
+    val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Feeds || this == Settings
 }
 
-enum class FrameTab { Overview, Library, People, Calendar, Settings }
+enum class FrameTab { Overview, Library, People, Feeds, Calendar, Settings }
+
+enum class FeedTab { Posts, People, Birthdays, Frames, Sources, Settings }
 
 /** A tiny back stack: enough for four tabs with detail screens, no navigation library needed. */
 class Navigator(start: Route = Route.Frames) {

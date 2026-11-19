@@ -52,6 +52,24 @@ final class PushRegistrar {
         }
     }
 
+    // MARK: Birthday notifications
+
+    /// Greetings for the same person and day replace each other (`birthday:<birthday_id>:<date>`, the newest body
+    /// counts the frames), and the morning notice is one per day: drop the older ones still in Notification Center.
+    /// The server can also collapse them for APNs (`apns-collapse-id`); this keeps the list tidy either way.
+    func tidyBirthdayNotifications() {
+        Task {
+            let center = UNUserNotificationCenter.current()
+            let delivered = await center.deliveredNotifications().map { n in
+                BirthdayPush.Delivered(id: n.request.identifier,
+                                       tag: BirthdayPush.tag(n.request.content.userInfo, received: LocalDate.today(now: n.date)),
+                                       date: n.date)
+            }
+            let old = BirthdayPush.superseded(delivered)
+            if !old.isEmpty { center.removeDeliveredNotifications(withIdentifiers: old) }
+        }
+    }
+
     // MARK: The Settings switch
 
     private let offKey = "push.off"

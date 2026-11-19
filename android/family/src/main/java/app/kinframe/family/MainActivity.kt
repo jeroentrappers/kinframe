@@ -18,6 +18,7 @@ import app.kinframe.family.notify.Notifications
 import app.kinframe.family.ui.AppViewModel
 import app.kinframe.family.ui.FamilyRoot
 import app.kinframe.family.util.DeepLinks
+import app.kinframe.family.ui.sources.GoogleImportFlow
 
 /** The single activity: launcher, share target (photos and videos), frame and invite links, notification taps. */
 class MainActivity : ComponentActivity() {
@@ -36,6 +37,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Back from the browser or the Google Photos app: catch up with the import.
+        graph.googleImports.onResume()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handle(intent)
@@ -47,8 +54,14 @@ class MainActivity : ComponentActivity() {
             Intent.ACTION_SEND, Intent.ACTION_SEND_MULTIPLE -> {
                 val uris = sharedUris(intent)
                 if (uris.isNotEmpty()) graph.incomingShare.value = uris
+                // A link to an Immich or iCloud album shared as text: "Sync this album to…" (photo-sources.md).
+                else intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()?.takeIf { it.isNotBlank() }?.let { graph.incomingSourceLink.value = it }
             }
-            Intent.ACTION_VIEW -> DeepLinks.parse(intent.dataString)?.let { app.onLink(it) }
+            Intent.ACTION_VIEW -> when {
+                // Back from Google's consent page: app.kinframe:/google-import?import_id=…&status=… (README §5.14).
+                GoogleImportFlow.isReturn(intent.dataString) -> graph.googleImports.onReturn(intent.dataString!!)
+                else -> DeepLinks.parse(intent.dataString)?.let { app.onLink(it) }
+            }
         }
         intent.getStringExtra(Notifications.EXTRA_TARGET)?.let { target ->
             graph.openTarget.value = OpenTarget(
@@ -56,6 +69,10 @@ class MainActivity : ComponentActivity() {
                 sendId = intent.getStringExtra(Notifications.EXTRA_SEND_ID),
                 frameId = intent.getStringExtra(Notifications.EXTRA_FRAME_ID),
                 placementId = intent.getStringExtra(Notifications.EXTRA_PLACEMENT_ID),
+                feedId = intent.getStringExtra(Notifications.EXTRA_FEED_ID),
+                postId = intent.getStringExtra(Notifications.EXTRA_POST_ID),
+                sourceId = intent.getStringExtra(Notifications.EXTRA_SOURCE_ID),
+                importId = intent.getStringExtra(Notifications.EXTRA_IMPORT_ID),
             )
         }
     }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Opstarten…</string>
+    <string name="startup_checking_library">Je foto\'s nakijken na een stroomonderbreking…</string>
+    <string name="startup_checking_update">De app-versie nakijken…</string>
+    <string name="startup_loading_photos">Je foto\'s laden…</string>
+    <string name="startup_preparing_photo">De eerste foto klaarzetten…</string>
+    <string name="startup_waiting_wifi">Wachten op wifi…</string>
+    <string name="startup_setting_clock">De klok instellen…</string>
+    <string name="startup_connecting">Verbinden met de server…</string>
+    <string name="power_cut_title">Uitgezet zonder af te sluiten</string>
+    <string name="power_cut_body_ok">Alles is nagekeken en in orde.</string>
+    <string name="power_cut_body_redownload">Alles is nagekeken. Een paar foto\'s worden opnieuw gedownload.</string>
+    <string name="power_cut_tip">Kies de volgende keer %1$s → %2$s in het menu en wacht tot er „%3$s” op het scherm staat.</string>
+</resources>

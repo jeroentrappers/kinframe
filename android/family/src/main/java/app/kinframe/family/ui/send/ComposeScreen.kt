@@ -68,10 +68,11 @@ fun ComposeScreen(
     onSend: () -> Unit,
     onAddFrame: () -> Unit,
     onRetryFrames: () -> Unit,
+    onToggleFeed: (String) -> Unit = {},
 ) {
     val c = Kin.colors
     val frames = state.frames
-    if (frames is Load.Ready && state.sendableFrames.isEmpty()) {
+    if (state.noRecipients) {
         Box(Modifier.fillMaxSize().background(c.paper).padding(top = 40.dp)) {
             EmptyState(stringResource(R.string.send_no_frames_title), stringResource(R.string.send_no_frames_body)) {
                 PrimaryButton(stringResource(R.string.frames_add), onAddFrame, icon = KinIcons.Plus)
@@ -115,6 +116,9 @@ fun ComposeScreen(
                     Load.Loading -> SkeletonList(1, 48.dp)
                     is Load.Error -> ErrorPanel(frames.message, onRetryFrames)
                     is Load.Ready -> {
+                        if (state.feeds.isNotEmpty() && state.sendableFrames.isNotEmpty()) {
+                            Text(stringResource(R.string.send_frames_section), style = Kin.type.label, color = c.inkSoft)
+                        }
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             state.sendableFrames.forEach { f ->
                                 ToggleChip(f.name, f.id in state.selected, { onToggleFrame(f.id) }) {
@@ -122,9 +126,23 @@ fun ComposeScreen(
                                 }
                             }
                         }
+                        // Feeds in their own section: "Peeters kids · 5 frames" (feeds.md §3.5).
+                        if (state.feeds.isNotEmpty()) {
+                            Text(stringResource(R.string.send_feeds_section), style = Kin.type.label, color = c.inkSoft)
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                state.feeds.forEach { f ->
+                                    val label = f.name + " · " + pluralStringResource(R.plurals.feed_frames_count, f.subscriptionCount, f.subscriptionCount)
+                                    ToggleChip(label, f.id in state.selectedFeeds, { onToggleFeed(f.id) }) {
+                                        Icon(KinIcons.People, null, Modifier.size(14.dp), tint = c.inkSoft)
+                                    }
+                                }
+                            }
+                        }
                         val anyOffline = state.sendableFrames.any { it.id in state.selected && !it.online }
                         if (anyOffline) Note(stringResource(R.string.send_offline_note))
-                        if (state.items.isNotEmpty() && state.selected.isEmpty()) Text(stringResource(R.string.send_pick_frame), style = Kin.type.caption, color = c.warn)
+                        if (state.items.isNotEmpty() && !state.hasRecipients) {
+                            Text(stringResource(if (state.feeds.isNotEmpty()) R.string.send_pick_recipient else R.string.send_pick_frame), style = Kin.type.caption, color = c.warn)
+                        }
                     }
                 }
                 state.error?.let { Note(stringResource(it), tone = NoteTone.Danger) }

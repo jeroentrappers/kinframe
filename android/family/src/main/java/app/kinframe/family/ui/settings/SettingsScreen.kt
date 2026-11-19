@@ -59,6 +59,8 @@ fun SettingsScreen(
     onLanguage: ((String) -> Unit)? = null,
     /** Opens a page of the server's website (`/privacy`, `/terms`). */
     onOpenWeb: ((String) -> Unit)? = null,
+    /** Settings → My photo sources; null when the server has no photo sources. */
+    onPhotoSources: (() -> Unit)? = null,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -110,6 +112,14 @@ fun SettingsScreen(
                 PushStatus.NeedsChoice -> SecondaryButton(stringResource(R.string.settings_push_pick), onChoosePush, icon = KinIcons.Bell)
                 PushStatus.Registering -> Text(stringResource(R.string.common_loading), style = Kin.type.body, color = c.inkSoft)
                 PushStatus.Unavailable -> Text(stringResource(R.string.settings_push_none), style = Kin.type.body, color = c.inkSoft)
+            }
+        }
+
+        if (onPhotoSources != null) {
+            SectionTitle(stringResource(R.string.source_settings_title))
+            Surface(Modifier.fillMaxWidth(), onClick = onPhotoSources) {
+                Text(stringResource(R.string.source_settings_open), style = Kin.type.bodyStrong, color = c.ink)
+                Text(stringResource(R.string.source_settings_hint), style = Kin.type.caption, color = c.inkSoft)
             }
         }
 

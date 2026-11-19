@@ -12,6 +12,8 @@ struct SendDetailView: View {
     @State private var commitUnsend: Task<Void, Never>?
     @State private var sharing: ShareRequest?
     @State private var tv: TvRequest?
+    @State private var posting = false
+    @State private var receipts: FeedPostRoute?
 
     var body: some View {
         ScrollView {
@@ -22,12 +24,21 @@ struct SendDetailView: View {
                     removedCard
                 } else if let send = model.send {
                     header(send)
-                    delivery(send)
+                    if !send.frames.isEmpty { delivery(send) }
+                    if let feeds = send.feeds, !feeds.isEmpty { feedDelivery(feeds) }
                     if let source = shareSource(send) {
                         Button {
                             sharing = ShareRequest(source: source)
                         } label: {
                             Label(L("share.action"), systemImage: "arrowshape.turn.up.right")
+                        }
+                        .buttonStyle(.kf(.secondary))
+                    }
+                    if !forwardableFeeds(send).isEmpty {
+                        Button {
+                            posting = true
+                        } label: {
+                            Label(L("ios.feeds.forward"), systemImage: "rectangle.stack.badge.plus")
                         }
                         .buttonStyle(.kf(.secondary))
                     }
@@ -73,6 +84,23 @@ struct SendDetailView: View {
                 ShareToFrameSheet(api: api, source: request.source) { Task { await model.load() } }
             }
         }
+        .sheet(isPresented: $posting) {
+            if let send = model.send {
+                ForwardToFeedSheet(feeds: forwardableFeeds(send)) { ids in
+                    do {
+                        try await model.forward(toFeeds: ids)
+                        app.toasts.show(Lp("ios.feeds.forwarded", count: ids.count))
+                        return true
+                    } catch {
+                        app.toasts.error(error)
+                        return false
+                    }
+                }
+            }
+        }
+        .sheet(item: $receipts) { r in
+            if let api = app.api { SendFeedReceiptsSheet(api: api, route: r, feedName: model.send?.feeds?.first { $0.postId == r.postId }?.feedName ?? "") }
+        }
         .sheet(item: $tv) { r in
             if let api = app.api { TvSheet(api: api, frameId: r.frameId, frameName: r.frameName, scope: r.scope) }
         }
@@ -92,7 +120,7 @@ struct SendDetailView: View {
 
     private func header(_ send: Send) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(kindSummary(send.items)).font(.display(.title)).foregroundStyle(Palette.text).accessibilityAddTraits(.isHeader)
+            Text(Credit.sender(kindSummary(send.items), via: send.via)).font(.display(.title)).foregroundStyle(Palette.text).accessibilityAddTraits(.isHeader)
             Text(L("detail.sentAt", ["when": Format.dateTime(send.createdAt, locale: L10n.locale)])).foregroundStyle(Palette.textMuted)
         }
     }
@@ -124,6 +152,30 @@ struct SendDetailView: View {
         }
         .card(padding: 16)
         .accessibilityLabel(L("detail.deliveryLabel"))
+    }
+
+    /// The feeds this send was posted to, with their receipts; tap for the per-frame detail.
+    private func feedDelivery(_ feeds: [SendFeed]) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            ForEach(feeds) { f in
+                Button {
+                    if f.removed != true { receipts = FeedPostRoute(feedId: f.feedId, postId: f.postId) }
+                } label: {
+                    FeedRecipientRow(feed: f).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(f.removed == true ? "" : L("ios.feeds.receiptsOpen"))
+            }
+        }
+        .card(padding: 16)
+        .accessibilityLabel(L("ios.feeds.deliveryLabel"))
+    }
+
+    /// Feeds you're in that don't have this send yet.
+    private func forwardableFeeds(_ send: Send) -> [FeedSummary] {
+        guard app.feedsEnabled, send.items.contains(where: { $0.status != .failed }) else { return [] }
+        let posted = Set((send.feeds ?? []).filter { $0.removed != true }.map(\.feedId))
+        return app.feeds.filter { !posted.contains($0.id) }
     }
 
     private func itemRow(_ item: Item, n: Int, send: Send) -> some View {
@@ -295,4 +347,121 @@ extension Components.Schemas.Item: Identifiable {}
 func failureMessage(_ code: String?) -> String {
     let key = "failure.\(code ?? "unknown")"
     return L10n.has(key) ? L(key) : L("failure.unknown")
+}
+
+/// "Post to a feed": pick feeds to post an existing send to, without uploading again.
+private struct ForwardToFeedSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let feeds: [FeedSummary]
+    let post: ([String]) async -> Bool
+    @State private var chosen: Set<String> = []
+    @State private var busy = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(L("ios.feeds.forwardHint")).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+                    VStack(spacing: 0) {
+                        ForEach(Array(feeds.enumerated()), id: \.element.id) { n, feed in
+                            if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
+                            let on = chosen.contains(feed.id)
+                            Button {
+                                if on { chosen.remove(feed.id) } else { chosen.insert(feed.id) }
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: on ? "checkmark.circle.fill" : "circle")
+                                        .font(.title2)
+                                        .foregroundStyle(on ? Palette.primary : Palette.borderStrong)
+                                    FeedCover(url: feed.coverUrl, name: feed.name, size: 36)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(feed.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                                        Text(Lp("ios.feeds.frameCount", count: feed.subscriptionCount)).font(.footnote).foregroundStyle(Palette.textMuted)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 14)
+                                .frame(minHeight: 60)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(on ? .isSelected : [])
+                        }
+                    }
+                    .card(padding: 0)
+                }
+                .padding(16)
+            }
+            .pageBackground()
+            .navigationTitle(L("ios.feeds.forward"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L("ios.feeds.forwardButton")) {
+                        busy = true
+                        Task {
+                            if await post(Recipients.valid(chosen, among: feeds.map(\.id))) { dismiss() }
+                            busy = false
+                        }
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(chosen.isEmpty || chosen.count > Recipients.maxFeeds || busy)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
+/// The per-frame receipts of one of your feed posts, opened from the sent history.
+private struct SendFeedReceiptsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let api: API
+    let route: FeedPostRoute
+    let feedName: String
+    @State private var receipts: FeedPostReceipts?
+    @State private var error: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    if let error {
+                        Callout(error, kind: .error)
+                    } else if let r = receipts {
+                        Text(FeedReceipts.text(r.summary)).font(.headline)
+                        ForEach(r.frames, id: \.subscriptionId) { f in
+                            HStack(spacing: 8) {
+                                StatusDot(online: f.online ?? false)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(f.frameName).font(.body.weight(.semibold))
+                                    if let loc = f.frameLocation, !loc.isEmpty { Text(loc).font(.footnote).foregroundStyle(Palette.textMuted) }
+                                }
+                                Spacer()
+                                if let r = f.items.compactMap(\.reaction).first { Text(r.emoji).accessibilityLabel(L("reaction.\(r.rawValue)")) }
+                                FeedDeliveryPill(status: f.subscriptionStatus == .paused ? .suspended : FeedReceipts.frameStatus(f.items))
+                            }
+                            .card(padding: 12)
+                            .accessibilityElement(children: .combine)
+                        }
+                    } else {
+                        LoadingView()
+                    }
+                }
+                .padding(16)
+            }
+            .pageBackground()
+            .navigationTitle(feedName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
+            .task {
+                do {
+                    receipts = try await api.feedPostReceipts(route.feedId, postId: route.postId)
+                } catch {
+                    self.error = errorMessage(error)
+                }
+            }
+        }
+    }
 }

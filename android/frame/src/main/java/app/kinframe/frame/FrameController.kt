@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -105,6 +106,9 @@ class FrameController(val g: FrameGraph) {
     /** Calendars, event invitations, countdowns and the timed calendar view (product spec 4.9). */
     val calendar by lazy { app.kinframe.frame.calendar.CalendarController(this) }
 
+    /** Birthdays of the feeds this frame subscribes to: the day's card, countdowns, greetings (docs/spec/birthdays.md). */
+    val birthdays by lazy { app.kinframe.frame.birthdays.BirthdayController(this) }
+
     /** Live widgets from devices on the home network (docs/plugins.md, step 1: built-in widgets). */
     val plugins by lazy { app.kinframe.frame.plugins.FramePlugins(this) }
 
@@ -126,14 +130,56 @@ class FrameController(val g: FrameGraph) {
         _session.flatMapLatest { it?.connection ?: flowOf(null) }.stateIn(scope, SharingStarted.Eagerly, null)
     }
 
+    /** Where [start] is; with the slideshow's progress it makes [startup]. */
+    private val boot = MutableStateFlow(StartupStep.Starting)
+    private val awaitingFirstSync = MutableStateFlow(true)
+    private val splashGaveUp = MutableStateFlow(false)
+
+    private val _splashUp = MutableStateFlow(true)
+    /** The start-up splash is (still) on screen: true from launch until it has faded out for good. */
+    val splashUp: StateFlow<Boolean> = _splashUp
+
+    /** Called by the UI once the start-up splash has faded out; it never comes back in this process. */
+    fun onSplashGone() { _splashUp.value = false }
+
+    /** What the start-up splash says, and when it may go ([StartupStep.Ready]). Driven by the real steps. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val startup: StateFlow<StartupStep> by lazy {
+        val ss = slideshow
+        kotlinx.coroutines.flow.combine(
+            listOf(
+                _screen, boot, ss.loaded, ss.stage.map { it.incoming != null }.distinctUntilChanged(), ss.empty,
+                awaitingFirstSync, g.network.status.map { it.connected }.distinctUntilChanged(), g.time.clockWrong, splashGaveUp,
+            ),
+        ) { v ->
+            Startup.step(
+                StartupSignals(
+                    screen = v[0] as AppScreen, boot = v[1] as StartupStep, slideshowLoaded = v[2] as Boolean, hasSlide = v[3] as Boolean,
+                    empty = v[4] as app.kinframe.frame.slideshow.EmptyState?, awaitingFirstSync = v[5] as Boolean,
+                    networkConnected = v[6] as Boolean, clockWrong = v[7] as Boolean, gaveUp = v[8] as Boolean,
+                ),
+            )
+        }.distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, Startup.step(StartupSignals(_screen.value, boot.value)))
+    }
+
+    private val _powerCut = MutableStateFlow<PowerCutNotice?>(null)
+    /** The calm "switched off without shutting down" card, once after a power cut (null when there is none). */
+    val powerCut: StateFlow<PowerCutNotice?> = _powerCut
+    fun dismissPowerCut() { _powerCut.value = null }
+
     fun start() {
         scope.launch {
             g.sessionMarker.onStart()
             g.network.start()
             g.time.start(scope) { g.network.onAvailable(it) }
             launch(Dispatchers.IO) { g.root.isAvailable() }
-            if (g.sessionMarker.needsIntegrityCheck) withContext(Dispatchers.IO) { integrityCheck() }
+            if (g.sessionMarker.needsIntegrityCheck) {
+                boot.value = StartupStep.CheckingLibrary
+                val dropped = withContext(Dispatchers.IO) { integrityCheck() }
+                _powerCut.value = PowerCutNotice.forStart(true, dropped)
+            }
             applyTimezone()
+            boot.value = StartupStep.CheckingUpdate
             if (update.onAppStart()) {
                 // This version crash-loops right after an update: the previous one is being reinstalled.
                 _screen.value = AppScreen.Restarting
@@ -145,7 +191,9 @@ class FrameController(val g: FrameGraph) {
                 g.crashGuard.inCrashLoop -> _screen.value = AppScreen.Recovery
                 g.credentials.load() != null && g.prefs.claimed -> {
                     startSession()
+                    boot.value = StartupStep.LoadingPhotos
                     _screen.value = AppScreen.Slideshow
+                    watchSplash()
                 }
                 else -> {
                     if (g.credentials.load() != null) startSession()
@@ -163,6 +211,7 @@ class FrameController(val g: FrameGraph) {
                 }
             }
             calendar.start()
+            birthdays.start()
             reportStateChanges()
             app.kinframe.frame.sync.NowShowingReporter(this@FrameController).start()
             update.start()
@@ -239,21 +288,46 @@ class FrameController(val g: FrameGraph) {
         g.clock.zone = tz ?: ZoneId.systemDefault()
     }
 
-    /** After a power cut: drop cache entries whose files are missing or truncated, check the database. */
-    private suspend fun integrityCheck() {
+    /**
+     * Bounds the splash on the slideshow: an empty library waits for this start's first sync at most
+     * [Startup.FIRST_SYNC_GRACE_MS], and the splash goes after [Startup.SLIDESHOW_MAX_MS] whatever happens.
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun watchSplash() {
+        scope.launch {
+            kotlinx.coroutines.withTimeoutOrNull(Startup.FIRST_SYNC_GRACE_MS) {
+                _session.flatMapLatest { it?.lastSyncAt ?: flowOf(null) }.first { it != null }
+            }
+            awaitingFirstSync.value = false
+        }
+        scope.launch {
+            delay(Startup.SLIDESHOW_MAX_MS)
+            if (_splashUp.value) Log.w(TAG, "start-up splash still up after ${Startup.SLIDESHOW_MAX_MS} ms (${startup.value}): giving up")
+            splashGaveUp.value = true
+        }
+    }
+
+    /**
+     * After a power cut: drop cache entries whose files are missing or truncated, check the database. Returns how
+     * many files were dropped, or -1 when the database was started over.
+     */
+    private suspend fun integrityCheck(): Int {
         Log.i(TAG, "unclean shutdown detected: checking media cache")
         if (!g.db.quickCheckOk()) {
             Log.w(TAG, "database failed quick_check: starting over from the server")
             g.db.clearAllTables()
-            return
+            return -1
         }
+        var dropped = 0
         for (p in g.db.placements().all()) {
             val f = p.localFile?.let { g.media.file(it) } ?: continue
             if (!f.exists() || (p.mediaBytes > 0 && f.length() != p.mediaBytes)) {
                 f.delete()
                 g.db.placements().clearLocalFile(p.id)
+                dropped++
             }
         }
+        return dropped
     }
 
     fun startSession() {
@@ -388,6 +462,7 @@ class FrameController(val g: FrameGraph) {
             timezone = g.clock.zone.id,
             updateState = updateState,
             lastUpdateError = updateError,
+            features = app.kinframe.core.api.FrameFeatures.SUPPORTED,
         )
     }
 

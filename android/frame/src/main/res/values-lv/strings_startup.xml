@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Notiek palaišana…</string>
+    <string name="startup_checking_library">Pēc strāvas pārrāvuma tiek pārbaudīti fotoattēli…</string>
+    <string name="startup_checking_update">Tiek pārbaudīta lietotnes versija…</string>
+    <string name="startup_loading_photos">Tiek ielādēti fotoattēli…</string>
+    <string name="startup_preparing_photo">Tiek sagatavots pirmais fotoattēls…</string>
+    <string name="startup_waiting_wifi">Gaida Wi-Fi…</string>
+    <string name="startup_setting_clock">Tiek iestatīts pulkstenis…</string>
+    <string name="startup_connecting">Notiek savienojuma izveide ar serveri…</string>
+    <string name="power_cut_title">Rāmis tika izslēgts bez pareizas izslēgšanas</string>
+    <string name="power_cut_body_ok">Viss ir pārbaudīts un kārtībā.</string>
+    <string name="power_cut_body_redownload">Viss ir pārbaudīts. Daži fotoattēli tiek lejupielādēti vēlreiz.</string>
+    <string name="power_cut_tip">Nākamreiz izvēlnē izvēlieties %1$s → %2$s un uzgaidiet, līdz ekrānā parādās „%3$s”.</string>
+</resources>

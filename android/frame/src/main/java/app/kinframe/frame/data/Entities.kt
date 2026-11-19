@@ -65,7 +65,23 @@ data class PlacementEntity(
     /** Imported on this frame from another app's leftover data ("frameo"); the caption credits [importedSenderName]. */
     val importedFrom: String? = null,
     val importedSenderName: String? = null,
+    // ---- feeds (docs/spec/feeds.md): placements made by a feed this frame subscribes to
+    /** `send`, `share`, `feed` or `import` (`Placement.origin`). */
+    @ColumnInfo(defaultValue = "send") val origin: String = "send",
+    val originFeedId: String? = null,
+    /** The feed's current name; the caption reads "sender · feed name". */
+    val originFeedName: String? = null,
+    /** Feeds holding this placement, comma-separated ids (feed mode plays one feed). */
+    val feedIds: String? = null,
+    /** Placed as feed history: never "new" (no card, no wake). */
+    @ColumnInfo(defaultValue = "0") val backfill: Boolean = false,
+    /** A photo source or Google Photos import brought it in (`item.via.label`): the caption reads "sender via Immich". */
+    val viaLabel: String? = null,
 ) {
+    val feedIdList: List<String> get() = feedIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
+    /** The feed to credit, when this photo came through one. */
+    val creditFeedName: String? get() = originFeedName?.takeIf { origin == "feed" && it.isNotBlank() }
+
     /** A Live/Motion Photo: shown as a photo, its clip plays over it when downloaded. */
     val isLive: Boolean get() = kind == "live"
     val hasMotionFile: Boolean get() = isLive && motionLocalFile != null
@@ -95,6 +111,18 @@ data class SyncStateEntity(
     val weatherJson: String? = null,
     /** Last `calendar` change (`FrameCalendar`), so the calendar shows after a reboot while offline. */
     val calendarJson: String? = null,
+    /** Last `birthdays` change (`FrameBirthdays`), so birthdays show offline on the day (birthdays.md §6.1). */
+    val birthdaysJson: String? = null,
+)
+
+/**
+ * An album's flags from `album.upsert` (the frame keeps only what playback needs). [onlyInAlbumMode]: its photos play
+ * only when the frame plays that album, not in the normal slideshow (photo-sources.md §9.1).
+ */
+@Entity(tableName = "album_flags")
+data class AlbumFlagEntity(
+    @PrimaryKey val albumId: String,
+    val onlyInAlbumMode: Boolean = false,
 )
 
 /** Durable ack queue (README §5.4): delivered when stored, seen on first display. */
@@ -133,5 +161,35 @@ data class OutboxEntity(
         const val INVITATION_DECISION = "invitation_decision"
         /** Countdown on/off for a calendar event; `placementId` holds the event id. */
         const val COUNTDOWN = "countdown"
+        /** "Say happy birthday"; `placementId` holds the birthday id, the payload the local date. */
+        const val BIRTHDAY_GREETING = "birthday_greeting"
+    }
+}
+
+/**
+ * A greeting sent from the frame (birthdays.md §7): one per person and local date. The button shows "Sent ✓" for the
+ * rest of the day from this row, whatever happens to the queued call. Pruned after a week.
+ */
+@Entity(tableName = "birthday_greetings", primaryKeys = ["birthdayId", "date"])
+data class BirthdayGreetingEntity(
+    val birthdayId: String,
+    /** The frame's local date, `YYYY-MM-DD`. */
+    val date: String,
+    val sentAt: Long,
+)
+
+/**
+ * A feed placement that left the frame while its subscription was paused (`placement.remove`) or was otherwise removed
+ * while held by a feed. If the same placement comes back (resume), it is restored, not new: no card, no wake.
+ * Pruned after [FeedTombstoneEntity.KEEP_MS].
+ */
+@Entity(tableName = "feed_tombstones")
+data class FeedTombstoneEntity(
+    @PrimaryKey val placementId: String,
+    val removedAt: Long,
+) {
+    companion object {
+        /** Long enough for any realistic pause. */
+        const val KEEP_MS = 365L * 24 * 3600 * 1000
     }
 }

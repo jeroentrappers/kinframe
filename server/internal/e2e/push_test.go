@@ -38,6 +38,7 @@ type pushMsg struct {
 	Title string            `json:"title"`
 	Body  string            `json:"body"`
 	IDs   map[string]string `json:"ids"`
+	Tag   string            `json:"tag"`
 }
 
 // TestWebPush: a sender without an open websocket gets encrypted browser

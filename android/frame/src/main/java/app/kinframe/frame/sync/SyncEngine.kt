@@ -6,6 +6,8 @@ import app.kinframe.core.api.ChangeType
 import app.kinframe.core.api.DeviceApi
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.Placement
+import app.kinframe.frame.data.AlbumFlagEntity
+import app.kinframe.frame.data.FeedTombstoneEntity
 import app.kinframe.frame.data.FrameDatabase
 import app.kinframe.frame.data.MediaCache
 import app.kinframe.frame.data.MemberEntity
@@ -16,6 +18,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -76,9 +79,13 @@ class SyncEngine(
                         if (existing != null) {
                             existing.localFile?.let { orphans += it }
                             placements.delete(p.id)
+                            rememberFeedRemoval(existing)
                         }
                     } else {
-                        val merged = withPendingLocalActions(merge(existing, p, initial))
+                        // Back after a pause (feeds.md §5.1): restored, not new.
+                        val restored = existing == null && db.feedTombstones().has(p.id)
+                        if (restored) db.feedTombstones().delete(p.id)
+                        val merged = withPendingLocalActions(merge(existing, p, initial, restored))
                         if (existing?.localFile != null && merged.localFile == null) orphans += existing.localFile
                         if (existing == null && merged.isNew) newItems++
                         placements.upsert(merged)
@@ -86,8 +93,10 @@ class SyncEngine(
                 }
                 ChangeType.PLACEMENT_REMOVE -> {
                     val id = c.id ?: c.placement?.id ?: continue
-                    placements.get(id)?.localFile?.let { orphans += it }
+                    val gone = placements.get(id)
+                    gone?.localFile?.let { orphans += it }
                     placements.delete(id)
+                    gone?.let { rememberFeedRemoval(it) }
                     db.outbox().forPlacement(id).forEach { db.outbox().delete(it.id) }
                 }
                 ChangeType.SETTINGS -> c.settings?.let { state = state.copy(settingsJson = KinJson.encodeToString(JsonObject.serializer(), it)) }
@@ -106,26 +115,44 @@ class SyncEngine(
                 ChangeType.WEATHER -> state = state.copy(weatherJson = c.weather?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 // `calendar: null` means the frame has no calendars any more.
                 ChangeType.CALENDAR -> state = state.copy(calendarJson = c.calendar?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                // `birthdays: null` means no birthday subscription lists anyone any more (birthdays.md §11).
+                ChangeType.BIRTHDAYS -> state = state.copy(birthdaysJson = c.birthdays?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                // Albums: only the "Only in album mode" flag matters to playback (photo-sources.md §9.1).
+                ChangeType.ALBUM_UPSERT -> c.album?.let { a ->
+                    val id = (a["id"] as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull ?: return@let
+                    val only = (a["only_in_album_mode"] as? kotlinx.serialization.json.JsonPrimitive)?.booleanOrNull ?: false
+                    db.albumFlags().put(AlbumFlagEntity(id, only))
+                }
+                ChangeType.ALBUM_REMOVE -> (c.id ?: (c.album?.get("id") as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull)?.let { db.albumFlags().delete(it) }
                 ChangeType.RESET -> {
                     Log.i(TAG, "reset at seq ${c.seq}: re-syncing from 0")
                     placements.deleteAll()
+                    db.albumFlags().deleteAll()
                     db.members().deleteAll()
                     db.acks().deleteAll()
+                    db.feedTombstones().deleteAll()
                     db.outbox().ofKind(OutboxEntity.PLACEMENT_PATCH).forEach { db.outbox().delete(it.id) }
                     db.outbox().ofKind(OutboxEntity.REACTION).forEach { db.outbox().delete(it.id) }
                     // Media files stay: they are content-addressed and re-linked by the downloader.
-                    db.syncState().put(state.copy(nextSeq = 0))
+                    // Snapshots omit `birthdays` when there are none, so a stale list must not survive the reset.
+                    db.syncState().put(state.copy(nextSeq = 0, birthdaysJson = null))
                     return@tx PageResult(applied, 0, true, emptySet())
                 }
-                else -> Unit // album.* (v0.5) and unknown types are ignored (README §7)
+                else -> Unit // unknown types are ignored (README §7)
             }
             applied++
         }
         db.syncState().put(state.copy(nextSeq = nextSeq))
+        db.feedTombstones().prune(now() - FeedTombstoneEntity.KEEP_MS)
         PageResult(applied, newItems, false, orphans)
     }
 
-    private fun merge(existing: PlacementEntity?, p: Placement, initial: Boolean): PlacementEntity {
+    /** A feed-held placement left the frame (a pause renders as a remove): remember it so a resume isn't "new". */
+    private suspend fun rememberFeedRemoval(e: PlacementEntity) {
+        if (e.origin == "feed" || e.feedIdList.isNotEmpty()) db.feedTombstones().put(FeedTombstoneEntity(e.id, now()))
+    }
+
+    private fun merge(existing: PlacementEntity?, p: Placement, initial: Boolean, restored: Boolean = false): PlacementEntity {
         val item = p.item
         val m = p.media
         val sameMedia = existing != null && existing.mediaSha256 != null && existing.mediaSha256.equals(m?.sha256, ignoreCase = true)
@@ -142,6 +169,12 @@ class SyncEngine(
             sharedByName = p.sharedByName,
             importedFrom = item.importedFrom,
             importedSenderName = item.importedSenderName,
+            viaLabel = item.via?.displayLabel,
+            origin = p.origin,
+            originFeedId = p.originFeedId,
+            originFeedName = p.originFeedName,
+            feedIds = p.feedIds.joinToString(",").ifEmpty { null },
+            backfill = p.backfill,
             caption = item.caption,
             captionEdited = item.captionEdited,
             capturedAt = parseTime(item.capturedAt),
@@ -170,7 +203,8 @@ class SyncEngine(
             firstShownAt = existing?.firstShownAt,
             lastShownAt = existing?.lastShownAt,
             // Photos imported from the frame's old app were seen there already: they don't jump the queue as new.
-            isNew = existing?.isNew ?: (!initial && item.importedFrom == null && p.seenAt == null && p.status != "seen"),
+            // Feed history (`backfill`) joins quietly in its original order: never the new-photo card or a screen wake.
+            isNew = existing?.isNew ?: (!initial && !restored && !p.backfill && item.importedFrom == null && p.seenAt == null && p.status != "seen"),
             evictedAt = if (sameMedia) existing?.evictedAt else null,
             albumIds = p.albumIds.joinToString(",").ifEmpty { null },
             motionUrl = mo?.url,

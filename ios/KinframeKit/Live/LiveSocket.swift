@@ -10,6 +10,46 @@ public enum LiveEvent: Equatable, Sendable {
     case membershipUpdated(frameId: String)
     /// A frame accepted or declined an event sent to it.
     case invitationDecided(frameId: String, invitation: EventInvitation)
+    /// A reaction or quick reply on a placement that came through a feed (to the poster).
+    case feedReaction(feedId: String, postId: String, placementId: String, reaction: Reaction?, byFrameName: String?)
+    case feedReply(feedId: String, postId: String, placementId: String, preset: ReplyPreset)
+    /// Delivery or seen counts of a feed post changed.
+    case feedPostUpdated(feedId: String, postId: String, summary: FeedReceiptSummary?)
+    /// A frame asks to subscribe to a feed (feed owner and admins).
+    case subscriptionRequest(feedId: String, subscription: FeedSubscription?)
+    /// Approved, rejected, paused, resumed, history changed or removed.
+    case subscriptionUpdated(feedId: String, frameId: String?, subscription: FeedSubscription?)
+    /// Someone asks to join a feed (feed owner and admins).
+    case feedJoinRequest(feedId: String, name: String?)
+    /// Your feed role changed, you were added or removed, or the feed was deleted.
+    case feedMembershipUpdated(feedId: String)
+    /// A poster suggested a birthday person (feed owner and admins).
+    case birthdaySuggested(feedId: String, birthday: BirthdayPerson?)
+    /// Your suggestion was approved or rejected.
+    case birthdayDecided(feedId: String, birthday: BirthdayPerson?)
+    /// A birthday person was added, changed, approved or rejected.
+    case birthdayUpdated(feedId: String, birthday: BirthdayPerson?)
+    case birthdayRemoved(feedId: String, birthdayId: String)
+    /// The morning notification while the app is open: whose birthday it is today, per feed.
+    case birthdayToday(date: String, birthdays: [BirthdayRef])
+    /// A frame said happy birthday.
+    case birthdayGreeting(feedId: String, greeting: FeedBirthdayGreeting?)
+    /// A photo source's status, counts or last run changed (its managers and its owner).
+    case photoSourceUpdated(PhotoSource)
+    /// A photo source was deleted, also with its album or feed.
+    case photoSourceRemoved(sourceId: String, albumId: String?, feedId: String?)
+    /// Status or progress of your Google Photos import changed.
+    case googleImportUpdated(GoogleImport)
+
+    public struct BirthdayRef: Equatable, Sendable {
+        public var feedId: String
+        public var birthdayId: String
+
+        public init(feedId: String, birthdayId: String) {
+            self.feedId = feedId
+            self.birthdayId = birthdayId
+        }
+    }
 
     /// Parse one websocket text frame.
     public static func parse(_ data: Data) -> LiveEvent? {
@@ -21,10 +61,60 @@ public enum LiveEvent: Equatable, Sendable {
             return .sendUpdated(sendId: id)
         case "reaction":
             guard let p = str("placement_id"), let f = str("frame_id") else { return nil }
-            return .reaction(placementId: p, frameId: f, reaction: str("reaction").flatMap(Reaction.init(rawValue:)), byFrameName: str("by_frame_name"))
+            let reaction = str("reaction").flatMap(Reaction.init(rawValue:))
+            if let feed = str("feed_id"), let post = str("post_id") {
+                return .feedReaction(feedId: feed, postId: post, placementId: p, reaction: reaction, byFrameName: str("by_frame_name"))
+            }
+            return .reaction(placementId: p, frameId: f, reaction: reaction, byFrameName: str("by_frame_name"))
         case "reply":
             guard let p = str("placement_id"), let f = str("frame_id"), let preset = str("preset").flatMap(ReplyPreset.init(rawValue:)) else { return nil }
+            if let feed = str("feed_id"), let post = str("post_id") {
+                return .feedReply(feedId: feed, postId: post, placementId: p, preset: preset)
+            }
             return .reply(placementId: p, frameId: f, preset: preset)
+        case "feed_post.updated":
+            guard let feed = str("feed_id"), let post = str("post_id") else { return nil }
+            return .feedPostUpdated(feedId: feed, postId: post, summary: decode(FeedReceiptSummary.self, obj["summary"]))
+        case "subscription.request":
+            guard let feed = str("feed_id") else { return nil }
+            return .subscriptionRequest(feedId: feed, subscription: decode(FeedSubscription.self, obj["subscription"]))
+        case "subscription.updated":
+            guard let feed = str("feed_id") else { return nil }
+            return .subscriptionUpdated(feedId: feed, frameId: str("frame_id"), subscription: decode(FeedSubscription.self, obj["subscription"]))
+        case "feed.join_request":
+            guard let feed = str("feed_id") else { return nil }
+            let user = (obj["request"] as? [String: Any])?["user"] as? [String: Any]
+            return .feedJoinRequest(feedId: feed, name: user?["display_name"] as? String)
+        case "feed.membership_updated":
+            guard let feed = str("feed_id") else { return nil }
+            return .feedMembershipUpdated(feedId: feed)
+        case "birthday.suggested", "birthday.decided", "birthday.updated":
+            guard let feed = str("feed_id") else { return nil }
+            let b = decode(BirthdayPerson.self, obj["birthday"])
+            switch type {
+            case "birthday.suggested": return .birthdaySuggested(feedId: feed, birthday: b)
+            case "birthday.decided": return .birthdayDecided(feedId: feed, birthday: b)
+            default: return .birthdayUpdated(feedId: feed, birthday: b)
+            }
+        case "birthday.removed":
+            guard let feed = str("feed_id"), let b = str("birthday_id") else { return nil }
+            return .birthdayRemoved(feedId: feed, birthdayId: b)
+        case "birthday.today":
+            let refs = (obj["birthdays"] as? [[String: Any]] ?? []).compactMap { r -> BirthdayRef? in
+                guard let f = r["feed_id"] as? String, let b = r["birthday_id"] as? String else { return nil }
+                return BirthdayRef(feedId: f, birthdayId: b)
+            }
+            return .birthdayToday(date: str("date") ?? "", birthdays: refs)
+        case "birthday.greeting":
+            guard let feed = str("feed_id") else { return nil }
+            return .birthdayGreeting(feedId: feed, greeting: decode(FeedBirthdayGreeting.self, obj["greeting"]))
+        case "photo_source.updated":
+            return decode(PhotoSource.self, obj["source"]).map { .photoSourceUpdated($0) }
+        case "photo_source.removed":
+            guard let id = str("source_id") else { return nil }
+            return .photoSourceRemoved(sourceId: id, albumId: str("album_id"), feedId: str("feed_id"))
+        case "google_import.updated":
+            return decode(GoogleImport.self, obj["import"]).map { .googleImportUpdated($0) }
         case "frame.status":
             guard let f = str("frame_id") else { return nil }
             return .frameStatus(frameId: f, online: obj["online"] as? Bool ?? false, lastSeenAt: str("last_seen_at").flatMap(FlexibleDateTranscoder.parse))
@@ -43,6 +133,12 @@ public enum LiveEvent: Equatable, Sendable {
         default:
             return nil
         }
+    }
+
+    /// A nested object of the event, decoded as a generated schema (nil when absent or not understood).
+    private static func decode<T: Decodable>(_ type: T.Type, _ value: Any?) -> T? {
+        guard let value, JSONSerialization.isValidJSONObject(value), let raw = try? JSONSerialization.data(withJSONObject: value) else { return nil }
+        return try? OutboxRunner.decoder.decode(type, from: raw)
     }
 }
 

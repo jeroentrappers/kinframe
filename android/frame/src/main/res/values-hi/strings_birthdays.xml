@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 आज %1$s का %2$dवाँ जन्मदिन है!</item>
+        <item quantity="other">🎈 आज %1$s का %2$dवाँ जन्मदिन है!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 आज %1$s का जन्मदिन है!</string>
+    <string name="birthday_card_title_many">🎈 आज के जन्मदिन</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">और %d अन्य</item>
+        <item quantity="other">और %d अन्य</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s का %2$dवाँ जन्मदिन</item>
+        <item quantity="other">%1$s का %2$dवाँ जन्मदिन</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s का जन्मदिन</string>
+    <string name="birthday_countdown_two">%1$s और %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s और %2$d अन्य</item>
+        <item quantity="other">%1$s और %2$d अन्य</item>
+    </plurals>
+    <string name="birthday_greet_title">इस फ़्रेम से जन्मदिन की शुभकामनाएँ भेजें</string>
+    <string name="birthday_greet_button">%1$s को जन्मदिन की शुभकामनाएँ</string>
+    <string name="birthday_greet_sent">भेज दिया ✓ — परिवार इसे देखेगा</string>
+    <string name="birthday_detail_label">जन्मदिन</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">%dवाँ जन्मदिन</item>
+        <item quantity="other">%dवाँ जन्मदिन</item>
+    </plurals>
+</resources>

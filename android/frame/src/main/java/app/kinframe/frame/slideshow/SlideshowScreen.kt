@@ -44,7 +44,13 @@ import androidx.compose.foundation.layout.widthIn
 import app.kinframe.frame.calendar.CalendarIcons
 import app.kinframe.frame.calendar.CalendarLayer
 import app.kinframe.frame.calendar.CalendarSidebar
-import app.kinframe.frame.calendar.CountdownWidgets
+import app.kinframe.frame.calendar.CountdownColumn
+import app.kinframe.frame.birthdays.BalloonPlanner
+import app.kinframe.frame.birthdays.BalloonsLayer
+import app.kinframe.frame.birthdays.BirthdayCard
+import app.kinframe.frame.birthdays.BirthdayGreetingSheet
+import app.kinframe.frame.birthdays.BirthdayLogic
+import app.kinframe.frame.birthdays.rememberBirthdayPhotos
 import app.kinframe.frame.calendar.InvitationsPill
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -169,6 +175,10 @@ fun SlideshowScreen(c: FrameController) {
     val joinFocused by c.joins.focused.collectAsState()
     val sync by c.syncState.collectAsState()
     val nowMs by minuteTicker(c)
+    // A frame without a clock battery starts at its factory date: no clock or date until the time is known again.
+    val clockWrong by c.g.time.clockWrong.collectAsState()
+    val showClock = settings.widgets.clock && !clockWrong
+    val showDate = settings.widgets.date && !clockWrong
     val weatherDoc by c.weather.collectAsState()
     // Shown only when enabled, located and fresh (> 6 h old means the frame has been offline a long while).
     val stationNow by c.plugins.stationNow.collectAsState()
@@ -206,12 +216,20 @@ fun SlideshowScreen(c: FrameController) {
     }
     val displayMode by c.display.mode.collectAsState()
     val awake = displayMode != ScreenMode.Asleep && displayMode != ScreenMode.FadingOut
+    // Birthdays (docs/spec/birthdays.md §6): the day's card, birthday countdowns, balloons and the greeting sheet.
+    // All empty while the clock is not trusted; none of it ever changes the display mode.
+    val birthdaysToday by c.birthdays.todays.collectAsState()
+    val birthdaysAhead by c.birthdays.upcoming.collectAsState()
+    val birthdayDate by c.birthdays.today.collectAsState()
+    val greetOpen by c.birthdays.sheetOpen.collectAsState()
+    val greeted by c.birthdays.sent.collectAsState()
+    val birthdayPhotos = rememberBirthdayPhotos(c, birthdaysToday)
     // Set by the swipe gesture below; hoisted so the corner widgets can step aside while a finger drags the photo.
     var dragSeq by remember { mutableLongStateOf(-1L) }
 
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen, addSomeoneOpen, detailFor) {
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen, addSomeoneOpen, detailFor, greetOpen) {
         ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy || storageOpen ||
-            addSomeoneOpen || detailFor != null
+            addSomeoneOpen || detailFor != null || greetOpen
     }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
@@ -255,7 +273,7 @@ fun SlideshowScreen(c: FrameController) {
         }
         val overlayMode = pluginLayout.mode == PluginLayoutMode.Overlay || (pluginLayout.mode == PluginLayoutMode.Band && band == null)
         // Whenever the band shows, it holds the clock, date and weather too, so the photo carries no overlay at all.
-        val clockInBand = band != null && (settings.widgets.clock || settings.widgets.date || weather != null)
+        val clockInBand = band != null && (showClock || showDate || weather != null)
         val paper = stage.incoming == null && empty != null
         LaunchedEffect(splitMode, pluginLayout.side) { ss.setSplit(if (splitMode) pluginLayout.side else null) }
         // The dashboard shows with the split slides; a video or a lone photo takes the whole screen meanwhile.
@@ -499,35 +517,64 @@ fun SlideshowScreen(c: FrameController) {
 
         val clockMoved = (clockInBand && bandWanted) || splitShown
         ClockWidget(
-            c, nowMs, settings.widgets.clock && !clockMoved, settings.widgets.date && !clockMoved, settings.widgets.clock24h,
+            c, nowMs, showClock && !clockMoved, showDate && !clockMoved, settings.widgets.clock24h,
             weather.takeIf { !clockMoved }, settings.locale.temperatureUnit,
             onPaper = stage.incoming == null && empty != null,
             onWeatherClick = { menuOpen = false; forecastOpen = true },
             onClockClick = { menuOpen = false; c.calendar.openCalendar() },
         )
-        // Top-right corner: countdowns, then the plugin widgets of that slot below them.
+        // The countdown column (birthdays.md §6.3, §6.6): the birthday card on the day (whatever widgets.countdowns
+        // says), then event and birthday countdowns merged, three entries at most. Not under the quick menu, a card,
+        // the calendar, settings or a plugin detail, and not in split mode (the dashboard lists birthdays there).
+        val columnShown = !menuOpen && !splitShown && !calendarBusy && !joinCard && !settingsOpen && detailFor == null
+        val cardShown = columnShown && birthdaysToday.isNotEmpty()
+        val countdownItems = remember(calendarData, nowMs, birthdaysAhead, cardShown, settings.widgets.countdowns) {
+            if (!settings.widgets.countdowns) emptyList()
+            else BirthdayLogic.mergeCountdowns(calendarData?.upcomingCountdowns(nowMs).orEmpty(), birthdaysAhead, card = cardShown)
+        }
+        val countdownToday = java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate()
+        val birthdayCard: (@Composable () -> Unit)? = if (!cardShown) null else {
+            { BirthdayCard(birthdaysToday, birthdayPhotos, onPaper = paper, onClick = { c.birthdays.openSheet() }) }
+        }
+        // Top-right corner: the countdown column, then the plugin widgets of that slot below them.
         Column(
             Modifier.align(Alignment.TopEnd).padding(top = 28.dp, end = 40.dp).offset { IntOffset(0, (menuShift * MENU_SHIFT_DP * density.density).roundToInt()) },
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            if (settings.widgets.countdowns && !menuOpen && !paper && !splitShown) {
-                val items = remember(calendarData, nowMs) { calendarData?.upcomingCountdowns(nowMs).orEmpty() }
-                CountdownWidgets(items, java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate(), onPaper = false, onClick = { c.calendar.openCalendar() })
+            if (columnShown && !paper) {
+                CountdownColumn(birthdayCard, countdownItems, countdownToday, onPaper = false, onClick = { c.calendar.openCalendar() })
             }
             if (overlayMode) {
                 CornerSlot(pluginStates.inSlot(Slot.TopRight), end = true, screenWidth = screenW, screenHeight = screenH, hidden = overlayHidden || liveMark != null, onTap = openDetail)
             }
         }
-        if (settings.widgets.countdowns && !menuOpen && paper) {
-            val items = remember(calendarData, nowMs) { calendarData?.upcomingCountdowns(nowMs).orEmpty() }
+        if (columnShown && paper) {
             // On the paper empty state the clock has the top corner.
-            CountdownWidgets(
-                items, java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate(),
-                onPaper = true, onClick = { c.calendar.openCalendar() },
+            CountdownColumn(
+                birthdayCard, countdownItems, countdownToday, onPaper = true, onClick = { c.calendar.openCalendar() },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 28.dp, end = 40.dp),
             )
         }
+        // Balloons (§6.4): on the card's first appearance on an awake screen that day, then hourly; skipped while the
+        // screen is dimmed, a video or live motion plays, a menu or card is open, or a slide is changing.
+        val planner = remember { BalloonPlanner() }
+        var balloonSeed by remember { mutableIntStateOf(0) }
+        var balloonsUp by remember { mutableStateOf(false) }
+        val balloonsBlocked = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy ||
+            storageOpen || addSomeoneOpen || detailFor != null || greetOpen || newCount > 0 || video?.visible == true ||
+            stage.outgoing != null
+        val screenOn = displayMode == ScreenMode.Awake
+        val balloonInputs = rememberUpdatedState(Triple(birthdaysToday.isNotEmpty(), screenOn, !balloonsBlocked && !balloonsUp))
+        LaunchedEffect(birthdayDate, birthdaysToday.isNotEmpty(), screenOn, balloonsBlocked) {
+            while (true) {
+                val (shown, on, free) = balloonInputs.value
+                if (planner.tick(c.g.clock.nowMs(), birthdayDate, shown, on, free)) { balloonSeed++; balloonsUp = true }
+                if (!shown || !on) break
+                delay(BalloonPlanner.TICK_MS)
+            }
+        }
+        if (balloonsUp) key(balloonSeed) { BalloonsLayer(balloonSeed) { balloonsUp = false } }
         }
         if (bandComposed && band != null) {
             PluginBand(
@@ -537,9 +584,9 @@ fun SlideshowScreen(c: FrameController) {
                     val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
                     BandClock(
                         form, palette,
-                        clock = if (settings.widgets.clock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
-                        date = if (settings.widgets.date) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
-                        shortDate = if (settings.widgets.date) Format.shortDate(nowMs, c.g.clock.zone, locale) else null,
+                        clock = if (showClock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
+                        date = if (showDate) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
+                        shortDate = if (showDate) Format.shortDate(nowMs, c.g.clock.zone, locale) else null,
                         weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
                         onPaper = pluginLayout.background == BandBackground.Paper,
                     )
@@ -551,8 +598,8 @@ fun SlideshowScreen(c: FrameController) {
             val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
             SplitDashboard(
                 states = pluginStates,
-                clock = if (settings.widgets.clock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
-                date = if (settings.widgets.date) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
+                clock = if (showClock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
+                date = if (showDate) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
                 weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
                 calendar = calendarData, zone = c.calendar.zone, h24 = settings.widgets.clock24h,
                 onWidget = openDetail, onEvent = { c.calendar.showEvent(it) },
@@ -575,6 +622,7 @@ fun SlideshowScreen(c: FrameController) {
         VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusArea(c, hidden = menuOpen || joinCard)
+            app.kinframe.frame.ui.PowerCutCard(c, hidden = menuOpen || joinCard || settingsOpen)
             app.kinframe.frame.removable.RemovableSlideshowCards(c, hidden = menuOpen || joinCard || settingsOpen)
             app.kinframe.frame.frameo.FrameoSlideshowCard(c, hidden = menuOpen || joinCard || settingsOpen)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
@@ -663,6 +711,11 @@ fun SlideshowScreen(c: FrameController) {
         app.kinframe.frame.join.AddSomeoneOverlay(c, addSomeoneOpen, joinPending.size) { addSomeoneOpen = false }
         JoinRequestLayer(c, sync?.frameName ?: stringResource(R.string.frame_default_name))
         CalendarLayer(c, nowMs, calendarWeather)
+        // Above the calendar: on the day, a birthday entry there opens this sheet too.
+        BirthdayGreetingSheet(
+            visible = greetOpen, people = birthdaysToday, sent = greeted, photos = birthdayPhotos,
+            onGreet = { c.birthdays.greet(it) }, onClose = { c.birthdays.closeSheet() },
+        )
 
         if (powerOpen) PowerDialog(c, onDismiss = { powerOpen = false })
 
@@ -673,6 +726,8 @@ fun SlideshowScreen(c: FrameController) {
 
         IdentifyOverlay(c)
         SleepOverlay(c)
+        // At start-up: the boot animation's picture stays on top until the first photo (or the empty state) is ready.
+        app.kinframe.frame.ui.SplashOverlay(c)
     }
     }
 }
@@ -815,7 +870,22 @@ fun reactionEmoji(r: String) = when (r) {
 @Composable
 private fun minuteTicker(c: FrameController): androidx.compose.runtime.State<Long> {
     val now = remember { mutableLongStateOf(c.g.clock.nowMs()) }
-    LaunchedEffect(Unit) {
+    // Restarts the minute loop when the OS clock or time zone changes (NTP setting a frame that booted at its factory
+    // date), so the clock shows the new time at once instead of at the next whole minute of the old one.
+    var changes by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    androidx.compose.runtime.DisposableEffect(ctx) {
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(context: android.content.Context, intent: android.content.Intent) { c.g.time.checkPlausible(); changes++ }
+        }
+        val filter = android.content.IntentFilter().apply {
+            addAction(android.content.Intent.ACTION_TIME_CHANGED)
+            addAction(android.content.Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        androidx.core.content.ContextCompat.registerReceiver(ctx, receiver, filter, androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED)
+        onDispose { ctx.unregisterReceiver(receiver) }
+    }
+    LaunchedEffect(changes) {
         while (true) {
             now.longValue = c.g.clock.nowMs()
             delay(60_000 - now.longValue % 60_000 + 50)

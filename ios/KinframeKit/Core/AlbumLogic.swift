@@ -23,6 +23,28 @@ public enum AlbumLogic {
         return shown + album.filter { !set.contains($0) }
     }
 
+    // MARK: Only in album mode (docs/spec/photo-sources.md §9.1)
+
+    /// Above this many photos in a first import into an album, the add-source sheet suggests "Only in album mode".
+    public static let albumOnlySuggestionThreshold = 200
+
+    /// The PATCH body that turns the flag on or off.
+    public static func onlyInAlbumModeBody(_ on: Bool) -> [String: JSONValue] {
+        ["only_in_album_mode": .bool(on)]
+    }
+
+    /// Whether to suggest the flag: an album target that isn't album-only yet, whose first import (the test's
+    /// photos and videos, capped by `last_n`; nothing for "from now on") is over the threshold.
+    public static func suggestsOnlyInAlbumMode(album: Album?, history: SourceHistoryChoice, upstream: Int?) -> Bool {
+        guard let album, album.onlyInAlbumMode != true, let upstream else { return false }
+        let first: Int = switch history {
+        case .all: upstream
+        case .lastN(let n): min(n, upstream)
+        case .none: 0
+        }
+        return first > albumOnlySuggestionThreshold
+    }
+
     /// Days in a month (1–12), counting 29 February so a schedule can include it.
     public static func daysInMonth(_ month: Int) -> Int {
         switch month {

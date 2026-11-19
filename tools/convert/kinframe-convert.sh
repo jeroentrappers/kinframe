@@ -3,7 +3,7 @@
 # kinframe-convert.sh: turn a stock Frameo photo frame into a kinframe frame over adb, or turn it back.
 #
 # The command-line twin of the website's convert tool (https://kinframe.appmire.be/convert). Same steps, same
-# commands: see tools/convert/README.md. Needs Android platform-tools (adb), curl, unzip and openssl (or apksigner).
+# commands: see tools/convert/README.md. Needs Android platform-tools (adb), curl, tar, unzip and openssl (or apksigner).
 #
 #   sh kinframe-convert.sh --dry-run          report what would change, change nothing
 #   sh kinframe-convert.sh                    convert to kinframe (hosted server)
@@ -21,7 +21,14 @@ RELEASE_CERT_SHA256='99c5e36c1a7fd3740caa5115d9e303c982a18555f7bd29336b55e4481a2
 DEFAULT_SERVER='https://kinframe.appmire.be'
 RELEASES_REPO='jeroentrappers/kinframe'
 FRAMEO_PACKAGE='net.frameo.frame'
-DISABLE_PACKAGES='net.frameo.frame com.adups.fota com.adups.fota.sysoper'
+ADUPS_PACKAGE='com.adups.fota'
+DISABLE_PACKAGES='net.frameo.frame com.adups.fota com.adups.fota.sysoper android.rockchip.update.service'
+EXTRA_PACKAGES='com.android.browser com.android.calculator2 com.android.music com.android.musicfx com.android.soundrecorder com.android.gallery3d android.rk.RockVideoPlayer com.android.rk com.android.rk.mediafloat com.android.dreams.basic com.android.dreams.phototable com.android.galaxy4 com.android.noisefield com.android.phasebeam com.android.wallpaper com.android.wallpaper.holospiral com.android.wallpaper.livepicker com.android.wallpapercropper com.android.htmlviewer com.android.bluetoothmidiservice com.android.printspooler com.android.providers.downloads.ui com.cghs.stresstest com.DeviceTest com.svox.pico'
+STATE_FILE='/data/local/tmp/kinframe-state.txt'
+ADUPS_HOSTS='fota5p.adups.com fota5p.adups.cn fruet.adups.com'
+HOSTS_BEGIN='# >>> kinframe: block the Adups firmware update servers (kinframe revert removes this block)'
+HOSTS_END='# <<< kinframe'
+HOSTS='/system/etc/hosts'
 GRANT_PERMISSIONS='android.permission.ACCESS_COARSE_LOCATION android.permission.READ_EXTERNAL_STORAGE android.permission.WRITE_EXTERNAL_STORAGE'
 APPOPS_ALLOW='WRITE_SETTINGS:23 REQUEST_INSTALL_PACKAGES:26'
 SUPPORTED_MODELS='denver/PFF_1024'
@@ -35,6 +42,12 @@ BOOT_ASSETS='/frame-boot'
 BOOT_ANIMATION='/system/media/bootanimation.zip'
 RESOURCE_BACKUP='resource.img'
 BOOT_ANIMATION_BACKUP='bootanimation.zip'
+SETTLE_SECONDS='15'
+ROOT_CERT_FILE='6187b673.0'
+ROOT_CERT='/system/etc/security/cacerts/6187b673.0'
+ROOT_CERT_ASSETS='/frame-certs'
+ROOT_CERT_SHA256='b3dce5684d06bf72f8d998ee2245c933df91443a7348eef6d57477796f13da14'
+ROOT_CERT_BEFORE_SDK='24'
 # Command templates: {name} in plan.ts is $name here (filled by fill(), never by the shell).
 CMD_getprop='getprop'
 CMD_rootCheck='su 0 id'
@@ -42,13 +55,35 @@ CMD_packagePath='pm path $pkg'
 CMD_packageInfo='dumpsys package $pkg'
 CMD_bootCompleted='getprop sys.boot_completed'
 CMD_activities='dumpsys activity activities'
+CMD_screenSize='wm size'
+CMD_checkRootCert='ls /system/etc/security/cacerts/6187b673.0'
+CMD_listDisabled='pm list packages -d'
+CMD_listPackages='pm list packages'
+CMD_readState='cat /data/local/tmp/kinframe-state.txt'
+CMD_listRecovery='su 0 ls /cache/recovery'
+CMD_readRecoveryCommand='su 0 cat /cache/recovery/command'
+CMD_readUpdateResult='su 0 cat /data/data/com.adups.fota/files/updateResult'
+CMD_readAdupsPrefs='su 0 cat /data/data/com.adups.fota/shared_prefs/adupsfota.xml'
+CMD_listAdupsInternal='su 0 ls /data/data/com.adups.fota/files/adupsfota'
+CMD_listAdupsExternal='ls -d /storage/*/Android/data/com.adups.fota/files/adupsfota /storage/emulated/0/Android/data/com.adups.fota/files/adupsfota /storage/*/adupsfota /storage/emulated/0/adupsfota'
+CMD_checkPath='ls -d $path'
 CMD_mkWork='mkdir -p $work'
-CMD_backupData='su 0 tar -czf $work/$pkg-data.tgz -C /data/data $pkg'
-CMD_backupReadable='su 0 chmod 644 $work/$pkg-data.tgz'
+CMD_listData='su 0 ls -lnRa /data/data/$pkg'
+CMD_copyData='su 0 cp -a /data/data/$pkg $work/$pkg'
+CMD_pruneData='su 0 rm -rf $work/$pkg/cache $work/$pkg/code_cache $work/$pkg/app_webview $work/$pkg/lib $work/$pkg/files/.crashlytics.v3'
+CMD_readableData='su 0 chmod -R a+rX $work/$pkg'
+CMD_removeDataCopy='su 0 rm -rf $work/$pkg'
 CMD_install='pm install -r -g $work/kinframe.apk'
 CMD_grant='pm grant $frame $perm'
 CMD_appop='appops set $frame $op allow'
 CMD_disable='su 0 pm disable-user $pkg'
+CMD_settle='sleep $seconds'
+CMD_forceStop='am force-stop $pkg'
+CMD_clearData='pm clear $pkg'
+CMD_removePath='rm -rf $path'
+CMD_removePathRoot='su 0 rm -rf $path'
+CMD_removeRecoveryCommand='su 0 rm -f /cache/recovery/command'
+CMD_removeState='rm -f /data/local/tmp/kinframe-state.txt'
 CMD_setHome='pm set-home-activity $activity'
 CMD_cleanup='rm -rf $work'
 CMD_provision='am start -n $activity --es server_url $server'
@@ -71,6 +106,14 @@ CMD_copyBootAnimation='su 0 cp $work/bootanimation.zip /system/media/bootanimati
 CMD_chmodBootAnimation='su 0 chmod 644 /system/media/bootanimation.zip'
 CMD_remountRo='su 0 mount -o remount,ro $system /system'
 CMD_sha1BootAnimation='sha1sum /system/media/bootanimation.zip'
+CMD_copyRootCert='su 0 cp $work/6187b673.0 /system/etc/security/cacerts/6187b673.0'
+CMD_chmodRootCert='su 0 chmod 644 /system/etc/security/cacerts/6187b673.0'
+CMD_chownRootCert='su 0 chown 0:0 /system/etc/security/cacerts/6187b673.0'
+CMD_sha1RootCert='sha1sum /system/etc/security/cacerts/6187b673.0'
+CMD_copyHosts='su 0 cp $work/hosts /system/etc/hosts'
+CMD_chmodHosts='su 0 chmod 644 /system/etc/hosts'
+CMD_chownHosts='su 0 chown 0:0 /system/etc/hosts'
+CMD_sha1Hosts='sha1sum /system/etc/hosts'
 # <<< shared plan
 
 # ---------------------------------------------------------------- options
@@ -87,6 +130,8 @@ KEEP_DATA=0
 RESTORE_APK=''
 BOOT=1
 BOOT_DIR=''
+ROOT_CERT_WANTED=1
+KEEP_EXTRAS=0
 RESTORE_RESOURCE=''
 RESTORE_BOOTANIMATION=''
 OFFLINE=''
@@ -111,7 +156,14 @@ Turns a stock Frameo photo frame into a kinframe frame over USB (adb), or revert
                        after the originals are saved to the backup directory (also with --no-backup).
                        The logo lives in a boot partition: it is read back and checked, and on any mismatch the
                        original is written back at once.
-  --boot-assets DIR    Use logo.bmp and bootanimation.zip from DIR (default: download them from the server).
+  --boot-assets DIR    Use the start-up logos and animations in DIR (manifest.json and its files, for example
+                       web/static/frame-boot/kinframe in a checkout) instead of downloading them.
+  --keep-extras        Leave the preinstalled apps a photo frame doesn't use (browser, music, live wallpapers,
+                       factory test apps, ...) enabled. By default they are turned off, and --revert turns them on.
+  --edit-hosts block|unblock IN OUT  No frame needed: write OUT, which is the hosts file IN with kinframe's block
+                       added or removed.
+  --no-root-cert       Don't add the Let's Encrypt root certificate to /system (only done on Android 6 frames
+                       that lack it).
   --full-backup        Also copy every eMMC partition except user data (slow, read-only).
   --backup-dir DIR     Where backups go (default: ./kinframe-backup-<serial>-<date>).
   --apk FILE           Install this kinframe APK instead of downloading the latest release.
@@ -147,6 +199,14 @@ while [ $# -gt 0 ]; do
 	--no-backup) BACKUP=0 ;;
 	--no-boot-logo) BOOT=0 ;;
 	--boot-assets) [ $# -ge 2 ] || die_usage "--boot-assets needs a directory"; BOOT_DIR=$2; shift ;;
+	--no-root-cert) ROOT_CERT_WANTED=0 ;;
+	--keep-extras) KEEP_EXTRAS=1 ;;
+	--edit-hosts)
+		[ $# -ge 4 ] || die_usage "--edit-hosts needs block|unblock IN OUT"
+		case $2 in block | unblock) ;; *) die_usage "--edit-hosts needs block or unblock" ;; esac
+		OFFLINE='hosts'; OFF_MODE=$2; OFF_IN=$3; OFF_OUT=$4
+		shift 3
+		;;
 	--restore-resource) [ $# -ge 2 ] || die_usage "--restore-resource needs a file"; RESTORE_RESOURCE=$2; shift ;;
 	--restore-bootanimation) [ $# -ge 2 ] || die_usage "--restore-bootanimation needs a file"; RESTORE_BOOTANIMATION=$2; shift ;;
 	--check-resource) [ $# -ge 2 ] || die_usage "--check-resource needs a file"; OFFLINE='check'; OFF_IN=$2; shift ;;
@@ -300,6 +360,21 @@ bmp_format() {
 	printf '%s %s %s %s\n' "$(u32 "$1" $((_b + 18)))" "$(u32 "$1" $((_b + 22)))" "$(od -An -tu2 -j $((_b + 28)) -N2 "$1" | tr -d ' ')" "$(u32 "$1" $((_b + 30)))"
 }
 
+# resource_logo_format FILE: "width height bpp compression" of the first logo entry of a resource image that is a
+# BMP (resourceLogoFormat()), or nothing.
+resource_logo_format() {
+	check_resource "$1" || return 1
+	for _want in logo.bmp logo_kernel.bmp; do
+		_i=0
+		while [ $_i -lt "$RS_N" ]; do
+			eval "_name=\$RS_NAME_$_i _blk=\$RS_BLOCK_$_i"
+			if [ "$_name" = "$_want" ] && bmp_format "$1" $((_blk * 512)); then return 0; fi
+			_i=$((_i + 1))
+		done
+	done
+	return 1
+}
+
 # brand_resource IN LOGO OUT: brandResource(): IN with logo.bmp and logo_kernel.bmp replaced by LOGO, which must
 # have the same size, depth and compression. Contents are laid out again from the first block after the table, in
 # table order; the image keeps its length. Returns 1 with the reason in RS_PROBLEM.
@@ -338,6 +413,26 @@ brand_resource() {
 	return 0
 }
 
+# hosts_edit block|unblock IN OUT: OUT is the hosts file IN without kinframe's block (removeHostsBlock() in plan.ts:
+# the lines from HOSTS_BEGIN to HOSTS_END; an unterminated block ends at the first line that isn't ours), plus the
+# block at the end when blocking (addHostsBlock()). Everything else is kept.
+hosts_edit() {
+	awk -v b="$HOSTS_BEGIN" -v e="$HOSTS_END" -v hosts="$ADUPS_HOSTS" '
+		BEGIN { n = split(hosts, h, " "); for (i = 1; i <= n; i++) ours["0.0.0.0 " h[i]] = 1 }
+		$0 == b { inb = 1; next }
+		inb && $0 == e { inb = 0; next }
+		inb && ($0 in ours) { next }
+		{ inb = 0; print }
+	' "$2" >"$3" || return 1
+	if [ "$1" = block ]; then
+		{
+			printf '%s\n' "$HOSTS_BEGIN"
+			for _h in $ADUPS_HOSTS; do printf '0.0.0.0 %s\n' "$_h"; done
+			printf '%s\n' "$HOSTS_END"
+		} >>"$3"
+	fi
+}
+
 # Offline modes: no frame, no adb.
 case $OFFLINE in
 check)
@@ -355,6 +450,11 @@ check)
 patch)
 	brand_resource "$OFF_IN" "$OFF_LOGO" "$OFF_OUT" && exit 0
 	printf 'kinframe-convert: %s\n' "$RS_PROBLEM" >&2
+	exit 1
+	;;
+hosts)
+	[ -f "$OFF_IN" ] || { printf 'kinframe-convert: no such file: %s\n' "$OFF_IN" >&2; exit 1; }
+	hosts_edit "$OFF_MODE" "$OFF_IN" "$OFF_OUT" && exit 0
 	exit 1
 	;;
 esac
@@ -483,15 +583,29 @@ identify() {
 	RESOURCE_DEV=$(printf '%s\n' "$OUT" | grep -E '^/dev/block/platform/[^/[:space:]]+/by-name/resource$' | head -n 1)
 	log "\$ $CMD_mounts"
 	SYSTEM_DEV=$(adb_sh "$CMD_mounts" | awk '$2 == "/system" { print $1; exit } $3 == "/system" && $2 == "on" { print $1; exit }')
+	rd "$(fill "$CMD_screenSize")"
+	SCREEN=$(printf '%s\n' "$OUT" | sed -n 's/.*Physical size: *\([0-9]*x[0-9]*\).*/\1/p' | head -n 1)
+	HWROTATION=$(getp ro.sf.hwrotation)
+	case $HWROTATION in '' | *[!0-9]*) HWROTATION=0 ;; esac
+	rd "$(fill "$CMD_checkRootCert")"
+	if printf '%s\n' "$OUT" | grep -qxF "$ROOT_CERT"; then ROOT_CERT_STATE=present
+	elif contains "$OUT" 'No such file'; then ROOT_CERT_STATE=missing
+	else ROOT_CERT_STATE=unknown
+	fi
 	BOOT_LOGO_OK=0
 	BOOT_ANIM_OK=0
 	if [ $ROOT = 1 ] && [ -n "$RESOURCE_DEV" ]; then BOOT_LOGO_OK=1; fi
 	case $SYSTEM_DEV in /dev/block/dm-*) ;; /dev/block/*) [ $ROOT = 1 ] && BOOT_ANIM_OK=1 ;; esac
+	# rootCertNeeded(): Android before 7, the Let's Encrypt root known to be missing, /system changeable.
+	ROOT_CERT_OK=0
+	if [ "$SDK" -lt "$ROOT_CERT_BEFORE_SDK" ] && [ $ROOT_CERT_STATE = missing ] && [ $BOOT_ANIM_OK = 1 ]; then ROOT_CERT_OK=1; fi
 
 	say "  device:      $BRAND $MODEL ($KEY), $(getp ro.product.manufacturer), $(getp ro.board.platform)"
 	say "  android:     $(getp ro.build.version.release) (API $SDK), ABIs: $ABIS, root: $([ $ROOT = 1 ] && echo yes || echo no)"
-	say "  boot:        resource ${RESOURCE_DEV:-none}, /system on ${SYSTEM_DEV:-?}"
-	log "  fingerprint: $(getp ro.build.fingerprint)"
+	say "  boot:        resource ${RESOURCE_DEV:-none}, /system on ${SYSTEM_DEV:-?}, screen ${SCREEN:-?}, hwrotation $HWROTATION"
+	say "  CA store:    Let's Encrypt root $ROOT_CERT_STATE"
+	say "  fingerprint: $(getp ro.build.fingerprint)"
+	say "  firmware:    $(getp ro.build.display.id), updater version $(getp ro.fota.version)"
 	STATES=''
 	for _p in $FRAME_PACKAGE $DISABLE_PACKAGES; do
 		pkg_state "$_p"
@@ -503,6 +617,10 @@ identify() {
 		STATES="$STATES $_p=$PKG_INSTALLED:$PKG_ENABLED"
 		[ "$_p" = "$FRAMEO_PACKAGE" ] && FRAMEO_PATHS=$PKG_PATHS
 	done
+	case ${FRAMEO_PATHS:-} in /system/*) say "  Frameo:      the copy in /system" ;; '') ;; *) say "  Frameo:      updated, in /data/app" ;; esac
+	UPDATERS_INSTALLED=''
+	for _p in $DISABLE_PACKAGES; do case $(state_of "$_p") in 1:*) UPDATERS_INSTALLED="$UPDATERS_INSTALLED $_p" ;; esac; done
+	identify_more
 
 	ISSUES=''
 	[ "$SDK" -lt "$MIN_SDK" ] && ISSUES="$ISSUES sdk"
@@ -517,6 +635,78 @@ identify() {
 	*) VERDICT=supported ;;
 	esac
 	say "  verdict:     $VERDICT${ISSUES:+ (${ISSUES# })}"
+}
+
+# names OUTPUT: the names an `ls` listing gives, one per line, without its error lines (parseNames()).
+names() { printf '%s\n' "$1" | sed 's/^ *//; s/ *$//' | grep -v -E '^ls:|No such file|Permission denied|not found|^$'; }
+# file_content OUTPUT: a file's content from `cat`, or nothing when it is missing (parseFile()).
+file_content() { case $1 in *'No such file'* | *'Permission denied'* | cat:*) ;; *) printf '%s' "$1" ;; esac; }
+# has_line TEXT LINE
+has_line() { printf '%s\n' "$1" | grep -qxF "$2"; }
+# pref_string XML NAME: a <string> of a SharedPreferences file, unescaped.
+pref_string() {
+	printf '%s\n' "$1" | sed -n "s/.*<string name=\"$2\">\([^<]*\)<\/string>.*/\1/p" | head -n 1 |
+		sed 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/&apos;/'"'"'/g; s/&amp;/\&/g'
+}
+
+# identify_more: the package lists, the extras record and the firmware updater's leftovers (updaterLeftovers(),
+# describeUpdater() in plan.ts). The updater's preferences hold a device id, so they are summarised, not logged.
+identify_more() {
+	_raw=$(adb_sh "$(fill "$CMD_listPackages")")
+	log "\$ $CMD_listPackages ($(printf '%s\n' "$_raw" | grep -c '^package:') packages)"
+	INSTALLED_LIST=$(printf '%s\n' "$_raw" | sed -n 's/^package:\([^ ]*\).*/\1/p')
+	rd "$(fill "$CMD_listDisabled")"
+	DISABLED_LIST=$(printf '%s\n' "$OUT" | sed -n 's/^package:\([^ ]*\).*/\1/p')
+	rd "$(fill "$CMD_readState")"
+	EXTRAS_STATE=''
+	STATE_EXISTS=0
+	if [ -n "$OUT" ] && ! contains "$OUT" 'No such file' && ! contains "$OUT" 'cat:'; then
+		STATE_EXISTS=1
+		for _p in $EXTRA_PACKAGES; do has_line "$OUT" "$_p" && EXTRAS_STATE="$EXTRAS_STATE $_p"; done
+	fi
+	rd "$(fill "$CMD_listRecovery")"
+	RECOVERY_LIST=$(names "$OUT")
+	rd "$(fill "$CMD_readRecoveryCommand")"
+	RECOVERY_COMMAND=$(file_content "$OUT")
+	rd "$(fill "$CMD_readUpdateResult")"
+	UPDATE_RESULT=$(file_content "$OUT")
+	_xml=$(adb_sh "$(fill "$CMD_readAdupsPrefs")")
+	log "\$ $CMD_readAdupsPrefs ($(printf '%s\n' "$_xml" | grep -c 'name=') entries)"
+	UPDATER_STATUS=$(printf '%s\n' "$_xml" | sed -n 's/.*<[a-z]* name="ota_update_status" value="\(-\{0,1\}[0-9]*\)".*/\1/p' | head -n 1)
+	UPDATE_PATH=$(pref_string "$_xml" update_package_path)
+	rd "$(fill "$CMD_listAdupsInternal")"
+	ADUPS_INTERNAL=$(names "$OUT")
+	rd "$(fill "$CMD_listAdupsExternal")"
+	ADUPS_DOWNLOADS=''
+	ADUPS_OTHER=''
+	for _d in $(names "$OUT" | grep '^/storage/' | sort -u); do
+		safe_arg "$_d" || { log "skipping an unusual path: $_d"; continue; }
+		case $_d in */Android/data/com.adups.fota/*) ADUPS_DOWNLOADS="$ADUPS_DOWNLOADS $_d" ;; *) ADUPS_OTHER="$ADUPS_OTHER $_d" ;; esac
+	done
+	EXTRAS_TODO=''
+	for _p in $EXTRA_PACKAGES; do
+		has_line "$INSTALLED_LIST" "$_p" && ! has_line "$DISABLED_LIST" "$_p" && EXTRAS_TODO="$EXTRAS_TODO $_p"
+	done
+
+	case $UPDATER_STATUS in
+	'') _st=unknown ;; 0) _st=idle ;; 1) _st='new version found' ;; 2) _st=downloading ;; 3) _st=paused ;; 4) _st='update downloaded' ;; *) _st="state $UPDATER_STATUS" ;;
+	esac
+	say "  updater:     $_st${UPDATE_PATH:+, update at $UPDATE_PATH}"
+	say "  recovery:    /cache/recovery: $(printf '%s' "$RECOVERY_LIST" | tr '\n' ' ' | sed 's/ $//; s/ /, /g')${RECOVERY_COMMAND:+ (command: $(printf '%s' "$RECOVERY_COMMAND" | tr '\n' ' '))}"
+	[ -n "$UPDATE_RESULT" ] && say "  last update result: $(printf '%s' "$UPDATE_RESULT" | tr '\n' ' ')"
+	[ -n "$ADUPS_INTERNAL" ] && say "  internal downloads: $(printf '%s' "$ADUPS_INTERNAL" | tr '\n' ' ')"
+	[ -n "$ADUPS_DOWNLOADS" ] && say "  download folders:$ADUPS_DOWNLOADS"
+	[ -n "$ADUPS_OTHER" ] && say "  update folders on storage:$ADUPS_OTHER"
+	say "  extras:      to turn off:${EXTRAS_TODO:- none}; record: $([ $STATE_EXISTS = 1 ] && echo "${EXTRAS_STATE:- empty}" || echo none)"
+	UPDATE_PENDING=0
+	case $UPDATER_STATUS in 1 | 2 | 3 | 4) UPDATE_PENDING=1 ;; esac
+	[ -n "$UPDATE_PATH" ] && UPDATE_PENDING=1
+	printf '%s\n' "$ADUPS_INTERNAL" | grep -q '\.zip$' && UPDATE_PENDING=1
+	has_line "$RECOVERY_LIST" command && UPDATE_PENDING=1
+	if [ $UPDATE_PENDING = 1 ]; then
+		warn "the firmware updater has a pending or downloaded update; converting clears it and turns the updater off"
+	fi
+	return 0
 }
 
 # state_of PKG: "installed:enabled" from the identification.
@@ -619,15 +809,65 @@ backup() {
 			pull "$_path" "$BACKUP_DIR/$FRAMEO_PACKAGE-${_path##*/}" || fail "could not copy $_path"
 		done
 		if [ $ROOT = 1 ]; then
-			wr "$(fill "$CMD_mkWork")"
-			wr "$(fill "$CMD_backupData" "pkg=$FRAMEO_PACKAGE")"
-			wr "$(fill "$CMD_backupReadable" "pkg=$FRAMEO_PACKAGE")"
-			pull "$WORK_DIR/$FRAMEO_PACKAGE-data.tgz" "$BACKUP_DIR/$FRAMEO_PACKAGE-data.tgz" || fail "could not copy the Frameo data"
+			if ! backup_data "$FRAMEO_PACKAGE" "$BACKUP_DIR/$FRAMEO_PACKAGE-data.tgz" "$BACKUP_DIR/$FRAMEO_PACKAGE-data-files.txt"; then
+				DATA_WARNING="could not back up the data of $FRAMEO_PACKAGE ($DATA_PROBLEM). It stays on the frame: converting only turns the app off, and --revert turns it on again with its data."
+				warn "$DATA_WARNING"
+			fi
 			wr "$(fill "$CMD_cleanup")"
 		fi
 	fi
 	[ "$FULL_BACKUP" = 1 ] && full_backup
 	[ "$DRY_RUN" = 1 ] || say "  saved in $BACKUP_DIR"
+}
+
+# archive_tree PARENT NAME DEST: DEST is a .tgz of PARENT/NAME with names NAME/…, made with the computer's tar
+# (GNU tar and bsdtar store long names). Returns 1 with the reason in DATA_PROBLEM.
+archive_tree() {
+	[ -d "$1/$2" ] || { DATA_PROBLEM="nothing was copied from the frame"; return 1; }
+	_n=$(find "$1/$2" -type f | wc -l | tr -d ' ')
+	[ "$_n" -gt 0 ] || { DATA_PROBLEM="no files were copied from the frame"; return 1; }
+	command -v tar >/dev/null 2>&1 || { DATA_PROBLEM="tar not found on this computer (the copy is in $1/$2)"; return 1; }
+	tar -czf "$3" -C "$1" "$2" 2>>"$LOG_FILE" || { DATA_PROBLEM="tar failed on this computer"; return 1; }
+	say "  $_n files archived as ${3##*/}"
+	return 0
+}
+
+# backup_data PKG DEST LIST: the app data as a .tgz (backupData() in runner.ts). Toybox tar on some frames can't store
+# names over 100 bytes, so nothing is archived on the frame: the data is copied as root into the work directory
+# (without caches, WebView data, crash reports and the lib symlink), made readable, pulled as a directory and
+# archived here; then the copy is removed. LIST gets `ls -lnRa` of the original (modes and numeric owners, for a
+# restore). Returns 1 with the reason in DATA_PROBLEM; DATA_NOTE when some files could not be copied.
+backup_data() {
+	DATA_PROBLEM=''
+	DATA_NOTE=''
+	wr "$(fill "$CMD_mkWork")"
+	wr "$(fill "$CMD_listData" "pkg=$1")"
+	if [ "$DRY_RUN" = 0 ] && [ -n "$OUT" ] && ! contains "$OUT" 'No such file'; then printf '%s\n' "$OUT" >"$3"; fi
+	wr "$(fill "$CMD_copyData" "pkg=$1")"
+	_copy=$OUT
+	wr "$(fill "$CMD_pruneData" "pkg=$1")"
+	wr "$(fill "$CMD_readableData" "pkg=$1")"
+	_pulled="$TMP/data-$1"
+	if [ "$DRY_RUN" = 1 ]; then
+		say "  would copy: $WORK_DIR/$1 -> $_pulled, and archive it as $2"
+	else
+		mkdir -p "$_pulled"
+		log "pull $WORK_DIR/$1 -> $_pulled/"
+		adb_ pull "$WORK_DIR/$1" "$_pulled/" >>"$LOG_FILE" 2>&1
+		# adb puts the directory inside the existing target; should one put its contents there instead, nest them.
+		if [ ! -d "$_pulled/$1" ] && [ -n "$(ls -A "$_pulled")" ]; then
+			mkdir -p "$_pulled.nest" && mv "$_pulled" "$_pulled.nest/$1" && _pulled="$_pulled.nest"
+		fi
+	fi
+	wr "$(fill "$CMD_removeDataCopy" "pkg=$1")"
+	[ "$DRY_RUN" = 1 ] && return 0
+	archive_tree "$_pulled" "$1" "$2" || return 1
+	_bad=$(printf '%s\n' "$_copy" | grep -E 'Error|Exception|not found|denied|Failure|not permitted|Read-only file system|No such file' | head -n 1)
+	if [ -n "$_bad" ]; then
+		DATA_NOTE="some files of $1 could not be copied ($_bad); the backup has the rest"
+		warn "$DATA_NOTE"
+	fi
+	return 0
 }
 
 # Every eMMC partition except the largest (user data), via a temporary file: binary output through su is not clean.
@@ -686,38 +926,229 @@ boot_backup() {
 	[ "$DRY_RUN" = 1 ] || say "  saved in $BACKUP_DIR"
 }
 
-# fetch_boot SERVER: logo.bmp and bootanimation.zip into $TMP/boot (from --boot-assets, or the server's static files
-# checked against its manifest).
+# mf ENTRY KEY: a field of a one-line manifest entry ({"file": "…", "width": 800, …}).
+mf() { printf '%s\n' "$1" | sed -n "s/.*\"$2\": *\"\{0,1\}\([^\",}]*\).*/\1/p"; }
+
+# boot_get BASE FILE DEST: a file of the start-up branding, from --boot-assets or the server at BASE.
+boot_get() {
+	if [ -n "$BOOT_DIR" ]; then cp "$BOOT_DIR/$2" "$3" 2>>"$LOG_FILE"
+	else curl -fsSL -o "$3" "$1/$2" 2>>"$LOG_FILE"
+	fi
+}
+
+# boot_pick BASE: picks and fetches the variants for this frame from BASE's manifest.json into $BOOT_FILES/logo.bmp
+# and bootanimation.zip, like the runner's fetchBoot (pickBootLogo(), pickBootAnimation() in plan.ts): the logo with
+# exactly the format of the frame's own (from the backed-up resource image) made for its panel rotation, the animation
+# for its screen size (either orientation). Each is checked against the manifest's sha256. Returns 1 with the reason
+# in BOOT_PROBLEM.
+boot_pick() {
+	BOOT_PROBLEM=''
+	boot_get "$1" manifest.json "$BOOT_FILES/manifest.json" || { BOOT_PROBLEM="no manifest.json at $1"; return 1; }
+	if [ "$BOOT_LOGO_OK" = 1 ]; then
+		if [ "$DRY_RUN" = 1 ]; then
+			say "  the boot logo is picked once the frame's own logo has been read"
+		else
+			_fmt=$(resource_logo_format "$BACKUP_DIR/$RESOURCE_BACKUP") || { BOOT_PROBLEM='no boot logo in the resource image'; return 1; }
+			_entry=''
+			while IFS= read -r _line; do
+				case $_line in *'"hwrotation"'*) ;; *) continue ;; esac
+				if [ "$(mf "$_line" width) $(mf "$_line" height) $(mf "$_line" bpp) $(mf "$_line" compression) $(mf "$_line" hwrotation)" = "$_fmt $HWROTATION" ]; then
+					_entry=$_line
+					break
+				fi
+			done <"$BOOT_FILES/manifest.json"
+			if [ -z "$_entry" ]; then
+				BOOT_PROBLEM="no kinframe boot logo for this frame (its logo is $_fmt as width height bits compression, panel rotation $HWROTATION)"
+				return 1
+			fi
+			say "  the frame's logo is $_fmt (width height bits compression), rotation $HWROTATION: using $(mf "$_entry" file)"
+			boot_get "$1" "$(mf "$_entry" file)" "$BOOT_FILES/logo.bmp" || { BOOT_PROBLEM="could not get $(mf "$_entry" file)"; return 1; }
+			[ "$(sha256_of "$BOOT_FILES/logo.bmp")" = "$(mf "$_entry" sha256)" ] || { BOOT_PROBLEM="$(mf "$_entry" file) does not match its sha256"; return 1; }
+			bmp_format "$BOOT_FILES/logo.bmp" >/dev/null || { BOOT_PROBLEM='the boot logo is not a BMP file'; return 1; }
+		fi
+	fi
+	if [ "$BOOT_ANIM_OK" = 1 ]; then
+		_entry=''
+		if [ -n "$SCREEN" ]; then
+			for _want in "$SCREEN" "${SCREEN#*x}x${SCREEN%%x*}"; do
+				_entry=$(grep -F "\"screen\": \"$_want\"" "$BOOT_FILES/manifest.json" | head -n 1)
+				[ -n "$_entry" ] && break
+			done
+		fi
+		[ -n "$_entry" ] || { BOOT_PROBLEM="no kinframe boot animation for this frame's screen (${SCREEN:-unknown size})"; return 1; }
+		say "  screen $SCREEN: using $(mf "$_entry" file)"
+		boot_get "$1" "$(mf "$_entry" file)" "$BOOT_FILES/bootanimation.zip" || { BOOT_PROBLEM="could not get $(mf "$_entry" file)"; return 1; }
+		[ "$(sha256_of "$BOOT_FILES/bootanimation.zip")" = "$(mf "$_entry" sha256)" ] || { BOOT_PROBLEM="$(mf "$_entry" file) does not match its sha256"; return 1; }
+		[ "$(dd if="$BOOT_FILES/bootanimation.zip" bs=1 count=2 2>/dev/null)" = PK ] || { BOOT_PROBLEM='the boot animation is not a zip file'; return 1; }
+	fi
+	return 0
+}
+
+# fetch_boot SERVER: the start-up branding for this frame into $BOOT_FILES (from --boot-assets, or the server's static
+# files, falling back to the hosted server).
 fetch_boot() {
 	step "Download the start-up logo and animation"
 	BOOT_FILES="$TMP/boot"
 	mkdir -p "$BOOT_FILES"
 	if [ -n "$BOOT_DIR" ]; then
-		cp "$BOOT_DIR/logo.bmp" "$BOOT_DIR/bootanimation.zip" "$BOOT_FILES/" || fail "no logo.bmp and bootanimation.zip in $BOOT_DIR"
+		boot_pick "$BOOT_DIR" || fail "$BOOT_PROBLEM ($BOOT_DIR). Run again with --no-boot-logo."
 		say "  using $BOOT_DIR"
 	else
 		_ok=0
+		_why=''
 		for _base in "$1" "$DEFAULT_SERVER"; do
 			_url="$_base$BOOT_ASSETS/$BOOT_BRAND"
-			if ! curl -fsSL -o "$BOOT_FILES/manifest.json" "$_url/manifest.json" ||
-				! curl -fsSL -o "$BOOT_FILES/logo.bmp" "$_url/logo.bmp" ||
-				! curl -fsSL -o "$BOOT_FILES/bootanimation.zip" "$_url/bootanimation.zip"; then
-				continue
-			fi
-			# manifest.json lists the logo first, then the boot animation.
-			_sums=$(sed -n 's/.*"sha256": *"\([0-9a-f]*\)".*/\1/p' "$BOOT_FILES/manifest.json")
-			if [ "$(sha256_of "$BOOT_FILES/logo.bmp") $(sha256_of "$BOOT_FILES/bootanimation.zip")" = "$(printf '%s' "$_sums" | tr '\n' ' ')" ]; then
+			if boot_pick "$_url"; then
 				_ok=1
 				say "  from $_url"
 				break
 			fi
-			log "checksums do not match the manifest at $_url"
+			log "$_url: $BOOT_PROBLEM"
+			_why="$BOOT_PROBLEM"
 		done
-		[ $_ok = 1 ] || fail "could not download the start-up logo and animation. Run again with --no-boot-logo, or use --boot-assets."
+		[ $_ok = 1 ] || fail "could not get the start-up logo and animation: $_why. Run again with --no-boot-logo, or use --boot-assets."
 	fi
-	bmp_format "$BOOT_FILES/logo.bmp" >/dev/null || fail "the boot logo is not a BMP file"
-	[ "$(dd if="$BOOT_FILES/bootanimation.zip" bs=1 count=2 2>/dev/null)" = PK ] || fail "the boot animation is not a zip file"
-	log "boot logo sha256 $(sha256_of "$BOOT_FILES/logo.bmp"), boot animation sha256 $(sha256_of "$BOOT_FILES/bootanimation.zip")"
+	[ -f "$BOOT_FILES/logo.bmp" ] && log "boot logo sha256 $(sha256_of "$BOOT_FILES/logo.bmp")"
+	[ -f "$BOOT_FILES/bootanimation.zip" ] && log "boot animation sha256 $(sha256_of "$BOOT_FILES/bootanimation.zip")"
+	return 0
+}
+
+# fetch_root_cert SERVER: the Let's Encrypt root into $TMP/root-cert, only when its sha256 is the pinned one (from a
+# checkout next to this script, the server, or the hosted server). Returns 1 when there is none.
+fetch_root_cert() {
+	_here=$(dirname "$0")
+	for _src in "$_here/../../web/static$ROOT_CERT_ASSETS/$ROOT_CERT_FILE" "$1$ROOT_CERT_ASSETS/$ROOT_CERT_FILE" "$DEFAULT_SERVER$ROOT_CERT_ASSETS/$ROOT_CERT_FILE"; do
+		: >"$TMP/root-cert"
+		case $_src in
+		http://* | https://*) curl -fsSL -o "$TMP/root-cert" "$_src" 2>>"$LOG_FILE" || continue ;;
+		*) if [ -f "$_src" ]; then cp "$_src" "$TMP/root-cert" || continue; else continue; fi ;;
+		esac
+		if [ "$(sha256_of "$TMP/root-cert")" = "$ROOT_CERT_SHA256" ]; then
+			log "Let's Encrypt root certificate from $_src"
+			return 0
+		fi
+		log "$_src: sha256 does not match $ROOT_CERT_SHA256"
+	done
+	return 1
+}
+
+# write_root_cert FILE: adds the Let's Encrypt root to the system CA store like the boot animation: push, remount
+# /system writable, copy, mode 644 root:root, remount read-only, check sha1. Failures are warnings (returns 1).
+write_root_cert() {
+	wr "$(fill "$CMD_mkWork")"
+	push "$1" "$WORK_DIR/$ROOT_CERT_FILE" || { warn "could not copy the root certificate to the frame"; return 1; }
+	wr "$(fill "$CMD_remountRw" "system=$SYSTEM_DEV")"
+	[ -z "$OUT" ] || { warn "could not make /system writable: $OUT"; return 1; }
+	wr "$(fill "$CMD_copyRootCert")"
+	wr "$(fill "$CMD_chmodRootCert")"
+	wr "$(fill "$CMD_chownRootCert")"
+	wr "$(fill "$CMD_remountRo" "system=$SYSTEM_DEV")"
+	[ -z "$OUT" ] || warn "could not make /system read-only again ($OUT); it will be after the restart"
+	wr "$(fill "$CMD_removeFile" "file=$ROOT_CERT_FILE")"
+	[ "$DRY_RUN" = 1 ] && return 0
+	rd "$(fill "$CMD_sha1RootCert")"
+	[ "${OUT%% *}" = "$(sha1_of "$1")" ] || { warn "the root certificate on the frame is not the one copied ($OUT)"; return 1; }
+	say "  Let's Encrypt root certificate added ($ROOT_CERT)"
+}
+
+# disabled_missing PACKAGES: those of PACKAGES that `pm list packages -d` doesn't list, in MISSING.
+disabled_missing() {
+	rd "$(fill "$CMD_listDisabled")"
+	MISSING=''
+	for _p in $1; do
+		printf '%s\n' "$OUT" | grep -qxF "package:$_p" || MISSING="$MISSING $_p"
+	done
+	MISSING=${MISSING# }
+}
+
+# path_exists PATH: `ls -d PATH` shows it.
+path_exists() {
+	rd "$(fill "$CMD_checkPath" "path=$1")"
+	has_line "$OUT" "$1"
+}
+
+# clear_updater: the clearUpdater action: removes the updater's download folders on the volumes (as the shell user,
+# then as root if still there) and a pending /cache/recovery/command, checking each.
+clear_updater() {
+	for _d in $ADUPS_DOWNLOADS; do
+		wr "$(fill "$CMD_removePath" "path=$_d")"
+		[ "$DRY_RUN" = 1 ] && continue
+		if path_exists "$_d"; then
+			wr "$(fill "$CMD_removePathRoot" "path=$_d")"
+			path_exists "$_d" && warn "could not remove the updater's download folder $_d"
+		fi
+	done
+	if has_line "$RECOVERY_LIST" command; then
+		say "  /cache/recovery/command (removed): $(printf '%s' "$RECOVERY_COMMAND" | tr '\n' ' ')"
+		wr "$(fill "$CMD_removeRecoveryCommand")"
+		if [ "$DRY_RUN" = 0 ]; then
+			rd "$(fill "$CMD_listRecovery")"
+			has_line "$(names "$OUT")" command && warn "could not remove /cache/recovery/command"
+		fi
+	fi
+	return 0
+}
+
+# edit_hosts block|unblock: the editHosts action: pulls /system/etc/hosts, builds the new file here (hosts_edit) and,
+# when it changes, copies it in like the boot animation (remount rw, cp, chmod 644, chown 0:0, remount ro, sha1).
+# Failures are warnings (returns 1).
+edit_hosts() {
+	if [ "$DRY_RUN" = 1 ]; then
+		say "  would $1 the update servers in $HOSTS (built here from the pulled file, copied in with remount rw / ro, sha1 checked)"
+		return 0
+	fi
+	pull "$HOSTS" "$TMP/hosts.orig" || { warn "could not read $HOSTS"; return 1; }
+	hosts_edit "$1" "$TMP/hosts.orig" "$TMP/hosts.new" || { warn "could not build the new hosts file"; return 1; }
+	if cmp -s "$TMP/hosts.orig" "$TMP/hosts.new"; then
+		if [ "$1" = block ]; then say "  the update servers are already blocked"; else say "  no kinframe block in the hosts file"; fi
+		return 0
+	fi
+	if [ "$1" = block ]; then ensure_backup_dir && cp "$TMP/hosts.orig" "$BACKUP_DIR/hosts"; fi
+	wr "$(fill "$CMD_mkWork")"
+	push "$TMP/hosts.new" "$WORK_DIR/hosts" || { warn "could not copy the hosts file to the frame"; return 1; }
+	wr "$(fill "$CMD_remountRw" "system=$SYSTEM_DEV")"
+	[ -z "$OUT" ] || { warn "could not make /system writable: $OUT"; return 1; }
+	wr "$(fill "$CMD_copyHosts")"
+	wr "$(fill "$CMD_chmodHosts")"
+	wr "$(fill "$CMD_chownHosts")"
+	wr "$(fill "$CMD_remountRo" "system=$SYSTEM_DEV")"
+	[ -z "$OUT" ] || warn "could not make /system read-only again ($OUT); it will be after the restart"
+	wr "$(fill "$CMD_removeFile" "file=hosts")"
+	rd "$(fill "$CMD_sha1Hosts")"
+	[ "${OUT%% *}" = "$(sha1_of "$TMP/hosts.new")" ] || { warn "$HOSTS on the frame is not the one copied ($OUT)"; return 1; }
+	if [ "$1" = block ]; then say "  update servers blocked in $HOSTS"; else say "  kinframe block removed from $HOSTS"; fi
+}
+
+# save_state: the saveState action: records the extra packages this convert disabled (those of EXTRAS_TODO that are
+# disabled now) plus the earlier record, in STATE_FILE on the frame and in the backup directory.
+save_state() {
+	if [ "$DRY_RUN" = 1 ]; then
+		say "  would record the disabled extra packages in $STATE_FILE"
+		return 0
+	fi
+	rd "$(fill "$CMD_listDisabled")"
+	_off=$OUT
+	_rec=''
+	for _p in $EXTRA_PACKAGES; do
+		if in_list "$_p" "$EXTRAS_STATE"; then _rec="$_rec $_p"
+		elif in_list "$_p" "$EXTRAS_TODO"; then
+			if has_line "$_off" "package:$_p"; then _rec="$_rec $_p"; else warn "still enabled: $_p"; fi
+		fi
+	done
+	{
+		printf '%s\n' '# kinframe convert: the extra packages it disabled; kinframe revert enables these again'
+		for _p in $_rec; do printf '%s\n' "$_p"; done
+	} >"$TMP/state"
+	push "$TMP/state" "$STATE_FILE" || warn "could not record the disabled extra packages on the frame"
+	ensure_backup_dir && cp "$TMP/state" "$BACKUP_DIR/kinframe-state.txt"
+	say "  recorded in $STATE_FILE:${_rec:- nothing}"
+}
+
+# settle: PackageManager saves package states about 10 s after a change; wait, then flush, before a restart.
+settle() {
+	say "  waiting ${SETTLE_SECONDS}s so the frame saves the changes"
+	wr "$(fill "$CMD_settle" "seconds=$SETTLE_SECONDS")"
+	wr "$(fill "$CMD_sync")"
 }
 
 # flash_resource IMAGE: writes a resource image to the resource partition like the website's flashResource():
@@ -836,6 +1267,26 @@ convert() {
 		fi
 	fi
 
+	# A fallback for frames whose CA store lacks the Let's Encrypt root (rootCertNeeded()); failures are warnings.
+	if [ "$ROOT_CERT_OK" = 1 ] && [ "$ROOT_CERT_WANTED" = 1 ]; then
+		step "Add the Let's Encrypt root certificate"
+		if fetch_root_cert "$_server"; then
+			write_root_cert "$TMP/root-cert" || CERT_WARNING="the Let's Encrypt root certificate could not be added; kinframe may not reach a server with a Let's Encrypt certificate"
+		else
+			CERT_WARNING="could not download the Let's Encrypt root certificate; it was not added"
+			warn "$CERT_WARNING"
+		fi
+	fi
+
+	# Defence in depth that survives a factory reset: the Adups servers resolve to 0.0.0.0. Failures are warnings.
+	step "Block the firmware update servers ($HOSTS)"
+	if [ "$BOOT_ANIM_OK" = 1 ]; then
+		edit_hosts block || HOSTS_WARNING="the firmware update servers could not be blocked in $HOSTS"
+	else
+		HOSTS_WARNING="/system cannot be changed on this frame (no root, or dm-verity): the update servers are not blocked in $HOSTS"
+		warn "$HOSTS_WARNING"
+	fi
+
 	step "Install kinframe"
 	wr "$(fill "$CMD_mkWork")"
 	push "$APK" "$WORK_DIR/kinframe.apk" || fail "could not copy the APK to the frame"
@@ -856,13 +1307,39 @@ convert() {
 	done
 
 	step "Disable Frameo and the firmware updaters"
+	# First stop the updater and drop what it has queued, so nothing is half-way when it is turned off.
+	case $(state_of "$ADUPS_PACKAGE") in
+	1:*)
+		wr "$(fill "$CMD_forceStop" "pkg=$ADUPS_PACKAGE")"
+		wr_expect "$(fill "$CMD_clearData" "pkg=$ADUPS_PACKAGE")" 'Success' || warn "could not clear the data of $ADUPS_PACKAGE: $OUT"
+		;;
+	esac
+	clear_updater
+	_changed=0
 	for _p in $DISABLE_PACKAGES; do
 		case $(state_of "$_p") in
-		1:enabled) wr_expect "$(fill "$CMD_disable" "pkg=$_p")" 'disabled-user' || fail "could not disable $_p: $OUT" ;;
+		1:enabled)
+			wr_expect "$(fill "$CMD_disable" "pkg=$_p")" 'disabled-user' || fail "could not disable $_p: $OUT"
+			_changed=1
+			;;
 		1:disabled) say "  $_p is already disabled" ;;
 		*) say "  $_p is not installed" ;;
 		esac
 	done
+	if [ "$DRY_RUN" = 0 ] && [ $_changed = 1 ]; then
+		disabled_missing "$UPDATERS_INSTALLED"
+		[ -z "$MISSING" ] || fail "still enabled after pm disable-user: $MISSING"
+	fi
+
+	EXTRAS_DONE=''
+	if [ "$KEEP_EXTRAS" = 0 ] && [ -n "$EXTRAS_TODO" ]; then
+		step "Turn off apps a photo frame doesn't use"
+		for _p in $EXTRAS_TODO; do
+			wr_expect "$(fill "$CMD_disable" "pkg=$_p")" 'disabled-user' || warn "could not disable $_p: $OUT"
+		done
+		save_state
+		EXTRAS_DONE=$EXTRAS_TODO
+	fi
 
 	step "Make kinframe the home app"
 	if [ "$SDK" -ge "$SET_HOME_MIN_SDK" ]; then
@@ -875,12 +1352,38 @@ convert() {
 	wr "$(fill "$CMD_cleanup")"
 
 	step "Restart"
+	settle
 	if [ "$DRY_RUN" = 1 ]; then
 		say "  would run: adb reboot"
 	else
 		log "\$ adb reboot"
 		adb_ reboot >>"$LOG_FILE" 2>&1
 		wait_boot || fail "the frame did not come back within 3 minutes. If it shows kinframe, set it up on the screen."
+		# The updaters must stay off: com.adups.fota.sysoper can install firmware updates through recovery.
+		disabled_missing "$UPDATERS_INSTALLED"
+		if [ -n "$MISSING" ]; then
+			warn "$MISSING came back after the restart; turning it off again"
+			for _p in $MISSING; do wr "$(fill "$CMD_disable" "pkg=$_p")"; done
+			settle
+			_back=$MISSING
+			disabled_missing "$UPDATERS_INSTALLED"
+			[ -z "$MISSING" ] || fail "$MISSING came back after the restart and could not be turned off again. Run the convert again, or turn it off by hand: adb shell su 0 pm disable-user <package>"
+			DISABLE_WARNING="$_back came back after the restart and was turned off again"
+		else
+			say "  Frameo and the updaters stayed off"
+		fi
+		# The extras: the same check, but only a warning.
+		if [ -n "$EXTRAS_DONE" ]; then
+			disabled_missing "$EXTRAS_DONE"
+			if [ -n "$MISSING" ]; then
+				for _p in $MISSING; do wr "$(fill "$CMD_disable" "pkg=$_p")"; done
+				settle
+				_back=$MISSING
+				disabled_missing "$EXTRAS_DONE"
+				if [ -n "$MISSING" ]; then EXTRAS_WARNING="$MISSING could not be kept turned off"; else EXTRAS_WARNING="$_back came back after the restart and was turned off again"; fi
+				warn "$EXTRAS_WARNING"
+			fi
+		fi
 	fi
 
 	step "Connect kinframe to $_server"
@@ -900,9 +1403,13 @@ convert() {
 		say "Dry run: nothing on the frame was changed. The log is in $LOG_FILE."
 	else
 		say ""
+		for _w in "${DATA_WARNING:-}" "${DATA_NOTE:-}" "${CERT_WARNING:-}" "${HOSTS_WARNING:-}" "${DISABLE_WARNING:-}" "${EXTRAS_WARNING:-}"; do
+			[ -n "$_w" ] && say "Note: $_w"
+		done
 		say "Done. Follow the setup on the frame (language, Wi-Fi, time zone)."
 		say "At the end it shows a code: enter it at $_server/frames/add to add the frame to your family."
 		say "Photos sent to the frame with Frameo are then imported automatically, with their captions and senders."
+		say "A factory reset turns the original app and its firmware updaters back on: run this convert again after one."
 		say "The log is in $LOG_FILE."
 	fi
 }
@@ -936,6 +1443,11 @@ revert() {
 		write_bootanimation "$RESTORE_BOOTANIMATION"
 	fi
 
+	if [ "$BOOT_ANIM_OK" = 1 ]; then
+		step "Unblock the firmware update servers ($HOSTS)"
+		edit_hosts unblock
+	fi
+
 	step "Enable Frameo and the firmware updaters"
 	for _p in $DISABLE_PACKAGES; do
 		case $(state_of "$_p") in
@@ -943,6 +1455,13 @@ revert() {
 		1:enabled) say "  $_p is already enabled" ;;
 		*) say "  $_p is not installed" ;;
 		esac
+	done
+	# extrasToEnable(): what the convert recorded, or without a record every extra package that is disabled.
+	if [ $STATE_EXISTS = 1 ]; then _recorded=$EXTRAS_STATE; else _recorded=$EXTRA_PACKAGES; fi
+	for _p in $EXTRA_PACKAGES; do
+		if in_list "$_p" "$_recorded" && has_line "$DISABLED_LIST" "$_p"; then
+			wr_expect "$(fill "$CMD_enable" "pkg=$_p")" 'enabled' || warn "could not enable $_p: $OUT"
+		fi
 	done
 
 	step "Uninstall kinframe"
@@ -956,8 +1475,10 @@ revert() {
 	*) say "  kinframe is not installed" ;;
 	esac
 	wr "$(fill "$CMD_cleanup")"
+	[ $STATE_EXISTS = 1 ] && wr "$(fill "$CMD_removeState")"
 
 	step "Restart"
+	settle
 	if [ "$DRY_RUN" = 1 ]; then
 		say "  would run: adb reboot"
 		say ""

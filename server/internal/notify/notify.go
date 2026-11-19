@@ -26,6 +26,14 @@ type Push struct {
 	Key  string            // message key, e.g. "reaction"
 	Args map[string]string // substitutions for the localized text
 	IDs  map[string]string // ids clients use to fetch details
+	// Text, if set, picks the localized texts instead of Key (one key, several
+	// messages: subscription_decided is approved or rejected).
+	Text string
+	// Tag, if set, is sent as the payload's "tag": a newer notification with
+	// the same tag replaces the older one (birthday greetings:
+	// "birthday:<birthday_id>:<date>"). APNs delivery, once built, must set
+	// apns-collapse-id to it; FCM the notification tag / collapse key.
+	Tag string
 }
 
 // Sender delivers one push payload to one endpoint. Gone reports the endpoint
@@ -70,8 +78,16 @@ func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 		if ep.Locale != nil {
 			locale = *ep.Locale
 		}
-		title, body := Text(locale, p.Key, p.Args)
-		payload, _ := json.Marshal(map[string]any{"type": ev["type"], "key": p.Key, "title": title, "body": body, "ids": p.IDs})
+		textKey := p.Key
+		if p.Text != "" {
+			textKey = p.Text
+		}
+		title, body := Text(locale, textKey, p.Args)
+		msg := map[string]any{"type": ev["type"], "key": p.Key, "title": title, "body": body, "ids": p.IDs}
+		if p.Tag != "" {
+			msg["tag"] = p.Tag
+		}
+		payload, _ := json.Marshal(msg)
 		gone, err := n.Sender.Send(ctx, ep, payload)
 		if gone {
 			_ = n.Store.DeletePushEndpoint(ctx, userID, ep.ID)

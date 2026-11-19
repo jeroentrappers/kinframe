@@ -75,10 +75,10 @@ class SendRunner(
                 }
             }
             val ready = store.get(id) ?: return Outcome.Failed(ProblemCode.NOT_FOUND)
-            val created = api.createSend(SendCreate(ready.frameIds, ready.items.map { it.toSendItem() }), idempotencyKey = ready.id)
+            val created = api.createSend(SendCreate.of(ready.frameIds, ready.feedIds, ready.items.map { it.toSendItem() }), idempotencyKey = ready.id)
             cleanup(ready)
             store.remove(id)
-            Outcome.Sent(created.id, ready.frameNames)
+            Outcome.Sent(created.id, ready.recipientNames)
         } catch (e: CancellationException) {
             store.update(id) { it.copy(state = OutboxState.QUEUED) }
             throw e

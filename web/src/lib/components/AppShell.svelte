@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { auth } from '$lib/auth.svelte';
 	import { live } from '$lib/live.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 	import { t, type MessageKey } from '$lib/i18n/index.svelte';
 	import Logo from './Logo.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
@@ -10,12 +11,16 @@
 
 	let { children }: { children: Snippet } = $props();
 
-	const tabs: { href: string; label: MessageKey; icon: IconName }[] = [
+	type Tab = { href: string; label: MessageKey; icon: IconName };
+	const FEEDS: Tab = { href: '/feeds', label: 'nav.feeds', icon: 'feed' };
+	// Feeds sit between History and Settings, only when the server has them (discovery `feeds`).
+	const tabs = $derived<Tab[]>([
 		{ href: '/frames', label: 'nav.frames', icon: 'frame' },
 		{ href: '/send', label: 'nav.send', icon: 'send' },
 		{ href: '/history', label: 'nav.history', icon: 'history' },
+		...(discovery.feeds ? [FEEDS] : []),
 		{ href: '/settings', label: 'nav.settings', icon: 'settings' }
-	];
+	]);
 
 	const isActive = (href: string) => page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 </script>
@@ -28,7 +33,7 @@
 			<Logo size={30} />
 		</a>
 		<nav class="desktop-nav" aria-label={t('a11y.mainNav')}>
-			{#each tabs.slice(0, 3) as tab}
+			{#each tabs.filter((x) => x.href !== '/settings') as tab}
 				<a href={tab.href} class:active={isActive(tab.href)} aria-current={isActive(tab.href) ? 'page' : undefined}>
 					<Icon name={tab.icon} size={18} />
 					{t(tab.label)}
@@ -63,7 +68,7 @@
 	{@render children()}
 </main>
 
-<nav class="tabbar" aria-label={t('a11y.mainNav')}>
+<nav class="tabbar" aria-label={t('a11y.mainNav')} style="--tabs:{tabs.length}">
 	{#each tabs as tab}
 		<a href={tab.href} class:active={isActive(tab.href)} aria-current={isActive(tab.href) ? 'page' : undefined}>
 			<span class="tab-icon"><Icon name={tab.icon} size={22} stroke={isActive(tab.href) ? 2.3 : 1.8} /></span>
@@ -153,7 +158,7 @@
 		right: 0;
 		bottom: 0;
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(var(--tabs, 4), 1fr);
 		height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 		padding-bottom: env(safe-area-inset-bottom);
 		background: color-mix(in srgb, var(--surface) 97%, transparent);

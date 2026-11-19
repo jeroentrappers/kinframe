@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="credit_via">%1$s · forrás: %2$s</string>
+</resources>

@@ -55,8 +55,12 @@ class CalendarController(private val c: FrameController) {
 
     /** The merged calendar to show; null when the frame has no calendars (or none synced yet). */
     val data: StateFlow<CalendarData?> by lazy {
-        combine(parsed, countdownOverrides) { d, o -> o.entries.fold(d ?: return@combine null) { acc, (id, on) -> acc.withCountdown(id, on) } }
-            .stateIn(c.scope, SharingStarted.Eagerly, null)
+        val withOverrides = combine(parsed, countdownOverrides) { d, o -> o.entries.fold(d ?: return@combine null) { acc, (id, on) -> acc.withCountdown(id, on) } }
+        // Birthdays are all-day entries computed on the frame (birthdays.md §6.6), around today's year.
+        val year = c.birthdays.today.map { it?.year }.distinctUntilChanged()
+        combine(withOverrides, c.birthdays.people, year) { d, people, y ->
+            CalendarData.withBirthdays(d, people, y?.let { c.birthdays.today.value }, g.clock.zone)
+        }.flowOn(Dispatchers.Default).stateIn(c.scope, SharingStarted.Eagerly, null)
     }
 
     val zone: ZoneId get() = g.clock.zone
@@ -130,7 +134,15 @@ class CalendarController(private val c: FrameController) {
         }
     }
 
-    fun showEvent(e: CalEvent?) { _detail.value = e }
+    /** On the day a birthday entry opens the greeting sheet instead of the details (birthdays.md §6.6). */
+    fun showEvent(e: CalEvent?) {
+        val b = e?.birthday
+        if (b != null && b.date == c.birthdays.today.value) {
+            c.birthdays.openSheet()
+            return
+        }
+        _detail.value = e
+    }
 
     /** "Sync now": the server re-syncs every calendar; a `calendar` change follows when something changed. */
     fun syncNow() {

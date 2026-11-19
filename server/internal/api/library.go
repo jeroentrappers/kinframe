@@ -20,7 +20,8 @@ func (s *Server) ListPlacements(ctx context.Context, req gen.ListPlacementsReque
 	if err != nil {
 		return nil, err
 	}
-	f := store.PlacementFilter{FrameID: req.FrameId, Limit: pageLimit(req.Params.Limit), SenderID: req.Params.SenderId, AlbumID: req.Params.AlbumId}
+	f := store.PlacementFilter{FrameID: req.FrameId, Limit: pageLimit(req.Params.Limit), SenderID: req.Params.SenderId, AlbumID: req.Params.AlbumId,
+		FeedID: req.Params.FeedId}
 	if !m.Effective().SeeLibrary {
 		f.OnlySender = &m.UserID
 	}
@@ -213,6 +214,8 @@ type albumJSON struct {
 	CoverPlacementID *uuid.UUID      `json:"cover_placement_id,omitempty"`
 	PlacementIDs     []uuid.UUID     `json:"placement_ids"`
 	Schedule         json.RawMessage `json:"schedule"`
+	OnlyInAlbumMode  bool            `json:"only_in_album_mode"`
+	PhotoSourceCount int             `json:"photo_source_count"`
 }
 
 func albumOut(a *store.Album) albumJSON {
@@ -224,7 +227,8 @@ func albumOut(a *store.Album) albumJSON {
 	if len(sched) == 0 {
 		sched = json.RawMessage("null")
 	}
-	return albumJSON{ID: a.ID, Name: a.Name, Version: a.Version, PlacementCount: len(ids), CoverPlacementID: a.CoverPlacementID, PlacementIDs: ids, Schedule: sched}
+	return albumJSON{ID: a.ID, Name: a.Name, Version: a.Version, PlacementCount: len(ids), CoverPlacementID: a.CoverPlacementID, PlacementIDs: ids, Schedule: sched,
+		OnlyInAlbumMode: a.OnlyInAlbumMode, PhotoSourceCount: a.PhotoSourceCount}
 }
 
 func (s *Server) ListAlbums(ctx context.Context, req gen.ListAlbumsRequestObject) (gen.ListAlbumsResponseObject, error) {
@@ -243,7 +247,7 @@ func (s *Server) ListAlbums(ctx context.Context, req gen.ListAlbumsRequestObject
 }
 
 func albumWrite(ctx context.Context, b *gen.AlbumWrite) (store.AlbumWrite, error) {
-	w := store.AlbumWrite{Name: b.Name, PlacementIDs: b.PlacementIds, CoverPlacementID: b.CoverPlacementId}
+	w := store.AlbumWrite{Name: b.Name, PlacementIDs: b.PlacementIds, CoverPlacementID: b.CoverPlacementId, OnlyInAlbumMode: b.OnlyInAlbumMode}
 	if present, null := rawField(ctx, "schedule"); null {
 		raw := json.RawMessage("null")
 		w.Schedule = &raw
@@ -335,7 +339,17 @@ func (s *Server) DeleteAlbum(ctx context.Context, req gen.DeleteAlbumRequestObje
 	if err := requirePerm(m, m.Effective().ManageLibrary, "manage_library"); err != nil {
 		return nil, err
 	}
+	removeItems := req.Params.RemoveSourceItems != nil && *req.Params.RemoveSourceItems
+	var sources []removedSource
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
+		if _, err := s.st.GetAlbum(ctx, tx, req.FrameId, req.AlbumId); err != nil {
+			return notFound(err, "album")
+		}
+		// Its photo sources go with it; remove_source_items also removes what they imported (§9.1).
+		var err error
+		if sources, err = s.deleteSourcesOf(ctx, tx, &req.AlbumId, nil, removeItems); err != nil {
+			return err
+		}
 		deleted, err := tx.DeleteAlbum(ctx, req.FrameId, req.AlbumId)
 		if err == nil && !deleted {
 			return problem.New(problem.NotFound, "album not found")
@@ -345,6 +359,7 @@ func (s *Server) DeleteAlbum(ctx context.Context, req gen.DeleteAlbumRequestObje
 	if err != nil {
 		return nil, err
 	}
+	s.announceRemovedSources(sources)
 	// A frame playing the deleted album goes back to all photos.
 	if f, err := s.st.GetFrame(ctx, s.st.Q(), req.FrameId); err == nil {
 		var doc struct {

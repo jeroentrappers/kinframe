@@ -18,6 +18,8 @@ public final class ShareModel {
     private weak var context: NSExtensionContext?
     public private(set) var phase: Phase = .loading
     public private(set) var frames: [FrameSummary] = []
+    /// Feeds you can post to (when the server has feeds), next to the frames.
+    public private(set) var feeds: [FeedSummary] = []
     /// "Preparing 2 of 3 · 40 %" while the queue prepares the files.
     public private(set) var progress: String?
     private var runner: OutboxRunner?
@@ -27,6 +29,7 @@ public final class ShareModel {
     private let auth = AuthService()
     private var server: ServerConfig?
     private static let lastFramesKey = "share.lastFrames"
+    private static let lastFeedsKey = "share.lastFeeds"
 
     /// `preview` files are used instead of the extension context (DEBUG previews in the app).
     public init(context: NSExtensionContext?, preview: [URL] = []) {
@@ -46,15 +49,24 @@ public final class ShareModel {
             return
         }
         let api = API(baseURL: server.apiBase, tokens: auth)
-        let all = (try? await api.call { try await $0.listMyFrames().ok.body.json }) ?? []
-        frames = all.filter { $0.can(\.send) }
+        let feedsOn = server.discovery.feeds
+        async let allFrames: [FrameSummary]? = try? await api.call { try await $0.listMyFrames().ok.body.json }
+        async let allFeeds: [FeedSummary]? = feedsOn ? (try? await api.myFeeds()) : nil
+        frames = ((await allFrames) ?? []).filter { $0.can(\.send) }
+        feeds = (await allFeeds) ?? []
         await files
-        if frames.isEmpty {
+        if frames.isEmpty, feeds.isEmpty {
             phase = .noFrames
             return
         }
         let last = Set(AppGroup.defaults.stringArray(forKey: Self.lastFramesKey) ?? [])
-        compose.frameIds = frames.count == 1 ? [frames[0].id] : Set(frames.map(\.id)).intersection(last)
+        let lastFeeds = Set(AppGroup.defaults.stringArray(forKey: Self.lastFeedsKey) ?? [])
+        if frames.count == 1, feeds.isEmpty {
+            compose.frameIds = [frames[0].id]
+        } else {
+            compose.frameIds = Set(frames.map(\.id)).intersection(last)
+            compose.feedIds = Set(feeds.map(\.id)).intersection(lastFeeds)
+        }
         phase = .ready
     }
 
@@ -105,9 +117,10 @@ public final class ShareModel {
         phase = .sending
         do {
             let store = OutboxStore()
-            let job = try compose.makeJob(server: server.apiBase, frames: frames, store: store)
+            let job = try compose.makeJob(server: server.apiBase, frames: frames, feeds: feeds, store: store)
             try store.save(job)
             AppGroup.defaults.set(job.frameIds, forKey: Self.lastFramesKey)
+            AppGroup.defaults.set(job.feedIds ?? [], forKey: Self.lastFeedsKey)
             let transport = BackgroundUploadTransport(identifier: "app.kinframe.family.share.\(UUID().uuidString)")
             let runner = OutboxRunner(store: store, transport: transport, owner: "share-\(UUID().uuidString)", preparer: MediaPreparer())
             self.runner = runner
@@ -212,7 +225,8 @@ public struct ShareRootView: View {
                             }
                             .accessibilityElement(children: .combine)
                         }
-                        frames
+                        if !model.frames.isEmpty { frames }
+                        if !model.feeds.isEmpty { feeds }
                         caption
                         if model.compose.issueCount > 0 {
                             Callout(Lp("send.issues", count: model.compose.issueCount), kind: .error)
@@ -288,6 +302,38 @@ public struct ShareRootView: View {
                                     StatusDot(online: frame.online)
                                     Text(frame.online ? L("frame.online") : L("frame.offline")).font(.footnote).foregroundStyle(Palette.textMuted)
                                 }
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .frame(minHeight: 56)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+            }
+            .card(padding: 0)
+        }
+    }
+
+    /// Feeds as recipients, in their own section ("Peeters kids · 5 frames").
+    private var feeds: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(model.frames.isEmpty ? L("send.to") : L("ios.feeds.sendToFeeds")).font(.headline)
+            VStack(spacing: 0) {
+                ForEach(model.feeds) { feed in
+                    let on = model.compose.feedIds.contains(feed.id)
+                    Button {
+                        model.compose.toggle(feed: feed.id)
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: on ? "checkmark.circle.fill" : "circle")
+                                .font(.title2)
+                                .foregroundStyle(on ? Palette.primary : Palette.borderStrong)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(feed.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                                Text(Lp("ios.feeds.frameCount", count: feed.subscriptionCount)).font(.footnote).foregroundStyle(Palette.textMuted)
                             }
                             Spacer()
                         }

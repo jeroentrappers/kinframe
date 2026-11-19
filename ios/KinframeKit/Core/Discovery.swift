@@ -45,6 +45,18 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var calendar: Bool = false
     /// The server runs the pre-order shop (`shop` in discovery): operators see its reservations.
     public var shop: Bool = false
+    /// Feeds and subscriptions are on (`feeds`, docs/spec/feeds.md). When off, the app shows nothing of them.
+    public var feeds: Bool = false
+    /// Feeds have birthday lists (`birthdays`, docs/spec/birthdays.md). Only counts together with `feeds`.
+    public var birthdays: Bool = false
+    /// Albums and feeds can sync from Immich or iCloud (`photo_sources`, docs/spec/photo-sources.md), with the providers
+    /// this server allows (raw values: a newer server may list providers this app doesn't know, they are skipped).
+    public var photoSources: Bool = false
+    public var photoSourceProviders: [String] = []
+    /// Sources may reach home-network addresses (`photo_sources_private_networks`).
+    public var photoSourcesPrivateNetworks: Bool = false
+    /// "Add from Google Photos" is offered (`google_photos_import`).
+    public var googlePhotosImport: Bool = false
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -58,8 +70,12 @@ public struct Discovery: Codable, Equatable, Sendable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case name, version, api, web, auth, limits, weather, calendar, shop
+        case name, version, api, web, auth, limits, weather, calendar, shop, feeds, birthdays
         case devAuth = "dev_auth"
+        case photoSources = "photo_sources"
+        case photoSourceProviders = "photo_source_providers"
+        case photoSourcesPrivateNetworks = "photo_sources_private_networks"
+        case googlePhotosImport = "google_photos_import"
     }
 
     public init(from decoder: Decoder) throws {
@@ -73,6 +89,12 @@ public struct Discovery: Codable, Equatable, Sendable {
         devAuth = try c.decodeIfPresent(Bool.self, forKey: .devAuth) ?? false
         weather = try c.decodeIfPresent(Bool.self, forKey: .weather) ?? false
         calendar = try c.decodeIfPresent(Bool.self, forKey: .calendar) ?? false
+        feeds = (try? c.decodeIfPresent(Bool.self, forKey: .feeds)) ?? false
+        birthdays = feeds && ((try? c.decodeIfPresent(Bool.self, forKey: .birthdays)) ?? false)
+        photoSources = (try? c.decodeIfPresent(Bool.self, forKey: .photoSources)) ?? false
+        photoSourceProviders = photoSources ? ((try? c.decodeIfPresent([String].self, forKey: .photoSourceProviders)) ?? []) : []
+        photoSourcesPrivateNetworks = (try? c.decodeIfPresent(Bool.self, forKey: .photoSourcesPrivateNetworks)) ?? false
+        googlePhotosImport = (try? c.decodeIfPresent(Bool.self, forKey: .googlePhotosImport)) ?? false
         // The server sends the shop's configuration (an object); we keep only whether there is one.
         if let b = try? c.decode(Bool.self, forKey: .shop) {
             shop = b

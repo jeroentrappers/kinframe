@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Start-up splash (ui/BootSplash.kt): one quiet line under the boot animation's dots saying what the frame is doing. -->
+    <string name="startup_starting">Starting…</string>
+    <string name="startup_checking_library">Checking your photos after a power cut…</string>
+    <string name="startup_checking_update">Checking the app version…</string>
+    <string name="startup_loading_photos">Loading your photos…</string>
+    <string name="startup_preparing_photo">Preparing the first photo…</string>
+    <string name="startup_waiting_wifi">Waiting for Wi-Fi…</string>
+    <string name="startup_setting_clock">Setting the clock…</string>
+    <string name="startup_connecting">Connecting to the server…</string>
+    <!-- Card after the frame lost power without shutting down (ui/PowerCutNotice.kt). -->
+    <string name="power_cut_title">Switched off without shutting down</string>
+    <string name="power_cut_body_ok">Everything was checked and is fine.</string>
+    <string name="power_cut_body_redownload">Everything was checked. Some photos are being downloaded again.</string>
+    <!-- %1$s = menu_power, %2$s = power_off, %3$s = safe_title, so the tip quotes the exact labels. -->
+    <string name="power_cut_tip">Next time, choose %1$s → %2$s in the menu and wait until the screen says “%3$s”.</string>
+</resources>

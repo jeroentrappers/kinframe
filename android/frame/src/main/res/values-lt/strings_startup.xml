@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Paleidžiama…</string>
+    <string name="startup_checking_library">Po elektros dingimo tikrinamos nuotraukos…</string>
+    <string name="startup_checking_update">Tikrinama programėlės versija…</string>
+    <string name="startup_loading_photos">Įkeliamos nuotraukos…</string>
+    <string name="startup_preparing_photo">Ruošiama pirmoji nuotrauka…</string>
+    <string name="startup_waiting_wifi">Laukiama Wi-Fi…</string>
+    <string name="startup_setting_clock">Nustatomas laikrodis…</string>
+    <string name="startup_connecting">Jungiamasi prie serverio…</string>
+    <string name="power_cut_title">Rėmelis išjungtas neišjungus tinkamai</string>
+    <string name="power_cut_body_ok">Viskas patikrinta ir tvarkoje.</string>
+    <string name="power_cut_body_redownload">Viskas patikrinta. Kai kurios nuotraukos atsisiunčiamos iš naujo.</string>
+    <string name="power_cut_tip">Kitą kartą meniu pasirinkite %1$s → %2$s ir palaukite, kol ekrane pasirodys „%3$s“.</string>
+</resources>

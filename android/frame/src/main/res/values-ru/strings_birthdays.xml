@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s: сегодня исполняется %2$d!</item>
+        <item quantity="few">🎈 %1$s: сегодня исполняется %2$d!</item>
+        <item quantity="many">🎈 %1$s: сегодня исполняется %2$d!</item>
+        <item quantity="other">🎈 %1$s: сегодня исполняется %2$d!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Сегодня день рождения: %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Сегодня дни рождения</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">и ещё %d</item>
+        <item quantity="few">и ещё %d</item>
+        <item quantity="many">и ещё %d</item>
+        <item quantity="other">и ещё %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s: исполнится %2$d</item>
+        <item quantity="few">%1$s: исполнится %2$d</item>
+        <item quantity="many">%1$s: исполнится %2$d</item>
+        <item quantity="other">%1$s: исполнится %2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">День рождения: %1$s</string>
+    <string name="birthday_countdown_two">%1$s и %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s и ещё %2$d</item>
+        <item quantity="few">%1$s и ещё %2$d</item>
+        <item quantity="many">%1$s и ещё %2$d</item>
+        <item quantity="other">%1$s и ещё %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Поздравить с днём рождения с этой рамки</string>
+    <string name="birthday_greet_button">Поздравить: %1$s</string>
+    <string name="birthday_greet_sent">Отправлено ✓ — семья увидит</string>
+    <string name="birthday_detail_label">День рождения</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">исполнится %d</item>
+        <item quantity="few">исполнится %d</item>
+        <item quantity="many">исполнится %d</item>
+        <item quantity="other">исполнится %d</item>
+    </plurals>
+</resources>

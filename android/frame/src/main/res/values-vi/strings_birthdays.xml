@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="other">🎈 Hôm nay %1$s tròn %2$d tuổi!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Hôm nay là sinh nhật của %1$s!</string>
+    <string name="birthday_card_title_many">🎈 Sinh nhật hôm nay</string>
+    <plurals name="birthday_card_more">
+        <item quantity="other">và %d người khác</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="other">%1$s tròn %2$d tuổi</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Sinh nhật của %1$s</string>
+    <string name="birthday_countdown_two">%1$s và %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="other">%1$s và %2$d người khác</item>
+    </plurals>
+    <string name="birthday_greet_title">Chúc mừng sinh nhật từ khung ảnh này</string>
+    <string name="birthday_greet_button">Chúc mừng sinh nhật %1$s</string>
+    <string name="birthday_greet_sent">Đã gửi ✓ — gia đình sẽ thấy</string>
+    <string name="birthday_detail_label">Sinh nhật</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="other">tròn %d tuổi</item>
+    </plurals>
+</resources>

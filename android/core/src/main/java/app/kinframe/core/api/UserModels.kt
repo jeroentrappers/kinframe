@@ -17,6 +17,8 @@ data class User(
     val avatarUrl: String? = null,
     val shareLocationNames: Boolean = false,
     val locale: String? = null,
+    /** IANA time zone reported by the apps (birthday morning notifications); null until one did. */
+    val timezone: String? = null,
     val isOperator: Boolean = false,
     val createdAt: String? = null,
 ) {
@@ -199,8 +201,19 @@ object PreparedProfile {
     const val VIDEO = "video-master-v1"
 }
 
+/**
+ * `SendCreate`: recipients are [frameIds] plus [feedIds]; together they must not be empty (feeds.md §6.1).
+ * [feedIds] is left out of the body when there are none, so servers without feeds see the request they know.
+ */
 @Serializable
-data class SendCreate(val frameIds: List<String>, val items: List<SendItemCreate>)
+data class SendCreate(val frameIds: List<String>, val items: List<SendItemCreate>, val feedIds: List<String>? = null) {
+    companion object {
+        fun of(frameIds: List<String>, feedIds: List<String>, items: List<SendItemCreate>): SendCreate {
+            require(frameIds.isNotEmpty() || feedIds.isNotEmpty()) { "a send needs at least one frame or feed" }
+            return SendCreate(frameIds, items, feedIds.takeIf { it.isNotEmpty() })
+        }
+    }
+}
 
 object PlacementStatus {
     const val PENDING = "pending"
@@ -246,6 +259,10 @@ data class Send(
     val items: List<Item> = emptyList(),
     val frames: List<SendFrame> = emptyList(),
     val summary: SendSummary? = null,
+    /** The feeds this send was posted to, with receipts; feed placements are not in [frames]. */
+    val feeds: List<SendFeed> = emptyList(),
+    /** A photo source or Google Photos import made this send on the sender's behalf ("12 photos via Immich"). */
+    val via: ItemVia? = null,
 )
 
 @Serializable

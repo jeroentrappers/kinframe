@@ -34,6 +34,7 @@ class FcmService : FirebaseMessagingService() {
             title = data["title"] ?: message.notification?.title.orEmpty(),
             body = data["body"] ?: message.notification?.body.orEmpty(),
             ids = data.filterKeys { it.endsWith("_id") },
+            key = data["key"].orEmpty(),
         )
         Notifications.showPush(this, msg)
         (application as FamilyApp).graph.onPush(msg)

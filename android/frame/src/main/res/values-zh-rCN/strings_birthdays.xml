@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="other">🎈 今天是%1$s的%2$d岁生日！</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 今天是%1$s的生日！</string>
+    <string name="birthday_card_title_many">🎈 今天的生日</string>
+    <plurals name="birthday_card_more">
+        <item quantity="other">还有%d人</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="other">%1$s满%2$d岁</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s的生日</string>
+    <string name="birthday_countdown_two">%1$s和%2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="other">%1$s和另外%2$d人</item>
+    </plurals>
+    <string name="birthday_greet_title">从这个相框送上生日祝福</string>
+    <string name="birthday_greet_button">祝%1$s生日快乐</string>
+    <string name="birthday_greet_sent">已发送 ✓ — 家人会看到</string>
+    <string name="birthday_detail_label">生日</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="other">满%d岁</item>
+    </plurals>
+</resources>

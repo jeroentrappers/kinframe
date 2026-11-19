@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="other">🎈 %1$s berulang tahun ke-%2$d hari ini!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Hari ini %1$s berulang tahun!</string>
+    <string name="birthday_card_title_many">🎈 Ulang tahun hari ini</string>
+    <plurals name="birthday_card_more">
+        <item quantity="other">dan %d lainnya</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="other">%1$s berulang tahun ke-%2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">Ulang tahun %1$s</string>
+    <string name="birthday_countdown_two">%1$s dan %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="other">%1$s dan %2$d lainnya</item>
+    </plurals>
+    <string name="birthday_greet_title">Ucapkan selamat ulang tahun dari bingkai ini</string>
+    <string name="birthday_greet_button">Ucapkan selamat ulang tahun kepada %1$s</string>
+    <string name="birthday_greet_sent">Terkirim ✓ — keluarga akan melihatnya</string>
+    <string name="birthday_detail_label">Ulang tahun</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="other">ulang tahun ke-%d</item>
+    </plurals>
+</resources>

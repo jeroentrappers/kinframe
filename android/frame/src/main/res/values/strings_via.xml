@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Photos a photo source (Immich, iCloud) or a Google Photos import brought in (photo-sources.md §9.5). -->
+<resources>
+    <!-- Caption credit: the sender (or "sender · feed"), then the service name, which is never translated ("Immich", "iCloud", "Google Photos"). -->
+    <string name="credit_via">%1$s via %2$s</string>
+</resources>

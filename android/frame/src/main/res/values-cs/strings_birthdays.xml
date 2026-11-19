@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s má dnes %2$d rok!</item>
+        <item quantity="few">🎈 %1$s má dnes %2$d roky!</item>
+        <item quantity="many">🎈 %1$s má dnes %2$d roku!</item>
+        <item quantity="other">🎈 %1$s má dnes %2$d let!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s má dnes narozeniny!</string>
+    <string name="birthday_card_title_many">🎈 Dnešní narozeniny</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">a dalších %d</item>
+        <item quantity="few">a dalších %d</item>
+        <item quantity="many">a dalších %d</item>
+        <item quantity="other">a dalších %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s bude mít %2$d rok</item>
+        <item quantity="few">%1$s bude mít %2$d roky</item>
+        <item quantity="many">%1$s bude mít %2$d roku</item>
+        <item quantity="other">%1$s bude mít %2$d let</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s má narozeniny</string>
+    <string name="birthday_countdown_two">%1$s a %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s a dalších %2$d</item>
+        <item quantity="few">%1$s a dalších %2$d</item>
+        <item quantity="many">%1$s a dalších %2$d</item>
+        <item quantity="other">%1$s a dalších %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Popřát k narozeninám z tohoto rámečku</string>
+    <string name="birthday_greet_button">Popřát k narozeninám: %1$s</string>
+    <string name="birthday_greet_sent">Odesláno ✓ — rodina to uvidí</string>
+    <string name="birthday_detail_label">Narozeniny</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">bude mít %d rok</item>
+        <item quantity="few">bude mít %d roky</item>
+        <item quantity="many">bude mít %d roku</item>
+        <item quantity="other">bude mít %d let</item>
+    </plurals>
+</resources>

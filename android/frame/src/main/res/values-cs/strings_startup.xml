@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Spouštění…</string>
+    <string name="startup_checking_library">Kontrola fotek po výpadku proudu…</string>
+    <string name="startup_checking_update">Kontrola verze aplikace…</string>
+    <string name="startup_loading_photos">Načítání fotek…</string>
+    <string name="startup_preparing_photo">Příprava první fotky…</string>
+    <string name="startup_waiting_wifi">Čekání na Wi-Fi…</string>
+    <string name="startup_setting_clock">Nastavování hodin…</string>
+    <string name="startup_connecting">Připojování k serveru…</string>
+    <string name="power_cut_title">Rámeček se vypnul bez řádného vypnutí</string>
+    <string name="power_cut_body_ok">Vše bylo zkontrolováno a je v pořádku.</string>
+    <string name="power_cut_body_redownload">Vše bylo zkontrolováno. Některé fotky se stahují znovu.</string>
+    <string name="power_cut_tip">Příště zvolte v nabídce %1$s → %2$s a počkejte, až se na obrazovce objeví „%3$s“.</string>
+</resources>

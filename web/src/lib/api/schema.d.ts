@@ -452,8 +452,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
-         *     renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+         * @description Place the same items on additional frames, or post them to feeds. Uses the same path as `sharePlacements`:
+         *     no new upload or master, renditions only for screen sizes that have none yet, and frames that already hold an
+         *     item are skipped (a placement that was only there through a feed becomes held directly, so unsubscribing no
+         *     longer removes it).
          */
         post: operations["forwardSend"];
         delete?: never;
@@ -618,11 +620,921 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** @description Placements stay on the frame. */
+        /**
+         * @description Placements stay on the frame, unless `remove_source_items` is true: then the photos the album's photo sources
+         *     imported are removed too (docs/spec/photo-sources.md §9.1). The album's photo sources are deleted either way.
+         */
         delete: operations["deleteAlbum"];
         options?: never;
         head?: never;
         patch: operations["updateAlbum"];
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/albums/{albumId}/photo-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The album's photo sources with their status (album managers, i.e. owner, admin or manage_library; `403 missing_permission` otherwise). */
+        get: operations["listAlbumPhotoSources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Feeds the caller is a member of (any role). See docs/spec/feeds.md. */
+        get: operations["listMyFeeds"];
+        put?: never;
+        /** @description The caller becomes the feed's owner. At most `limits.max_feeds_per_user` owned feeds (`409 limit_reached`). */
+        post: operations["createFeed"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /** @description Feed members only; everyone else gets `404 not_found` (feeds are never discoverable). */
+        get: operations["getFeed"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Owner only. Removes every post from every subscribed frame (placements that also reached a frame directly
+         *     stay), ends all subscriptions (`removed`, reason `feed_deleted`) and notifies the frames' owners and admins.
+         *     Items stay in the posters' sent history. Runs in the background; the feed is gone for clients at once.
+         */
+        delete: operations["deleteFeed"];
+        options?: never;
+        head?: never;
+        /** @description Owner or admin. Renaming re-emits the feed's placements on every subscribed frame so their credit follows. */
+        patch: operations["updateFeed"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Remove your own feed membership. The owner must transfer ownership first (`409 owner_cannot_leave`). */
+        post: operations["leaveFeed"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Owner only. The new owner must be a member; the previous owner becomes admin. */
+        post: operations["transferFeedOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Any feed member. */
+        get: operations["listFeedMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Owner or admin (admins cannot remove the owner or other admins). */
+        delete: operations["removeFeedMember"];
+        options?: never;
+        head?: never;
+        /** @description Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`. */
+        patch: operations["updateFeedMember"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Owner or admin. Pending requests from join invites (`via` is always `invite`). */
+        get: operations["listFeedJoinRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/join-requests/{requestId}/{decision}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Owner or admin. Approved requesters become posters. */
+        post: operations["decideFeedJoinRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description Owner or admin: all active (not expired, revoked or used up) invites. Posters, when the feed has
+         *     `posters_can_invite`: their own active invites.
+         */
+        get: operations["listFeedInvites"];
+        put?: never;
+        /**
+         * @description Owner or admin, or any member when the feed has `posters_can_invite` (default off) for `join` invites;
+         *     `subscribe` invites are pre-approved and stay owner/admin only (`403 forbidden`). Returns a link (`https://<web>/fi/<token>`, also shown as QR) and a short code for the
+         *     app's "Enter a code" field. `join` invites make the redeemer a poster (after approval unless the feed's
+         *     `invite_requires_approval` is off); `subscribe` invites let the redeemer subscribe frames they manage,
+         *     pre-approved, without joining.
+         */
+        post: operations["createFeedInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/invites/{inviteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Owner or admin, or the poster who created it. */
+        delete: operations["revokeFeedInvite"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feed-invites:lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Resolve a short feed invite code (typed into "Enter a code"; codes contain letters, frame codes are 8 digits)
+         *     to its preview, including the token for `acceptFeedInvite`. Rate-limited like code redemption; unknown codes
+         *     answer `404 invite_invalid`.
+         */
+        post: operations["lookupFeedInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feed-invites/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Requires sign-in so tokens can't be enumerated anonymously. */
+        get: operations["previewFeedInvite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feed-invites/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `join` invites: no body needed; the caller joins as poster or a join request is created. `subscribe` invites:
+         *     `frame_ids` (frames the caller manages: owner, admin or `change_settings`) are subscribed and active at once;
+         *     frames that already have a live subscription to the feed are reported with their existing one.
+         */
+        post: operations["acceptFeedInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
+         *     for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
+         *     they are null. Post as a feed is done with `createSend` (`feed_ids`).
+         */
+        get: operations["listFeedPosts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/posts/{postId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        get: operations["getFeedPost"];
+        put?: never;
+        post?: never;
+        /**
+         * @description The poster (unsend) or an owner/admin of the feed. Removes the post from the feed and its placements from every
+         *     subscribed frame, except placements that also reached a frame directly or through another feed. The send and its
+         *     direct placements are untouched. Never needs a frame to be online.
+         */
+        delete: operations["removeFeedPost"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/posts/{postId}/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Like `removeFeedPost` for one item. Removing the last item removes the post. */
+        delete: operations["removeFeedPostItem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/posts/{postId}/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
+         *     (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+         *     for direct sends; who moderated is never revealed.
+         */
+        get: operations["getFeedPostReceipts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/birthdays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description The feed's birthday people (docs/spec/birthdays.md), sorted by the next birthday in the caller's time zone.
+         *     Any feed member sees `approved` ones; owner and admins also see `pending` and `rejected` ones (rejected for 30
+         *     days), posters their own suggestions. `birth_year` is null unless the caller may see it (owner/admin, whoever
+         *     added the entry, the linked member, or `show_age` on).
+         */
+        get: operations["listFeedBirthdays"];
+        put?: never;
+        /**
+         * @description Add a birthday person. Owner, admins and (with the feed's `posters_can_add_birthdays`) posters add it as
+         *     `approved`: it reaches every frame with a birthday subscription. Other posters create a `pending` suggestion
+         *     and the feed's owner and admins are notified (`birthday.suggested`, push `birthday_suggestion`).
+         *     `409 duplicate_birthday` (existing entry's id in `detail`) when a pending or approved entry of this feed has
+         *     the same normalized name, day and month; `409 limit_reached` beyond `limits.max_birthdays_per_feed`
+         *     (pending and approved count); `422 validation_failed` for an impossible date (`day`) or year (`birth_year`).
+         *     `user_id` must be a member of this feed without another entry. The photo is uploaded afterwards with
+         *     `putFeedBirthdayPhoto`.
+         */
+        post: operations["createFeedBirthday"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/birthdays/{birthdayId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        /** @description Same visibility and field rules as `listFeedBirthdays`. */
+        get: operations["getFeedBirthday"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Owner and admins (any entry), the suggester (withdraw a pending suggestion), posters with
+         *     `posters_can_add_birthdays` (entries they added) and the linked member (their own entry). Deletes the entry,
+         *     its photo and its greetings; frames drop the person with the next `birthdays` change. Not reversible on the
+         *     server: clients offer Undo by creating it again.
+         */
+        delete: operations["removeFeedBirthday"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Owner and admins: any field of any entry (also of a pending suggestion before approving it). The suggester:
+         *     their pending suggestion. Posters with `posters_can_add_birthdays`: entries they added. The linked member:
+         *     `birth_year`, `show_age` and unlinking (`user_id: null`) of their own entry. Other fields answer
+         *     `403 forbidden`. Omitted fields are kept; `birth_year: null` clears the year. Changes to approved entries
+         *     reach the frames with a `birthdays` change. Same `409`/`422` rules as `createFeedBirthday`.
+         */
+        patch: operations["updateFeedBirthday"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/birthdays/{birthdayId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Owner or admin; `pending` → `approved`. Notifies the suggester (`birthday.decided`, push `birthday_decided`)
+         *     and puts the person on the frames. Repeating it on an approved entry returns it unchanged;
+         *     `409 already_decided` on a rejected one; `409 duplicate_birthday` when an approved entry with the same name
+         *     and date appeared meanwhile.
+         */
+        post: operations["approveFeedBirthday"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/birthdays/{birthdayId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Owner or admin; `pending` → `rejected`. Notifies the suggester. The entry stays visible to the suggester and
+         *     admins for 30 days, then it is deleted; a new suggestion for the same person is allowed at once. Repeating it
+         *     returns the entry unchanged; `409 already_decided` on an approved one (remove it instead).
+         */
+        post: operations["rejectFeedBirthday"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/birthdays/{birthdayId}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description Set the person's photo, like `putAvatar`: the server crops to a centred square, stores 256x256 WebP at a new
+         *     unguessable URL and deletes the previous file. Whoever may edit the entry's photo (see `updateFeedBirthday`;
+         *     the linked member too).
+         */
+        put: operations["putFeedBirthdayPhoto"];
+        post?: never;
+        /** @description Remove the uploaded photo; the linked member's avatar (if any) is used instead. */
+        delete: operations["deleteFeedBirthdayPhoto"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/birthday-greetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Greetings frames sent for this feed's birthday people ("Opa's frame says happy birthday to Oma"), newest
+         *     first, kept 13 months. Any feed member.
+         */
+        get: operations["listFeedBirthdayGreetings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The caller's own preferences in this feed (any member). `birthday_notifications` (default true): the morning
+         *     notification on a birthday day and greeting notifications for this feed's people.
+         */
+        patch: operations["updateFeedPreferences"];
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description Owner and admins see every status, including who requested. Other members see `active` and `paused`
+         *     subscriptions only, without `requested_by_name`. Rejected and removed ones are listed for 30 days.
+         */
+        get: operations["listFeedSubscriptions"];
+        put?: never;
+        /**
+         * @description Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
+         *     `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
+         *     has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+         *     `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
+         *     this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
+         */
+        post: operations["requestSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The feeds a frame subscribes to. Frame managers (owner, admin, `change_settings`) see every status; other
+         *     members see `active` and `paused` ones.
+         */
+        get: operations["listFrameSubscriptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscriptions/{subscriptionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        /** @description Visible to the frame's members and the feed's members, with the same field rules as the lists. */
+        get: operations["getSubscription"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Ends a subscription (`removed`): frame managers unsubscribe (or withdraw a pending request), the requester may
+         *     withdraw their pending request, and feed owners/admins remove any subscription. Feed-only placements leave the
+         *     frame; `slideshow.feed_id` resets to null if it pointed at this feed. The other side is notified.
+         */
+        delete: operations["removeSubscription"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Frame managers only. Changing the history option backfills (quietly) or trims feed-only placements of
+         *     history items; posts made after `activated_at` are never trimmed. Allowed in `pending`, `active` and
+         *     `paused`.
+         */
+        patch: operations["updateSubscription"];
+        trace?: never;
+    };
+    "/v1/subscriptions/{subscriptionId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Feed owner or admin; `pending` → `active`. Starts the history backfill and notifies the requester. */
+        post: operations["approveSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscriptions/{subscriptionId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Feed owner or admin; `pending` → `rejected`. Notifies the requester. */
+        post: operations["rejectSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscriptions/{subscriptionId}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Frame managers; `active` → `paused`. The feed's placements leave the frame (kept on the server, restored on
+         *     resume) unless they also reached it directly or through another active feed. No new posts are placed.
+         */
+        post: operations["pauseSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscriptions/{subscriptionId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Frame managers; `paused` → `active`. Restores the feed's placements and quietly places the posts made while
+         *     paused.
+         */
+        post: operations["resumeSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/photo-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The feed's photo sources with their status (feed owner and admins; posters get `403 missing_permission`). */
+        get: operations["listFeedPhotoSources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/photo-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Sources the caller owns (set up), across all albums and feeds, for Settings → Photo sources. */
+        get: operations["listMyPhotoSources"];
+        put?: never;
+        /**
+         * @description Connect an outside album to a kinframe album (`album_id`: album managers of its frame) or a feed (`feed_id`:
+         *     feed owner/admins). The caller becomes the source's owner: imported photos are sent by them. The server tests
+         *     the connection first (`422 source_test_failed` with the `PhotoSourceErrorCode` in `detail`; a blocked private
+         *     address is `422 validation_failed` on `url`/`server_url`), then starts the first run (`running: true`).
+         *     Secrets (`url`, `api_key`, `password`) are sealed at rest and never returned. `409 duplicate_source` when the
+         *     same outside album already feeds this target (`detail`: its id), `409 limit_reached` beyond
+         *     `limits.max_photo_sources_per_target` or `max_photo_sources_per_user`, `503 feature_disabled` when the server
+         *     has photo sources (or this provider) turned off. Rate-limited (30/h per user).
+         */
+        post: operations["createPhotoSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/photo-sources:test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Try a connection without saving it: reads the outside album's name and size, and the warnings the source would
+         *     have (`downloads_disabled`, `metadata_hidden`). `ok: false` with `error_code` when it cannot be read. For
+         *     `immich_api` without `immich_album_id`, `albums` lists the account's albums (like `listImmichAlbums`).
+         *     Rate-limited together with `listImmichAlbums` (30/h per user).
+         */
+        post: operations["testPhotoSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/photo-sources:immich-albums": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The albums an Immich API key can read (own and shared with that account), before creating an `immich_api`
+         *     source, so the client can let the person pick one. Nothing is saved. Failures answer `200` with `ok: false`
+         *     and `error_code`, like `testPhotoSource`. Rate-limited together with `testPhotoSource`.
+         */
+        post: operations["listImmichAlbums"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/photo-sources/{sourceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["SourceId"];
+            };
+            cookie?: never;
+        };
+        /** @description Managers of the target (album managers, feed owner/admins) and the owner. Others get `404 not_found`. */
+        get: operations["getPhotoSource"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Stop syncing (managers of the target). With `remove_items` the photos this source imported are removed from
+         *     the frame (album) or from the feed's posts, like an unsend, in the background; without it they stay as the
+         *     owner's ordinary photos (still credited "via …"). Clients ask which, showing `counts.imported`.
+         */
+        delete: operations["deletePhotoSource"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op).
+         *     Changing the link, server URL, key, password or album tests it first (`422 source_test_failed`) and then
+         *     syncs at once; success returns an `error`/`needs_attention` source to `active`. `take_over: true` makes the
+         *     caller the owner (needed after `owner_lost_access`; for `immich_api` together with a new `api_key`).
+         */
+        patch: operations["updatePhotoSource"];
+        trace?: never;
+    };
+    "/v1/photo-sources/{sourceId}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Sync now (managers of the target). Returns at once with `running: true`. At most once per 2 minutes per source
+         *     and 30 per hour per user (`429` with `Retry-After`). A paused source answers `409 invalid_transition`.
+         *     `confirm_removals: true` applies removals held back by the mass-removal guard (`pending_removals`,
+         *     `last_error_code: mass_removal`).
+         */
+        post: operations["syncPhotoSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/google-imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The caller's imports of the last 7 days, newest first (so an app that was closed while the picker was open can resume). */
+        get: operations["listMyGoogleImports"];
+        put?: never;
+        /**
+         * @description "Add from Google Photos" into an album (album managers) or a feed (any feed member). Answers `needs_auth` with
+         *     `auth_url` (open it in a browser session; Google redirects to `googleOAuthCallback`, which redirects to
+         *     `return_uri`), or directly `picking` with `picker_uri` when the caller's previous import left a token with more
+         *     than 10 minutes to live. `503 feature_disabled` when the server has no Google OAuth client (discovery
+         *     `google_photos_import: false`). `return_uri` must be `app.kinframe:/google-import`,
+         *     `<public URL>/google-import/return` or `<web>/google-import/return` (`422 validation_failed`). Rate-limited
+         *     (20/h per user).
+         */
+        post: operations["startGoogleImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/google-imports/{importId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The importer only. Poll while `picking` or `importing` (every 2–5 s, or follow `google_import.updated`). */
+        get: operations["getGoogleImport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/google-imports/{importId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Cancel (the importer). From `needs_auth` or `picking` the picker session is deleted; from `importing` the server
+         *     stops after the current file and keeps what was added (undo is `unsend` of `send_ids`). A finished import
+         *     answers `409 invalid_transition`; cancelling a cancelled one returns it unchanged.
+         */
+        post: operations["cancelGoogleImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/oauth/google/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Google's OAuth redirect (registered by the operator as `<public URL>/v1/oauth/google/callback`). Opened by the
+         *     browser, never called by clients. Checks `state` (single use, 15 minutes), exchanges `code` with the PKCE
+         *     verifier, creates the picker session and answers `302` to the import's `return_uri` with
+         *     `?import_id=<id>&status=<GoogleImportStatus>` (`picking`, or `failed` after a denied or failed consent).
+         *     An unknown, expired or reused `state` gets a small HTML page instead of a redirect.
+         */
+        get: operations["googleOAuthCallback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/frames/{frameId}/tv-links": {
@@ -1502,6 +2414,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/birthdays/{birthdayId}/greetings/{date}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description "Say happy birthday" on the frame's birthday card (docs/spec/birthdays.md §7). `birthdayId` is a
+         *     `FrameBirthday.id` (or any of its `birthday_ids`), `date` the frame's local date. Idempotent: one greeting per
+         *     person, frame and date, recorded once in every feed that lists the person; `204` also when it existed.
+         *     Feed members get `birthday.greeting` (push `birthday_greeting` with `birthday_notifications`).
+         *     `404 not_found` when the person is not on this frame (removed, subscription paused or birthdays off);
+         *     `422 validation_failed` (field `date`) when `date` is not the person's birthday (29 February counts on
+         *     28 February in non-leap years) or lies outside the server's UTC date −2 … +1 days. At most 50 a day per frame
+         *     (`429 rate_limited`).
+         */
+        put: operations["deviceGreetBirthday"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/device/update": {
         parameters: {
             query?: never;
@@ -1732,7 +2670,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "server_error";
         Discovery: {
             name: string;
             version: string;
@@ -1768,6 +2706,34 @@ export interface components {
              * @default false
              */
             calendar?: boolean;
+            /**
+             * @description True when the server supports feeds and subscriptions (docs/spec/feeds.md).
+             * @default false
+             */
+            feeds?: boolean;
+            /**
+             * @description True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
+             * @default false
+             */
+            birthdays?: boolean;
+            /**
+             * @description True when albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md).
+             * @default false
+             */
+            photo_sources?: boolean;
+            /** @description The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`. */
+            photo_source_providers?: components["schemas"]["PhotoSourceProvider"][];
+            /**
+             * @description True when sources may reach private network addresses (a home-network Immich such as
+             *     `http://192.168.1.10:2283`). False: the connect sheet asks for a public address (docs/spec/photo-sources.md §12.3).
+             * @default false
+             */
+            photo_sources_private_networks?: boolean;
+            /**
+             * @description True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+             * @default false
+             */
+            google_photos_import?: boolean;
             /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
@@ -1838,7 +2804,7 @@ export interface components {
              * @example 10.1"
              */
             size?: string;
-            /** @description Unit price incl. VAT */
+            /** @description Unit price incl. VAT, in cents */
             price_cents: number;
             max_qty: number;
             /**
@@ -1937,6 +2903,48 @@ export interface components {
             max_upload_bytes: number;
             /** @default 30 */
             trash_retention_days?: number;
+            /**
+             * @description Feeds one account may own.
+             * @default 20
+             */
+            max_feeds_per_user?: number;
+            /** @default 100 */
+            max_subscriptions_per_feed?: number;
+            /**
+             * @description Cap of `history: all` per subscription (newest first).
+             * @default 5000
+             */
+            max_feed_backfill_items?: number;
+            /**
+             * @description Birthday people per feed (pending and approved).
+             * @default 200
+             */
+            max_birthdays_per_feed?: number;
+            /**
+             * @description Photo sources per album or feed.
+             * @default 5
+             */
+            max_photo_sources_per_target?: number;
+            /**
+             * @description Photo sources one account owns.
+             * @default 20
+             */
+            max_photo_sources_per_user?: number;
+            /**
+             * @description Live imported items per photo source; newer upstream items beyond it are skipped.
+             * @default 10000
+             */
+            max_photo_source_items?: number;
+            /**
+             * @description Bytes one sync run downloads; the rest follows in the next runs.
+             * @default 2147483648
+             */
+            max_photo_source_run_bytes?: number;
+            /**
+             * @description Items per Google Photos import (the picker's own maximum is 2000).
+             * @default 500
+             */
+            max_google_import_items?: number;
         };
         /** @description A geocoding result (Open-Meteo geocoding API). */
         Place: {
@@ -1967,6 +2975,11 @@ export interface components {
             avatar_url?: string | null;
             share_location_names?: boolean;
             locale?: string | null;
+            /**
+             * @description IANA time zone reported by the user's apps; null until one did.
+             * @example Europe/Brussels
+             */
+            timezone?: string | null;
             is_operator?: boolean;
             /** Format: date-time */
             created_at?: string;
@@ -1974,7 +2987,7 @@ export interface components {
         PushEndpointCreate: {
             /** @enum {string} */
             kind: "unifiedpush" | "fcm" | "apns" | "webpush";
-            /** @description UnifiedPush/WebPush URL */
+            /** @description UnifiedPush/WebPush URL, or FCM/APNs token */
             endpoint: string;
             webpush_keys?: {
                 p256dh?: string;
@@ -2043,6 +3056,14 @@ export interface components {
             app_version: string;
             app_version_code?: number;
             android_sdk?: number;
+            /**
+             * @description Optional capabilities of the frame app. `feed_backfill`: the frame shows `Placement.backfill` placements
+             *     quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
+             *     backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
+             *     the `birthdays` change (informational only: nothing is withheld; apps use it for
+             *     `Subscription.frame.birthdays_supported`).
+             */
+            features?: string[];
             uptime_s: number;
             wifi_ssid?: string | null;
             wifi_rssi_dbm?: number | null;
@@ -2166,10 +3187,18 @@ export interface components {
         Reaction: "love" | "laugh" | "wow" | "sad";
         /** @enum {string} */
         ReplyPreset: "beautiful" | "call_me" | "miss_you" | "thanks";
+        /**
+         * @description Recipients are `frame_ids` plus `feed_ids`; together they must not be empty (`422 validation_failed` on
+         *     `frame_ids`). Feeds need membership (any role), frames need `send`. A frame that is a direct recipient and
+         *     also subscribes to a feed in `feed_ids` gets the item once (docs/spec/feeds.md §6.2).
+         */
         SendCreate: {
+            /** @description Frames to send to directly. May be empty when `feed_ids` is not. */
             frame_ids: components["schemas"]["Id"][];
+            /** @description Feeds to post to. Each becomes one post; every active subscribed frame gets a placement (`origin: feed`). */
+            feed_ids?: components["schemas"]["Id"][];
             items: {
-                /** @description tus upload id */
+                /** @description tus upload id, or an existing item id when the server reported a duplicate. For a live item, the still. */
                 upload_id: string;
                 caption?: string | null;
                 focal_point?: components["schemas"]["FocalPoint"];
@@ -2239,6 +3268,12 @@ export interface components {
             /** @description The original sender's display name in that app, when known. */
             imported_sender_name?: string | null;
             /**
+             * @description Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
+             *     sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
+             *     for feed placements). Optional: clients that don't know it show the sender only.
+             */
+            via?: components["schemas"]["ItemVia"] | null;
+            /**
              * @description Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
              *     `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
              */
@@ -2254,6 +3289,21 @@ export interface components {
          * @enum {string}
          */
         ItemOrigin: "frameo";
+        /**
+         * @description The outside service a photo came from.
+         * @enum {string}
+         */
+        PhotoService: "immich" | "icloud" | "google_photos";
+        ItemVia: {
+            service: components["schemas"]["PhotoService"];
+            /**
+             * @description Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+             * @example Immich
+             */
+            label: string;
+            /** @description The photo source that synced it, while it exists (null for Google imports and deleted sources). */
+            source_id?: components["schemas"]["Id"] | null;
+        };
         ItemMotion: {
             /** @enum {string} */
             status: "processing" | "ready";
@@ -2295,6 +3345,23 @@ export interface components {
             shared_by_user_id?: components["schemas"]["Id"] | null;
             /** @description Display name of `shared_by_user_id`. Frames show "Sender · shared by Name". */
             shared_by_name?: string | null;
+            origin?: components["schemas"]["PlacementOrigin"];
+            /** @description `origin: feed`: the feed that placed it. */
+            origin_feed_id?: components["schemas"]["Id"] | null;
+            /** @description Current name of `origin_feed_id`. Frames show "Sender · Feed name" (instead of "shared by"). */
+            origin_feed_name?: string | null;
+            /**
+             * @description Feeds whose active subscriptions hold this placement on the frame (possibly also when `origin` is `send`).
+             *     Used for feed mode (`slideshow.feed_id`), like `album_ids` for album mode.
+             */
+            feed_ids?: components["schemas"]["Id"][];
+            /**
+             * @description Placed as history (a feed subscription's history, a history change, a resume, or a photo source's first
+             *     import). Frames don't treat it as new: no "N new" card, no screen wake. `received_at` is then the post time
+             *     (for a photo source's first import: when the photo was added upstream, else its capture time).
+             * @default false
+             */
+            backfill?: boolean;
         };
         ShareResult: {
             /** @description The placements created on the target frames (empty for a dry run). */
@@ -2313,7 +3380,14 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             items: components["schemas"]["Item"][];
-            /** @description Per-frame delivery for this send. */
+            /**
+             * @description Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
+             *     run or import). Such sends get no `delivered` push.
+             */
+            via?: components["schemas"]["ItemVia"] | null;
+            /** @description The feeds this send was posted to, with receipts (docs/spec/feeds.md §7). */
+            feeds?: components["schemas"]["SendFeed"][];
+            /** @description Per-frame delivery for this send (direct recipients and shares; feed placements are in `feeds`). */
             frames: {
                 frame_id: components["schemas"]["Id"];
                 frame_name: string;
@@ -2344,6 +3418,13 @@ export interface components {
             cover_placement_id?: components["schemas"]["Id"];
             /** @description Ordered. */
             placement_ids?: components["schemas"]["Id"][];
+            /** @description Photo sources syncing into this album (docs/spec/photo-sources.md); details for album managers in `listAlbumPhotoSources`. */
+            photo_source_count?: number;
+            /**
+             * @description Only play this album's photos when the frame plays this album (album mode or its schedule), not in the normal slideshow. A placement is left out of the normal slideshow when it is in at least one album with this flag and in no album without it. Frames that don't know the flag show everything as before.
+             * @default false
+             */
+            only_in_album_mode?: boolean;
             /** @description Play this album automatically between dates each year (e.g. December). */
             schedule?: {
                 from_month_day?: string;
@@ -2355,6 +3436,823 @@ export interface components {
             placement_ids?: components["schemas"]["Id"][];
             cover_placement_id?: components["schemas"]["Id"];
             schedule?: components["schemas"]["Album"]["schedule"];
+            only_in_album_mode?: components["schemas"]["Album"]["only_in_album_mode"];
+        };
+        /** @enum {string} */
+        FeedRole: "owner" | "admin" | "poster";
+        FeedSummary: {
+            id: components["schemas"]["Id"];
+            name: string;
+            /**
+             * Format: uri
+             * @description Short-lived signed thumbnail URL (thumb_512 of `cover_item_id`), usable in <img src>.
+             */
+            cover_url?: string | null;
+            role: components["schemas"]["FeedRole"];
+            member_count: number;
+            /** @description Active and paused subscriptions. */
+            subscription_count: number;
+            /** Format: date-time */
+            last_post_at?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        Feed: components["schemas"]["FeedSummary"] & {
+            owner_name?: string;
+            /** @description An item of a live post of this feed. */
+            cover_item_id?: components["schemas"]["Id"] | null;
+            auto_approve_subscriptions?: boolean;
+            invite_requires_approval?: boolean;
+            members_see_reactions?: boolean;
+            /** @description Posters may create `join` invites and revoke their own. */
+            posters_can_invite?: boolean;
+            /** @description Posters add birthday people directly instead of suggesting them. */
+            posters_can_add_birthdays?: boolean;
+            /** @description The caller's own preference (`updateFeedPreferences`): morning and greeting notifications for this feed's birthdays. */
+            birthday_notifications?: boolean;
+            /** @description Approved birthday people. */
+            birthday_count?: number;
+            /** @description Suggestions waiting; owner and admins only (0 for posters). */
+            pending_birthday_count?: number;
+            post_count?: number;
+            /** @description Owner and admins only (0 for posters). */
+            pending_subscription_count?: number;
+            /** @description Owner and admins only (0 for posters). */
+            pending_join_request_count?: number;
+        };
+        FeedCreate: {
+            name: string;
+            /** @default false */
+            auto_approve_subscriptions?: boolean;
+            /** @default true */
+            invite_requires_approval?: boolean;
+            /** @default false */
+            members_see_reactions?: boolean;
+            /** @default false */
+            posters_can_invite?: boolean;
+            /** @default false */
+            posters_can_add_birthdays?: boolean;
+        };
+        FeedUpdate: {
+            name?: string;
+            /** @description An item of a live post of this feed; null removes the cover. */
+            cover_item_id?: components["schemas"]["Id"] | null;
+            /** @description Requests by non-admin members become active without approval. */
+            auto_approve_subscriptions?: boolean;
+            /** @description Join invites need an admin's approval. */
+            invite_requires_approval?: boolean;
+            /** @description Every member sees receipts and reactions of every post. */
+            members_see_reactions?: boolean;
+            /** @description Posters may create `join` invites (and list and revoke their own). */
+            posters_can_invite?: boolean;
+            /** @description Posters add birthday people directly (and edit and remove the ones they added) instead of suggesting them. */
+            posters_can_add_birthdays?: boolean;
+        };
+        FeedMember: {
+            user_id: components["schemas"]["Id"];
+            display_name: string;
+            /** Format: uri */
+            avatar_url?: string | null;
+            role: components["schemas"]["FeedRole"];
+            /** Format: date-time */
+            joined_at?: string;
+            /** Format: date-time */
+            last_posted_at?: string | null;
+        };
+        /**
+         * @description `join`: become a poster. `subscribe`: subscribe frames you manage (pre-approved), without joining.
+         * @enum {string}
+         */
+        FeedInvitePurpose: "join" | "subscribe";
+        FeedInviteCreate: {
+            purpose: components["schemas"]["FeedInvitePurpose"];
+            /** @description null = unlimited */
+            max_uses?: number | null;
+            /** @default 168 */
+            expires_in_hours?: number;
+            /** @description Shown to admins when approving a join request. */
+            note?: string;
+        };
+        FeedInvite: {
+            id: components["schemas"]["Id"];
+            purpose: components["schemas"]["FeedInvitePurpose"];
+            token: string;
+            /**
+             * @description Short code for "Enter a code", shown as `KF7Q-M2XA`.
+             * @example KF7QM2XA
+             */
+            code: string;
+            /**
+             * Format: uri
+             * @description https://<web>/fi/<token>; also shown as QR.
+             */
+            url: string;
+            created_by_name?: string;
+            max_uses?: number | null;
+            uses?: number;
+            note?: string | null;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        FeedInvitePreview: {
+            /** @description For `acceptFeedInvite` (also after a code lookup). */
+            token: string;
+            purpose: components["schemas"]["FeedInvitePurpose"];
+            feed_name: string;
+            /** Format: uri */
+            cover_url?: string | null;
+            owner_name?: string;
+            invited_by_name: string;
+            member_count?: number;
+            /** @description `join` only: the request waits for an admin. */
+            requires_approval: boolean;
+            already_member?: boolean;
+            /**
+             * @description `subscribe` only: the frames the caller manages (owner, admin or `change_settings`), and whether each already
+             *     has a live subscription to this feed.
+             */
+            frames?: {
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                subscription_status?: components["schemas"]["SubscriptionStatus"] | null;
+            }[];
+        };
+        FeedInviteAccept: {
+            /** @description `subscribe` invites (required there): the frames to subscribe. */
+            frame_ids?: components["schemas"]["Id"][];
+            history?: components["schemas"]["SubscriptionHistory"];
+            /** @description Required with `history: last_n`. */
+            history_count?: number;
+            /**
+             * @description Show the feed's birthday people on the frames.
+             * @default true
+             */
+            birthdays?: boolean;
+        };
+        FeedInviteResult: {
+            /** @enum {string} */
+            status: "joined" | "pending" | "already_member" | "subscribed";
+            feed: components["schemas"]["FeedSummary"];
+            join_request_id?: components["schemas"]["Id"];
+            /** @description `subscribed`: one per requested frame (existing live subscriptions are returned as they are). */
+            subscriptions?: components["schemas"]["Subscription"][];
+        };
+        /**
+         * @description `pending`: waiting for a feed admin. `active`: posts are placed on the frame. `paused`: paused by the frame
+         *     side; the feed's placements are kept but not shown. `rejected`: declined by a feed admin. `removed`: ended
+         *     (see `removed_reason`). Rejected and removed subscriptions are listed for 30 days.
+         * @enum {string}
+         */
+        SubscriptionStatus: "pending" | "active" | "paused" | "rejected" | "removed";
+        /**
+         * @description What a new subscription places from before it became active: `none` (only new posts), `last_n` (the
+         *     `history_count` most recent items) or `all`. History only, not a rolling limit; changing it later backfills
+         *     or trims.
+         * @default none
+         * @enum {string}
+         */
+        SubscriptionHistory: "none" | "last_n" | "all";
+        SubscriptionRequest: {
+            frame_id: components["schemas"]["Id"];
+            history?: components["schemas"]["SubscriptionHistory"];
+            /** @description Required with `history: last_n`. */
+            history_count?: number;
+            /**
+             * @description Show the feed's birthday people on the frame.
+             * @default true
+             */
+            birthdays?: boolean;
+        };
+        /** @description At least one field. Omitting `history` keeps the history option (and starts no backfill or trim). */
+        SubscriptionUpdate: {
+            history?: components["schemas"]["SubscriptionHistory"];
+            /** @description Required with `history: last_n`. */
+            history_count?: number;
+            /** @description Show the feed's birthday people on the frame (a `birthdays` change follows). */
+            birthdays?: boolean;
+        };
+        Subscription: {
+            id: components["schemas"]["Id"];
+            status: components["schemas"]["SubscriptionStatus"];
+            history: components["schemas"]["SubscriptionHistory"];
+            history_count?: number | null;
+            feed: {
+                id: components["schemas"]["Id"];
+                name: string;
+                /** Format: uri */
+                cover_url?: string | null;
+                member_count?: number;
+                /** @description Owner first; so the frame side knows whom it subscribes to. */
+                admin_names?: string[];
+            };
+            frame: {
+                id: components["schemas"]["Id"];
+                name: string;
+                location?: string | null;
+                online?: boolean;
+                /** Format: date-time */
+                last_seen_at?: string | null;
+                /** @description The frame app shows birthdays (its latest heartbeat lists `birthdays`); false means "update the frame app". */
+                birthdays_supported?: boolean;
+            };
+            /** @description Feed owner/admins and frame managers only. */
+            requested_by_name?: string | null;
+            /** @description Created through a `subscribe` invite. */
+            via_invite?: boolean;
+            /** @description The feed's birthday people are shown on the frame while the subscription is `active` (default true; frame side). */
+            birthdays?: boolean;
+            /** @description Approved birthday people of the feed (so frame managers outside the feed see how many). */
+            birthday_count?: number;
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description First activation; the history boundary.
+             */
+            activated_at?: string | null;
+            /** Format: date-time */
+            paused_at?: string | null;
+            /** Format: date-time */
+            ended_at?: string | null;
+            removed_reason?: ("unsubscribed" | "removed_by_feed" | "frame_removed" | "feed_deleted" | "withdrawn") | null;
+            /** @description Progress of the history backfill or trim after activation, a history change or a resume. */
+            backfill?: {
+                /** @enum {string} */
+                state?: "idle" | "queued" | "running";
+                placed?: number;
+                total?: number;
+            };
+            /** @description Size of what the current history option places on this frame, for the subscribe dialog. */
+            estimate?: {
+                items?: number;
+                bytes?: number;
+            };
+            /** @description The caller may pause, resume, change history and unsubscribe (frame side). */
+            can_manage?: boolean;
+            /** @description The caller may approve, reject and remove (feed side). */
+            can_decide?: boolean;
+        };
+        /**
+         * @description Per post (or per send's post). `frames` counts active subscriptions holding the post; a frame counts as
+         *     delivered/seen when every item of the post is. Paused frames are only in `paused`.
+         */
+        FeedReceiptSummary: {
+            frames: number;
+            delivered: number;
+            seen: number;
+            awaiting_approval?: number;
+            paused?: number;
+            /** @description Frames whose moderation rejected the post or that deleted it. */
+            removed?: number;
+        };
+        FeedReaction: {
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            item_id: components["schemas"]["Id"];
+            placement_id: components["schemas"]["Id"];
+            reaction?: components["schemas"]["Reaction"] | null;
+            replies?: components["schemas"]["ReplyPreset"][];
+            /** Format: date-time */
+            at?: string;
+        };
+        FeedPost: {
+            id: components["schemas"]["Id"];
+            feed_id: components["schemas"]["Id"];
+            poster: {
+                user_id: components["schemas"]["Id"];
+                display_name: string;
+                /** Format: uri */
+                avatar_url?: string | null;
+            };
+            /** @description The poster's send (own posts only). */
+            send_id?: components["schemas"]["Id"] | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich". */
+            via?: components["schemas"]["ItemVia"] | null;
+            /** @description Live items in send order. */
+            items: components["schemas"]["Item"][];
+            /** @description Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null. */
+            receipts?: components["schemas"]["FeedReceiptSummary"] | null;
+            /** @description Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`). */
+            reactions?: components["schemas"]["FeedReaction"][] | null;
+        };
+        /**
+         * @description One item on one subscribed frame: the placement status, or `awaiting_approval` (the frame's moderation),
+         *     `suspended` (subscription paused) or `removed` (rejected or deleted on that frame).
+         * @enum {string}
+         */
+        FeedDeliveryStatus: "pending" | "ready" | "delivered" | "seen" | "failed" | "awaiting_approval" | "suspended" | "removed";
+        FeedPostReceipts: {
+            post_id: components["schemas"]["Id"];
+            summary: components["schemas"]["FeedReceiptSummary"];
+            frames: {
+                subscription_id: components["schemas"]["Id"];
+                frame_id: components["schemas"]["Id"];
+                frame_name: string;
+                frame_location?: string | null;
+                online?: boolean;
+                /** Format: date-time */
+                last_seen_at?: string | null;
+                /** @enum {string} */
+                subscription_status: "active" | "paused";
+                items: {
+                    item_id: components["schemas"]["Id"];
+                    placement_id?: components["schemas"]["Id"] | null;
+                    status: components["schemas"]["FeedDeliveryStatus"];
+                    /** Format: date-time */
+                    delivered_at?: string | null;
+                    /** Format: date-time */
+                    seen_at?: string | null;
+                    reaction?: components["schemas"]["Reaction"] | null;
+                    replies?: {
+                        preset?: components["schemas"]["ReplyPreset"];
+                        /** Format: date-time */
+                        at?: string;
+                    }[];
+                }[];
+            }[];
+        };
+        /** @description One feed a send was posted to. */
+        SendFeed: {
+            feed_id: components["schemas"]["Id"];
+            feed_name: string;
+            post_id: components["schemas"]["Id"];
+            /** @description The post was removed from the feed (unsend or admin). */
+            removed?: boolean;
+            summary?: components["schemas"]["FeedReceiptSummary"];
+        };
+        /**
+         * @description `pending`: a poster's suggestion waiting for the feed's owner or an admin. `approved`: on the list and on
+         *     frames. `rejected`: declined; listed for the suggester and admins for 30 days.
+         * @enum {string}
+         */
+        BirthdayStatus: "pending" | "approved" | "rejected";
+        /**
+         * @description A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
+         *     a feed member.
+         */
+        BirthdayPerson: {
+            id: components["schemas"]["Id"];
+            feed_id: components["schemas"]["Id"];
+            status: components["schemas"]["BirthdayStatus"];
+            /** @example Oma */
+            display_name: string;
+            /** @example 12 */
+            day: number;
+            /** @example 3 */
+            month: number;
+            /**
+             * @description Null when unknown or when the caller may not see it: shown to owner/admins, whoever added the entry and
+             *     the linked member; to other members only with `show_age`.
+             * @example 1946
+             */
+            birth_year?: number | null;
+            /** @description Frames and notifications show the age (needs `birth_year`). */
+            show_age: boolean;
+            /**
+             * Format: uri
+             * @description 256x256 WebP, public at an unguessable URL like avatars. The uploaded photo, else the linked member's avatar.
+             */
+            photo_url?: string | null;
+            /** @description `photo_url` is an uploaded photo, not the linked member's avatar. */
+            has_own_photo?: boolean;
+            /** @description The linked feed member; cleared when they leave the feed or delete their account. */
+            user_id?: components["schemas"]["Id"] | null;
+            linked_member_name?: string | null;
+            /** @description Null when that account is gone. */
+            created_by_name?: string | null;
+            /** @description Account id of whoever added or suggested it ("added by me"); null when that account is gone. */
+            created_by_id?: components["schemas"]["Id"] | null;
+            /** @description Created as a poster's suggestion (also after approval). */
+            suggested?: boolean;
+            /** @description Suggestions only; owner/admins and the suggester. */
+            decided_by_name?: string | null;
+            /** Format: date-time */
+            decided_at?: string | null;
+            /**
+             * Format: date
+             * @description The next occurrence on or after today in the caller's time zone (`User.timezone`); 29 February becomes 28 February in non-leap years.
+             */
+            next_birthday?: string;
+            /** @description Age on `next_birthday`, when `birth_year` is visible to the caller. */
+            turns?: number | null;
+            /** @description Frames that sent a greeting for today's occurrence (0 on other days). */
+            greetings_today?: number;
+            /** @description The caller may change this entry (some fields only, for the linked member). */
+            can_edit?: boolean;
+            /** @description The caller may approve or reject it (pending, owner/admin). */
+            can_decide?: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        /**
+         * @description `day`/`month` must form a real date (29 February is allowed, and with `birth_year` only in leap years).
+         *     `birth_year` from 1900 to the current year.
+         */
+        BirthdayPersonCreate: {
+            display_name: string;
+            day: number;
+            month: number;
+            birth_year?: number | null;
+            /** @default false */
+            show_age?: boolean;
+            /** @description Link to a member of this feed who has no entry yet ("Add my birthday" sends the caller's id). */
+            user_id?: components["schemas"]["Id"] | null;
+        };
+        BirthdayPersonUpdate: {
+            display_name?: string;
+            day?: number;
+            month?: number;
+            /** @description null clears the year. */
+            birth_year?: number | null;
+            show_age?: boolean;
+            /** @description null unlinks. */
+            user_id?: components["schemas"]["Id"] | null;
+        };
+        FeedPreferencesUpdate: {
+            /** @description Morning notification and greetings for this feed's birthdays. */
+            birthday_notifications?: boolean;
+        };
+        /**
+         * @description A frame said happy birthday to a person of this feed on their day. One per person, frame and date; recorded
+         *     in every feed that lists the person. Also the payload of the `birthday.greeting` websocket event.
+         */
+        FeedBirthdayGreeting: {
+            id: components["schemas"]["Id"];
+            feed_id: components["schemas"]["Id"];
+            birthday_id: components["schemas"]["Id"];
+            /** @example Oma */
+            birthday_name: string;
+            frame_id: components["schemas"]["Id"];
+            /**
+             * @description The frame's name when it sent the greeting.
+             * @example Opa's frame
+             */
+            frame_name: string;
+            frame_location?: string | null;
+            /**
+             * Format: date
+             * @description The occurrence date (the frame's local date).
+             */
+            date: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        /**
+         * @description One person on the frame, merged across the frame's birthday subscriptions on normalized name + day + month
+         *     (docs/spec/birthdays.md §6.5). The frame computes today, countdowns and ages in its own time zone.
+         */
+        FrameBirthday: {
+            /**
+             * Format: uuid
+             * @description The primary entry (a `BirthdayPerson` id); use it for `deviceGreetBirthday`.
+             */
+            id: string;
+            /** @example Oma */
+            name: string;
+            day: number;
+            month: number;
+            /**
+             * @description Present only when the age may be shown (`show_age` on for every merged entry that has a year, and the
+             *     years agree). Absent otherwise: show no age.
+             */
+            birth_year?: number;
+            /**
+             * Format: uri
+             * @description 256x256 WebP (public, unguessable, cacheable by URL).
+             */
+            photo_url?: string | null;
+            feed_ids: components["schemas"]["Id"][];
+            /** @description Every merged `BirthdayPerson` id. */
+            birthday_ids: components["schemas"]["Id"][];
+        };
+        /**
+         * @description Payload of the `birthdays` change (docs/api/README.md §5.13): the approved people of every feed the frame has
+         *     an `active` subscription with `birthdays: true` to, merged, sorted by month and day. Nothing in it depends on
+         *     today, so it is emitted only when the list changes.
+         */
+        FrameBirthdays: {
+            /** Format: date-time */
+            generated_at: string;
+            people: components["schemas"]["FrameBirthday"][];
+        };
+        /**
+         * @description How a placement got onto the frame. `send`: a send or forward to the frame. `share`: shared from another
+         *     frame's library (`shared_by_*`). `feed`: a post in a feed the frame subscribes to (`origin_feed_*`).
+         *     `import`: imported on the frame. When several paths lead to the same item, the first one is the origin.
+         * @enum {string}
+         */
+        PlacementOrigin: "send" | "share" | "feed" | "import";
+        /**
+         * @description `immich_link`: an Immich shared link (`https://<immich>/share/<key>`, optional password); recommended.
+         *     `immich_api`: an Immich server URL with an API key and a chosen album. `icloud_link`: an iCloud shared album's
+         *     public website link (`https://www.icloud.com/sharedalbum/#<token>`), best effort.
+         * @enum {string}
+         */
+        PhotoSourceProvider: "immich_link" | "immich_api" | "icloud_link";
+        /**
+         * @description `active`: syncing on schedule (a single failed run being retried stays active, with `last_error_code`).
+         *     `error`: failures expected to pass (unreachable, upstream errors) for 3 runs or 6 hours; retried with backoff.
+         *     `needs_attention`: only a person can fix it (`last_error_code`); syncing stopped except a daily probe for some
+         *     codes. `paused`: paused by a manager; imported photos keep showing.
+         * @enum {string}
+         */
+        PhotoSourceStatus: "active" | "paused" | "error" | "needs_attention";
+        /**
+         * @description Why the last run (or a test) failed; user-facing texts are in docs/spec/photo-sources.md §13.
+         * @enum {string}
+         */
+        PhotoSourceErrorCode: "unreachable" | "tls_error" | "private_address_blocked" | "auth_failed" | "password_required" | "permission_missing" | "link_not_found" | "link_expired" | "album_not_found" | "unsupported_link" | "too_large" | "format_changed" | "rate_limited_upstream" | "upstream_error" | "owner_lost_access" | "credentials_unreadable" | "mass_removal";
+        /**
+         * @description Conditions that don't stop syncing. `downloads_disabled`: the Immich link doesn't allow downloads, so photos
+         *     come as previews. `metadata_hidden`: the link hides EXIF (no capture dates or descriptions).
+         *     `item_limit_reached`: `limits.max_photo_source_items` is reached; newer upstream items are skipped.
+         * @enum {string}
+         */
+        PhotoSourceWarning: "downloads_disabled" | "metadata_hidden" | "item_limit_reached";
+        /**
+         * @description What the first run imports: `none` (only photos added from now on), `last_n` (the `history_count` newest by
+         *     capture date) or `all` (up to `limits.max_photo_source_items`). Imported quietly (`Placement.backfill`).
+         *     Defaults: `all` for albums, `last_n` with 20 for feeds.
+         * @enum {string}
+         */
+        PhotoSourceHistory: "none" | "last_n" | "all";
+        /**
+         * @description What happens when a photo disappears from the outside album. `mirror`: remove it here too (default for albums).
+         *     `keep`: keep it (default for feeds). Errors never remove anything; many removals at once wait for
+         *     confirmation (`mass_removal`).
+         * @enum {string}
+         */
+        PhotoSourceDeletePolicy: "mirror" | "keep";
+        /** @description Where the photos go. Exactly one of `album_id` (with its frame) or `feed_id` is set. */
+        PhotoSourceTarget: {
+            /** @enum {string} */
+            kind: "album" | "feed";
+            /** @description The album's frame (albums belong to one frame). */
+            frame_id?: components["schemas"]["Id"] | null;
+            frame_name?: string | null;
+            album_id?: components["schemas"]["Id"] | null;
+            album_name?: string | null;
+            feed_id?: components["schemas"]["Id"] | null;
+            feed_name?: string | null;
+        };
+        /**
+         * @description How to reach the outside album. `immich_link` and `icloud_link` need `url` (and `password` for a protected
+         *     Immich link); `immich_api` needs `server_url`, `api_key` and, to create, `immich_album_id`. Secrets are
+         *     write-only: they are sealed at rest and never returned.
+         */
+        PhotoSourceConnection: {
+            provider: components["schemas"]["PhotoSourceProvider"];
+            /**
+             * @description The shared link (links only). It is the secret; responses carry `url_hint`.
+             * @example https://photos.example.org/share/0d1e…
+             * @example https://www.icloud.com/sharedalbum/#B0aGWZuqDGxyz
+             */
+            url?: string;
+            /** @description `immich_api` only: the Immich server, e.g. `https://photos.example.org` (an `/api` suffix is tolerated). */
+            server_url?: string;
+            /** @description `immich_api` only. Needs album.read, asset.read, asset.view and asset.download. */
+            api_key?: string;
+            /** @description `immich_link` only: the link password. */
+            password?: string;
+            /** @description `immich_api` only: the album, from `listImmichAlbums`. */
+            immich_album_id?: string;
+        };
+        PhotoSourceCreate: components["schemas"]["PhotoSourceConnection"] & {
+            album_id?: components["schemas"]["Id"];
+            feed_id?: components["schemas"]["Id"];
+            /** @description Display name; defaults to the outside album's name. */
+            name?: string;
+            history?: components["schemas"]["PhotoSourceHistory"];
+            /** @description Required with `history: last_n`. */
+            history_count?: number;
+            on_upstream_delete?: components["schemas"]["PhotoSourceDeletePolicy"];
+            /** @default true */
+            include_videos?: boolean;
+            /**
+             * @description The owner gets reaction and reply notifications for this source's photos.
+             * @default true
+             */
+            notify_reactions?: boolean;
+        };
+        /** @description At least one field. Connection changes are tested first and then synced at once. */
+        PhotoSourceUpdate: {
+            name?: string;
+            /** @description true pauses, false resumes. */
+            paused?: boolean;
+            /** @description A new link to the same (or another) outside album. */
+            url?: string;
+            server_url?: string;
+            api_key?: string;
+            /** @description null removes the link password. */
+            password?: string | null;
+            immich_album_id?: string;
+            on_upstream_delete?: components["schemas"]["PhotoSourceDeletePolicy"];
+            /** @description Turning it on imports previously skipped videos in the next run. */
+            include_videos?: boolean;
+            /** @description The owner's own switch; only the owner may change it. */
+            notify_reactions?: boolean;
+            /** @description The caller becomes the owner (credit for future photos). `immich_api` needs a new `api_key` with it. */
+            take_over?: boolean;
+        };
+        PhotoSourceCounts: {
+            /** @description Photos and videos in the outside album at the last listing. */
+            upstream?: number;
+            /** @description Live items this source created. */
+            imported: number;
+            /** @description Upstream photos the target already had. */
+            duplicates?: number;
+            /** @description Waiting to be downloaded (backlog). */
+            pending: number;
+            /** @description Not imported on purpose (videos off, too long, too large, unsupported, over the limit, before the first import's cut). */
+            skipped?: number;
+            failed?: number;
+            /** @description Removed on kinframe; never imported again. */
+            removed_locally?: number;
+            /** @description No longer in the outside album (kept with `keep`). */
+            gone_upstream?: number;
+        };
+        PhotoSourceRun: {
+            /** Format: date-time */
+            started_at: string;
+            /** Format: date-time */
+            finished_at?: string | null;
+            added?: number;
+            /** @description Captions, dates or files changed upstream. */
+            updated?: number;
+            removed?: number;
+            skipped?: number;
+            failed?: number;
+            bytes?: number;
+            error_code?: components["schemas"]["PhotoSourceErrorCode"] | null;
+        };
+        PhotoSource: {
+            id: components["schemas"]["Id"];
+            provider: components["schemas"]["PhotoSourceProvider"];
+            /** @description The outside album's name (or the name given at creation). */
+            name: string;
+            target: components["schemas"]["PhotoSourceTarget"];
+            /** @description Who set it up; imported photos are sent by them. Null when that account is gone. */
+            owner?: {
+                user_id: components["schemas"]["Id"];
+                display_name: string;
+                /** Format: uri */
+                avatar_url?: string | null;
+            } | null;
+            /** @description True for `icloud_link`: no official API; clients show the best-effort note. */
+            best_effort?: boolean;
+            /**
+             * @description Redacted link for display (links only).
+             * @example https://photos.example.org/share/…
+             */
+            url_hint?: string | null;
+            /** @description `immich_api` only. */
+            server_url?: string | null;
+            /** @description `immich_api` only. */
+            immich_album_id?: string | null;
+            has_api_key?: boolean;
+            has_password?: boolean;
+            status: components["schemas"]["PhotoSourceStatus"];
+            /** @description A run is in progress. */
+            running: boolean;
+            warnings?: components["schemas"]["PhotoSourceWarning"][];
+            last_error_code?: components["schemas"]["PhotoSourceErrorCode"] | null;
+            /** @description Short English detail for support; clients show their own text for `last_error_code`. */
+            last_error?: string | null;
+            /**
+             * Format: date-time
+             * @description First failure of the current streak.
+             */
+            error_since?: string | null;
+            /** @description Removals held back by the mass-removal guard; confirm with `syncPhotoSource {confirm_removals: true}`. */
+            pending_removals?: number;
+            history: components["schemas"]["PhotoSourceHistory"];
+            history_count?: number | null;
+            on_upstream_delete: components["schemas"]["PhotoSourceDeletePolicy"];
+            include_videos: boolean;
+            notify_reactions?: boolean;
+            counts: components["schemas"]["PhotoSourceCounts"];
+            last_run?: components["schemas"]["PhotoSourceRun"] | null;
+            /**
+             * Format: date-time
+             * @description Last successful run.
+             */
+            last_synced_at?: string | null;
+            /** Format: date-time */
+            last_attempt_at?: string | null;
+            /**
+             * Format: date-time
+             * @description Null while paused or waiting for a person.
+             */
+            next_sync_at?: string | null;
+            /** @description The caller may pause, change and delete it. */
+            can_manage?: boolean;
+            is_owner?: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PhotoSourceTestResult: {
+            ok: boolean;
+            error_code?: components["schemas"]["PhotoSourceErrorCode"] | null;
+            /** @description Short English detail. */
+            error?: string | null;
+            album_name?: string | null;
+            photos?: number | null;
+            videos?: number | null;
+            /** @description Size of everything in the album, when the provider tells. */
+            estimate_bytes?: number | null;
+            warnings?: components["schemas"]["PhotoSourceWarning"][];
+            best_effort?: boolean;
+            /** @description Immich only, e.g. `v1.132.3`. */
+            server_version?: string | null;
+            /** @description `immich_api` without `immich_album_id`: the albums the key can read. */
+            albums?: components["schemas"]["ImmichAlbum"][];
+        };
+        ImmichConnection: {
+            server_url: string;
+            api_key: string;
+        };
+        ImmichAlbum: {
+            id: string;
+            name: string;
+            asset_count: number;
+            /** Format: date-time */
+            updated_at?: string | null;
+            owner_name?: string | null;
+            /** @description Shared with the key's account by someone else. */
+            shared?: boolean;
+            /**
+             * Format: uri
+             * @description A short-lived kinframe URL of the album thumbnail (proxied; the key never reaches the client).
+             */
+            thumbnail_url?: string | null;
+        };
+        ImmichAlbumList: {
+            ok: boolean;
+            error_code?: components["schemas"]["PhotoSourceErrorCode"] | null;
+            error?: string | null;
+            server_version?: string | null;
+            /** @description Own albums first, then shared ones, by name. */
+            albums: components["schemas"]["ImmichAlbum"][];
+        };
+        /**
+         * @description `needs_auth`: open `auth_url`. `picking`: open `picker_uri`; the server waits for Google. `importing`: copying
+         *     (`progress`). `done` (possibly with `progress.failed` > 0), `failed` (`error_code`), `expired` (nothing picked
+         *     before Google's session ended) and `cancelled` are final.
+         * @enum {string}
+         */
+        GoogleImportStatus: "needs_auth" | "picking" | "importing" | "done" | "failed" | "cancelled" | "expired";
+        /** @enum {string} */
+        GoogleImportErrorCode: "consent_denied" | "auth_failed" | "picker_expired" | "google_unavailable" | "target_gone" | "download_failed" | "server_error";
+        /** @description Exactly one of `album_id` or `feed_id`. */
+        GoogleImportCreate: {
+            album_id?: components["schemas"]["Id"];
+            feed_id?: components["schemas"]["Id"];
+            /**
+             * @description Where the browser goes after consent, with `?import_id=…&status=…` added.
+             * @example app.kinframe:/google-import
+             * @example https://kinframe.appmire.be/google-import/return
+             */
+            return_uri: string;
+        };
+        GoogleImport: {
+            id: components["schemas"]["Id"];
+            status: components["schemas"]["GoogleImportStatus"];
+            target: components["schemas"]["PhotoSourceTarget"];
+            /**
+             * Format: uri
+             * @description `needs_auth` only: Google's consent page, to open in a browser session (never an embedded web view).
+             */
+            auth_url?: string | null;
+            /**
+             * Format: uri
+             * @description `picking` only: Google's picker. Web clients append `/autoclose`; on Android the Google Photos app can handle it.
+             */
+            picker_uri?: string | null;
+            /** Format: date-time */
+            picker_expires_at?: string | null;
+            progress: {
+                picked: number;
+                imported: number;
+                /** @description Already in the album or feed. */
+                duplicates?: number;
+                /** @description Too long, too large or unsupported. */
+                skipped?: number;
+                failed?: number;
+                bytes?: number;
+            };
+            /** @description The sends (and thus posts) the import made; unsend them to undo. */
+            send_ids?: components["schemas"]["Id"][];
+            error_code?: components["schemas"]["GoogleImportErrorCode"] | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at?: string | null;
+            /** Format: date-time */
+            finished_at?: string | null;
         };
         TvLinkCreate: {
             /**
@@ -2629,8 +4527,14 @@ export interface components {
                 collage?: boolean;
                 /** @default 3 */
                 collage_max?: number;
-                /** @description null = all photos */
+                /** @description null = all photos. Setting it clears `feed_id`. */
                 album_id?: string | null;
+                /**
+                 * @description Feed mode: play only placements of this subscribed feed (`Placement.feed_ids`); null = all photos.
+                 *     Setting it clears `album_id`. Reset to null when the subscription ends. An empty or unknown feed plays
+                 *     everything.
+                 */
+                feed_id?: string | null;
                 /** @default false */
                 on_this_day?: boolean;
                 /**
@@ -2663,7 +4567,7 @@ export interface components {
                  */
                 calendar_sidebar?: boolean;
                 /**
-                 * @description Countdown widgets on the slideshow (the nearest three).
+                 * @description Countdown widgets on the slideshow (the nearest three): marked events and, from 7 days before, feed birthdays (docs/spec/birthdays.md §6.6). The birthday card on the day itself does not depend on it.
                  * @default true
                  */
                 countdowns?: boolean;
@@ -2885,7 +4789,7 @@ export interface components {
             instance_id: string;
             /** @description The instance started on the frame. */
             running?: boolean;
-            /** @description The last error */
+            /** @description The last error, null when the last update and render worked. */
             error?: string | null;
             /** Format: date-time */
             error_at?: string | null;
@@ -3049,7 +4953,7 @@ export interface components {
             alg: "pbkdf2-sha256";
             /** @example 20000 */
             iterations: number;
-            /** @description base64 */
+            /** @description base64, at least 12 random bytes */
             salt: string;
             /** @description base64 of 32 bytes */
             hash: string;
@@ -3138,7 +5042,7 @@ export interface components {
         Change: {
             seq: number;
             /** @enum {string} */
-            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "reset";
+            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "birthdays" | "reset";
             placement?: components["schemas"]["Placement"] & {
                 /** @description Frame rendition to download (present on placement.upsert when status is ready). */
                 media?: {
@@ -3190,6 +5094,8 @@ export interface components {
             };
             weather?: components["schemas"]["Weather"];
             calendar?: components["schemas"]["Calendar"] | null;
+            /** @description The frame's birthday people (`birthdays` change), or null = drop them. Old frame apps ignore it. */
+            birthdays?: components["schemas"]["FrameBirthdays"] | null;
         };
         /**
          * @description Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -3239,7 +5145,7 @@ export interface components {
                 code: number;
                 is_day: boolean;
                 wind_kmh?: number | null;
-                /** @description Direction the wind comes from */
+                /** @description Direction the wind comes from, 0 = north */
                 wind_dir_deg?: number | null;
                 humidity_pct?: number | null;
                 precip_mm?: number | null;
@@ -3323,7 +5229,7 @@ export interface components {
             kind: "ics" | "caldav";
             /** @description `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL. */
             url: string;
-            /** @description Defaults to the calendar's own name */
+            /** @description Defaults to the calendar's own name, else the host. */
             name?: string;
             color?: components["schemas"]["CalendarColor"];
             /** @default true */
@@ -3349,7 +5255,7 @@ export interface components {
             /** @enum {string} */
             status: "ok" | "failed" | "auth_failed";
             error?: string | null;
-            /** @description The calendar's own name */
+            /** @description The calendar's own name, if it has one. */
             calendar_name?: string | null;
             /** @description Events in the next 30 days. */
             event_count?: number | null;
@@ -3357,7 +5263,7 @@ export interface components {
             calendars?: {
                 url: string;
                 name: string;
-                /** @description The server's colour (hex) */
+                /** @description The server's colour (hex), as a hint. */
                 color?: string | null;
             }[];
         };
@@ -3512,6 +5418,12 @@ export interface components {
         InvitationId: components["schemas"]["Id"];
         EventId: components["schemas"]["CalendarEventId"];
         EndpointId: components["schemas"]["Id"];
+        FeedId: components["schemas"]["Id"];
+        PostId: components["schemas"]["Id"];
+        SubscriptionId: components["schemas"]["Id"];
+        BirthdayId: components["schemas"]["Id"];
+        SourceId: components["schemas"]["Id"];
+        ImportId: components["schemas"]["Id"];
         InviteToken: string;
         Cursor: string;
         Limit: number;
@@ -3635,6 +5547,11 @@ export interface operations {
                     share_location_names?: boolean;
                     /** @example nl-BE */
                     locale?: string;
+                    /**
+                     * @description IANA time zone of the user's device, set automatically by the apps (birthday morning notifications at 08:00 local).
+                     * @example Europe/Brussels
+                     */
+                    timezone?: string;
                 };
             };
         };
@@ -4411,6 +6328,8 @@ export interface operations {
             content: {
                 "application/json": {
                     frame_ids: components["schemas"]["Id"][];
+                    /** @description Post the send's items to these feeds (caller must be a member). A feed that already has a live post of this send is skipped. */
+                    feed_ids?: components["schemas"]["Id"][];
                 };
             };
         };
@@ -4489,6 +6408,8 @@ export interface operations {
                 sender_id?: components["schemas"]["Id"];
                 kind?: components["schemas"]["MediaKind"];
                 album_id?: components["schemas"]["Id"];
+                /** @description Only placements held by this feed (`feed_ids`). */
+                feed_id?: components["schemas"]["Id"];
                 /**
                  * @description "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
                  *     on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
@@ -4559,7 +6480,7 @@ export interface operations {
             content: {
                 "application/json": {
                     hidden?: boolean;
-                    /** @description true moves to trash (30 days) */
+                    /** @description true moves to trash (30 days), false restores. */
                     trashed?: boolean;
                     /** @description Moderation decision (owner/admin). */
                     approved?: boolean;
@@ -4702,7 +6623,10 @@ export interface operations {
     };
     deleteAlbum: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Also remove the photos this album's photo sources imported (clients ask when `photo_source_count` > 0). */
+                remove_source_items?: boolean;
+            };
             header?: never;
             path: {
                 frameId: components["parameters"]["FrameId"];
@@ -4750,6 +6674,1530 @@ export interface operations {
                 };
             };
             412: components["responses"]["Problem"];
+        };
+    };
+    listAlbumPhotoSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                albumId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sources, oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMyFeeds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Feeds */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedSummary"][];
+                };
+            };
+        };
+    };
+    createFeed: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feed"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Feed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feed"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteFeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateFeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feed"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    leaveFeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Also remove your posts from the feed and every subscribed frame.
+                     * @default false
+                     */
+                    remove_my_posts?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Left */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    transferFeedOwnership: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    user_id: components["schemas"]["Id"];
+                };
+            };
+        };
+        responses: {
+            /** @description Transferred */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedMember"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeFeedMember: {
+        parameters: {
+            query?: {
+                /** @description Also remove the member's posts from the feed and every subscribed frame. */
+                remove_posts?: boolean;
+            };
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateFeedMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                userId: components["parameters"]["UserId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    role: "admin" | "poster";
+                };
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedMember"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedJoinRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequest"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    decideFeedJoinRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                requestId: components["schemas"]["Id"];
+                decision: "approve" | "deny";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Decided */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active invites */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedInvite"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createFeedInvite: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedInviteCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedInvite"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    revokeFeedInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                inviteId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    lookupFeedInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description 8 Crockford base32 characters, hyphen optional, case-insensitive. */
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedInvitePreview"];
+                };
+            };
+            404: components["responses"]["Problem"];
+            410: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+        };
+    };
+    previewFeedInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["InviteToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedInvitePreview"];
+                };
+            };
+            404: components["responses"]["Problem"];
+            410: components["responses"]["Problem"];
+        };
+    };
+    acceptFeedInvite: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                token: components["parameters"]["InviteToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedInviteAccept"];
+            };
+        };
+        responses: {
+            /** @description Result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedInviteResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedPosts: {
+        parameters: {
+            query?: {
+                cursor?: components["parameters"]["Cursor"];
+                limit?: components["parameters"]["Limit"];
+                poster_id?: components["schemas"]["Id"];
+            };
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page of posts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        posts: components["schemas"]["FeedPost"][];
+                        next_cursor: string | null;
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeedPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Post */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedPost"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeFeedPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeFeedPostItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                postId: components["parameters"]["PostId"];
+                itemId: components["parameters"]["ItemId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeedPostReceipts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                postId: components["parameters"]["PostId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Receipts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedPostReceipts"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedBirthdays: {
+        parameters: {
+            query?: {
+                /** @description Only this status (default all the caller may see). */
+                status?: components["schemas"]["BirthdayStatus"];
+            };
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Birthday people */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createFeedBirthday: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BirthdayPersonCreate"];
+            };
+        };
+        responses: {
+            /** @description Created (approved or pending) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFeedBirthday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Birthday person */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeFeedBirthday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateFeedBirthday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BirthdayPersonUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    approveFeedBirthday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    rejectFeedBirthday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rejected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    putFeedBirthdayPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+            };
+        };
+        responses: {
+            /** @description Stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteFeedBirthdayPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+                birthdayId: components["parameters"]["BirthdayId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BirthdayPerson"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedBirthdayGreetings: {
+        parameters: {
+            query?: {
+                cursor?: components["parameters"]["Cursor"];
+                limit?: components["parameters"]["Limit"];
+                birthday_id?: components["schemas"]["Id"];
+                /** @description Only greetings for this occurrence date. */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page of greetings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        greetings: components["schemas"]["FeedBirthdayGreeting"][];
+                        next_cursor: string | null;
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateFeedPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedPreferencesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feed"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedSubscriptions: {
+        parameters: {
+            query?: {
+                /** @description Only this status (default all the caller may see). */
+                status?: components["schemas"]["SubscriptionStatus"];
+            };
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscriptions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    requestSubscription: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created (pending or active) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            403: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFrameSubscriptions: {
+        parameters: {
+            query?: {
+                /** @description Only this status (default all the caller may see). */
+                status?: components["schemas"]["SubscriptionStatus"];
+            };
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscriptions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscription */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    approveSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    rejectSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rejected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    pauseSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paused */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    resumeSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscriptionId: components["parameters"]["SubscriptionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resumed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedPhotoSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sources, oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMyPhotoSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sources, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createPhotoSource: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PhotoSourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    testPhotoSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PhotoSourceConnection"];
+            };
+        };
+        responses: {
+            /** @description Outcome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSourceTestResult"];
+                };
+            };
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listImmichAlbums: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImmichConnection"];
+            };
+        };
+        responses: {
+            /** @description Albums */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImmichAlbumList"];
+                };
+            };
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getPhotoSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["SourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Source */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deletePhotoSource: {
+        parameters: {
+            query: {
+                /** @description Also remove the photos this source imported. */
+                remove_items: boolean;
+            };
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["SourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updatePhotoSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["SourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PhotoSourceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    syncPhotoSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["SourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Remove the photos that disappeared upstream although there were many.
+                     * @default false
+                     */
+                    confirm_removals?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Sync started */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoSource"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMyGoogleImports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Imports */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoogleImport"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    startGoogleImport: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleImportCreate"];
+            };
+        };
+        responses: {
+            /** @description Started */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoogleImport"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getGoogleImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                importId: components["parameters"]["ImportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Import */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoogleImport"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    cancelGoogleImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                importId: components["parameters"]["ImportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoogleImport"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    googleOAuthCallback: {
+        parameters: {
+            query: {
+                state: string;
+                code?: string;
+                /** @description Set by Google when consent failed (e.g. `access_denied`). */
+                error?: string;
+                scope?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirect to the import's `return_uri` */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown, expired or reused state (HTML page) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
         };
     };
     listTvLinks: {
@@ -5384,7 +8832,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         device_id: components["schemas"]["Id"];
-                        /** @description 256-bit random */
+                        /** @description 256-bit random, base64url. Shown only once. */
                         device_secret: string;
                     };
                 };
@@ -6081,6 +9529,30 @@ export interface operations {
                 content?: never;
             };
             404: components["responses"]["Problem"];
+        };
+    };
+    deviceGreetBirthday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                birthdayId: components["parameters"]["BirthdayId"];
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recorded */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
         };
     };
     deviceCheckUpdate: {

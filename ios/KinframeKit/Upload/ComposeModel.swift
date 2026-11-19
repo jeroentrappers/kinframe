@@ -39,6 +39,8 @@ public struct Draft: Identifiable, Sendable {
 public final class ComposeModel {
     public private(set) var drafts: [Draft] = []
     public var frameIds: Set<String> = []
+    /// Feeds to post to, next to the frames (docs/spec/feeds.md §6.1). At least one frame or feed.
+    public var feedIds: Set<String> = []
     /// Caption for every item without its own.
     public var sharedCaption = ""
     public var limits: Limits
@@ -152,6 +154,13 @@ public final class ComposeModel {
         if frameIds.contains(id) { frameIds.remove(id) } else { frameIds.insert(id) }
     }
 
+    public func toggle(feed id: String) {
+        if feedIds.contains(id) { feedIds.remove(id) } else { feedIds.insert(id) }
+    }
+
+    /// Frames plus feeds.
+    public var recipientCount: Int { frameIds.count + feedIds.count }
+
     public func issue(_ d: Draft) -> ItemIssue? {
         ComposeRules.issue(kind: d.kind, bytes: d.bytes, durationSeconds: d.info?.duration, trim: d.trim, limits: limits)
     }
@@ -164,6 +173,7 @@ public final class ComposeModel {
         ComposeRules.blocker(
             itemCount: drafts.count,
             frameCount: frameIds.count,
+            feedCount: feedIds.count,
             issues: issueCount,
             longestCaption: drafts.map { caption(of: $0).count }.max() ?? 0,
             limits: limits
@@ -173,7 +183,7 @@ public final class ComposeModel {
     public var canSend: Bool { blocker == nil && !isProbing }
 
     /// Move the files into the upload queue and describe the send. The composer is empty afterwards.
-    public func makeJob(server: URL, frames: [FrameSummary], store: OutboxStore) throws -> OutboxJob {
+    public func makeJob(server: URL, frames: [FrameSummary], feeds: [FeedSummary] = [], store: OutboxStore) throws -> OutboxJob {
         let id = UUID()
         let dir = try store.makeDirectory(for: id)
         var items: [OutboxItem] = []
@@ -213,7 +223,9 @@ public final class ComposeModel {
             ))
         }
         let chosen = frames.filter { frameIds.contains($0.id) }
-        let job = OutboxJob(id: id, server: server, frameIds: chosen.map(\.id), frameNames: chosen.map(\.name), items: items)
+        let chosenFeeds = feeds.filter { feedIds.contains($0.id) }
+        let job = OutboxJob(id: id, server: server, frameIds: chosen.map(\.id), frameNames: chosen.map(\.name),
+                            feedIds: chosenFeeds.map(\.id), feedNames: chosenFeeds.map(\.name), items: items)
         drafts = []
         sharedCaption = ""
         try? FileManager.default.removeItem(at: staging)

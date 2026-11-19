@@ -28,13 +28,20 @@ import org.unifiedpush.android.connector.data.PushMessage as UpMessage
 import java.util.Locale
 
 /** A push payload from the server: only ids plus a localized title and body (README §6.3). */
-data class PushMessage(val type: String, val title: String, val body: String, val ids: Map<String, String>) {
+data class PushMessage(
+    val type: String, val title: String, val body: String, val ids: Map<String, String>, val key: String = "",
+    /** Notification tag set by the server (greetings: `birthday:<birthday_id>:<date>`, so a newer one replaces the older). */
+    val tag: String = "",
+) {
+    /** The push key (`subscription_request`…), falling back to the type for servers that send only one. */
+    val kind: String get() = key.ifBlank { type }
+
     companion object {
         fun parse(bytes: ByteArray): PushMessage? = runCatching {
             val o = KinJson.parseToJsonElement(bytes.toString(Charsets.UTF_8)).jsonObject
             fun s(k: String) = o[k]?.jsonPrimitive?.contentOrNull.orEmpty()
             val ids = (o["ids"]?.jsonObject ?: emptyMap()).mapNotNull { (k, v) -> v.jsonPrimitive.contentOrNull?.let { k to it } }.toMap()
-            PushMessage(s("type"), s("title"), s("body"), ids)
+            PushMessage(s("type"), s("title"), s("body"), ids, s("key"), s("tag"))
         }.getOrNull()
     }
 }

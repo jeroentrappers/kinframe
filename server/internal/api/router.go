@@ -58,6 +58,7 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("/v1/uploads", user(s.tusRoutes()))
 	mux.Handle("/v1/uploads/", user(s.tusRoutes()))
 	mux.Handle("PUT /v1/me/avatar", user(http.HandlerFunc(s.putAvatar)))
+	mux.Handle("PUT /v1/feeds/{feedId}/birthdays/{birthdayId}/photo", user(http.HandlerFunc(s.putFeedBirthdayPhoto)))
 	mux.Handle("GET /v1/items/{itemId}/media/{variant}", user(http.HandlerFunc(s.getItemMedia)))
 	mux.Handle("GET /v1/device/media/{placementId}", s.deviceAuth(http.HandlerFunc(s.deviceGetMedia)))
 	mux.Handle("GET /v1/device/ws", s.deviceAuth(http.HandlerFunc(s.deviceWS)))
@@ -69,6 +70,7 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/device/invitations/{invitationId}/photo", s.deviceAuth(http.HandlerFunc(s.deviceGetInvitationPhoto)))
 	mux.Handle("GET /v1/frames/{frameId}/events/{invitationId}/photo", user(http.HandlerFunc(s.getEventInvitationPhoto)))
 	mux.Handle("GET /v1/operator/reservations.csv", user(http.HandlerFunc(s.exportReservations)))
+	mux.HandleFunc("GET /v1/oauth/google/callback", s.googleOAuthCallback) // no sign-in: Google's browser redirect
 	mux.HandleFunc("GET /v1/ws", s.userWS)
 	mux.HandleFunc("GET /v1/tv/{token}/mirror", s.tvMirrorWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)

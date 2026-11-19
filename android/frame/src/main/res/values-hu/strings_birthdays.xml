@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s ma %2$d éves!</item>
+        <item quantity="other">🎈 %1$s ma %2$d éves!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 Ma van %1$s születésnapja!</string>
+    <string name="birthday_card_title_many">🎈 Mai születésnapok</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">és még %d</item>
+        <item quantity="other">és még %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s %2$d éves lesz</item>
+        <item quantity="other">%1$s %2$d éves lesz</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s születésnapja</string>
+    <string name="birthday_countdown_two">%1$s és %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s és még %2$d</item>
+        <item quantity="other">%1$s és még %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Boldog születésnapot erről a képkeretről</string>
+    <string name="birthday_greet_button">Boldog születésnapot, %1$s!</string>
+    <string name="birthday_greet_sent">Elküldve ✓ – a család látni fogja</string>
+    <string name="birthday_detail_label">Születésnap</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">%d éves lesz</item>
+        <item quantity="other">%d éves lesz</item>
+    </plurals>
+</resources>

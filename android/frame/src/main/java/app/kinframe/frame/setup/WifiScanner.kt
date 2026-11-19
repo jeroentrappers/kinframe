@@ -57,7 +57,7 @@ class WifiScanner(private val context: Context) {
     private fun publish() {
         val current = runCatching { wm.connectionInfo?.ssid?.trim('"') }.getOrNull()
         val results = runCatching { wm.scanResults }.getOrNull().orEmpty()
-        _networks.value = results
+        val fresh = results
             .filter { it.SSID.isNotBlank() }
             .groupBy { it.SSID }
             .map { (ssid, list) ->
@@ -69,8 +69,39 @@ class WifiScanner(private val context: Context) {
                     connected = ssid == current,
                 )
             }
-            .sortedWith(compareByDescending<Network> { it.connected }.thenByDescending { it.level }.thenBy { it.ssid.lowercase() })
-            .take(30)
+        val (list, missed) = stableOrder(_networks.value, fresh, missedScans)
+        missedScans = missed
+        _networks.value = list
+    }
+
+    /** Per SSID still listed but absent from the latest scans: how many scans in a row it was missing. */
+    private var missedScans: Map<String, Int> = emptyMap()
+
+    companion object {
+        /** Scans a network may be missing (one is often skipped) before it leaves the list. */
+        const val KEEP_MISSING_SCANS = 3
+        const val MAX_SHOWN = 30
+
+        /**
+         * Merges a scan into the list on screen without moving anything: networks already shown keep their place
+         * (with fresh signal and state), new ones are appended (connected first, then by signal and name), and a
+         * network missing from the scan stays until it was absent [KEEP_MISSING_SCANS] times in a row. Re-sorting
+         * on every scan made rows jump under the user's finger, so a tap opened another network than the one aimed at.
+         */
+        fun stableOrder(shown: List<Network>, fresh: List<Network>, missed: Map<String, Int>): Pair<List<Network>, Map<String, Int>> {
+            val bySsid = fresh.associateBy { it.ssid }
+            val nextMissed = mutableMapOf<String, Int>()
+            val kept = shown.mapNotNull { old ->
+                bySsid[old.ssid] ?: run {
+                    val n = (missed[old.ssid] ?: 0) + 1
+                    if (n >= KEEP_MISSING_SCANS) null else old.copy(connected = false).also { nextMissed[old.ssid] = n }
+                }
+            }
+            val known = shown.mapTo(HashSet()) { it.ssid }
+            val added = fresh.filter { it.ssid !in known }
+                .sortedWith(compareByDescending<Network> { it.connected }.thenByDescending { it.level }.thenBy { it.ssid.lowercase() })
+            return (kept + added).take(MAX_SHOWN) to nextMissed
+        }
     }
 
     /** Joins a network (Android ≤ 9). Returns false if the system refused the configuration. */

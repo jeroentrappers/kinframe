@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s kończy dziś %2$d rok!</item>
+        <item quantity="few">🎈 %1$s kończy dziś %2$d lata!</item>
+        <item quantity="many">🎈 %1$s kończy dziś %2$d lat!</item>
+        <item quantity="other">🎈 %1$s kończy dziś %2$d lat!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s ma dziś urodziny!</string>
+    <string name="birthday_card_title_many">🎈 Dzisiejsze urodziny</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">i jeszcze %d</item>
+        <item quantity="few">i jeszcze %d</item>
+        <item quantity="many">i jeszcze %d</item>
+        <item quantity="other">i jeszcze %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s skończy %2$d rok</item>
+        <item quantity="few">%1$s skończy %2$d lata</item>
+        <item quantity="many">%1$s skończy %2$d lat</item>
+        <item quantity="other">%1$s skończy %2$d lat</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s ma urodziny</string>
+    <string name="birthday_countdown_two">%1$s i %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s i jeszcze %2$d</item>
+        <item quantity="few">%1$s i jeszcze %2$d</item>
+        <item quantity="many">%1$s i jeszcze %2$d</item>
+        <item quantity="other">%1$s i jeszcze %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Złóż życzenia urodzinowe z tej ramki</string>
+    <string name="birthday_greet_button">Złóż życzenia: %1$s</string>
+    <string name="birthday_greet_sent">Wysłano ✓ — rodzina to zobaczy</string>
+    <string name="birthday_detail_label">Urodziny</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">skończy %d rok</item>
+        <item quantity="few">skończy %d lata</item>
+        <item quantity="many">skończy %d lat</item>
+        <item quantity="other">skończy %d lat</item>
+    </plurals>
+</resources>

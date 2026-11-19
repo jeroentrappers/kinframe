@@ -53,6 +53,8 @@ struct ComposeTab: View {
     @FocusState private var captionFocused: Bool
 
     private var sendable: [FrameSummary] { app.frames.filter { $0.can(\.send) } }
+    /// Every feed you're in takes posts (any role), when the server has feeds.
+    private var feeds: [FeedSummary] { app.feedsEnabled ? app.feeds : [] }
 
     var body: some View {
         NavigationStack {
@@ -61,7 +63,7 @@ struct ComposeTab: View {
                     Text(L("send.lede"))
                         .foregroundStyle(Palette.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
-                    if app.framesLoaded, sendable.isEmpty {
+                    if app.framesLoaded, sendable.isEmpty, feeds.isEmpty {
                         noFrames
                     } else if let id = sendingJob, let job = app.outbox.job(id) {
                         SendingCard(job: job, onRetry: { app.outbox.retry(id) }, onCancel: {
@@ -76,6 +78,7 @@ struct ComposeTab: View {
                             captionField
                         }
                         frameList
+                        if !feeds.isEmpty { feedList }
                     }
                 }
                 .padding(16)
@@ -127,6 +130,8 @@ struct ComposeTab: View {
             #endif
         }
         .onChange(of: app.composeFrameIds) { preselect() }
+        .onChange(of: app.composeFeedIds) { preselect() }
+        .onChange(of: app.feeds) { preselect() }
         .onChange(of: app.frames) { preselect() }
         .onChange(of: app.framesLoaded) { preselect() }
         .onChange(of: sendingJob.flatMap { app.outbox.job($0)?.state }) { _, state in
@@ -254,15 +259,58 @@ struct ComposeTab: View {
         }
     }
 
+    @ViewBuilder
     private var frameList: some View {
+        if !sendable.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                SectionHeader(L("send.to"))
+                VStack(spacing: 0) {
+                    ForEach(Array(sendable.enumerated()), id: \.element.id) { n, frame in
+                        if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
+                        let on = model.frameIds.contains(frame.id)
+                        Button {
+                            withAnimation(.snappy) { model.toggle(frame: frame.id) }
+                            UISelectionFeedbackGenerator().selectionChanged()
+                        } label: {
+                            HStack(spacing: 14) {
+                                Image(systemName: on ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2)
+                                    .foregroundStyle(on ? Palette.primary : Palette.borderStrong)
+                                    .frame(width: 30)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(frame.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                                    OnlineStatus(online: frame.online, lastSeen: frame.lastSeenAt)
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .frame(minHeight: 60)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(on ? .isSelected : [])
+                    }
+                }
+                .card(padding: 0)
+                if sendable.contains(where: { model.frameIds.contains($0.id) && !$0.online }) {
+                    Text(L("send.offlineNote")).font(.footnote).foregroundStyle(Palette.textMuted)
+                }
+            }
+        }
+    }
+
+    /// Feeds as recipients, in their own section ("Peeters kids · 5 frames"): one post per feed, and every frame
+    /// that follows it gets the photos.
+    private var feedList: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(L("send.to"))
+            SectionHeader(sendable.isEmpty ? L("send.to") : L("ios.feeds.sendToFeeds"))
             VStack(spacing: 0) {
-                ForEach(Array(sendable.enumerated()), id: \.element.id) { n, frame in
+                ForEach(Array(feeds.enumerated()), id: \.element.id) { n, feed in
                     if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
-                    let on = model.frameIds.contains(frame.id)
+                    let on = model.feedIds.contains(feed.id)
                     Button {
-                        withAnimation(.snappy) { model.toggle(frame: frame.id) }
+                        withAnimation(.snappy) { model.toggle(feed: feed.id) }
                         UISelectionFeedbackGenerator().selectionChanged()
                     } label: {
                         HStack(spacing: 14) {
@@ -270,9 +318,10 @@ struct ComposeTab: View {
                                 .font(.title2)
                                 .foregroundStyle(on ? Palette.primary : Palette.borderStrong)
                                 .frame(width: 30)
+                            FeedCover(url: feed.coverUrl, name: feed.name, size: 36)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(frame.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
-                                OnlineStatus(online: frame.online, lastSeen: frame.lastSeenAt)
+                                Text(feed.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                                Text(Lp("ios.feeds.frameCount", count: feed.subscriptionCount)).font(.footnote).foregroundStyle(Palette.textMuted)
                             }
                             Spacer()
                         }
@@ -286,9 +335,7 @@ struct ComposeTab: View {
                 }
             }
             .card(padding: 0)
-            if sendable.contains(where: { model.frameIds.contains($0.id) && !$0.online }) {
-                Text(L("send.offlineNote")).font(.footnote).foregroundStyle(Palette.textMuted)
-            }
+            Text(L("ios.feeds.sendHint")).font(.footnote).foregroundStyle(Palette.textMuted)
         }
     }
 
@@ -315,7 +362,8 @@ struct ComposeTab: View {
 
     private var blockerText: String? {
         switch model.blocker {
-        case .noFrames: L("send.pickFrame")
+        case .noFrames: feeds.isEmpty ? L("send.pickFrame") : L("ios.feeds.pickRecipient")
+        case .tooManyFeeds(let max): L("ios.feeds.tooManyFeeds", ["max": max])
         case .overLimit(let max): L("send.overLimit", ["max": max, "n": model.drafts.count - max])
         case .captionTooLong: L("send.charsLeft", ["n": 0, "max": Format.captionMax])
         default: nil
@@ -327,12 +375,20 @@ struct ComposeTab: View {
     private func preselect() {
         // Wait for the frame list: until then the wanted frames can't be checked.
         guard app.framesLoaded else { return }
-        if !app.composeFrameIds.isEmpty {
+        if !app.composeFeedIds.isEmpty, app.feedsLoaded {
+            // "Post" in a feed: that feed only.
+            model.feedIds = app.composeFeedIds.filter { id in feeds.contains { $0.id == id } }
+            model.frameIds = []
+            app.composeFeedIds = []
+        } else if !app.composeFrameIds.isEmpty {
             model.frameIds = app.composeFrameIds.filter { id in sendable.contains { $0.id == id } }
+            model.feedIds = []
             app.composeFrameIds = []
-        } else if model.frameIds.isEmpty, sendable.count == 1, let only = sendable.first {
+        } else if model.frameIds.isEmpty, model.feedIds.isEmpty, sendable.count == 1, feeds.isEmpty, let only = sendable.first {
             model.frameIds = [only.id]
         }
+        // Drop recipients that are gone (left a feed, lost `send`).
+        model.feedIds = Set(Recipients.valid(model.feedIds, among: feeds.map(\.id)))
     }
 
     private func load(_ items: [PhotosPickerItem]) async {
@@ -378,7 +434,7 @@ struct ComposeTab: View {
     private func send() {
         guard let server = app.server, model.canSend else { return }
         do {
-            let job = try model.makeJob(server: server.apiBase, frames: app.frames, store: app.outbox.store)
+            let job = try model.makeJob(server: server.apiBase, frames: app.frames, feeds: feeds, store: app.outbox.store)
             try app.outbox.enqueue(job)
             withAnimation { sendingJob = job.id }
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -483,7 +539,7 @@ struct SendingCard: View {
                 ThumbStack(job: job)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title).font(.headline).foregroundStyle(Palette.text)
-                    Text(job.frameNames.joined(separator: ", ")).font(.subheadline).foregroundStyle(Palette.textMuted).lineLimit(1)
+                    Text(job.recipientNames.joined(separator: ", ")).font(.subheadline).foregroundStyle(Palette.textMuted).lineLimit(1)
                 }
                 Spacer()
             }

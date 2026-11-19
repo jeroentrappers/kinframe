@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="zero">🎈 عيد ميلاد %1$s الـ%2$d اليوم!</item>
+        <item quantity="one">🎈 عيد ميلاد %1$s الـ%2$d اليوم!</item>
+        <item quantity="two">🎈 عيد ميلاد %1$s الـ%2$d اليوم!</item>
+        <item quantity="few">🎈 عيد ميلاد %1$s الـ%2$d اليوم!</item>
+        <item quantity="many">🎈 عيد ميلاد %1$s الـ%2$d اليوم!</item>
+        <item quantity="other">🎈 عيد ميلاد %1$s الـ%2$d اليوم!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 اليوم عيد ميلاد %1$s!</string>
+    <string name="birthday_card_title_many">🎈 أعياد ميلاد اليوم</string>
+    <plurals name="birthday_card_more">
+        <item quantity="zero">و%d آخرون</item>
+        <item quantity="one">و%d آخرون</item>
+        <item quantity="two">و%d آخرون</item>
+        <item quantity="few">و%d آخرون</item>
+        <item quantity="many">و%d آخرون</item>
+        <item quantity="other">و%d آخرون</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="zero">%1$s: عيد الميلاد الـ%2$d</item>
+        <item quantity="one">%1$s: عيد الميلاد الـ%2$d</item>
+        <item quantity="two">%1$s: عيد الميلاد الـ%2$d</item>
+        <item quantity="few">%1$s: عيد الميلاد الـ%2$d</item>
+        <item quantity="many">%1$s: عيد الميلاد الـ%2$d</item>
+        <item quantity="other">%1$s: عيد الميلاد الـ%2$d</item>
+    </plurals>
+    <string name="birthday_countdown_plain">عيد ميلاد %1$s</string>
+    <string name="birthday_countdown_two">%1$s و%2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="zero">%1$s و%2$d آخرون</item>
+        <item quantity="one">%1$s و%2$d آخرون</item>
+        <item quantity="two">%1$s و%2$d آخرون</item>
+        <item quantity="few">%1$s و%2$d آخرون</item>
+        <item quantity="many">%1$s و%2$d آخرون</item>
+        <item quantity="other">%1$s و%2$d آخرون</item>
+    </plurals>
+    <string name="birthday_greet_title">قل عيد ميلاد سعيد من هذا الإطار</string>
+    <string name="birthday_greet_button">عيد ميلاد سعيد يا %1$s</string>
+    <string name="birthday_greet_sent">تم الإرسال ✓ — ستراه العائلة</string>
+    <string name="birthday_detail_label">عيد ميلاد</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="zero">عيد الميلاد الـ%d</item>
+        <item quantity="one">عيد الميلاد الـ%d</item>
+        <item quantity="two">عيد الميلاد الـ%d</item>
+        <item quantity="few">عيد الميلاد الـ%d</item>
+        <item quantity="many">عيد الميلاد الـ%d</item>
+        <item quantity="other">عيد الميلاد الـ%d</item>
+    </plurals>
+</resources>

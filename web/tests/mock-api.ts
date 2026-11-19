@@ -65,6 +65,22 @@ export interface MockState {
 	eventInvitations: Record<string, S['EventInvitation'][]>;
 	/** Shop reservations (README §5.11); only reachable when discovery has a shop. */
 	reservations: S['ShopReservation'][];
+	/** Feeds (README §5.12); only reachable when discovery says `feeds: true`. */
+	feeds: S['Feed'][];
+	feedPosts: Record<string, S['FeedPost'][]>;
+	feedMembers: Record<string, S['FeedMember'][]>;
+	feedInvites: Record<string, S['FeedInvite'][]>;
+	feedInvitePreviews: Record<string, S['FeedInvitePreview']>;
+	subscriptions: S['Subscription'][];
+	/** Birthdays (README §5.13), per feed; only reachable when discovery says `birthdays: true`. */
+	birthdays: Record<string, S['BirthdayPerson'][]>;
+	birthdayGreetings: Record<string, S['FeedBirthdayGreeting'][]>;
+	/** Photo sources (README §5.14); only reachable when discovery says `photo_sources: true`. */
+	photoSources: S['PhotoSource'][];
+	/** Google Photos imports; `return_uri` kept so tests can play Google's redirect. */
+	googleImports: (S['GoogleImport'] & { return_uri?: string })[];
+	/** Make the next "Sync now" answer 429 with this Retry-After. */
+	syncRetryAfter?: number;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -103,6 +119,16 @@ export function emptyState(): MockState {
 		calendarViews: {},
 		eventInvitations: {},
 		reservations: [],
+		feeds: [],
+		feedPosts: {},
+		feedMembers: {},
+		feedInvites: {},
+		feedInvitePreviews: {},
+		subscriptions: [],
+		birthdays: {},
+		birthdayGreetings: {},
+		photoSources: [],
+		googleImports: [],
 		calls: [],
 		ws: null
 	};
@@ -221,6 +247,9 @@ export function communityPlugin(version = '1.0.0'): S['CatalogPlugin'] {
 export function pluginUpdate(instanceId: string, running: string, next: string, permissions: Record<string, unknown>): S['PluginInstanceStatus'] {
 	return { instance_id: instanceId, running: true, updated_at: iso(1), version: running, update: { version: next, permissions } };
 }
+
+/** 1×1 PNG, standing in for an uploaded birthday photo. */
+const gradientDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HwAFgwJ/l6Wg2wAAAABJRU5ErkJggg==';
 
 function json(route: Route, status: number, body: unknown, headers: Record<string, string> = {}) {
 	return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body), headers });
@@ -487,6 +516,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (b.name) a.name = b.name;
 			if (b.cover_placement_id) a.cover_placement_id = b.cover_placement_id;
 			if ('schedule' in b) a.schedule = b.schedule ?? null;
+			if (b.only_in_album_mode !== undefined) a.only_in_album_mode = b.only_in_album_mode;
 			if (b.placement_ids) a.placement_ids = b.placement_ids;
 			a.placement_count = a.placement_ids?.length ?? 0;
 			a.version++;
@@ -769,6 +799,8 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 				const ids = state.albums[m[1]!]?.find((a) => a.id === albumId)?.placement_ids ?? [];
 				list = list.filter((p) => ids.includes(p.id));
 			}
+			const feedId = url.searchParams.get('feed_id');
+			if (feedId) list = list.filter((p) => p.feed_ids?.includes(feedId));
 			const otd = url.searchParams.get('on_this_day');
 			if (otd) {
 				const year = new Date().getFullYear();
@@ -878,6 +910,406 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			return route.fulfill({ status: method === 'HEAD' ? 200 : 204, headers: { 'Upload-Offset': String(u.offset), 'Upload-Length': String(u.length), 'Tus-Resumable': '1.0.0' } });
 		}
 
+		// ---- photo sources and Google Photos import (README §5.14)
+		const now = () => new Date().toISOString();
+		const albumById = (id: string | null | undefined) => Object.entries(state.albums).flatMap(([fid, list]) => list.map((a) => ({ fid, a }))).find((x) => x.a.id === id);
+		const recount = (albumId: string | null | undefined) => {
+			const hit = albumById(albumId);
+			if (hit) hit.a.photo_source_count = state.photoSources.filter((x) => x.target.album_id === hit.a.id).length;
+		};
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/albums\/([^/]+)\/photo-sources$/)) && method === 'GET') {
+			return json(route, 200, state.photoSources.filter((x) => x.target.album_id === m![2]));
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/photo-sources$/)) && method === 'GET') {
+			return json(route, 200, state.photoSources.filter((x) => x.target.feed_id === m![1]));
+		}
+		if (path === '/v1/photo-sources' && method === 'GET') return json(route, 200, state.photoSources.filter((x) => x.is_owner));
+		if (path === '/v1/photo-sources:test' && method === 'POST') {
+			const b = body as S['PhotoSourceConnection'];
+			const url = b.url ?? b.server_url ?? '';
+			if (/gone/.test(url)) return json(route, 200, { ok: false, error_code: 'link_not_found', error: 'HTTP 404' });
+			if (/locked/.test(url) && !b.password) return json(route, 200, { ok: false, error_code: 'password_required', error: 'HTTP 401' });
+			if (b.provider === 'immich_api' && !b.immich_album_id) return json(route, 200, { ok: true, albums: [], server_version: 'v1.132.3' });
+			return json(route, 200, {
+				ok: true,
+				album_name: b.provider === 'icloud_link' ? 'Oma & Opa' : b.immich_album_id ? 'Christmas' : 'Garden 2026',
+				photos: 214,
+				videos: 6,
+				estimate_bytes: 1181116006,
+				warnings: /nodl/.test(url) ? ['downloads_disabled'] : [],
+				best_effort: b.provider === 'icloud_link',
+				server_version: b.provider === 'icloud_link' ? null : 'v1.132.3'
+			});
+		}
+		if (path === '/v1/photo-sources:immich-albums' && method === 'POST') {
+			const b = body as S['ImmichConnection'];
+			if (/^bad/.test(b.api_key)) return json(route, 200, { ok: false, error_code: 'auth_failed', albums: [] });
+			return json(route, 200, {
+				ok: true,
+				server_version: 'v1.132.3',
+				albums: [
+					{ id: 'im-christmas', name: 'Christmas', asset_count: 80, shared: false, owner_name: 'Ben' },
+					{ id: 'im-garden', name: 'Garden', asset_count: 214, shared: true, owner_name: 'Carla' }
+				]
+			});
+		}
+		if (path === '/v1/photo-sources' && method === 'POST') {
+			const b = body as S['PhotoSourceCreate'];
+			const albumHit = albumById(b.album_id);
+			const feed = state.feeds.find((f) => f.id === b.feed_id);
+			const key = b.url ?? `${b.server_url}|${b.immich_album_id}`;
+			if (state.photoSources.some((x) => (x as { _key?: string })._key === key && (x.target.album_id ?? x.target.feed_id) === (b.album_id ?? b.feed_id)))
+				return route.fulfill({ status: 409, contentType: 'application/problem+json', body: JSON.stringify({ title: 'Duplicate', status: 409, code: 'duplicate_source', detail: 'x' }) });
+			const hint = (() => {
+				try {
+					const u = new URL(b.url ?? b.server_url ?? '');
+					return `${u.protocol}//${u.host}/…`;
+				} catch {
+					return null;
+				}
+			})();
+			const src: S['PhotoSource'] & { _key?: string } = {
+				_key: key,
+				id: uid('ps'),
+				provider: b.provider,
+				name: b.name ?? 'Garden 2026',
+				target: albumHit
+					? { kind: 'album', frame_id: albumHit.fid, frame_name: state.frames.find((f) => f.id === albumHit.fid)?.name ?? null, album_id: albumHit.a.id, album_name: albumHit.a.name }
+					: { kind: 'feed', feed_id: feed?.id ?? null, feed_name: feed?.name ?? null },
+				owner: { user_id: state.me!.id, display_name: state.me!.display_name },
+				best_effort: b.provider === 'icloud_link',
+				url_hint: b.provider === 'immich_api' ? null : hint,
+				server_url: b.server_url ?? null,
+				immich_album_id: b.immich_album_id ?? null,
+				has_api_key: !!b.api_key,
+				has_password: !!b.password,
+				status: 'active',
+				running: true,
+				warnings: [],
+				last_error_code: null,
+				pending_removals: 0,
+				history: b.history ?? 'all',
+				history_count: b.history_count ?? null,
+				on_upstream_delete: b.on_upstream_delete ?? 'mirror',
+				include_videos: b.include_videos ?? true,
+				notify_reactions: b.notify_reactions ?? true,
+				counts: { upstream: 220, imported: 0, pending: 220 },
+				last_synced_at: null,
+				next_sync_at: null,
+				can_manage: true,
+				is_owner: true,
+				created_at: now()
+			};
+			state.photoSources.push(src);
+			recount(b.album_id);
+			return json(route, 201, src);
+		}
+		if ((m = path.match(/^\/v1\/photo-sources\/([^/:]+)\/sync$/)) && method === 'POST') {
+			const src = state.photoSources.find((x) => x.id === m![1]);
+			if (!src) return problem(route, 404, 'not_found', 'No source');
+			if (src.status === 'paused') return problem(route, 409, 'invalid_transition', 'Paused');
+			if (state.syncRetryAfter)
+				return route.fulfill({ status: 429, contentType: 'application/problem+json', headers: { 'Retry-After': String(state.syncRetryAfter) }, body: JSON.stringify({ title: 'Too many', status: 429, code: 'rate_limited' }) });
+			const b = (body ?? {}) as { confirm_removals?: boolean };
+			if (b.confirm_removals) Object.assign(src, { status: 'active', last_error_code: null, pending_removals: 0 });
+			src.running = true;
+			return json(route, 202, src);
+		}
+		if ((m = path.match(/^\/v1\/photo-sources\/([^/:]+)$/))) {
+			const src = state.photoSources.find((x) => x.id === m![1]);
+			if (!src) return problem(route, 404, 'not_found', 'No source');
+			if (method === 'DELETE') {
+				state.photoSources = state.photoSources.filter((x) => x !== src);
+				recount(src.target.album_id);
+				return route.fulfill({ status: 204 });
+			}
+			if (method === 'PATCH') {
+				const b = body as S['PhotoSourceUpdate'];
+				if (b.url && /gone/.test(b.url))
+					return route.fulfill({ status: 422, contentType: 'application/problem+json', body: JSON.stringify({ title: 'Test failed', status: 422, code: 'source_test_failed', detail: 'link_not_found' }) });
+				if (b.paused === true) Object.assign(src, { status: 'paused', next_sync_at: null, running: false });
+				if (b.paused === false) Object.assign(src, { status: 'active', next_sync_at: new Date(Date.now() + 30 * 60_000).toISOString() });
+				if (b.take_over) Object.assign(src, { owner: { user_id: state.me!.id, display_name: state.me!.display_name }, is_owner: true, status: 'active', last_error_code: null });
+				if (b.url || b.api_key || b.password !== undefined) Object.assign(src, { status: 'active', last_error_code: null, running: true });
+				if (b.password !== undefined) src.has_password = b.password !== null;
+				for (const k of ['name', 'on_upstream_delete', 'include_videos', 'notify_reactions'] as const) if (b[k] !== undefined) (src as Record<string, unknown>)[k] = b[k];
+				if (b.on_upstream_delete === 'keep' && src.last_error_code === 'mass_removal') Object.assign(src, { status: 'active', last_error_code: null, pending_removals: 0 });
+				return json(route, 200, src);
+			}
+			return json(route, 200, src);
+		}
+		if (path === '/v1/google-imports' && method === 'GET') return json(route, 200, state.googleImports.map(({ return_uri: _r, ...i }) => i));
+		if (path === '/v1/google-imports' && method === 'POST') {
+			const b = body as S['GoogleImportCreate'];
+			if (!state.discovery.google_photos_import) return problem(route, 503, 'feature_disabled', 'Off');
+			const albumHit = albumById(b.album_id);
+			const feed = state.feeds.find((f) => f.id === b.feed_id);
+			const id = uid('6a1'); // hex only: the return page accepts UUID-shaped ids
+			const imp: S['GoogleImport'] & { return_uri?: string } = {
+				id,
+				status: 'needs_auth',
+				target: albumHit
+					? { kind: 'album', frame_id: albumHit.fid, frame_name: state.frames.find((f) => f.id === albumHit.fid)?.name ?? null, album_id: albumHit.a.id, album_name: albumHit.a.name }
+					: { kind: 'feed', feed_id: feed?.id ?? null, feed_name: feed?.name ?? null },
+				auth_url: `https://accounts.google.com/o/oauth2/v2/auth?client_id=test&state=${id}`,
+				picker_uri: null,
+				progress: { picked: 0, imported: 0, duplicates: 0, skipped: 0, failed: 0, bytes: 0 },
+				send_ids: [],
+				error_code: null,
+				created_at: now(),
+				return_uri: b.return_uri
+			};
+			state.googleImports.unshift(imp);
+			const { return_uri: _r, ...out } = imp;
+			return json(route, 201, out);
+		}
+		if ((m = path.match(/^\/v1\/google-imports\/([^/]+)(\/cancel)?$/))) {
+			const imp = state.googleImports.find((x) => x.id === m![1]);
+			if (!imp) return problem(route, 404, 'not_found', 'No import');
+			if (m[2] && method === 'POST') {
+				if (['done', 'failed', 'expired'].includes(imp.status)) return problem(route, 409, 'invalid_transition', 'Finished');
+				Object.assign(imp, { status: 'cancelled', finished_at: now() });
+			}
+			const { return_uri: _r, ...out } = imp;
+			return json(route, 200, out);
+		}
+
+		// ---- feeds and subscriptions (README §5.12)
+		const feedOf = (id: string) => state.feeds.find((f) => f.id === id);
+		const sumOf = (f: S['Feed']): S['FeedSummary'] => {
+			const { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at } = f;
+			return { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at };
+		};
+		const subById = (id: string) => state.subscriptions.find((x) => x.id === id);
+		if (path === '/v1/feeds' && method === 'GET') return json(route, 200, state.feeds.map(sumOf));
+		if (path === '/v1/feeds' && method === 'POST') {
+			const b = body as S['FeedCreate'];
+			const f: S['Feed'] = {
+				id: uid('fd'),
+				name: b.name,
+				cover_url: null,
+				role: 'owner',
+				member_count: 1,
+				subscription_count: 0,
+				last_post_at: null,
+				created_at: new Date().toISOString(),
+				owner_name: state.me!.display_name,
+				cover_item_id: null,
+				auto_approve_subscriptions: false,
+				invite_requires_approval: true,
+				members_see_reactions: false,
+				post_count: 0,
+				pending_subscription_count: 0,
+				pending_join_request_count: 0
+			};
+			state.feeds.push(f);
+			state.feedMembers[f.id] = [{ user_id: state.me!.id, display_name: state.me!.display_name, avatar_url: null, role: 'owner', joined_at: f.created_at!, last_posted_at: null }];
+			return json(route, 201, f);
+		}
+		if (path === '/v1/feed-invites:lookup' && method === 'POST') {
+			const code = String((body as { code: string }).code).replace(/-/g, '').toUpperCase();
+			const p = Object.values(state.feedInvitePreviews).find((x) => (x as { code?: string }).code === code);
+			return p ? json(route, 200, p) : problem(route, 404, 'invite_invalid', 'Invalid');
+		}
+		if ((m = path.match(/^\/v1\/feed-invites\/([^/]+)\/accept$/)) && method === 'POST') {
+			const p = state.feedInvitePreviews[m[1]!];
+			if (!p) return problem(route, 404, 'invite_invalid', 'Invalid');
+			const b = (body ?? {}) as S['FeedInviteAccept'];
+			const summary: S['FeedSummary'] = { id: uid('fd'), name: p.feed_name, role: 'poster', member_count: (p.member_count ?? 1) + 1, subscription_count: 0, cover_url: null };
+			if (p.purpose === 'subscribe') {
+				const subs = (b.frame_ids ?? []).map((fid) => {
+					const fr = state.frames.find((x) => x.id === fid)!;
+					const sub: S['Subscription'] = { id: uid('sb'), status: 'active', history: b.history ?? 'none', history_count: b.history_count ?? null, feed: { id: summary.id, name: p.feed_name }, frame: { id: fid, name: fr.name }, created_at: new Date().toISOString(), via_invite: true, can_manage: true };
+					state.subscriptions.push(sub);
+					return sub;
+				});
+				return json(route, 200, { status: 'subscribed', feed: summary, subscriptions: subs });
+			}
+			if (p.requires_approval) return json(route, 200, { status: 'pending', feed: summary, join_request_id: uid('jr') });
+			state.feeds.push({ ...summary });
+			return json(route, 200, { status: 'joined', feed: summary });
+		}
+		if ((m = path.match(/^\/v1\/feed-invites\/([^/]+)$/))) {
+			const p = state.feedInvitePreviews[m[1]!];
+			return p ? json(route, 200, p) : problem(route, 404, 'invite_invalid', 'Invalid');
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)$/))) {
+			const f = feedOf(m[1]!);
+			if (!f) return problem(route, 404, 'not_found', 'Not found');
+			if (method === 'PATCH') {
+				Object.assign(f, body);
+				return json(route, 200, f);
+			}
+			if (method === 'DELETE') {
+				state.feeds = state.feeds.filter((x) => x.id !== f.id);
+				return route.fulfill({ status: 204 });
+			}
+			return json(route, 200, f);
+		}
+		// ---- birthdays (README §5.13)
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/birthdays$/))) {
+			const f = feedOf(m[1]!);
+			if (!f) return problem(route, 404, 'not_found', 'Not found');
+			const list = (state.birthdays[f.id] ??= []);
+			if (method === 'POST') {
+				const b = body as S['BirthdayPersonCreate'];
+				const key = (x: { display_name: string; day: number; month: number }) => `${x.display_name.trim().toLowerCase()}|${x.day}|${x.month}`;
+				const dup = list.find((x) => x.status !== 'rejected' && key(x) === key(b));
+				if (dup)
+					return route.fulfill({
+						status: 409,
+						contentType: 'application/problem+json',
+						body: JSON.stringify({ title: 'Duplicate', status: 409, code: 'duplicate_birthday', detail: dup.id })
+					});
+				const admin = f.role === 'owner' || f.role === 'admin';
+				const direct = admin || f.posters_can_add_birthdays === true;
+				const p: S['BirthdayPerson'] = {
+					id: uid('bd'),
+					feed_id: f.id,
+					status: direct ? 'approved' : 'pending',
+					display_name: b.display_name,
+					day: b.day,
+					month: b.month,
+					birth_year: b.birth_year ?? null,
+					show_age: b.show_age ?? false,
+					photo_url: null,
+					has_own_photo: false,
+					user_id: b.user_id ?? null,
+					created_by_name: state.me!.display_name,
+					created_by_id: state.me!.id,
+					suggested: !direct,
+					can_edit: true,
+					can_decide: admin && !direct,
+					greetings_today: 0,
+					created_at: new Date().toISOString()
+				};
+				list.push(p);
+				if (direct) f.birthday_count = (f.birthday_count ?? 0) + 1;
+				else if (admin) f.pending_birthday_count = (f.pending_birthday_count ?? 0) + 1;
+				return json(route, 201, p);
+			}
+			return json(route, 200, list);
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/birthdays\/([^/]+)(?:\/(approve|reject|photo))?$/))) {
+			const list = state.birthdays[m[1]!] ?? [];
+			const p = list.find((x) => x.id === m![2]);
+			const f = feedOf(m[1]!);
+			if (!p || !f) return problem(route, 404, 'not_found', 'Not found');
+			if (m[3] === 'approve' || m[3] === 'reject') {
+				if (p.status !== 'pending' && p.status !== (m[3] === 'approve' ? 'approved' : 'rejected')) return problem(route, 409, 'already_decided', 'Decided');
+				p.status = m[3] === 'approve' ? 'approved' : 'rejected';
+				p.can_decide = false;
+				p.decided_at = new Date().toISOString();
+				f.pending_birthday_count = Math.max(0, (f.pending_birthday_count ?? 0) - 1);
+				return json(route, 200, p);
+			}
+			if (m[3] === 'photo') {
+				if (method === 'PUT') Object.assign(p, { photo_url: gradientDataUrl, has_own_photo: true });
+				else Object.assign(p, { photo_url: null, has_own_photo: false });
+				return json(route, 200, p);
+			}
+			if (method === 'PATCH') {
+				Object.assign(p, body, { updated_at: new Date().toISOString() });
+				return json(route, 200, p);
+			}
+			if (method === 'DELETE') {
+				state.birthdays[m[1]!] = list.filter((x) => x !== p);
+				return route.fulfill({ status: 204 });
+			}
+			return json(route, 200, p);
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/birthday-greetings$/))) return json(route, 200, { greetings: state.birthdayGreetings[m[1]!] ?? [], next_cursor: null });
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/preferences$/)) && method === 'PATCH') {
+			const f = feedOf(m[1]!);
+			if (!f) return problem(route, 404, 'not_found', 'Not found');
+			Object.assign(f, body);
+			return json(route, 200, f);
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/members$/))) return json(route, 200, state.feedMembers[m[1]!] ?? []);
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/members\/([^/]+)$/))) {
+			const list = state.feedMembers[m[1]!] ?? [];
+			const mem = list.find((x) => x.user_id === m![2]);
+			if (!mem) return problem(route, 404, 'not_found', 'Not found');
+			if (method === 'DELETE') {
+				state.feedMembers[m[1]!] = list.filter((x) => x !== mem);
+				return route.fulfill({ status: 204 });
+			}
+			Object.assign(mem, body);
+			return json(route, 200, mem);
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/join-requests$/))) return json(route, 200, []);
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/(leave|transfer)$/)) && method === 'POST') return route.fulfill({ status: 204 });
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/invites$/))) {
+			const fid = m[1]!;
+			if (method === 'POST') {
+				const b = body as S['FeedInviteCreate'];
+				const token = `fi${uid('tk').replace(/-/g, '')}`;
+				const inv: S['FeedInvite'] = { id: uid('iv'), purpose: b.purpose, token, code: 'KF7QM2XA', url: `${BASE}/fi/${token}`, max_uses: b.max_uses ?? null, uses: 0, note: b.note ?? null, expires_at: new Date(Date.now() + (b.expires_in_hours ?? 168) * 3600_000).toISOString(), created_by_name: state.me!.display_name };
+				(state.feedInvites[fid] ??= []).unshift(inv);
+				return json(route, 201, inv);
+			}
+			return json(route, 200, state.feedInvites[fid] ?? []);
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/invites\/([^/]+)$/)) && method === 'DELETE') {
+			state.feedInvites[m[1]!] = (state.feedInvites[m[1]!] ?? []).filter((x) => x.id !== m![2]);
+			return route.fulfill({ status: 204 });
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/posts$/))) return json(route, 200, { posts: state.feedPosts[m[1]!] ?? [], next_cursor: null });
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/posts\/([^/]+)\/receipts$/))) {
+			const post = (state.feedPosts[m[1]!] ?? []).find((x) => x.id === m![2]);
+			if (!post) return problem(route, 404, 'not_found', 'Not found');
+			const frames = state.subscriptions
+				.filter((x) => x.feed.id === m![1] && (x.status === 'active' || x.status === 'paused'))
+				.map((x) => ({ subscription_id: x.id, frame_id: x.frame.id, frame_name: x.frame.name, online: true, subscription_status: x.status as 'active' | 'paused', items: post.items.map((it) => ({ item_id: it.id, status: 'seen' as const, reaction: null })) }));
+			return json(route, 200, { post_id: post.id, summary: post.receipts ?? { frames: 0, delivered: 0, seen: 0 }, frames });
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/posts\/([^/]+)(?:\/items\/([^/]+))?$/))) {
+			const list = state.feedPosts[m[1]!] ?? [];
+			const post = list.find((x) => x.id === m![2]);
+			if (!post) return problem(route, 404, 'not_found', 'Not found');
+			if (method === 'DELETE') {
+				if (m[3]) post.items = post.items.filter((i) => i.id !== m![3]);
+				else state.feedPosts[m[1]!] = list.filter((x) => x !== post);
+				return route.fulfill({ status: 204 });
+			}
+			return json(route, 200, post);
+		}
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/subscriptions$/))) {
+			const f = feedOf(m[1]!);
+			if (!f) return problem(route, 404, 'not_found', 'Not found');
+			if (method === 'POST') {
+				const b = body as S['SubscriptionRequest'];
+				if (state.subscriptions.some((x) => x.feed.id === f.id && x.frame.id === b.frame_id && ['pending', 'active', 'paused'].includes(x.status)))
+					return problem(route, 409, 'already_subscribed', 'Already subscribed');
+				const fr = state.frames.find((x) => x.id === b.frame_id)!;
+				const admin = f.role === 'owner' || f.role === 'admin';
+				const sub: S['Subscription'] = { id: uid('sb'), status: admin ? 'active' : 'pending', history: b.history ?? 'none', history_count: b.history_count ?? null, feed: { id: f.id, name: f.name }, frame: { id: fr.id, name: fr.name }, created_at: new Date().toISOString(), activated_at: admin ? new Date().toISOString() : null, can_manage: true, can_decide: admin };
+				state.subscriptions.push(sub);
+				return json(route, 201, sub);
+			}
+			return json(route, 200, state.subscriptions.filter((x) => x.feed.id === f.id));
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/subscriptions$/))) return json(route, 200, state.subscriptions.filter((x) => x.frame.id === m![1]));
+		if ((m = path.match(/^\/v1\/subscriptions\/([^/]+)\/(approve|reject|pause|resume)$/)) && method === 'POST') {
+			const sub = subById(m[1]!);
+			if (!sub) return problem(route, 404, 'not_found', 'Not found');
+			sub.status = ({ approve: 'active', reject: 'rejected', pause: 'paused', resume: 'active' } as const)[m[2] as 'approve'];
+			if (m[2] === 'pause') sub.paused_at = new Date().toISOString();
+			return json(route, 200, sub);
+		}
+		if ((m = path.match(/^\/v1\/subscriptions\/([^/]+)$/))) {
+			const sub = subById(m[1]!);
+			if (!sub) return problem(route, 404, 'not_found', 'Not found');
+			if (method === 'DELETE') {
+				sub.status = 'removed';
+				sub.removed_reason = 'unsubscribed';
+				sub.ended_at = new Date().toISOString();
+				return route.fulfill({ status: 204 });
+			}
+			if (method === 'PATCH') Object.assign(sub, { history_count: null }, body);
+			return json(route, 200, sub);
+		}
+
 		// ---- sends
 		if (path === '/v1/sends' && method === 'POST') {
 			const b = body as S['SendCreate'];
@@ -915,7 +1347,11 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 						placements: items.map((it) => ({ placement_id: uid('p'), item_id: it.id, status: 'pending' as const, reaction: null, replies: [] }))
 					};
 				}),
-				summary: { processing: items.length, pending: 0, delivered: 0, seen: 0, failed: 0 }
+				summary: { processing: items.length, pending: 0, delivered: 0, seen: 0, failed: 0 },
+				feeds: (b.feed_ids ?? []).map((fid) => {
+					const f = state.feeds.find((x) => x.id === fid)!;
+					return { feed_id: fid, feed_name: f.name, post_id: uid('po'), summary: { frames: f.subscription_count, delivered: 0, seen: 0 } };
+				})
 			};
 			state.sends.unshift(send);
 			return json(route, 202, send);
@@ -928,6 +1364,15 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 				return st === 'delivered' ? done : !done;
 			});
 			return json(route, 200, { sends: list, next_cursor: null });
+		}
+		if ((m = path.match(/^\/v1\/sends\/([^/]+)\/forward$/)) && method === 'POST') {
+			const s = state.sends.find((x) => x.id === m![1]);
+			if (!s) return problem(route, 404, 'not_found', 'Not found');
+			for (const fid of (body as { feed_ids?: string[] }).feed_ids ?? []) {
+				const f = state.feeds.find((x) => x.id === fid)!;
+				(s.feeds ??= []).push({ feed_id: fid, feed_name: f.name, post_id: uid('po'), summary: { frames: f.subscription_count, delivered: 0, seen: 0 } });
+			}
+			return json(route, 202, s);
 		}
 		if ((m = path.match(/^\/v1\/sends\/([^/]+)$/))) {
 			const s = state.sends.find((x) => x.id === m![1]);

@@ -8,6 +8,8 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { filesFromDataTransfer } from '$lib/dropfiles';
 	import { can, frames } from '$lib/frames.svelte';
+	import { feeds } from '$lib/feeds.svelte';
+	import FeedCover from '$components/feed/FeedCover.svelte';
 	import { formatBytes, formatDuration } from '$lib/format';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
@@ -27,6 +29,13 @@
 	let editorOpen = $state(false);
 
 	const sendable = $derived(frames.list.filter((f) => can(f, 'send')));
+	/** Every feed role can post (feeds.md §4.1). Hidden when the server has no feeds. */
+	const postable = $derived(discovery.feeds ? feeds.list : []);
+	const recipientsLoaded = $derived(frames.loaded && (!discovery.feeds || feeds.loaded || feeds.error !== null));
+	const recipientNames = $derived(
+		[...compose.frameIds.map((id) => frames.get(id)?.name), ...compose.feedIds.map((id) => feeds.get(id)?.name)].filter(Boolean).join(', ')
+	);
+	$effect(() => void feeds.load());
 	const editing = $derived(compose.items.find((i) => i.key === editingKey) ?? null);
 	const locked = $derived(compose.phase !== 'compose');
 	const limits = $derived(discovery.limits);
@@ -36,12 +45,14 @@
 	});
 	const totalBytes = $derived(compose.items.reduce((s, i) => s + i.bytes, 0));
 
-	// Preselect: ?frame=<id>, or the only frame you can send to.
+	// Preselect: ?frame=<id> or ?feed=<id>, or the only frame you can send to when there are no feeds.
 	$effect(() => {
-		if (!frames.loaded || compose.frameIds.length > 0) return;
+		if (!recipientsLoaded || compose.hasRecipients) return;
 		const wanted = page.url.searchParams.get('frame');
+		const wantedFeed = page.url.searchParams.get('feed');
 		if (wanted && sendable.some((f) => f.id === wanted)) compose.frameIds = [wanted];
-		else if (sendable.length === 1) compose.frameIds = [sendable[0]!.id];
+		else if (wantedFeed && postable.some((f) => f.id === wantedFeed)) compose.feedIds = [wantedFeed];
+		else if (!wanted && !wantedFeed && sendable.length === 1 && postable.length === 0) compose.frameIds = [sendable[0]!.id];
 	});
 
 	function addFiles(files: File[]) {
@@ -129,7 +140,7 @@
 		</div>
 	</div>
 
-	{#if frames.loaded && sendable.length === 0}
+	{#if recipientsLoaded && sendable.length === 0 && postable.length === 0}
 		<div class="card">
 			<div class="no-frames">
 				<Icon name="frame" size={28} />
@@ -192,6 +203,7 @@
 				<div class="card card-pad stack sticky">
 					<fieldset class="recipients" id="recipients">
 						<legend><h2>{t('send.to')}</h2></legend>
+						{#if postable.length > 0 && sendable.length > 0}<h3 class="r-group">{t('send.framesGroup')}</h3>{/if}
 						{#if !frames.loaded}
 							<div class="skeleton" style="height:56px"></div>
 							<div class="skeleton" style="height:56px"></div>
@@ -214,6 +226,26 @@
 							{#if compose.frameIds.some((id) => !frames.get(id)?.online)}
 								<p class="hint offline-note"><Icon name="info" size={15} />{t('send.offlineNote')}</p>
 							{/if}
+						{/if}
+						{#if postable.length > 0}
+							<h3 class="r-group">{t('send.feedsGroup')}</h3>
+							{#each postable as feed (feed.id)}
+								<label class="recipient" class:checked={compose.feedIds.includes(feed.id)}>
+									<input
+										type="checkbox"
+										checked={compose.feedIds.includes(feed.id)}
+										onchange={() => compose.toggleFeed(feed.id)}
+										disabled={locked}
+										data-testid="feed-recipient"
+									/>
+									<FeedCover name={feed.name} url={feed.cover_url} size={32} />
+									<span class="r-body">
+										<span class="r-name">{feed.name}</span>
+										<span class="muted tiny">{tn('feeds.frames', feed.subscription_count)}</span>
+									</span>
+									<span class="check" aria-hidden="true"><Icon name="check" size={16} stroke={3} /></span>
+								</label>
+							{/each}
 						{/if}
 					</fieldset>
 
@@ -238,8 +270,8 @@
 							<Icon name="send" size={20} />
 							{compose.items.length > 0 ? tn('send.sendN', compose.items.length) : t('send.sendButton')}
 						</button>
-						{#if compose.items.length > 0 && compose.frameIds.length === 0}
-							<p class="hint center-text">{t('send.pickFrame')}</p>
+						{#if compose.items.length > 0 && !compose.hasRecipients}
+							<p class="hint center-text">{postable.length > 0 ? t('send.pickRecipient') : t('send.pickFrame')}</p>
 						{/if}
 					{/if}
 				</div>
@@ -253,11 +285,11 @@
 		{#if locked}
 			<div class="mb-status small" role="status"><span class="spinner" aria-hidden="true"></span>{status}</div>
 			<div class="progress mb-progress"><span style="width:{Math.round(compose.progress * 100)}%"></span></div>
-		{:else if compose.frameIds.length === 0}
-			<span class="small muted">{t('send.pickFrame')}</span>
+		{:else if !compose.hasRecipients}
+			<span class="small muted">{postable.length > 0 ? t('send.pickRecipient') : t('send.pickFrame')}</span>
 			<button class="btn btn-soft btn-sm" onclick={() => document.getElementById('recipients')?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth' })}>{t('send.to')}</button>
 		{:else}
-			<span class="small muted mb-to">{compose.frameIds.map((id) => frames.get(id)?.name).join(', ')}</span>
+			<span class="small muted mb-to">{recipientNames}</span>
 			<button class="btn btn-primary" onclick={send} disabled={!compose.canSend}><Icon name="send" size={18} />{tn('send.sendN', compose.items.length)}</button>
 		{/if}
 	</div>
@@ -383,6 +415,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+	}
+	.r-group {
+		font-family: var(--font-body);
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--text-faint);
+		margin: 6px 0 0;
 	}
 	.recipients legend {
 		padding: 0;

@@ -10,6 +10,9 @@
 	import Icon from '../Icon.svelte';
 	import LocationPicker from './LocationPicker.svelte';
 	import PluginsSection from './plugins/PluginsSection.svelte';
+	import { discovery } from '$lib/discovery.svelte';
+	import { slideshowSource, slideshowSourcePatch } from '$lib/feeds';
+	import type { Subscription } from '$lib/api/client';
 
 	let { frame }: { frame: Frame } = $props();
 
@@ -27,7 +30,7 @@
 	/** Fill in spec defaults (product spec §6) for anything the server left out. */
 	function withDefaults(s: FrameSettings): FrameSettings {
 		const c = clone(s);
-		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', album_id: null, on_this_day: false, ...c.slideshow };
+		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', album_id: null, feed_id: null, on_this_day: false, ...c.slideshow };
 		c.display = { brightness: 204, sleep_schedules: [], ...c.display };
 		c.widgets = { caption: true, clock: true, weather: false, ...c.widgets };
 		c.locale = { temperature_unit: 'c', ...c.locale };
@@ -51,6 +54,8 @@
 	}
 
 	let albums = $state<Album[]>([]);
+	/** Feeds this frame subscribes to (active or paused): feed mode plays one of them (`slideshow.feed_id`). */
+	let subscribed = $state<Subscription[]>([]);
 
 	$effect(() => {
 		void frame.id;
@@ -58,7 +63,19 @@
 		call(api.GET('/v1/frames/{frameId}/albums', { params: { path: { frameId: frame.id } } }))
 			.then((a) => (albums = a))
 			.catch(() => (albums = []));
+		if (discovery.feeds)
+			call(api.GET('/v1/frames/{frameId}/subscriptions', { params: { path: { frameId: frame.id } } }))
+				.then((s) => (subscribed = s.filter((x) => x.status === 'active' || x.status === 'paused')))
+				.catch(() => (subscribed = []));
 	});
+
+	/** Album and feed mode share one select; choosing one clears the other (they exclude each other). */
+	function setSource(value: string) {
+		if (!form?.slideshow) return;
+		const next = slideshowSourcePatch(value);
+		form.slideshow.album_id = next.album_id;
+		form.slideshow.feed_id = next.feed_id;
+	}
 
 	/**
 	 * What the save bar compares and sends. Plugin instances are left out: the Plugins section saves each instance
@@ -233,7 +250,26 @@
 						</select>
 					</div>
 				{/if}
-				{#if albums.length > 0 || form.slideshow.album_id}
+				{#if subscribed.length > 0 || form.slideshow.feed_id}
+					<div class="field">
+						<label for="s-album">{t('settingsForm.playSource')}</label>
+						<select id="s-album" class="select" value={slideshowSource(form.slideshow)} onchange={(e) => setSource(e.currentTarget.value)}>
+							<option value="">{t('settingsForm.allPhotos')}</option>
+							{#if albums.length > 0}
+								<optgroup label={t('settingsForm.albumsGroup')}>
+									{#each albums as a (a.id)}<option value="album:{a.id}">{a.name}</option>{/each}
+								</optgroup>
+							{/if}
+							<optgroup label={t('settingsForm.feedsGroup')}>
+								{#each subscribed as s (s.id)}<option value="feed:{s.feed.id}">{s.feed.name}</option>{/each}
+								{#if form.slideshow.feed_id && !subscribed.some((s) => s.feed.id === form?.slideshow?.feed_id)}
+									<option value="feed:{form.slideshow.feed_id}">{t('settingsForm.unknownFeed')}</option>
+								{/if}
+							</optgroup>
+						</select>
+						<span class="hint">{t('settingsForm.playSourceHint')}</span>
+					</div>
+				{:else if albums.length > 0 || form.slideshow.album_id}
 					<div class="field">
 						<label for="s-album">{t('settingsForm.playAlbum')}</label>
 						<select id="s-album" class="select" bind:value={form.slideshow.album_id}>

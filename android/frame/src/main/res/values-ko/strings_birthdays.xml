@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="other">🎈 오늘은 %1$s의 %2$d번째 생일!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 오늘은 %1$s의 생일!</string>
+    <string name="birthday_card_title_many">🎈 오늘의 생일</string>
+    <plurals name="birthday_card_more">
+        <item quantity="other">외 %d명</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="other">%1$s %2$d번째 생일</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s의 생일</string>
+    <string name="birthday_countdown_two">%1$s, %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="other">%1$s 외 %2$d명</item>
+    </plurals>
+    <string name="birthday_greet_title">이 액자에서 생일 축하 보내기</string>
+    <string name="birthday_greet_button">%1$s에게 생일 축하 보내기</string>
+    <string name="birthday_greet_sent">보냈어요 ✓ — 가족이 볼 수 있어요</string>
+    <string name="birthday_detail_label">생일</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="other">%d번째 생일</item>
+    </plurals>
+</resources>

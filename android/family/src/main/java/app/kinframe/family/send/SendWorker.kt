@@ -37,7 +37,7 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     private fun foreground(fraction: Float?): ForegroundInfo {
         val ctx = applicationContext
         val send = graph.outbox.get(sendId)
-        val names = send?.frameNames?.joinToString(", ").orEmpty()
+        val names = send?.recipientNames?.joinToString(", ").orEmpty()
         val count = send?.items?.size ?: 0
         val p = graph.outbox.progress.value[sendId]
         val text = if (p != null && p.preparing) {

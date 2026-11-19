@@ -1,0 +1,850 @@
+{
+  "ios.albums.onlyInAlbumMode": {
+    "en": "Only in album mode",
+    "nl": "Alleen in albummodus"
+  },
+  "ios.albums.onlyInAlbumModeHint": {
+    "en": "These photos play only when the frame plays this album, not in the everyday slideshow.",
+    "nl": "Deze foto’s spelen alleen als het kader dit album speelt, niet in de gewone diavoorstelling."
+  },
+  "ios.albums.onlyInAlbumModeOff": {
+    "en": "{name} plays in the everyday slideshow again",
+    "nl": "{name} speelt weer in de gewone diavoorstelling"
+  },
+  "ios.albums.onlyInAlbumModeOn": {
+    "en": "{name} now plays only in album mode",
+    "nl": "{name} speelt nu alleen in albummodus"
+  },
+  "ios.gi.add": {
+    "en": "Add from Google Photos",
+    "nl": "Toevoegen uit Google Foto’s"
+  },
+  "ios.gi.adding.one": {
+    "en": "Adding a photo from Google Photos…",
+    "nl": "Een foto toevoegen uit Google Foto’s…"
+  },
+  "ios.gi.adding.other": {
+    "en": "Adding {count} photos from Google Photos…",
+    "nl": "{count} foto’s toevoegen uit Google Foto’s…"
+  },
+  "ios.gi.canLeave": {
+    "en": "You can close this; the photos keep coming.",
+    "nl": "Je kunt dit sluiten; de foto’s blijven binnenkomen."
+  },
+  "ios.gi.cancel": {
+    "en": "Stop",
+    "nl": "Stoppen"
+  },
+  "ios.gi.cancelled": {
+    "en": "Stopped. Photos already added stay.",
+    "nl": "Gestopt. Foto’s die al toegevoegd zijn, blijven."
+  },
+  "ios.gi.consent": {
+    "en": "Sign in with Google and allow kinframe to see the photos you select.",
+    "nl": "Meld je aan bij Google en geef kinframe toegang tot de foto’s die je kiest."
+  },
+  "ios.gi.done": {
+    "en": "{count} photos added",
+    "nl": "{count} foto’s toegevoegd"
+  },
+  "ios.gi.doneDuplicates": {
+    "en": "{count} added, {duplicates} were already there",
+    "nl": "{count} toegevoegd, {duplicates} stonden er al"
+  },
+  "ios.gi.doneFailed": {
+    "en": "{count} added, {failed} couldn’t be copied",
+    "nl": "{count} toegevoegd, {failed} konden niet gekopieerd worden"
+  },
+  "ios.gi.doneMixed": {
+    "en": "{count} added, {duplicates} were already there, {failed} couldn’t be copied",
+    "nl": "{count} toegevoegd, {duplicates} stonden er al, {failed} konden niet gekopieerd worden"
+  },
+  "ios.gi.doneNothing": {
+    "en": "Nothing was added.",
+    "nl": "Er werd niets toegevoegd."
+  },
+  "ios.gi.err.auth_failed": {
+    "en": "Signing in with Google didn’t work.",
+    "nl": "Aanmelden bij Google lukte niet."
+  },
+  "ios.gi.err.consent_denied": {
+    "en": "You didn’t allow access.",
+    "nl": "Je gaf geen toegang."
+  },
+  "ios.gi.err.download_failed": {
+    "en": "None of the photos could be copied.",
+    "nl": "Geen enkele foto kon gekopieerd worden."
+  },
+  "ios.gi.err.google_unavailable": {
+    "en": "Google Photos isn’t available right now.",
+    "nl": "Google Foto’s is nu niet beschikbaar."
+  },
+  "ios.gi.err.picker_expired": {
+    "en": "Google’s picker expired. Try again.",
+    "nl": "De kiezer van Google is verlopen. Probeer het opnieuw."
+  },
+  "ios.gi.err.server_error": {
+    "en": "Something went wrong. Try again.",
+    "nl": "Er ging iets mis. Probeer het opnieuw."
+  },
+  "ios.gi.err.target_gone": {
+    "en": "The album or feed was deleted meanwhile.",
+    "nl": "Het album of de feed is ondertussen verwijderd."
+  },
+  "ios.gi.expired": {
+    "en": "Google’s picker closed before anything was picked.",
+    "nl": "De kiezer van Google sloot voor er iets gekozen was."
+  },
+  "ios.gi.hide": {
+    "en": "Hide",
+    "nl": "Verbergen"
+  },
+  "ios.gi.into": {
+    "en": "Into {name}",
+    "nl": "Naar {name}"
+  },
+  "ios.gi.openAgain": {
+    "en": "Open Google Photos",
+    "nl": "Google Foto’s openen"
+  },
+  "ios.gi.progress": {
+    "en": "{done} of {total}",
+    "nl": "{done} van {total}"
+  },
+  "ios.gi.starting": {
+    "en": "Opening Google…",
+    "nl": "Google openen…"
+  },
+  "ios.gi.title": {
+    "en": "Google Photos",
+    "nl": "Google Foto’s"
+  },
+  "ios.gi.tryAgain": {
+    "en": "Try again",
+    "nl": "Opnieuw proberen"
+  },
+  "ios.gi.waiting": {
+    "en": "Waiting for Google Photos…",
+    "nl": "Wachten op Google Foto’s…"
+  },
+  "ios.gi.waitingHint": {
+    "en": "Pick your photos in Google Photos and tap Done, then come back here.",
+    "nl": "Kies je foto’s in Google Foto’s en tik op Klaar, kom dan hier terug."
+  },
+  "ios.ps.about": {
+    "en": "about {size}",
+    "nl": "ongeveer {size}"
+  },
+  "ios.ps.actions": {
+    "en": "Actions for {name}",
+    "nl": "Acties voor {name}"
+  },
+  "ios.ps.add": {
+    "en": "Add",
+    "nl": "Toevoegen"
+  },
+  "ios.ps.addTitle": {
+    "en": "Sync from…",
+    "nl": "Synchroniseren vanuit…"
+  },
+  "ios.ps.albumOnlySuggest": {
+    "en": "The first import adds more than {count} photos. With Only in album mode they play when the frame plays this album, without flooding the everyday slideshow.",
+    "nl": "De eerste import voegt meer dan {count} foto’s toe. Met Alleen in albummodus spelen ze als het kader dit album speelt, zonder de gewone diavoorstelling te overspoelen."
+  },
+  "ios.ps.albumSyncs": {
+    "en": "Synced",
+    "nl": "Gesynchroniseerd"
+  },
+  "ios.ps.albumTiming": {
+    "en": "We check the album about every half hour (iCloud: every hour).",
+    "nl": "We kijken ongeveer elk half uur in het album (iCloud: elk uur)."
+  },
+  "ios.ps.apiKey": {
+    "en": "API key",
+    "nl": "API-sleutel"
+  },
+  "ios.ps.apiKeyHowTo": {
+    "en": "In Immich, open Account settings → API keys → New API key and tick only album.read, asset.read, asset.view and asset.download.",
+    "nl": "Open in Immich Accountinstellingen → API-sleutels → Nieuwe API-sleutel en vink alleen album.read, asset.read, asset.view en asset.download aan."
+  },
+  "ios.ps.bestEffort": {
+    "en": "best effort",
+    "nl": "zonder garantie"
+  },
+  "ios.ps.bestEffortNote": {
+    "en": "Best effort: Apple offers no official way to do this. It may stop working without warning; we’ll tell you if it does.",
+    "nl": "Zonder garantie: Apple biedt hier geen officiële manier voor. Het kan zonder waarschuwing stoppen; we laten het je weten als dat gebeurt."
+  },
+  "ios.ps.bestEffortShort": {
+    "en": "iCloud: best effort, may stop working without warning.",
+    "nl": "iCloud: zonder garantie, kan zonder waarschuwing stoppen."
+  },
+  "ios.ps.connect": {
+    "en": "Connect",
+    "nl": "Koppelen"
+  },
+  "ios.ps.connected": {
+    "en": "{name} is connected. The first sync is starting.",
+    "nl": "{name} is gekoppeld. De eerste synchronisatie start."
+  },
+  "ios.ps.count.duplicates": {
+    "en": "{count} already there",
+    "nl": "{count} stonden er al"
+  },
+  "ios.ps.count.failed": {
+    "en": "{count} couldn’t be copied",
+    "nl": "{count} konden niet gekopieerd worden"
+  },
+  "ios.ps.count.imported": {
+    "en": "{count} imported",
+    "nl": "{count} geïmporteerd"
+  },
+  "ios.ps.count.pending": {
+    "en": "{count} waiting",
+    "nl": "{count} wachtend"
+  },
+  "ios.ps.count.skipped": {
+    "en": "{count} skipped",
+    "nl": "{count} overgeslagen"
+  },
+  "ios.ps.count.upstream": {
+    "en": "{count} in {service}",
+    "nl": "{count} in {service}"
+  },
+  "ios.ps.deleteAlbumBody": {
+    "en": "This album syncs from outside. Its syncing stops either way.",
+    "nl": "Dit album synchroniseert van buitenaf. Het synchroniseren stopt in elk geval."
+  },
+  "ios.ps.deleteAlbumKeep": {
+    "en": "Delete, keep the synced photos",
+    "nl": "Verwijderen, gesynchroniseerde foto’s houden"
+  },
+  "ios.ps.deleteAlbumRemove": {
+    "en": "Delete with the synced photos",
+    "nl": "Verwijderen met de gesynchroniseerde foto’s"
+  },
+  "ios.ps.edit": {
+    "en": "Change",
+    "nl": "Wijzigen"
+  },
+  "ios.ps.emptyAlbum": {
+    "en": "Keep this album in sync with an album in Immich or iCloud: new photos appear on the frame by themselves.",
+    "nl": "Houd dit album gelijk met een album in Immich of iCloud: nieuwe foto’s verschijnen vanzelf op het kader."
+  },
+  "ios.ps.emptyFeed": {
+    "en": "Post the photos of an Immich or iCloud album to this feed automatically.",
+    "nl": "Post de foto’s van een Immich- of iCloud-album automatisch in deze feed."
+  },
+  "ios.ps.emptyMine": {
+    "en": "You haven’t connected any albums yet. Open an album or a feed to sync it from Immich or iCloud.",
+    "nl": "Je hebt nog geen albums gekoppeld. Open een album of een feed om het vanuit Immich of iCloud te synchroniseren."
+  },
+  "ios.ps.err.album_not_found": {
+    "en": "The album no longer exists in Immich.",
+    "nl": "Het album bestaat niet meer in Immich."
+  },
+  "ios.ps.err.album_not_found.icloud": {
+    "en": "The shared album no longer exists in iCloud.",
+    "nl": "Het gedeelde album bestaat niet meer in iCloud."
+  },
+  "ios.ps.err.auth_failed": {
+    "en": "The service refused the key or password. Enter it again.",
+    "nl": "De dienst weigerde de sleutel of het wachtwoord. Vul het opnieuw in."
+  },
+  "ios.ps.err.auth_failed.key": {
+    "en": "Immich refused the API key. Enter it again.",
+    "nl": "Immich weigerde de API-sleutel. Vul hem opnieuw in."
+  },
+  "ios.ps.err.auth_failed.password": {
+    "en": "Immich refused the link password. Enter it again.",
+    "nl": "Immich weigerde het wachtwoord van de link. Vul het opnieuw in."
+  },
+  "ios.ps.err.credentials_unreadable": {
+    "en": "The stored key can’t be read any more (the server’s secret key changed). Enter it again.",
+    "nl": "De opgeslagen sleutel is niet meer leesbaar (de geheime sleutel van de server is veranderd). Vul hem opnieuw in."
+  },
+  "ios.ps.err.disabled": {
+    "en": "This server doesn’t offer this kind of photo source.",
+    "nl": "Deze server biedt dit soort fotobron niet aan."
+  },
+  "ios.ps.err.duplicate": {
+    "en": "This album already syncs here.",
+    "nl": "Dit album synchroniseert hier al."
+  },
+  "ios.ps.err.format_changed": {
+    "en": "{service} answered in a way we don’t understand. This can happen because there’s no official way to do this. We’ll keep checking once a day.",
+    "nl": "{service} antwoordde op een manier die we niet begrijpen. Dat kan gebeuren omdat er geen officiële manier voor is. We blijven één keer per dag kijken."
+  },
+  "ios.ps.err.limit": {
+    "en": "There are as many photo sources as allowed. Stop one first.",
+    "nl": "Er zijn al zoveel fotobronnen als toegestaan. Stop er eerst een."
+  },
+  "ios.ps.err.link_expired": {
+    "en": "The Immich link expired. Create a new one and paste it here.",
+    "nl": "De Immich-link is verlopen. Maak een nieuwe en plak hem hier."
+  },
+  "ios.ps.err.link_not_found": {
+    "en": "The link no longer works. It may have been deleted.",
+    "nl": "De link werkt niet meer. Misschien is hij verwijderd."
+  },
+  "ios.ps.err.link_not_found.icloud": {
+    "en": "The link no longer works. It may have been deleted, or Public Website was turned off.",
+    "nl": "De link werkt niet meer. Misschien is hij verwijderd, of is Openbare website uitgezet."
+  },
+  "ios.ps.err.mass_removal": {
+    "en": "{count} photos disappeared from the album. Remove them here too?",
+    "nl": "Er verdwenen {count} foto’s uit het album. Ook hier verwijderen?"
+  },
+  "ios.ps.err.owner_lost_access": {
+    "en": "The person who set this up can no longer manage it, so syncing stopped.",
+    "nl": "Wie dit instelde, kan het niet meer beheren, dus het synchroniseren is gestopt."
+  },
+  "ios.ps.err.owner_lost_access.album": {
+    "en": "{name} can no longer manage this album, so syncing stopped. Take it over or stop syncing.",
+    "nl": "{name} kan dit album niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren."
+  },
+  "ios.ps.err.owner_lost_access.feed": {
+    "en": "{name} can no longer manage this feed, so syncing stopped. Take it over or stop syncing.",
+    "nl": "{name} kan deze feed niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren."
+  },
+  "ios.ps.err.password_required": {
+    "en": "The link now needs a password.",
+    "nl": "De link heeft nu een wachtwoord nodig."
+  },
+  "ios.ps.err.permission_missing": {
+    "en": "The API key is missing a permission: it needs album.read, asset.read, asset.view and asset.download.",
+    "nl": "De API-sleutel mist een recht: hij heeft album.read, asset.read, asset.view en asset.download nodig."
+  },
+  "ios.ps.err.private_address_blocked": {
+    "en": "This server isn’t allowed to reach addresses on a private network. Use the public address, or ask the server’s operator.",
+    "nl": "Deze server mag geen adressen op een privénetwerk bereiken. Gebruik het openbare adres, of vraag het aan de beheerder van de server."
+  },
+  "ios.ps.err.rate_limited_upstream": {
+    "en": "The service asked us to slow down. We’ll try again later.",
+    "nl": "De dienst vroeg ons trager te gaan. We proberen het later opnieuw."
+  },
+  "ios.ps.err.tls_error": {
+    "en": "{host}’s certificate isn’t trusted. Check its HTTPS setup.",
+    "nl": "Het certificaat van {host} wordt niet vertrouwd. Controleer de HTTPS-instellingen."
+  },
+  "ios.ps.err.too_large": {
+    "en": "This album is too big to read in one go. Use a smaller album.",
+    "nl": "Dit album is te groot om in één keer te lezen. Gebruik een kleiner album."
+  },
+  "ios.ps.err.unknown": {
+    "en": "Something went wrong with this source.",
+    "nl": "Er ging iets mis met deze bron."
+  },
+  "ios.ps.err.unreachable": {
+    "en": "Can’t reach {host}. Is the server on? We keep trying.",
+    "nl": "{host} is niet bereikbaar. Staat de server aan? We blijven het proberen."
+  },
+  "ios.ps.err.unreachable.since": {
+    "en": "Can’t reach {host} since {since}. We keep trying.",
+    "nl": "{host} is niet bereikbaar sinds {since}. We blijven het proberen."
+  },
+  "ios.ps.err.unsupported_link": {
+    "en": "This is an iCloud Link for a few photos, not a shared album. Share an album with Public Website on.",
+    "nl": "Dit is een iCloud-link voor enkele foto’s, geen gedeeld album. Deel een album met Openbare website aan."
+  },
+  "ios.ps.err.upstream_error": {
+    "en": "{host} had a problem. We keep trying.",
+    "nl": "{host} had een probleem. We blijven het proberen."
+  },
+  "ios.ps.err.upstream_error.since": {
+    "en": "{host} has had a problem since {since}. We keep trying.",
+    "nl": "{host} heeft een probleem sinds {since}. We blijven het proberen."
+  },
+  "ios.ps.feedBatching": {
+    "en": "New photos become one post once the album has been quiet for 30 minutes, at most 3 hours after the first new photo.",
+    "nl": "Nieuwe foto’s worden één bericht zodra het album 30 minuten rust heeft gehad, ten laatste 3 uur na de eerste nieuwe foto."
+  },
+  "ios.ps.feedFooter": {
+    "en": "New photos become one post once the outside album has been quiet for 30 minutes (at most 3 hours after the first one). Nobody gets a notification for them.",
+    "nl": "Nieuwe foto’s worden één bericht zodra het album buiten 30 minuten rust heeft gehad (ten laatste 3 uur na de eerste). Niemand krijgt er een melding van."
+  },
+  "ios.ps.findAlbums": {
+    "en": "Show my albums",
+    "nl": "Mijn albums tonen"
+  },
+  "ios.ps.fix.confirmRemovals": {
+    "en": "Review the removals",
+    "nl": "Verwijderingen bekijken"
+  },
+  "ios.ps.fix.enterPassword": {
+    "en": "Enter the password",
+    "nl": "Wachtwoord invullen"
+  },
+  "ios.ps.fix.pickAlbum": {
+    "en": "Pick another album",
+    "nl": "Ander album kiezen"
+  },
+  "ios.ps.fix.replaceKey": {
+    "en": "Enter a new API key",
+    "nl": "Nieuwe API-sleutel invullen"
+  },
+  "ios.ps.fix.replaceLink": {
+    "en": "Paste a new link",
+    "nl": "Nieuwe link plakken"
+  },
+  "ios.ps.fix.takeOver": {
+    "en": "Take over",
+    "nl": "Overnemen"
+  },
+  "ios.ps.formerMember": {
+    "en": "A former member",
+    "nl": "Een voormalig lid"
+  },
+  "ios.ps.history": {
+    "en": "First import",
+    "nl": "Eerste import"
+  },
+  "ios.ps.historyAll": {
+    "en": "Import everything",
+    "nl": "Alles importeren"
+  },
+  "ios.ps.historyHint": {
+    "en": "The first import joins the slideshow quietly: no “new photos” on the frame.",
+    "nl": "De eerste import komt stil in de diavoorstelling: geen “nieuwe foto’s” op het kader."
+  },
+  "ios.ps.historyLast": {
+    "en": "The newest {count}",
+    "nl": "De nieuwste {count}"
+  },
+  "ios.ps.historyNone": {
+    "en": "Only photos added from now on",
+    "nl": "Alleen foto’s die er vanaf nu bij komen"
+  },
+  "ios.ps.icloudHowTo": {
+    "en": "On your iPhone: open Photos → Albums → the shared album, tap the people icon, turn on Public Website, then tap Share Link → Copy and paste it here.",
+    "nl": "Op je iPhone: open Foto’s → Albums → het gedeelde album, tik op het personen-symbool, zet Openbare website aan, tik dan op Deel link → Kopieer en plak hem hier."
+  },
+  "ios.ps.icloudPlaceholder": {
+    "en": "https://www.icloud.com/sharedalbum/#…",
+    "nl": "https://www.icloud.com/sharedalbum/#…"
+  },
+  "ios.ps.immichApiWhy": {
+    "en": "With your Immich server address and an API key you pick the album from a list.",
+    "nl": "Met het adres van je Immich-server en een API-sleutel kies je het album uit een lijst."
+  },
+  "ios.ps.immichLinkHowTo": {
+    "en": "In Immich, open the album, tap Share → Create link, allow downloads, and paste the link here.",
+    "nl": "Open in Immich het album, tik op Delen → Link maken, sta downloaden toe en plak de link hier."
+  },
+  "ios.ps.immichLinkPlaceholder": {
+    "en": "https://photos.example.org/share/…",
+    "nl": "https://photos.example.org/share/…"
+  },
+  "ios.ps.immichLinkWhy": {
+    "en": "A shared link gives access to this one album only, read-only, and you can revoke it in Immich with one tap.",
+    "nl": "Een gedeelde link geeft alleen toegang tot dit ene album, alleen-lezen, en je trekt hem in Immich met één tik weer in."
+  },
+  "ios.ps.includeVideos": {
+    "en": "Include videos",
+    "nl": "Video’s meenemen"
+  },
+  "ios.ps.input.empty": {
+    "en": "Paste the link first.",
+    "nl": "Plak eerst de link."
+  },
+  "ios.ps.input.httpPublic": {
+    "en": "Use https:// for addresses on the internet.",
+    "nl": "Gebruik https:// voor adressen op het internet."
+  },
+  "ios.ps.input.isIcloud": {
+    "en": "That’s an iCloud shared album link.",
+    "nl": "Dat is een link naar een gedeeld iCloud-album."
+  },
+  "ios.ps.input.isImmich": {
+    "en": "That’s an Immich shared link.",
+    "nl": "Dat is een gedeelde Immich-link."
+  },
+  "ios.ps.input.notALink": {
+    "en": "That doesn’t look like a link.",
+    "nl": "Dat lijkt geen link."
+  },
+  "ios.ps.input.notAShareLink": {
+    "en": "That’s not a shared link: it should contain /share/. To use your server address, choose Immich server.",
+    "nl": "Dat is geen gedeelde link: er hoort /share/ in te staan. Kies Immich-server om je serveradres te gebruiken."
+  },
+  "ios.ps.items.one": {
+    "en": "{count} item",
+    "nl": "{count} item"
+  },
+  "ios.ps.items.other": {
+    "en": "{count} items",
+    "nl": "{count} items"
+  },
+  "ios.ps.keepAlbum": {
+    "en": "Keep it on the frame",
+    "nl": "Op het kader houden"
+  },
+  "ios.ps.keepFeed": {
+    "en": "Keep it in the feed",
+    "nl": "In de feed houden"
+  },
+  "ios.ps.limit": {
+    "en": "This has the maximum of {count} photo sources.",
+    "nl": "Dit heeft het maximum van {count} fotobronnen."
+  },
+  "ios.ps.link": {
+    "en": "Link",
+    "nl": "Link"
+  },
+  "ios.ps.live.attention": {
+    "en": "{name} needs your attention",
+    "nl": "{name} heeft je aandacht nodig"
+  },
+  "ios.ps.massBody": {
+    "en": "That’s many at once, so we waited for you. If the link changed by mistake, keep them and paste the right link.",
+    "nl": "Dat zijn er veel tegelijk, dus we wachtten op jou. Is de link per vergissing veranderd? Houd ze dan en plak de juiste link."
+  },
+  "ios.ps.massKeep": {
+    "en": "Keep them",
+    "nl": "Houden"
+  },
+  "ios.ps.massRemove": {
+    "en": "Remove them",
+    "nl": "Verwijderen"
+  },
+  "ios.ps.massTitle.one": {
+    "en": "A photo disappeared from the {service} album. Remove it here too?",
+    "nl": "Er verdween een foto uit het {service}-album. Ook hier verwijderen?"
+  },
+  "ios.ps.massTitle.other": {
+    "en": "{count} photos disappeared from the {service} album. Remove them here too?",
+    "nl": "Er verdwenen {count} foto’s uit het {service}-album. Ook hier verwijderen?"
+  },
+  "ios.ps.mine": {
+    "en": "My photo sources",
+    "nl": "Mijn fotobronnen"
+  },
+  "ios.ps.mineHint": {
+    "en": "The albums from Immich and iCloud you connected. Photos they bring in are sent by you.",
+    "nl": "De albums uit Immich en iCloud die je koppelde. Foto’s die ze binnenbrengen, worden door jou verstuurd."
+  },
+  "ios.ps.mineLinkHint": {
+    "en": "Albums from Immich and iCloud that you keep in sync",
+    "nl": "Albums uit Immich en iCloud die je gesynchroniseerd houdt"
+  },
+  "ios.ps.mirrorAlbum": {
+    "en": "Remove it here too",
+    "nl": "Ook hier verwijderen"
+  },
+  "ios.ps.mirrorFeed": {
+    "en": "Remove it from the feed too",
+    "nl": "Ook uit de feed verwijderen"
+  },
+  "ios.ps.name": {
+    "en": "Name",
+    "nl": "Naam"
+  },
+  "ios.ps.namePlaceholder": {
+    "en": "The album’s name",
+    "nl": "De naam van het album"
+  },
+  "ios.ps.newApiKey": {
+    "en": "New API key",
+    "nl": "Nieuwe API-sleutel"
+  },
+  "ios.ps.newLink": {
+    "en": "New link",
+    "nl": "Nieuwe link"
+  },
+  "ios.ps.newLinkHint": {
+    "en": "Leave it empty to keep the current link.",
+    "nl": "Laat leeg om de huidige link te houden."
+  },
+  "ios.ps.newPassword": {
+    "en": "New link password",
+    "nl": "Nieuw wachtwoord van de link"
+  },
+  "ios.ps.noAlbums": {
+    "en": "This key can’t see any albums.",
+    "nl": "Deze sleutel ziet geen albums."
+  },
+  "ios.ps.notifyHint": {
+    "en": "Photos are sent in your name, so reactions come to you. You never get a notification for new photos.",
+    "nl": "Foto’s worden in jouw naam verstuurd, dus reacties komen bij jou. Voor nieuwe foto’s krijg je nooit een melding."
+  },
+  "ios.ps.notifyReactions": {
+    "en": "Notify me of reactions",
+    "nl": "Meld me reacties"
+  },
+  "ios.ps.owner": {
+    "en": "Set up by",
+    "nl": "Ingesteld door"
+  },
+  "ios.ps.password": {
+    "en": "Link password (if any)",
+    "nl": "Wachtwoord van de link (indien nodig)"
+  },
+  "ios.ps.pause": {
+    "en": "Pause",
+    "nl": "Pauzeren"
+  },
+  "ios.ps.paused": {
+    "en": "{name} is paused. Its photos stay.",
+    "nl": "{name} is gepauzeerd. De foto’s blijven."
+  },
+  "ios.ps.photos.one": {
+    "en": "{count} photo",
+    "nl": "{count} foto"
+  },
+  "ios.ps.photos.other": {
+    "en": "{count} photos",
+    "nl": "{count} foto’s"
+  },
+  "ios.ps.pickAlbum": {
+    "en": "Pick an album",
+    "nl": "Kies een album"
+  },
+  "ios.ps.privateAllowed": {
+    "en": "This server may also reach your home network, e.g. http://192.168.1.10:2283.",
+    "nl": "Deze server mag ook je thuisnetwerk bereiken, bv. http://192.168.1.10:2283."
+  },
+  "ios.ps.privateHint": {
+    "en": "This server can’t reach addresses on your home network; use Immich’s public address or ask the server’s operator.",
+    "nl": "Deze server kan geen adressen op je thuisnetwerk bereiken; gebruik het openbare adres van Immich of vraag het aan de beheerder van de server."
+  },
+  "ios.ps.provider": {
+    "en": "Source",
+    "nl": "Bron"
+  },
+  "ios.ps.provider.icloudLink": {
+    "en": "iCloud shared album",
+    "nl": "Gedeeld iCloud-album"
+  },
+  "ios.ps.provider.immichApi": {
+    "en": "Immich server",
+    "nl": "Immich-server"
+  },
+  "ios.ps.provider.immichLink": {
+    "en": "Immich shared link",
+    "nl": "Gedeelde Immich-link"
+  },
+  "ios.ps.providerPick": {
+    "en": "Where are the photos?",
+    "nl": "Waar staan de foto’s?"
+  },
+  "ios.ps.recommended": {
+    "en": "recommended",
+    "nl": "aanbevolen"
+  },
+  "ios.ps.removePassword": {
+    "en": "Remove the link password",
+    "nl": "Wachtwoord van de link verwijderen"
+  },
+  "ios.ps.removed": {
+    "en": "When a photo is removed in {service}",
+    "nl": "Als een foto in {service} verwijderd wordt"
+  },
+  "ios.ps.removedHint": {
+    "en": "If many photos disappear at once, we ask you first.",
+    "nl": "Als er veel foto’s tegelijk verdwijnen, vragen we het je eerst."
+  },
+  "ios.ps.resume": {
+    "en": "Resume",
+    "nl": "Hervatten"
+  },
+  "ios.ps.resumed": {
+    "en": "{name} syncs again",
+    "nl": "{name} synchroniseert weer"
+  },
+  "ios.ps.server": {
+    "en": "Immich server",
+    "nl": "Immich-server"
+  },
+  "ios.ps.serverPlaceholder": {
+    "en": "https://photos.example.org",
+    "nl": "https://photos.example.org"
+  },
+  "ios.ps.serverVersion": {
+    "en": "Immich {version}",
+    "nl": "Immich {version}"
+  },
+  "ios.ps.setUpBy": {
+    "en": "set up by {name}",
+    "nl": "ingesteld door {name}"
+  },
+  "ios.ps.sharedBy": {
+    "en": "shared by {name}",
+    "nl": "gedeeld door {name}"
+  },
+  "ios.ps.status.attentionGeneric": {
+    "en": "Syncing stopped and needs you.",
+    "nl": "Synchroniseren is gestopt en heeft je nodig."
+  },
+  "ios.ps.status.errorGeneric": {
+    "en": "Syncing doesn’t work right now. We keep trying.",
+    "nl": "Synchroniseren lukt nu niet. We blijven het proberen."
+  },
+  "ios.ps.status.firstSync": {
+    "en": "The first sync starts soon",
+    "nl": "De eerste synchronisatie start zo"
+  },
+  "ios.ps.status.importing": {
+    "en": "Importing {done} of {total}",
+    "nl": "{done} van {total} geïmporteerd"
+  },
+  "ios.ps.status.next": {
+    "en": "Next sync {when}",
+    "nl": "Volgende synchronisatie {when}"
+  },
+  "ios.ps.status.nextSoon": {
+    "en": "Next sync in a minute",
+    "nl": "Volgende synchronisatie binnen een minuut"
+  },
+  "ios.ps.status.paused": {
+    "en": "Paused",
+    "nl": "Gepauzeerd"
+  },
+  "ios.ps.status.synced": {
+    "en": "Synced from {service} · {when}",
+    "nl": "Gesynchroniseerd vanuit {service} · {when}"
+  },
+  "ios.ps.status.syncing": {
+    "en": "Syncing…",
+    "nl": "Bezig met synchroniseren…"
+  },
+  "ios.ps.status.unknown": {
+    "en": "Update the app to see this source’s status.",
+    "nl": "Werk de app bij om de status van deze bron te zien."
+  },
+  "ios.ps.stop": {
+    "en": "Stop syncing",
+    "nl": "Stoppen met synchroniseren"
+  },
+  "ios.ps.stopBodyAlbum": {
+    "en": "Kept photos stay on the frame as your own photos.",
+    "nl": "Gehouden foto’s blijven op het kader als je eigen foto’s."
+  },
+  "ios.ps.stopBodyFeed": {
+    "en": "Kept photos stay in the feed as your own posts.",
+    "nl": "Gehouden foto’s blijven in de feed als je eigen berichten."
+  },
+  "ios.ps.stopKeep.one": {
+    "en": "Stop and keep the photo",
+    "nl": "Stoppen en de foto houden"
+  },
+  "ios.ps.stopKeep.other": {
+    "en": "Stop and keep the {count} photos",
+    "nl": "Stoppen en de {count} foto’s houden"
+  },
+  "ios.ps.stopRemove.one": {
+    "en": "Stop and remove the photo",
+    "nl": "Stoppen en de foto verwijderen"
+  },
+  "ios.ps.stopRemove.other": {
+    "en": "Stop and remove the {count} photos",
+    "nl": "Stoppen en de {count} foto’s verwijderen"
+  },
+  "ios.ps.stopTitle": {
+    "en": "Stop syncing {name}?",
+    "nl": "Stoppen met het synchroniseren van {name}?"
+  },
+  "ios.ps.stopped": {
+    "en": "Stopped syncing {name}",
+    "nl": "Gestopt met het synchroniseren van {name}"
+  },
+  "ios.ps.stoppedRemoved": {
+    "en": "Stopped syncing {name}. Its photos are being removed.",
+    "nl": "Gestopt met het synchroniseren van {name}. De foto’s worden verwijderd."
+  },
+  "ios.ps.switchTo": {
+    "en": "Use {name} instead",
+    "nl": "{name} gebruiken"
+  },
+  "ios.ps.syncFrom": {
+    "en": "Sync from…",
+    "nl": "Synchroniseren vanuit…"
+  },
+  "ios.ps.syncNow": {
+    "en": "Sync now",
+    "nl": "Nu synchroniseren"
+  },
+  "ios.ps.syncPaused": {
+    "en": "Resume it first.",
+    "nl": "Hervat eerst."
+  },
+  "ios.ps.syncWait": {
+    "en": "Synced just now. Try again in a few minutes.",
+    "nl": "Net gesynchroniseerd. Probeer het over een paar minuten opnieuw."
+  },
+  "ios.ps.syncsTo": {
+    "en": "Syncs to",
+    "nl": "Synchroniseert naar"
+  },
+  "ios.ps.takeOverBody": {
+    "en": "New photos will be sent in your name. Photos already imported keep their sender.",
+    "nl": "Nieuwe foto’s worden in jouw naam verstuurd. Foto’s die al geïmporteerd zijn, houden hun afzender."
+  },
+  "ios.ps.takeOverKey": {
+    "en": "The API key belongs to someone else’s Immich account: enter your own key to take over. New photos will be sent in your name.",
+    "nl": "De API-sleutel hoort bij iemand anders’ Immich-account: vul je eigen sleutel in om over te nemen. Nieuwe foto’s worden in jouw naam verstuurd."
+  },
+  "ios.ps.takeOverTitle": {
+    "en": "Take over",
+    "nl": "Overnemen"
+  },
+  "ios.ps.target.album": {
+    "en": "{album} · {frame}",
+    "nl": "{album} · {frame}"
+  },
+  "ios.ps.target.feed": {
+    "en": "Feed {feed}",
+    "nl": "Feed {feed}"
+  },
+  "ios.ps.test": {
+    "en": "Test connection",
+    "nl": "Verbinding testen"
+  },
+  "ios.ps.testTitle": {
+    "en": "Connection",
+    "nl": "Verbinding"
+  },
+  "ios.ps.testing": {
+    "en": "Testing…",
+    "nl": "Bezig met testen…"
+  },
+  "ios.ps.title": {
+    "en": "Photo sources",
+    "nl": "Fotobronnen"
+  },
+  "ios.ps.tookOver": {
+    "en": "You took over {name}",
+    "nl": "Je hebt {name} overgenomen"
+  },
+  "ios.ps.via": {
+    "en": "{name} via {service}",
+    "nl": "{name} via {service}"
+  },
+  "ios.ps.videos.one": {
+    "en": "{count} video",
+    "nl": "{count} video"
+  },
+  "ios.ps.videos.other": {
+    "en": "{count} videos",
+    "nl": "{count} video’s"
+  },
+  "ios.ps.visibleAlbum": {
+    "en": "Everyone who can see {name}’s photos will see the photos in this album, including new ones added later.",
+    "nl": "Iedereen die de foto’s van {name} kan zien, ziet de foto’s in dit album, ook nieuwe die er later bij komen."
+  },
+  "ios.ps.visibleFeed": {
+    "en": "Everyone whose frame shows {name} will see the photos in this album, including new ones added later.",
+    "nl": "Iedereen bij wie {name} op het kader staat, ziet de foto’s in dit album, ook nieuwe die er later bij komen."
+  },
+  "ios.ps.warn.downloads_disabled": {
+    "en": "Photos come in reduced quality because the link doesn’t allow downloads.",
+    "nl": "Foto’s komen in lagere kwaliteit binnen omdat de link downloaden niet toestaat."
+  },
+  "ios.ps.warn.item_limit_reached": {
+    "en": "Only the newest {count} photos are synced.",
+    "nl": "Alleen de nieuwste {count} foto’s worden gesynchroniseerd."
+  },
+  "ios.ps.warn.metadata_hidden": {
+    "en": "The link hides photo details, so dates and descriptions are missing.",
+    "nl": "De link verbergt fotogegevens, dus datums en beschrijvingen ontbreken."
+  }
+}

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kinframe.core.api.Feed
 import app.kinframe.core.api.Frame
 import app.kinframe.core.api.KinApi
 import app.kinframe.core.api.Limits
@@ -60,8 +61,17 @@ data class ComposerState(
     /** Files left out because of the per-send limit. */
     val overLimit: Int = 0,
     @StringRes val error: Int? = null,
+    /** Feeds you can post to (any role), when the server has feeds; shown in their own section next to frames. */
+    val feeds: List<Feed> = emptyList(),
+    val selectedFeeds: Set<String> = emptySet(),
 ) {
     val sendableFrames: List<Frame> get() = (frames as? Load.Ready)?.value?.filter { it.can { p -> p.send } }.orEmpty()
+
+    /** At least one frame or feed (feeds.md §6.1). */
+    val hasRecipients: Boolean get() = Recipients.valid(selected, selectedFeeds)
+
+    /** Nothing to send to at all: no frame you may send to and no feed. */
+    val noRecipients: Boolean get() = frames is Load.Ready && sendableFrames.isEmpty() && feeds.isEmpty()
 
     fun issue(item: DraftItem): ItemIssue? = when {
         item.info.size > limits.maxUploadBytes -> ItemIssue.TooLarge
@@ -71,7 +81,15 @@ data class ComposerState(
     }
 
     val issues: Int get() = items.count { issue(it) != null }
-    val canSend: Boolean get() = items.isNotEmpty() && issues == 0 && selected.isNotEmpty() && !preparing
+    val canSend: Boolean get() = items.isNotEmpty() && issues == 0 && hasRecipients && !preparing
+}
+
+/** Who a send goes to: frames and feeds; together they must not be empty (feeds.md §6.1). */
+object Recipients {
+    fun valid(frameIds: Collection<String>, feedIds: Collection<String>): Boolean = frameIds.isNotEmpty() || feedIds.isNotEmpty()
+
+    /** Keep only what can still be sent to (a feed you left, a frame whose send permission went). */
+    fun keep(selected: Set<String>, available: Collection<String>): Set<String> = selected.filter { it in available }.toSet()
 }
 
 sealed interface ComposerEvent {
@@ -92,6 +110,8 @@ class ComposerViewModel(
     private val enqueue: suspend (OutboxSend) -> Unit,
     private val newId: () -> String = { UUID.randomUUID().toString() },
     private val now: () -> Long = { System.currentTimeMillis() },
+    /** Discovery `feeds`: offer feeds as recipients. */
+    private val feedsEnabled: () -> Boolean = { false },
 ) : ViewModel() {
     private val _state = MutableStateFlow(ComposerState(limits = limits()))
     val state: StateFlow<ComposerState> = _state.asStateFlow()
@@ -100,12 +120,15 @@ class ComposerViewModel(
     val events: SharedFlow<ComposerEvent> = _events.asSharedFlow()
 
     private var preselect: String? = null
+    private var preselectFeed: String? = null
 
     init { loadFrames() }
 
     fun loadFrames() = viewModelScope.launch {
         val a = api() ?: return@launch
         _state.update { it.copy(limits = limits()) }
+        if (feedsEnabled()) launch { loadFeeds(a) }
+        else _state.update { it.copy(feeds = emptyList(), selectedFeeds = emptySet()) }
         try {
             val frames = a.frames().sortedBy { it.name.lowercase() }
             _state.update { s ->
@@ -114,6 +137,8 @@ class ComposerViewModel(
                 val sel = when {
                     preselect != null && sendable.any { it.id == preselect } -> setOf(preselect!!)
                     keep.isNotEmpty() -> keep
+                    // "Post to this feed": no frame on top of it.
+                    preselectFeed != null || s.selectedFeeds.isNotEmpty() -> emptySet()
                     sendable.size == 1 -> setOf(sendable.single().id)
                     else -> emptySet()
                 }
@@ -124,8 +149,30 @@ class ComposerViewModel(
         }
     }
 
+    private suspend fun loadFeeds(a: KinApi) {
+        val feeds = runCatching { a.feeds() }.getOrNull()?.sortedBy { it.name.lowercase() } ?: return
+        _state.update { s ->
+            val pre = preselectFeed?.takeIf { id -> feeds.any { it.id == id } }
+            s.copy(feeds = feeds, selectedFeeds = if (pre != null) setOf(pre) else Recipients.keep(s.selectedFeeds, feeds.map { it.id }))
+        }
+    }
+
+    /** "Post to this feed" from a feed: the feed alone is selected. */
+    fun preselectFeed(feedId: String) {
+        preselectFeed = feedId
+        preselect = null
+        _state.update { s -> s.copy(selected = emptySet(), selectedFeeds = if (s.feeds.any { it.id == feedId }) setOf(feedId) else s.selectedFeeds) }
+        loadFrames()
+    }
+
+    fun toggleFeed(feedId: String) = _state.update { s ->
+        s.copy(selectedFeeds = if (feedId in s.selectedFeeds) s.selectedFeeds - feedId else s.selectedFeeds + feedId, error = null)
+    }
+
     /** "Send to this frame" from a frame card or a fresh join. */
     fun preselectFrame(frameId: String) {
+        preselectFeed = null
+        _state.update { it.copy(selectedFeeds = emptySet()) }
         preselect = frameId
         _state.update { s -> if ((s.frames as? Load.Ready)?.value?.any { it.id == frameId } == true) s.copy(selected = setOf(frameId)) else s }
         loadFrames()
@@ -194,7 +241,11 @@ class ComposerViewModel(
         val s = state.value
         if (!s.canSend) return
         val frames = s.sendableFrames.filter { it.id in s.selected }
+        val feeds = s.feeds.filter { it.id in s.selectedFeeds }
+        if (!Recipients.valid(frames.map { it.id }, feeds.map { it.id })) return
         val outbox = OutboxSend(
+            feedIds = feeds.map { it.id },
+            feedNames = feeds.map { it.name },
             id = newId(),
             server = server(),
             frameIds = frames.map { it.id },
@@ -224,6 +275,7 @@ class ComposerViewModel(
         viewModelScope.launch {
             try {
                 enqueue(outbox)
+                preselectFeed = null
                 _state.update { it.copy(preparing = false, items = emptyList(), editing = null, skipped = 0, overLimit = 0) }
                 _events.tryEmit(ComposerEvent.Queued(outbox.id))
             } catch (e: Exception) {

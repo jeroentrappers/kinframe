@@ -1,22 +1,11 @@
 {
   "brand": "kinframe",
-  "logo": {
-    "file": "logo.bmp",
-    "size": 20196,
-    "sha256": "58da8d2c6e7de58c9087943800e68ee4a6016d925cc42ab7ec3895277c4c23f7",
-    "width": 800,
-    "height": 1280,
-    "bpp": 8,
-    "compression": "rle8"
-  },
-  "bootanimation": {
-    "file": "bootanimation.zip",
-    "size": 121926,
-    "sha256": "d5f860281476def7c040b4647e5920ea56def7d7765a50ba33d179ea9a15d1ca",
-    "frame": [
-      720,
-      336
-    ],
-    "fps": 20
-  }
+  "logos": [
+    {"file": "logo-800x1280-r270.bmp", "width": 800, "height": 1280, "bpp": 8, "compression": 1, "hwrotation": 270, "size": 20196, "sha256": "58da8d2c6e7de58c9087943800e68ee4a6016d925cc42ab7ec3895277c4c23f7"},
+    {"file": "logo-1920x1080-r180.bmp", "width": 1920, "height": 1080, "bpp": 8, "compression": 1, "hwrotation": 180, "size": 30666, "sha256": "9a2b0398563d79d0241c5b0db35e0e47fd5de6762d5fdff4dbd9013ec3cf7a1c"}
+  ],
+  "bootanimations": [
+    {"file": "bootanimation-1280x800.zip", "screen": "1280x800", "frame": "720x336", "fps": 20, "size": 121926, "sha256": "d5f860281476def7c040b4647e5920ea56def7d7765a50ba33d179ea9a15d1ca"},
+    {"file": "bootanimation-1920x1080.zip", "screen": "1920x1080", "frame": "972x454", "fps": 20, "size": 171104, "sha256": "c524f4499376ead391d957c40e87830dc35062aaa8baabb1d6324213d851c2e1"}
+  ]
 }

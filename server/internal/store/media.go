@@ -120,19 +120,22 @@ type Media struct {
 	DeclaredWidth      *int `db:"declared_width"`
 	DeclaredHeight     *int `db:"declared_height"`
 	DeclaredDurationMS *int `db:"declared_duration_ms"`
+	// OriginalSHA256 is the client-declared hash of a prepared upload's original (photo-sources.md §8.1).
+	OriginalSHA256 *string `db:"original_sha256"`
 }
 
 const mediaCols = `id, owner_user_id, source_sha256, kind, status, failure_code, source_path, source_mime, trim_start_ms, trim_end_ms,
 	include_audio, width, height, duration_ms, has_audio, captured_at, master_key, master_sha256, master_bytes, master_mime,
-	poster_key, created_at, updated_at, prepared, pipeline, pipeline_note, motion, declared_width, declared_height, declared_duration_ms`
+	poster_key, created_at, updated_at, prepared, pipeline, pipeline_note, motion, declared_width, declared_height, declared_duration_ms,
+	original_sha256`
 
 func (tx *Tx) CreateMedia(ctx context.Context, m Media) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO media (id, owner_user_id, kind, source_path, source_mime, trim_start_ms, trim_end_ms, include_audio, duration_ms,
-			prepared, motion, declared_width, declared_height, declared_duration_ms, source_sha256)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+			prepared, motion, declared_width, declared_height, declared_duration_ms, source_sha256, original_sha256)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
 		m.ID, m.OwnerUserID, m.Kind, m.SourcePath, m.SourceMime, m.TrimStartMS, m.TrimEndMS, m.IncludeAudio, m.DurationMS,
-		m.Prepared, m.Motion, m.DeclaredWidth, m.DeclaredHeight, m.DeclaredDurationMS, m.SourceSHA256)
+		m.Prepared, m.Motion, m.DeclaredWidth, m.DeclaredHeight, m.DeclaredDurationMS, m.SourceSHA256, m.OriginalSHA256)
 	return err
 }
 
@@ -283,15 +286,19 @@ type Item struct {
 	Origin           *string `db:"origin"`
 	OriginSenderName *string `db:"origin_sender_name"`
 	OriginKey        *string `db:"origin_key"`
+	// Via credits a photo source or Google import (immich, icloud, google_photos).
+	Via              *string    `db:"via"`
+	ViaSourceID      *uuid.UUID `db:"via_source_id"`
+	CapturedOverride *time.Time `db:"captured_override"`
 }
 
 func (tx *Tx) CreateItem(ctx context.Context, it Item) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO items (id, media_id, sender_user_id, sender_frame_id, caption, focal_x, focal_y, fit, captured_hint, motion_media_id,
-			origin, origin_sender_name, origin_key)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+			origin, origin_sender_name, origin_key, via, via_source_id, captured_override)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
 		it.ID, it.MediaID, it.SenderUserID, it.SenderFrameID, it.Caption, it.FocalX, it.FocalY, it.Fit, it.CapturedHint, it.MotionMediaID,
-		it.Origin, it.OriginSenderName, it.OriginKey)
+		it.Origin, it.OriginSenderName, it.OriginKey, it.Via, it.ViaSourceID, it.CapturedOverride)
 	return err
 }
 
@@ -334,6 +341,9 @@ type ItemRow struct {
 	// Imported from another app (Item.Origin).
 	Origin           *string `db:"origin"`
 	OriginSenderName *string `db:"origin_sender_name"`
+	// Via credits a photo source or Google import.
+	Via         *string    `db:"via"`
+	ViaSourceID *uuid.UUID `db:"via_source_id"`
 }
 
 // IsLive reports whether the item is a Live/Motion Photo whose clip has not failed.
@@ -345,10 +355,11 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	COALESCE(su.display_name, sf.name, '') AS sender_name, su.avatar_key AS sender_avatar_key,
 	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.thumb256_key, i.thumb512_key,
 	i.created_at AS item_created_at, i.captured_hint,
-	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio, m.captured_at,
+	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio,
+	COALESCE(i.captured_override, m.captured_at) AS captured_at,
 	m.master_key, m.master_mime, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
 	mm.height AS motion_height, mm.duration_ms AS motion_duration_ms, mm.has_audio AS motion_has_audio,
-	mm.master_key AS motion_master_key, i.origin, i.origin_sender_name`
+	mm.master_key AS motion_master_key, i.origin, i.origin_sender_name, i.via, i.via_source_id`
 
 const itemJoins = ` JOIN media m ON m.id = i.media_id LEFT JOIN media mm ON mm.id = i.motion_media_id
 	LEFT JOIN users su ON su.id = i.sender_user_id LEFT JOIN frames sf ON sf.id = i.sender_frame_id`
@@ -384,9 +395,9 @@ func (s *Store) SetItemThumbs(ctx context.Context, id uuid.UUID, k256, k512 stri
 	return err
 }
 
-// UserCanSeeItem: the sender, a member who shared a live placement of it, or a
+// UserCanSeeItem: the sender, a member who shared a live placement of it, a
 // member of a frame with a live placement of the item who may see the library
-// (or is a manager).
+// (or is a manager), or a member of a feed with a live post of it.
 func (s *Store) UserCanSeeItem(ctx context.Context, userID, itemID uuid.UUID) (bool, error) {
 	var ok bool
 	err := s.Pool.QueryRow(ctx, `
@@ -396,7 +407,12 @@ func (s *Store) UserCanSeeItem(ctx context.Context, userID, itemID uuid.UUID) (b
 			SELECT 1 FROM placements p JOIN memberships m ON m.frame_id = p.frame_id AND m.user_id = $1
 			JOIN frames f ON f.id = p.frame_id AND f.deleted_at IS NULL
 			WHERE p.item_id = $2 AND p.removed_at IS NULL
-			AND (m.role IN ('owner','admin') OR (m.permissions->>'see_library')::boolean))`, userID, itemID).Scan(&ok)
+			AND (m.role IN ('owner','admin') OR (m.permissions->>'see_library')::boolean))
+		OR EXISTS (
+			SELECT 1 FROM feed_post_items pi JOIN feed_posts p ON p.id = pi.post_id AND p.removed_at IS NULL
+			JOIN feeds f ON f.id = p.feed_id AND f.deleted_at IS NULL
+			JOIN feed_members fm ON fm.feed_id = p.feed_id AND fm.user_id = $1
+			WHERE pi.item_id = $2 AND pi.removed_at IS NULL)`, userID, itemID).Scan(&ok)
 	return ok, err
 }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Покретање…</string>
+    <string name="startup_checking_library">Провера фотографија после нестанка струје…</string>
+    <string name="startup_checking_update">Провера верзије апликације…</string>
+    <string name="startup_loading_photos">Учитавање фотографија…</string>
+    <string name="startup_preparing_photo">Припрема прве фотографије…</string>
+    <string name="startup_waiting_wifi">Чека се Wi-Fi…</string>
+    <string name="startup_setting_clock">Подешавање сата…</string>
+    <string name="startup_connecting">Повезивање са сервером…</string>
+    <string name="power_cut_title">Рам је искључен без гашења</string>
+    <string name="power_cut_body_ok">Све је проверено и у реду је.</string>
+    <string name="power_cut_body_redownload">Све је проверено. Неке фотографије се поново преузимају.</string>
+    <string name="power_cut_tip">Следећи пут у менију изаберите %1$s → %2$s и сачекајте да се на екрану појави „%3$s“.</string>
+</resources>

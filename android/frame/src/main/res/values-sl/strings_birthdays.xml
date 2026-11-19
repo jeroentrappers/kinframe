@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s danes praznuje %2$d. rojstni dan!</item>
+        <item quantity="two">🎈 %1$s danes praznuje %2$d. rojstni dan!</item>
+        <item quantity="few">🎈 %1$s danes praznuje %2$d. rojstni dan!</item>
+        <item quantity="other">🎈 %1$s danes praznuje %2$d. rojstni dan!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s ima danes rojstni dan!</string>
+    <string name="birthday_card_title_many">🎈 Današnji rojstni dnevi</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">in še %d</item>
+        <item quantity="two">in še %d</item>
+        <item quantity="few">in še %d</item>
+        <item quantity="other">in še %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s – %2$d. rojstni dan</item>
+        <item quantity="two">%1$s – %2$d. rojstni dan</item>
+        <item quantity="few">%1$s – %2$d. rojstni dan</item>
+        <item quantity="other">%1$s – %2$d. rojstni dan</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s ima rojstni dan</string>
+    <string name="birthday_countdown_two">%1$s in %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s in še %2$d</item>
+        <item quantity="two">%1$s in še %2$d</item>
+        <item quantity="few">%1$s in še %2$d</item>
+        <item quantity="other">%1$s in še %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Voščite za rojstni dan s tega okvirja</string>
+    <string name="birthday_greet_button">Voščite: %1$s</string>
+    <string name="birthday_greet_sent">Poslano ✓ — družina bo videla</string>
+    <string name="birthday_detail_label">Rojstni dan</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">%d. rojstni dan</item>
+        <item quantity="two">%d. rojstni dan</item>
+        <item quantity="few">%d. rojstni dan</item>
+        <item quantity="other">%d. rojstni dan</item>
+    </plurals>
+</resources>

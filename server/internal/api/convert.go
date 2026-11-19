@@ -36,6 +36,7 @@ func (s *Server) userJSON(ctx context.Context, u *store.User) gen.User {
 		AvatarUrl:          s.avatarURL(u.AvatarKey),
 		ShareLocationNames: ptr(u.ShareLocationNames),
 		Locale:             u.Locale,
+		Timezone:           u.Timezone,
 		IsOperator:         ptr(isOperator(ctx)),
 		CreatedAt:          ptr(u.CreatedAt),
 	}
@@ -171,6 +172,7 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if out.CapturedAt == nil {
 		out.CapturedAt = it.CapturedHint
 	}
+	out.Via = viaJSON(it.Via, it.ViaSourceID)
 	if it.Origin != nil {
 		out.ImportedFrom = ptr(gen.ItemOrigin(*it.Origin))
 		out.ImportedSenderName = it.OriginSenderName
@@ -238,5 +240,17 @@ func (s *Server) placementJSON(p *store.PlacementRow) gen.Placement {
 	if out.AlbumIds != nil && *out.AlbumIds == nil {
 		out.AlbumIds = &[]uuid.UUID{}
 	}
+	if p.Placement.Origin != "" {
+		out.Origin = ptr(gen.PlacementOrigin(p.Placement.Origin))
+	}
+	if p.Placement.Origin == "feed" {
+		out.OriginFeedId, out.OriginFeedName = p.OriginFeedID, p.OriginFeedName
+	}
+	feedIDs := p.FeedIDs
+	if feedIDs == nil {
+		feedIDs = []uuid.UUID{}
+	}
+	out.FeedIds = &feedIDs
+	out.Backfill = ptr(p.Backfill)
 	return out
 }

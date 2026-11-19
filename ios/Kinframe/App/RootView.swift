@@ -77,6 +77,8 @@ private struct LaunchView: View {
 struct FrameRoute: Hashable {
     var id: String
     var section: FrameSection = .overview
+    /// Open this album in the photos (a photo source's notification).
+    var albumId: String? = nil
 }
 
 enum FrameSection: String, Hashable, CaseIterable {
@@ -92,6 +94,12 @@ struct MainTabs: View {
             FramesTab()
                 .tabItem { Label(L("nav.frames"), systemImage: "photo.on.rectangle") }
                 .tag(AppModel.Tab.frames)
+            // Only when the server has feeds (discovery `feeds`).
+            if app.feedsEnabled {
+                FeedsTab()
+                    .tabItem { Label(L("ios.feeds.title"), systemImage: "rectangle.stack.badge.person.crop") }
+                    .tag(AppModel.Tab.feeds)
+            }
             ComposeTab()
                 .tabItem { Label(L("nav.send"), systemImage: "paperplane") }
                 .tag(AppModel.Tab.send)
@@ -103,8 +111,15 @@ struct MainTabs: View {
                 .tag(AppModel.Tab.settings)
         }
         .onAppear { app.consumePendingLink() }
+        .onChange(of: app.feedsEnabled) { _, on in
+            if !on, app.tab == .feeds { app.tab = .frames }
+        }
         .sheet(item: $app.activeLink) { link in
             DeepLinkSheet(link: link)
+        }
+        // "Add from Google Photos": waiting for Google, progress and the result (docs/spec/photo-sources.md §7.3).
+        .sheet(isPresented: Binding(get: { app.googleImport.presented }, set: { if !$0 { app.googleImport.close() } })) {
+            GoogleImportSheet(controller: app.googleImport)
         }
         .overlay(alignment: .top) {
             if app.unreachable {
@@ -119,11 +134,12 @@ extension DeepLink: @retroactive Identifiable {
         switch self {
         case .frameCode(_, let code): "f/\(code)"
         case .invite(_, let token): "i/\(token)"
+        case .feedInvite(_, let token): "fi/\(token)"
         }
     }
 }
 
-/// Frame codes and invites from links.
+/// Frame codes, frame invites and feed invites from links.
 private struct DeepLinkSheet: View {
     @Environment(AppModel.self) private var app
     let link: DeepLink
@@ -136,6 +152,8 @@ private struct DeepLinkSheet: View {
                     AddFrameView(api: api, prefill: code)
                 case .invite(_, let token):
                     InviteView(api: api, token: token)
+                case .feedInvite(_, let token):
+                    FeedInviteView(api: api, source: .token(token))
                 }
             }
         }

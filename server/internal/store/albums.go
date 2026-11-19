@@ -19,9 +19,12 @@ type Album struct {
 	Schedule         json.RawMessage `db:"schedule"`
 	CreatedAt        time.Time       `db:"created_at"`
 	PlacementIDs     []uuid.UUID     `db:"placement_ids"`
+	OnlyInAlbumMode  bool            `db:"only_in_album_mode"`
+	PhotoSourceCount int             `db:"photo_source_count"`
 }
 
-const albumSelect = `SELECT a.id, a.frame_id, a.name, a.version, a.cover_placement_id, a.schedule, a.created_at,
+const albumSelect = `SELECT a.id, a.frame_id, a.name, a.version, a.cover_placement_id, a.schedule, a.created_at, a.only_in_album_mode,
+	(SELECT count(*) FROM photo_sources ps WHERE ps.album_id = a.id)::int AS photo_source_count,
 	COALESCE((SELECT array_agg(ap.placement_id ORDER BY ap.position) FROM album_placements ap
 		JOIN placements p ON p.id = ap.placement_id AND p.removed_at IS NULL WHERE ap.album_id = a.id), '{}') AS placement_ids
 	FROM albums a`
@@ -52,6 +55,7 @@ type AlbumWrite struct {
 	PlacementIDs     *[]uuid.UUID
 	CoverPlacementID *uuid.UUID
 	Schedule         *json.RawMessage // JSON null clears
+	OnlyInAlbumMode  *bool
 }
 
 func (tx *Tx) CreateAlbum(ctx context.Context, frameID uuid.UUID, w AlbumWrite) (uuid.UUID, error) {
@@ -60,8 +64,9 @@ func (tx *Tx) CreateAlbum(ctx context.Context, frameID uuid.UUID, w AlbumWrite) 
 	if w.Schedule != nil && string(*w.Schedule) != "null" {
 		sched = *w.Schedule
 	}
-	if _, err := tx.Exec(ctx, `INSERT INTO albums (id, frame_id, name, cover_placement_id, schedule) VALUES ($1, $2, $3, $4, $5)`,
-		id, frameID, *w.Name, w.CoverPlacementID, sched); err != nil {
+	only := w.OnlyInAlbumMode != nil && *w.OnlyInAlbumMode
+	if _, err := tx.Exec(ctx, `INSERT INTO albums (id, frame_id, name, cover_placement_id, schedule, only_in_album_mode) VALUES ($1, $2, $3, $4, $5, $6)`,
+		id, frameID, *w.Name, w.CoverPlacementID, sched, only); err != nil {
 		return uuid.Nil, err
 	}
 	if w.PlacementIDs != nil {
@@ -81,8 +86,9 @@ func (tx *Tx) UpdateAlbum(ctx context.Context, frameID, id uuid.UUID, version in
 	}
 	tag, err := tx.Exec(ctx, `
 		UPDATE albums SET name = COALESCE($4, name), cover_placement_id = COALESCE($5, cover_placement_id),
-			schedule = CASE WHEN $6 THEN $7::jsonb ELSE schedule END, version = version + 1
-		WHERE frame_id = $1 AND id = $2 AND version = $3`, frameID, id, version, w.Name, w.CoverPlacementID, setSched, sched)
+			schedule = CASE WHEN $6 THEN $7::jsonb ELSE schedule END, only_in_album_mode = COALESCE($8, only_in_album_mode),
+			version = version + 1
+		WHERE frame_id = $1 AND id = $2 AND version = $3`, frameID, id, version, w.Name, w.CoverPlacementID, setSched, sched, w.OnlyInAlbumMode)
 	if err != nil || tag.RowsAffected() == 0 {
 		return false, err
 	}
@@ -91,6 +97,12 @@ func (tx *Tx) UpdateAlbum(ctx context.Context, frameID, id uuid.UUID, version in
 			return false, err
 		}
 		if err := tx.setAlbumPlacements(ctx, frameID, id, *w.PlacementIDs); err != nil {
+			return false, err
+		}
+		// Photos taken out of the album are never synced into it again.
+		if err := tx.markRemovedLocally(ctx, `ps.album_id = $1 AND psi.item_id IN (SELECT p.item_id FROM placements p
+			WHERE p.frame_id = $2 AND p.removed_at IS NULL AND NOT EXISTS (SELECT 1 FROM album_placements ap
+			WHERE ap.album_id = $1 AND ap.placement_id = p.id))`, id, frameID); err != nil {
 			return false, err
 		}
 	}
@@ -125,6 +137,9 @@ func (tx *Tx) RemoveFromAlbum(ctx context.Context, frameID, albumID uuid.UUID, i
 	if _, err := tx.Exec(ctx, `DELETE FROM album_placements WHERE album_id = $1 AND placement_id = ANY($2)`, albumID, ids); err != nil {
 		return err
 	}
+	if err := tx.markRemovedLocally(ctx, `ps.album_id = $1 AND psi.item_id IN (SELECT item_id FROM placements WHERE id = ANY($2))`, albumID, ids); err != nil {
+		return err
+	}
 	return tx.bumpAlbum(ctx, frameID, albumID)
 }
 
@@ -141,4 +156,9 @@ func (tx *Tx) DeleteAlbum(ctx context.Context, frameID, id uuid.UUID) (bool, err
 		return false, err
 	}
 	return true, tx.FeedPut(ctx, frameID, FeedAlbum, id, true)
+}
+
+// AlbumByID returns an album whatever its frame.
+func (s *Store) AlbumByID(ctx context.Context, q db.DBTX, id uuid.UUID) (*Album, error) {
+	return one[Album](q.Query(ctx, albumSelect+` WHERE a.id = $1`, id))
 }

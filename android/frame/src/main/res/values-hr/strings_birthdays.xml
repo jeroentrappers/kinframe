@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="birthday_card_age">
+        <item quantity="one">🎈 %1$s danas slavi %2$d. rođendan!</item>
+        <item quantity="few">🎈 %1$s danas slavi %2$d. rođendan!</item>
+        <item quantity="other">🎈 %1$s danas slavi %2$d. rođendan!</item>
+    </plurals>
+    <string name="birthday_card_plain">🎈 %1$s danas ima rođendan!</string>
+    <string name="birthday_card_title_many">🎈 Današnji rođendani</string>
+    <plurals name="birthday_card_more">
+        <item quantity="one">i još %d</item>
+        <item quantity="few">i još %d</item>
+        <item quantity="other">i još %d</item>
+    </plurals>
+    <plurals name="birthday_countdown_turns">
+        <item quantity="one">%1$s – %2$d. rođendan</item>
+        <item quantity="few">%1$s – %2$d. rođendan</item>
+        <item quantity="other">%1$s – %2$d. rođendan</item>
+    </plurals>
+    <string name="birthday_countdown_plain">%1$s ima rođendan</string>
+    <string name="birthday_countdown_two">%1$s i %2$s</string>
+    <plurals name="birthday_countdown_more">
+        <item quantity="one">%1$s i još %2$d</item>
+        <item quantity="few">%1$s i još %2$d</item>
+        <item quantity="other">%1$s i još %2$d</item>
+    </plurals>
+    <string name="birthday_greet_title">Čestitajte rođendan s ovog okvira</string>
+    <string name="birthday_greet_button">Čestitajte: %1$s</string>
+    <string name="birthday_greet_sent">Poslano ✓ — obitelj će vidjeti</string>
+    <string name="birthday_detail_label">Rođendan</string>
+    <plurals name="birthday_detail_turns">
+        <item quantity="one">%d. rođendan</item>
+        <item quantity="few">%d. rođendan</item>
+        <item quantity="other">%d. rođendan</item>
+    </plurals>
+</resources>

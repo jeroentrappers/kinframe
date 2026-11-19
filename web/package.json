@@ -38,6 +38,7 @@
     "libheif-js": "1.23.5",
     "mediabunny": "1.61.3",
     "openapi-fetch": "^0.17.0",
+    "qrcode-generator": "^2.0.4",
     "tus-js-client": "^4.3.1"
   }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">جارٍ التشغيل…</string>
+    <string name="startup_checking_library">جارٍ فحص صورك بعد انقطاع الكهرباء…</string>
+    <string name="startup_checking_update">جارٍ التحقق من إصدار التطبيق…</string>
+    <string name="startup_loading_photos">جارٍ تحميل صورك…</string>
+    <string name="startup_preparing_photo">جارٍ تجهيز الصورة الأولى…</string>
+    <string name="startup_waiting_wifi">في انتظار شبكة Wi-Fi…</string>
+    <string name="startup_setting_clock">جارٍ ضبط الساعة…</string>
+    <string name="startup_connecting">جارٍ الاتصال بالخادم…</string>
+    <string name="power_cut_title">أُطفئ الإطار دون إيقاف تشغيله بشكل صحيح</string>
+    <string name="power_cut_body_ok">تم فحص كل شيء وكل شيء على ما يرام.</string>
+    <string name="power_cut_body_redownload">تم فحص كل شيء. يجري تنزيل بعض الصور مرة أخرى.</string>
+    <string name="power_cut_tip">في المرة القادمة، اختر %1$s ← %2$s من القائمة وانتظر حتى تظهر على الشاشة عبارة «%3$s».</string>
+</resources>

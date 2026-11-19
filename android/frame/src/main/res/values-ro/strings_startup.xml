@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Se pornește…</string>
+    <string name="startup_checking_library">Se verifică fotografiile după o pană de curent…</string>
+    <string name="startup_checking_update">Se verifică versiunea aplicației…</string>
+    <string name="startup_loading_photos">Se încarcă fotografiile…</string>
+    <string name="startup_preparing_photo">Se pregătește prima fotografie…</string>
+    <string name="startup_waiting_wifi">Se așteaptă Wi-Fi…</string>
+    <string name="startup_setting_clock">Se potrivește ceasul…</string>
+    <string name="startup_connecting">Se conectează la server…</string>
+    <string name="power_cut_title">Rama a fost oprită fără închidere</string>
+    <string name="power_cut_body_ok">Totul a fost verificat și este în regulă.</string>
+    <string name="power_cut_body_redownload">Totul a fost verificat. Unele fotografii se descarcă din nou.</string>
+    <string name="power_cut_tip">Data viitoare, alegeți %1$s → %2$s din meniu și așteptați până când pe ecran apare „%3$s”.</string>
+</resources>

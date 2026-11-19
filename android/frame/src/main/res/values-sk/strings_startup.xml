@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startup_starting">Spúšťa sa…</string>
+    <string name="startup_checking_library">Kontrolujú sa fotky po výpadku prúdu…</string>
+    <string name="startup_checking_update">Kontroluje sa verzia aplikácie…</string>
+    <string name="startup_loading_photos">Načítavajú sa fotky…</string>
+    <string name="startup_preparing_photo">Pripravuje sa prvá fotka…</string>
+    <string name="startup_waiting_wifi">Čaká sa na Wi-Fi…</string>
+    <string name="startup_setting_clock">Nastavujú sa hodiny…</string>
+    <string name="startup_connecting">Pripája sa k serveru…</string>
+    <string name="power_cut_title">Rámik sa vypol bez riadneho vypnutia</string>
+    <string name="power_cut_body_ok">Všetko je skontrolované a v poriadku.</string>
+    <string name="power_cut_body_redownload">Všetko je skontrolované. Niektoré fotky sa sťahujú znova.</string>
+    <string name="power_cut_tip">Nabudúce v ponuke vyberte %1$s → %2$s a počkajte, kým sa na obrazovke zobrazí „%3$s“.</string>
+</resources>

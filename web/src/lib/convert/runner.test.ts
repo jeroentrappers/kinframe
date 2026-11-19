@@ -7,13 +7,33 @@ import {
 	FRAME_PACKAGE,
 	FRAMEO_PACKAGE,
 	RESOURCE_BACKUP,
+	ROOT_CERT,
+	ROOT_CERT_FILE,
+	HOSTS,
+	STATE_FILE,
+	addHostsBlock,
 	WORK_DIR,
 	planConvert,
 	planRevert,
+	type BootManifest,
 	type StepId
 } from './plan';
-import { bootAssetsProblem, identifyFrame, isReadOnly, runPlan, type FrameShell, type RunHooks, type StepStatus } from './runner';
+import { bootAssetsProblem, identifyFrame, isReadOnly, runPlan, type BootSource, type FrameShell, type RemoteEntry, type RunHooks, type StepStatus } from './runner';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { brandResource, buildResource } from './rsce';
+
+/** Frameo data as copied to the work directory: a Firebase file whose name alone is ~90 bytes, and the lib symlink. */
+const LONG_NAME = 'PersistedInstallation.W0RFRkFVTFRd+MTo2NDA1NzkyMzE0Nzk6YW5kcm9pZDo4MjcxNWY0NjY3M2U0M2Nj.json';
+const DATA_TREE: Record<string, Uint8Array | 'link'> = {
+	'databases/frameo.db': new TextEncoder().encode('SQLite format 3'),
+	'shared_prefs/prefs.xml': new TextEncoder().encode('<map/>'),
+	[`files/${LONG_NAME}`]: new TextEncoder().encode('{"fid":"x"}'),
+	'files/media/photo-1.jpg': Uint8Array.from({ length: 3000 }, (_, i) => i & 0xff),
+	lib: 'link'
+};
 
 const GETPROP = ['[ro.product.brand]: [denver]', '[ro.product.device]: [PFF_1024]', '[ro.product.model]: [Frame]', '[ro.build.version.sdk]: [23]', '[ro.product.cpu.abilist]: [armeabi-v7a,armeabi]'].join('\r\n');
 
@@ -37,8 +57,19 @@ class FakeFrame implements FrameShell {
 		const info = /^dumpsys package (\S+)/.exec(cmd)?.[1];
 		if (info) return `  Package [${info}]\r\n    versionCode=1\r\n    versionName=1.0\r\n    User 0:  installed=true enabled=${this.enabled[info] ? 0 : 3}\r\n`;
 		if (cmd.startsWith('pm install')) return 'Success\r\n';
-		if (cmd.includes('disable-user')) return `Package ${cmd.split(' ').pop()} new state: disabled-user\r\n`;
-		if (cmd.includes('pm enable')) return `Package ${cmd.split(' ').pop()} new state: enabled\r\n`;
+		if (cmd.startsWith('pm clear ')) return 'Success\r\n';
+		if (cmd.includes('disable-user')) {
+			const p = cmd.split(' ').pop()!;
+			this.enabled[p] = false;
+			return `Package ${p} new state: disabled-user\r\n`;
+		}
+		if (cmd.includes('pm enable')) {
+			const p = cmd.split(' ').pop()!;
+			this.enabled[p] = true;
+			return `Package ${p} new state: enabled\r\n`;
+		}
+		if (cmd === 'pm list packages') return Object.keys(this.enabled).map((p) => `package:${p}\r\n`).join('');
+		if (cmd === 'pm list packages -d') return Object.entries(this.enabled).filter(([, on]) => !on).map(([p]) => `package:${p}\r\n`).join('');
 		if (cmd.includes('pm uninstall')) return 'Success\r\n';
 		if (cmd === 'dumpsys activity activities') return `  mFocusedActivity: ActivityRecord{1 u0 ${FRAME_PACKAGE}/.MainActivity t3}\r\n`;
 		return '';
@@ -46,13 +77,31 @@ class FakeFrame implements FrameShell {
 	async push(remote: string) {
 		this.pushed.push(remote);
 	}
+	/** The copy of the app data in the work directory, as the frame would list it: files, and symlinks as 'link'. */
+	tree = new Map<string, Uint8Array | 'link'>(Object.entries(DATA_TREE).map(([k, v]) => [`${WORK_DIR}/${FRAMEO_PACKAGE}/${k}`, v]));
 	async pull(remote: string) {
 		this.calls.push(`pull ${remote}`);
-		return new Uint8Array([1, 2, 3]);
+		const f = this.tree.get(remote);
+		return f instanceof Uint8Array ? f : new Uint8Array([1, 2, 3]);
+	}
+	async list(remote: string): Promise<RemoteEntry[]> {
+		this.calls.push(`list ${remote}`);
+		const out = new Map<string, RemoteEntry>([['.', { name: '.', mode: 0o40771, size: 0, mtime: 1 }]]);
+		for (const [path, v] of this.tree) {
+			if (!path.startsWith(`${remote}/`)) continue;
+			const [name, ...rest] = path.slice(remote.length + 1).split('/');
+			if (rest.length) out.set(name!, { name: name!, mode: 0o40771, size: 4096, mtime: 1700000000 });
+			else out.set(name!, v === 'link' ? { name: name!, mode: 0o120777, size: 20, mtime: 1 } : { name: name!, mode: 0o100660, size: v.length, mtime: 1700000000 });
+		}
+		if (out.size === 1) throw new Error(`no such directory ${remote}`);
+		return [...out.values()];
 	}
 	async reboot() {
 		this.reboots++;
+		this.onReboot?.(this.enabled);
 	}
+	/** What a restart does to the package states (a lost write: a package enabled again). */
+	onReboot?: (enabled: Record<string, boolean>) => void;
 }
 
 function hooks(frame: FakeFrame, over: Partial<RunHooks> = {}) {
@@ -95,7 +144,9 @@ describe('runPlan', () => {
 		expect(files).toEqual([`${FRAMEO_PACKAGE}-base.apk`, `${FRAMEO_PACKAGE}-data.tgz`]);
 		expect(frame.pushed).toEqual([`${WORK_DIR}/kinframe.apk`]);
 		expect(frame.reboots).toBe(1);
-		expect(Object.values(statuses).every((s) => s === 'done')).toBe(true);
+		// The fake frame has no /system device, so the hosts file is left alone with a warning.
+		expect(statuses.hosts).toBe('warn');
+		expect(Object.entries(statuses).every(([id, s]) => id === 'hosts' || s === 'done')).toBe(true);
 		const install = frame.calls.findIndex((c) => c.startsWith('pm install'));
 		expect(install).toBeGreaterThan(-1);
 		expect(frame.calls.findIndex((c) => c.includes('disable-user'))).toBeGreaterThan(install);
@@ -193,6 +244,196 @@ describe('runPlan', () => {
 	});
 });
 
+describe('backing up the app data', () => {
+	const pkg = FRAMEO_PACKAGE;
+	const d = `${WORK_DIR}/${pkg}`;
+
+	it('copies the data on the frame, pulls it as a tree and archives it here, with long names', async () => {
+		const frame = new FakeFrame((c) => (c === `su 0 ls -lnRa /data/data/${pkg}` ? `/data/data/${pkg}:\r\ndrwxr-x--x 6 10052 10052 4096 databases\r\n` : undefined), { [pkg]: true });
+		const id = await identifyFrame(frame, { log: () => {} });
+		frame.calls = [];
+		const saved: Record<string, Uint8Array> = {};
+		const { h, statuses, files } = hooks(frame);
+		h.file = (name, data) => ((saved[name] = data), files.push(name));
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: true }), h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(statuses.backup).toBe('done');
+		expect(files).toEqual([`${pkg}-base.apk`, `${pkg}-data-files.txt`, `${pkg}-data.tgz`]);
+		expect(new TextDecoder().decode(saved[`${pkg}-data-files.txt`])).toContain('10052 10052');
+		// No tar on the frame; the copy is removed after the pull.
+		expect(frame.calls.filter((c) => c.startsWith('su 0'))).toEqual([
+			`su 0 ls -lnRa /data/data/${pkg}`,
+			`su 0 cp -a /data/data/${pkg} ${d}`,
+			`su 0 rm -rf ${d}/cache ${d}/code_cache ${d}/app_webview ${d}/lib ${d}/files/.crashlytics.v3`,
+			`su 0 chmod -R a+rX ${d}`,
+			`su 0 rm -rf ${d}`,
+			...frame.calls.filter((c) => c.startsWith('su 0') && frame.calls.indexOf(c) > frame.calls.indexOf(`su 0 rm -rf ${d}`))
+		]);
+		expect(frame.calls.indexOf(`su 0 rm -rf ${d}`)).toBeGreaterThan(frame.calls.lastIndexOf(`pull ${d}/files/media/photo-1.jpg`));
+		// The archive extracts with the system tar, long name and all; the symlink is left out.
+		const dir = mkdtempSync(join(tmpdir(), 'kinframe-data-'));
+		try {
+			writeFileSync(join(dir, 'data.tgz'), saved[`${pkg}-data.tgz`]!);
+			execFileSync('tar', ['-xzf', 'data.tgz'], { cwd: dir });
+			for (const [path, v] of Object.entries(DATA_TREE)) {
+				if (v === 'link') continue;
+				expect(new Uint8Array(readFileSync(join(dir, pkg, path))), path).toEqual(v);
+			}
+			const names = execFileSync('tar', ['-tzf', 'data.tgz'], { cwd: dir, encoding: 'utf8' }).split('\n');
+			expect(names).toContain(`${pkg}/files/${LONG_NAME}`);
+			expect(`${pkg}/files/${LONG_NAME}`.length).toBeGreaterThan(100);
+			expect(names.some((n) => n.endsWith('/lib'))).toBe(false);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	it('a data backup that fails is a warning, the copy is removed and the convert goes on', async () => {
+		const frame = new FakeFrame(() => undefined, { [pkg]: true });
+		frame.tree.clear(); // the copy failed: nothing to pull
+		const id = await identifyFrame(frame, { log: () => {} });
+		const details: Partial<Record<StepId, string>> = {};
+		const { h, statuses, files } = hooks(frame);
+		h.step = (sid, st, detail) => ((statuses[sid] = st), detail && (details[sid] = detail));
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: true }), h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(statuses.backup).toBe('warn');
+		expect(details.backup).toMatch(/could not back up the data of net.frameo.frame .*stays on the frame/);
+		expect(files).toEqual([`${pkg}-base.apk`]);
+		expect(statuses.disable).toBe('done');
+		expect(frame.calls).toContain(`su 0 rm -rf ${d}`);
+	});
+
+	it('files cp could not copy are a warning, the rest is kept', async () => {
+		const frame = new FakeFrame((c) => (c.startsWith('su 0 cp -a') ? "cp: /data/data/net.frameo.frame/x: Permission denied\r\n" : undefined), { [pkg]: true });
+		const id = await identifyFrame(frame, { log: () => {} });
+		const { h, statuses, files } = hooks(frame);
+		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: true }), h, { continueOnError: false });
+		expect(statuses.backup).toBe('warn');
+		expect(files).toContain(`${pkg}-data.tgz`);
+	});
+});
+
+describe('firmware updater leftovers', () => {
+	const EXT = '/storage/1234-ABCD/Android/data/com.adups.fota/files/adupsfota';
+
+	it('identifies a pending update, and clears the download folder (as root when needed) and the recovery command', async () => {
+		const present = new Set([EXT, 'command']);
+		const frame = new FakeFrame(
+			(c) => {
+				if (c === COMMANDS.listAdupsExternal) return `${EXT}\r\nls: /storage/emulated/0/adupsfota: No such file or directory\r\n`;
+				if (c === COMMANDS.readAdupsPrefs) return '<map><int name="ota_update_status" value="4" /></map>';
+				if (c === COMMANDS.listRecovery) return present.has('command') ? 'command\r\nlast_log\r\n' : 'last_log\r\n';
+				if (c === COMMANDS.readRecoveryCommand) return '--update_package=/cache/update.zip\r\n';
+				if (c === `ls -d ${EXT}`) return present.has(EXT) ? `${EXT}\r\n` : `ls: ${EXT}: No such file or directory\r\n`;
+				if (c === `rm -rf ${EXT}`) return `rm: ${EXT}: Permission denied\r\n`; // the shell user may not
+				if (c === `su 0 rm -rf ${EXT}`) return (present.delete(EXT), '');
+				if (c === COMMANDS.removeRecoveryCommand) return (present.delete('command'), '');
+				return undefined;
+			},
+			{ [FRAMEO_PACKAGE]: true, 'com.adups.fota': true, 'com.adups.fota.sysoper': true, 'android.rockchip.update.service': true }
+		);
+		const lines: string[] = [];
+		const id = await identifyFrame(frame, { log: (l) => lines.push(l) });
+		expect(id.facts.updater).toMatchObject({ status: 4, downloads: [EXT], recovery: ['command', 'last_log'] });
+		expect(lines.join('\n')).toMatch(/WARNING: the firmware updater has a pending or downloaded update/);
+		expect(frame.calls.every(isReadOnly)).toBe(true);
+		frame.calls = [];
+		const { h, statuses } = hooks(frame);
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(statuses.disable).toBe('done');
+		expect(present.size).toBe(0);
+		const order = ['am force-stop com.adups.fota', 'pm clear com.adups.fota', `su 0 rm -rf ${EXT}`, COMMANDS.removeRecoveryCommand, 'su 0 pm disable-user com.adups.fota'];
+		const at = order.map((c) => frame.calls.indexOf(c));
+		expect(at.every((i, k) => i > -1 && (k === 0 || i > at[k - 1]!))).toBe(true);
+		expect(frame.calls).toContain('su 0 pm disable-user android.rockchip.update.service');
+	});
+});
+
+describe('extra packages', () => {
+	const pkgs = { [FRAMEO_PACKAGE]: true, 'com.adups.fota': true, 'com.adups.fota.sysoper': true, 'com.android.music': true, 'com.android.browser': true, 'com.android.systemui': false };
+
+	it('converting disables and records them; reverting enables exactly those', async () => {
+		const frame = new FakeFrame(() => undefined, { ...pkgs });
+		const id = await identifyFrame(frame, { log: () => {} });
+		expect(id.facts.extrasState).toBeNull();
+		const saved: Record<string, Uint8Array> = {};
+		const { h, statuses } = hooks(frame);
+		h.file = (name, data) => (saved[name] = data);
+		const pushed: Record<string, Uint8Array> = {};
+		frame.push = async (remote: string, data?: Uint8Array) => {
+			frame.pushed.push(remote);
+			if (data) pushed[remote] = data;
+		};
+		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
+		expect(statuses.extras).toBe('done');
+		const record = new TextDecoder().decode(pushed[STATE_FILE]);
+		expect(record.split('\n').filter((l) => l && !l.startsWith('#'))).toEqual(['com.android.browser', 'com.android.music']);
+		expect(new TextDecoder().decode(saved['kinframe-state.txt'])).toBe(record);
+		expect(frame.calls).not.toContain('su 0 pm disable-user com.android.systemui');
+
+		// Revert with that record: only those two come back, System UI stays as the vendor left it.
+		const after = new FakeFrame((c) => (c === `cat ${STATE_FILE}` ? record.replace(/\n/g, '\r\n') : undefined), {
+			...pkgs,
+			'com.android.music': false,
+			'com.android.browser': false,
+			'com.android.calculator2': false
+		});
+		const rid = await identifyFrame(after, { log: () => {} });
+		await runPlan(after, planRevert(rid, { keepData: false, restoreFrameo: false }), hooks(after).h, { continueOnError: true });
+		expect(after.calls).toContain('su 0 pm enable com.android.music');
+		expect(after.calls).toContain('su 0 pm enable com.android.browser');
+		expect(after.calls).not.toContain('su 0 pm enable com.android.calculator2'); // disabled, but not by us
+		expect(after.calls.some((c) => c.includes('enable com.android.systemui'))).toBe(false);
+		expect(after.calls).toContain(`rm -f ${STATE_FILE}`);
+	});
+
+	it('a package that does not stay off is a warning, not a failure', async () => {
+		const frame = new FakeFrame((c) => (c === 'su 0 pm disable-user com.android.music' ? 'Package com.android.music new state: disabled-user\r\n' : undefined), { ...pkgs });
+		const id = await identifyFrame(frame, { log: () => {} });
+		const { h, statuses } = hooks(frame);
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(statuses.extras).toBe('warn');
+		expect(statuses.reboot).toBe('warn');
+	});
+});
+
+describe('keeping the packages disabled', () => {
+	const all = { [FRAMEO_PACKAGE]: true, 'com.adups.fota': true, 'com.adups.fota.sysoper': true };
+
+	it('waits before the restart, and turns a package that came back off again (warning)', async () => {
+		const frame = new FakeFrame(() => undefined, { ...all });
+		frame.onReboot = (en) => (en['com.adups.fota.sysoper'] = true); // the last write was lost
+		const id = await identifyFrame(frame, { log: () => {} });
+		frame.calls = [];
+		const details: Partial<Record<StepId, string>> = {};
+		const { h, statuses } = hooks(frame);
+		h.step = (sid, st, detail) => ((statuses[sid] = st), detail && (details[sid] = detail));
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(statuses.reboot).toBe('warn');
+		expect(details.reboot).toMatch(/com.adups.fota.sysoper came back after the restart; turned off again/);
+		// Disabled, checked, waited for before the restart; after it, disabled again and waited for again.
+		const disables = frame.calls.flatMap((c, i) => (c === 'su 0 pm disable-user com.adups.fota.sysoper' ? [i] : []));
+		const sleeps = frame.calls.flatMap((c, i) => (c === 'sleep 15' ? [i] : []));
+		expect(disables).toHaveLength(2);
+		expect(disables[0]! < sleeps[0]! && sleeps[0]! < disables[1]! && disables[1]! < sleeps[1]!).toBe(true);
+		expect(frame.calls.filter((c) => c === 'sleep 15')).toHaveLength(2);
+		expect(statuses.provision).toBe('done');
+	});
+
+	it('fails when a package does not stay disabled at all', async () => {
+		const frame = new FakeFrame((c) => (c === 'su 0 pm disable-user com.adups.fota.sysoper' ? 'Package com.adups.fota.sysoper new state: disabled-user\r\n' : undefined), { ...all });
+		const id = await identifyFrame(frame, { log: () => {} });
+		const { h, statuses } = hooks(frame);
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
+		expect(r.failed).toEqual(['disable']);
+		expect(statuses.reboot).toBe('skipped');
+	});
+});
+
 // ---------------------------------------------------------------- start-up branding
 
 const RESOURCE = '/dev/block/platform/1021c000.rksdmmc/by-name/resource';
@@ -224,21 +465,31 @@ const STOCK_ANIM = new Uint8Array([0x50, 0x4b, 3, 4, 1, 1, 1]);
 const sha1 = (b: Uint8Array) => createHash('sha1').update(b).digest('hex');
 
 /** A frame with a resource partition, /system and a work directory, as files. */
+const HOSTS_STOCK = '127.0.0.1       localhost\n::1             ip6-localhost\n';
+
 class BootFrame extends FakeFrame {
 	partition: Uint8Array = STOCK.slice();
-	files = new Map<string, Uint8Array>([['/system/media/bootanimation.zip', STOCK_ANIM]]);
+	files = new Map<string, Uint8Array>([
+		['/system/media/bootanimation.zip', STOCK_ANIM],
+		[HOSTS, new TextEncoder().encode(HOSTS_STOCK)]
+	]);
 	systemRw = false;
 	writes = 0;
 	/** Corrupts the n-th partition write (1-based), 0 for never; or every write. */
 	corrupt = 0;
 	corruptAll = false;
-	constructor() {
+	constructor(certPresent = true) {
 		super(() => undefined, { [FRAMEO_PACKAGE]: true });
+		if (certPresent) this.files.set(ROOT_CERT, new Uint8Array([1]));
 	}
 	override async shell(cmd: string) {
 		this.calls.push(cmd);
 		if (cmd === COMMANDS.findResource) return `${RESOURCE}\r\n`;
 		if (cmd === 'mount') return `${SYSTEM} /system ext4 ro,seclabel 0 0\r\n`;
+		if (cmd === COMMANDS.screenSize) return 'Physical size: 1280x800\r\n';
+		if (cmd === COMMANDS.checkRootCert) return this.files.has(ROOT_CERT) ? `${ROOT_CERT}\r\n` : `${ROOT_CERT}: No such file or directory\r\n`;
+		if (cmd === COMMANDS.sha1Hosts) return `${sha1(this.files.get(HOSTS)!)}  ${HOSTS}\r\n`;
+		if (cmd === COMMANDS.sha1RootCert) return this.files.has(ROOT_CERT) ? `${sha1(this.files.get(ROOT_CERT)!)}  ${ROOT_CERT}\r\n` : 'No such file\r\n';
 		let m = /^su 0 dd if=(\S+) of=(\S+) bs=1048576$/.exec(cmd);
 		if (m) {
 			if (m[1] === RESOURCE) this.files.set(m[2]!, this.partition.slice());
@@ -274,8 +525,28 @@ class BootFrame extends FakeFrame {
 	}
 }
 
+/** A brand offering one logo (800×1280, rotation 0 like the fake frame) and one 1280×800 animation, plus others. */
+function source(logo = LOGO, anim = ANIM, over: Partial<BootManifest> = {}): BootSource {
+	const sha = (b: Uint8Array) => createHash('sha256').update(b).digest('hex');
+	const files: Record<string, Uint8Array> = { 'logo-a.bmp': logo, 'anim-a.zip': anim, 'logo-b.bmp': bmp(10), 'anim-b.zip': ANIM };
+	return {
+		manifest: {
+			logos: [
+				{ file: 'logo-b.bmp', width: 800, height: 1280, bpp: 8, compression: 1, hwrotation: 270, sha256: sha(files['logo-b.bmp']!) },
+				{ file: 'logo-a.bmp', width: 800, height: 1280, bpp: 8, compression: 1, hwrotation: 0, sha256: sha(logo) }
+			],
+			bootanimations: [
+				{ file: 'anim-b.zip', screen: '1920x1080', sha256: sha(ANIM) },
+				{ file: 'anim-a.zip', screen: '1280x800', sha256: sha(anim) }
+			],
+			...over
+		},
+		get: async (f) => files[f]!
+	};
+}
+
 describe('start-up branding', () => {
-	const fetchBoot = async () => ({ logo: LOGO, bootanimation: ANIM });
+	const fetchBoot = async () => source();
 
 	it('backs up, writes and verifies the boot logo and animation', async () => {
 		const frame = new BootFrame();
@@ -286,7 +557,7 @@ describe('start-up branding', () => {
 		h.file = (name, data) => ((saved[name] = data), files.push(name));
 		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
 		expect(r).toEqual({ ok: true, failed: [] });
-		expect(files).toEqual([BOOT_ANIMATION_BACKUP, RESOURCE_BACKUP]);
+		expect(files).toEqual([BOOT_ANIMATION_BACKUP, RESOURCE_BACKUP, 'hosts']);
 		expect(saved[RESOURCE_BACKUP]).toEqual(STOCK);
 		expect(saved[BOOT_ANIMATION_BACKUP]).toEqual(STOCK_ANIM);
 		expect(frame.partition).toEqual(brandResource(STOCK, LOGO));
@@ -324,12 +595,47 @@ describe('start-up branding', () => {
 		expect(details.join(' ')).toMatch(/Do not restart the frame/);
 	});
 
+	it('picks the logo for the frame logo format and the animation for its screen', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		const lines: string[] = [];
+		const { h } = hooks(frame, { fetchBoot, log: (l) => lines.push(l) });
+		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(lines.some((l) => /logo is 800×1280, 8 bits, compression 1, panel rotation 0: using logo-a.bmp/.test(l))).toBe(true);
+		expect(lines).toContain('screen 1280x800: using anim-a.zip');
+	});
+
+	it('refuses when the brand has no logo for the frame, without writing anything', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		const details: string[] = [];
+		const { h, statuses } = hooks(frame, { fetchBoot: async () => source(LOGO, ANIM, { logos: [] }), step: (s, st, d) => ((statuses[s] = st), d && details.push(d)) });
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(r.failed).toEqual(['download']);
+		expect(details.join(' ')).toMatch(/no kinframe boot logo for this frame \(its logo is 800×1280, 8 bits, compression 1, panel rotation 0\)/);
+		expect(statuses.bootLogo).toBe('skipped');
+		expect(frame.calls.some((c) => c.includes(`of=${RESOURCE}`))).toBe(false);
+		expect(frame.partition).toEqual(STOCK);
+	});
+
+	it('refuses when the brand has no animation for the screen, or a file does not match its sha256', async () => {
+		for (const src of [source(LOGO, ANIM, { bootanimations: [] }), { ...source(), get: async () => bmp(5) }]) {
+			const frame = new BootFrame();
+			const id = await identifyFrame(frame, { log: () => {} });
+			const { h } = hooks(frame, { fetchBoot: async () => src });
+			const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+			expect(r.failed).toEqual(['download']);
+			expect(frame.partition).toEqual(STOCK);
+		}
+	});
+
 	it('refuses a logo the frame cannot show, without writing anything', async () => {
 		const frame = new BootFrame();
 		const id = await identifyFrame(frame, { log: () => {} });
 		const wrong = bmp(100);
 		new DataView(wrong.buffer).setInt32(18, 1280, true);
-		const { h, statuses } = hooks(frame, { fetchBoot: async () => ({ logo: wrong, bootanimation: ANIM }) });
+		// A manifest that claims the wrong file fits: brandResource() still compares the real formats.
+		const { h, statuses } = hooks(frame, { fetchBoot: async () => source(wrong) });
 		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
 		expect(r.failed).toEqual(['bootLogo']);
 		expect(statuses.bootAnimation).toBe('skipped');
@@ -380,6 +686,63 @@ describe('start-up branding', () => {
 		expect(r.ok).toBe(true);
 		expect(frame.calls).toEqual([]);
 		expect(statuses.bootLogo).toBe('dry');
+	});
+
+	it("adds the Let's Encrypt root where it is missing, and a failure there is only a warning", async () => {
+		const CERT = new TextEncoder().encode('-----BEGIN CERTIFICATE-----\n');
+		const { ROOT_CERT_SHA256 } = await import('./plan');
+		// The pinned sha256 is the real file's: a fake certificate is refused, the step warns and the convert goes on.
+		const frame = new BootFrame(false);
+		const id = await identifyFrame(frame, { log: () => {} });
+		expect(id.facts.rootCert).toBe('missing');
+		const plan = planConvert(id, { server: DEFAULT_SERVER, backup: false });
+		expect(plan.map((s) => s.id)).toContain('rootCert');
+		const bad = hooks(frame, { fetchRootCert: async () => CERT });
+		const r = await runPlan(frame, plan, bad.h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(bad.statuses.download).toBe('warn');
+		expect(bad.statuses.rootCert).toBe('warn');
+		expect(bad.statuses.install).toBe('done');
+		expect(frame.files.has(ROOT_CERT)).toBe(false);
+		expect(frame.systemRw).toBe(false);
+
+		// The real file: copied, checked, /system read-only again.
+		const { readFileSync } = await import('node:fs');
+		const real = new Uint8Array(readFileSync(new URL(`../../../static/frame-certs/${ROOT_CERT_FILE}`, import.meta.url)));
+		expect(createHash('sha256').update(real).digest('hex')).toBe(ROOT_CERT_SHA256);
+		const good = new BootFrame(false);
+		const gid = await identifyFrame(good, { log: () => {} });
+		const ok = hooks(good, { fetchRootCert: async () => real });
+		expect((await runPlan(good, planConvert(gid, { server: DEFAULT_SERVER, backup: false }), ok.h, { continueOnError: false })).ok).toBe(true);
+		expect(ok.statuses.rootCert).toBe('done');
+		expect(good.files.get(ROOT_CERT)).toEqual(real);
+		expect(good.systemRw).toBe(false);
+		expect(good.calls).toContain(`su 0 chown 0:0 ${ROOT_CERT}`);
+	});
+
+	it('blocks the update servers in the hosts file once, and the revert removes only that block', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		const saved: Record<string, Uint8Array> = {};
+		const { h, statuses } = hooks(frame);
+		h.file = (name, data) => (saved[name] = data);
+		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
+		expect(statuses.hosts).toBe('done');
+		const text = new TextDecoder().decode(frame.files.get(HOSTS));
+		expect(text).toBe(addHostsBlock(HOSTS_STOCK));
+		expect(new TextDecoder().decode(saved.hosts)).toBe(HOSTS_STOCK);
+		expect(frame.systemRw).toBe(false);
+		expect(frame.calls).toContain('su 0 chown 0:0 /system/etc/hosts');
+		// A second convert finds the block and writes nothing.
+		frame.calls = [];
+		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), hooks(frame).h, { continueOnError: false });
+		expect(frame.calls.some((c) => c.includes('remount,rw'))).toBe(false);
+		// The revert removes exactly the block, also after the user added a line.
+		frame.files.set(HOSTS, new TextEncoder().encode(`${text}10.0.0.1 nas\n`));
+		const r = hooks(frame);
+		await runPlan(frame, planRevert(id, { keepData: false, restoreFrameo: false }), r.h, { continueOnError: true });
+		expect(r.statuses.hosts).toBe('done');
+		expect(new TextDecoder().decode(frame.files.get(HOSTS))).toBe(`${HOSTS_STOCK}10.0.0.1 nas\n`);
 	});
 
 	it('only accepts a BMP logo and a zip animation', () => {
