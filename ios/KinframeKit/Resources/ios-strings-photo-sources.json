@@ -88,8 +88,8 @@
     "nl": "Er ging iets mis. Probeer het opnieuw."
   },
   "ios.gi.err.target_gone": {
-    "en": "The album or feed was deleted meanwhile.",
-    "nl": "Het album of de feed is ondertussen verwijderd."
+    "en": "The album or family was deleted meanwhile.",
+    "nl": "Het album of de familie is ondertussen verwijderd."
   },
   "ios.gi.expired": {
     "en": "Google’s picker closed before anything was picked.",
@@ -232,12 +232,12 @@
     "nl": "Houd dit album gelijk met een album in Immich of iCloud: nieuwe foto’s verschijnen vanzelf op het kader."
   },
   "ios.ps.emptyFeed": {
-    "en": "Post the photos of an Immich or iCloud album to this feed automatically.",
-    "nl": "Post de foto’s van een Immich- of iCloud-album automatisch in deze feed."
+    "en": "Post the photos of an Immich or iCloud album to this family automatically.",
+    "nl": "Post de foto’s van een Immich- of iCloud-album automatisch in deze familie."
   },
   "ios.ps.emptyMine": {
-    "en": "You haven’t connected any albums yet. Open an album or a feed to sync it from Immich or iCloud.",
-    "nl": "Je hebt nog geen albums gekoppeld. Open een album of een feed om het vanuit Immich of iCloud te synchroniseren."
+    "en": "You haven’t connected any albums yet. Open an album or a family to sync it from Immich or iCloud.",
+    "nl": "Je hebt nog geen albums gekoppeld. Open een album of een familie om het vanuit Immich of iCloud te synchroniseren."
   },
   "ios.ps.err.album_not_found": {
     "en": "The album no longer exists in Immich.",
@@ -304,8 +304,8 @@
     "nl": "{name} kan dit album niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren."
   },
   "ios.ps.err.owner_lost_access.feed": {
-    "en": "{name} can no longer manage this feed, so syncing stopped. Take it over or stop syncing.",
-    "nl": "{name} kan deze feed niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren."
+    "en": "{name} can no longer manage this family, so syncing stopped. Take it over or stop syncing.",
+    "nl": "{name} kan deze familie niet meer beheren, dus het synchroniseren is gestopt. Neem het over of stop met synchroniseren."
   },
   "ios.ps.err.password_required": {
     "en": "The link now needs a password.",
@@ -480,8 +480,8 @@
     "nl": "Op het kader houden"
   },
   "ios.ps.keepFeed": {
-    "en": "Keep it in the feed",
-    "nl": "In de feed houden"
+    "en": "Keep it in the family",
+    "nl": "In de familie houden"
   },
   "ios.ps.limit": {
     "en": "This has the maximum of {count} photo sources.",
@@ -532,8 +532,8 @@
     "nl": "Ook hier verwijderen"
   },
   "ios.ps.mirrorFeed": {
-    "en": "Remove it from the feed too",
-    "nl": "Ook uit de feed verwijderen"
+    "en": "Remove it from the family too",
+    "nl": "Ook uit de familie verwijderen"
   },
   "ios.ps.name": {
     "en": "Name",
@@ -720,8 +720,8 @@
     "nl": "Gehouden foto’s blijven op het kader als je eigen foto’s."
   },
   "ios.ps.stopBodyFeed": {
-    "en": "Kept photos stay in the feed as your own posts.",
-    "nl": "Gehouden foto’s blijven in de feed als je eigen berichten."
+    "en": "Kept photos stay in the family as your own posts.",
+    "nl": "Gehouden foto’s blijven in de familie als je eigen berichten."
   },
   "ios.ps.stopKeep.one": {
     "en": "Stop and keep the photo",
@@ -792,8 +792,8 @@
     "nl": "{album} · {frame}"
   },
   "ios.ps.target.feed": {
-    "en": "Feed {feed}",
-    "nl": "Feed {feed}"
+    "en": "Family {family}",
+    "nl": "Familie {familie}"
   },
   "ios.ps.test": {
     "en": "Test connection",

@@ -212,8 +212,8 @@
     "nl": "Wachtende mail"
   },
   "ios.em.introFeed": {
-    "en": "Give {name} an email address: photos mailed to it are posted to the feed and reach every frame that follows it.",
-    "nl": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de feed en op elk kader dat de feed volgt."
+    "en": "Give {name} an email address: photos mailed to it are posted to the family and reach every frame that follows it.",
+    "nl": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de familie en op elk kader dat de familie volgt."
   },
   "ios.em.introFrame": {
     "en": "Give {name} an email address: photos mailed to it appear on the frame. Handy for relatives without the app.",
@@ -616,8 +616,8 @@
     "nl": "Overnemen"
   },
   "ios.em.titleFeed": {
-    "en": "Email photos to this feed",
-    "nl": "Foto’s mailen naar deze feed"
+    "en": "Email photos to this family",
+    "nl": "Foto’s mailen naar deze familie"
   },
   "ios.em.titleFrame": {
     "en": "Email photos to this frame",

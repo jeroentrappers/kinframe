@@ -16,8 +16,8 @@
     "nl": "Je hebt de bot in Telegram geblokkeerd, dus kan hij je geen berichten sturen."
   },
   "ios.tg.codeErr.already_connected": {
-    "en": "That group already sends to a frame or feed. Disconnect it there first, or pick another group.",
-    "nl": "Die groep stuurt al naar een kader of feed. Verbreek die verbinding eerst, of kies een andere groep."
+    "en": "That group already sends to a frame or family. Disconnect it there first, or pick another group.",
+    "nl": "Die groep stuurt al naar een kader of familie. Verbreek die verbinding eerst, of kies een andere groep."
   },
   "ios.tg.codeErr.already_linked": {
     "en": "This Telegram account is already linked to another kinframe account. Unlink it there first.",
