@@ -113,7 +113,7 @@ final class HistoryModel {
              .feedJoinRequest, .feedMembershipUpdated, .birthdaySuggested, .birthdayDecided, .birthdayUpdated, .birthdayRemoved,
              .birthdayToday, .birthdayGreeting, .photoSourceUpdated, .photoSourceRemoved, .googleImportUpdated,
              .emailAddressUpdated, .emailAddressRemoved, .emailSenderPending, .emailSenderDecided, .telegramChatUpdated,
-             .telegramChatRemoved, .telegramCodeUpdated, .telegramLinkUpdated, .social:
+             .telegramChatRemoved, .telegramCodeUpdated, .telegramLinkUpdated, .social, .leaving:
             break
         }
     }

@@ -194,11 +194,13 @@ struct PromptCard: View {
 struct OnThisDayCard: View {
     @Environment(AppModel.self) private var app
     let day: OnThisDay
+    /// Leaving: memories hidden with "Don't show this memory again" leave the card at once.
+    @State private var hiddenPosts: Set<String> = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(L("engagement.otd.title"))
-            ForEach(Array(day.groups.enumerated()), id: \.offset) { _, g in
+            ForEach(Array(day.groups.filter { !$0.postIds.allSatisfy(hiddenPosts.contains) }.enumerated()), id: \.offset) { _, g in
                 VStack(alignment: .leading, spacing: 8) {
                     Text(Lp("engagement.otd.yearsAgo", count: g.yearsAgo, ["feed": g.feedName]))
                         .font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
@@ -213,6 +215,8 @@ struct OnThisDayCard: View {
                         if let first = g.postIds.first {
                             Button(L("engagement.otd.open")) { app.homePath.append(PostRoute(postId: first)) }.buttonStyle(.kf(.secondary))
                         }
+                        Spacer()
+                        HideMemoryButton(postIds: g.postIds) { hiddenPosts.formUnion(g.postIds) }
                     }
                 }
             }
