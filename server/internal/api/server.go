@@ -73,7 +73,7 @@ type Server struct {
 	// orderTokens sign the order page link the payment provider returns to.
 	orderTokens *shop.Tokens
 	// shopStock caches the stock counts for discovery (stock.go).
-	shopStock stockCache
+	shopStock   stockCache
 	shopOrderIP *ratelimit.Limiter
 	mailer      shop.Mailer          // nil: SMTP not configured
 	payments    shop.PaymentProvider // nil: the shop has no payments
@@ -119,6 +119,8 @@ type Server struct {
 	tg *telegramBridge // Telegram bridge (telegram.go); nil without a bot
 
 	em *emailInbox // email to frame (email.go)
+
+	fed *federationState // families on different servers (federation_identity.go)
 }
 
 // now is the server's clock (birthday dates and windows).
@@ -246,6 +248,9 @@ func New(d Deps) (*Server, error) {
 	}
 	if err := s.setupChat(); err != nil {
 		return nil, fmt.Errorf("chats: %w", err)
+	}
+	if err := s.setupFederation(); err != nil {
+		return nil, fmt.Errorf("federation: %w", err)
 	}
 	return s, nil
 }

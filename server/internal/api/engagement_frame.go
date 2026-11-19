@@ -93,6 +93,9 @@ func (s *Server) placementComments(ctx context.Context, q db.DBTX, f *store.Fram
 	if !frameSocialSetting(f, "show_comments", false) {
 		return nil, nil
 	}
+	if c, handled, err := s.remotePlacementComments(ctx, q, f, placementID); handled { // a copy from another server (README §5.22)
+		return c, err
+	}
 	rows, err := engRows[frameCommentRow](q.Query(ctx, `
 		SELECT c.id, u.display_name, c.body, c.body_enc, c.created_at
 		FROM placements p

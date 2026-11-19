@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "tính năng liên kết máy chủ đang tắt trên máy chủ này",
+    "give a host or a server URL": "nhập tên máy chủ hoặc URL máy chủ",
+    "not a kinframe family invite link": "đây không phải liên kết mời vào gia đình kinframe",
+    "only subscribe invites can be used by frames on other servers": "khung ảnh trên máy chủ khác chỉ dùng được lời mời đăng ký theo dõi",
+    "remote subscription not found": "không tìm thấy đăng ký từ máy chủ khác",
+    "that server is blocked": "máy chủ đó đã bị chặn",
+    "the family does not allow frames on other servers": "gia đình không cho phép khung ảnh trên máy chủ khác",
+    "the frame needs an id and a name": "khung ảnh cần có id và tên",
+    "the other server could not be reached": "không kết nối được với máy chủ kia",
+    "the other server refused the request": "máy chủ kia đã từ chối yêu cầu",
+    "the request is not signed correctly": "yêu cầu không được ký đúng cách",
+    "this family is on this server: use the invite here": "gia đình này ở trên máy chủ này: hãy dùng lời mời tại đây",
+    "this invite is not for frames on other servers": "lời mời này không dành cho khung ảnh trên máy chủ khác",
+    "this server does not federate with that server": "máy chủ này không liên kết với máy chủ đó"
+  }
+}

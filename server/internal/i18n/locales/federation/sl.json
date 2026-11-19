@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federacija je na tem strežniku izklopljena",
+    "give a host or a server URL": "vnesite ime gostitelja ali URL strežnika",
+    "not a kinframe family invite link": "to ni povezava povabila v družino kinframe",
+    "only subscribe invites can be used by frames on other servers": "okvirji na drugih strežnikih lahko uporabljajo samo povabila za naročnino",
+    "remote subscription not found": "naročnine z drugega strežnika ni mogoče najti",
+    "that server is blocked": "ta strežnik je blokiran",
+    "the family does not allow frames on other servers": "družina ne dovoli okvirjev na drugih strežnikih",
+    "the frame needs an id and a name": "okvir potrebuje ID in ime",
+    "the other server could not be reached": "drugi strežnik ni dosegljiv",
+    "the other server refused the request": "drugi strežnik je zavrnil zahtevo",
+    "the request is not signed correctly": "zahteva ni pravilno podpisana",
+    "this family is on this server: use the invite here": "ta družina je na tem strežniku: uporabite povabilo tukaj",
+    "this invite is not for frames on other servers": "to povabilo ni za okvirje na drugih strežnikih",
+    "this server does not federate with that server": "ta strežnik ne sodeluje s tistim strežnikom"
+  }
+}

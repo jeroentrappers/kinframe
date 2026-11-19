@@ -150,6 +150,8 @@ func senderID(it *store.ItemRow) uuid.UUID {
 		return *it.SenderUserID
 	case it.SenderFrameID != nil:
 		return *it.SenderFrameID
+	case it.RemoteSenderID != nil: // copied from another server (README §5.22)
+		return *it.RemoteSenderID
 	}
 	return uuid.Nil
 }
@@ -197,6 +199,7 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if it.Thumb256Key != nil {
 		out.ThumbUrl = ptr(s.signedURL(*it.Thumb256Key, thumbURLTTL))
 	}
+	out.RemoteSender = remoteSenderJSON(it) // federation_items.go
 	return out
 }
 
@@ -247,6 +250,7 @@ func (s *Server) placementJSON(p *store.PlacementRow) gen.Placement {
 	}
 	if p.Placement.Origin == "feed" {
 		out.OriginFeedId, out.OriginFeedName = p.OriginFeedID, p.OriginFeedName
+		out.OriginRemote = placementRemoteJSON(p) // federation_items.go
 	}
 	feedIDs := p.FeedIDs
 	if feedIDs == nil {

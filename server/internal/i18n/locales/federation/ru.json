@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "федерация на этом сервере выключена",
+    "give a host or a server URL": "укажите имя хоста или URL сервера",
+    "not a kinframe family invite link": "это не ссылка-приглашение в семью kinframe",
+    "only subscribe invites can be used by frames on other servers": "рамки на других серверах могут использовать только приглашения на подписку",
+    "remote subscription not found": "подписка с другого сервера не найдена",
+    "that server is blocked": "этот сервер заблокирован",
+    "the family does not allow frames on other servers": "семья не разрешает рамки на других серверах",
+    "the frame needs an id and a name": "рамке нужны идентификатор и название",
+    "the other server could not be reached": "другой сервер недоступен",
+    "the other server refused the request": "другой сервер отклонил запрос",
+    "the request is not signed correctly": "запрос подписан неправильно",
+    "this family is on this server: use the invite here": "эта семья на этом сервере: используйте приглашение здесь",
+    "this invite is not for frames on other servers": "это приглашение не для рамок на других серверах",
+    "this server does not federate with that server": "этот сервер не работает с тем сервером"
+  }
+}

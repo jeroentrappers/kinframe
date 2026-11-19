@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federation is turned off on this server",
+    "give a host or a server URL": "give a host or a server URL",
+    "not a kinframe family invite link": "not a kinframe family invite link",
+    "only subscribe invites can be used by frames on other servers": "only subscribe invites can be used by frames on other servers",
+    "remote subscription not found": "remote subscription not found",
+    "that server is blocked": "that server is blocked",
+    "the family does not allow frames on other servers": "the family does not allow frames on other servers",
+    "the frame needs an id and a name": "the frame needs an id and a name",
+    "the other server could not be reached": "the other server could not be reached",
+    "the other server refused the request": "the other server refused the request",
+    "the request is not signed correctly": "the request is not signed correctly",
+    "this family is on this server: use the invite here": "this family is on this server: use the invite here",
+    "this invite is not for frames on other servers": "this invite is not for frames on other servers",
+    "this server does not federate with that server": "this server does not federate with that server"
+  }
+}

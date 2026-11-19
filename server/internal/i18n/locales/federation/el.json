@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "η ομοσπονδία είναι απενεργοποιημένη σε αυτόν τον διακομιστή",
+    "give a host or a server URL": "δώστε όνομα κεντρικού υπολογιστή ή URL διακομιστή",
+    "not a kinframe family invite link": "δεν είναι σύνδεσμος πρόσκλησης σε οικογένεια του kinframe",
+    "only subscribe invites can be used by frames on other servers": "μόνο προσκλήσεις συνδρομής μπορούν να χρησιμοποιηθούν από κορνίζες σε άλλους διακομιστές",
+    "remote subscription not found": "η συνδρομή από άλλον διακομιστή δεν βρέθηκε",
+    "that server is blocked": "αυτός ο διακομιστής είναι αποκλεισμένος",
+    "the family does not allow frames on other servers": "η οικογένεια δεν επιτρέπει κορνίζες σε άλλους διακομιστές",
+    "the frame needs an id and a name": "η κορνίζα χρειάζεται αναγνωριστικό και όνομα",
+    "the other server could not be reached": "ο άλλος διακομιστής δεν είναι προσβάσιμος",
+    "the other server refused the request": "ο άλλος διακομιστής απέρριψε το αίτημα",
+    "the request is not signed correctly": "το αίτημα δεν είναι σωστά υπογεγραμμένο",
+    "this family is on this server: use the invite here": "αυτή η οικογένεια είναι σε αυτόν τον διακομιστή: χρησιμοποιήστε την πρόσκληση εδώ",
+    "this invite is not for frames on other servers": "αυτή η πρόσκληση δεν είναι για κορνίζες σε άλλους διακομιστές",
+    "this server does not federate with that server": "αυτός ο διακομιστής δεν συνεργάζεται με εκείνον τον διακομιστή"
+  }
+}

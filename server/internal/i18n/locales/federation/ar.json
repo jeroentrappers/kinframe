@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "الاتحاد بين الخوادم متوقف على هذا الخادم",
+    "give a host or a server URL": "أدخل اسم مضيف أو عنوان URL للخادم",
+    "not a kinframe family invite link": "هذا ليس رابط دعوة لعائلة على kinframe",
+    "only subscribe invites can be used by frames on other servers": "يمكن للإطارات على خوادم أخرى استخدام دعوات الاشتراك فقط",
+    "remote subscription not found": "لم يُعثر على الاشتراك البعيد",
+    "that server is blocked": "هذا الخادم محظور",
+    "the family does not allow frames on other servers": "لا تسمح العائلة بالإطارات على خوادم أخرى",
+    "the frame needs an id and a name": "يحتاج الإطار إلى معرّف واسم",
+    "the other server could not be reached": "تعذّر الوصول إلى الخادم الآخر",
+    "the other server refused the request": "رفض الخادم الآخر الطلب",
+    "the request is not signed correctly": "الطلب غير موقّع بشكل صحيح",
+    "this family is on this server: use the invite here": "هذه العائلة على هذا الخادم: استخدم الدعوة هنا",
+    "this invite is not for frames on other servers": "هذه الدعوة ليست للإطارات على خوادم أخرى",
+    "this server does not federate with that server": "هذا الخادم لا يتعاون مع ذلك الخادم"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "bu sunucuda federasyon kapalı",
+    "give a host or a server URL": "bir ana makine adı veya sunucu URL'si girin",
+    "not a kinframe family invite link": "bu bir kinframe aile davet bağlantısı değil",
+    "only subscribe invites can be used by frames on other servers": "diğer sunuculardaki çerçeveler yalnızca abonelik davetlerini kullanabilir",
+    "remote subscription not found": "başka sunucudan gelen abonelik bulunamadı",
+    "that server is blocked": "o sunucu engellendi",
+    "the family does not allow frames on other servers": "aile diğer sunuculardaki çerçevelere izin vermiyor",
+    "the frame needs an id and a name": "çerçevenin bir kimliğe ve ada ihtiyacı var",
+    "the other server could not be reached": "diğer sunucuya ulaşılamadı",
+    "the other server refused the request": "diğer sunucu isteği reddetti",
+    "the request is not signed correctly": "istek doğru şekilde imzalanmamış",
+    "this family is on this server: use the invite here": "bu aile bu sunucuda: daveti burada kullanın",
+    "this invite is not for frames on other servers": "bu davet diğer sunuculardaki çerçeveler için değil",
+    "this server does not federate with that server": "bu sunucu o sunucuyla birlikte çalışmıyor"
+  }
+}

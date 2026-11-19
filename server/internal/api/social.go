@@ -179,7 +179,8 @@ func frameRefs(rows []store.FrameReactionRow, postID uuid.UUID, item *uuid.UUID)
 		}
 		seen[r.FrameID] = true
 		itemID, at := r.ItemID, r.At
-		out = append(out, gen.FrameReactionRef{FrameId: r.FrameID, FrameName: r.FrameName, Reaction: gen.Reaction(r.Reaction), ItemId: &itemID, At: &at})
+		out = append(out, gen.FrameReactionRef{FrameId: r.FrameID, FrameName: r.FrameName, Reaction: gen.Reaction(r.Reaction), ItemId: &itemID, At: &at,
+			ServerName: r.ServerName})
 	}
 	return out
 }
@@ -210,6 +211,9 @@ func (s *Server) commentOut(v *viewerCtx, p *store.SocialPost, c *store.Comment,
 		}
 		if c.FrameReply != nil {
 			f.Reply = ptr(gen.ReplyPreset(*c.FrameReply))
+		}
+		if c.RemoteSubscriberID != nil { // a frame on another server: frame_id is the remote subscription (README §5.22)
+			f.FrameId, f.ServerName = *c.RemoteSubscriberID, c.FrameServerName
 		}
 		out.Frame = f
 		return out

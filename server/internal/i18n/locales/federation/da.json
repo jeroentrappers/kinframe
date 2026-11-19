@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "føderation er slået fra på denne server",
+    "give a host or a server URL": "angiv et værtsnavn eller en server-URL",
+    "not a kinframe family invite link": "ikke et invitationslink til en kinframe-familie",
+    "only subscribe invites can be used by frames on other servers": "kun abonnementsinvitationer kan bruges af rammer på andre servere",
+    "remote subscription not found": "abonnementet fra en anden server blev ikke fundet",
+    "that server is blocked": "den server er blokeret",
+    "the family does not allow frames on other servers": "familien tillader ikke rammer på andre servere",
+    "the frame needs an id and a name": "rammen skal have et id og et navn",
+    "the other server could not be reached": "den anden server kunne ikke nås",
+    "the other server refused the request": "den anden server afviste anmodningen",
+    "the request is not signed correctly": "anmodningen er ikke signeret korrekt",
+    "this family is on this server: use the invite here": "denne familie er på denne server: brug invitationen her",
+    "this invite is not for frames on other servers": "denne invitation er ikke til rammer på andre servere",
+    "this server does not federate with that server": "denne server samarbejder ikke med den server"
+  }
+}

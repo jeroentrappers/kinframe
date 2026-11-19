@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "このサーバーではフェデレーションがオフになっています",
+    "give a host or a server URL": "ホスト名またはサーバーの URL を入力してください",
+    "not a kinframe family invite link": "kinframe の家族の招待リンクではありません",
+    "only subscribe invites can be used by frames on other servers": "他のサーバーのフレームが使えるのは購読の招待だけです",
+    "remote subscription not found": "他のサーバーの購読が見つかりません",
+    "that server is blocked": "そのサーバーはブロックされています",
+    "the family does not allow frames on other servers": "この家族は他のサーバーのフレームを許可していません",
+    "the frame needs an id and a name": "フレームには ID と名前が必要です",
+    "the other server could not be reached": "相手のサーバーに接続できません",
+    "the other server refused the request": "相手のサーバーがリクエストを拒否しました",
+    "the request is not signed correctly": "リクエストの署名が正しくありません",
+    "this family is on this server: use the invite here": "この家族はこのサーバーにあります：ここで招待を使ってください",
+    "this invite is not for frames on other servers": "この招待は他のサーバーのフレーム向けではありません",
+    "this server does not federate with that server": "このサーバーはそのサーバーと連携していません"
+  }
+}

@@ -307,6 +307,7 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				continue
 			}
 			pc := placementChange{Placement: s.placementJSON(&p)}
+			pc.OriginRemote = nil // frames see copies from other servers as feed placements (README §5.22)
 			if id, ok := promptIDs[p.Placement.ID]; ok {
 				pc.PromptId = &id
 			}
@@ -582,6 +583,18 @@ func (s *Server) DeviceAck(ctx context.Context, req gen.DeviceAckRequestObject) 
 	}
 	s.placementsChanged(ctx, changes, s.deliveredPushes(ctx, f, changes))
 	s.sharedDeliveredPushes(ctx, f, changes)
+	if req.Body.Seen != nil { // copies from other servers, first seen only (README §5.22)
+		seen := map[uuid.UUID]bool{}
+		for _, sn := range *req.Body.Seen {
+			seen[sn.PlacementId] = true
+		}
+		for _, ch := range changes {
+			if seen[ch.PlacementID] && ch.Origin == "feed" {
+				s.remoteFrameActivity(ctx, ch.PlacementID, "seen", nil, nil)
+				delete(seen, ch.PlacementID)
+			}
+		}
+	}
 	return noContent(), nil
 }
 
@@ -688,8 +701,9 @@ func (s *Server) DeviceSetReaction(ctx context.Context, req gen.DeviceSetReactio
 	if err := s.st.InTx(ctx, func(tx *store.Tx) error { return tx.SetReaction(ctx, f.ID, p.Placement.ID, reaction) }); err != nil {
 		return nil, err
 	}
-	s.TelegramItemReacted(ctx, p.ItemRow.ItemID) // mirrored on the Telegram message (telegram_out.go)
-	s.frameReactionEntries(ctx, f, p)            // frame entries in the posts' threads (social_frames.go)
+	s.remoteFrameActivity(ctx, p.Placement.ID, "reaction", req.Body.Reaction, nil) // copies from other servers (README §5.22)
+	s.TelegramItemReacted(ctx, p.ItemRow.ItemID)                                   // mirrored on the Telegram message (telegram_out.go)
+	s.frameReactionEntries(ctx, f, p)                                              // frame entries in the posts' threads (social_frames.go)
 	if p.SenderUserID != nil {
 		var push *notify.Push
 		ids := s.placementPushIDs(ctx, p, f)
@@ -725,9 +739,10 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 	if err != nil {
 		return nil, err
 	}
-	s.TelegramItemReplied(ctx, p.ItemRow.ItemID, f, preset) // posted in the Telegram chat when it wants replies
-	s.frameReplyEntries(ctx, f, p, preset)                  // frame entries in the posts' threads (social_frames.go)
-	s.chatFrameActivity(ctx, p.ItemRow.ItemID)              // chat messages that were put on this frame (chat_events.go)
+	s.remoteFrameActivity(ctx, p.Placement.ID, "reply", nil, &req.Body.Preset) // copies from other servers (README §5.22)
+	s.TelegramItemReplied(ctx, p.ItemRow.ItemID, f, preset)                    // posted in the Telegram chat when it wants replies
+	s.frameReplyEntries(ctx, f, p, preset)                                     // frame entries in the posts' threads (social_frames.go)
+	s.chatFrameActivity(ctx, p.ItemRow.ItemID)                                 // chat messages that were put on this frame (chat_events.go)
 	if p.SenderUserID != nil {
 		ids := s.placementPushIDs(ctx, p, f)
 		ev := notify.Event{"type": "reply", "placement_id": p.Placement.ID, "frame_id": f.ID, "preset": preset}

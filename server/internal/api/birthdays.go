@@ -876,8 +876,15 @@ func (s *Server) UpdateFeedPreferences(ctx context.Context, req gen.UpdateFeedPr
 // frameBirthdays renders the frame's `birthdays` change (nil: none).
 func (s *Server) frameBirthdays(ctx context.Context, f *store.Frame) (map[string]any, error) {
 	groups, err := s.st.FrameBirthdays(ctx, s.st.Q(), f.ID)
-	if err != nil || len(groups) == 0 {
+	if err != nil {
 		return nil, err
+	}
+	remote, err := s.remoteFrameBirthdays(ctx, s.st.Q(), f.ID) // families on other servers (README §5.22)
+	if err != nil {
+		return nil, err
+	}
+	if len(groups) == 0 && len(remote) == 0 {
+		return nil, nil
 	}
 	at, err := s.st.FrameBirthdaysEmittedAt(ctx, s.st.Q(), f.ID)
 	if err != nil {
@@ -894,6 +901,7 @@ func (s *Server) frameBirthdays(ctx context.Context, f *store.Frame) (map[string
 		}
 		people[i] = p
 	}
+	people = mergeRemoteBirthdays(people, remote) // federation_frames.go
 	return map[string]any{"generated_at": at, "people": people}, nil
 }
 

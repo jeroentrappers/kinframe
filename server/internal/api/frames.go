@@ -122,6 +122,9 @@ func (s *Server) RemoveFrame(ctx context.Context, req gen.RemoveFrameRequestObje
 		if ended, err = tx.EndFrameSubscriptions(ctx, f.ID); err != nil {
 			return err
 		}
+		if err := s.federationFrameRemoved(ctx, tx, f.ID); err != nil { // its follows of families on other servers
+			return err
+		}
 		rows, err := tx.Query(ctx, `DELETE FROM memberships WHERE frame_id = $1 RETURNING user_id`, f.ID)
 		if err != nil {
 			return err

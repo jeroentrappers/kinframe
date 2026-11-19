@@ -58,6 +58,8 @@ type feedJSON struct {
 	MembersCanCreateCircles bool   `json:"members_can_create_circles"`
 	CircleCount             int    `json:"circle_count"`
 	Mute                    string `json:"mute"`
+	// Families on different servers (README §5.22).
+	AllowRemoteFrames bool `json:"allow_remote_frames"`
 }
 
 func (s *Server) feedCoverURL(key *string) *string {
@@ -81,7 +83,7 @@ func (s *Server) feedOut(v *store.FeedView) feedJSON {
 		MembersSeeReactions: v.MembersSeeReactions, PostersCanInvite: v.PostersCanInvite, PostCount: v.PostCount,
 		PostersCanAddBirthdays: v.PostersCanAddBirthdays, BirthdayNotifications: v.BirthdayNotifications, BirthdayCount: v.BirthdayCount,
 		MembersSeeReceipts: v.MembersSeeReceipts, NewMembersCanPost: v.NewMembersCanPost, MembersCanCreateCircles: v.MembersCanCreateCircles,
-		CircleCount: v.CircleCount, Mute: v.Mute,
+		CircleCount: v.CircleCount, Mute: v.Mute, AllowRemoteFrames: v.AllowRemoteFrames,
 	}
 	if v.OwnerName != nil {
 		out.OwnerName = *v.OwnerName
@@ -118,11 +120,12 @@ type feedInviteJSON struct {
 	Uses          int       `json:"uses"`
 	Note          *string   `json:"note,omitempty"`
 	ExpiresAt     time.Time `json:"expires_at"`
+	AllowRemote   bool      `json:"allow_remote"` // frames on other servers may use it (README §5.22)
 }
 
 func (s *Server) feedInviteOut(i *store.FeedInvite) feedInviteJSON {
 	out := feedInviteJSON{ID: i.ID, Purpose: i.Purpose, Token: i.Token, Code: i.Code, URL: s.cfg.PublicURL + "/fi/" + i.Token,
-		MaxUses: i.MaxUses, Uses: i.Uses, Note: i.Note, ExpiresAt: i.ExpiresAt}
+		MaxUses: i.MaxUses, Uses: i.Uses, Note: i.Note, ExpiresAt: i.ExpiresAt, AllowRemote: i.AllowRemote}
 	if i.CreatedByName != nil {
 		out.CreatedByName = *i.CreatedByName
 	}
@@ -251,6 +254,9 @@ func (s *Server) CreateFeed(ctx context.Context, req gen.CreateFeedRequestObject
 		if err := tx.CreateFeed(ctx, f, u.ID); err != nil {
 			return err
 		}
+		if err := s.federationFeedSettings(ctx, tx, f.ID, b.AllowRemoteFrames); err != nil { // federation_settings.go
+			return err
+		}
 		if key != "" {
 			return tx.SaveIdempotent(ctx, u.ID, "feed", key, feedRef{f.ID})
 		}
@@ -322,6 +328,9 @@ func (s *Server) UpdateFeed(ctx context.Context, req gen.UpdateFeedRequestObject
 		if err := tx.UpdateFeed(ctx, req.FeedId, p); err != nil {
 			return err
 		}
+		if err := s.federationFeedSettings(ctx, tx, req.FeedId, b.AllowRemoteFrames); err != nil { // federation_settings.go
+			return err
+		}
 		if renamed {
 			// Frames show "Sender · Feed name": re-emit the feed's placements.
 			return tx.BumpFeedPlacements(ctx, req.FeedId)
@@ -380,6 +389,9 @@ func (s *Server) DeleteFeed(ctx context.Context, req gen.DeleteFeedRequestObject
 		}
 		subs, err := s.st.LiveSubscriptionsOfFeed(ctx, tx, req.FeedId)
 		if err != nil {
+			return err
+		}
+		if err := s.federationFeedEnded(ctx, tx, req.FeedId, "feed_deleted"); err != nil { // frames on other servers
 			return err
 		}
 		for _, sub0 := range subs {
@@ -758,6 +770,9 @@ func (s *Server) CreateFeedInvite(ctx context.Context, req gen.CreateFeedInviteR
 				ExpiresAt: time.Now().Add(time.Duration(hours) * time.Hour).UTC().Truncate(time.Second),
 			})
 			if err != nil {
+				return err
+			}
+			if inv, err = s.federationInviteSettings(ctx, tx, inv, v, b.AllowRemote); err != nil { // federation_settings.go
 				return err
 			}
 			out = s.feedInviteOut(inv)

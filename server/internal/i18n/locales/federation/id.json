@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "federasi dimatikan di server ini",
+    "give a host or a server URL": "masukkan nama host atau URL server",
+    "not a kinframe family invite link": "bukan tautan undangan keluarga kinframe",
+    "only subscribe invites can be used by frames on other servers": "hanya undangan berlangganan yang bisa dipakai bingkai di server lain",
+    "remote subscription not found": "langganan dari server lain tidak ditemukan",
+    "that server is blocked": "server itu diblokir",
+    "the family does not allow frames on other servers": "keluarga tidak mengizinkan bingkai di server lain",
+    "the frame needs an id and a name": "bingkai memerlukan id dan nama",
+    "the other server could not be reached": "server lain tidak dapat dijangkau",
+    "the other server refused the request": "server lain menolak permintaan",
+    "the request is not signed correctly": "permintaan tidak ditandatangani dengan benar",
+    "this family is on this server: use the invite here": "keluarga ini ada di server ini: gunakan undangan di sini",
+    "this invite is not for frames on other servers": "undangan ini bukan untuk bingkai di server lain",
+    "this server does not federate with that server": "server ini tidak bekerja sama dengan server itu"
+  }
+}

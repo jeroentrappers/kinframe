@@ -32,6 +32,8 @@ type Feed struct {
 	MembersCanCreateCircles bool       `db:"members_can_create_circles"`
 	CreatedAt               time.Time  `db:"created_at"`
 	DeletedAt               *time.Time `db:"deleted_at"`
+	// Families on different servers (README §5.22): frames on other servers may follow it.
+	AllowRemoteFrames bool `db:"allow_remote_frames"`
 }
 
 // FeedView is a feed with counts and the viewer's role ("" when not a member).
@@ -60,7 +62,8 @@ func (v *FeedView) IsAdmin() bool { return v.Role == "owner" || v.Role == "admin
 
 const feedCols = `f.id, f.name, f.cover_item_id, f.auto_approve_subscriptions, f.invite_requires_approval,
 	f.members_see_reactions, f.posters_can_invite, f.posters_can_add_birthdays,
-	f.members_see_receipts, f.new_members_can_post, f.members_can_create_circles, f.created_at, f.deleted_at`
+	f.members_see_receipts, f.new_members_can_post, f.members_can_create_circles, f.created_at, f.deleted_at,
+	f.allow_remote_frames`
 
 const feedViewSelect = `SELECT ` + feedCols + `, COALESCE(m.role, '') AS role,
 	(SELECT count(*) FROM feed_members x WHERE x.feed_id = f.id)::int AS member_count,
@@ -268,6 +271,8 @@ type FeedInvite struct {
 	// Via, ViaRef: a channel invite (see Invite).
 	Via    *string `db:"via"`
 	ViaRef *string `db:"via_ref"`
+	// AllowRemote: frames on other servers may use this subscribe invite (README §5.22).
+	AllowRemote bool `db:"allow_remote"`
 }
 
 // Usable reports whether the invite can still be accepted.
@@ -276,7 +281,7 @@ func (i FeedInvite) Usable(now time.Time) bool {
 }
 
 const feedInviteSelect = `SELECT i.id, i.feed_id, i.purpose, i.token, i.code, i.created_by, u.display_name AS created_by_name,
-	i.max_uses, i.uses, i.note, i.expires_at, i.revoked_at, i.via, i.via_ref FROM feed_invites i LEFT JOIN users u ON u.id = i.created_by`
+	i.max_uses, i.uses, i.note, i.expires_at, i.revoked_at, i.via, i.via_ref, i.allow_remote FROM feed_invites i LEFT JOIN users u ON u.id = i.created_by`
 
 // CreateFeedInvite inserts an invite; a unique violation on the code means
 // the caller should retry with another code.

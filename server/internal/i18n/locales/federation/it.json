@@ -1,0 +1,19 @@
+{
+  "messages": {},
+  "details": {
+    "federation is turned off on this server": "la federazione è disattivata su questo server",
+    "give a host or a server URL": "indica un host o l'URL di un server",
+    "not a kinframe family invite link": "non è un link di invito a una famiglia kinframe",
+    "only subscribe invites can be used by frames on other servers": "solo gli inviti di iscrizione possono essere usati da cornici su altri server",
+    "remote subscription not found": "iscrizione da un altro server non trovata",
+    "that server is blocked": "quel server è bloccato",
+    "the family does not allow frames on other servers": "la famiglia non consente cornici su altri server",
+    "the frame needs an id and a name": "la cornice ha bisogno di un id e di un nome",
+    "the other server could not be reached": "l'altro server non è raggiungibile",
+    "the other server refused the request": "l'altro server ha rifiutato la richiesta",
+    "the request is not signed correctly": "la richiesta non è firmata correttamente",
+    "this family is on this server: use the invite here": "questa famiglia è su questo server: usa l'invito qui",
+    "this invite is not for frames on other servers": "questo invito non è per cornici su altri server",
+    "this server does not federate with that server": "questo server non collabora con quel server"
+  }
+}
