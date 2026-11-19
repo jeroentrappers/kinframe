@@ -1174,7 +1174,8 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			const p = state.feedInvitePreviews[m[1]!];
 			if (!p) return problem(route, 404, 'invite_invalid', 'Invalid');
 			const b = (body ?? {}) as S['FeedInviteAccept'];
-			const summary: S['FeedSummary'] = { id: uid('fd'), name: p.feed_name, role: 'poster', member_count: (p.member_count ?? 1) + 1, subscription_count: 0, cover_url: null };
+			// Tests set `join_role: 'member'` for families whose new members are Readers (new_members_can_post off).
+			const summary: S['FeedSummary'] = { id: uid('fd'), name: p.feed_name, role: (p as { join_role?: S['FeedRole'] }).join_role ?? 'poster', member_count: (p.member_count ?? 1) + 1, subscription_count: 0, cover_url: null };
 			if (p.purpose === 'subscribe') {
 				const subs = (b.frame_ids ?? []).map((fid) => {
 					const fr = state.frames.find((x) => x.id === fid)!;

@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { api, call, type FeedInvitePreview, type FeedInviteResult } from '$lib/api/client';
 	import { discovery } from '$lib/discovery.svelte';
-	import { HISTORY_DEFAULT_N, historyBody, type HistoryChoice } from '$lib/feeds';
+	import { canPostToFeed, HISTORY_DEFAULT_N, historyBody, type HistoryChoice } from '$lib/feeds';
 	import { feeds } from '$lib/feeds.svelte';
 	import { frames } from '$lib/frames.svelte';
 	import { newIdempotencyKey } from '$lib/logic';
@@ -103,11 +103,17 @@
 				{:else}
 					<span class="big-icon ok"><Icon name="check" size={28} /></span>
 					<h1>{t('fi.joinedTitle', { feed: result.feed.name })}</h1>
-					<p class="muted">{t('fi.joinedBody')}</p>
-					<div class="row-wrap center-row">
-						<a class="btn btn-primary btn-lg" href="/send?feed={result.feed.id}"><Icon name="send" size={18} />{t('fi.postFirst')}</a>
-						<a class="btn" href="/feeds/{result.feed.id}">{t('fi.viewFeed')}</a>
-					</div>
+					{#if canPostToFeed(result.feed.role)}
+						<p class="muted">{t('fi.joinedBody')}</p>
+						<div class="row-wrap center-row">
+							<a class="btn btn-primary btn-lg" href="/send?feed={result.feed.id}"><Icon name="send" size={18} />{t('fi.postFirst')}</a>
+							<a class="btn" href="/feeds/{result.feed.id}">{t('fi.viewFeed')}</a>
+						</div>
+					{:else}
+						<!-- Joined as a Reader (the family's new members don't post): no "Post photos". -->
+						<p class="muted">{t('social.readerHint')}</p>
+						<a class="btn btn-primary btn-lg" href="/feeds/{result.feed.id}">{t('fi.viewFeed')}</a>
+					{/if}
 				{/if}
 			</div>
 		{:else}
