@@ -331,7 +331,9 @@ test('operator: transfer a frame to Lies, removing Tom; the log', async ({ brows
 	const op = await user(api, 'Operator', { operator: true });
 	const tom = await user(api, 'Tom');
 	const lies = await user(api, 'Lies');
-	const oma = await claimFrame(api, tom, 'Oma Janssens’s frame');
+	// A name of its own: the log keeps the transfers of earlier runs on the same database.
+	const name = `Oma Janssens’s frame ${Date.now().toString(36)}`;
+	const oma = await claimFrame(api, tom, name);
 	await joinFrame(tom, lies, oma.frameId);
 
 	const O = await signedIn(browser, op);
@@ -339,15 +341,15 @@ test('operator: transfer a frame to Lies, removing Tom; the log', async ({ brows
 	await O.page.getByRole('link', { name: /Ownership transfers/ }).click();
 	await O.page.getByPlaceholder('Frame, family, email or name').fill(tom.email);
 	await O.page.getByRole('button', { name: 'Search' }).click();
-	await expect(O.page.getByText('Oma Janssens’s frame')).toBeVisible();
+	await expect(O.page.getByText(name, { exact: true })).toBeVisible();
 	await O.page.getByRole('button', { name: 'Transfer ownership' }).first().click();
-	const dlg = O.page.getByRole('dialog', { name: 'Transfer Oma Janssens’s frame' });
+	const dlg = O.page.getByRole('dialog', { name: `Transfer ${name}` });
 	await dlg.getByLabel('New owner').selectOption(lies.id);
 	await dlg.getByLabel(/Reason/).fill('Divorce; Lies keeps the frame');
 	await dlg.getByRole('checkbox', { name: 'Remove Tom instead of making them admin' }).check();
 	await dlg.getByRole('button', { name: 'Transfer ownership' }).click();
-	await expect(O.page.getByText('Lies now owns Oma Janssens’s frame.')).toBeVisible();
-	await expect(O.page.getByText('Oma Janssens’s frame: Tom → Lies').first()).toBeVisible();
+	await expect(O.page.getByText(`Lies now owns ${name}.`)).toBeVisible();
+	await expect(O.page.getByText(`${name}: Tom → Lies`)).toBeVisible();
 
 	expect((await lies.get(`/v1/frames/${oma.frameId}`)).role).toBe('owner');
 	expect((await tom.raw('GET', `/v1/frames/${oma.frameId}`)).status).toBe(404);
