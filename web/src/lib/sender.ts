@@ -1,7 +1,20 @@
 import type { ItemVia, Schemas } from '$lib/api/client';
 import { t } from '$lib/i18n/index.svelte';
 
-type Item = Pick<Schemas['Item'], 'sender_name' | 'imported_from' | 'imported_sender_name'> & { via?: ItemVia | null };
+type Item = Pick<Schemas['Item'], 'sender_name' | 'imported_from' | 'imported_sender_name'> &
+	Partial<Pick<Schemas['Item'], 'former_sender_name' | 'remote_sender'>> & { via?: ItemVia | null };
+
+/**
+ * The sender's name: "Tom (former member)" for photos handed over at account deletion, the poster's name for copies
+ * from a family on another server (README §5.21, §5.22), else `sender_name`.
+ */
+function senderName(item: Item): string {
+	const former = item.former_sender_name?.trim();
+	if (former) return t('leaving.formerMember', { name: former });
+	const remote = item.remote_sender?.name?.trim();
+	if (remote) return remote;
+	return item.sender_name ?? '';
+}
 
 /**
  * Who an item is from, as the library shows it. Items a frame imported from Frameo's leftover data
@@ -12,7 +25,7 @@ export function senderLabel(item: Item): string {
 		const name = item.imported_sender_name?.trim();
 		return name ? t('library.viaFrameo', { name }) : t('library.viaFrameoNoName');
 	}
-	return withVia(item.sender_name ?? '', item.via);
+	return withVia(senderName(item), item.via);
 }
 
 /**

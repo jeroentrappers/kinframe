@@ -9,6 +9,7 @@
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
 	import Thumb from '../Thumb.svelte';
+	import BlockedServers from '../remote/BlockedServers.svelte';
 
 	let { feed, onupdated }: { feed: Feed; onupdated?: (f: Feed) => void } = $props();
 
@@ -23,6 +24,7 @@
 		members_see_receipts: boolean;
 		new_members_can_post: boolean;
 		members_can_create_circles: boolean;
+		allow_remote_frames: boolean;
 	};
 	const fromFeed = (f: Feed): Form => ({
 		name: f.name,
@@ -34,7 +36,8 @@
 		posters_can_add_birthdays: f.posters_can_add_birthdays ?? false,
 		members_see_receipts: f.members_see_receipts ?? false,
 		new_members_can_post: f.new_members_can_post ?? true,
-		members_can_create_circles: f.members_can_create_circles ?? true
+		members_can_create_circles: f.members_can_create_circles ?? true,
+		allow_remote_frames: f.allow_remote_frames ?? false
 	});
 
 	const EMPTY: Form = {
@@ -47,7 +50,8 @@
 		posters_can_add_birthdays: false,
 		members_see_receipts: false,
 		new_members_can_post: true,
-		members_can_create_circles: true
+		members_can_create_circles: true,
+		allow_remote_frames: false
 	};
 	let form = $state<Form>({ ...EMPTY });
 	let base = $state<Form>({ ...EMPTY });
@@ -70,6 +74,8 @@
 		// Family social (README §5.18): only sent to servers that have it.
 		if (discovery.social)
 			for (const k of ['members_see_receipts', 'new_members_can_post', 'members_can_create_circles'] as const) if (form[k] !== base[k]) out[k] = form[k];
+		// Families on other servers (README §5.22)
+		if (discovery.remoteFamilies && form.allow_remote_frames !== base.allow_remote_frames) out.allow_remote_frames = form.allow_remote_frames;
 		return out;
 	});
 	const dirty = $derived(Object.keys(patch).length > 0);
@@ -186,6 +192,12 @@
 				<span><span class="s-label">{t('social.membersCreateCircles')}</span><span class="hint">{t('social.membersCreateCirclesHint')}</span></span>
 			</label>
 		{/if}
+		{#if discovery.remoteFamilies}
+			<label class="switch">
+				<input type="checkbox" bind:checked={form.allow_remote_frames} />
+				<span><span class="s-label">{t('remote.allowFrames')}</span><span class="hint">{t('remote.allowFramesHint')}</span></span>
+			</label>
+		{/if}
 	</section>
 
 	{#if discovery.birthdays}
@@ -205,6 +217,10 @@
 		{#if dirty}<button class="btn btn-ghost" type="button" onclick={() => (form = { ...base })}>{t('common.cancel')}</button>{/if}
 	</div>
 </form>
+
+{#if discovery.remoteFamilies}
+	<BlockedServers scope={{ kind: 'feed', feedId: feed.id }} />
+{/if}
 
 {#if feed.role === 'owner'}
 	<section class="card card-pad stack-sm danger-zone" aria-labelledby="fs-danger">

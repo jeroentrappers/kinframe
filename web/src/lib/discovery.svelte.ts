@@ -167,6 +167,27 @@ class DiscoveryState {
 		return this.doc?.email_digest === true;
 	}
 
+	// Leaving a family and families on other servers (README §5.21, §5.22). Hidden until the server says so.
+	/** The leave choices, taking photos away, keep requests, the account deletion handover and the memories filter. */
+	get leaving() {
+		return this.doc?.leaving === true;
+	}
+
+	/** Frames here following families on other servers, and families here allowing frames on other servers. */
+	get remoteFamilies() {
+		return this.doc?.remote_families === true;
+	}
+
+	/** The server's stable id (set by servers that know about other servers; the web stays single-server). */
+	get serverId() {
+		return this.doc?.server_id ?? null;
+	}
+
+	/** The server's label (`server_name`), else its host. */
+	get serverLabel() {
+		return this.doc?.server_name || (typeof location !== 'undefined' ? location.host : this.name);
+	}
+
 	/** Logto is usable when the server published an issuer and a web client id. */
 	get logtoConfigured() {
 		return Boolean(this.doc?.auth?.issuer && this.doc?.auth?.web_client_id);

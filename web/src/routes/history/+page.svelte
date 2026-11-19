@@ -9,6 +9,8 @@
 	import EmptyState from '$components/EmptyState.svelte';
 	import Icon from '$components/Icon.svelte';
 	import SendCard from '$components/SendCard.svelte';
+	import HistoryLeaving from '$components/leaving/HistoryLeaving.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 
 	let sends = $state<Send[]>([]);
 	let cursor = $state<string | null>(null);
@@ -90,6 +92,10 @@
 		</div>
 	</div>
 
+	{#if discovery.leaving}
+		<div class="stack leaving"><HistoryLeaving focus={page.url.searchParams.get('keep')} /></div>
+	{/if}
+
 	{#if loading}
 		<div class="stack" aria-busy="true" aria-label={t('common.loading')}>
 			{#each [0, 1, 2] as i (i)}
@@ -146,6 +152,9 @@
 <style>
 	.narrow {
 		max-width: 860px;
+	}
+	.leaving:not(:empty) {
+		margin-bottom: var(--s-5);
 	}
 	.day {
 		font-family: var(--font-body);

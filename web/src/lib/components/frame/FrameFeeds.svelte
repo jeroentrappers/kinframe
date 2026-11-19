@@ -19,6 +19,10 @@
 	import HistoryPicker from '../feed/HistoryPicker.svelte';
 	import SubscribeDialog from '../feed/SubscribeDialog.svelte';
 	import SubscriptionStatusBadge from '../feed/SubscriptionStatusBadge.svelte';
+	// Families on other servers (multi-server.md §3, README §5.22)
+	import RemoteFollows from '../remote/RemoteFollows.svelte';
+	import { isOtherServer, parseInviteUrl } from '$lib/remote';
+	let remoteAddUrl = $state<string | null>(null);
 
 	/** The feeds a frame subscribes to (feeds.md §3 story 8): managers pause, resume, change history, unsubscribe. */
 	let { frame }: { frame: Frame } = $props();
@@ -175,6 +179,13 @@
 	async function useInvite(e: SubmitEvent) {
 		e.preventDefault();
 		codeError = null;
+		// A frame invite of another server (README §5.22): the remote flow.
+		const remote = discovery.remoteFamilies ? parseInviteUrl(codeText) : null;
+		if (remote && isOtherServer(remote.host, location.host)) {
+			codeOpen = false;
+			remoteAddUrl = remote.url;
+			return;
+		}
 		const token = feedInviteToken(codeText);
 		if (token) return void goto(`/fi/${encodeURIComponent(token)}`);
 		const p = parseEnteredCode(codeText);
@@ -292,6 +303,8 @@
 		</div>
 	{/if}
 {/if}
+
+{#if discovery.remoteFamilies}<RemoteFollows {frame} bind:addUrl={remoteAddUrl} />{/if}
 
 <SubscribeDialog bind:open={subscribeOpen} frameId={frame.id} {taken} onsubscribed={replace} />
 
