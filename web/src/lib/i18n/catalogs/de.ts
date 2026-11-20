@@ -496,6 +496,8 @@ const de: Catalog = {
 	'settings.preferences': 'Präferenzen',
 	'settings.language': 'Sprache',
 	'settings.languageHint': 'Für diese Website und für Benachrichtigungen.',
+	'settings.crashReports': 'Absturzberichte senden',
+	'settings.crashReportsHint': 'Anonyme Absturzdaten helfen uns, Fehler zu beheben. Keine Fotos, Nachrichten oder persönlichen Daten.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Name',
 	'settings.version': 'Version',

@@ -512,6 +512,8 @@ const sk: Catalog = {
 	'settings.preferences': 'Predvoľby',
 	'settings.language': 'Jazyk',
 	'settings.languageHint': 'Používa sa na tomto webe a v upozorneniach.',
+	'settings.crashReports': 'Odosielať hlásenia o zlyhaniach',
+	'settings.crashReportsHint': 'Anonymné údaje o zlyhaniach nám pomáhajú opravovať chyby. Žiadne fotky, správy ani osobné údaje.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Názov',
 	'settings.version': 'Verzia',

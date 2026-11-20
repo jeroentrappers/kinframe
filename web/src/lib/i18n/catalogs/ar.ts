@@ -561,6 +561,8 @@ const ar: Catalog = {
 	'settings.preferences': 'التفضيلات',
 	'settings.language': 'اللغة',
 	'settings.languageHint': 'تُستخدم على هذا الموقع وفي الإشعارات.',
+	'settings.crashReports': 'إرسال تقارير الأعطال',
+	'settings.crashReportsHint': 'تساعدنا تفاصيل الأعطال المجهولة على إصلاح الأخطاء. لا صور ولا رسائل ولا بيانات شخصية.',
 	'settings.server': 'الخادم',
 	'settings.serverName': 'الاسم',
 	'settings.version': 'الإصدار',

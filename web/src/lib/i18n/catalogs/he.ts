@@ -501,6 +501,8 @@ const he: Catalog = {
 	'settings.preferences': 'העדפות',
 	'settings.language': 'שפה',
 	'settings.languageHint': 'משמשת באתר הזה ובהתראות.',
+	'settings.crashReports': 'שליחת דוחות קריסה',
+	'settings.crashReportsHint': 'פרטי קריסה אנונימיים עוזרים לנו לתקן באגים. בלי תמונות, הודעות או מידע אישי.',
 	'settings.server': 'שרת',
 	'settings.serverName': 'שם',
 	'settings.version': 'גרסה',

@@ -496,6 +496,8 @@ const hu: Catalog = {
 	'settings.preferences': 'Beállítások',
 	'settings.language': 'Nyelv',
 	'settings.languageHint': 'Ezen a weboldalon és az értesítésekben.',
+	'settings.crashReports': 'Összeomlási jelentések küldése',
+	'settings.crashReportsHint': 'A névtelen összeomlási adatok segítenek kijavítani a hibákat. Fotók, üzenetek és személyes adatok nélkül.',
 	'settings.server': 'Szerver',
 	'settings.serverName': 'Név',
 	'settings.version': 'Verzió',

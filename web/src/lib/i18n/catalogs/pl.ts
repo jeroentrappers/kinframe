@@ -528,6 +528,8 @@ const pl: Catalog = {
 	'settings.preferences': 'Preferencje',
 	'settings.language': 'Język',
 	'settings.languageHint': 'Używany na tej stronie i w powiadomieniach.',
+	'settings.crashReports': 'Wysyłaj raporty o awariach',
+	'settings.crashReportsHint': 'Anonimowe dane o awariach pomagają nam naprawiać błędy. Bez zdjęć, wiadomości i danych osobowych.',
 	'settings.server': 'Serwer',
 	'settings.serverName': 'Nazwa',
 	'settings.version': 'Wersja',

@@ -513,6 +513,8 @@ const lv: Catalog = {
 	'settings.preferences': 'Preferences',
 	'settings.language': 'Valoda',
 	'settings.languageHint': 'Izmanto šajā vietnē un paziņojumos.',
+	'settings.crashReports': 'Sūtīt avāriju ziņojumus',
+	'settings.crashReportsHint': 'Anonīmi dati par avārijām palīdz mums labot kļūdas. Bez fotoattēliem, ziņām vai personas datiem.',
 	'settings.server': 'Serveris',
 	'settings.serverName': 'Nosaukums',
 	'settings.version': 'Versija',

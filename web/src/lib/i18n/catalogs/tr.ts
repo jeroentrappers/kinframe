@@ -485,6 +485,8 @@ const tr: Catalog = {
 	'settings.preferences': 'Tercihler',
 	'settings.language': 'Dil',
 	'settings.languageHint': 'Bu web sitesinde ve bildirimlerde kullanılır.',
+	'settings.crashReports': 'Çökme raporları gönder',
+	'settings.crashReportsHint': 'Anonim çökme bilgileri hataları düzeltmemize yardımcı olur. Fotoğraf, mesaj veya kişisel veri yok.',
 	'settings.server': 'Sunucu',
 	'settings.serverName': 'Ad',
 	'settings.version': 'Sürüm',

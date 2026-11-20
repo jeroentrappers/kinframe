@@ -512,6 +512,8 @@ const it: Catalog = {
 	'settings.preferences': 'Preferenze',
 	'settings.language': 'Lingua',
 	'settings.languageHint': 'Usata su questo sito e per le notifiche.',
+	'settings.crashReports': 'Invia segnalazioni di arresto anomalo',
+	'settings.crashReportsHint': 'I dettagli anonimi sugli arresti anomali ci aiutano a correggere i bug. Niente foto, messaggi o dati personali.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Nome',
 	'settings.version': 'Versione',

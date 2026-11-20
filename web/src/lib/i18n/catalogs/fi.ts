@@ -485,6 +485,8 @@ const fi: Catalog = {
 	'settings.preferences': 'Asetukset',
 	'settings.language': 'Kieli',
 	'settings.languageHint': 'Käytetään tällä sivustolla ja ilmoituksissa.',
+	'settings.crashReports': 'Lähetä kaatumisraportteja',
+	'settings.crashReportsHint': 'Nimettömät kaatumistiedot auttavat meitä korjaamaan virheitä. Ei kuvia, viestejä eikä henkilötietoja.',
 	'settings.server': 'Palvelin',
 	'settings.serverName': 'Nimi',
 	'settings.version': 'Versio',

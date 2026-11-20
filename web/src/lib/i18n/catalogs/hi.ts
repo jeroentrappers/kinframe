@@ -497,6 +497,8 @@ const hi: Catalog = {
 	'settings.preferences': 'प्राथमिकताएं',
 	'settings.language': 'भाषा',
 	'settings.languageHint': 'इस वेबसाइट पर और सूचनाओं के लिए इस्तेमाल होती है।',
+	'settings.crashReports': 'क्रैश रिपोर्ट भेजें',
+	'settings.crashReportsHint': 'गुमनाम क्रैश जानकारी से हमें गड़बड़ियाँ ठीक करने में मदद मिलती है। कोई फ़ोटो, संदेश या निजी डेटा नहीं।',
 	'settings.server': 'सर्वर',
 	'settings.serverName': 'नाम',
 	'settings.version': 'वर्शन',

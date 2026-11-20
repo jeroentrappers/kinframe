@@ -495,6 +495,8 @@ const zhCN: Catalog = {
 	'settings.preferences': '偏好设置',
 	'settings.language': '语言',
 	'settings.languageHint': '用于本网站和通知。',
+	'settings.crashReports': '发送崩溃报告',
+	'settings.crashReportsHint': '匿名的崩溃信息帮助我们修复问题。不含照片、消息或个人数据。',
 	'settings.server': '服务器',
 	'settings.serverName': '名称',
 	'settings.version': '版本',

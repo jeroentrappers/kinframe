@@ -497,6 +497,8 @@ export const en = {
 	'settings.preferences': 'Preferences',
 	'settings.language': 'Language',
 	'settings.languageHint': 'Used on this website and for notifications.',
+	'settings.crashReports': 'Send crash reports',
+	'settings.crashReportsHint': 'Anonymous crash details help us fix bugs. No photos, messages or personal data.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Name',
 	'settings.version': 'Version',

@@ -496,6 +496,8 @@ const bg: Catalog = {
 	'settings.preferences': 'Предпочитания',
 	'settings.language': 'Език',
 	'settings.languageHint': 'Използва се на този уебсайт и за известията.',
+	'settings.crashReports': 'Изпращане на доклади за сривове',
+	'settings.crashReportsHint': 'Анонимните данни за сривове ни помагат да поправяме грешки. Без снимки, съобщения или лични данни.',
 	'settings.server': 'Сървър',
 	'settings.serverName': 'Име',
 	'settings.version': 'Версия',

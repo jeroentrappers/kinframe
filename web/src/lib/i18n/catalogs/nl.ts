@@ -487,6 +487,8 @@ const nl: Catalog = {
 	'settings.preferences': 'Voorkeuren',
 	'settings.language': 'Taal',
 	'settings.languageHint': 'Voor deze website en voor meldingen.',
+	'settings.crashReports': 'Crashrapporten versturen',
+	'settings.crashReportsHint': 'Anonieme crashgegevens helpen ons fouten op te lossen. Geen foto’s, berichten of persoonsgegevens.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Naam',
 	'settings.version': 'Versie',

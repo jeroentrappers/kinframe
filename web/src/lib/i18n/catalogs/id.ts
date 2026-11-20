@@ -497,6 +497,8 @@ const id: Catalog = {
 	'settings.preferences': 'Preferensi',
 	'settings.language': 'Bahasa',
 	'settings.languageHint': 'Digunakan di situs ini dan untuk notifikasi.',
+	'settings.crashReports': 'Kirim laporan crash',
+	'settings.crashReportsHint': 'Detail crash anonim membantu kami memperbaiki bug. Tanpa foto, pesan, atau data pribadi.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Nama',
 	'settings.version': 'Versi',

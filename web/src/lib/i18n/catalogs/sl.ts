@@ -528,6 +528,8 @@ const sl: Catalog = {
 	'settings.preferences': 'Nastavitve',
 	'settings.language': 'Jezik',
 	'settings.languageHint': 'Uporablja se na tem spletnem mestu in za obvestila.',
+	'settings.crashReports': 'Pošiljaj poročila o zrušitvah',
+	'settings.crashReportsHint': 'Anonimni podatki o zrušitvah nam pomagajo odpravljati napake. Brez fotografij, sporočil ali osebnih podatkov.',
 	'settings.server': 'Strežnik',
 	'settings.serverName': 'Ime',
 	'settings.version': 'Različica',

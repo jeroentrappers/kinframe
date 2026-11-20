@@ -501,6 +501,8 @@ const ro: Catalog = {
 	'settings.preferences': 'Preferințe',
 	'settings.language': 'Limbă',
 	'settings.languageHint': 'Folosită pe acest site și pentru notificări.',
+	'settings.crashReports': 'Trimite rapoarte de blocare',
+	'settings.crashReportsHint': 'Detaliile anonime despre blocări ne ajută să reparăm erorile. Fără fotografii, mesaje sau date personale.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Nume',
 	'settings.version': 'Versiune',

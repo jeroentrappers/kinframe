@@ -495,6 +495,8 @@ const zhTW: Catalog = {
 	'settings.preferences': '偏好設定',
 	'settings.language': '語言',
 	'settings.languageHint': '用於本網站和通知。',
+	'settings.crashReports': '傳送當機報告',
+	'settings.crashReportsHint': '匿名的當機資訊能幫助我們修正問題。不含照片、訊息或個人資料。',
 	'settings.server': '伺服器',
 	'settings.serverName': '名稱',
 	'settings.version': '版本',

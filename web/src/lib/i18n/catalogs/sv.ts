@@ -485,6 +485,8 @@ const sv: Catalog = {
 	'settings.preferences': 'Inställningar',
 	'settings.language': 'Språk',
 	'settings.languageHint': 'Används på den här webbplatsen och för aviseringar.',
+	'settings.crashReports': 'Skicka kraschrapporter',
+	'settings.crashReportsHint': 'Anonyma kraschuppgifter hjälper oss att rätta fel. Inga bilder, meddelanden eller personuppgifter.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Namn',
 	'settings.version': 'Version',

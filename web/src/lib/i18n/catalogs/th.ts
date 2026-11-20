@@ -497,6 +497,8 @@ const th: Catalog = {
 	'settings.preferences': 'ค่ากำหนด',
 	'settings.language': 'ภาษา',
 	'settings.languageHint': 'ใช้บนเว็บไซต์นี้และสำหรับการแจ้งเตือน',
+	'settings.crashReports': 'ส่งรายงานข้อขัดข้อง',
+	'settings.crashReportsHint': 'รายละเอียดข้อขัดข้องแบบไม่ระบุตัวตนช่วยให้เราแก้ไขบั๊กได้ ไม่มีรูปภาพ ข้อความ หรือข้อมูลส่วนบุคคล',
 	'settings.server': 'เซิร์ฟเวอร์',
 	'settings.serverName': 'ชื่อ',
 	'settings.version': 'เวอร์ชัน',

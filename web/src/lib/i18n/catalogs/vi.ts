@@ -497,6 +497,8 @@ const vi: Catalog = {
 	'settings.preferences': 'Tùy chọn',
 	'settings.language': 'Ngôn ngữ',
 	'settings.languageHint': 'Dùng trên trang web này và cho thông báo.',
+	'settings.crashReports': 'Gửi báo cáo sự cố',
+	'settings.crashReportsHint': 'Thông tin sự cố ẩn danh giúp chúng tôi sửa lỗi. Không có ảnh, tin nhắn hay dữ liệu cá nhân.',
 	'settings.server': 'Máy chủ',
 	'settings.serverName': 'Tên',
 	'settings.version': 'Phiên bản',

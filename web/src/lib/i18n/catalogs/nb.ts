@@ -485,6 +485,8 @@ const nb: Catalog = {
 	'settings.preferences': 'Innstillinger',
 	'settings.language': 'Språk',
 	'settings.languageHint': 'Brukes på dette nettstedet og i varsler.',
+	'settings.crashReports': 'Send krasjrapporter',
+	'settings.crashReportsHint': 'Anonyme krasjdetaljer hjelper oss å rette feil. Ingen bilder, meldinger eller personopplysninger.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Navn',
 	'settings.version': 'Versjon',

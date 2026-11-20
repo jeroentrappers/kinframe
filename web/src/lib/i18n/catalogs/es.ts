@@ -501,6 +501,8 @@ const es: Catalog = {
 	'settings.preferences': 'Preferencias',
 	'settings.language': 'Idioma',
 	'settings.languageHint': 'Se usa en esta web y en las notificaciones.',
+	'settings.crashReports': 'Enviar informes de fallos',
+	'settings.crashReportsHint': 'Los datos anónimos de los fallos nos ayudan a corregir errores. Sin fotos, mensajes ni datos personales.',
 	'settings.server': 'Servidor',
 	'settings.serverName': 'Nombre',
 	'settings.version': 'Versión',

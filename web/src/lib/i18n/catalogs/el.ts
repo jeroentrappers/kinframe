@@ -485,6 +485,8 @@ const el: Catalog = {
 	'settings.preferences': 'Προτιμήσεις',
 	'settings.language': 'Γλώσσα',
 	'settings.languageHint': 'Χρησιμοποιείται σε αυτόν τον ιστότοπο και στις ειδοποιήσεις.',
+	'settings.crashReports': 'Αποστολή αναφορών σφαλμάτων',
+	'settings.crashReportsHint': 'Τα ανώνυμα στοιχεία σφαλμάτων μάς βοηθούν να διορθώνουμε προβλήματα. Χωρίς φωτογραφίες, μηνύματα ή προσωπικά δεδομένα.',
 	'settings.server': 'Διακομιστής',
 	'settings.serverName': 'Όνομα',
 	'settings.version': 'Έκδοση',

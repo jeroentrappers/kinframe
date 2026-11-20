@@ -496,6 +496,8 @@ const da: Catalog = {
 	'settings.preferences': 'Præferencer',
 	'settings.language': 'Sprog',
 	'settings.languageHint': 'Bruges på dette website og til notifikationer.',
+	'settings.crashReports': 'Send nedbrudsrapporter',
+	'settings.crashReportsHint': 'Anonyme oplysninger om nedbrud hjælper os med at rette fejl. Ingen billeder, beskeder eller personoplysninger.',
 	'settings.server': 'Server',
 	'settings.serverName': 'Navn',
 	'settings.version': 'Version',

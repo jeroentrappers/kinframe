@@ -496,6 +496,8 @@ const ko: Catalog = {
 	'settings.preferences': '환경설정',
 	'settings.language': '언어',
 	'settings.languageHint': '이 웹사이트와 알림에 사용돼요.',
+	'settings.crashReports': '오류 보고서 보내기',
+	'settings.crashReportsHint': '익명의 오류 정보는 버그를 고치는 데 도움이 돼요. 사진, 메시지, 개인 정보는 포함되지 않아요.',
 	'settings.server': '서버',
 	'settings.serverName': '이름',
 	'settings.version': '버전',

@@ -183,6 +183,11 @@ class DiscoveryState {
 		return this.doc?.remote_help === true;
 	}
 
+	/** The operator's crash reporting DSN for the web app (docs/spec/crash-reporting.md); null = no reporting. */
+	get sentryDsn() {
+		return this.doc?.sentry_dsn || null;
+	}
+
 	/** The server's stable id (set by servers that know about other servers; the web stays single-server). */
 	get serverId() {
 		return this.doc?.server_id ?? null;

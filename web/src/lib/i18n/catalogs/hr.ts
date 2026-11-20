@@ -512,6 +512,8 @@ const hr: Catalog = {
 	'settings.preferences': 'Preference',
 	'settings.language': 'Jezik',
 	'settings.languageHint': 'Koristi se na ovoj web-stranici i za obavijesti.',
+	'settings.crashReports': 'Šalji izvješća o rušenju',
+	'settings.crashReportsHint': 'Anonimni podaci o rušenjima pomažu nam ispraviti greške. Bez fotografija, poruka ili osobnih podataka.',
 	'settings.server': 'Poslužitelj',
 	'settings.serverName': 'Naziv',
 	'settings.version': 'Verzija',

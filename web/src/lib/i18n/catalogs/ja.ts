@@ -496,6 +496,8 @@ const ja: Catalog = {
 	'settings.preferences': '環境設定',
 	'settings.language': '言語',
 	'settings.languageHint': 'このウェブサイトと通知で使われます。',
+	'settings.crashReports': 'クラッシュレポートを送信',
+	'settings.crashReportsHint': '匿名のクラッシュ情報はバグの修正に役立ちます。写真、メッセージ、個人データは含まれません。',
 	'settings.server': 'サーバー',
 	'settings.serverName': '名前',
 	'settings.version': 'バージョン',

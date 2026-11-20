@@ -20,6 +20,7 @@
 	import { PUSH_ACTIONS, type KnownPushAction } from '$lib/pushPayload';
 	import ChoiceGroup from '$components/leaving/ChoiceGroup.svelte';
 	import OtherServers from '$components/remote/OtherServers.svelte';
+	import { crashReportsEnabled, setCrashReportsEnabled } from '$lib/crash';
 
 	// After a first sign-in without a name claim: ask once, then continue where they were going.
 	const welcome = page.url.searchParams.get('welcome') === '1';
@@ -80,6 +81,14 @@
 	}
 
 	const limits = $derived(discovery.limits);
+
+	// Crash reports (docs/spec/crash-reporting.md §4): this device only. Off stops sending at once, on applies at
+	// the next start.
+	let crashReports = $state(crashReportsEnabled());
+	function toggleCrashReports(e: Event & { currentTarget: HTMLInputElement }) {
+		crashReports = e.currentTarget.checked;
+		setCrashReportsEnabled(crashReports);
+	}
 
 	// A reminder's notification button when no tab was open (README §6.3): the worker opened this page with it.
 	$effect(() => {
@@ -201,6 +210,15 @@
 				</div>
 				<LanguagePicker onchange={saveLocale} />
 			</div>
+			{#if discovery.sentryDsn}
+				<label class="switch crash-switch">
+					<input type="checkbox" checked={crashReports} onchange={toggleCrashReports} />
+					<span>
+						<span class="s-label">{t('settings.crashReports')}</span>
+						<span class="hint">{t('settings.crashReportsHint')}</span>
+					</span>
+				</label>
+			{/if}
 		</section>
 
 		<section class="card card-pad" aria-labelledby="push-title">
@@ -399,6 +417,9 @@
 	}
 	.s-label {
 		font-weight: 600;
+	}
+	.crash-switch {
+		margin-top: var(--s-4);
 	}
 	.push-note {
 		margin-top: var(--s-3);

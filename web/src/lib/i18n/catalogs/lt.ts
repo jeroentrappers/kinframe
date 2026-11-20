@@ -513,6 +513,8 @@ const lt: Catalog = {
 	'settings.preferences': 'Nuostatos',
 	'settings.language': 'Kalba',
 	'settings.languageHint': 'Naudojama šioje svetainėje ir pranešimuose.',
+	'settings.crashReports': 'Siųsti strigčių ataskaitas',
+	'settings.crashReportsHint': 'Anoniminė informacija apie strigtis padeda mums taisyti klaidas. Jokių nuotraukų, žinučių ar asmens duomenų.',
 	'settings.server': 'Serveris',
 	'settings.serverName': 'Pavadinimas',
 	'settings.version': 'Versija',

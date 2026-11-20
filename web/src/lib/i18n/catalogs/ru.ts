@@ -517,6 +517,8 @@ const ru: Catalog = {
 	'settings.preferences': 'Предпочтения',
 	'settings.language': 'Язык',
 	'settings.languageHint': 'Для этого сайта и уведомлений.',
+	'settings.crashReports': 'Отправлять отчёты о сбоях',
+	'settings.crashReportsHint': 'Анонимные данные о сбоях помогают нам исправлять ошибки. Без фото, сообщений и личных данных.',
 	'settings.server': 'Сервер',
 	'settings.serverName': 'Название',
 	'settings.version': 'Версия',

@@ -517,6 +517,8 @@ const uk: Catalog = {
 	'settings.preferences': 'Параметри',
 	'settings.language': 'Мова',
 	'settings.languageHint': 'Для цього сайту та сповіщень.',
+	'settings.crashReports': 'Надсилати звіти про збої',
+	'settings.crashReportsHint': 'Анонімні дані про збої допомагають нам виправляти помилки. Без фото, повідомлень і особистих даних.',
 	'settings.server': 'Сервер',
 	'settings.serverName': 'Назва',
 	'settings.version': 'Версія',

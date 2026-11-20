@@ -512,6 +512,8 @@ const fr: Catalog = {
 	'settings.preferences': 'Préférences',
 	'settings.language': 'Langue',
 	'settings.languageHint': 'Utilisée sur ce site et pour les notifications.',
+	'settings.crashReports': 'Envoyer les rapports de plantage',
+	'settings.crashReportsHint': 'Des détails anonymes sur les plantages nous aident à corriger les bugs. Ni photos, ni messages, ni données personnelles.',
 	'settings.server': 'Serveur',
 	'settings.serverName': 'Nom',
 	'settings.version': 'Version',

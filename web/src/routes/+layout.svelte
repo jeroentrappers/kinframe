@@ -23,6 +23,7 @@
 	import Icon from '$components/Icon.svelte';
 	import TvMiniBar from '$components/TvMiniBar.svelte';
 	import { requestSendUrl } from '$lib/engagement';
+	import { startCrashReporting } from '$lib/crash';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -58,6 +59,7 @@
 	async function boot() {
 		booting = true;
 		const [doc] = await Promise.all([discovery.load(), i18n.ready]);
+		void startCrashReporting(doc?.sentry_dsn);
 		if (doc && discovery.storefront) {
 			if (leaveStorefront()) return; // keep the splash while the browser leaves
 			if (!hasSavedLocale()) {
