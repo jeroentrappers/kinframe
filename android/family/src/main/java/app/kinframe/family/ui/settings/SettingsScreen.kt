@@ -42,6 +42,7 @@ import app.kinframe.family.ui.QuietButton
 import app.kinframe.family.ui.SecondaryButton
 import app.kinframe.family.ui.SectionTitle
 import app.kinframe.family.ui.Surface
+import app.kinframe.family.ui.SwitchRow
 import app.kinframe.family.util.Format
 
 @Composable
@@ -80,6 +81,9 @@ fun SettingsScreen(
     leaving: (@Composable () -> Unit)? = null,
     /** The server has leaving (README §5.21): deleting asks "Take my photos with me" or "Leave them to the families". */
     deletionChoice: Boolean = false,
+    /** "Send crash reports" (crash-reporting.md §4); null hides it. */
+    sendCrashReports: Boolean? = null,
+    onSendCrashReports: (Boolean) -> Unit = {},
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -145,6 +149,14 @@ fun SettingsScreen(
         telegram?.invoke()
         social?.invoke()
         leaving?.invoke()
+
+        if (sendCrashReports != null) {
+            SectionTitle(stringResource(R.string.settings_privacy))
+            Surface(Modifier.fillMaxWidth()) {
+                SwitchRow(stringResource(R.string.settings_crash_reports), sendCrashReports, onSendCrashReports,
+                    hint = stringResource(R.string.settings_crash_reports_hint))
+            }
+        }
 
         SectionTitle(stringResource(R.string.settings_server))
         Surface(Modifier.fillMaxWidth()) {

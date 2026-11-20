@@ -219,6 +219,11 @@ class SmokeTest {
             R.string.social_nav_home, R.string.nav_frames, R.string.nav_send, R.string.chat_nav,
             R.string.nav_feeds, R.string.nav_history, R.string.nav_settings,
         ).forEach(::openTab)
+        // Settings is open: "Send crash reports" (on by default) turns off.
+        assertTrue(FamilyCrashReports.enabled(app))
+        compose.onAllNodes(hasText(app.getString(R.string.settings_crash_reports))).onFirst().performScrollTo().performClick()
+        settle()
+        assertTrue("Send crash reports turned off", !FamilyCrashReports.enabled(app))
 
         // Pushed screens, the way a notification tap opens them.
         graph.openTarget.value = OpenTarget(Notifications.TARGET_FRAME, frameId = "f-oma")

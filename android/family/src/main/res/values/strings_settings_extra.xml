@@ -25,4 +25,8 @@
     <string name="common_review">Review</string>
     <!-- Android only: the app instead of the website. -->
     <string name="settings_language_hint_app">Used in this app and for notifications.</string>
+    <!-- Crash reports (docs/spec/crash-reporting.md §4). -->
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_crash_reports">Send crash reports</string>
+    <string name="settings_crash_reports_hint">Anonymous crash details help us fix bugs. No photos, messages or personal data.</string>
 </resources>

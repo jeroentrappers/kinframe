@@ -77,6 +77,7 @@ import app.kinframe.core.design.KinIcons
 import app.kinframe.family.AppGraph
 import app.kinframe.family.BuildConfig
 import app.kinframe.family.DebugLaunch
+import app.kinframe.family.FamilyCrashReports
 import app.kinframe.family.R
 import app.kinframe.family.auth.AuthMode
 import app.kinframe.family.notify.Notifications
@@ -599,6 +600,7 @@ private fun Screen(
             val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) app.setAvatar(uri) { err -> toaster.show(res.getString(err ?: R.string.settings_avatar_saved)) }
             }
+            var sendCrashReports by remember { mutableStateOf(FamilyCrashReports.enabled(context)) }
             SettingsScreen(
                 ready.me, ready.server, graph.auth.mode() == AuthMode.Dev, push, allowed, ps.savingName,
                 onSaveName = { app.onNameDraft(it); app.saveName(); toaster.show(res.getString(R.string.settings_name_saved)) },
@@ -629,6 +631,8 @@ private fun Screen(
                     app.deleteAccount(removeItems) { err -> deletingAccount = false; toaster.show(res.getString(err)) }
                 },
                 deletingAccount = deletingAccount,
+                sendCrashReports = sendCrashReports,
+                onSendCrashReports = { on -> sendCrashReports = on; FamilyCrashReports.setEnabled(context, on) },
             )
         }
         is Route.AccountSettings -> {
