@@ -285,6 +285,7 @@ fun reasonText(reason: OwnerGate.Reason): String = stringResource(
         OwnerGate.Reason.ChangeServer -> R.string.pin_reason_server
         OwnerGate.Reason.FactoryReset -> R.string.pin_reason_reset
         OwnerGate.Reason.ExternalStorage -> R.string.pin_reason_storage
+        OwnerGate.Reason.StopRemoteHelp -> R.string.pin_reason_remote_help
     },
 )
 

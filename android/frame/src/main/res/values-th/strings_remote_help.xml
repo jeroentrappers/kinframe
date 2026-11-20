@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">ความช่วยเหลือระยะไกล</string>
+    <string name="remote_help_badge">ความช่วยเหลือระยะไกลเปิดอยู่ถึง %1$s</string>
+    <string name="remote_help_stop_question">ผู้ดูแล kinframe สามารถดูกรอบรูปนี้เพื่อช่วยเหลือได้ หยุดไหม</string>
+    <string name="remote_help_stop">หยุดความช่วยเหลือระยะไกล</string>
+    <string name="remote_help_keep">เปิดไว้ต่อ</string>
+    <string name="pin_reason_remote_help">เพื่อหยุดความช่วยเหลือระยะไกล</string>
+</resources>

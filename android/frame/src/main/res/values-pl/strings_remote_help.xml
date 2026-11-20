@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Pomoc zdalna</string>
+    <string name="remote_help_badge">Pomoc zdalna jest włączona do %1$s</string>
+    <string name="remote_help_stop_question">Operator kinframe może zajrzeć do tej ramki, aby pomóc. Zatrzymać?</string>
+    <string name="remote_help_stop">Zatrzymaj pomoc zdalną</string>
+    <string name="remote_help_keep">Zostaw włączoną</string>
+    <string name="pin_reason_remote_help">aby zatrzymać pomoc zdalną</string>
+</resources>

@@ -49,6 +49,14 @@ class PlayBuildTest {
         assertTrue("play" in Distribution.heartbeatFeatures())
     }
 
+    @Test fun noRemoteHelpInThisBuild() {
+        // Remote help (docs/spec/remote-help.md) needs root: its engine, script and tarball reader are GitHub-only.
+        for (name in listOf("RemoteHelpEngine", "RemoteHelpScript", "TailscaleArchive", "RemoteHelpPayload")) {
+            assertFalse(name, runCatching { Class.forName("app.kinframe.frame.remotehelp.$name") }.isSuccess)
+        }
+        assertFalse(app.kinframe.core.api.FrameFeatures.REMOTE_HELP in Distribution.heartbeatFeatures())
+    }
+
     @Test fun noSelfUpdateCodeInThisBuild() {
         // The installer, the APK downloader and the root install script exist only in the GitHub build.
         for (name in listOf("app.kinframe.frame.update.Installer", "app.kinframe.frame.update.ApkDownloader")) {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Fernhilfe</string>
+    <string name="remote_help_badge">Fernhilfe ist bis %1$s an</string>
+    <string name="remote_help_stop_question">Der kinframe-Betreiber kann sich diesen Rahmen ansehen, um zu helfen. Beenden?</string>
+    <string name="remote_help_stop">Fernhilfe beenden</string>
+    <string name="remote_help_keep">Anlassen</string>
+    <string name="pin_reason_remote_help">um die Fernhilfe zu beenden</string>
+</resources>

@@ -19,6 +19,8 @@ import app.kinframe.frame.ui.FrameStatuses
 import app.kinframe.frame.schedule.DisplayController
 import app.kinframe.frame.setup.SetupController
 import app.kinframe.frame.slideshow.SlideshowController
+import app.kinframe.frame.remotehelp.RemoteHelp
+import app.kinframe.frame.remotehelp.RemoteHelpManager
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.system.PowerActions
 import app.kinframe.frame.update.AppUpdates
@@ -79,6 +81,8 @@ class FrameController(val g: FrameGraph) {
     val power = PowerActions(this)
     /** Self-update (github) or Google Play in-app updates (play): the flavor's [UpdateManager]. */
     val update: AppUpdates = UpdateManager(this)
+    /** Remote help for the operator (github, rooted frames) or nothing (play): the flavor's [RemoteHelpManager]. */
+    val remoteHelp: RemoteHelp = RemoteHelpManager(this)
     val gate = OwnerGate(
         pinHash = { g.settings.settings.value.kiosk.ownerPinHash },
         attempts = PinAttempts(g.prefs.pinAttempts) { g.clock.nowMs() },
@@ -224,6 +228,7 @@ class FrameController(val g: FrameGraph) {
             reportStateChanges()
             app.kinframe.frame.sync.NowShowingReporter(this@FrameController).start()
             update.start()
+            remoteHelp.start()
             removable.start()
             frameo.start()
             scope.launch {
@@ -381,6 +386,8 @@ class FrameController(val g: FrameGraph) {
             scope.launch { joins.onEvent(request) }
         }
 
+        override fun onRemoteHelp(payload: JsonObject?) = remoteHelp.onChange(payload)
+
         override fun onEventInvitation(invitation: JsonObject) {
             scope.launch { calendar.onInvitationEvent(invitation) }
         }
@@ -395,6 +402,7 @@ class FrameController(val g: FrameGraph) {
         calendar.clear()
         social.clear()
         frameo.reset()
+        runCatching { remoteHelp.onUnpaired() }.onFailure { Log.w(TAG, "remote help clean-up", it) }
         withContext(Dispatchers.IO) {
             g.credentials.clear()
             g.api.forgetToken()
@@ -472,7 +480,8 @@ class FrameController(val g: FrameGraph) {
             timezone = g.clock.zone.id,
             updateState = updateState,
             lastUpdateError = updateError,
-            features = Distribution.heartbeatFeatures(),
+            features = Distribution.heartbeatFeatures() + remoteHelp.features(),
+            remoteHelp = remoteHelp.report(),
         )
     }
 

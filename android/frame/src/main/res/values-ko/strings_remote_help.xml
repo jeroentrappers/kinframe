@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">원격 지원</string>
+    <string name="remote_help_badge">원격 지원이 %1$s까지 켜져 있어요</string>
+    <string name="remote_help_stop_question">kinframe 운영자가 도움을 드리기 위해 이 액자를 볼 수 있어요. 중지할까요?</string>
+    <string name="remote_help_stop">원격 지원 중지</string>
+    <string name="remote_help_keep">켜 두기</string>
+    <string name="pin_reason_remote_help">원격 지원을 중지하려면</string>
+</resources>

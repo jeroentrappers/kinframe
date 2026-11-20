@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Remote help (docs/spec/remote-help.md): the operator's temporary tunnel to the frame, shown while it is on. -->
+<resources>
+    <!-- Title of the Stop dialog. -->
+    <string name="remote_help_title">Remote help</string>
+    <!-- Badge in a corner while a session runs; %1$s is the end time, e.g. 18:00. -->
+    <string name="remote_help_badge">Remote help is on until %1$s</string>
+    <!-- Shown when the badge is tapped. "kinframe" is the product name, always lowercase. -->
+    <string name="remote_help_stop_question">The kinframe operator can look at this frame to help. Stop?</string>
+    <string name="remote_help_stop">Stop remote help</string>
+    <string name="remote_help_keep">Keep it on</string>
+    <!-- Owner PIN keypad subtitle, like "to open settings". -->
+    <string name="pin_reason_remote_help">to stop remote help</string>
+</resources>

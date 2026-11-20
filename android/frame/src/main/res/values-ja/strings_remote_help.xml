@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">リモートサポート</string>
+    <string name="remote_help_badge">リモートサポートは%1$sまでオンです</string>
+    <string name="remote_help_stop_question">kinframe の運営者がサポートのためにこのフレームを確認できます。停止しますか？</string>
+    <string name="remote_help_stop">リモートサポートを停止</string>
+    <string name="remote_help_keep">オンのままにする</string>
+    <string name="pin_reason_remote_help">リモートサポートを停止するため</string>
+</resources>

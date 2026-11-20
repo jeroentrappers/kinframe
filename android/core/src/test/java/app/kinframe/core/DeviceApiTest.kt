@@ -224,6 +224,30 @@ class DeviceApiTest {
     }
 
     @Test
+    fun endsRemoteHelpAndReportsItInTheHeartbeat() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(MockResponse.Builder().code(204).build())
+        server.enqueue(json("""{"type":"x","title":"x","status":404,"code":"not_found"}""", 404))
+        server.enqueue(MockResponse.Builder().code(204).build())
+        api.endRemoteHelp()
+        api.endRemoteHelp() // already ended: still fine
+        api.heartbeat(
+            app.kinframe.core.api.Heartbeat(
+                appVersion = "1", uptimeS = 5, features = listOf(app.kinframe.core.api.FrameFeatures.REMOTE_HELP),
+                remoteHelp = app.kinframe.core.api.RemoteHelpReport("rh1", app.kinframe.core.api.RemoteHelpState.ON, ip = "100.64.0.9"),
+            ),
+        )
+        server.takeRequest()
+        val del = server.takeRequest()
+        assertEquals("DELETE", del.method)
+        assertEquals("/v1/device/remote-help", del.url.encodedPath)
+        server.takeRequest()
+        val hb = server.takeRequest().body!!.utf8()
+        assertTrue(hb, hb.contains(""""remote_help":{"session_id":"rh1","state":"on","ip":"100.64.0.9"}"""))
+        assertTrue(hb, hb.contains(""""features":["remote_help"]"""))
+    }
+
+    @Test
     fun updateRequiredHookFiresOn426() = runBlocking {
         var fired = 0
         api.onUpdateRequired = { fired++ }

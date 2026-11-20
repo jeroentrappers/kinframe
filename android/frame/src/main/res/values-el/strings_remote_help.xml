@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Απομακρυσμένη βοήθεια</string>
+    <string name="remote_help_badge">Η απομακρυσμένη βοήθεια είναι ενεργή έως τις %1$s</string>
+    <string name="remote_help_stop_question">Ο διαχειριστής του kinframe μπορεί να δει αυτή την κορνίζα για να βοηθήσει. Διακοπή;</string>
+    <string name="remote_help_stop">Διακοπή απομακρυσμένης βοήθειας</string>
+    <string name="remote_help_keep">Να μείνει ενεργή</string>
+    <string name="pin_reason_remote_help">για διακοπή της απομακρυσμένης βοήθειας</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">रिमोट सहायता</string>
+    <string name="remote_help_badge">रिमोट सहायता %1$s तक चालू है</string>
+    <string name="remote_help_stop_question">kinframe ऑपरेटर मदद के लिए इस फ़्रेम को देख सकता है। रोकें?</string>
+    <string name="remote_help_stop">रिमोट सहायता रोकें</string>
+    <string name="remote_help_keep">चालू रहने दें</string>
+    <string name="pin_reason_remote_help">रिमोट सहायता रोकने के लिए</string>
+</resources>

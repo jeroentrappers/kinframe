@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">المساعدة عن بُعد</string>
+    <string name="remote_help_badge">المساعدة عن بُعد مفعّلة حتى %1$s</string>
+    <string name="remote_help_stop_question">يمكن لمشغّل kinframe الاطلاع على هذا الإطار للمساعدة. هل تريد الإيقاف؟</string>
+    <string name="remote_help_stop">إيقاف المساعدة عن بُعد</string>
+    <string name="remote_help_keep">إبقاؤها مفعّلة</string>
+    <string name="pin_reason_remote_help">لإيقاف المساعدة عن بُعد</string>
+</resources>

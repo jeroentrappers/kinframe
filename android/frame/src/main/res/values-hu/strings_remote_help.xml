@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Távsegítség</string>
+    <string name="remote_help_badge">A távsegítség %1$s-ig be van kapcsolva</string>
+    <string name="remote_help_stop_question">A kinframe üzemeltetője megnézheti ezt a képkeretet, hogy segítsen. Leállítja?</string>
+    <string name="remote_help_stop">Távsegítség leállítása</string>
+    <string name="remote_help_keep">Maradjon bekapcsolva</string>
+    <string name="pin_reason_remote_help">a távsegítség leállításához</string>
+</resources>

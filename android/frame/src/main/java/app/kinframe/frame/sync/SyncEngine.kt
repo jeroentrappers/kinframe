@@ -39,6 +39,12 @@ class SyncEngine(
 ) {
     private val mutex = Mutex()
 
+    /**
+     * A `remote_help` change (docs/spec/remote-help.md §5.4): the session payload, or null for "no session". Called
+     * inside the page's transaction, so it must only record the wish (idempotent: a rolled-back page comes again).
+     */
+    var onRemoteHelp: (JsonObject?) -> Unit = {}
+
     data class PullResult(val applied: Int, val newItems: Int, val resets: Int)
 
     /** Pulls until `has_more` is false. Serialised: concurrent callers wait and then pull again (cheap). */
@@ -148,6 +154,8 @@ class SyncEngine(
                     state = state.copy(photoRequestJson = c.photoRequest?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 }
                 ChangeType.PROMPTS -> state = state.copy(promptsJson = c.prompts?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                // Remote help (entity = the frame): kept by the flavor's RemoteHelp, not in the mirror.
+                ChangeType.REMOTE_HELP -> onRemoteHelp(c.remoteHelp)
                 // Albums: only the "Only in album mode" flag matters to playback (photo-sources.md §9.1).
                 ChangeType.ALBUM_UPSERT -> c.album?.let { a ->
                     val id = (a["id"] as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull ?: return@let

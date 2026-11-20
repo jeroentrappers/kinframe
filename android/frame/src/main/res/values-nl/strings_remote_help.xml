@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Hulp op afstand</string>
+    <string name="remote_help_badge">Hulp op afstand staat aan tot %1$s</string>
+    <string name="remote_help_stop_question">De beheerder van kinframe kan op deze fotolijst meekijken om te helpen. Stoppen?</string>
+    <string name="remote_help_stop">Hulp op afstand stoppen</string>
+    <string name="remote_help_keep">Aan laten</string>
+    <string name="pin_reason_remote_help">om hulp op afstand te stoppen</string>
+</resources>

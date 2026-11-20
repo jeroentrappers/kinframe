@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Etätuki</string>
+    <string name="remote_help_badge">Etätuki on päällä klo %1$s asti</string>
+    <string name="remote_help_stop_question">kinframen ylläpitäjä voi katsoa tätä kuvakehystä auttaakseen. Lopetetaanko?</string>
+    <string name="remote_help_stop">Lopeta etätuki</string>
+    <string name="remote_help_keep">Pidä päällä</string>
+    <string name="pin_reason_remote_help">lopettaaksesi etätuen</string>
+</resources>

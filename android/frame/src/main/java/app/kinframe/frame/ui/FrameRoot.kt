@@ -63,6 +63,7 @@ fun FrameRoot(c: FrameController) {
         UpdateNotice(c.update)
         val portalOpen by c.portalOpen.collectAsState()
         if (portalOpen) CaptivePortalScreen(c)
+        app.kinframe.frame.remotehelp.RemoteHelpBadge(c)
         OwnerPinPrompt(c)
     }
 }

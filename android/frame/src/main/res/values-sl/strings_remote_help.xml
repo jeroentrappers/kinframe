@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Pomoč na daljavo</string>
+    <string name="remote_help_badge">Pomoč na daljavo je vklopljena do %1$s</string>
+    <string name="remote_help_stop_question">Upravljavec kinframa si lahko ogleda ta okvir, da pomaga. Ustavim?</string>
+    <string name="remote_help_stop">Ustavi pomoč na daljavo</string>
+    <string name="remote_help_keep">Pusti vklopljeno</string>
+    <string name="pin_reason_remote_help">za ustavitev pomoči na daljavo</string>
+</resources>

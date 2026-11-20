@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Hỗ trợ từ xa</string>
+    <string name="remote_help_badge">Hỗ trợ từ xa đang bật đến %1$s</string>
+    <string name="remote_help_stop_question">Nhà vận hành kinframe có thể xem khung ảnh này để hỗ trợ. Dừng lại?</string>
+    <string name="remote_help_stop">Dừng hỗ trợ từ xa</string>
+    <string name="remote_help_keep">Giữ bật</string>
+    <string name="pin_reason_remote_help">để dừng hỗ trợ từ xa</string>
+</resources>

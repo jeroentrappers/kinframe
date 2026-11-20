@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Uzaktan yardım</string>
+    <string name="remote_help_badge">Uzaktan yardım %1$s saatine kadar açık</string>
+    <string name="remote_help_stop_question">kinframe operatörü yardım etmek için bu çerçeveye bakabilir. Durdurulsun mu?</string>
+    <string name="remote_help_stop">Uzaktan yardımı durdur</string>
+    <string name="remote_help_keep">Açık kalsın</string>
+    <string name="pin_reason_remote_help">uzaktan yardımı durdurmak için</string>
+</resources>
