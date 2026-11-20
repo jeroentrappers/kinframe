@@ -8,6 +8,8 @@
 # web/src/lib/prep/wasm, and the HEIC decoder comes prebuilt from the pinned libheif-js npm package. CI checks that
 # the committed module matches its source (ci.yml, "Web prep WebAssembly").
 FROM node:22-trixie-slim AS web
+# sentry-cli (source map upload) needs the CA bundle to reach GlitchTip over TLS; the slim image has none.
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 ARG VERSION=0.1.0-dev
 ARG REVISION=
 # Crash reporting (docs/spec/crash-reporting.md): source maps go to GlitchTip when the build gets the secret
