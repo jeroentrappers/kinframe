@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Feeds (docs/spec/feeds.md): private family channels that frames follow. Members post, frames subscribe. -->
 <resources>
-    <string name="nav_feeds">Families</string>
+    <string name="nav_feeds">Family</string>
     <string name="frame_tab_feeds">Families</string>
     <string name="feeds_title">Families</string>
-    <string name="feeds_lede">Post once, and every frame that follows the family gets the photos.</string>
+    <string name="feeds_lede">Post once, and every frame that shows the family gets the photos.</string>
     <string name="feeds_enter_code">Enter a code</string>
-    <string name="feeds_new">New family</string>
-    <string name="feeds_new_body">A family is a private place for your relatives to share photos. You can invite people to post and frames to follow it.</string>
+    <string name="feeds_new">Start a family</string>
+    <string name="feeds_new_body">A family is a private place for your relatives to share photos. You can invite people to post and add frames that show it.</string>
     <string name="feeds_create">Create family</string>
     <string name="feeds_empty_title">No families yet</string>
-    <string name="feeds_empty_body">Start a family for your relatives: everyone posts to it once, and every frame that follows it shows the photos.</string>
+    <string name="feeds_empty_body">Start a family for your relatives: everyone posts to it once, and every frame that shows it gets the photos.</string>
     <string name="feed_name">Name</string>
     <string name="feed_name_placeholder">e.g. Peeters kids</string>
     <plurals name="feed_members_count">
@@ -37,7 +37,7 @@
     <!-- posts and receipts -->
     <string name="feed_post_to">Post to %1$s</string>
     <string name="feed_post_button">Post photos</string>
-    <string name="feed_no_posts">Nothing posted yet. Photos posted here appear on every frame that follows this family.</string>
+    <string name="feed_no_posts">Nothing posted yet. Photos posted here appear on every frame that shows this family.</string>
     <string name="feed_load_more">Show older posts</string>
     <string name="feed_receipts_own_only">Only the poster and the family’s admins see where a post was seen and how the frames reacted.</string>
     <string name="feed_post_by">Post by %1$s</string>
@@ -73,7 +73,7 @@
     <string name="feed_unsend_title">Unsend this post?</string>
     <string name="feed_remove_post">Remove post</string>
     <string name="feed_remove_post_title">Remove this post?</string>
-    <string name="feed_remove_post_body">It disappears from the family and from every frame that follows it. Photos that also reached a frame directly stay there.</string>
+    <string name="feed_remove_post_body">It disappears from the family and from every frame that shows it. Photos that also reached a frame directly stay there.</string>
     <string name="feed_remove_item">Remove photo %1$d from the family</string>
     <string name="feed_post_removed">Post removed from the family</string>
     <string name="feed_item_removed">Photo removed from the family</string>
@@ -100,12 +100,12 @@
     <string name="feed_owner_hint">As the owner, hand the family to someone else (tap a member) before you leave, or delete it.</string>
     <string name="feed_delete">Delete family</string>
     <string name="feed_delete_title">Delete %1$s?</string>
-    <string name="feed_delete_body">Every post leaves every frame that follows it, and those frames stop following. The photos stay in each poster’s sent history.</string>
+    <string name="feed_delete_body">Every post leaves every frame that shows the family, and those frames stop showing it. The photos stay in each poster’s sent history.</string>
     <string name="feed_invite_join">Invite to post</string>
     <string name="feed_invite_subscribe">Invite a frame</string>
     <string name="feed_invite_join_hint_approval">Anyone with the link or code can ask to post. You approve each request.</string>
     <string name="feed_invite_join_hint">Anyone with the link or code can post right away.</string>
-    <string name="feed_invite_subscribe_hint">For someone who manages a frame but isn’t in the family: they pick their frame and it follows the family at once, without joining.</string>
+    <string name="feed_invite_subscribe_hint">For someone who manages a frame but isn’t in the family: they pick their frame and it shows the family at once, without joining.</string>
     <string name="feed_invite_show_qr">Show QR code</string>
     <string name="feed_invite_code_label">Or enter this code in the app</string>
     <string name="feed_invite_code_hint">Under Frames → Add, or Families → Enter a code.</string>
@@ -114,44 +114,44 @@
     <string name="feed_share_subscribe_text">Show %1$s on your kinframe frame: %2$s (or enter the code %3$s in the app)</string>
 
     <!-- frames (subscriptions) -->
-    <string name="feed_frames_lede">Frames that follow this family show every new post.</string>
-    <string name="feed_show_on_frame">Show on a frame</string>
+    <string name="feed_frames_lede">Frames that show this family show every new post.</string>
+    <string name="feed_show_on_frame">Add a frame</string>
     <string name="feed_show_on_frame_title">Show %1$s on a frame</string>
-    <string name="feed_show_on_frame_none">Every frame you manage already follows this family.</string>
+    <string name="feed_show_on_frame_none">Every frame you manage already shows this family.</string>
     <string name="feed_show_on_frame_needs_approval">An admin of the family approves this first.</string>
     <string name="feed_show_on_frame_do">Show on the frame</string>
     <string name="feed_privacy_note">Members of %1$s will see this frame’s name, and posters will see when their photos were seen and how the frame reacted.</string>
     <string name="feed_sub_requests">Waiting for approval</string>
     <string name="feed_sub_requested_by">Asked by %1$s</string>
     <string name="feed_sub_reject">Decline</string>
-    <string name="feed_sub_frames">Following frames</string>
-    <string name="feed_sub_none">No frame follows this family yet.</string>
+    <string name="feed_sub_frames">Frames that show this family</string>
+    <string name="feed_sub_none">No frame shows this family yet.</string>
     <string name="feed_sub_ended">Ended</string>
     <string name="feed_sub_remove">Remove frame</string>
     <string name="feed_sub_remove_title">Remove %1$s?</string>
-    <string name="feed_sub_remove_body">The frame stops following the family and the family’s photos leave it. The frame’s owner is told.</string>
-    <string name="feed_sub_status_active">Following</string>
+    <string name="feed_sub_remove_body">The frame stops showing the family and the family’s photos leave it. The frame’s owner is told.</string>
+    <string name="feed_sub_status_active">Shows the family</string>
     <string name="feed_sub_status_paused">Paused</string>
     <string name="feed_sub_status_pending">Waiting</string>
     <string name="feed_sub_status_rejected">Declined</string>
     <string name="feed_sub_status_removed">Ended</string>
-    <string name="feed_sub_reason_unsubscribed">The frame stopped following</string>
+    <string name="feed_sub_reason_unsubscribed">The frame stopped showing the family</string>
     <string name="feed_sub_reason_removed_by_feed">Removed by the family</string>
     <string name="feed_sub_reason_frame_removed">Frame removed</string>
     <string name="feed_sub_reason_feed_deleted">Family deleted</string>
     <string name="feed_sub_reason_withdrawn">Request withdrawn</string>
-    <string name="feed_sub_approved">%1$s now follows the family</string>
+    <string name="feed_sub_approved">%1$s now shows the family</string>
     <string name="feed_sub_rejected">Declined for %1$s</string>
-    <string name="feed_sub_removed">%1$s no longer follows the family</string>
-    <string name="feed_sub_requested">Asked to show the family on %1$s. An admin approves it.</string>
-    <string name="feed_sub_active">The family now shows on %1$s</string>
-    <string name="feed_sub_requested_frame">Asked to follow %1$s. An admin of the family approves it.</string>
-    <string name="feed_sub_active_frame">This frame now follows %1$s</string>
+    <string name="feed_sub_removed">%1$s no longer shows the family</string>
+    <string name="feed_sub_requested">Waiting for an admin of the family before %1$s shows it.</string>
+    <string name="feed_sub_active">%1$s now shows the family</string>
+    <string name="feed_sub_requested_frame">Waiting for an admin of %1$s.</string>
+    <string name="feed_sub_active_frame">This frame now shows %1$s</string>
     <string name="feed_sub_paused">%1$s paused: its photos are hidden on this frame</string>
     <string name="feed_sub_resumed">%1$s is back on this frame</string>
     <string name="feed_sub_history_saved">History for %1$s saved</string>
-    <string name="feed_sub_unsubscribed">This frame no longer follows %1$s</string>
-    <string name="feed_sub_withdrawn">Request to follow %1$s withdrawn</string>
+    <string name="feed_sub_unsubscribed">This frame no longer shows %1$s</string>
+    <string name="feed_sub_withdrawn">Request to show %1$s withdrawn</string>
 
     <!-- history option -->
     <string name="feed_history_title">Earlier posts</string>
@@ -173,7 +173,7 @@
     <string name="feed_cover_saved">Cover saved</string>
     <string name="feed_cover_no_items">Post a photo first; the cover is one of the family’s own photos.</string>
     <string name="feed_settings_rules">Rules</string>
-    <string name="feed_setting_auto_approve">Frames follow without approval</string>
+    <string name="feed_setting_auto_approve">Frames show the family without approval</string>
     <string name="feed_setting_auto_approve_hint">When a poster shows the family on a frame they manage, it starts at once.</string>
     <string name="feed_setting_invite_approval">Approve new posters</string>
     <string name="feed_setting_invite_approval_hint">People who open an invite to post wait for an admin.</string>
@@ -194,15 +194,15 @@
     <string name="feed_invite_already">You’re already in this family.</string>
     <string name="feed_invite_subscribe_body">Pick the frames that should show this family. You don’t join the family; you can pause or stop it any time in the frame’s Families.</string>
     <string name="feed_invite_pick_frames">Frames you manage</string>
-    <string name="feed_invite_frame_already">Already follows this family</string>
+    <string name="feed_invite_frame_already">Already shows this family</string>
     <string name="feed_invite_no_frames">You don’t manage a frame yet. Add or claim one first.</string>
     <string name="feed_invite_subscribe_do">Show on these frames</string>
     <string name="feed_invite_subscribed">%1$s now shows on your frames.</string>
     <string name="feed_code_invalid">That code doesn’t match a family. Check the letters and try again.</string>
 
     <!-- a frame's feeds -->
-    <string name="frame_feeds_lede">Families that %1$s follows. New posts show up on their own.</string>
-    <string name="frame_feeds_none">This frame doesn’t follow any family.</string>
+    <string name="frame_feeds_lede">Families that %1$s shows. New posts show up on their own.</string>
+    <string name="frame_feeds_none">This frame doesn’t show a family yet.</string>
     <string name="frame_feeds_admins">Run by %1$s</string>
     <string name="frame_feeds_backfill">Adding earlier photos: %1$d of %2$d</string>
     <string name="frame_feeds_paused_hint">Paused: its photos are hidden on the frame until you resume.</string>
@@ -214,11 +214,11 @@
     <string name="frame_feeds_history_change_hint">More history adds earlier photos quietly; less removes earlier ones this family brought. New posts are never removed.</string>
     <string name="frame_feeds_play_only">Play only this family</string>
     <string name="frame_feeds_play_all">Play everything</string>
-    <string name="frame_feeds_unsubscribe">Stop following</string>
+    <string name="frame_feeds_unsubscribe">Remove from this frame</string>
     <string name="frame_feeds_withdraw">Withdraw request</string>
-    <string name="frame_feeds_unsubscribe_title">Stop following %1$s?</string>
+    <string name="frame_feeds_unsubscribe_title">Remove %1$s from this frame?</string>
     <string name="frame_feeds_unsubscribe_body">The family’s photos leave this frame, with their reactions. Photos sent to the frame directly stay.</string>
-    <string name="frame_feeds_add">Follow a family</string>
+    <string name="frame_feeds_add">Add a family</string>
     <string name="frame_feeds_add_none">You are in no other family. Got an invite? Enter its code.</string>
     <string name="frame_feeds_have_code">I have a family code</string>
     <string name="feed_mode_on">The frame now plays only this family</string>
@@ -242,14 +242,14 @@
     <!-- live and push -->
     <string name="live_subscription_request">%1$s wants to show %2$s</string>
     <string name="live_feed_join_request">%1$s wants to post to %2$s</string>
-    <string name="notif_subscription_request_title">A frame wants to follow your family</string>
+    <string name="notif_subscription_request_title">A frame wants to show your family</string>
     <string name="notif_subscription_decided_title">Family request answered</string>
     <string name="notif_subscription_removed_title">A family left your frame</string>
     <string name="notif_feed_join_title">Someone wants to post to your family</string>
     <string name="notif_feed_membership_title">Your family membership changed</string>
 
     <!-- problems -->
-    <string name="problem_already_subscribed">This frame already follows this family, or is waiting for approval.</string>
+    <string name="problem_already_subscribed">This frame already shows this family, or is waiting for approval.</string>
     <string name="problem_invalid_transition">That isn’t possible any more. Reload and try again.</string>
     <string name="problem_limit_reached">That’s the most this server allows.</string>
 </resources>

@@ -99,12 +99,12 @@
     <string name="social_role_member">Reader</string>
     <string name="social_role_member_hint">Readers see everything, comment, react and chat, but don’t post photos.</string>
     <!-- Android only: no web key -->
-    <string name="social_member_cannot_post">You follow this family as a reader: you can comment, react and chat, but not post photos.</string>
+    <string name="social_member_cannot_post">You read along in this family: you can comment, react and chat, but not post photos.</string>
     <string name="social_setting_see_reactions_hint">Hearts and quick replies from the frames show on every post, for every member.</string>
     <string name="social_setting_see_receipts">Everyone sees where posts were seen</string>
     <string name="social_setting_see_receipts_hint">Otherwise only the poster and admins see which frames showed a post.</string>
     <string name="social_setting_new_can_post">New members can post photos</string>
-    <string name="social_setting_new_can_post_hint">When off, people who join become readers: they follow along, comment and chat.</string>
+    <string name="social_setting_new_can_post_hint">When off, people who join read along: they comment and chat, but don’t post photos.</string>
     <string name="social_setting_circles">Members can make circles</string>
     <string name="social_setting_circles_hint">When off, only the owner and admins make circles.</string>
     <string name="social_family_chat">Family chat</string>

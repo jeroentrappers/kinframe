@@ -34,8 +34,8 @@
     <!-- Android only: no web key -->
     <string name="servers_follow_check">Link controleren</string>
     <plurals name="servers_preview_frames">
-        <item quantity="one">%d kader volgt deze familie</item>
-        <item quantity="other">%d kaders volgen deze familie</item>
+        <item quantity="one">%d kader toont deze familie</item>
+        <item quantity="other">%d kaders tonen deze familie</item>
     </plurals>
     <string name="servers_preview_copy">Foto’s van deze familie worden gekopieerd naar deze server (%1$s) en getoond op %2$s.</string>
     <string name="servers_preview_operator">Wie %1$s beheert, kan de kopieën zien, net als elke andere foto op deze server.</string>
@@ -66,7 +66,7 @@
     <!-- Android only: no web key -->
     <string name="servers_feed_title">Kaders op andere servers</string>
     <string name="servers_feed_allow">Kaders op andere servers toestaan</string>
-    <string name="servers_feed_allow_hint">Kaders op andere kinframe-servers mogen deze familie volgen met een uitnodiging voor kaders die dat toestaat. Zet je dit uit, dan stopt dat.</string>
+    <string name="servers_feed_allow_hint">Kaders op andere kinframe-servers mogen deze familie tonen met een uitnodiging voor kaders die dat toestaat. Zet je dit uit, dan stopt dat.</string>
     <!-- Android only: no web key -->
     <string name="servers_feed_invite">Deel een link voor kaders op andere servers</string>
     <string name="servers_feed_invite_hint">Kaders op andere servers mogen deze link gebruiken. Je kunt ze altijd verwijderen.</string>
@@ -79,7 +79,7 @@
     <string name="servers_blocked_unblock">Deblokkeren</string>
     <string name="servers_blocked_done">%1$s is geblokkeerd.</string>
 
-    <string name="servers_problem_already">Dit kader volgt die familie al.</string>
+    <string name="servers_problem_already">Dit kader toont die familie al.</string>
     <!-- Android only: no web key -->
     <string name="servers_problem_invite">Deze link werkt niet (meer).</string>
     <string name="servers_problem_unreachable">De andere server is nu niet bereikbaar. Probeer het later opnieuw.</string>

@@ -98,12 +98,12 @@
     <string name="social_role_member">Meelezer</string>
     <string name="social_role_member_hint">Lezers zien alles, plaatsen opmerkingen, reageren en chatten, maar plaatsen geen foto’s.</string>
     <!-- Android only: no web key -->
-    <string name="social_member_cannot_post">Je volgt deze familie als meelezer: je kunt opmerkingen plaatsen, reageren en chatten, maar geen foto’s plaatsen.</string>
+    <string name="social_member_cannot_post">Je leest mee in deze familie: je kunt opmerkingen plaatsen, reageren en chatten, maar geen foto’s plaatsen.</string>
     <string name="social_setting_see_reactions_hint">Hartjes en snelle antwoorden van de kaders staan bij elk bericht, voor elk lid.</string>
     <string name="social_setting_see_receipts">Iedereen ziet waar berichten bekeken werden</string>
     <string name="social_setting_see_receipts_hint">Anders zien alleen wie het plaatste en de beheerders welke kaders een bericht toonden.</string>
     <string name="social_setting_new_can_post">Nieuwe leden kunnen foto’s plaatsen</string>
-    <string name="social_setting_new_can_post_hint">Staat dit uit, dan worden nieuwe leden lezers: ze volgen mee, plaatsen opmerkingen en chatten.</string>
+    <string name="social_setting_new_can_post_hint">Staat dit uit, dan lezen nieuwe leden mee: ze plaatsen opmerkingen en chatten, maar geen foto’s.</string>
     <string name="social_setting_circles">Leden kunnen kringen maken</string>
     <string name="social_setting_circles_hint">Staat dit uit, dan maken alleen de eigenaar en de beheerders kringen.</string>
     <string name="social_family_chat">Familiechat</string>

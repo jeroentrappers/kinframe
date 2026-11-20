@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Feeds (docs/spec/feeds.md): private familiekanalen die kaders volgen. Leden plaatsen, kaders volgen. -->
 <resources>
-    <string name="nav_feeds">Families</string>
+    <string name="nav_feeds">Familie</string>
     <string name="frame_tab_feeds">Families</string>
     <string name="feeds_title">Families</string>
-    <string name="feeds_lede">Eén keer plaatsen, en elk kader dat de familie volgt, krijgt de foto’s.</string>
+    <string name="feeds_lede">Eén keer plaatsen, en elk kader dat de familie toont, krijgt de foto’s.</string>
     <string name="feeds_enter_code">Code invullen</string>
-    <string name="feeds_new">Nieuwe familie</string>
-    <string name="feeds_new_body">Een familie is een privéplek waar je familieleden foto’s delen. Je nodigt mensen uit om erin te plaatsen en kaders om haar te volgen.</string>
+    <string name="feeds_new">Een familie starten</string>
+    <string name="feeds_new_body">Een familie is een privéplek waar je familieleden foto’s delen. Je nodigt mensen uit om erin te plaatsen en voegt kaders toe die haar tonen.</string>
     <string name="feeds_create">Familie maken</string>
     <string name="feeds_empty_title">Nog geen families</string>
-    <string name="feeds_empty_body">Begin een familie voor je familieleden: iedereen plaatst er één keer in, en elk kader dat haar volgt, toont de foto’s.</string>
+    <string name="feeds_empty_body">Begin een familie voor je familieleden: iedereen plaatst er één keer in, en elk kader dat haar toont, krijgt de foto’s.</string>
     <string name="feed_name">Naam</string>
     <string name="feed_name_placeholder">bv. Kinderen Peeters</string>
     <plurals name="feed_members_count">
@@ -35,7 +35,7 @@
 
     <string name="feed_post_to">Plaatsen in %1$s</string>
     <string name="feed_post_button">Foto’s plaatsen</string>
-    <string name="feed_no_posts">Nog niets geplaatst. Foto’s die je hier plaatst, verschijnen op elk kader dat deze familie volgt.</string>
+    <string name="feed_no_posts">Nog niets geplaatst. Foto’s die je hier plaatst, verschijnen op elk kader dat deze familie toont.</string>
     <string name="feed_load_more">Oudere berichten tonen</string>
     <string name="feed_receipts_own_only">Alleen wie het bericht plaatste en de beheerders van de familie zien waar het bekeken is en hoe de kaders reageerden.</string>
     <string name="feed_post_by">Bericht van %1$s</string>
@@ -71,7 +71,7 @@
     <string name="feed_unsend_title">Dit bericht terughalen?</string>
     <string name="feed_remove_post">Bericht verwijderen</string>
     <string name="feed_remove_post_title">Dit bericht verwijderen?</string>
-    <string name="feed_remove_post_body">Het verdwijnt uit de familie en van elk kader dat haar volgt. Foto’s die ook rechtstreeks naar een kader gingen, blijven daar.</string>
+    <string name="feed_remove_post_body">Het verdwijnt uit de familie en van elk kader dat haar toont. Foto’s die ook rechtstreeks naar een kader gingen, blijven daar.</string>
     <string name="feed_remove_item">Foto %1$d uit de familie verwijderen</string>
     <string name="feed_post_removed">Bericht uit de familie verwijderd</string>
     <string name="feed_item_removed">Foto uit de familie verwijderd</string>
@@ -97,12 +97,12 @@
     <string name="feed_owner_hint">Als eigenaar geef je de familie eerst aan iemand anders (tik op een lid) voor je vertrekt, of je verwijdert haar.</string>
     <string name="feed_delete">Familie verwijderen</string>
     <string name="feed_delete_title">%1$s verwijderen?</string>
-    <string name="feed_delete_body">Elk bericht verdwijnt van elk kader dat de familie volgt, en die kaders volgen haar niet meer. De foto’s blijven in de verzonden foto’s van wie ze plaatste.</string>
+    <string name="feed_delete_body">Elk bericht verdwijnt van elk kader dat de familie toont, en die kaders tonen haar niet meer. De foto’s blijven in de verzonden foto’s van wie ze plaatste.</string>
     <string name="feed_invite_join">Uitnodigen om te plaatsen</string>
     <string name="feed_invite_subscribe">Een kader uitnodigen</string>
     <string name="feed_invite_join_hint_approval">Wie de link of code heeft, kan vragen om te plaatsen. Jij keurt elk verzoek goed.</string>
     <string name="feed_invite_join_hint">Wie de link of code heeft, kan meteen plaatsen.</string>
-    <string name="feed_invite_subscribe_hint">Voor wie een kader beheert maar niet in de familie zit: die kiest het kader en dat volgt de familie meteen, zonder lid te worden.</string>
+    <string name="feed_invite_subscribe_hint">Voor wie een kader beheert maar niet in de familie zit: die kiest het kader en dat toont de familie meteen, zonder lid te worden.</string>
     <string name="feed_invite_show_qr">QR-code tonen</string>
     <string name="feed_invite_code_label">Of vul deze code in de app in</string>
     <string name="feed_invite_code_hint">Bij Kaders → Toevoegen, of Families → Code invullen.</string>
@@ -110,44 +110,44 @@
     <string name="feed_share_join_text">Plaats je foto’s in %1$s op kinframe: %2$s (of vul de code %3$s in de app in)</string>
     <string name="feed_share_subscribe_text">Toon %1$s op je kinframe-kader: %2$s (of vul de code %3$s in de app in)</string>
 
-    <string name="feed_frames_lede">Kaders die deze familie volgen, tonen elk nieuw bericht.</string>
-    <string name="feed_show_on_frame">Op een kader tonen</string>
+    <string name="feed_frames_lede">Kaders die deze familie tonen, tonen elk nieuw bericht.</string>
+    <string name="feed_show_on_frame">Kader toevoegen</string>
     <string name="feed_show_on_frame_title">%1$s op een kader tonen</string>
-    <string name="feed_show_on_frame_none">Elk kader dat je beheert, volgt deze familie al.</string>
+    <string name="feed_show_on_frame_none">Elk kader dat je beheert, toont deze familie al.</string>
     <string name="feed_show_on_frame_needs_approval">Een beheerder van de familie keurt dit eerst goed.</string>
     <string name="feed_show_on_frame_do">Op het kader tonen</string>
     <string name="feed_privacy_note">De leden van %1$s zien de naam van dit kader, en plaatsers zien wanneer hun foto’s bekeken zijn en hoe het kader reageerde.</string>
     <string name="feed_sub_requests">Wacht op goedkeuring</string>
     <string name="feed_sub_requested_by">Gevraagd door %1$s</string>
     <string name="feed_sub_reject">Weigeren</string>
-    <string name="feed_sub_frames">Kaders die volgen</string>
-    <string name="feed_sub_none">Nog geen enkel kader volgt deze familie.</string>
+    <string name="feed_sub_frames">Kaders die deze familie tonen</string>
+    <string name="feed_sub_none">Nog geen enkel kader toont deze familie.</string>
     <string name="feed_sub_ended">Gestopt</string>
     <string name="feed_sub_remove">Kader verwijderen</string>
     <string name="feed_sub_remove_title">%1$s verwijderen?</string>
-    <string name="feed_sub_remove_body">Het kader volgt de familie niet meer en de foto’s van de familie verdwijnen ervan. De eigenaar van het kader krijgt een melding.</string>
-    <string name="feed_sub_status_active">Volgt</string>
+    <string name="feed_sub_remove_body">Het kader toont de familie niet meer en de foto’s van de familie verdwijnen ervan. De eigenaar van het kader krijgt een melding.</string>
+    <string name="feed_sub_status_active">Toont de familie</string>
     <string name="feed_sub_status_paused">Gepauzeerd</string>
     <string name="feed_sub_status_pending">Wacht</string>
     <string name="feed_sub_status_rejected">Geweigerd</string>
     <string name="feed_sub_status_removed">Gestopt</string>
-    <string name="feed_sub_reason_unsubscribed">Het kader volgt niet meer</string>
+    <string name="feed_sub_reason_unsubscribed">Het kader toont de familie niet meer</string>
     <string name="feed_sub_reason_removed_by_feed">Verwijderd door de familie</string>
     <string name="feed_sub_reason_frame_removed">Kader verwijderd</string>
     <string name="feed_sub_reason_feed_deleted">Familie verwijderd</string>
     <string name="feed_sub_reason_withdrawn">Verzoek ingetrokken</string>
-    <string name="feed_sub_approved">%1$s volgt nu de familie</string>
+    <string name="feed_sub_approved">%1$s toont nu de familie</string>
     <string name="feed_sub_rejected">Geweigerd voor %1$s</string>
-    <string name="feed_sub_removed">%1$s volgt de familie niet meer</string>
-    <string name="feed_sub_requested">Gevraagd om de familie op %1$s te tonen. Een beheerder keurt het goed.</string>
-    <string name="feed_sub_active">De familie staat nu op %1$s</string>
-    <string name="feed_sub_requested_frame">Gevraagd om %1$s te volgen. Een beheerder van de familie keurt het goed.</string>
-    <string name="feed_sub_active_frame">Dit kader volgt nu %1$s</string>
+    <string name="feed_sub_removed">%1$s toont de familie niet meer</string>
+    <string name="feed_sub_requested">Wacht op een beheerder van de familie voordat %1$s haar toont.</string>
+    <string name="feed_sub_active">%1$s toont nu de familie</string>
+    <string name="feed_sub_requested_frame">Wacht op een beheerder van %1$s.</string>
+    <string name="feed_sub_active_frame">Dit kader toont nu %1$s</string>
     <string name="feed_sub_paused">%1$s gepauzeerd: de foto’s zijn verborgen op dit kader</string>
     <string name="feed_sub_resumed">%1$s staat weer op dit kader</string>
     <string name="feed_sub_history_saved">Eerdere berichten van %1$s bewaard</string>
-    <string name="feed_sub_unsubscribed">Dit kader volgt %1$s niet meer</string>
-    <string name="feed_sub_withdrawn">Verzoek om %1$s te volgen ingetrokken</string>
+    <string name="feed_sub_unsubscribed">Dit kader toont %1$s niet meer</string>
+    <string name="feed_sub_withdrawn">Verzoek om %1$s te tonen ingetrokken</string>
 
     <string name="feed_history_title">Eerdere berichten</string>
     <string name="feed_history_none">Alleen nieuwe berichten</string>
@@ -167,7 +167,7 @@
     <string name="feed_cover_saved">Omslag bewaard</string>
     <string name="feed_cover_no_items">Plaats eerst een foto; de omslag is een van de foto’s van de familie.</string>
     <string name="feed_settings_rules">Regels</string>
-    <string name="feed_setting_auto_approve">Kaders volgen zonder goedkeuring</string>
+    <string name="feed_setting_auto_approve">Kaders tonen de familie zonder goedkeuring</string>
     <string name="feed_setting_auto_approve_hint">Als een plaatser de familie op een kader toont dat hij beheert, begint het meteen.</string>
     <string name="feed_setting_invite_approval">Nieuwe plaatsers goedkeuren</string>
     <string name="feed_setting_invite_approval_hint">Wie een uitnodiging om te plaatsen opent, wacht op een beheerder.</string>
@@ -187,14 +187,14 @@
     <string name="feed_invite_already">Je zit al in deze familie.</string>
     <string name="feed_invite_subscribe_body">Kies de kaders die deze familie tonen. Je wordt geen lid van de familie; je kunt dat altijd pauzeren of stoppen bij Families van het kader.</string>
     <string name="feed_invite_pick_frames">Kaders die je beheert</string>
-    <string name="feed_invite_frame_already">Volgt deze familie al</string>
+    <string name="feed_invite_frame_already">Toont deze familie al</string>
     <string name="feed_invite_no_frames">Je beheert nog geen kader. Voeg er eerst een toe.</string>
     <string name="feed_invite_subscribe_do">Op deze kaders tonen</string>
     <string name="feed_invite_subscribed">%1$s staat nu op je kaders.</string>
     <string name="feed_code_invalid">Die code hoort bij geen enkele familie. Controleer de letters en probeer opnieuw.</string>
 
-    <string name="frame_feeds_lede">Families die %1$s volgt. Nieuwe berichten verschijnen vanzelf.</string>
-    <string name="frame_feeds_none">Dit kader volgt geen enkele familie.</string>
+    <string name="frame_feeds_lede">Families die %1$s toont. Nieuwe berichten verschijnen vanzelf.</string>
+    <string name="frame_feeds_none">Dit kader toont nog geen familie.</string>
     <string name="frame_feeds_admins">Beheerd door %1$s</string>
     <string name="frame_feeds_backfill">Eerdere foto’s toevoegen: %1$d van %2$d</string>
     <string name="frame_feeds_paused_hint">Gepauzeerd: de foto’s zijn verborgen op het kader tot je hervat.</string>
@@ -206,11 +206,11 @@
     <string name="frame_feeds_history_change_hint">Meer geschiedenis voegt eerdere foto’s stil toe; minder haalt eerdere foto’s van deze familie weg. Nieuwe berichten verdwijnen nooit.</string>
     <string name="frame_feeds_play_only">Alleen deze familie spelen</string>
     <string name="frame_feeds_play_all">Alles spelen</string>
-    <string name="frame_feeds_unsubscribe">Niet meer volgen</string>
+    <string name="frame_feeds_unsubscribe">Van dit kader halen</string>
     <string name="frame_feeds_withdraw">Verzoek intrekken</string>
-    <string name="frame_feeds_unsubscribe_title">%1$s niet meer volgen?</string>
+    <string name="frame_feeds_unsubscribe_title">%1$s van dit kader halen?</string>
     <string name="frame_feeds_unsubscribe_body">De foto’s van de familie verdwijnen van dit kader, met hun reacties. Foto’s die rechtstreeks naar het kader gestuurd zijn, blijven.</string>
-    <string name="frame_feeds_add">Een familie volgen</string>
+    <string name="frame_feeds_add">Een familie toevoegen</string>
     <string name="frame_feeds_add_none">Je zit in geen andere familie. Kreeg je een uitnodiging? Vul de code in.</string>
     <string name="frame_feeds_have_code">Ik heb een familiecode</string>
     <string name="feed_mode_on">Het kader speelt nu alleen deze familie</string>
@@ -231,13 +231,13 @@
 
     <string name="live_subscription_request">%1$s wil %2$s tonen</string>
     <string name="live_feed_join_request">%1$s wil plaatsen in %2$s</string>
-    <string name="notif_subscription_request_title">Een kader wil je familie volgen</string>
+    <string name="notif_subscription_request_title">Een kader wil je familie tonen</string>
     <string name="notif_subscription_decided_title">Antwoord op je familieverzoek</string>
     <string name="notif_subscription_removed_title">Een familie staat niet meer op je kader</string>
     <string name="notif_feed_join_title">Iemand wil plaatsen in je familie</string>
     <string name="notif_feed_membership_title">Je lidmaatschap van een familie is gewijzigd</string>
 
-    <string name="problem_already_subscribed">Dit kader volgt deze familie al, of wacht op goedkeuring.</string>
+    <string name="problem_already_subscribed">Dit kader toont deze familie al, of wacht op goedkeuring.</string>
     <string name="problem_invalid_transition">Dat kan niet meer. Laad opnieuw en probeer nog eens.</string>
     <string name="problem_limit_reached">Meer laat deze server niet toe.</string>
 </resources>

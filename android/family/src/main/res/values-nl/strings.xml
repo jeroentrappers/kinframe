@@ -25,7 +25,7 @@
     <string name="nav_settings">Instellingen</string>
 
     <string name="live_reconnecting">Opnieuw verbinden…</string>
-    <string name="live_join_request">%1$s wil %2$s volgen</string>
+    <string name="live_join_request">%1$s wil lid worden van %2$s</string>
 
     <!-- welcome and server choice -->
     <string name="welcome_title">Jouw foto’s, op hun kader, in een paar seconden.</string>
@@ -112,7 +112,7 @@
     <string name="add_save_and_send">Bewaren en foto’s sturen</string>
     <string name="add_later">Dat doe ik later</string>
     <string name="add_named">%1$s is klaar</string>
-    <string name="add_joined_title">Je volgt nu %1$s</string>
+    <string name="add_joined_title">Je bent nu lid van %1$s</string>
     <string name="add_joined_body">Wat je nu stuurt, verschijnt op het kader. %1$s kan aanpassen wat je mag doen.</string>
     <string name="add_already_title">Je bent er al bij</string>
     <string name="add_already_body">Je bent al lid van %1$s.</string>
@@ -381,7 +381,7 @@
     <string name="people_remove_items">Ook de foto’s verwijderen die deze persoon stuurde</string>
     <string name="people_removed">%1$s is verwijderd</string>
     <string name="people_invite">Iemand uitnodigen</string>
-    <string name="people_invite_hint">Deel een link. Wie hem opent en zich aanmeldt, volgt meteen dit kader.</string>
+    <string name="people_invite_hint">Deel een link. Wie hem opent en zich aanmeldt, wordt meteen lid van dit kader.</string>
     <string name="people_invite_hint_approval">Deel een link. Wie hem opent, keur jij eerst goed voor die persoon kan sturen.</string>
     <string name="people_expires">Link werkt</string>
     <string name="people_exp_1d">1 dag</string>
@@ -396,8 +396,8 @@
     <string name="people_copy">Link kopiëren</string>
     <string name="people_copied">Link gekopieerd</string>
     <string name="people_share">Delen</string>
-    <string name="people_share_title">Volg %1$s op kinframe</string>
-    <string name="people_share_text">Volg %1$s zodat je er foto’s naar kunt sturen: %2$s</string>
+    <string name="people_share_title">Word lid van %1$s op kinframe</string>
+    <string name="people_share_text">Word lid van %1$s zodat je er foto’s naar kunt sturen: %2$s</string>
     <string name="people_active_invites">Actieve links</string>
     <string name="people_by_name">Gemaakt door %1$s</string>
     <string name="people_uses_of">%1$d van %2$d keer gebruikt</string>
@@ -499,7 +499,7 @@
     <!-- invite accept -->
     <string name="invite_title">Uitnodiging</string>
     <string name="invite_from">%1$s nodigt je uit</string>
-    <string name="invite_join">%1$s volgen</string>
+    <string name="invite_join">Lid worden van %1$s</string>
     <string name="invite_instant">Zodra je meedoet, verschijnen de foto’s die je stuurt op dit kader.</string>
     <string name="invite_needs_approval">%1$s keurt nieuwe mensen goed voor ze kunnen sturen.</string>
     <string name="invite_accept">Meedoen</string>
@@ -542,7 +542,7 @@
     <string name="channel_activity">Reacties en antwoorden</string>
     <string name="channel_activity_desc">Als een kader op je foto’s reageert of een antwoord stuurt.</string>
     <string name="channel_people">Verzoeken om mee te doen</string>
-    <string name="channel_people_desc">Als iemand een kader wil volgen dat jij beheert.</string>
+    <string name="channel_people_desc">Als iemand lid wil worden van een kader dat jij beheert.</string>
     <string name="channel_sending">Versturen</string>
     <string name="channel_sending_desc">Voortgang terwijl foto’s geüpload worden.</string>
     <string name="channel_frames">Nieuws van je kaders</string>

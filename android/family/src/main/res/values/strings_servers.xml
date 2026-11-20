@@ -36,8 +36,8 @@
     <!-- Android only: no web key -->
     <string name="servers_follow_check">Check the link</string>
     <plurals name="servers_preview_frames">
-        <item quantity="one">%d frame follows this family</item>
-        <item quantity="other">%d frames follow this family</item>
+        <item quantity="one">%d frame shows this family</item>
+        <item quantity="other">%d frames show this family</item>
     </plurals>
     <string name="servers_preview_copy">Photos from this family will be copied to this server (%1$s) and shown on %2$s.</string>
     <string name="servers_preview_operator">Whoever runs %1$s can see the copies, like any photo on this server.</string>
@@ -68,7 +68,7 @@
     <!-- Android only: no web key -->
     <string name="servers_feed_title">Frames on other servers</string>
     <string name="servers_feed_allow">Allow frames on other servers</string>
-    <string name="servers_feed_allow_hint">Frames on other kinframe servers may follow this family with a frame invite that allows it. Turning this off ends them.</string>
+    <string name="servers_feed_allow_hint">Frames on other kinframe servers may show this family with a frame invite that allows it. Turning this off ends that.</string>
     <!-- Android only: no web key -->
     <string name="servers_feed_invite">Share a link for frames on other servers</string>
     <string name="servers_feed_invite_hint">Frames on other servers may use this link. You can remove them any time.</string>
@@ -81,7 +81,7 @@
     <string name="servers_blocked_unblock">Unblock</string>
     <string name="servers_blocked_done">%1$s is blocked.</string>
 
-    <string name="servers_problem_already">This frame already follows that family.</string>
+    <string name="servers_problem_already">This frame already shows that family.</string>
     <!-- Android only: no web key -->
     <string name="servers_problem_invite">This link doesn\'t work (any more).</string>
     <string name="servers_problem_unreachable">The other server can’t be reached right now. Try again later.</string>
