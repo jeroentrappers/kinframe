@@ -36,18 +36,20 @@ test('dev sign-in → add frame → send → history', async ({ page }) => {
 
 	await page.getByLabel('Frame name').fill('Oma’s frame');
 	await page.getByLabel(/Where is it/).fill('Living room');
-	await page.getByRole('button', { name: 'Save and send photos' }).click();
+	await page.getByRole('button', { name: 'Save', exact: true }).click();
 
-	// 4. Send: the new frame is preselected; add two photos with a caption.
+	// 4. The frame's screen; "Send something to this frame only" opens the composer preset to it.
+	await expect(page).toHaveURL(new RegExp(`/frames/${frame.id}$`));
+	await page.getByRole('link', { name: /Send something to this frame only/ }).click();
 	await expect(page).toHaveURL(/\/send\?frame=/);
-	await expect(page.getByRole('checkbox', { name: /Oma’s frame/ })).toBeChecked();
+	await expect(page.getByTestId('destination')).toHaveText('Only Oma’s frame');
 	await page.getByTestId('file-input').setInputFiles([
 		{ name: 'beach.png', mimeType: 'image/png', buffer: await gradientPng(320, 240, 10) },
 		{ name: 'garden.png', mimeType: 'image/png', buffer: await gradientPng(240, 320, 40) }
 	]);
 	await expect(page.getByLabel('Caption for item 1')).toBeVisible();
 	await page.getByLabel('Caption for item 1').fill('Zomer aan zee ☀️');
-	await page.getByRole('button', { name: 'Send all 2' }).first().click();
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
 
 	// 5. Lands on the send in history with per-frame status.
 	await expect(page).toHaveURL(/\/history\/.+/);
@@ -143,7 +145,7 @@ test('set a frame location from place search and turn the weather on', async ({ 
 	expect(geocode.every((c) => c.method === 'GET')).toBe(true);
 
 	await page.getByText('°F').click();
-	await page.getByRole('button', { name: 'Save' }).click();
+	await page.locator('.savebar').getByRole('button', { name: 'Save' }).click();
 	await expect(page.getByText('Settings sent to Oma’s frame')).toBeVisible();
 	const saved = state.calls.find((c) => c.method === 'PATCH' && c.path.endsWith('/settings'));
 	expect(saved?.headers?.['if-match']).toBe('"1"');
@@ -156,7 +158,7 @@ test('set a frame location from place search and turn the weather on', async ({ 
 	// Removing the place sends null.
 	await page.getByRole('button', { name: 'Remove', exact: true }).click();
 	await expect(weather).toBeDisabled();
-	await page.getByRole('button', { name: 'Save' }).click();
+	await page.locator('.savebar').getByRole('button', { name: 'Save' }).click();
 	await expect.poll(() => state.calls.filter((c) => c.method === 'PATCH').length).toBe(2);
 	const removed = state.calls.filter((c) => c.method === 'PATCH')[1]!;
 	expect(removed.headers?.['if-match']).toBe('"2"');

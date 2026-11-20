@@ -69,15 +69,14 @@ test('frames: drop photos on a frame card to send them to that frame', async ({ 
 
 	// Dropping opens the send with the photo, and only that frame picked.
 	expect(await drag(card('Dad’s frame').getByRole('heading'), 'drop', files)).toBe(true);
-	await expect(page).toHaveURL(/\/send$/);
-	await expect(page.getByRole('checkbox', { name: /Dad’s frame/ })).toBeChecked();
-	await expect(page.getByRole('checkbox', { name: /Oma’s frame/ })).not.toBeChecked();
+	await expect(page).toHaveURL(/\/send(\?frame=.+)?$/);
+	await expect(page.getByTestId('destination')).toHaveText('Only Dad’s frame');
 	await expect(page.getByLabel('Caption for item 1')).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Remove item 2' })).toHaveCount(0);
 
 	// It's still the usual review-and-confirm flow.
 	await page.getByLabel('Caption for item 1').fill('Strand');
-	await page.getByRole('button', { name: 'Send it' }).first().click();
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
 	await expect(page).toHaveURL(/\/history\/.+/);
 	const send = st.calls.find((c) => c.path === '/v1/sends' && c.method === 'POST');
 	const body = send!.body as { frame_ids: string[]; items: { caption: string | null }[] };
@@ -104,9 +103,11 @@ test('frames: dropping beside the cards or on a frame you can’t send to does n
 
 	await expect(page).toHaveURL(/\/frames$/);
 	await expect(page.getByRole('article').first()).not.toHaveClass(/drop-ready/);
-	// A plain Send link stays for everyone who doesn't drag.
-	await page.getByRole('article').filter({ hasText: 'Oma’s frame' }).getByRole('link', { name: 'Send' }).click();
+	// Without dragging, a frame's screen has "Send something to this frame only".
+	await page.getByRole('article').filter({ hasText: 'Oma’s frame' }).getByRole('link', { name: 'Oma’s frame', exact: true }).click();
+	await page.getByRole('link', { name: /Send something to this frame only/ }).click();
 	await expect(page).toHaveURL(/\/send\?frame=/);
+	await expect(page.getByTestId('destination')).toHaveText('Only Oma’s frame');
 	await expect(page.getByLabel('Caption for item 1')).toHaveCount(0);
 });
 
@@ -123,9 +124,8 @@ test('frame page: drop anywhere to send to this frame', async ({ page }) => {
 	await expect(page.locator('.drop-veil')).toContainText('Drop to send to Oma’s frame');
 	expect(await drag(page.getByRole('heading', { level: 1 }), 'drop', files)).toBe(true);
 
-	await expect(page).toHaveURL(/\/send$/);
-	await expect(page.getByRole('checkbox', { name: /Oma’s frame/ })).toBeChecked();
-	await expect(page.getByRole('checkbox', { name: /Dad’s frame/ })).not.toBeChecked();
+	await expect(page).toHaveURL(/\/send(\?frame=.+)?$/);
+	await expect(page.getByTestId('destination')).toHaveText('Only Oma’s frame');
 	await expect(page.getByLabel('Caption for item 1')).toBeVisible();
 });
 

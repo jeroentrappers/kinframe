@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
 import { defaultSettings, emptyState, makeFrame, mockApi, push, uid, type MockState } from './mock-api';
+import { feedPostsOnTimeline } from './mock-social';
 
 // Photo sources (docs/spec/photo-sources.md): the add-source wizard on albums and feeds, the source cards, and
 // "Add from Google Photos", against the in-memory mock API.
@@ -33,7 +34,7 @@ async function signIn(page: Page, st: MockState) {
 	await page.goto('/');
 	await page.getByLabel('Email').fill('anna@example.org');
 	await page.getByRole('button', { name: 'Continue' }).click();
-	await page.waitForURL(/\/frames$/);
+	await page.waitForURL(/\/(frames|home)$/);
 }
 
 function existingSource(st: MockState, target: S['PhotoSourceTarget'], p: Partial<S['PhotoSource']> = {}): S['PhotoSource'] {
@@ -70,9 +71,9 @@ test('everything stays hidden when the server has no photo sources', async ({ pa
 	await expect(page.getByRole('heading', { name: 'Garden' })).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Sync from…' })).toHaveCount(0);
 	await expect(page.getByRole('button', { name: 'Add from Google Photos' })).toHaveCount(0);
-	await page.goto(`/feeds/${feed.id}`);
-	await expect(page.getByRole('heading', { name: 'Peeters kids' })).toBeVisible();
-	await expect(page.getByRole('tab', { name: 'Sources' })).toHaveCount(0);
+	await page.goto(`/settings?family=${feed.id}`);
+	await expect(page.getByRole('heading', { name: 'This family' })).toBeVisible();
+	await expect(page.getByRole('link', { name: /More ways to add photos/ })).toHaveCount(0);
 	await page.goto('/settings');
 	await expect(page.getByRole('link', { name: /My photo sources/ })).toHaveCount(0);
 });
@@ -227,6 +228,7 @@ test('My photo sources lists my sources with their target, and credits show "via
 	st.feedPosts[feed.id] = [
 		{ id: uid('po'), feed_id: feed.id, poster: { user_id: st.me!.id, display_name: 'Anna' }, created_at: ago(30), items: [item], via: { service: 'immich', label: 'Immich' } } as S['FeedPost']
 	];
+	feedPostsOnTimeline(st);
 	await signIn(page, st);
 	await page.goto('/settings');
 	await page.getByRole('link', { name: /My photo sources/ }).click();
@@ -238,8 +240,9 @@ test('My photo sources lists my sources with their target, and credits show "via
 	await expect(cards.first()).toContainText('Can’t reach photos.peeters.be. Is the server on? We keep trying.');
 	await expect(cards.nth(1).getByRole('link', { name: 'Garden · Oma’s frame' })).toHaveAttribute('href', `/frames/${oma.id}?tab=library&album=${garden.id}`);
 
-	await page.goto(`/feeds/${feed.id}`);
-	await expect(page.getByText('1 photo via Immich', { exact: false })).toBeVisible();
+	// Home: the family's post credits the source.
+	await page.goto('/home');
+	await expect(page.getByText('Anna via Immich', { exact: false })).toBeVisible();
 });
 
 // ------------------------------------------------------------------ Google Photos import
@@ -268,7 +271,10 @@ test('Add from Google Photos: consent in a popup, then the picker, then progress
 	const { st, feed } = sourcesState();
 	await signIn(page, st);
 	await fakeGoogle(page, st);
-	await page.goto(`/feeds/${feed.id}`);
+	// Family › gear › This family › More ways to add photos.
+	await page.goto(`/settings?family=${feed.id}`);
+	await page.getByRole('link', { name: /More ways to add photos/ }).click();
+	await expect(page).toHaveURL(new RegExp(`/feeds/${feed.id}\\?tab=sources$`));
 	const popupP = page.waitForEvent('popup');
 	await page.getByRole('button', { name: 'Add from Google Photos' }).click();
 	const popup = await popupP;

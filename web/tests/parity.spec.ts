@@ -134,7 +134,7 @@ test('settings: on this day and the album to show', async ({ page }) => {
 	await page.goto(`/frames/${frame.id}?tab=settings`);
 	await page.getByLabel('Show on the frame').selectOption({ label: 'Summer' });
 	await page.getByRole('checkbox', { name: /On this day/ }).check();
-	await page.getByRole('button', { name: 'Save' }).click();
+	await page.locator('.savebar').getByRole('button', { name: 'Save' }).click();
 	await expect(page.getByText('Settings sent to Oma’s frame')).toBeVisible();
 	const saved = st.calls.find((c) => c.method === 'PATCH' && c.path.endsWith('/settings'));
 	expect(saved?.body).toEqual({ slideshow: { album_id: st.albums[frame.id]![0]!.id, on_this_day: true } });
@@ -147,6 +147,8 @@ test('ownership: transfer to an admin, then leave', async ({ page }) => {
 	await mockApi(page, st);
 	await signIn(page);
 	await page.goto(`/frames/${frame.id}`);
+	await page.getByRole('link', { name: /Frame settings and help/ }).click();
+	await expect(page).toHaveURL(new RegExp(`/frames/${frame.id}\\?tab=settings$`));
 
 	// The owner can't simply leave: leaving starts a hand-over.
 	await page.getByRole('button', { name: 'Leave frame' }).click();
@@ -173,7 +175,7 @@ test('ownership: make a member owner from the people list', async ({ page }) => 
 	const frame = st.frames[0]!;
 	await mockApi(page, st);
 	await signIn(page);
-	await page.goto(`/frames/${frame.id}?tab=people`);
+	await page.goto(`/frames/${frame.id}?tab=settings`);
 	await page.getByRole('button', { name: 'Edit Tom' }).click();
 	await page.getByRole('button', { name: 'Make owner' }).click();
 	await expect(page.getByRole('dialog').getByRole('radio', { name: /Tom/ })).toBeChecked();
@@ -190,7 +192,7 @@ test('move to a new frame with its code', async ({ page }) => {
 	st.replaceCodes = ['55512345'];
 	await mockApi(page, st);
 	await signIn(page);
-	await page.goto(`/frames/${frame.id}`);
+	await page.goto(`/frames/${frame.id}?tab=settings`);
 	await page.getByRole('button', { name: 'Move', exact: true }).click();
 	const code = page.getByLabel('Code on the new frame');
 	await code.fill('1111 2222');
@@ -205,7 +207,7 @@ test('trim a video and send it without sound', async ({ page }) => {
 	const st = libraryState();
 	await mockApi(page, st);
 	await signIn(page);
-	await page.goto('/send');
+	await page.goto(`/send?frame=${st.frames[0]!.id}`);
 	await page.getByTestId('file-input').setInputFiles({ name: 'clip.webm', mimeType: 'video/webm', buffer: readFileSync('tests/fixtures/clip.webm') });
 	await expect(page.locator('.duration')).toContainText('0:08');
 	await page.getByRole('button', { name: 'Adjust framing of item 1' }).click();
@@ -237,7 +239,7 @@ test('trim a video and send it without sound', async ({ page }) => {
 	await page.getByRole('button', { name: 'Done' }).click();
 	await expect(page.locator('.duration')).toContainText('0:05');
 
-	await page.getByRole('button', { name: /^Send/ }).first().click();
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
 	await expect(page).toHaveURL(/\/history\/.+/);
 	const send = st.calls.find((c) => c.path === '/v1/sends' && c.method === 'POST');
 	const item = (send!.body as S['SendCreate']).items[0]!;
@@ -258,15 +260,16 @@ test('trim a video and send it without sound', async ({ page }) => {
 
 test('notifications: offered after the first send, managed in settings', async ({ page }) => {
 	await page.addInitScript(() => {
-		let perm: NotificationPermission = 'default';
-		const w = window as unknown as { __sub: unknown };
-		w.__sub = null;
+		// Kept in sessionStorage so the permission and the subscription survive opening /settings by URL.
+		const store = sessionStorage;
+		let perm = (store.getItem('fake.perm') as NotificationPermission | null) ?? 'default';
 		class FakeNotification {
 			static get permission() {
 				return perm;
 			}
 			static requestPermission() {
 				perm = 'granted';
+				store.setItem('fake.perm', perm);
 				return Promise.resolve(perm);
 			}
 		}
@@ -276,15 +279,15 @@ test('notifications: offered after the first send, managed in settings', async (
 			options: { applicationServerKey: null },
 			toJSON: () => ({ endpoint: 'https://push.example.net/send/abc', keys: { p256dh: 'BPk-key', auth: 'auth-secret' } }),
 			unsubscribe: () => {
-				w.__sub = null;
+				store.removeItem('fake.sub');
 				return Promise.resolve(true);
 			}
 		};
 		const reg = {
 			pushManager: {
-				getSubscription: () => Promise.resolve(w.__sub),
+				getSubscription: () => Promise.resolve(store.getItem('fake.sub') ? sub : null),
 				subscribe: () => {
-					w.__sub = sub;
+					store.setItem('fake.sub', '1');
 					return Promise.resolve(sub);
 				}
 			}
@@ -302,9 +305,9 @@ test('notifications: offered after the first send, managed in settings', async (
 	await expect(page.getByText('Want to know when it arrives?')).toHaveCount(0);
 
 	// After a send: a gentle offer.
-	await page.goto('/send');
+	await page.goto(`/send?frame=${st.frames[0]!.id}`);
 	await page.getByTestId('file-input').setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: await gradientPng(64, 48) });
-	await page.getByRole('button', { name: /^Send/ }).first().click();
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
 	await expect(page).toHaveURL(/\/history\/.+/);
 	await expect(page.getByRole('heading', { name: 'Want to know when it arrives?' })).toBeVisible();
 	await page.getByRole('button', { name: 'Turn on' }).click();
@@ -319,7 +322,8 @@ test('notifications: offered after the first send, managed in settings', async (
 	});
 
 	// Settings: the switch reflects it and turns it off again.
-	await page.getByRole('link', { name: 'Settings' }).first().click();
+	// Settings is opened from the Family page's gear; this frame-only account opens it by its address.
+	await page.goto('/settings');
 	const toggle = page.getByRole('checkbox', { name: /Notifications on this device/ });
 	await expect(toggle).toBeChecked();
 	await toggle.uncheck();

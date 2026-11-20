@@ -5,32 +5,55 @@ import { call, signIn, socialState } from './social-fixtures';
 
 // Family social (docs/spec/family-social.md, README §5.18–§5.20): the web family app against the in-memory mock.
 
-test('family social stays hidden until the server has it', async ({ page }) => {
-	const { st } = socialState({ flags: false });
-	await signIn(page, st, /\/frames$/);
-	await expect(page.getByRole('link', { name: 'Home', exact: true })).toHaveCount(0);
+test('the navigation: Home, Frames, Share and Family; Chats only when the server has chats', async ({ page }) => {
+	const { st, feed } = socialState();
+	st.discovery.chats = false;
+	await signIn(page, st);
+	await expect(page.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
+	await expect(page.getByRole('link', { name: 'Frames', exact: true })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Share', exact: true })).toHaveAttribute('href', '/send');
 	await expect(page.getByRole('link', { name: 'Chats' })).toHaveCount(0);
-	await expect(page.getByRole('link', { name: 'Families' }).first()).toBeVisible();
-	await page.goto('/home');
-	await expect(page.getByText('This server doesn’t offer the family timeline yet.')).toBeVisible();
+	// Two families: the Family tab lists them, home family first.
+	await page.getByRole('link', { name: 'Family', exact: true }).click();
+	await expect(page).toHaveURL(/\/family$/);
+	await expect(page.getByRole('heading', { name: 'Your families' })).toBeVisible();
+	await expect(page.getByRole('link', { name: /Peeters|Janssens/ })).toHaveText([/Peeters/, /Janssens/]);
+	await expect(page.getByRole('button', { name: 'Start a family' })).toBeVisible();
+	await page.getByRole('link', { name: /Peeters/ }).click();
+	await expect(page).toHaveURL(new RegExp(`/feeds/${feed.id}$`));
+	await expect(page.getByRole('link', { name: 'Family', exact: true })).toHaveAttribute('aria-current', 'page');
 	await page.goto('/chats');
 	await expect(page.getByText('This server doesn’t offer chats.')).toBeVisible();
-	expect(call(st, 'GET', '/v1/timeline')).toBeUndefined();
 });
 
 test('Home: the strip, the timeline, reactions, prompts and On this day', async ({ page }) => {
 	const s = socialState();
 	await signIn(page, s.st);
 
-	// The strip: a quiet frame that asked for photos, and the family with its streak.
-	const strip = page.getByRole('navigation', { name: 'Your frames and families' });
-	await expect(strip.getByText('Would like new photos')).toBeVisible();
-	await expect(strip.getByText('12 weeks')).toBeVisible();
-	await strip.getByRole('button', { name: /Oma’s frame/ }).click();
-	const suggest = page.getByRole('dialog', { name: 'Send something to Oma’s frame' });
-	await expect(suggest.getByText(/asked for new photos/)).toBeVisible();
-	await expect(suggest.getByRole('link', { name: 'Choose photos' })).toHaveAttribute('href', `/send?frame=${s.oma.id}`);
-	await suggest.getByRole('button', { name: 'Close' }).click();
+	// The top bar, and with two families the filter chips: All, then the home family first.
+	await expect(page.getByRole('heading', { name: 'Home', level: 1 })).toBeVisible();
+	const chips = page.getByRole('group', { name: 'Show posts of' });
+	await expect(chips.getByRole('button')).toHaveText(['All', 'Peeters', 'Janssens']);
+	await expect(chips.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
+
+	// The row of the home family: people, its frames, and Invite.
+	const row = page.getByRole('navigation', { name: 'Peeters: people and frames' });
+	await expect(row.getByText('You', { exact: true })).toBeVisible();
+	await expect(row.getByText('Ben', { exact: true })).toBeVisible();
+	await expect(row.getByRole('link', { name: 'Oma’s frame' })).toHaveAttribute('href', `/frames/${s.oma.id}`);
+	await row.getByRole('button', { name: 'Invite' }).click();
+	const invite = page.getByRole('dialog', { name: 'Invite family to Peeters' });
+	await expect(invite.getByTestId('invite-code')).toHaveText('KF7Q-M2XA');
+	await invite.getByRole('button', { name: 'Close' }).click();
+
+	// One family's posts, remembered on this device.
+	await chips.getByRole('button', { name: 'Janssens' }).click();
+	await expect(chips.getByRole('button', { name: 'Janssens' })).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByRole('navigation', { name: 'Janssens: people and frames' })).toBeVisible();
+	await expect.poll(() => s.st.calls.filter((c) => c.path === '/v1/timeline').pop()?.query?.feed_id).toBe(s.readOnly.id);
+	expect(await page.evaluate(() => localStorage.getItem('kinframe.homeFilter'))).toBe(s.readOnly.id);
+	await chips.getByRole('button', { name: 'All' }).click();
+	await expect(row).toBeVisible();
 
 	// Cards: the milestone, this week's prompt and On this day.
 	await expect(page.getByRole('heading', { name: 'You shared your first photo' })).toBeVisible();
@@ -43,6 +66,8 @@ test('Home: the strip, the timeline, reactions, prompts and On this day', async 
 
 	// The timeline: frames and people in one reaction row, the newest comments, prompt answers grouped.
 	const first = page.locator('article').filter({ hasText: 'Ben' }).first();
+	// With several families, each post says which family it was posted in.
+	await expect(first.getByRole('link', { name: 'Peeters', exact: true })).toHaveAttribute('href', `/feeds/${s.feed.id}`);
 	await expect(first.getByText('Oma’s frame and Clara')).toBeVisible();
 	await expect(first.getByText('So sweet')).toBeVisible();
 	await expect(first.getByRole('link', { name: /View all 3 comments/ })).toBeVisible();
@@ -58,6 +83,10 @@ test('Home: the strip, the timeline, reactions, prompts and On this day', async 
 	// Live: the thread changes on the server.
 	push(s.st, { type: 'post.updated', post_id: s.p1, thread: { ...s.soc.posts[0]!.thread, comment_count: 7 } });
 	await expect(first.getByRole('link', { name: /View all 7 comments/ })).toBeVisible();
+
+	// The quiet frame that asked for photos says so on its screen.
+	await row.getByRole('link', { name: 'Oma’s frame' }).click();
+	await expect(page.getByText('Would like new photos')).toBeVisible();
 });
 
 test('a thread: mention, reply to a reply, edit, undo a delete, and live comments', async ({ page, isMobile }) => {
@@ -236,10 +265,20 @@ test('a family: streak, chat, circles, readers, settings and reports', async ({ 
 	await page.goto(`/feeds/${s.feed.id}`);
 	await expect(page.getByText('12 weeks')).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Family chat' })).toHaveAttribute('href', `/chats/${s.famConv}`);
-	// The posts tab is the family's timeline.
-	await expect(page.getByText('Look at her face 😂').or(page.getByText('So sweet')).first()).toBeVisible();
+	await expect(page.getByRole('tab', { name: 'Photos' })).toHaveAttribute('aria-selected', 'true');
 
-	await page.getByRole('tab', { name: 'Circles' }).click();
+	await page.getByRole('tab', { name: 'People' }).click();
+	await expect(page.getByText('Reader')).toBeVisible();
+
+	// The family's settings sections open from the gear.
+	const settings = async (row: RegExp) => {
+		await page.goto(`/feeds/${s.feed.id}`);
+		await page.getByRole('link', { name: 'Settings' }).first().click();
+		await expect(page).toHaveURL(new RegExp(`/settings\\?family=${s.feed.id}$`));
+		await page.getByRole('link', { name: row }).click();
+	};
+	await settings(/^Circles/);
+	await expect(page).toHaveURL(/\?tab=circles$/);
 	await page.getByRole('button', { name: 'New circle' }).click();
 	const dlg = page.getByRole('dialog', { name: 'New circle' });
 	await dlg.getByLabel('Name').fill('The cousins');
@@ -247,11 +286,12 @@ test('a family: streak, chat, circles, readers, settings and reports', async ({ 
 	await dlg.getByRole('button', { name: 'Create circle' }).click();
 	await expect.poll(() => call(s.st, 'POST', `/v1/feeds/${s.feed.id}/circles`)?.body).toEqual({ name: 'The cousins', member_ids: [s.ben.user_id] });
 	await expect(page.getByRole('heading', { name: 'The cousins' })).toBeVisible();
+	// Back to Settings.
+	await page.getByRole('link', { name: 'Settings' }).first().click();
+	await expect(page).toHaveURL(new RegExp(`/settings\\?family=${s.feed.id}$`));
 
-	await page.getByRole('tab', { name: 'Members' }).click();
-	await expect(page.getByText('Reader')).toBeVisible();
-
-	await page.getByRole('tab', { name: 'Settings' }).click();
+	await settings(/Name, cover and approvals/);
+	await expect(page).toHaveURL(/\?tab=settings$/);
 	await page.locator('label.switch', { hasText: 'Everyone sees where posts were seen' }).click();
 	await page.getByRole('button', { name: 'Save' }).first().click();
 	await expect.poll(() => call(s.st, 'PATCH', `/v1/feeds/${s.feed.id}`)?.body).toEqual({ members_see_receipts: true });
@@ -259,7 +299,7 @@ test('a family: streak, chat, circles, readers, settings and reports', async ({ 
 	await page.locator('label.switch', { hasText: 'Weekly theme' }).click();
 	await expect.poll(() => call(s.st, 'PATCH', `/v1/feeds/${s.feed.id}/engagement`)?.body).toEqual({ prompts_enabled: true });
 
-	await page.getByRole('tab', { name: 'Reports' }).click();
+	await settings(/^Reports/);
 	await expect(page.getByText('Unkind or hurtful')).toBeVisible();
 	await page.getByRole('button', { name: 'Remove it' }).click();
 	await expect.poll(() => call(s.st, 'POST', /\/v1\/reports\/.+\/resolve$/)?.body).toEqual({ action: 'remove' });
@@ -273,12 +313,19 @@ test('sending: readers can’t post, a circle as the audience, and a prompt answ
 	await signIn(page, s.st);
 	await page.goto(`/send?feed=${s.feed.id}&prompt=${s.promptId}`);
 	await expect(page.getByText('Answers “Your view right now”')).toBeVisible();
-	await expect(page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
-	await expect(page.getByRole('checkbox', { name: /Janssens/ })).toHaveCount(0);
-	await page.getByTestId('audience').selectOption({ label: 'The cousins' });
+	const dest = page.getByTestId('destination');
+	await expect(dest).toHaveText('Peeters · everyone and its frame');
+	// Change: the families Anna can post to (not Janssens, where she reads), and a circle instead of everyone.
+	await page.getByRole('button', { name: 'Change' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Share with' });
+	await expect(sheet.getByTestId('family-option')).toHaveCount(1);
+	await expect(sheet.getByRole('checkbox', { name: /Janssens/ })).toHaveCount(0);
+	await sheet.getByTestId('audience').selectOption({ label: 'The cousins' });
+	await sheet.getByRole('button', { name: 'Done' }).click();
+	await expect(dest).toHaveText('Peeters · only The cousins');
 	await page.getByTestId('file-input').setInputFiles([{ name: 'view.png', mimeType: 'image/png', buffer: await gradientPng(320, 240, 30) }]);
-	await page.getByRole('button', { name: /^Send/ }).first().click();
-	await expect(page).toHaveURL(/\/history\/.+/);
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
+	await expect(page).toHaveURL(/\/home$/);
 	expect(call(s.st, 'POST', '/v1/sends')?.body).toMatchObject({ feed_ids: [s.feed.id], circle_ids: [s.soc.circles[s.feed.id]![0]!.id], prompt_id: s.promptId });
 });
 
@@ -290,7 +337,7 @@ test('a frame request for a frame you’re not on preselects the family that rea
 	await signIn(page, s.st);
 	// From the frame_request push or toast: the request names the families.
 	await page.goto(`/send?frame=${opa}&request=${req}`);
-	await expect(page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
+	await expect(page.getByTestId('destination')).toHaveText('Peeters · everyone and its frame');
 });
 
 test('a quiet-frame reminder for a frame you’re not on preselects the family that reaches it', async ({ page }) => {
@@ -300,7 +347,7 @@ test('a quiet-frame reminder for a frame you’re not on preselects the family t
 	s.st.subscriptions.push({ id: 'sb-1', status: 'active', history: 'none', feed: { id: s.feed.id, name: 'Peeters' }, frame: { id: opa, name: 'Opa’s frame' }, created_at: new Date().toISOString() } as never);
 	await signIn(page, s.st);
 	await page.goto(`/send?frame=${opa}`);
-	await expect(page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
+	await expect(page.getByTestId('destination')).toHaveText('Peeters · everyone and its frame');
 });
 
 test('the badge shows in the tab title and on Chats', async ({ page }) => {
@@ -325,4 +372,33 @@ test('a person’s profile: start a chat and block', async ({ page }) => {
 	await page.getByRole('button', { name: 'Message' }).click();
 	await expect(page).toHaveURL(/\/chats\/.+/);
 	expect(call(s.st, 'POST', '/v1/conversations')?.body).toEqual({ kind: 'direct', member_ids: [s.clara.user_id] });
+});
+
+test('simple view: one big photo at a time, a heart, next and back, and Normal view again', async ({ page }) => {
+	const s = socialState();
+	await page.addInitScript(() => localStorage.setItem('kinframe.simpleView', '1'));
+	await signIn(page, s.st);
+	const simple = page.getByRole('region', { name: 'Simple view' });
+	await expect(simple).toBeVisible();
+	// No tab bar or sidebar.
+	await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0);
+	await expect(simple.getByRole('article')).toHaveCount(1);
+	await expect(simple.getByRole('article')).toContainText('Ben');
+	// Several families: the family under the poster.
+	await expect(simple.getByRole('article')).toContainText('Peeters');
+
+	await simple.getByRole('button', { name: 'Send a heart' }).click();
+	await expect.poll(() => call(s.st, 'PUT', `/v1/reactions/post/${s.p1}`)?.body).toEqual({ emoji: 'love' });
+	await expect(simple.getByRole('button', { name: 'Heart sent' })).toHaveAttribute('aria-pressed', 'true');
+
+	await expect(simple.getByRole('button', { name: 'Back' })).toBeDisabled();
+	await simple.getByRole('button', { name: 'Next' }).click();
+	await expect(simple.getByRole('article')).toContainText('Clara');
+	await simple.getByRole('button', { name: 'Back' }).click();
+	await expect(simple.getByRole('article')).toContainText('Ben');
+
+	await simple.getByRole('button', { name: 'Settings' }).click();
+	await page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'Normal view' }).click();
+	await expect(page.getByRole('heading', { name: 'Home', level: 1 })).toBeVisible();
+	expect(await page.evaluate(() => localStorage.getItem('kinframe.simpleView'))).toBeNull();
 });

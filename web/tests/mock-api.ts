@@ -96,7 +96,7 @@ export interface MockState {
 	telegramCodes: S['TelegramCode'][];
 	telegramContributors: Record<string, S['TelegramContributor'][]>;
 	telegramLink: S['TelegramLink'] | null;
-	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
+	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string>; query?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 	/** Family social (README §5.18–§5.20), tests/mock-social.ts; created on first use. */
 	social?: SocialMock;
@@ -321,7 +321,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		} catch {
 			body = undefined;
 		}
-		state.calls.push({ method, path, body, headers: req.headers() });
+		state.calls.push({ method, path, body, headers: req.headers(), query: Object.fromEntries(url.searchParams) });
 
 		let m: RegExpMatchArray | null;
 
@@ -1323,7 +1323,12 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			state.feedInvites[m[1]!] = (state.feedInvites[m[1]!] ?? []).filter((x) => x.id !== m![2]);
 			return route.fulfill({ status: 204 });
 		}
-		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/posts$/))) return json(route, 200, { posts: state.feedPosts[m[1]!] ?? [], next_cursor: null });
+		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/posts$/))) {
+			// "Only mine" on the family's Photos asks for one poster.
+			const poster = url.searchParams.get('poster_id');
+			const posts = (state.feedPosts[m[1]!] ?? []).filter((x) => !poster || x.poster.user_id === poster);
+			return json(route, 200, { posts, next_cursor: null });
+		}
 		if ((m = path.match(/^\/v1\/feeds\/([^/]+)\/posts\/([^/]+)\/receipts$/))) {
 			const post = (state.feedPosts[m[1]!] ?? []).find((x) => x.id === m![2]);
 			if (!post) return problem(route, 404, 'not_found', 'Not found');
@@ -1352,7 +1357,10 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 					return problem(route, 409, 'already_subscribed', 'Already subscribed');
 				const fr = state.frames.find((x) => x.id === b.frame_id)!;
 				const admin = f.role === 'owner' || f.role === 'admin';
-				const sub: S['Subscription'] = { id: uid('sb'), status: admin ? 'active' : 'pending', history: b.history ?? 'none', history_count: b.history_count ?? null, feed: { id: f.id, name: f.name }, frame: { id: fr.id, name: fr.name }, created_at: new Date().toISOString(), activated_at: admin ? new Date().toISOString() : null, can_manage: true, can_decide: admin };
+				// Active at once for a feed admin, or for any poster who manages the frame (simple-app.md §7).
+				const managesFrame = fr.role === 'owner' || fr.role === 'admin' || fr.permissions?.change_settings === true;
+				const instant = admin || (f.role !== 'member' && managesFrame);
+				const sub: S['Subscription'] = { id: uid('sb'), status: instant ? 'active' : 'pending', history: b.history ?? 'none', history_count: b.history_count ?? null, feed: { id: f.id, name: f.name }, frame: { id: fr.id, name: fr.name }, created_at: new Date().toISOString(), activated_at: instant ? new Date().toISOString() : null, can_manage: true, can_decide: admin };
 				state.subscriptions.push(sub);
 				return json(route, 201, sub);
 			}

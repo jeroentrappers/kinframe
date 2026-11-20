@@ -562,3 +562,28 @@ export async function socialRoute(state: Host, route: Route, method: string, pat
 	}
 	return null;
 }
+
+/**
+ * Home shows the families' posts on the social timeline (simple-app.md §3.1): turn family social on and mirror the
+ * mock's feed posts (`state.feedPosts`) as timeline posts, newest first.
+ */
+export function feedPostsOnTimeline(state: Host & { feedPosts: Record<string, S['FeedPost'][]> }) {
+	state.discovery.social = true;
+	const soc = (state.social ??= emptySocial());
+	const posts = Object.entries(state.feedPosts).flatMap(([feedId, list]) =>
+		list.map(
+			(p): S['TimelinePost'] => ({
+				id: p.id,
+				kind: 'feed',
+				feed_id: feedId,
+				feed_name: state.feeds.find((f) => f.id === feedId)?.name ?? null,
+				poster: { user_id: p.poster.user_id ?? 'someone', display_name: p.poster.display_name },
+				created_at: p.created_at,
+				via: p.via ?? null,
+				items: p.items,
+				thread: { post_id: p.id, state: 'open', comment_count: 0, latest_comments: [], reactions: EMPTY_SUMMARY, can_comment: true, can_moderate: false, unread_count: 0, muted: false }
+			})
+		)
+	);
+	soc.posts = [...soc.posts, ...posts].sort((a, b) => b.created_at.localeCompare(a.created_at));
+}

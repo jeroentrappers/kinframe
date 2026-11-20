@@ -2,6 +2,7 @@
 import { test, type Page } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
 import { defaultSettings, emptyState, gradientPng, makeFrame, mockApi, uid, type MockState } from './mock-api';
+import { socialState } from './social-fixtures';
 
 type S = components['schemas'];
 const DIR = process.env.SCREENSHOT_DIR ?? 'screenshots';
@@ -136,14 +137,14 @@ for (const vp of VIEWPORTS) {
 					await signIn(page);
 					await page.getByText('Oma’s frame').first().waitFor();
 					await shot(page, n('02-frames'));
-					await page.goto('/send');
+					await page.goto(`/send?frame=${oma.id}`);
 					await page.getByTestId('file-input').setInputFiles([
 						{ name: 'a.png', mimeType: 'image/png', buffer: await gradientPng(480, 320, 0) },
 						{ name: 'b.png', mimeType: 'image/png', buffer: await gradientPng(320, 480, 40) }
 					]);
 					await shot(page, n('04-send'));
 					await page.goto(`/frames/${oma.id}`);
-					await page.getByText('Remote control').waitFor();
+					await page.getByText('Frame settings and help').waitFor();
 					await shot(page, n('07-frame-overview'));
 					return;
 				}
@@ -155,7 +156,7 @@ for (const vp of VIEWPORTS) {
 				await page.goto('/frames/add');
 				await shot(page, n('03-add-frame'));
 
-				await page.goto('/send');
+				await page.goto(`/send?frame=${oma.id}`);
 				await page.getByText('Drop photos and videos here').waitFor();
 				await shot(page, n('04a-send-empty'));
 				await page.getByTestId('file-input').setInputFiles([
@@ -164,7 +165,6 @@ for (const vp of VIEWPORTS) {
 					{ name: 'sunset.png', mimeType: 'image/png', buffer: await gradientPng(480, 320, 70) }
 				]);
 				await page.getByLabel('Caption for item 1').fill('Zomer aan zee ☀️');
-				await page.getByRole('checkbox', { name: /Oma’s frame/ }).check({ force: true });
 				await shot(page, n('04-send'));
 				await page.getByRole('button', { name: 'Adjust framing of item 1' }).click();
 				await page.getByRole('dialog').waitFor();
@@ -181,7 +181,7 @@ for (const vp of VIEWPORTS) {
 				await shot(page, n('06b-history-detail'));
 
 				await page.goto(`/frames/${oma.id}`);
-				await page.getByText('Remote control').waitFor();
+				await page.getByText('Frame settings and help').waitFor();
 				await shot(page, n('07-frame-overview'));
 
 				await page.goto(`/frames/${oma.id}?tab=library`);
@@ -190,7 +190,7 @@ for (const vp of VIEWPORTS) {
 				await page.getByRole('checkbox', { name: 'Select' }).nth(2).click();
 				await shot(page, n('08-frame-library'));
 
-				await page.goto(`/frames/${oma.id}?tab=people`);
+				await page.goto(`/frames/${oma.id}?tab=settings`);
 				await page.getByText('Waiting to join').waitFor();
 				await page.getByRole('button', { name: 'Edit Tom' }).click();
 				await shot(page, n('09-frame-people'));
@@ -218,6 +218,77 @@ for (const vp of VIEWPORTS) {
 	}
 }
 
+// The simple family app (docs/spec/simple-app.md): Home, the composer, Frames, the Family profile and Settings, the
+// getting-started choices and the simple view.
+for (const vp of VIEWPORTS) {
+	test(`family app ${vp.tag}`, async ({ page }) => {
+		test.setTimeout(90_000);
+		await page.setViewportSize(vp.viewport);
+		const s = socialState();
+		// A second family Anna posts to, and a circle: the composer's Change has something to offer.
+		s.st.feeds.push({ ...s.feed, id: uid('fd'), name: 'Opa & Oma Trappers', role: 'poster', conversation_id: null, streak: null, last_post_at: ago(3000) });
+		s.soc.circles[s.feed.id] = [{ id: uid('ci'), feed_id: s.feed.id, name: 'The cousins', my_role: 'admin', members: [{ user_id: s.me.user_id, display_name: 'Anna', role: 'admin' }], member_count: 1, frame_ids: [], frames_reached: [], conversation_id: null }];
+		await mockApi(page, s.st);
+		const n = (x: string) => `family-${vp.tag}-${x}`;
+		await page.goto('/');
+		await page.getByLabel('Email').fill('anna@example.org');
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await page.waitForURL(/\/home$/);
+		await page.getByRole('group', { name: 'Show posts of' }).waitFor();
+		await shot(page, n('20-home'));
+
+		await page.getByRole('link', { name: 'Share', exact: true }).first().click();
+		await page.getByTestId('destination').waitFor();
+		await page.getByTestId('file-input').setInputFiles([
+			{ name: 'a.png', mimeType: 'image/png', buffer: await gradientPng(480, 320, 0) },
+			{ name: 'b.png', mimeType: 'image/png', buffer: await gradientPng(320, 480, 40) }
+		]);
+		await shot(page, n('21-share'));
+		await page.getByRole('button', { name: 'Change' }).click();
+		await page.getByRole('dialog', { name: 'Share with' }).waitFor();
+		await page.waitForTimeout(300);
+		await page.screenshot({ path: `${DIR}/${n('22-share-change')}.png` });
+		await page.keyboard.press('Escape');
+
+		await page.goto('/frames');
+		await page.getByText('Shows Peeters').first().waitFor();
+		await shot(page, n('23-frames'));
+		await page.goto(`/frames/${s.oma.id}`);
+		await page.getByText('Frame settings and help').waitFor();
+		await shot(page, n('24-frame'));
+
+		await page.goto('/family');
+		await page.getByRole('heading', { name: 'Your families' }).waitFor();
+		await shot(page, n('25-families'));
+		await page.goto(`/feeds/${s.feed.id}`);
+		await page.getByRole('button', { name: 'Invite family' }).waitFor();
+		await shot(page, n('26-family'));
+		await page.goto(`/feeds/${s.feed.id}?tab=members`);
+		await page.getByText('Reader').first().waitFor();
+		await shot(page, n('27-family-people'));
+		await page.goto(`/settings?family=${s.feed.id}`);
+		await page.getByRole('heading', { name: 'This family' }).waitFor();
+		await shot(page, n('28-settings'));
+
+		await page.evaluate(() => localStorage.setItem('kinframe.simpleView', '1'));
+		await page.goto('/home');
+		await page.getByRole('button', { name: 'Send a heart' }).waitFor();
+		await shot(page, n('29-simple-view'));
+	});
+
+	test(`getting started ${vp.tag}`, async ({ page }) => {
+		await page.setViewportSize(vp.viewport);
+		const s = socialState();
+		s.st.feeds = [];
+		await mockApi(page, s.st);
+		await page.goto('/');
+		await page.getByLabel('Email').fill('anna@example.org');
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await page.getByRole('heading', { name: 'Welcome to kinframe' }).waitFor();
+		await shot(page, `family-${vp.tag}-30-getting-started`);
+	});
+}
+
 // Languages that stress the layout: right to left (Arabic, Hebrew), CJK, long German and Russian words.
 for (const locale of ['ar', 'he', 'ja', 'de', 'ru'] as const) {
 	for (const vp of VIEWPORTS) {
@@ -237,7 +308,7 @@ for (const locale of ['ar', 'he', 'ja', 'de', 'ru'] as const) {
 			await page.waitForURL(/\/frames$/);
 			await page.getByText('Oma’s frame').first().waitFor();
 			await shot(page, n('02-frames'));
-			await page.goto('/send');
+			await page.goto(`/send?frame=${oma.id}`);
 			await page.getByTestId('file-input').setInputFiles([
 				{ name: 'a.png', mimeType: 'image/png', buffer: await gradientPng(480, 320, 0) },
 				{ name: 'b.png', mimeType: 'image/png', buffer: await gradientPng(320, 480, 40) }
@@ -246,7 +317,7 @@ for (const locale of ['ar', 'he', 'ja', 'de', 'ru'] as const) {
 			await page.goto('/history');
 			await page.waitForLoadState('networkidle');
 			await shot(page, n('06-history'));
-			for (const [tab, name] of [['', '07-frame-overview'], ['?tab=library', '08-frame-library'], ['?tab=people', '09-frame-people'], ['?tab=settings', '10-frame-settings']] as const) {
+			for (const [tab, name] of [['', '07-frame-overview'], ['?tab=library', '08-frame-library'], ['?tab=settings', '10-frame-settings']] as const) {
 				await page.goto(`/frames/${oma.id}${tab}`);
 				await page.waitForLoadState('networkidle');
 				await shot(page, n(name));

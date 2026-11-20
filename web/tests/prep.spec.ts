@@ -20,12 +20,13 @@ async function openSend(page: Page, st: MockState) {
 	await page.getByLabel('Email').fill('jeroen@example.org');
 	await page.getByRole('button', { name: 'Continue' }).click();
 	await page.waitForURL(/\/frames$/);
-	await page.goto('/send');
-	await expect(page.getByRole('checkbox', { name: /Oma’s frame/ })).toBeChecked();
+	// A direct send to one frame is reached from that frame's screen (simple-app.md §3.2).
+	await page.goto(`/send?frame=${st.frames[0]!.id}`);
+	await expect(page.getByTestId('destination')).toHaveText('Only Oma’s frame');
 }
 
 async function sent(page: Page, st: MockState): Promise<S['SendCreate']> {
-	await page.getByRole('button', { name: /^Send (all|it)/ }).first().click();
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
 	await expect(page).toHaveURL(/\/history\/.+/);
 	return st.calls.find((c) => c.path === '/v1/sends' && c.method === 'POST')!.body as S['SendCreate'];
 }
@@ -267,7 +268,7 @@ test('strict: a photo that can’t be prepared goes up as is only within the lim
 		{ name: 'huge.jpg', mimeType: 'image/jpeg', buffer: brokenJpeg(4000, 3000) }
 	]);
 	await expect(page.getByRole('alert').filter({ hasText: 'This browser can’t prepare this photo' })).toHaveCount(1, { timeout: 20_000 });
-	await expect(page.getByRole('button', { name: /^Send (all|it)/ }).first()).toBeDisabled();
+	await expect(page.getByRole('button', { name: 'Share', exact: true }).first()).toBeDisabled();
 	await page.getByRole('button', { name: 'Remove item 2' }).click();
 	const item = (await sent(page, st)).items[0]!;
 	const up = st.uploads[item.upload_id]!;

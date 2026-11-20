@@ -94,8 +94,7 @@ test('weekly prompt, streak and reminder settings', async ({ browser }) => {
 	await join(anna, ben, feed);
 
 	const A = await signedIn(browser, anna);
-	await A.page.goto(`/feeds/${feed}`);
-	await A.page.getByRole('tab', { name: 'Settings' }).click();
+	await A.page.goto(`/feeds/${feed}?tab=settings`);
 	await expect(A.page.getByRole('heading', { name: 'Encouragement' })).toBeVisible();
 	await A.page.locator('label.switch', { hasText: 'Weekly theme' }).click();
 	await expect.poll(async () => (await anna.get(`/v1/feeds/${feed}/engagement`)).prompts_enabled).toBe(true);

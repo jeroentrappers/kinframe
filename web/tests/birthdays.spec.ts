@@ -78,9 +78,13 @@ async function signIn(page: Page, st: MockState) {
 test('birthdays stay hidden when the server has none', async ({ page }) => {
 	const { st, feed } = bdayState({ birthdays: false });
 	await signIn(page, st);
-	await page.goto(`/feeds/${feed.id}`);
-	await expect(page.getByRole('tab', { name: 'Posts' })).toBeVisible();
-	await expect(page.getByRole('tab', { name: /Birthdays/ })).toHaveCount(0);
+	await page.goto(`/settings?family=${feed.id}`);
+	await expect(page.getByRole('heading', { name: 'This family' })).toBeVisible();
+	await expect(page.getByRole('link', { name: /Birthdays/ })).toHaveCount(0);
+	// The section's address opens the family's profile instead.
+	await page.goto(`/feeds/${feed.id}?tab=birthdays`);
+	await expect(page.getByRole('tab', { name: 'Photos' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Birthdays' })).toHaveCount(0);
 	expect(st.calls.some((c) => c.method === 'PATCH' && c.path === '/v1/me' && (c.body as { timezone?: string })?.timezone)).toBe(false);
 });
 
@@ -90,11 +94,12 @@ test('owner: list by next birthday, add, duplicate, approve a suggestion', async
 	// The profile's zone is set from the browser.
 	await expect.poll(() => st.calls.some((c) => c.method === 'PATCH' && c.path === '/v1/me' && typeof (c.body as { timezone?: string })?.timezone === 'string')).toBe(true);
 
+	// Family › gear › This family › Birthdays.
 	await page.goto(`/feeds/${feed.id}`);
-	const tab = page.getByRole('tab', { name: /Birthdays/ });
-	await expect(tab).toContainText('1');
-	await tab.click();
+	await page.getByRole('link', { name: 'Settings' }).first().click();
+	await page.getByRole('link', { name: /Birthdays/ }).click();
 	await expect(page).toHaveURL(/tab=birthdays/);
+	await expect(page.getByRole('heading', { name: 'Birthdays', level: 1 })).toBeVisible();
 
 	const rows = page.getByTestId('birthday-row');
 	await expect(rows).toHaveCount(2);
@@ -192,7 +197,7 @@ test('greetings arrive live; the member mutes birthday notifications', async ({ 
 test('frame side: turn a subscription’s birthdays off; old frame app hint', async ({ page }) => {
 	const { st, oma } = bdayState();
 	await signIn(page, st);
-	await page.goto(`/frames/${oma.id}?tab=feeds`);
+	await page.goto(`/frames/${oma.id}?tab=settings`);
 	await expect(page.getByText('Update the frame app to show birthdays.')).toBeVisible();
 	await expect(page.getByText('2 birthdays')).toBeVisible();
 	await page.getByRole('checkbox', { name: /Show birthdays/ }).click();

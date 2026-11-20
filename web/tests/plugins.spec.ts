@@ -114,7 +114,7 @@ test('add a plugin, save it incomplete, pick entities the frame found, and switc
 
 	// The layout goes with the save bar like every other setting.
 	await section.getByText('Beside the photo').click();
-	await page.getByRole('button', { name: 'Save', exact: true }).click();
+	await page.locator('.savebar').getByRole('button', { name: 'Save', exact: true }).click();
 	await expect.poll(() => patches(state).length).toBe(3);
 	expect(patches(state)[2]!.body).toEqual({ plugins: { layout: { mode: 'band' } } });
 });

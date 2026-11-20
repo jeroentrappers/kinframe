@@ -51,7 +51,7 @@ test('everything stays hidden until the server has it', async ({ page }) => {
 	await open(page, '/settings');
 	await expect(page.getByRole('link', { name: /Memories/ })).toHaveCount(0);
 	await expect(page.getByText('You also use kinframe on other servers?')).toHaveCount(0);
-	await open(page, `/frames/${s.oma.id}?tab=feeds`);
+	await open(page, `/frames/${s.oma.id}?tab=settings`);
 	await expect(page.getByRole('button', { name: 'Add a family from another server' })).toHaveCount(0);
 	expect(call(s.st, 'GET', '/v1/me/former-places')).toBeUndefined();
 	expect(call(s.st, 'GET', '/v1/me/leave-preview')).toBeUndefined();
@@ -87,7 +87,7 @@ test('leaving a family: take my photos, delete my comments, leave the kitchen fr
 	await sheet.getByRole('radio', { name: /Delete them too/ }).check();
 	await sheet.getByRole('button', { name: 'Leave', exact: true }).click();
 
-	await expect(page).toHaveURL(/\/feeds$/);
+	await expect(page).toHaveURL(/\/home$/);
 	await expect(page.getByText(/You left Janssens\. 214 photos taken away\. Frames keep them in their trash until/)).toBeVisible();
 	await expect(page.getByText(/You also left Kitchen frame\./)).toBeVisible();
 	expect(call(s.st, 'POST', `/v1/feeds/${s.readOnly.id}/leave`)?.body).toEqual({ photos: 'take', comments: 'delete', leave_frame_ids: [s.kitchen.id] });
@@ -98,6 +98,7 @@ test('leaving a frame keeps the photos by default', async ({ page }) => {
 	s.lv.previews[`frame:${s.kitchen.id}`] = { scope: 'frame', name: 'Kitchen frame', member: true, owner: false, photos: 5 };
 	await signIn(page, s.st);
 	await open(page, `/frames/${s.kitchen.id}`);
+	await page.getByRole('link', { name: /Frame settings and help/ }).click();
 	await page.getByRole('button', { name: 'Leave frame' }).click();
 	const sheet = page.getByRole('dialog', { name: 'Leave Kitchen frame?' });
 	await expect(sheet.getByRole('radio', { name: /Leave them on the frame/ })).toBeChecked();
@@ -216,7 +217,7 @@ test('family admins: taken-away posts in the family, allow frames on other serve
 
 	s.st.feeds[0]!.allow_remote_frames = true;
 	await open(page, `/feeds/${s.feed.id}?tab=invites`);
-	await page.getByRole('radio', { name: /Show on a frame/ }).check();
+	await page.getByRole('radio', { name: /Add a frame/ }).check();
 	await page.getByRole('checkbox', { name: /Frames on other servers may use this link/ }).check();
 	await page.getByRole('button', { name: 'Create invite link' }).click();
 	await expect.poll(() => (call(s.st, 'POST', `/v1/feeds/${s.feed.id}/invites`)?.body as { allow_remote?: boolean })?.allow_remote).toBe(true);
@@ -242,7 +243,7 @@ test('a frame follows a family on another server', async ({ page }) => {
 		this_server_host: 'localhost:4173'
 	};
 	await signIn(page, s.st);
-	await open(page, `/frames/${s.oma.id}?tab=feeds`);
+	await open(page, `/frames/${s.oma.id}?tab=settings`);
 
 	// Pasted in "Use an invite", it opens the remote flow.
 	await page.getByRole('button', { name: 'Use an invite' }).click();
@@ -267,8 +268,8 @@ test('a frame follows a family on another server', async ({ page }) => {
 	push(s.st, { type: 'remote_subscription.updated', frame_id: s.oma.id, remote_subscription: { ...sub, status: 'error' } });
 	await expect(list.getByText('Can’t reach the server')).toBeVisible();
 
-	await list.getByRole('button', { name: 'Unfollow' }).click();
-	await page.getByRole('dialog', { name: 'Stop showing Janssens?' }).getByRole('button', { name: 'Unfollow' }).click();
+	await list.getByRole('button', { name: 'Stop showing' }).click();
+	await page.getByRole('dialog', { name: 'Stop showing Janssens?' }).getByRole('button', { name: 'Stop showing' }).click();
 	await expect.poll(() => call(s.st, 'DELETE', `/v1/frames/${s.oma.id}/remote-subscriptions/${sub.id}`)).toBeTruthy();
 
 	// A refused link says why.
@@ -376,7 +377,7 @@ test('operator: transfer ownership, the log, and blocked servers', async ({ page
 	expect(call(s.st, 'POST', `/v1/operator/frames/${fid}/owner`)?.body).toEqual({ user_id: lies, reason: 'Divorce; Lies keeps the frame', remove_previous: true });
 
 	await open(page, '/settings/servers');
-	await expect(page.getByText('Frames there following families here: 2')).toBeVisible();
+	await expect(page.getByText('Frames there showing families here: 2')).toBeVisible();
 	await page.getByRole('button', { name: 'Block' }).first().click();
 	await page.getByRole('dialog', { name: 'Block' }).getByRole('button', { name: 'Block' }).click();
 	await expect(page.getByText('kinframe.janssens.be is blocked.')).toBeVisible();

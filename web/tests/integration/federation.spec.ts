@@ -81,7 +81,7 @@ test('a frame on server B follows a family on server A', async ({ browser }) => 
 
 	// A subscribe invite that other servers may use.
 	await A.page.goto(`/feeds/${feed}?tab=invites`);
-	await A.page.getByRole('radio', { name: /Show on a frame/ }).check();
+	await A.page.getByRole('radio', { name: /Add a frame/ }).check();
 	await A.page.getByRole('checkbox', { name: /Frames on other servers may use this link/ }).check();
 	await A.page.getByRole('button', { name: 'Create invite link' }).click();
 	let inviteUrl = '';
@@ -99,7 +99,7 @@ test('a frame on server B follows a family on server A', async ({ browser }) => 
 	const tom = await user(api, 'Tom', { base: B });
 	const oma = await browserFrameOnB(browser, tom, 'Oma’s frame');
 	const T = await signedIn(browser, tom);
-	await T.page.goto(`/frames/${oma.frameId}?tab=feeds`);
+	await T.page.goto(`/frames/${oma.frameId}?tab=settings`);
 	await T.page.getByRole('button', { name: 'Add a family from another server' }).click();
 	const dlg = T.page.getByRole('dialog', { name: 'Add a family from another server' });
 	await dlg.getByLabel('Invite link').fill(inviteUrl);
@@ -207,11 +207,11 @@ test('B unfollows; A blocks B for the family; the operator sees B among the know
 	await expect.poll(async () => (await remoteSubs(tom, frameId))[0]?.status, { timeout: 60_000 }).toBe('active');
 
 	const T = await signedIn(browser, tom);
-	await T.page.goto(`/frames/${frameId}?tab=feeds`);
+	await T.page.goto(`/frames/${frameId}?tab=settings`);
 	const list = T.page.getByRole('region', { name: 'Families on other servers' });
 	await expect(list.getByText('Active')).toBeVisible();
-	await list.getByRole('button', { name: 'Unfollow' }).click();
-	await T.page.getByRole('dialog', { name: 'Stop showing Peeters?' }).getByRole('button', { name: 'Unfollow' }).click();
+	await list.getByRole('button', { name: 'Stop showing' }).click();
+	await T.page.getByRole('dialog', { name: 'Stop showing Peeters?' }).getByRole('button', { name: 'Stop showing' }).click();
 	await expect(list.getByText('Active')).toHaveCount(0);
 	// A hears it: the remote frame is no longer among the family's frames.
 	await expect

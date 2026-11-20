@@ -125,8 +125,7 @@ test('a circle: its chat, and posts only its members see', async ({ browser }) =
 	await join(anna, carla, feed);
 
 	const A = await signedIn(browser, anna);
-	await A.page.goto(`/feeds/${feed}`);
-	await A.page.getByRole('tab', { name: 'Circles' }).click();
+	await A.page.goto(`/feeds/${feed}?tab=circles`);
 	await A.page.getByRole('button', { name: 'New circle' }).click();
 	const dlg = A.page.getByRole('dialog', { name: 'New circle' });
 	await dlg.getByLabel('Name').fill('The cousins');

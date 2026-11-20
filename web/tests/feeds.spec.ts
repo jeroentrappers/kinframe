@@ -68,32 +68,117 @@ async function signIn(page: Page, st: MockState) {
 	await page.waitForURL(/\/frames$/);
 }
 
-test('feeds stay hidden when the server has none', async ({ page }) => {
-	const { st } = feedState({ feeds: false });
+test('without a family: start one, add the frame later, invite the family', async ({ page }) => {
+	const { st } = feedState();
+	st.feeds = [];
+	st.subscriptions = [];
 	await signIn(page, st);
-	await expect(page.getByRole('link', { name: 'Families' })).toHaveCount(0);
-	await page.goto('/feeds');
-	await expect(page.getByText('This server doesn’t offer families.')).toBeVisible();
+	// Getting started (simple-app.md §8) instead of the frames list, Home and the composer.
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toBeVisible();
+	await expect(page.getByRole('button', { name: /Join my family/ })).toBeVisible();
+	await page.goto('/send');
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toBeVisible();
+
+	await page.getByRole('button', { name: /Start a family/ }).click();
+	await page.getByLabel('Name of the family').fill('Janssens family');
+	await page.getByRole('button', { name: 'Start the family' }).click();
+	await expect(page.getByRole('heading', { name: 'Add Oma’s frame now?' })).toBeVisible();
+	expect(st.calls.find((c) => c.method === 'POST' && c.path === '/v1/feeds')?.body).toMatchObject({ name: 'Janssens family' });
+	await page.getByRole('button', { name: 'Later' }).click();
+
+	// The invite sheet opens by itself.
+	const invite = page.getByRole('dialog', { name: 'Invite family to Janssens family' });
+	await expect(invite.getByTestId('invite-code')).toHaveText('KF7Q-M2XA');
+	await expect(invite.getByRole('button', { name: 'Share' })).toBeVisible();
+	await invite.getByRole('button', { name: 'Close' }).click();
+	await page.getByRole('button', { name: 'Done' }).click();
+	await expect(page).toHaveURL(/\/home$/);
+	await expect(page.getByRole('link', { name: 'Family' }).first()).toHaveAttribute('href', new RegExp(`/feeds/${st.feeds[0]!.id}$`));
 });
 
-test('feed posts show receipts and reactions only where the viewer may see them', async ({ page }) => {
+test('the family profile: counts, Photos with Only mine, People, Frames and the gear', async ({ page }) => {
 	const { st, feed } = feedState();
 	await signIn(page, st);
-	await page.getByRole('link', { name: 'Families' }).first().click();
-	await page.getByRole('link', { name: /Peeters kids/ }).click();
+	// One family: the Family tab opens straight into its profile.
+	await page.getByRole('link', { name: 'Family' }).first().click();
 	await expect(page).toHaveURL(new RegExp(`/feeds/${feed.id}$`));
+	await expect(page.getByRole('heading', { name: 'Peeters kids', level: 1 })).toBeVisible();
+	await expect(page.getByText('You and Ben')).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Invite family' })).toBeVisible();
 
-	await expect(page.getByText('Seen on 4 of 5 frames')).toBeVisible();
-	await expect(page.getByText('1 paused')).toBeVisible();
-	await expect(page.getByText('Oma’s frame', { exact: true })).toBeVisible();
-	await expect(page.getByText('Kitchen', { exact: true })).toBeVisible();
-	// Ben's post: receipts are null for us… as the server decides; the page says so.
-	await expect(page.getByText('Only the poster and admins see who saw it.')).toBeVisible();
+	// Photos: every post, or only mine.
+	await expect(page.getByRole('tab', { name: 'Photos' })).toHaveAttribute('aria-selected', 'true');
+	await expect(page.getByRole('link', { name: '2 photos by Anna' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Photo by Ben' })).toBeVisible();
+	await page.getByText('Only mine').click();
+	await expect(page.getByRole('link', { name: 'Photo by Ben' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: '2 photos by Anna' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Sent history' })).toBeVisible();
+	const mine = st.calls.filter((c) => c.method === 'GET' && c.path === `/v1/feeds/${feed.id}/posts`).pop();
+	expect(mine?.query?.poster_id).toBe(st.me!.id);
 
-	// Live: the post got seen on one more frame.
-	await expect.poll(() => st.ws !== null).toBe(true);
-	push(st, { type: 'feed_post.updated', feed_id: feed.id, post_id: st.feedPosts[feed.id]![0]!.id, summary: { frames: 5, delivered: 5, seen: 5 } });
-	await expect(page.getByText('Seen on 5 of 5 frames')).toBeVisible();
+	// People and Frames.
+	await page.getByRole('tab', { name: 'People' }).click();
+	await expect(page).toHaveURL(/\?tab=members$/);
+	await expect(page.getByText('Ben', { exact: true }).first()).toBeVisible();
+	await page.getByRole('tab', { name: /Frames/ }).click();
+	await expect(page).toHaveURL(/\?tab=subscriptions$/);
+	await expect(page.getByText('asked by Ben', { exact: false })).toBeVisible();
+
+	// The gear: Settings with "This family" first.
+	await page.getByRole('link', { name: 'Settings' }).first().click();
+	await expect(page).toHaveURL(new RegExp(`/settings\\?family=${feed.id}$`));
+	await expect(page.getByRole('heading', { name: 'This family' })).toBeVisible();
+	await page.getByRole('link', { name: /Invite links/ }).click();
+	await expect(page).toHaveURL(new RegExp(`/feeds/${feed.id}\\?tab=invites$`));
+	await page.getByRole('link', { name: 'Settings' }).first().click();
+	await expect(page).toHaveURL(new RegExp(`/settings\\?family=${feed.id}$`));
+});
+
+test('Add a frame: one of my frames shows the family at once, with the last 50 posts', async ({ page }) => {
+	const { st, feed } = feedState();
+	const kitchen = makeFrame({ name: 'Kitchen', role: 'owner' });
+	st.frames.push(kitchen);
+	await signIn(page, st);
+	await page.goto(`/feeds/${feed.id}`);
+	await page.getByRole('button', { name: 'Add a frame' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Add a frame' });
+	// Oma's frame already shows the family.
+	await expect(sheet.getByRole('button', { name: /Oma’s frame/ })).toHaveCount(0);
+	await sheet.getByRole('button', { name: /Kitchen/ }).click();
+	await expect(page.getByText('Kitchen now shows Peeters kids')).toBeVisible();
+	const sub = st.calls.find((c) => c.method === 'POST' && c.path === `/v1/feeds/${feed.id}/subscriptions`);
+	expect(sub?.body).toEqual({ frame_id: kitchen.id, history: 'last_n', history_count: 50 });
+	expect(st.subscriptions.find((x) => x.frame.id === kitchen.id)?.status).toBe('active');
+});
+
+test('Frames: which family each frame shows, Add a family, and frames that show your families', async ({ page }) => {
+	const { st, feed } = feedState();
+	const kitchen = makeFrame({ name: 'Kitchen', role: 'owner', online: true });
+	const dad = makeFrame({ name: 'Dad’s frame', role: 'member', permissions: { send: true } });
+	st.frames.push(kitchen, dad);
+	st.subscriptions.push({ id: uid('sb'), status: 'active', history: 'none', feed: { id: feed.id, name: feed.name }, frame: { id: uid('f'), name: 'Tante’s frame' }, created_at: ago(500), activated_at: ago(500) });
+	await signIn(page, st);
+
+	// Frames you look after first, by name; then the frames you're only on.
+	const cards = page.getByRole('article');
+	await expect(cards.getByRole('heading', { level: 2 })).toHaveText(['Kitchen', 'Oma’s frame', 'Dad’s frame']);
+	const card = (name: string) => cards.filter({ has: page.getByRole('heading', { name, level: 2 }) });
+	await expect(card('Kitchen').getByText('Online · showing now')).toBeVisible();
+	await expect(card('Oma’s frame').getByText('Shows Peeters kids')).toBeVisible();
+	await expect(card('Dad’s frame').getByRole('button', { name: 'Add a family' })).toHaveCount(0);
+
+	// A frame without a family: add one, it shows at once.
+	await expect(card('Kitchen').getByText('Doesn’t show a family yet')).toBeVisible();
+	await card('Kitchen').getByRole('button', { name: 'Add a family' }).click();
+	await page.getByRole('dialog', { name: 'Add a family' }).getByRole('button', { name: /Peeters kids/ }).click();
+	await expect(page.getByText('Kitchen now shows Peeters kids')).toBeVisible();
+	await expect(card('Kitchen').getByText('Shows Peeters kids')).toBeVisible();
+	expect(st.calls.find((c) => c.method === 'POST' && c.path === `/v1/feeds/${feed.id}/subscriptions`)?.body).toEqual({ frame_id: kitchen.id, history: 'last_n', history_count: 50 });
+
+	// Frames you're not on that show one of your families.
+	await expect(page.getByRole('heading', { name: 'Frames that show your families' })).toBeVisible();
+	await expect(page.getByRole('listitem').filter({ hasText: 'Tante’s frame' })).toContainText('Shows Peeters kids');
 });
 
 test('approve a frame’s subscription request', async ({ page }) => {
@@ -110,7 +195,7 @@ test('create a subscribe invite: link, QR and code', async ({ page }) => {
 	const { st, feed } = feedState();
 	await signIn(page, st);
 	await page.goto(`/feeds/${feed.id}?tab=invites`);
-	await page.getByRole('radio', { name: /Show on a frame/ }).check();
+	await page.getByRole('radio', { name: /Add a frame/ }).check();
 	await page.getByRole('button', { name: 'Create invite link' }).click();
 	await expect(page.getByTestId('invite-code').first()).toHaveText('KF7Q-M2XA');
 	await expect(page.getByRole('img', { name: /QR code/ }).first()).toBeVisible();
@@ -130,41 +215,63 @@ test('a feed code in "Enter a code" opens the feed invite', async ({ page }) => 
 	await page.getByRole('button', { name: 'Join family' }).click();
 	await expect(page.getByRole('heading', { name: 'You’re in Cousins' })).toBeVisible();
 	expect(st.calls.find((c) => c.path === '/v1/feed-invites:lookup')?.body).toEqual({ code: 'AB12CD34' });
+
+	// Asked once on this device: normal or simple view.
+	await expect(page.getByTestId('view-simple')).toBeVisible();
+	await page.getByTestId('view-normal').click();
+	await expect(page).toHaveURL(/\/home$/);
+	expect(await page.evaluate(() => [localStorage.getItem('kinframe.viewAsked'), localStorage.getItem('kinframe.simpleView')])).toEqual(['1', null]);
 });
 
 test('joining as a Reader offers the family, not posting', async ({ page }) => {
 	const { st } = feedState();
 	const token = 'fiREADER000000000000000000';
 	st.feedInvitePreviews[token] = { token, purpose: 'join', feed_name: 'Cousins', invited_by_name: 'Lisa', owner_name: 'Lisa', member_count: 4, requires_approval: false, join_role: 'member' } as S['FeedInvitePreview'];
+	// The view question was answered before on this device.
+	await page.addInitScript(() => localStorage.setItem('kinframe.viewAsked', '1'));
 	await signIn(page, st);
 	await page.goto(`/fi/${token}`);
 	await page.getByRole('button', { name: 'Join family' }).click();
 	await expect(page.getByRole('heading', { name: 'You’re in Cousins' })).toBeVisible();
 	await expect(page.getByText('Readers see everything, comment, react and chat, but don’t post photos.')).toBeVisible();
-	await expect(page.getByRole('link', { name: 'Post photos' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: 'Share photos' })).toHaveCount(0);
+	await expect(page.getByTestId('view-simple')).toHaveCount(0);
 	await expect(page.getByRole('link', { name: 'View family' })).toBeVisible();
 });
 
-test('send to a frame and a feed at once', async ({ page }) => {
-	const { st, oma, feed } = feedState();
+test('share with the family, or with two families at once', async ({ page }) => {
+	const { st, feed } = feedState();
+	const opa = { ...feed, id: uid('fd'), name: 'Opa & Oma', role: 'poster' as const, subscription_count: 1, last_post_at: ago(9000), pending_subscription_count: 0 };
+	st.feeds.push(opa);
 	await signIn(page, st);
-	await page.goto(`/send?feed=${feed.id}`);
-	await expect(page.getByRole('checkbox', { name: /Peeters kids/ })).toBeChecked();
-	await page.locator('label.recipient', { hasText: 'Oma’s frame' }).click();
-	await expect(page.getByRole('checkbox', { name: /Oma’s frame/ })).toBeChecked();
+	await page.getByRole('link', { name: 'Share' }).first().click();
+	await expect(page).toHaveURL(/\/send$/);
+	// The home family by default: nothing to choose.
+	const dest = page.getByTestId('destination');
+	await expect(dest).toHaveText('Peeters kids · everyone and its 5 frames');
+	await page.getByRole('button', { name: 'Change' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Share with' });
+	await expect(sheet.getByTestId('family-option')).toHaveCount(2);
+	await expect(sheet.getByRole('checkbox', { name: /Peeters kids/ })).toBeChecked();
+	await sheet.getByRole('checkbox', { name: /Opa & Oma/ }).check();
+	await sheet.getByRole('button', { name: 'Done' }).click();
+	await expect(dest).toHaveText('2 families · 6 frames');
+
 	await page.getByTestId('file-input').setInputFiles([{ name: 'beach.png', mimeType: 'image/png', buffer: await gradientPng(320, 240, 10) }]);
-	await page.getByRole('button', { name: /^Send/ }).first().click();
-	await expect(page).toHaveURL(/\/history\/.+/);
+	await page.getByRole('button', { name: 'Share', exact: true }).first().click();
+	// Shared with families: back to Home.
+	await expect(page).toHaveURL(/\/home$/);
 	const send = st.calls.find((c) => c.path === '/v1/sends' && c.method === 'POST');
-	expect(send?.body).toMatchObject({ frame_ids: [oma.id], feed_ids: [feed.id] });
-	await expect(page.getByRole('link', { name: 'Peeters kids' })).toBeVisible();
+	expect(send?.body).toMatchObject({ feed_ids: [feed.id, opa.id] });
+	expect((send?.body as S['SendCreate']).frame_ids ?? []).toEqual([]);
 });
 
 test('frame side: pause a subscription and play only that feed', async ({ page }) => {
 	const { st, oma, feed } = feedState();
 	await signIn(page, st);
-	await page.goto(`/frames/${oma.id}?tab=feeds`);
-	await expect(page.getByText('Peeters kids')).toBeVisible();
+	await page.goto(`/frames/${oma.id}?tab=settings`);
+	await expect(page.getByRole('heading', { name: 'Families on this frame' })).toBeVisible();
+	await expect(page.getByRole('strong').filter({ hasText: 'Peeters kids' })).toBeVisible();
 	await page.getByRole('button', { name: 'Play only this family' }).click();
 	await expect.poll(() => st.calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/settings'))).toBe(true);
 	const patch = st.calls.find((c) => c.method === 'PATCH' && c.path.endsWith('/settings'));

@@ -23,7 +23,7 @@ test('every social page loads for owner, poster and reader', async ({ browser })
 
 	for (const u of [anna, ben, carla]) {
 		const { ctx, page, watch } = await signedIn(browser, u);
-		for (const path of ['/home', '/chats', `/chats/${famChat!.id}`, `/posts/${post}`, `/feeds/${feed}`, '/feeds', '/frames', '/settings', `/people/${anna.id}`, '/send']) {
+		for (const path of ['/home', '/chats', `/chats/${famChat!.id}`, `/posts/${post}`, `/feeds/${feed}`, '/family', '/frames', '/settings', `/people/${anna.id}`, '/send']) {
 			await page.goto(path);
 			await page.waitForLoadState('networkidle');
 			await expect(page.locator('main')).toBeVisible();

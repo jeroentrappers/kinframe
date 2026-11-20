@@ -132,7 +132,7 @@ for (const vp of VIEWPORTS) {
 				await shot(page, n('07-settings-album'));
 
 				// Ownership and moving to a new frame.
-				await page.goto(`/frames/${oma.id}`);
+				await page.goto(`/frames/${oma.id}?tab=settings`);
 				await page.getByRole('heading', { name: 'Ownership and device' }).waitFor();
 				await shot(page, n('08-overview-ownership'));
 				await page.getByRole('button', { name: 'Transfer', exact: true }).click();
@@ -148,7 +148,7 @@ for (const vp of VIEWPORTS) {
 				await page.keyboard.press('Escape');
 
 				// Trimming a video.
-				await page.goto('/send');
+				await page.goto(`/send?frame=${oma.id}`);
 				await page.getByTestId('file-input').setInputFiles([
 					{ name: 'clip.webm', mimeType: 'video/webm', buffer: readFileSync('tests/fixtures/clip.webm') },
 					{ name: 'garden.png', mimeType: 'image/png', buffer: await gradientPng(320, 480, 40) }
@@ -166,7 +166,7 @@ for (const vp of VIEWPORTS) {
 				await shot(page, n('13-send-trimmed'));
 
 				// The notification offer after a send, and the settings switch.
-				await page.getByRole('button', { name: /^Send/ }).first().click();
+				await page.getByRole('button', { name: 'Share', exact: true }).first().click();
 				await page.getByRole('heading', { name: 'Want to know when it arrives?' }).waitFor();
 				await shot(page, n('14-push-offer'));
 				await page.goto('/settings');

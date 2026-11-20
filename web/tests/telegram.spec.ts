@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
 import { defaultSettings, emptyState, makeFrame, mockApi, push, uid, type MockState } from './mock-api';
+import { feedPostsOnTimeline } from './mock-social';
 
 // Telegram bridge (docs/spec/telegram.md, README §5.17): connecting a group with a t.me deep link and QR code, chat
 // status and settings, contributors, disconnecting, and "Link my Telegram", against the in-memory mock API.
@@ -29,7 +30,7 @@ async function signIn(page: Page, st: MockState) {
 	await page.goto('/');
 	await page.getByLabel('Email').fill('anna@example.org');
 	await page.getByRole('button', { name: 'Continue' }).click();
-	await page.waitForURL(/\/frames$/);
+	await page.waitForURL(/\/(frames|home)$/);
 }
 
 function chatFor(st: MockState, frame: S['Frame'], p: Partial<S['TelegramChat']> = {}): S['TelegramChat'] {
@@ -64,8 +65,8 @@ test('everything stays hidden when the server has no Telegram bot', async ({ pag
 	await page.goto(`/frames/${oma.id}?tab=settings`);
 	await expect(page.getByRole('heading', { name: 'Slideshow' }).first()).toBeVisible();
 	await expect(page.getByTestId('telegram-section')).toHaveCount(0);
-	await page.goto(`/feeds/${feed.id}?tab=settings`);
-	await expect(page.getByRole('heading', { name: 'Peeters kids' })).toBeVisible();
+	await page.goto(`/feeds/${feed.id}?tab=sources`);
+	await expect(page.getByRole('heading', { name: 'More ways to add photos' })).toBeVisible();
 	await expect(page.getByTestId('telegram-section')).toHaveCount(0);
 	await page.goto('/settings');
 	await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
@@ -183,10 +184,11 @@ test('a feed connects a group too, and its posts say "via Telegram"', async ({ p
 			reactions: null
 		}
 	];
+	feedPostsOnTimeline(st);
 	await signIn(page, st);
-	await page.goto(`/feeds/${feed.id}`);
+	await page.goto('/home');
 	await expect(page.getByText('Ben via Telegram')).toBeVisible();
-	await page.goto(`/feeds/${feed.id}?tab=settings`);
+	await page.goto(`/feeds/${feed.id}?tab=sources`);
 	await page.getByTestId('telegram-section').getByRole('button', { name: 'Connect a Telegram group' }).click();
 	await expect(page.getByRole('dialog')).toContainText('Photos posted in the group become posts in Peeters kids.');
 	expect(st.calls.some((c) => c.method === 'POST' && c.path === `/v1/feeds/${feed.id}/telegram-codes`)).toBe(true);
@@ -196,7 +198,7 @@ test('join requests from Telegram say so', async ({ page }) => {
 	const { st, oma } = tgState();
 	st.joinRequests[oma.id] = [{ id: uid('jr'), user: { id: uid('u'), display_name: 'Ben' }, via: 'telegram', via_name: 'Ben · Telegram, Peeters family', via_matches: null, created_at: ago(5) }];
 	await signIn(page, st);
-	await page.goto(`/frames/${oma.id}?tab=people`);
+	await page.goto(`/frames/${oma.id}?tab=settings`);
 	await expect(page.getByText('Asked to join from Telegram')).toBeVisible();
 	await expect(page.getByTestId('join-via-name')).toHaveText('Ben · Telegram, Peeters family');
 });

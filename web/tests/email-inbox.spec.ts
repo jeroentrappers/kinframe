@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
 import { defaultSettings, emptyState, makeFrame, mockApi, push, uid, type MockState } from './mock-api';
+import { feedPostsOnTimeline } from './mock-social';
 
 // Email to frame (docs/spec/email-inbox.md, README §5.16): addresses on frames and feeds, senders, the pending list
 // with held mail, recent mail, and the "via email" credit, against the in-memory mock API.
@@ -35,7 +36,7 @@ async function signIn(page: Page, st: MockState) {
 	await page.goto('/');
 	await page.getByLabel('Email').fill('anna@example.org');
 	await page.getByRole('button', { name: 'Continue' }).click();
-	await page.waitForURL(/\/frames$/);
+	await page.waitForURL(/\/(frames|home)$/);
 }
 
 function existingAddress(st: MockState, frame: S['Frame'], p: Partial<S['EmailAddress']> = {}): S['EmailAddress'] {
@@ -102,8 +103,8 @@ test('everything stays hidden when the server has no email inbox', async ({ page
 	await page.goto(`/frames/${oma.id}?tab=settings`);
 	await expect(page.getByRole('heading', { name: 'Slideshow' }).first()).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Email photos to this frame' })).toHaveCount(0);
-	await page.goto(`/feeds/${feed.id}?tab=settings`);
-	await expect(page.getByRole('heading', { name: 'Peeters kids' })).toBeVisible();
+	await page.goto(`/feeds/${feed.id}?tab=sources`);
+	await expect(page.getByRole('heading', { name: 'More ways to add photos' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Email photos to this family' })).toHaveCount(0);
 	expect(st.calls.some((c) => c.path.includes('email-addresses'))).toBe(false);
 });
@@ -283,7 +284,10 @@ test('settings: slug change warns, and the feed gets its own address', async ({ 
 	await expect(page.getByText('The address is now grandma-k7q2m9@in.kinframe.appmire.be')).toBeVisible();
 	expect(st.calls.find((c) => c.method === 'PATCH' && c.path.startsWith('/v1/email-addresses/'))!.body).toEqual({ slug: 'grandma', anyone_may_send: true });
 
-	await page.goto(`/feeds/${feed.id}?tab=settings`);
+	// Family › gear › This family › More ways to add photos.
+	await page.goto(`/settings?family=${feed.id}`);
+	await page.getByRole('link', { name: /More ways to add photos/ }).click();
+	await expect(page).toHaveURL(new RegExp(`/feeds/${feed.id}\\?tab=sources$`));
 	const section = page.getByTestId('email-inbox');
 	await expect(section.getByRole('heading', { name: 'Email photos to this family' })).toBeVisible();
 	await section.getByRole('button', { name: 'Create an address' }).click();
@@ -310,12 +314,13 @@ test('credit and join requests: "Grandpa via email" and "asked to join from the 
 	st.joinRequests[oma.id] = [
 		{ id: uid('jr'), user: { id: uid('u'), display_name: 'Jan Peeters' }, via: 'email', via_name: 'Jan · jan.peeters@telenet.be', via_matches: true, created_at: ago(5) }
 	];
+	feedPostsOnTimeline(st);
 	await signIn(page, st);
-	await page.goto(`/feeds/${feed.id}`);
+	// Home: the family's timeline credits the person behind the email.
+	await page.goto('/home');
 	await expect(page.getByText('Grandpa via email')).toBeVisible();
-	await expect(page.getByText('2 photos', { exact: false }).first()).toBeVisible();
 
-	await page.goto(`/frames/${oma.id}?tab=people`);
+	await page.goto(`/frames/${oma.id}?tab=settings`);
 	await expect(page.getByText('Asked to join from the email link')).toBeVisible();
 	const via = page.getByTestId('join-via-name');
 	await expect(via).toContainText('Jan · jan.peeters@telenet.be');

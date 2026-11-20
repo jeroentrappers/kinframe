@@ -32,7 +32,8 @@ test('add an ICS link: test the connection, pick a colour, it syncs', async ({ p
 	await mockApi(page, st);
 	await signIn(page);
 	await page.goto(`/frames/${frame.id}`);
-	await page.getByRole('tab', { name: 'Calendar' }).click();
+	await page.getByRole('link', { name: 'Calendar, weather and add-ons' }).click();
+	await expect(page).toHaveURL(/\?tab=calendar$/);
 	await expect(page.getByText('No calendars yet.')).toBeVisible();
 
 	await page.getByRole('button', { name: 'Add calendar' }).click();
@@ -226,12 +227,16 @@ test('members who can only send see just the send section', async ({ page }) => 
 	await expect(page.getByRole('heading', { name: 'What the frame shows' })).toHaveCount(0);
 });
 
-test('the tab is hidden when the server has calendars off', async ({ page }) => {
+test('the row is hidden when the server has calendars off', async ({ page }) => {
 	const st = calState();
 	st.discovery.calendar = false;
 	await mockApi(page, st);
 	await signIn(page);
 	await page.goto(`/frames/${st.frames[0]!.id}`);
-	await expect(page.getByRole('tab', { name: 'Photos' })).toBeVisible();
-	await expect(page.getByRole('tab', { name: 'Calendar' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: /Photos on this frame/ })).toBeVisible();
+	await expect(page.getByRole('link', { name: /Calendar, weather and add-ons/ })).toHaveCount(0);
+	// Its address shows the frame screen.
+	await page.goto(`/frames/${st.frames[0]!.id}?tab=calendar`);
+	await expect(page.getByRole('link', { name: /Frame settings and help/ })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Add calendar' })).toHaveCount(0);
 });
