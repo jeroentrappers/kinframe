@@ -7,6 +7,9 @@ open-source server that accepts the Sentry SDKs' reports. Nothing goes to a thir
 
 - GlitchTip runs at `https://errors.kinframe.appmire.be` on appmire-hetz1 (kinframe-deploy, role `glitchtip`),
   organization `kinframe`, with sign-up closed.
+- Operators sign in with kinframe's Logto: `bootstrap-logto` registers the app `GlitchTip` and writes
+  `glitchtip-oidc.json` (`KINFRAME_LOGTO_GLITCHTIP_URL`), and the role links each operator's Logto user to the GlitchTip
+  account with the same email (`glitchtip_oidc_file`). Anyone else is refused; the password sign-in stays.
 - One project per client:
 
   | Project | Client | SDK |
