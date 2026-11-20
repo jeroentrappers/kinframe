@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -27,8 +28,7 @@ func TestRecovererReportsPanic(t *testing.T) {
 
 	s := &Server{cfg: &config.Config{TrustProxy: true}, log: slog.New(slog.DiscardHandler)}
 	h := s.recoverer(s.realIP(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
-		var m map[string]int
-		m["boom"]++ // assignment to entry in nil map
+		panic(errors.New("assignment to entry in nil map"))
 	})))
 	r := httptest.NewRequest("PATCH", "http://kinframe.test/v1/frames/0b9e4f3c-6f0e-4c4e-9a59-8e3d4a1f2b7c?name=Oma%27s+frame",
 		strings.NewReader(`{"name":"Oma's frame"}`))
