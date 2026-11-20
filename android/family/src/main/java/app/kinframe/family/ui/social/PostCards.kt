@@ -57,7 +57,7 @@ fun postLabel(p: TimelinePost): String = when {
 
 /** Photos large, swipe through a multi-photo post (Home and the post screen). */
 @Composable
-fun PostMedia(items: List<Item>, modifier: Modifier = Modifier, onPage: (Int) -> Unit = {}, onOpen: ((Int) -> Unit)? = null, overlay: @Composable (Int) -> Unit = {}) {
+fun PostMedia(items: List<Item>, modifier: Modifier = Modifier, onPage: (Int) -> Unit = {}, onOpen: ((Int) -> Unit)? = null, corner: androidx.compose.ui.unit.Dp = 14.dp, overlay: @Composable (Int) -> Unit = {}) {
     if (items.isEmpty()) return
     val pager = rememberPagerState { items.size }
     LaunchedEffect(pager.currentPage) { onPage(pager.currentPage) }
@@ -66,7 +66,7 @@ fun PostMedia(items: List<Item>, modifier: Modifier = Modifier, onPage: (Int) ->
             val item = items[i]
             Box(Modifier.fillMaxSize().let { m -> if (onOpen != null) m.clickable(role = Role.Image) { onOpen(i) } else m }) {
                 // Uncropped display rendition, cropped to the pager's aspect (Thumb crops by default).
-                Thumb(item.largeImageUrl, item.caption, Modifier.fillMaxSize(), corner = 14.dp)
+                Thumb(item.largeImageUrl, item.caption, Modifier.fillMaxSize(), corner = corner)
                 if (item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, stringResource(R.string.social_video), Modifier.align(Alignment.Center).size(40.dp), tint = Color.White)
                 if (item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(8.dp))
                 overlay(i)

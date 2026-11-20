@@ -100,10 +100,14 @@ fun HistoryScreen(
     serverChip: (Send) -> String? = { null },
     /** A queued send's server chip (its `server`), likewise. */
     outboxChip: (OutboxSend) -> String? = { null },
+    /** Settings › Sent history: a top bar with back instead of the page heading. */
+    onBack: (() -> Unit)? = null,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
-    PullToRefreshBox(state.refreshing, onRefresh, Modifier.fillMaxSize().background(c.paper)) {
+    Column(Modifier.fillMaxSize().background(c.paper)) {
+    if (onBack != null) KinTopBar(stringResource(R.string.history_title), onBack = onBack)
+    PullToRefreshBox(state.refreshing, onRefresh, Modifier.weight(1f).fillMaxWidth().background(c.paper)) {
         val list = (state.sends as? Load.Ready)?.value
         val lazy = androidx.compose.foundation.lazy.rememberLazyListState()
         LaunchedEffect(lazy, list?.size) {
@@ -119,7 +123,7 @@ fun HistoryScreen(
         ) {
             item {
                 Column(Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(R.string.history_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.semantics { heading() })
+                    if (onBack == null) Text(stringResource(R.string.history_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.semantics { heading() })
                     Text(stringResource(R.string.history_lede), style = Kin.type.caption, color = c.inkSoft)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HistoryFilter.entries.forEach { f ->
@@ -163,6 +167,7 @@ fun HistoryScreen(
                 }
             }
         }
+    }
     }
 }
 

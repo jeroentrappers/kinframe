@@ -120,12 +120,10 @@ import app.kinframe.core.api.FeedCodes
 import app.kinframe.core.api.FeedInvite
 import app.kinframe.core.api.FeedInvitePurpose
 import app.kinframe.family.ui.feeds.FeedActions
-import app.kinframe.family.ui.feeds.FeedDetailScreen
 import app.kinframe.family.ui.feeds.FeedDetailViewModel
 import app.kinframe.family.ui.feeds.FeedInviteScreen
 import app.kinframe.family.ui.feeds.FeedInviteViewModel
 import app.kinframe.family.ui.feeds.FeedNotice
-import app.kinframe.family.ui.feeds.FeedsScreen
 import app.kinframe.family.ui.feeds.FeedsViewModel
 import app.kinframe.family.ui.feeds.FrameFeedsTab
 import app.kinframe.family.ui.feeds.FrameFeedsViewModel
@@ -155,6 +153,27 @@ import app.kinframe.family.ui.send.ItemEditor
 import app.kinframe.family.ui.settings.SettingsScreen
 import app.kinframe.family.ui.settings.AccountSettingsScreen
 import app.kinframe.family.util.DeepLink
+import app.kinframe.family.ui.family.Families
+import app.kinframe.family.ui.family.FamilyListScreen
+import app.kinframe.family.ui.family.AddFamilySheet
+import app.kinframe.family.ui.family.FamilyInvites
+import app.kinframe.family.ui.family.FamilyFrames
+import app.kinframe.family.ui.frames.FrameAdded
+import app.kinframe.family.ui.family.FamilyPrefs
+import app.kinframe.family.ui.family.FamilyProfileScreen
+import app.kinframe.family.ui.family.FamilyScope
+import app.kinframe.family.ui.family.LocalFamily
+import app.kinframe.family.ui.family.ProfileActions
+import app.kinframe.family.ui.family.SetupStep
+import app.kinframe.family.ui.family.ViewQuestionDialog
+import app.kinframe.family.ui.send.DestinationSheet
+import app.kinframe.family.ui.send.canChangeDestination
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import app.kinframe.family.util.Problems
 import app.kinframe.family.update.UpdateState
 import app.kinframe.family.update.openStore
@@ -268,27 +287,26 @@ private fun Onboarding(graph: AppGraph, phase: Phase) {
 
 private data class TabSpec(val route: Route, val icon: ImageVector, val label: Int)
 
-/** The bottom tabs; Feeds only when the server has them (discovery `feeds`); Home and Chats with family social. */
-/** Families on any signed-in account's server: the Families tab merges them (multi-server.md §2.2). */
-private fun anyFeeds(graph: AppGraph, ready: Phase.Ready): Boolean =
-    ready.server.discovery.feeds || graph.accounts.signedIn.any { it.server?.discovery?.feeds == true }
+/** The tabs (docs/spec/simple-app.md §3): Home · Frames · [+] · Chats · Family; Chats only when the server has chats. */
+internal fun tabs(chats: Boolean): List<Route> = listOfNotNull(HomeRoute, Route.Frames, if (chats) ChatsRoute else null, Route.Family)
 
-private fun tabs(feeds: Boolean, social: SocialFlags = SocialFlags(false, false, false, false, false)) = listOfNotNull(
-    if (social.social) TabSpec(HomeRoute, KinIcons.Home, R.string.social_nav_home) else null,
-    TabSpec(Route.Frames, KinIcons.Frame, R.string.nav_frames),
-    TabSpec(Route.Send, KinIcons.Send, R.string.nav_send),
-    TabSpec(Route.History, KinIcons.History, R.string.nav_history),
-    if (social.chats) TabSpec(ChatsRoute, KinIcons.Message, R.string.chat_nav) else null,
-    if (feeds) TabSpec(Route.Feeds, KinIcons.People, R.string.nav_feeds) else null,
-    TabSpec(Route.Settings, KinIcons.Settings, R.string.nav_settings),
-)
+private fun tabSpec(route: Route): TabSpec = when (route) {
+    HomeRoute -> TabSpec(route, KinIcons.Home, R.string.social_nav_home)
+    Route.Frames -> TabSpec(route, KinIcons.Frame, R.string.nav_frames)
+    ChatsRoute -> TabSpec(route, KinIcons.Message, R.string.chat_nav)
+    else -> TabSpec(route, KinIcons.People, R.string.nav_family)
+}
 
 /** The tab's badge: unread chats on Chats, threads with mentions or replies to you on Home (README §5.19). */
-private fun tabBadge(route: Route, b: app.kinframe.core.social.Badge): Int = when (route) {
+private fun tabBadge(route: Route, b: app.kinframe.core.social.Badge, f: FamilyCounts): Int = when (route) {
     ChatsRoute -> b.conversations
     HomeRoute -> b.threads
+    Route.Family -> f.pending
     else -> 0
 }
+
+/** Requests the current family's admins have to answer (frames and people). */
+private data class FamilyCounts(val pending: Int = 0)
 
 @Composable
 private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
@@ -298,27 +316,22 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     // The merged tabs show what any account's server has (multi-server.md §2.2).
     val accountsVersion by graph.accounts.version.collectAsStateWithLifecycle()
     val socialFlags = remember(ready.server.discovery, accountsVersion) { graph.social.flags }
-    val nav = remember(api) { Navigator(if (socialFlags.social) HomeRoute else Route.Frames) }
-    val homeTab: Route = if (socialFlags.social) HomeRoute else Route.Frames
+    val nav = remember(api) { Navigator(HomeRoute) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val toaster = remember { Toaster(snackbar, scope) }
     val k = System.identityHashCode(api)
-    val feedsOn = remember(ready.server.discovery, accountsVersion) { anyFeeds(graph, ready) }
-    val TABS = remember(feedsOn, socialFlags) { tabs(feedsOn, socialFlags) }
-    // A phone's bottom bar holds five: with Home and Chats, History and Settings move to the top bar of those tabs.
-    val BAR = remember(TABS) { if (TABS.size <= 5) TABS else TABS.filter { it.route != Route.History && it.route != Route.Settings } }
+    val TABS = remember(socialFlags) { tabs(socialFlags.chats).map(::tabSpec) }
     val badge by graph.social.badge.collectAsStateWithLifecycle()
 
     val frames: FramesViewModel = viewModel(key = "frames-$k") { FramesViewModel(api, graph.live.events) }
-    val feeds: FeedsViewModel = viewModel(key = "feeds-$k") { FeedsViewModel(api, graph.live.events) }
+    val feeds: FeedsViewModel = viewModel(key = "feeds-$k") { FeedsViewModel(api, graph.live.events, me = { id -> graph.accounts.meIdFor(id) }) }
     val composer: ComposerViewModel = viewModel(key = "composer-$k") {
         ComposerViewModel(
             api = { graph.api.value }, limits = { graph.servers.current.value?.limits ?: Limits() },
             server = { graph.servers.current.value?.url?.toString().orEmpty() },
             inspect = { uri -> withContext(Dispatchers.IO) { MediaFiles.inspect(context.applicationContext, uri) } },
             enqueue = { send -> queueSend(graph, send) },
-            feedsEnabled = { graph.accounts.signedIn.any { it.server?.discovery?.feeds == true } },
             social = { graph.social.api.value?.takeIf { graph.social.socialOn } },
             serverLabel = { id -> graph.accounts.chipFor(id) },
             // Each recipient's own server limits: the strictest applies to the selection (multi-server.md §2.2).
@@ -340,19 +353,46 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         }
     }
 
-    BackHandler(enabled = nav.stack.size > 1 || nav.tab != homeTab) { if (!nav.pop()) nav.selectTab(homeTab) }
+    // The person's families (docs/spec/simple-app.md §3): all together, the home family first; Home's filter chip is
+    // remembered per device.
+    val prefs = remember { FamilyPrefs(context.getSharedPreferences(FamilyPrefs.NAME, Context.MODE_PRIVATE)) }
+    val feedsState by feeds.state.collectAsStateWithLifecycle()
+    val savedFilter by prefs.homeFilter.collectAsStateWithLifecycle()
+    val simple by prefs.simpleView.collectAsStateWithLifecycle()
+    val families = feedsState.feeds.valueOrNull
+    val homeFamily = families?.let { Families.home(it, feedsState.myPosts) }
+    val ordered = families?.let { Families.ordered(it, homeFamily) }.orEmpty()
+    val filter = families?.let { Families.filter(it, savedFilter) }
+    nav.singleFamily = ordered.size <= 1
+    var setup by rememberSaveable { mutableStateOf<SetupStep?>(null) }
+    var askView by rememberSaveable { mutableStateOf(false) }
+    val invite: (app.kinframe.core.api.Feed) -> Unit = { f ->
+        scope.launch {
+            runCatching { FamilyInvites.create(graph.kinFor(f.id) ?: api, f.id, java.util.UUID.randomUUID().toString()) }
+                .onSuccess { shareFeedInvite(context, res, it, f.name) }
+                .onFailure { toaster.show(res.getString(Problems.message(it))) }
+        }
+    }
+    // The composer goes to the filtered family, with All to the home family.
+    val compose: () -> Unit = { (ordered.firstOrNull { it.id == filter } ?: homeFamily)?.let { composer.preselectFeed(it.id) }; nav.compose() }
+    val familyScope = FamilyScope(
+        all = ordered, home = homeFamily, filter = filter, setFilter = prefs::setHomeFilter,
+        invite = invite, compose = compose, start = { setup = SetupStep.Name },
+    )
+
+    BackHandler(enabled = nav.stack.size > 1 || nav.tab != HomeRoute) { if (!nav.pop()) nav.selectTab(HomeRoute) }
 
     // Incoming: share sheet, links, notification taps.
     val shared by graph.incomingShare.collectAsStateWithLifecycle()
-    LaunchedEffect(shared) {
-        if (shared.isNotEmpty()) { nav.selectTab(Route.Send); composer.add(shared); graph.incomingShare.value = emptyList() }
+    LaunchedEffect(shared, homeFamily?.id) {
+        if (shared.isNotEmpty() && homeFamily != null) { compose(); composer.add(shared); graph.incomingShare.value = emptyList() }
     }
     val link by graph.pendingLink.collectAsStateWithLifecycle()
     LaunchedEffect(link) {
         when (val l = link) {
-            is DeepLink.FrameCode -> nav.push(Route.AddFrame(l.code))
+            is DeepLink.FrameCode -> nav.push(Route.AddFrame(l.code, family = homeFamily?.id))
             is DeepLink.Invite -> nav.push(Route.Invite(l.token))
-            is DeepLink.FeedInvite -> if (feedsOn) nav.push(Route.FeedInvite(l.token))
+            is DeepLink.FeedInvite -> nav.push(Route.FeedInvite(l.token))
             null -> Unit
         }
         graph.pendingLink.value = null
@@ -370,48 +410,12 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                 val list = (frames.state.value.frames as? Load.Ready)?.value ?: runCatching { api.frames() }.getOrNull()
                 list == null || list.any { it.id == id && it.can { p -> p.send } }
             },
-            sendTo = { frame, request -> composer.preselectFrame(frame, request); nav.selectTab(Route.Send) },
+            sendTo = { frame, request -> composer.preselectFrame(frame, request); nav.compose() },
         )
         if (openSocialTarget(t, nav, targets)) return@LaunchedEffect
         // Leaving pushes (photos taken away, keep requests): ui/LeavingRoot.kt.
         if (openLeavingTarget(t, nav)) return@LaunchedEffect
-        when (t.target) {
-            Notifications.TARGET_PEOPLE -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.People)) }
-            Notifications.TARGET_FRAME -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it)) }
-            Notifications.TARGET_CALENDAR -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.Calendar)) }
-            Notifications.TARGET_FRAME_FEEDS -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.Feeds)) }
-            // A photo source needs its owner: My photo sources shows it with the fix (photo-sources.md §10).
-            Notifications.TARGET_PHOTO_SOURCES -> { nav.selectTab(Route.Settings); nav.push(Route.PhotoSources) }
-            Notifications.TARGET_GOOGLE_IMPORT -> t.importId?.let { graph.googleImports.resume(it) }
-            // Someone new mailed an address you manage: its pending list (email-inbox.md §11).
-            Notifications.TARGET_EMAIL_PENDING -> t.addressId?.let {
-                if (graph.accounts.contextFor(it).discovery?.emailInbox != true) return@let
-                if (t.feedId != null && feedsOn) nav.selectTab(Route.Feeds) else nav.selectTab(Route.Frames)
-                nav.push(Route.EmailAddress(it))
-            }
-            // A Telegram chat needs its owner (telegram.md §15.1).
-            Notifications.TARGET_TELEGRAM_CHAT -> t.chatId?.let {
-                if (graph.accounts.contextFor(it).discovery?.telegram != true) return@let
-                if (t.feedId != null && feedsOn) nav.selectTab(Route.Feeds) else nav.selectTab(Route.Frames)
-                nav.push(Route.TelegramChat(it))
-            }
-            Notifications.TARGET_FEED, Notifications.TARGET_FEED_PEOPLE, Notifications.TARGET_FEED_FRAMES, Notifications.TARGET_FEED_BIRTHDAYS -> t.feedId?.let {
-                if (!feedsOn) return@let
-                nav.selectTab(Route.Feeds)
-                val tab = when (t.target) {
-                    Notifications.TARGET_FEED_PEOPLE -> FeedTab.People
-                    Notifications.TARGET_FEED_FRAMES -> FeedTab.Frames
-                    Notifications.TARGET_FEED_BIRTHDAYS -> if (graph.accounts.contextFor(it).discovery?.birthdays == true) FeedTab.Birthdays else FeedTab.Posts
-                    else -> FeedTab.Posts
-                }
-                nav.push(Route.FeedDetail(it, tab, t.postId))
-            }
-            else -> {
-                nav.selectTab(Route.History)
-                val sendId = t.sendId ?: t.placementId?.let { history.sendWithPlacement(it) }
-                sendId?.let { nav.push(Route.SendDetail(it)) }
-            }
-        }
+        openTarget(graph, t, nav, history)
     }
     AskForNotifications()
     // Outside the screen's CompositionLocalProvider below, so it gets the toaster here (1.2 crashed at start).
@@ -424,12 +428,12 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
             val f = (frames.state.value.frames as? Load.Ready)?.value?.firstOrNull { it.id == e.frameId } ?: return@collect
             if (!f.isManager) return@collect
             toaster.show(res.getString(R.string.live_join_request, e.request?.user?.displayName.orEmpty(), f.name), res.getString(R.string.common_review)) {
-                nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(f.id, FrameTab.People))
+                nav.openFrame(f.id, FrameTab.People)
             }
         }
     }
-    // Feed requests while the app is open: a frame asks to subscribe, someone asks to join.
-    if (feedsOn) LaunchedEffect(graph) {
+    // Family requests while the app is open: a frame asks to show the family, someone asks to join.
+    LaunchedEffect(graph) {
         graph.live.events.collect { e ->
             val feedId = when (e) {
                 is app.kinframe.family.data.LiveEvent.SubscriptionRequested -> e.feedId
@@ -445,14 +449,14 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                     res.getString(R.string.live_feed_join_request, e.request?.user?.displayName.orEmpty(), feed.name) to FeedTab.People
                 else -> return@collect
             }
-            toaster.show(msg, res.getString(R.string.common_review)) { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feed.id, tab)) }
+            toaster.show(msg, res.getString(R.string.common_review)) { nav.openFamily(feed.id, tab) }
         }
     }
 
     LaunchedEffect(composer) {
         composer.events.collect { e ->
             when (e) {
-                is ComposerEvent.Queued -> { toaster.show(res.getString(R.string.send_sent)); nav.selectTab(Route.History) }
+                is ComposerEvent.Queued -> { toaster.show(res.getString(R.string.send_sent)); nav.selectTab(HomeRoute) }
                 is ComposerEvent.CaptionApplied -> toaster.show(res.getQuantityString(R.plurals.send_applied_all, e.count, e.count))
             }
         }
@@ -470,62 +474,149 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris -> composer.add(uris) }
     val pick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) }
 
-    CompositionLocalProvider(LocalToaster provides toaster, LocalShowOnTv provides { tvOpen = it }) {
+    // Without a family only "getting started" shows (docs/spec/simple-app.md §8), and it keeps showing while a new
+    // family is being set up.
+    val noFamily = families != null && families.isEmpty()
+    val setupStep = setup ?: if (noFamily) SetupStep.Choice else null
+    val familyCounts = FamilyCounts(ordered.filter { it.isAdmin }.sumOf { it.pendingJoinRequestCount + it.pendingSubscriptionCount })
+
+    CompositionLocalProvider(LocalToaster provides toaster, LocalShowOnTv provides { tvOpen = it }, LocalFamily provides familyScope) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 600.dp
             val showChrome = nav.stack.size == 1
-            Row(Modifier.fillMaxSize()) {
-                if (wide) {
-                    NavigationRail(containerColor = Kin.colors.surface, modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start))) {
-                        TABS.forEach { t ->
-                            NavigationRailItem(
-                                selected = nav.tab == t.route, onClick = { nav.selectTab(t.route) },
-                                icon = { BadgedIcon(t.icon, tabBadge(t.route, badge)) }, label = { Text(stringResource(t.label)) },
-                                colors = NavigationRailItemDefaults.colors(selectedIconColor = Kin.colors.onAccentSoft, indicatorColor = Kin.colors.accentSoft,
-                                    selectedTextColor = Kin.colors.ink, unselectedIconColor = Kin.colors.inkSoft, unselectedTextColor = Kin.colors.inkSoft),
-                            )
-                        }
-                    }
+            when {
+                setupStep != null && showChrome -> Box(Modifier.fillMaxSize()) {
+                    GettingStarted(graph, ready, feeds, nav, setupStep, { setup = it }, invite = { id, name -> scope.launch {
+                        runCatching { FamilyInvites.create(api, id, java.util.UUID.randomUUID().toString()) }
+                            .onSuccess { shareFeedInvite(context, res, it, name) }
+                            .onFailure { toaster.show(res.getString(Problems.message(it))) }
+                    } }, onCreated = { })
+                    SnackbarHost(snackbar, Modifier.align(androidx.compose.ui.Alignment.BottomCenter))
                 }
-                Scaffold(
-                    modifier = Modifier.weight(1f),
-                    containerColor = Kin.colors.paper,
-                    snackbarHost = { SnackbarHost(snackbar) },
-                    bottomBar = {
-                        if (!wide && showChrome) {
-                            NavigationBar(containerColor = Kin.colors.surface) {
-                                BAR.forEach { t ->
-                                    NavigationBarItem(
-                                        selected = nav.tab == t.route, onClick = { nav.selectTab(t.route) },
-                                        icon = { BadgedIcon(t.icon, tabBadge(t.route, badge)) }, label = { Text(stringResource(t.label), maxLines = 1) },
-                                        colors = NavigationBarItemDefaults.colors(selectedIconColor = Kin.colors.onAccentSoft, indicatorColor = Kin.colors.accentSoft,
-                                            selectedTextColor = Kin.colors.ink, unselectedIconColor = Kin.colors.inkSoft, unselectedTextColor = Kin.colors.inkSoft),
-                                    )
-                                }
+                simple && ordered.isNotEmpty() && showChrome -> Box(Modifier.fillMaxSize()) {
+                    SimpleViewRoute(graph, ready, app, ordered, prefs)
+                    SnackbarHost(snackbar, Modifier.align(androidx.compose.ui.Alignment.BottomCenter))
+                }
+                else -> Row(Modifier.fillMaxSize()) {
+                    if (wide) {
+                        NavigationRail(
+                            containerColor = Kin.colors.surface,
+                            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)),
+                            header = { NewPostButton(compose, Modifier.padding(vertical = 8.dp)) },
+                        ) {
+                            TABS.forEach { t ->
+                                NavigationRailItem(
+                                    selected = nav.tab == t.route, onClick = { nav.selectTab(t.route) },
+                                    icon = { BadgedIcon(t.icon, tabBadge(t.route, badge, familyCounts)) }, label = { Text(stringResource(t.label)) },
+                                    colors = NavigationRailItemDefaults.colors(selectedIconColor = Kin.colors.onAccentSoft, indicatorColor = Kin.colors.accentSoft,
+                                        selectedTextColor = Kin.colors.ink, unselectedIconColor = Kin.colors.inkSoft, unselectedTextColor = Kin.colors.inkSoft),
+                                )
                             }
                         }
-                    },
-                ) { pad ->
-                    Column(Modifier.fillMaxSize().padding(pad)) {
-                        val update by graph.updates.state.collectAsStateWithLifecycle()
-                        (update as? UpdateState.Available)?.takeIf { showChrome }?.let { available ->
-                            UpdateBanner(onUpdate = { context.openStore(available.storeUrl) }, onDismiss = graph.updates::dismiss)
-                        }
-                        TvMiniBar(
-                            tvState,
-                            onOpen = { tvState.frameId?.let { id -> tvOpen = TvTarget(id, tvState.frameName, true, false, TvScope.All) } },
-                            onPrevious = graph.tv::previous, onToggle = graph.tv::toggle, onNext = graph.tv::next,
-                            onStop = { graph.tv.stop(); toaster.show(res.getString(R.string.tv_stopped)) },
-                        )
-                        val overflow: @Composable () -> Unit = if (!wide && BAR.size < TABS.size) ({
-                            OverflowActions({ nav.selectTab(Route.History) }, { nav.selectTab(Route.Settings) })
-                        }) else ({})
-                        Box(Modifier.weight(1f)) { Screen(graph, app, ready, nav, frames, composer, history, pick, feeds, overflow) }
                     }
-                    tvOpen?.let { t -> TvRoute(graph, api, t, ready, tvState, { tvOpen = null }, frames) }
-                    ShareSheet(shareState, share::toggle, share::confirm, share::dismiss, share::retry)
+                    Scaffold(
+                        modifier = Modifier.weight(1f),
+                        containerColor = Kin.colors.paper,
+                        snackbarHost = { SnackbarHost(snackbar) },
+                        bottomBar = {
+                            if (!wide && showChrome) {
+                                NavigationBar(containerColor = Kin.colors.surface) {
+                                    TABS.forEachIndexed { i, t ->
+                                        // `+` sits in the middle: after Frames.
+                                        if (i == 2) androidx.compose.foundation.layout.Box(Modifier.weight(1f), contentAlignment = androidx.compose.ui.Alignment.Center) { NewPostButton(compose) }
+                                        NavigationBarItem(
+                                            selected = nav.tab == t.route, onClick = { nav.selectTab(t.route) },
+                                            icon = { BadgedIcon(t.icon, tabBadge(t.route, badge, familyCounts)) }, label = { Text(stringResource(t.label), maxLines = 1) },
+                                            colors = NavigationBarItemDefaults.colors(selectedIconColor = Kin.colors.onAccentSoft, indicatorColor = Kin.colors.accentSoft,
+                                                selectedTextColor = Kin.colors.ink, unselectedIconColor = Kin.colors.inkSoft, unselectedTextColor = Kin.colors.inkSoft),
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    ) { pad ->
+                        Column(Modifier.fillMaxSize().padding(pad)) {
+                            val update by graph.updates.state.collectAsStateWithLifecycle()
+                            (update as? UpdateState.Available)?.takeIf { showChrome }?.let { available ->
+                                UpdateBanner(onUpdate = { context.openStore(available.storeUrl) }, onDismiss = graph.updates::dismiss)
+                            }
+                            TvMiniBar(
+                                tvState,
+                                onOpen = { tvState.frameId?.let { id -> tvOpen = TvTarget(id, tvState.frameName, true, false, TvScope.All) } },
+                                onPrevious = graph.tv::previous, onToggle = graph.tv::toggle, onNext = graph.tv::next,
+                                onStop = { graph.tv.stop(); toaster.show(res.getString(R.string.tv_stopped)) },
+                            )
+                            Box(Modifier.weight(1f)) { Screen(graph, app, ready, nav, frames, composer, history, pick, feeds, prefs) }
+                        }
+                        tvOpen?.let { t -> TvRoute(graph, api, t, ready, tvState, { tvOpen = null }, frames) }
+                        ShareSheet(shareState, share::toggle, share::confirm, share::dismiss, share::retry)
+                    }
                 }
             }
+            if (askView) ViewQuestionDialog(onNormal = { askView = false; prefs.setSimpleView(false) }, onSimple = { askView = false; prefs.setSimpleView(true) })
+        }
+    }
+    // Joined someone else's family: the view question is asked once (§6).
+    LaunchedEffect(graph) {
+        joined.collect { if (!prefs.viewAsked.value) askView = true }
+    }
+}
+
+/** A family was joined through an invite (FeedInvite → result). */
+private val joined = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+
+/** The `+` of the tab bar and the rail: the composer. */
+@Composable
+private fun NewPostButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val c = Kin.colors
+    val label = stringResource(R.string.nav_new_post)
+    Box(
+        modifier.size(width = 56.dp, height = 44.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp)).background(c.accent)
+            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = label, onClick = onClick)
+            .semantics { contentDescription = label },
+        contentAlignment = androidx.compose.ui.Alignment.Center,
+    ) { Icon(KinIcons.Plus, null, Modifier.size(26.dp), tint = c.onAccent) }
+}
+
+/** Where a non-social notification tap goes (README §6.3), in the app's new places. */
+private fun openTarget(graph: AppGraph, t: app.kinframe.family.OpenTarget, nav: Navigator, history: HistoryViewModel) {
+    val openFamily = { id: String, tab: FeedTab -> nav.openFamily(id, tab) }
+    when (t.target) {
+        Notifications.TARGET_PEOPLE -> t.frameId?.let { nav.openFrame(it, FrameTab.People) }
+        Notifications.TARGET_FRAME -> t.frameId?.let { nav.openFrame(it) }
+        Notifications.TARGET_CALENDAR -> t.frameId?.let { nav.openFrame(it, FrameTab.Calendar) }
+        Notifications.TARGET_FRAME_FEEDS -> t.frameId?.let { nav.openFrame(it, FrameTab.Feeds) }
+        // A photo source needs its owner: My photo sources shows it with the fix (photo-sources.md §10).
+        Notifications.TARGET_PHOTO_SOURCES -> { nav.selectTab(Route.Family); nav.push(Route.Settings()); nav.push(Route.PhotoSources) }
+        Notifications.TARGET_GOOGLE_IMPORT -> t.importId?.let { graph.googleImports.resume(it) }
+        // Someone new mailed an address you manage: its pending list (email-inbox.md §11).
+        Notifications.TARGET_EMAIL_PENDING -> t.addressId?.let {
+            if (graph.accounts.contextFor(it).discovery?.emailInbox != true) return@let
+            nav.selectTab(if (t.feedId != null) Route.Family else Route.Frames)
+            nav.push(Route.EmailAddress(it))
+        }
+        // A Telegram chat needs its owner (telegram.md §15.1).
+        Notifications.TARGET_TELEGRAM_CHAT -> t.chatId?.let {
+            if (graph.accounts.contextFor(it).discovery?.telegram != true) return@let
+            nav.selectTab(if (t.feedId != null) Route.Family else Route.Frames)
+            nav.push(Route.TelegramChat(it))
+        }
+        Notifications.TARGET_FEED, Notifications.TARGET_FEED_PEOPLE, Notifications.TARGET_FEED_FRAMES, Notifications.TARGET_FEED_BIRTHDAYS -> t.feedId?.let {
+            val tab = when (t.target) {
+                Notifications.TARGET_FEED_PEOPLE -> FeedTab.People
+                Notifications.TARGET_FEED_FRAMES -> FeedTab.Frames
+                Notifications.TARGET_FEED_BIRTHDAYS -> if (graph.accounts.contextFor(it).discovery?.birthdays == true) FeedTab.Birthdays else FeedTab.Posts
+                else -> FeedTab.Posts
+            }
+            // A post's reactions and replies: the post itself.
+            if (tab == FeedTab.Posts && t.postId != null) { nav.selectTab(HomeRoute); nav.push(PostRoute(t.postId)) }
+            else openFamily(it, tab)
+        }
+        else -> {
+            // A send's delivery: Settings › Sent history.
+            nav.selectTab(Route.Family); nav.push(Route.Settings()); nav.push(Route.History)
+            val sendId = t.sendId ?: t.placementId?.let { history.sendWithPlacement(it) }
+            sendId?.let { nav.push(Route.SendDetail(it)) }
         }
     }
 }
@@ -541,23 +632,44 @@ private fun Screen(
     history: HistoryViewModel,
     pick: () -> Unit,
     feeds: FeedsViewModel,
-    overflow: @Composable () -> Unit = {},
+    prefs: FamilyPrefs,
 ) {
     val api = ready.api
-    val feedsOn = anyFeeds(graph, ready)
     val context = LocalContext.current
     val res = LocalResources.current
     val toaster = LocalToaster.current
+    val family = LocalFamily.current
     when (val r = nav.current) {
         Route.Frames -> {
             val s by frames.state.collectAsStateWithLifecycle()
-            FramesScreen(s, frames::refresh, { nav.push(Route.FrameDetail(it.id)) }, { nav.push(Route.AddFrame()) }, { f ->
-                composer.preselectFrame(f.id); nav.selectTab(Route.Send)
-            }, serverChip = { f -> graph.accounts.chipFor(f.id) })
+            // Frames that show the person's families but that they aren't on, after their own.
+            LaunchedEffect(family.all.map { it.id }) { frames.loadFamilyFrames(family.all.map { it.id }) }
+            var addingTo by remember { mutableStateOf<app.kinframe.core.api.Frame?>(null) }
+            FramesScreen(s, frames::refresh, { nav.push(Route.FrameDetail(it.id)) }, { nav.push(Route.AddFrame(family = family.home?.id)) },
+                onAddFamily = { frame -> addingTo = frame },
+                onOpenFamilyFrame = { f -> nav.push(FreshFrameRoute(f.id)) },
+                serverChip = { f -> graph.accounts.chipFor(f.id) })
+            addingTo?.let { frame ->
+                AddFamilySheet(frame.name, family.all.filter { graph.accounts.sameAccount(it.id, frame.id) }, s.adding != null,
+                    onPick = { f -> addingTo = null; frames.addToFamily(frame.id, f.id) { result -> toaster.show(frameAddedMessage(res, result)) } },
+                    onDismiss = { addingTo = null })
+            }
+        }
+        // One family: straight to its profile. Several: the list (home family first, "Start a family" last).
+        Route.Family -> when {
+            family.all.isEmpty() -> Box(Modifier.fillMaxSize()) { CenteredSpinner() }
+            !family.several -> FamilyProfileRoute(graph, api, family.all.single().id, nav, frames, feeds, composer, ready, nav.familySegment, { nav.familySegment = it }, onBack = null)
+            else -> FamilyListScreen(family.all, family.home?.id,
+                onOpen = { f -> nav.push(Route.FeedDetail(f.id, FeedTab.Posts)) }, onSettings = { nav.push(Route.Settings()) },
+                onStart = family.start, onJoin = { nav.push(Route.AddFrame(join = true)) })
         }
         Route.Send -> {
             val s by composer.state.collectAsStateWithLifecycle()
             LaunchedEffect(Unit) { composer.loadFrames() }
+            // Straight to the photo picker the first time (docs/spec/simple-app.md §3.2: picker first).
+            var picked by rememberSaveable { mutableStateOf(false) }
+            LaunchedEffect(Unit) { if (!picked && s.items.isEmpty()) { picked = true; pick() } }
+            var changing by rememberSaveable { mutableStateOf(false) }
             val editing = s.editing
             if (editing != null) {
                 BackHandler { composer.edit(null) }
@@ -567,10 +679,14 @@ private fun Screen(
                     composer::setTrim, composer::setIncludeAudio, composer::remove, composer::setSendLive,
                 )
             } else {
-                ComposeScreen(s, pick, composer::edit, composer::remove, composer::clear, composer::toggleFrame, composer::send,
-                    { nav.selectTab(Route.Frames); nav.push(Route.AddFrame()) }, { composer.loadFrames() }, composer::toggleFeed,
-                    audience = if (s.circles.isNotEmpty() || s.prompts.isNotEmpty()) ({ SendAudience(s, composer) }) else null)
+                ComposeScreen(s, pick, composer::edit, composer::remove, composer::clear, composer::send, { nav.pop() }, { composer.loadFrames() },
+                    onChange = if (canChangeDestination(s)) ({ changing = true }) else null,
+                    onAnswer = composer::answer)
             }
+            if (changing) DestinationSheet(s,
+                onFamily = composer::toggleFamily,
+                onCircle = { id, circle -> composer.setAudience(id, circle); changing = false },
+                onDismiss = { changing = false })
         }
         Route.History -> {
             val s by history.state.collectAsStateWithLifecycle()
@@ -584,9 +700,10 @@ private fun Screen(
                 // Several servers: a chip on every send (the routing index knows each send's account).
                 serverChip = { send -> graph.accounts.chipFor(send.id) },
                 outboxChip = { o -> if (graph.accounts.several) graph.accounts.forServer(o.server)?.label else null },
+                onBack = { nav.pop() },
             )
         }
-        Route.Settings -> {
+        is Route.Settings -> {
             val push by graph.push.status.collectAsStateWithLifecycle()
             val ps by app.profileState.collectAsStateWithLifecycle()
             val fs by frames.state.collectAsStateWithLifecycle()
@@ -633,6 +750,11 @@ private fun Screen(
                 deletingAccount = deletingAccount,
                 sendCrashReports = sendCrashReports,
                 onSendCrashReports = { on -> sendCrashReports = on; FamilyCrashReports.setEnabled(context, on) },
+                onBack = { nav.pop() },
+                family = family.byId(r.feedId)?.let { f -> { ThisFamilySettings(graph, f, nav) } },
+                simpleView = prefs.simpleView.collectAsStateWithLifecycle().value,
+                onSimpleView = prefs::setSimpleView,
+                onSentHistory = { nav.push(Route.History) },
             )
         }
         is Route.AccountSettings -> {
@@ -642,20 +764,34 @@ private fun Screen(
         is Route.AddFrame -> {
             // A code typed by hand with several accounts: the person picks the server (a link names its own).
             val vm: AddFrameViewModel = viewModel(key = "add-${r.code}-${System.identityHashCode(r)}") {
-                AddFrameViewModel(api, r.code, feedsOn, servers = if (r.code == null) serverOptions(graph) else emptyList()) { id -> graph.kinFor(id) ?: api }
+                AddFrameViewModel(api, r.code, true, servers = if (r.code == null) serverOptions(graph) else emptyList()) { id -> graph.kinFor(id) ?: api }
             }
             val s by vm.state.collectAsStateWithLifecycle()
+            // Paired for a family (Family › Add a frame, getting started): a frame you manage shows it at once.
+            LaunchedEffect(s.result) {
+                val claimed = s.result?.frame ?: return@LaunchedEffect
+                val feedId = r.family ?: return@LaunchedEffect
+                if (!claimed.can { it.changeSettings }) return@LaunchedEffect
+                runCatching { FamilyFrames.add(graph.kinFor(feedId) ?: api, feedId, claimed.id, java.util.UUID.randomUUID().toString()) }
+                    .onSuccess { sub ->
+                        toaster.show(frameAddedMessage(res, if (FamilyFrames.pending(sub)) FrameAdded.Pending
+                            else FrameAdded.Active(sub.frame.name, sub.feed.name)))
+                        frames.refresh(); feeds.refresh()
+                    }
+                    .onFailure { toaster.show(res.getString(Problems.message(it))) }
+            }
             AddFrameScreen(
                 s, vm::onInput, vm::submit, { nav.pop() }, vm::onName, vm::onLocation,
                 onSaveName = {
                     vm.saveName { f ->
                         frames.upsert(f); toaster.show(res.getString(R.string.add_named, f.name))
-                        composer.preselectFrame(f.id); nav.selectTab(Route.Send)
+                        nav.replace(Route.FrameDetail(f.id))
                     }
                 },
-                onSend = { id -> frames.refresh(); composer.preselectFrame(id); nav.selectTab(Route.Send) },
+                onSend = { id -> frames.refresh(); family.compose() },
                 onViewFrame = { id -> frames.refresh(); nav.replace(Route.FrameDetail(id)) },
-                onDone = { frames.refresh(); nav.selectTab(Route.Frames) },
+                onDone = { frames.refresh(); nav.pop() },
+                join = r.join,
                 onFeedInvite = { token -> vm.feedInviteOpened(); nav.push(Route.FeedInvite(token)) },
                 onServer = vm::chooseServer,
             )
@@ -664,7 +800,7 @@ private fun Screen(
             val vm: InviteViewModel = viewModel(key = "invite-${r.token}") { InviteViewModel(api, r.token) }
             val s by vm.state.collectAsStateWithLifecycle()
             InviteScreen(s, vm::accept, { vm.load() }, { nav.pop() },
-                onSend = { id -> frames.refresh(); composer.preselectFrame(id); nav.selectTab(Route.Send) },
+                onSend = { _ -> frames.refresh(); family.compose() },
                 onViewFrame = { id -> frames.refresh(); nav.replace(Route.FrameDetail(id)) })
         }
         is Route.SendDetail -> {
@@ -695,13 +831,12 @@ private fun Screen(
             // A send can only be posted on to families of its own server.
             val myFeeds = (feeds.state.collectAsStateWithLifecycle().value.feeds as? Load.Ready)?.value.orEmpty()
                 .filter { graph.accounts.sameAccount(it.id, r.sendId) }
-            val sendFeedsOn = graph.accounts.contextFor(r.sendId).discovery?.feeds == true
             if (postingToFeed && send != null) PostToFeedDialog(myFeeds, send.feeds.filter { !it.removed }.map { it.feedId }.toSet(), { postingToFeed = false }) { chosen ->
                 postingToFeed = false; vm.forwardToFeeds(chosen.map { it.id }, chosen.map { it.name })
             }
             SendDetailScreen(s, { nav.pop() }, { vm.load() }, vm::startEdit, vm::onCaption, vm::saveCaption, vm::cancelEdit, vm::unsend,
-                onPostToFeed = if (sendFeedsOn && myFeeds.isNotEmpty()) ({ postingToFeed = true }) else null,
-                onOpenFeed = if (sendFeedsOn) ({ f -> nav.push(Route.FeedDetail(f.feedId, FeedTab.Posts, f.postId)) }) else null,
+                onPostToFeed = if (myFeeds.isNotEmpty()) ({ postingToFeed = true }) else null,
+                onOpenFeed = { f -> nav.push(PostRoute(f.postId)) },
                 onShare = if (canShare && send != null) { ids -> Sharing.source(send, ids)?.let(share::open) } else null,
                 onShowOnTv = if (tvFrame != null && tvIds.isNotEmpty()) ({
                     showOnTv(TvTarget(tvFrame.frameId, tvFrame.frameName, canMirror = known?.can { it.seeLibrary } == true,
@@ -709,18 +844,8 @@ private fun Screen(
                 }) else null)
         }
         is Route.FrameDetail -> FrameDetailRoute(graph, api, r, nav, frames, composer, ready)
-        Route.Feeds -> {
-            val s by feeds.state.collectAsStateWithLifecycle()
-            LaunchedEffect(Unit) { feeds.refresh() }
-            FeedsScreen(s, feeds::refresh, { nav.push(Route.FeedDetail(it.id)) }, { name -> feeds.create(name) { f -> nav.push(Route.FeedDetail(f.id)) } },
-                onEnterCode = { nav.push(Route.AddFrame()) },
-                serverChip = { f -> graph.accounts.chipFor(f.id) },
-                // Several servers: the new family's server is chosen (only people on it can join).
-                servers = serverOptions(graph) { it.server?.discovery?.feeds == true },
-                onCreateOn = { name, account -> feeds.create(name, account?.let(graph::kinFor)) { f -> nav.push(Route.FeedDetail(f.id)) } })
-        }
-        is Route.FeedDetail -> FeedDetailRoute(graph, api, r, nav, frames, feeds, composer, ready)
-        is SocialRoute -> SocialRouteScreen(graph, ready, nav, r, composer, frames, feeds, overflow)
+        is Route.FeedDetail -> FamilyPartRoute(graph, api, r, nav, frames, feeds, composer, ready)
+        is SocialRoute -> SocialRouteScreen(graph, ready, nav, r, composer, frames, feeds)
         is LeavingRoute -> LeavingRouteScreen(graph, nav, r)
         Route.PhotoSources -> {
             val vm: PhotoSourcesViewModel = viewModel(key = "my-sources-${System.identityHashCode(api)}") {
@@ -751,26 +876,32 @@ private fun Screen(
                 FeedInviteViewModel(api, r.token, birthdays = graph.accounts.contextFor(r.token).discovery?.birthdays == true)
             }
             val s by vm.state.collectAsStateWithLifecycle()
-            LaunchedEffect(s.result) { if (s.result != null) { feeds.refresh(); frames.refresh() } }
+            LaunchedEffect(s.result) {
+                val result = s.result ?: return@LaunchedEffect
+                feeds.refresh(); frames.refresh()
+                // Joined: that family becomes the current one, and the view question is asked once.
+                if (!s.isSubscribe && result.joinRequestId == null) joined.tryEmit(result.feed.id)
+            }
             FeedInviteScreen(s, vm, { nav.pop() },
-                onOpenFeed = { id -> nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(id)) },
-                onOpenFrame = { id -> nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(id, FrameTab.Feeds)) })
+                onOpenFeed = { id -> nav.openFamily(id) },
+                onOpenFrame = { id -> nav.openFrame(id, FrameTab.Feeds) })
         }
     }
 }
 
+/** One family's view model and everything its screens can do (the profile and the pages of its settings). */
 @Composable
-private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, nav: Navigator, frames: FramesViewModel, feeds: FeedsViewModel, composer: ComposerViewModel, ready: Phase.Ready) {
+private fun rememberFamily(graph: AppGraph, api: KinApi, feedId: String, nav: Navigator, frames: FramesViewModel, feeds: FeedsViewModel, composer: ComposerViewModel, ready: Phase.Ready): Pair<app.kinframe.family.ui.feeds.FeedDetailState, FeedActions> {
     val context = LocalContext.current
     val res = LocalResources.current
     val toaster = LocalToaster.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     // The family's own server: its flags, and the person's user id there (multi-server.md §2.2).
-    val acct = rememberAccountContext(graph, r.feedId, ready)
+    val acct = rememberAccountContext(graph, feedId, ready)
     val d = acct.discovery ?: ready.server.discovery
-    val vm: FeedDetailViewModel = viewModel(key = "feed-${r.feedId}-${acct.accountId}-${System.identityHashCode(api)}") {
-        FeedDetailViewModel(api, r.feedId, { graph.accounts.meIdFor(r.feedId) }, graph.live.events)
+    val vm: FeedDetailViewModel = viewModel(key = "feed-${feedId}-${acct.accountId}-${System.identityHashCode(api)}") {
+        FeedDetailViewModel(api, feedId, { graph.accounts.meIdFor(feedId) }, graph.live.events)
     }
     val s by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(vm) {
@@ -779,26 +910,22 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 is FeedNotice.Message -> toaster.show(res.getString(e.message, *e.args.toTypedArray()))
                 is FeedNotice.Error -> toaster.show(res.getString(e.message))
                 is FeedNotice.ShareInvite -> shareFeedInvite(context, res, e.invite, e.feedName)
-                FeedNotice.Gone -> { feeds.remove(r.feedId); nav.selectTab(Route.Feeds) }
+                FeedNotice.Gone -> { feeds.remove(feedId); feeds.refresh(); nav.selectTab(HomeRoute) }
             }
         }
     }
     LaunchedEffect(s.feed) { (s.feed as? Load.Ready)?.value?.let { feeds.upsert(it) } }
-    // Opened from a notification or the history: show that post's receipts.
-    LaunchedEffect(r.postId, s.posts) {
-        val id = r.postId ?: return@LaunchedEffect
-        if ((s.posts as? Load.Ready)?.value?.any { it.id == id } == true && s.receiptsFor == null) vm.openReceipts(id)
-    }
     val fs by frames.state.collectAsStateWithLifecycle()
     // Frames you manage on the family's server (a frame can only subscribe to a family on its own server).
-    val managed = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.can { p -> p.changeSettings } && graph.accounts.sameAccount(it.id, r.feedId) }
+    val managed = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.can { p -> p.changeSettings } && graph.accounts.sameAccount(it.id, feedId) }
     val me = acct.me
     val feedName = s.feedOrNull?.name.orEmpty()
+    val addingFrame = rememberSaveable(feedId) { mutableStateOf(false) }
     // Birthdays (docs/spec/birthdays.md), only when the server has them.
     val birthdaysOn = d.birthdays
-    val bvm: app.kinframe.family.ui.feeds.FeedBirthdaysViewModel? = if (!birthdaysOn) null else viewModel(key = "birthdays-${r.feedId}-${acct.accountId}-${System.identityHashCode(api)}") {
+    val bvm: app.kinframe.family.ui.feeds.FeedBirthdaysViewModel? = if (!birthdaysOn) null else viewModel(key = "birthdays-${feedId}-${acct.accountId}-${System.identityHashCode(api)}") {
         app.kinframe.family.ui.feeds.FeedBirthdaysViewModel(
-            api, r.feedId, graph.live.events,
+            api, feedId, graph.live.events,
             readPhoto = { uri -> kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { app.kinframe.family.ui.Avatars.squareJpeg(graph.app, uri) } },
         )
     }
@@ -814,29 +941,27 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
             }
         }
     }
-    FeedDetailScreen(
-        s, r.tab, { t -> nav.replace(r.copy(tab = t, postId = null)) }, { nav.pop() },
-        FeedActions(
+    val actions = FeedActions(
             vm, me?.id, managed,
-            post = { composer.preselectFeed(r.feedId); nav.selectTab(Route.Send) },
+            post = { composer.preselectFeed(feedId); nav.compose() },
             shareInvite = { shareFeedInvite(context, res, it, feedName) },
             copyInvite = { inv -> scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(feedName, inv.url))); toaster.show(res.getString(R.string.people_copied)) } },
-            openFrame = { id -> nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(id, FrameTab.Feeds)) },
+            openFrame = { id -> nav.openFrame(id) },
             birthdays = bvm?.let { b ->
                 app.kinframe.family.ui.feeds.BirthdayActions(b, me?.id, me?.displayName, s.members, setNotifications = { on -> vm.setBirthdayNotifications(on) })
             },
             birthdaysState = bs,
             sources = if (d.sourceProviders.isEmpty()) null else ({
-                val svm: PhotoSourcesViewModel = viewModel(key = "feed-sources-${r.feedId}-${System.identityHashCode(api)}") {
-                    PhotoSourcesViewModel(api, SourceScope.Feed(r.feedId), graph.live.events)
+                val svm: PhotoSourcesViewModel = viewModel(key = "feed-sources-${feedId}-${System.identityHashCode(api)}") {
+                    PhotoSourcesViewModel(api, SourceScope.Feed(feedId), graph.live.events)
                 }
                 val sst by svm.state.collectAsStateWithLifecycle()
                 SourceNotices(svm)
                 PhotoSourcesSection(sst, svm, feed = true,
-                    onAdd = { nav.push(Route.AddPhotoSource(SourceTarget.feed(r.feedId, feedName))) }, onGoogle = null)
+                    onAdd = { nav.push(Route.AddPhotoSource(SourceTarget.feed(feedId, feedName))) }, onGoogle = null)
             }),
             channels = d.takeIf { it.emailInbox || it.telegram }?.let { d ->
-                val scope = app.kinframe.family.ui.channels.ChannelScope.feed(r.feedId, feedName)
+                val scope = app.kinframe.family.ui.channels.ChannelScope.feed(feedId, feedName)
                 ({
                     app.kinframe.family.ui.channels.ChannelsSection(feed = true,
                         onEmail = if (d.emailInbox) ({ nav.push(Route.EmailInbox(scope)) }) else null,
@@ -844,13 +969,51 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 })
             },
             addFromGoogle = if (d.googlePhotosImport) ({
-                graph.googleImports.start(SourceTarget.feed(r.feedId, feedName))
+                graph.googleImports.start(SourceTarget.feed(feedId, feedName))
             }) else null,
             social = feedSocialSlots(graph, acct, ready, nav, s.feedOrNull, onFeedChanged = { f -> feeds.upsert(f); vm.load() }, setFlag = vm::setFlag, busy = s.busy),
-            leaveSheet = feedLeaveSheet(graph, r.feedId) { feeds.remove(r.feedId); nav.selectTab(Route.Feeds) },
+            leaveSheet = feedLeaveSheet(graph, feedId) { feeds.remove(feedId); feeds.refresh(); nav.selectTab(HomeRoute) },
             leavingSettings = s.feedOrNull?.let { f -> { FeedLeavingSettings(graph, f) { nf -> feeds.upsert(nf) } } },
-        ),
+            addFrame = { addingFrame.value = true },
+        )
+    // "Add a frame": one of your frames (shown at once) or pair a new one.
+    if (addingFrame.value) app.kinframe.family.ui.family.AddFrameSheet(
+        feedName, app.kinframe.family.ui.family.FamilyFrames.candidates(managed, s.subscriptions), s.busy,
+        onPick = { f -> addingFrame.value = false; vm.addFrame(f.id) },
+        onPair = { addingFrame.value = false; nav.push(Route.AddFrame(family = feedId)) },
+        onDismiss = { addingFrame.value = false },
     )
+    return s to actions
+}
+
+/** The Family tab (the current family) or another family's profile. */
+@Composable
+private fun FamilyProfileRoute(
+    graph: AppGraph, api: KinApi, feedId: String, nav: Navigator, frames: FramesViewModel, feeds: FeedsViewModel, composer: ComposerViewModel,
+    ready: Phase.Ready, segment: FeedTab, onSegment: (FeedTab) -> Unit, onBack: (() -> Unit)?,
+) {
+    val family = LocalFamily.current
+    val (s, a) = rememberFamily(graph, api, feedId, nav, frames, feeds, composer, ready)
+    val managed = a.managedFrames
+    FamilyProfileScreen(s, segment, onSegment, a, ProfileActions(
+        onSettings = { nav.push(Route.Settings(feedId)) },
+        onInvite = { s.feedOrNull?.let(family.invite) },
+        onAddFrame = a.addFrame.takeIf { s.feedOrNull?.canPost == true || managed.isNotEmpty() },
+        openPost = { p -> nav.push(PostRoute(p.id)) },
+        onBack = onBack,
+    ))
+}
+
+/** A page of a family's settings: name, cover and rules; birthdays; more ways to add photos. */
+@Composable
+private fun FamilyPartRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, nav: Navigator, frames: FramesViewModel, feeds: FeedsViewModel, composer: ComposerViewModel, ready: Phase.Ready) {
+    var segment by rememberSaveable { mutableStateOf(r.tab) }
+    if (r.tab == FeedTab.Posts || r.tab == FeedTab.People || r.tab == FeedTab.Frames) {
+        FamilyProfileRoute(graph, api, r.feedId, nav, frames, feeds, composer, ready, segment, { segment = it }, onBack = { nav.pop() })
+        return
+    }
+    val (s, a) = rememberFamily(graph, api, r.feedId, nav, frames, feeds, composer, ready)
+    app.kinframe.family.ui.feeds.FamilyPartScreen(s, r.tab, { nav.pop() }, a)
 }
 
 private fun shareFeedInvite(context: Context, res: android.content.res.Resources, invite: FeedInvite, feedName: String) {
@@ -916,9 +1079,19 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         transfer = vm::transfer, replaceDevice = vm::replaceDevice, resetReplace = vm::resetReplace,
         leaveSheet = frameLeaveSheet(graph, r.frameId) { frames.remove(r.frameId); nav.selectTab(Route.Frames) },
     )
+    val fs0 by frames.state.collectAsStateWithLifecycle()
+    val showOnTv = LocalShowOnTv.current
+    val frameNow = (s.frame as? Load.Ready)?.value
+    val home = app.kinframe.family.ui.frame.FrameHomeActions(
+        sendOnly = frameNow?.takeIf { it.can { p -> p.send } }?.let { { composer.preselectFrame(r.frameId); nav.compose() } },
+        showOnTv = frameNow?.let { f -> { showOnTv(tvTarget(f, TvScope.All)) } },
+        shows = fs0.shows[r.frameId].orEmpty(),
+        thumb = fs0.thumbs[r.frameId],
+        addons = frameNow?.takeIf { it.can { p -> p.changeSettings } }?.let { { FramePlugins(api, r.frameId, acct.accountId) } },
+    )
     FrameDetailScreen(
-        s, r.tab, { t -> nav.replace(r.copy(tab = t)) }, { nav.pop() }, { vm.load() },
-        onSend = { composer.preselectFrame(r.frameId); nav.selectTab(Route.Send) },
+        s, r.tab, { t -> nav.push(r.copy(tab = t)) }, { nav.pop() }, { vm.load() },
+        home = home,
         overview = actions,
         library = {
             val canSettings = (s.frame as? Load.Ready)?.value?.can { it.changeSettings } == true
@@ -983,24 +1156,12 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     }
                 }
             }
-            val pv: PluginsViewModel = viewModel(key = "plugins-${r.frameId}-${acct.accountId}-${System.identityHashCode(api)}") { PluginsViewModel(api, r.frameId) }
-            val ps by pv.state.collectAsStateWithLifecycle()
-            LaunchedEffect(pv) {
-                pv.events.collect { e ->
-                    when (e) {
-                        PluginsEvent.Saved -> toaster.show(res.getString(R.string.plugins_saved))
-                        PluginsEvent.Removed -> toaster.show(res.getString(R.string.plugins_removed))
-                        is PluginsEvent.UpdateApproved -> toaster.show(res.getString(R.string.plugins_update_approved, e.version))
-                        is PluginsEvent.Error -> toaster.show(res.getString(e.message))
-                    }
-                }
-            }
             (s.frame as? Load.Ready)?.value?.let { f ->
                 val d = disco
                 val scope = app.kinframe.family.ui.channels.ChannelScope.frame(f.id, f.name)
                 val manages = f.can { it.changeSettings }
                 val socialFrame = manages && (SocialFlags.of(d).social || SocialFlags.of(d).engagement)
-                SettingsTab(f, ss, d.weather, fs, plugins = { PluginsSection(ps, pv) }, channels = if (!manages || (!d.emailInbox && !d.telegram && !socialFrame)) null else ({
+                SettingsTab(f, ss, d.weather, fs, plugins = null, channels = if (!manages || (!d.emailInbox && !d.telegram && !socialFrame)) null else ({
                     if (d.emailInbox || d.telegram) app.kinframe.family.ui.channels.ChannelsSection(feed = false,
                         onEmail = if (d.emailInbox) ({ nav.push(Route.EmailInbox(scope)) }) else null,
                         onTelegram = if (d.telegram) ({ nav.push(Route.TelegramChats(scope)) }) else null)
@@ -1012,7 +1173,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         calendar = if (!disco.calendar) null else ({
             (s.frame as? Load.Ready)?.value?.let { f -> CalendarRoute(graph, api, f, me) }
         }),
-        feeds = if (!disco.feeds) null else ({
+        feeds = ({
             (s.frame as? Load.Ready)?.value?.let { f ->
                 val ffs: FrameFeedsViewModel = viewModel(key = "frame-feeds-${f.id}-${System.identityHashCode(api)}") {
                     FrameFeedsViewModel(api, f.id, f.can { it.changeSettings }, graph.live.events)
@@ -1029,12 +1190,34 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                 }
                 FrameFeedsTab(f, st, ffs, onOpenFeed = { id ->
                     // Only feeds you are in open; a frame can subscribe to a feed you are not a member of.
-                    if (st.myFeeds.any { it.id == id }) { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(id)) }
+                    if (st.myFeeds.any { it.id == id }) nav.openFamily(id)
                 }, onEnterCode = { nav.push(Route.AddFrame()) }, birthdays = disco.birthdays,
                     remote = if (remoteOn(graph, f.id)) ({ FrameRemoteFollows(graph, f) }) else null)
             }
         }),
     )
+}
+
+/** A frame's add-ons, saved on their own (under "Calendar, weather and add-ons"). */
+@Composable
+private fun FramePlugins(api: KinApi, frameId: String, accountId: String) {
+    val res = LocalResources.current
+    val toaster = LocalToaster.current
+    val r = object { val frameId = frameId }
+    val acct = object { val accountId = accountId }
+            val pv: PluginsViewModel = viewModel(key = "plugins-${r.frameId}-${acct.accountId}-${System.identityHashCode(api)}") { PluginsViewModel(api, r.frameId) }
+            val ps by pv.state.collectAsStateWithLifecycle()
+            LaunchedEffect(pv) {
+                pv.events.collect { e ->
+                    when (e) {
+                        PluginsEvent.Saved -> toaster.show(res.getString(R.string.plugins_saved))
+                        PluginsEvent.Removed -> toaster.show(res.getString(R.string.plugins_removed))
+                        is PluginsEvent.UpdateApproved -> toaster.show(res.getString(R.string.plugins_update_approved, e.version))
+                        is PluginsEvent.Error -> toaster.show(res.getString(e.message))
+                    }
+                }
+            }
+    PluginsSection(ps, pv)
 }
 
 @Composable

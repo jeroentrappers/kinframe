@@ -90,12 +90,20 @@ private fun Exception.feedProblem(): Int = when ((this as? ApiException)?.code) 
 
 data class FeedsState(
     val feeds: Load<List<Feed>> = Load.Loading,
+    /** How many of the recent posts of each family are the person's own: picks the home family. */
+    val myPosts: Map<String, Int> = emptyMap(),
     val creating: Boolean = false,
     @StringRes val createError: Int? = null,
 )
 
 /** The Feeds tab: your feeds, and "New feed". */
-class FeedsViewModel(private val api: KinApi, live: Flow<LiveEvent>, private val newKey: () -> String = { UUID.randomUUID().toString() }) : ViewModel() {
+class FeedsViewModel(
+    private val api: KinApi,
+    live: Flow<LiveEvent>,
+    private val newKey: () -> String = { UUID.randomUUID().toString() },
+    /** The person's user id on a family's server, to count their own posts; null skips the count. */
+    private val me: (String) -> String? = { null },
+) : ViewModel() {
     private val _state = MutableStateFlow(FeedsState())
     val state: StateFlow<FeedsState> = _state.asStateFlow()
 
@@ -112,11 +120,19 @@ class FeedsViewModel(private val api: KinApi, live: Flow<LiveEvent>, private val
     }
 
     fun refresh() = viewModelScope.launch {
-        try {
-            _state.update { it.copy(feeds = Load.Ready(api.feeds().sortedBy { f -> f.name.lowercase() })) }
+        val feeds = try {
+            api.feeds().sortedBy { f -> f.name.lowercase() }.also { l -> _state.update { it.copy(feeds = Load.Ready(l)) } }
         } catch (e: Exception) {
             if (state.value.feeds !is Load.Ready) _state.update { it.copy(feeds = Load.Error(e.feedProblem())) }
+            return@launch
         }
+        // Only worth asking with several families: the home family is the one the person posts to most.
+        if (feeds.size < 2) return@launch
+        val counts = feeds.mapNotNull { f ->
+            val id = me(f.id) ?: return@mapNotNull null
+            runCatching { api.feedPosts(f.id, limit = MY_POSTS_SAMPLE, posterId = id).posts.size }.getOrNull()?.let { f.id to it }
+        }.toMap()
+        _state.update { it.copy(myPosts = counts) }
     }
 
     fun upsert(feed: Feed) = _state.update { s ->
@@ -151,6 +167,8 @@ class FeedsViewModel(private val api: KinApi, live: Flow<LiveEvent>, private val
 
     companion object {
         const val NAME_MAX = 40
+        /** Own posts counted per family for the home family. */
+        const val MY_POSTS_SAMPLE = 50
     }
 }
 
@@ -415,6 +433,20 @@ class FeedDetailViewModel(
         api.removeSubscription(sub.id)
         _state.update { s -> s.copy(subscriptions = s.subscriptions.filterNot { it.id == sub.id }) }
         loadSubscriptions()
+    }
+
+    /**
+     * "Add a frame" (docs/spec/simple-app.md §3.4): a frame you manage shows the family, with its last 50 posts and no
+     * dialog. Active at once when you are in the family; otherwise it waits for an admin.
+     */
+    fun addFrame(frameId: String) = act(null) {
+        val sub = app.kinframe.family.ui.family.FamilyFrames.add(api, feedId, frameId, newKey())
+        replaceSub(sub)
+        val feedName = state.value.feedOrNull?.name ?: sub.feed.name
+        _events.tryEmit(
+            if (app.kinframe.family.ui.family.FamilyFrames.pending(sub)) FeedNotice.Message(R.string.add_frame_pending)
+            else FeedNotice.Message(R.string.add_frame_added, listOf(sub.frame.name, feedName)),
+        )
     }
 
     /** "Show on a frame": subscribe a frame you manage (pending unless you are a feed admin or auto-approve is on). */

@@ -6,8 +6,11 @@ sealed interface SocialRoute : Route
 /** The Home and Chats tabs. */
 sealed interface SocialTab : SocialRoute
 
-/** Home: the timeline of every family, the frames and families strip, On this day (discovery `social`). */
+/** Home: the current family's timeline with its people and frames (docs/spec/simple-app.md §3.1). */
 data object HomeRoute : SocialTab
+
+/** Home's activity button: posts with new comments or mentions, and frames asking for photos. */
+data object ActivityRoute : SocialRoute
 
 /** Chats: family, circle, group and direct conversations (discovery `chats`). */
 data object ChatsRoute : SocialTab

@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
  * - `kfReset true` (`--ez`): forget the server and session first.
  * - `kfServer <url>` with `kfDevEmail <email>` [`kfDevName <name>`]: sign in with a dev token (dev servers only).
  * - `kfLanguage en|nl|system`: the app language (Android 13+).
- * - `kfTab frames|send|history|settings`.  `kfSend <id>`: open a send in History.
+ * - `kfTab frames|family|send|history|settings` (send: the composer; history and settings: under Family).  `kfSend <id>`: open a sent send.
  * - `kfFrame <id>` [`kfSection overview|photos|people|calendar|settings`]: open a frame.
  * - `kfCompose <uri,uri,…>` (file or content URIs the app can read), `kfCaption <text>` (the first item),
  *   `kfComposeFrames <id,id,…>`: fill the composer.
@@ -72,14 +72,18 @@ object DebugLaunch {
     }
 
     private fun request(intent: Intent): Request {
-        val tab = when (intent.getStringExtra("kfTab")) {
+        val which = intent.getStringExtra("kfTab")
+        val tab = when (which) {
             "frames" -> Route.Frames
-            "send" -> Route.Send
-            "history" -> Route.History
-            "settings" -> Route.Settings
+            "family", "settings", "history" -> Route.Family
             else -> null
         }
         val push = buildList {
+            when (which) {
+                "send" -> add(Route.Send)
+                "settings" -> add(Route.Settings())
+                "history" -> { add(Route.Settings()); add(Route.History) }
+            }
             intent.getStringExtra("kfSend")?.let { add(Route.SendDetail(it)) }
             intent.getStringExtra("kfFrame")?.let { id ->
                 val section = when (intent.getStringExtra("kfSection")) {

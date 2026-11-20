@@ -209,99 +209,6 @@ fun HistoryPicker(option: String, count: Int, onChange: (String, Int) -> Unit) {
     }
 }
 
-// ---------------------------------------------------------------------------------------------------------- list
-
-@Composable
-fun FeedsScreen(
-    state: FeedsState,
-    onRefresh: () -> Unit,
-    onOpen: (Feed) -> Unit,
-    onCreate: (String) -> Unit,
-    onEnterCode: () -> Unit,
-    /** A family's server chip when signed in to several servers (multi-server.md §2.2), else null. */
-    serverChip: (Feed) -> String? = { null },
-    /** The servers a new family can be made on (more than one account), primary first; empty: no choice. */
-    servers: List<app.kinframe.family.ui.ServerOption> = emptyList(),
-    /** Makes a family on the chosen account (with [servers]). */
-    onCreateOn: (String, String?) -> Unit = { name, _ -> onCreate(name) },
-) {
-    val c = Kin.colors
-    var creating by rememberSaveable { mutableStateOf(false) }
-    Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(R.string.feeds_title)) {
-            IconButton(onEnterCode) { Icon(KinIcons.Link, stringResource(R.string.feeds_enter_code), tint = c.inkSoft) }
-            IconButton({ creating = true }) { Icon(KinIcons.Plus, stringResource(R.string.feeds_new), tint = c.accent) }
-        }
-        when (val f = state.feeds) {
-            Load.Loading -> SkeletonList(3, 84.dp)
-            is Load.Error -> ErrorPanel(f.message, onRefresh)
-            is Load.Ready -> if (f.value.isEmpty()) {
-                Box(Modifier.padding(top = 40.dp)) {
-                    EmptyState(stringResource(R.string.feeds_empty_title), stringResource(R.string.feeds_empty_body)) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            PrimaryButton(stringResource(R.string.feeds_new), { creating = true }, icon = KinIcons.Plus)
-                            QuietButton(stringResource(R.string.feeds_enter_code), onEnterCode)
-                        }
-                    }
-                }
-            } else PageColumn(spacing = 10.dp) {
-                Text(stringResource(R.string.feeds_lede), style = Kin.type.body, color = c.inkSoft)
-                f.value.forEach { feed -> FeedCard(feed, serverChip(feed)) { onOpen(feed) } }
-            }
-        }
-    }
-    if (creating) CreateFeedDialog(state, servers, { creating = false }) { name, server -> onCreateOn(name, server); creating = false }
-}
-
-@Composable
-private fun FeedCard(feed: Feed, server: String? = null, onClick: () -> Unit) {
-    val c = Kin.colors
-    Surface(Modifier.fillMaxWidth(), onClick = onClick) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(c.paperDeep), contentAlignment = Alignment.Center) {
-                if (feed.coverUrl != null) Thumb(feed.coverUrl, null, Modifier.fillMaxSize(), corner = 14.dp)
-                else Icon(KinIcons.People, null, tint = c.inkSoft)
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(feed.name, style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                server?.let { Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
-                Text(
-                    pluralStringResource(R.plurals.feed_members_count, feed.memberCount, feed.memberCount) + " · " +
-                        pluralStringResource(R.plurals.feed_frames_count, feed.subscriptionCount, feed.subscriptionCount),
-                    style = Kin.type.caption, color = c.inkSoft,
-                )
-                feed.lastPostAt?.let { Text(stringResource(R.string.feed_last_post, Format.relative(it)), style = Kin.type.caption, color = c.inkFaint) }
-            }
-            val pending = feed.pendingSubscriptionCount + feed.pendingJoinRequestCount
-            if (pending > 0) Pill(pending.toString(), c.accent, c.onAccent)
-            FeedRoleBadge(feed.role)
-        }
-    }
-}
-
-@Composable
-private fun CreateFeedDialog(state: FeedsState, servers: List<app.kinframe.family.ui.ServerOption>, onDismiss: () -> Unit, onCreate: (String, String?) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var server by rememberSaveable { mutableStateOf(servers.firstOrNull()?.accountId) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.feeds_new)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.feeds_new_body), style = Kin.type.body, color = Kin.colors.inkSoft)
-                KinTextField(name, { name = it.take(FeedsViewModel.NAME_MAX) }, stringResource(R.string.feed_name),
-                    placeholder = stringResource(R.string.feed_name_placeholder),
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    error = state.createError?.let { stringResource(it) })
-                // Several servers: which one the family lives on (only people there can join it).
-                app.kinframe.family.ui.ServerPicker(servers, server, { server = it }, stringResource(R.string.servers_pick_feed_hint))
-            }
-        },
-        confirmButton = { TextButton({ onCreate(name, server) }, enabled = name.isNotBlank() && !state.creating) { Text(stringResource(R.string.feeds_create)) } },
-        dismissButton = { TextButton(onDismiss) { Text(stringResource(R.string.common_cancel)) } },
-    )
-}
-
 // ---------------------------------------------------------------------------------------------------------- one feed
 
 /** Everything a feed screen can do; wired to [FeedDetailViewModel] by the root. */
@@ -329,266 +236,55 @@ class FeedActions(
     val leaveSheet: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
     /** Leaving and other servers in Settings: photos taken away, frames on other servers (owner/admins). */
     val leavingSettings: (@Composable () -> Unit)? = null,
+    /** "Add a frame": pick a frame you manage or pair a new one (docs/spec/simple-app.md §3.4); null hides it. */
+    val addFrame: (() -> Unit)? = null,
 )
 
+/**
+ * A page of a family's settings (docs/spec/simple-app.md §3.4): name, cover, rules and leaving ([FeedTab.Settings]),
+ * birthdays, or photo sources. Posts, People and Frames are the family profile's segments instead.
+ */
 @Composable
-fun FeedDetailScreen(state: FeedDetailState, tab: FeedTab, onTab: (FeedTab) -> Unit, onBack: () -> Unit, a: FeedActions) {
+fun FamilyPartScreen(state: FeedDetailState, part: FeedTab, onBack: () -> Unit, a: FeedActions) {
     val c = Kin.colors
     val feed = state.feedOrNull
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(feed?.name.orEmpty(), onBack = onBack) {
-            if (feed != null && feed.canPost) IconButton(a.post) { Icon(KinIcons.Send, stringResource(R.string.feed_post_to, feed.name), tint = c.accent) }
-        }
+        KinTopBar(stringResource(when (part) {
+            FeedTab.Birthdays -> R.string.settings_family_birthdays
+            FeedTab.Sources -> R.string.settings_family_more_ways
+            FeedTab.People -> R.string.family_seg_people
+            FeedTab.Frames -> R.string.family_seg_frames
+            else -> R.string.settings_family_name_cover
+        }), onBack = onBack, subtitle = feed?.name)
         when (val f = state.feed) {
             Load.Loading -> SkeletonList(3, 140.dp)
             is Load.Error -> ErrorPanel(f.message, { a.vm.load() })
-            is Load.Ready -> {
-                val tabs = buildList {
-                    add(FeedTab.Posts); add(FeedTab.People)
-                    if (a.birthdays != null) add(FeedTab.Birthdays)
-                    add(FeedTab.Frames)
-                    if (f.value.isAdmin && a.sources != null) add(FeedTab.Sources)
-                    if (f.value.isAdmin) add(FeedTab.Settings)
-                }
-                val current = if (tab in tabs) tab else FeedTab.Posts
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = tabs.indexOf(current), containerColor = c.paper, contentColor = c.accent, edgePadding = 12.dp,
-                    divider = { HorizontalDivider(color = c.line) },
-                    indicator = { TabRowDefaults.PrimaryIndicator(Modifier.tabIndicatorOffset(tabs.indexOf(current), matchContentSize = true), color = c.accent) },
-                ) {
-                    tabs.forEach { t ->
-                        val badge = when (t) {
-                            FeedTab.People -> state.requests.size
-                            FeedTab.Frames -> state.pendingSubscriptions.size
-                            FeedTab.Birthdays -> a.birthdaysState?.pending?.count { it.canDecide } ?: 0
-                            else -> 0
-                        }
-                        Tab(
-                            selected = t == current, onClick = { onTab(t) },
-                            text = {
-                                val label = stringResource(when (t) {
-                                    FeedTab.Posts -> R.string.feed_tab_posts
-                                    FeedTab.People -> R.string.feed_tab_people
-                                    FeedTab.Frames -> R.string.feed_tab_frames
-                                    FeedTab.Birthdays -> R.string.feed_tab_birthdays
-                                    FeedTab.Sources -> R.string.feed_tab_sources
-                                    FeedTab.Settings -> R.string.feed_tab_settings
-                                })
-                                Text(if (badge > 0) "$label ($badge)" else label, style = Kin.type.label)
-                            },
-                            selectedContentColor = c.accent, unselectedContentColor = c.inkSoft,
-                        )
+            is Load.Ready -> Box(Modifier.weight(1f)) {
+                when (part) {
+                    FeedTab.People -> PeopleTab(f.value, state, a)
+                    FeedTab.Frames -> FramesTab(f.value, state, a)
+                    FeedTab.Birthdays -> a.birthdays?.let { b -> a.birthdaysState?.let { bs -> BirthdaysTab(f.value, bs, b) } }
+                    FeedTab.Sources -> PageColumn(spacing = 12.dp) {
+                        Text(stringResource(R.string.source_feed_intro), style = Kin.type.body, color = Kin.colors.inkSoft)
+                        a.sources?.invoke()
+                        if (f.value.canPost) a.addFromGoogle?.let { SecondaryButton(stringResource(R.string.google_add), it, Modifier.fillMaxWidth(), icon = KinIcons.Image) }
+                        if (f.value.isAdmin) a.channels?.invoke()
                     }
-                }
-                Box(Modifier.weight(1f)) {
-                    when (current) {
-                        FeedTab.Posts -> PostsTab(f.value, state, a)
-                        FeedTab.People -> PeopleTab(f.value, state, a)
-                        FeedTab.Frames -> FramesTab(f.value, state, a)
-                        FeedTab.Birthdays -> a.birthdays?.let { b -> a.birthdaysState?.let { bs -> BirthdaysTab(f.value, bs, b) } }
-                        FeedTab.Sources -> PageColumn(spacing = 12.dp) {
-                            Text(stringResource(R.string.source_feed_intro), style = Kin.type.body, color = Kin.colors.inkSoft)
-                            a.sources?.invoke()
-                        }
-                        FeedTab.Settings -> SettingsTab(f.value, state, a)
-                    }
-                }
-            }
-        }
-    }
-    val open = state.receiptsFor
-    val post = (state.posts as? Load.Ready)?.value?.firstOrNull { it.id == open }
-    if (open != null && post != null && feed != null) PostDialog(feed, post, state, a)
-}
-
-// ---- posts
-
-@Composable
-private fun PostsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
-    val c = Kin.colors
-    PageColumn(spacing = 12.dp) {
-        if (feed.canPost) PrimaryButton(stringResource(R.string.feed_post_button), a.post, Modifier.fillMaxWidth(), icon = KinIcons.Send)
-        else Note(stringResource(R.string.social_member_cannot_post))
-        a.social?.header?.invoke()
-        if (feed.canPost) a.addFromGoogle?.let { SecondaryButton(stringResource(R.string.google_add), it, Modifier.fillMaxWidth(), icon = KinIcons.Image) }
-        when (val p = state.posts) {
-            Load.Loading -> SkeletonList(2, 160.dp)
-            is Load.Error -> ErrorPanel(p.message, { a.vm.load() })
-            is Load.Ready -> {
-                if (p.value.isEmpty()) Note(stringResource(R.string.feed_no_posts))
-                p.value.forEach { post -> PostCard(feed, post, a) }
-                if (state.nextCursor != null) {
-                    SecondaryButton(stringResource(R.string.feed_load_more), a.vm::loadMore, Modifier.fillMaxWidth(), enabled = !state.loadingMore)
-                }
-            }
-        }
-        if (!feed.membersSeeReactions && !feed.isAdmin && a.social == null) Text(stringResource(R.string.feed_receipts_own_only), style = Kin.type.caption, color = c.inkFaint)
-    }
-}
-
-@Composable
-private fun PostCard(feed: Feed, post: FeedPost, a: FeedActions) {
-    val c = Kin.colors
-    Surface(Modifier.fillMaxWidth(), onClick = { a.vm.openReceipts(post.id) }) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Avatar(post.poster.displayName, post.poster.avatarUrl, 36.dp)
-            Column(Modifier.weight(1f)) {
-                Text(app.kinframe.family.ui.sources.creditName(post.poster.displayName, post.via) + if (post.poster.userId == a.me) " (" + stringResource(R.string.people_you) + ")" else "",
-                    style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(Format.relative(post.createdAt), style = Kin.type.caption, color = c.inkSoft)
-            }
-            Icon(KinIcons.ChevronRight, null, Modifier.size(20.dp), tint = c.inkFaint)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            post.items.take(4).forEachIndexed { i, item ->
-                Box(Modifier.weight(1f).aspectRatio(1f)) {
-                    Thumb(item.thumbUrl, null, Modifier.fillMaxSize())
-                    if (item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(22.dp), tint = Color.White)
-                    if (i == 3 && post.items.size > 4) {
-                        Box(Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
-                            Text("+${post.items.size - 3}", style = Kin.type.title, color = Color.White)
-                        }
-                    }
-                }
-            }
-            repeat((4 - post.items.size).coerceAtLeast(0)) { Box(Modifier.weight(1f)) }
-        }
-        post.items.firstOrNull { !it.caption.isNullOrBlank() }?.caption?.let {
-            Text("“$it”", style = Kin.type.body, color = c.inkSoft, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        }
-        // Receipts and reactions are null when this person may not see them (feeds.md §4.1).
-        post.receipts?.let { r ->
-            Text(receiptHeadline(r), style = Kin.type.caption, color = c.inkSoft)
-            receiptExtras(r)?.let { Text(it, style = Kin.type.caption, color = c.inkFaint) }
-        }
-        post.reactions?.takeIf { it.isNotEmpty() }?.let { ReactionChips(it) }
-        a.social?.postFooter?.invoke(post)
-    }
-}
-
-/** "❤ Oma's frame, 😂 Kitchen": reactions and replies with the frame that gave them. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ReactionChips(reactions: List<FeedReaction>) {
-    val c = Kin.colors
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        reactions.forEach { r ->
-            r.reaction?.let { kind ->
-                Row(Modifier.clip(CircleShape).background(c.paperDeep).padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(Delivery.EMOJI[kind].orEmpty(), style = Kin.type.body)
-                    Text(r.frameName, style = Kin.type.caption, color = c.inkSoft, maxLines = 1)
-                }
-            }
-            r.replies.forEach { p ->
-                Row(Modifier.clip(CircleShape).background(c.accentSoft).padding(horizontal = 10.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Icon(KinIcons.Message, null, Modifier.size(14.dp), tint = c.onAccentSoft)
-                    Text(stringResource(Delivery.replyLabel(p)) + " · " + r.frameName, style = Kin.type.caption, color = c.onAccentSoft, maxLines = 1)
+                    // Everyone can leave; owner and admins also see the family's name, cover and rules.
+                    else -> if (f.value.isAdmin) SettingsTab(f.value, state, a) else PageColumn { LeaveSection(f.value, a) }
                 }
             }
         }
     }
 }
-
-/** One post: its photos (remove one, use as cover), per-frame receipts when visible, and unsend / remove. */
-@Composable
-private fun PostDialog(feed: Feed, post: FeedPost, state: FeedDetailState, a: FeedActions) {
-    val c = Kin.colors
-    var confirmRemove by remember { mutableStateOf(false) }
-    val canRemove = FeedRules.canRemovePost(feed, post, a.me)
-    val own = post.poster.userId == a.me
-    if (confirmRemove) {
-        AlertDialog(
-            onDismissRequest = { confirmRemove = false },
-            title = { Text(stringResource(if (own) R.string.feed_unsend_title else R.string.feed_remove_post_title)) },
-            text = { Text(stringResource(R.string.feed_remove_post_body)) },
-            confirmButton = { TextButton({ confirmRemove = false; a.vm.closeReceipts(); a.vm.removePost(post) }) { Text(stringResource(R.string.detail_remove_now), color = c.danger) } },
-            dismissButton = { TextButton({ confirmRemove = false }) { Text(stringResource(R.string.common_cancel)) } },
-        )
-        return
-    }
-    AlertDialog(
-        onDismissRequest = a.vm::closeReceipts,
-        title = { Text(stringResource(R.string.feed_post_by, app.kinframe.family.ui.sources.creditName(post.poster.displayName, post.via))) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(Format.dateTime(post.createdAt), style = Kin.type.caption, color = c.inkSoft)
-                post.items.forEachIndexed { i, item ->
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Thumb(item.thumbUrl, null, Modifier.size(56.dp))
-                        Text(item.caption?.takeIf { it.isNotBlank() } ?: stringResource(R.string.detail_no_caption), style = Kin.type.caption,
-                            color = if (item.caption.isNullOrBlank()) c.inkFaint else c.ink, modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        if (feed.isAdmin) IconButton({ a.vm.setCover(item.id) }) { Icon(KinIcons.Star, stringResource(R.string.feed_use_as_cover), tint = if (feed.coverItemId == item.id) c.accent else c.inkSoft) }
-                        if (canRemove && post.items.size > 1) IconButton({ a.vm.removePostItem(post, item.id) }) {
-                            Icon(KinIcons.Trash, stringResource(R.string.feed_remove_item, i + 1), tint = c.danger)
-                        }
-                    }
-                }
-                if (post.receipts != null || FeedRules.canSeeReceipts(feed, post, a.me, social = a.social != null)) {
-                    SectionTitle(stringResource(R.string.feed_receipts_title))
-                    when (val r = state.receipts) {
-                        null, Load.Loading -> SkeletonList(1, 48.dp)
-                        is Load.Error -> Text(stringResource(r.message), style = Kin.type.caption, color = c.danger)
-                        is Load.Ready -> ReceiptFrames(r.value)
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(a.vm::closeReceipts) { Text(stringResource(R.string.common_close)) } },
-        dismissButton = {
-            if (canRemove) TextButton({ confirmRemove = true }) { Text(stringResource(if (own) R.string.feed_unsend else R.string.feed_remove_post), color = c.danger) }
-        },
-    )
-}
-
-@Composable
-private fun ReceiptFrames(r: FeedPostReceipts) {
-    val c = Kin.colors
-    Text(receiptHeadline(r.summary), style = Kin.type.bodyStrong, color = c.ink)
-    receiptExtras(r.summary)?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
-    if (r.frames.isEmpty()) Text(stringResource(R.string.feed_receipt_no_frames), style = Kin.type.caption, color = c.inkSoft)
-    r.frames.forEach { f ->
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(KinIcons.Frame, null, Modifier.size(16.dp), tint = c.inkSoft)
-                Text(listOfNotNull(f.frameName, f.frameLocation?.takeIf { it.isNotBlank() }).joinToString(" · "), style = Kin.type.label, color = c.ink,
-                    modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (f.subscriptionStatus == SubscriptionStatus.PAUSED) Pill(stringResource(R.string.feed_sub_status_paused), c.warnSoft, c.warn)
-            }
-            OnlineStatus(f.online, f.lastSeenAt)
-            val counts = f.items.groupingBy { it.status }.eachCount()
-            val parts = counts.entries.map { (status, n) -> "$n× " + deliveryLabel(status) }
-            Text(parts.joinToString(" · "), style = Kin.type.caption, color = c.inkSoft)
-            val reacts = f.items.mapNotNull { it.reaction }.joinToString(" ") { Delivery.EMOJI[it].orEmpty() }
-            val replies = f.items.flatMap { it.replies }.mapNotNull { it.preset }
-            if (reacts.isNotBlank()) Text(reacts, style = Kin.type.body)
-            replies.forEach { Text("“" + stringResource(Delivery.replyLabel(it)) + "”", style = Kin.type.caption, color = c.onAccentSoft) }
-        }
-    }
-}
-
-@Composable
-private fun deliveryLabel(status: String): String = stringResource(when (status) {
-    FeedDeliveryStatus.SEEN -> R.string.stage_seen
-    FeedDeliveryStatus.DELIVERED -> R.string.stage_delivered
-    FeedDeliveryStatus.READY -> R.string.stage_on_its_way
-    FeedDeliveryStatus.FAILED -> R.string.stage_failed
-    FeedDeliveryStatus.AWAITING_APPROVAL -> R.string.feed_delivery_awaiting
-    FeedDeliveryStatus.SUSPENDED -> R.string.feed_sub_status_paused
-    FeedDeliveryStatus.REMOVED -> R.string.feed_delivery_removed
-    else -> R.string.stage_processing
-})
 
 // ---- people
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PeopleTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
+internal fun PeopleTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
     val c = Kin.colors
     var editing by remember { mutableStateOf<FeedMember?>(null) }
-    var leaving by rememberSaveable { mutableStateOf(false) }
-    var deleting by rememberSaveable { mutableStateOf(false) }
     PageColumn {
         if (feed.isAdmin && state.requests.isNotEmpty()) {
             SectionTitle(stringResource(R.string.people_requests))
@@ -616,15 +312,23 @@ private fun PeopleTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
             }
         }
         if (feed.canInvite) FeedInviteSection(feed, state, a)
-        SectionTitle(stringResource(R.string.feed_you))
-        a.social?.you?.invoke()
-        if (!feed.isOwner) QuietButton(stringResource(R.string.feed_leave), { leaving = true }, danger = true)
-        else {
-            Text(stringResource(R.string.feed_owner_hint), style = Kin.type.caption, color = c.inkSoft)
-            QuietButton(stringResource(R.string.feed_delete), { deleting = true }, danger = true)
-        }
     }
     editing?.let { m -> FeedMemberDialog(feed, m, a) { editing = null } }
+}
+
+/** You in this family: mute, and leave (or, the owner, delete) it. */
+@Composable
+internal fun LeaveSection(feed: Feed, a: FeedActions) {
+    val c = Kin.colors
+    var leaving by rememberSaveable { mutableStateOf(false) }
+    var deleting by rememberSaveable { mutableStateOf(false) }
+    SectionTitle(stringResource(R.string.feed_you))
+    a.social?.you?.invoke()
+    if (!feed.isOwner) QuietButton(stringResource(R.string.feed_leave), { leaving = true }, danger = true)
+    else {
+        Text(stringResource(R.string.feed_owner_hint), style = Kin.type.caption, color = c.inkSoft)
+        QuietButton(stringResource(R.string.feed_delete), { deleting = true }, danger = true)
+    }
     if (leaving && a.leaveSheet != null) a.leaveSheet.invoke { leaving = false }
     else if (leaving) {
         var removeMine by remember { mutableStateOf(false) }
@@ -798,12 +502,11 @@ fun InviteQrDialog(feedName: String, inv: FeedInvite, onDismiss: () -> Unit) {
 // ---- frames (subscriptions, feed side)
 
 @Composable
-private fun FramesTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
+internal fun FramesTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
     val c = Kin.colors
-    var showOn by rememberSaveable { mutableStateOf(false) }
     PageColumn {
-        Text(stringResource(R.string.feed_frames_lede), style = Kin.type.body, color = c.inkSoft)
-        if (a.managedFrames.isNotEmpty()) SecondaryButton(stringResource(R.string.feed_show_on_frame), { showOn = true }, icon = KinIcons.Frame)
+        Text(stringResource(R.string.family_frames_lede), style = Kin.type.body, color = c.inkSoft)
+        a.addFrame?.let { SecondaryButton(stringResource(R.string.family_add_frame), it, icon = KinIcons.Frame) }
         if (feed.isAdmin && state.pendingSubscriptions.isNotEmpty()) {
             SectionTitle(stringResource(R.string.feed_sub_requests))
             state.pendingSubscriptions.forEach { s ->
@@ -834,9 +537,6 @@ private fun FramesTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
             }
         }
     }
-    if (showOn) ShowOnFrameDialog(feed, a.managedFrames.filter { f -> state.subscriptions.none { it.frame.id == f.id && it.isLive } }, { showOn = false }, birthdays = a.birthdays != null) { frame, h, n, b ->
-        showOn = false; a.vm.subscribe(frame.id, h, n, b)
-    }
 }
 
 @Composable
@@ -864,54 +564,10 @@ private fun SubscriptionCard(s: Subscription, canRemove: Boolean, busy: Boolean,
     )
 }
 
-/** "Show on a frame": pick a frame you manage and how much history it gets (feeds.md §3.3). */
-@Composable
-fun ShowOnFrameDialog(
-    feed: Feed,
-    frames: List<Frame>,
-    onDismiss: () -> Unit,
-    /** Offer "Show birthdays" (the server has birthdays); on by default. */
-    birthdays: Boolean = false,
-    onSubscribe: (Frame, String, Int, Boolean) -> Unit,
-) {
-    val c = Kin.colors
-    var showBirthdays by remember { mutableStateOf(true) }
-    var choice by remember { mutableStateOf(frames.singleOrNull()?.id) }
-    var option by remember { mutableStateOf(SubscriptionHistory.NONE) }
-    var count by remember { mutableStateOf(FeedRules.DEFAULT_LAST_N) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.feed_show_on_frame_title, feed.name)) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (frames.isEmpty()) Text(stringResource(R.string.feed_show_on_frame_none), color = c.inkSoft)
-                frames.forEach { f ->
-                    Row(Modifier.fillMaxWidth().clickable(role = Role.RadioButton) { choice = f.id }.padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        androidx.compose.material3.RadioButton(choice == f.id, null, colors = androidx.compose.material3.RadioButtonDefaults.colors(selectedColor = c.accent))
-                        Text(f.name, style = Kin.type.body, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                }
-                if (frames.isNotEmpty()) {
-                    HistoryPicker(option, count) { o, n -> option = o; count = n }
-                    if (birthdays) SwitchRow(stringResource(R.string.frame_feeds_show_birthdays), showBirthdays, { showBirthdays = it }, hint = stringResource(R.string.frame_feeds_show_birthdays_hint))
-                    if (!feed.isAdmin && !feed.autoApproveSubscriptions) Note(stringResource(R.string.feed_show_on_frame_needs_approval))
-                    Text(stringResource(R.string.feed_privacy_note, feed.name), style = Kin.type.caption, color = c.inkSoft)
-                }
-            }
-        },
-        confirmButton = {
-            val chosen = frames.firstOrNull { it.id == choice }
-            TextButton({ chosen?.let { onSubscribe(it, option, count, showBirthdays) } }, enabled = chosen != null) { Text(stringResource(R.string.feed_show_on_frame_do)) }
-        },
-        dismissButton = { TextButton(onDismiss) { Text(stringResource(R.string.common_cancel)) } },
-    )
-}
-
 // ---- settings (owner/admin)
 
 @Composable
-private fun SettingsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
+internal fun SettingsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
     val c = Kin.colors
     var name by remember(feed.name) { mutableStateOf(feed.name) }
     var picking by remember { mutableStateOf(false) }
@@ -944,8 +600,8 @@ private fun SettingsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
             SwitchRow(stringResource(R.string.feed_setting_posters_birthdays), feed.postersCanAddBirthdays, { a.vm.setFlag("posters_can_add_birthdays", it) },
                 hint = stringResource(R.string.feed_setting_posters_birthdays_hint), enabled = !state.busy)
         }
-        if (feed.isAdmin) a.channels?.invoke()
         a.leavingSettings?.invoke()
+        LeaveSection(feed, a)
     }
     if (picking) CoverPicker(feed, (state.posts as? Load.Ready)?.value.orEmpty(), { picking = false }) { id -> picking = false; a.vm.setCover(id) }
 }
@@ -1090,7 +746,6 @@ fun FrameFeedsTab(
 ) {
     val c = Kin.colors
     val manage = frame.can { it.changeSettings }
-    var subscribing by remember { mutableStateOf<Feed?>(null) }
     var editing by remember { mutableStateOf<Subscription?>(null) }
     var removing by remember { mutableStateOf<Subscription?>(null) }
     PageColumn {
@@ -1150,7 +805,8 @@ fun FrameFeedsTab(
                     SectionTitle(stringResource(R.string.frame_feeds_add))
                     if (state.subscribable.isEmpty()) Text(stringResource(R.string.frame_feeds_add_none), style = Kin.type.caption, color = c.inkSoft)
                     state.subscribable.forEach { f ->
-                        Surface(Modifier.fillMaxWidth(), onClick = { subscribing = f }) {
+                        // Shown at once with the last 50 posts (docs/spec/simple-app.md §5); no dialog.
+                        Surface(Modifier.fillMaxWidth(), onClick = { vm.subscribe(f, SubscriptionHistory.LAST_N, app.kinframe.family.ui.family.FamilyFrames.HISTORY_COUNT, true) }) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Icon(KinIcons.Plus, null, tint = c.accent)
                                 Text(f.name, style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
@@ -1174,9 +830,6 @@ fun FrameFeedsTab(
                 }
             }
         }
-    }
-    subscribing?.let { f ->
-        ShowOnFrameDialog(f, listOf(frame), { subscribing = null }, birthdays = birthdays) { _, h, n, b -> subscribing = null; vm.subscribe(f, h, n, b) }
     }
     editing?.let { s ->
         var option by remember(s.id) { mutableStateOf(s.history) }

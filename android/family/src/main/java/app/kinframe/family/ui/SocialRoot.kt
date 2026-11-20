@@ -132,6 +132,19 @@ fun chatsViewModel(graph: AppGraph, api: SocialApi): ChatsViewModel =
         ChatsViewModel(api, { graph.me.value?.id }, graph.live.events, { graph.social.openConversation }, isMe = graph.accounts::isMe)
     }
 
+/** Home's view model: every family or the filtered one (shared by Home, Activity and the simple view). */
+@Composable
+fun homeViewModel(graph: AppGraph, ready: Phase.Ready, social: SocialApi, flags: SocialFlags, feedId: String?, rowFeedId: String? = feedId): HomeViewModel =
+    viewModel(key = "home-${k(social)}-$feedId-$rowFeedId") {
+        HomeViewModel(social, ready.api, { graph.me.value?.id }, graph.live.events, flags.engagement, isMe = graph.accounts::isMe,
+            // One card per server: each opens its own server's summary.
+            summaries = { week ->
+                (social as? RoutingSocialApi)?.weeklySummaries(week)?.map { (account, w) -> app.kinframe.family.ui.home.HomeSummary(w, account) }
+                    ?: listOf(app.kinframe.family.ui.home.HomeSummary(social.weeklySummary(week)))
+            },
+            feedId = feedId, rowFeedId = rowFeedId)
+    }
+
 /** Toasts for "Share in chat" and everything else that only says something. */
 private suspend fun shareInChat(api: SocialApi, conversationId: String, postId: String, line: String) {
     val id = UUID.randomUUID().toString()
@@ -218,8 +231,8 @@ private suspend fun openMedia(context: android.content.Context, api: SocialApi, 
 fun SocialRouteScreen(
     graph: AppGraph, ready: Phase.Ready, nav: Navigator, r: SocialRoute,
     composer: ComposerViewModel, frames: FramesViewModel, feeds: FeedsViewModel,
-    topActions: @Composable () -> Unit,
 ) {
+    val family = app.kinframe.family.ui.family.LocalFamily.current
     val social = graph.social.api.collectAsStateWithLifecycle().value ?: return
     // The account of what this screen shows: its flags, limits and the person's user id there (multi-server.md §2.2).
     val key = socialRouteKey(r)
@@ -244,24 +257,22 @@ fun SocialRouteScreen(
     var sharing by remember { mutableStateOf<String?>(null) }
     var who by remember { mutableStateOf<Triple<String, String, String?>?>(null) }
     var again by remember { mutableStateOf<OnThisDayGroup?>(null) }
-    val openFeed = { id: String -> nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(id)) }
+    val openFeed = { id: String -> nav.openFamily(id) }
     when (r) {
-        HomeRoute -> {
-            val vm: HomeViewModel = viewModel(key = "home-${k(social)}") {
-                HomeViewModel(social, api, { graph.me.value?.id }, graph.live.events, flags.engagement, isMe = graph.accounts::isMe,
-                    // One card per server: each opens its own server's summary.
-                    summaries = { week ->
-                        (social as? RoutingSocialApi)?.weeklySummaries(week)?.map { (account, w) -> app.kinframe.family.ui.home.HomeSummary(w, account) }
-                            ?: listOf(app.kinframe.family.ui.home.HomeSummary(social.weeklySummary(week)))
-                    })
-            }
+        HomeRoute, ActivityRoute -> {
+            // Every family together, or the one of the filter chip; the people and frames row is of that family
+            // (with All: the home family).
+            val fam = family.byId(family.filter) ?: family.home
+            val vm = homeViewModel(graph, ready, social, flags, family.filter, fam?.id)
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) { vm.events.collect { e -> if (e is HomeNotice.Message) toaster.show(res.getString(e.message)) } }
-            HomeScreen(s, HomeActions(
+            val openFrame = { f: app.kinframe.core.api.Frame -> nav.openFrame(f.id) }
+            if (r == ActivityRoute) app.kinframe.family.ui.home.ActivityScreen(s, { nav.pop() }, openPost = { nav.push(PostRoute(it.id)) }, openFrame = openFrame)
+            else HomeScreen(s, HomeActions(
                 vm, me,
                 openPost = { nav.push(PostRoute(it.id)) },
                 openPerson = { nav.push(PersonRoute(it)) },
-                openFrame = { f -> if (flags.engagement) nav.push(FreshFrameRoute(f.id)) else { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(f.id)) } },
+                openFrame = openFrame,
                 openFeed = { f -> openFeed(f.id) },
                 who = { p -> who = Triple(ReactionTarget.POST, p.id, null) },
                 share = if (flags.chats) ({ p -> sharing = p.id }) else null,
@@ -269,8 +280,7 @@ fun SocialRouteScreen(
                 openSummary = { w -> nav.push(WeeklySummaryRoute(w.summary.weekOf, w.accountId)) },
                 openMilestones = { nav.push(MilestonesRoute()) },
                 openReminders = { nav.push(RemindersRoute()) },
-                post = { nav.selectTab(Route.Send) },
-                topActions = topActions,
+                post = family.compose,
                 // "Don't show this memory again" (README §5.21), on the memory's own server: hidden memories are per
                 // account, so the group's family names the account whose list it goes on.
                 hideMemory = { g: OnThisDayGroup ->
@@ -285,8 +295,13 @@ fun SocialRouteScreen(
                 // Several servers: a small server chip on each post (multi-server.md §2.2).
                 serverChip = { p -> graph.accounts.chipFor(p.id) },
                 meFor = { p -> graph.accounts.meIdFor(p.id) ?: primaryMe },
-                stripServer = homeStripServers(graph, s),
                 summaryServer = { w -> w.accountId?.let { graph.accounts.labelIfSeveral(it) } },
+                families = family.all,
+                filter = family.filter,
+                onFilter = family.setFilter,
+                onActivity = { nav.push(ActivityRoute) },
+                activityBadge = app.kinframe.family.ui.home.HomeRow.activity((s.posts as? Load.Ready)?.value.orEmpty()).size + s.openRequests.size,
+                invite = fam?.takeIf { it.canInvite }?.let { f -> { family.invite(f) } },
             ))
         }
         ChatsRoute -> {
@@ -295,7 +310,7 @@ fun SocialRouteScreen(
             LaunchedEffect(Unit) { vm.refresh() }
             ChatNotices(vm, nav)
             ChatsScreen(s, me, { nav.push(ConversationRoute(it.id)) }, { nav.push(NewChatRoute(false)) }, { nav.push(NewChatRoute(true)) },
-                vm::refresh, vm::toggleArchived, vm::archive, topActions,
+                vm::refresh, vm::toggleArchived, vm::archive, {},
                 // Several servers: each chat's own user id ("You: …") and a server chip (multi-server.md §2.2).
                 meFor = { c -> graph.accounts.meIdFor(c.id) ?: primaryMe }, serverChip = { c -> graph.accounts.chipFor(c.id) })
         }
@@ -353,7 +368,7 @@ fun SocialRouteScreen(
             val photo = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> if (uri != null) vm.setPhoto(uri) }
             ConversationInfoScreen(s, vm, me, { nav.pop() }, { nav.push(PersonRoute(it)) },
                 { photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                onOpenFamily = if (acct.discovery?.feeds == true) openFeed else null)
+                onOpenFamily = openFeed)
         }
         is PersonRoute -> {
             val vm: PersonViewModel = viewModel(key = "person-${r.userId}-$ak-${k(social)}") { PersonViewModel(social, r.userId) }
@@ -437,9 +452,9 @@ fun SocialRouteScreen(
             val s by vm.state.collectAsStateWithLifecycle()
             FreshFrameScreen(s, { nav.pop() },
                 // Not on the frame (it asked through a family): the send preselects the families that reach it.
-                onSend = { composer.preselectFrame(r.frameId, s.requests.firstOrNull { it.isOpen }?.id); nav.selectTab(Route.Send) },
+                onSend = { composer.preselectFrame(r.frameId, s.requests.firstOrNull { it.isOpen }?.id); nav.compose() },
                 onShareAgain = { again = it },
-                onOpenFrame = { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(r.frameId)) })
+                onOpenFrame = { nav.openFrame(r.frameId) })
         }
     }
     ShareInChatHost(graph, social, sharing) { sharing = null }
@@ -521,7 +536,7 @@ private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Na
         vm, me, onBack = { nav.pop() }, openInfo = { nav.push(ConversationInfoRoute(r.conversationId)) },
         openPost = { nav.push(PostRoute(it)) }, openPerson = { nav.push(PersonRoute(it)) },
         openRecap = { f, m -> nav.push(RecapRoute(f, m)) },
-        invite = if (acct.discovery?.feeds == true) ({ feedId -> nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feedId, FeedTab.People)) }) else null,
+        invite = { feedId -> nav.openFamily(feedId, FeedTab.People) },
         openUrl = { url -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } },
         openMedia = { item -> scope.launch { runCatching { openMedia(context, social, item) }.onFailure { toaster.show(res.getString(SocialProblems.message(it))) } } },
         voiceUrl = { id -> social.mediaUrl(id, "master") },
@@ -613,28 +628,6 @@ fun SocialSettingsSection(flags: SocialFlags, operator: Boolean, accountId: Stri
     }
 }
 
-/** "Share with" (circles) and "Answers this week's prompt" under the families in the Send tab. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun SendAudience(s: ComposerState, composer: ComposerViewModel) {
-    val c = Kin.colors
-    s.feeds.filter { it.id in s.selectedFeeds }.forEach { f ->
-        val circles = s.circles[f.id].orEmpty()
-        if (circles.isNotEmpty()) {
-            Text(stringResource(R.string.social_audience_title, f.name), style = Kin.type.label, color = c.inkSoft)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ToggleChip(stringResource(R.string.social_audience_whole), s.audience[f.id] == null, { composer.setAudience(f.id, null) })
-                circles.forEach { ci -> ToggleChip(ci.name, s.audience[f.id] == ci.id, { composer.setAudience(f.id, ci.id) }) }
-            }
-        }
-        s.prompts[f.id]?.let { p ->
-            ToggleChip(stringResource(R.string.engagement_answers_prompt, p.title), s.answering == p.id, { composer.answer(if (s.answering == p.id) null else p.id) }) {
-                Icon(KinIcons.Star, null, androidx.compose.ui.Modifier, tint = c.inkSoft)
-            }
-        }
-    }
-}
-
 /** Per-server settings screens: their account is named by the route, not found by an id. */
 fun isAccountScoped(r: SocialRoute): Boolean =
     r is RemindersRoute || r is BlockedPeopleRoute || r is MilestonesRoute || r is WeeklySummaryRoute || (r is ReportsRoute && r.feedId == null)
@@ -664,14 +657,6 @@ fun socialRouteKey(r: SocialRoute): String? = when (r) {
     else -> null
 }
 
-/** Home's strip: the server label of frames and families whose name is used on two servers (multi-server.md §2.2). */
-private fun homeStripServers(graph: AppGraph, s: app.kinframe.family.ui.home.HomeState): (String) -> String? {
-    if (!graph.accounts.several) return { null }
-    val entries = s.frames.map { it.id to it.name } + s.feeds.map { it.id to it.name }
-    val repeated = app.kinframe.family.accounts.ServerChips.repeatedAcrossServers(entries, { it.first }, { it.second }) { graph.accounts.index.get(it) }
-    return { id -> if (id in repeated) graph.accounts.chipFor(id) else null }
-}
-
 /** What a family social notification tap needs besides the navigator. */
 class SocialTargets(
     /** The merged tabs' flags (any account has it). */
@@ -689,7 +674,7 @@ class SocialTargets(
 /** Where a family social notification tap goes (README §6.3). Returns false when it isn't one. */
 suspend fun openSocialTarget(t: OpenTarget, nav: Navigator, c: SocialTargets): Boolean {
     val ids = t.ids
-    val home: Route = if (c.tabs.social) HomeRoute else Route.Frames
+    val home: Route = HomeRoute
     when (t.target) {
         SocialNotifications.TARGET_POST -> {
             val post = t.postId ?: ids["post_id"] ?: return true
@@ -707,7 +692,7 @@ suspend fun openSocialTarget(t: OpenTarget, nav: Navigator, c: SocialTargets): B
             val a = if (feed != null) c.account(feed) else c.byAccount(t.accountId)
             if (!a.flags.chats) return true
             if (feed == null && !a.isOperator) return true
-            nav.selectTab(if (c.tabs.social) HomeRoute else Route.Settings); nav.push(ReportsRoute(feed, if (feed == null) a.accountId else null))
+            nav.selectTab(HomeRoute); nav.push(ReportsRoute(feed, if (feed == null) a.accountId else null))
         }
         SocialNotifications.TARGET_WEEKLY_SUMMARY -> {
             val week = ids["week_of"] ?: return true
@@ -724,16 +709,11 @@ suspend fun openSocialTarget(t: OpenTarget, nav: Navigator, c: SocialTargets): B
             when {
                 !c.canSendTo(frame) -> c.sendTo(frame, request)
                 c.account(frame).flags.engagement -> { nav.selectTab(home); nav.push(FreshFrameRoute(frame)) }
-                else -> { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(frame)) }
+                else -> nav.openFrame(frame)
             }
         }
         SocialNotifications.TARGET_HOME -> {
-            val feed = t.feedId ?: ids["feed_id"]
-            when {
-                c.tabs.social -> nav.selectTab(HomeRoute)
-                feed != null && c.account(feed).discovery?.feeds == true -> { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(feed)) }
-                else -> nav.selectTab(Route.Frames)
-            }
+            nav.selectTab(HomeRoute)
         }
         else -> return false
     }
@@ -741,15 +721,9 @@ suspend fun openSocialTarget(t: OpenTarget, nav: Navigator, c: SocialTargets): B
 }
 
 @Composable
-fun BadgedIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, count: Int) {
-    if (count <= 0) { Icon(icon, null); return }
+fun BadgedIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, count: Int, description: String? = null) {
+    if (count <= 0) { Icon(icon, description); return }
     androidx.compose.material3.BadgedBox(badge = { androidx.compose.material3.Badge(containerColor = Kin.colors.accent) { Text(if (count > 99) "99+" else count.toString()) } }) {
-        Icon(icon, null)
+        Icon(icon, description)
     }
-}
-
-@Composable
-fun OverflowActions(onHistory: (() -> Unit)?, onSettings: (() -> Unit)?) {
-    onHistory?.let { IconButton(it) { Icon(KinIcons.History, stringResource(R.string.nav_history), tint = Kin.colors.inkSoft) } }
-    onSettings?.let { IconButton(it) { Icon(KinIcons.Settings, stringResource(R.string.nav_settings), tint = Kin.colors.inkSoft) } }
 }

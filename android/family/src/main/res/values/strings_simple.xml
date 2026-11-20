@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The simple family app (docs/spec/simple-app.md): one family, four tabs, simple view. -->
+<resources>
+    <!-- Navigation -->
+    <string name="nav_family">Family</string>
+    <string name="nav_new_post">New post</string>
+
+    <!-- The person's families -->
+    <string name="family_list_title">Your families</string>
+    <string name="family_start_another">Start a family</string>
+    <string name="family_join_another">Join a family</string>
+    <string name="home_all">All</string>
+
+    <!-- Home -->
+    <string name="home_activity">Activity</string>
+    <string name="home_invite">Invite</string>
+    <string name="home_empty_title">Share your first photo</string>
+    <string name="home_empty_body">Photos you share appear here and on the family’s frames.</string>
+    <string name="home_only_you">You’re the only one here so far. Invite the others.</string>
+    <string name="home_invite_family">Invite family</string>
+    <plurals name="home_on_frames">
+        <item quantity="one">On %1$d frame</item>
+        <item quantity="other">On %1$d frames</item>
+    </plurals>
+    <string name="home_frame_online">%1$s, online</string>
+    <string name="activity_title">Activity</string>
+    <string name="activity_empty">Nothing new. New comments, mentions and photo requests show up here.</string>
+    <plurals name="activity_comments">
+        <item quantity="one">%1$d new comment</item>
+        <item quantity="other">%1$d new comments</item>
+    </plurals>
+
+    <!-- Composer -->
+    <string name="compose_title">New post</string>
+    <string name="compose_share">Share</string>
+    <string name="compose_everyone_no_frames">Everyone in the family</string>
+    <plurals name="compose_everyone">
+        <item quantity="one">Everyone in the family and its %1$d frame</item>
+        <item quantity="other">Everyone in the family and its %1$d frames</item>
+    </plurals>
+    <plurals name="compose_families">
+        <item quantity="one">%1$d family</item>
+        <item quantity="other">%1$d families</item>
+    </plurals>
+    <plurals name="compose_frames">
+        <item quantity="one">%1$d frame</item>
+        <item quantity="other">%1$d frames</item>
+    </plurals>
+    <string name="compose_circle">Only %1$s</string>
+    <string name="compose_change">Change</string>
+    <string name="compose_frame_only">Only this frame, not the family</string>
+    <string name="compose_sheet_title">Share with</string>
+    <string name="compose_sheet_who">Who in %1$s</string>
+    <string name="compose_sheet_everyone">Everyone</string>
+    <string name="compose_choose_photos">Choose the photos to share</string>
+
+    <!-- Frames -->
+    <string name="frames_shows">Shows %1$s</string>
+    <plurals name="frames_shows_more">
+        <item quantity="one">Shows %1$s and %2$d other family</item>
+        <item quantity="other">Shows %1$s and %2$d other families</item>
+    </plurals>
+    <string name="frames_shows_none">Doesn’t show a family yet</string>
+    <string name="frames_online_now">Online · showing now</string>
+    <string name="frames_offline_since">Offline since %1$s</string>
+    <string name="frames_offline">Offline</string>
+    <string name="frames_other">Frames that show your families</string>
+    <string name="frames_none_title">No frames yet</string>
+    <string name="frames_none_body">A frame shows the family’s photos, at Oma’s or in your own living room.</string>
+
+    <!-- One frame -->
+    <string name="frame_row_photos">Photos on this frame</string>
+    <string name="frame_row_send">Send something to this frame only</string>
+    <string name="frame_row_extras">Calendar, weather and add-ons</string>
+    <string name="frame_row_tv">Show on TV</string>
+    <string name="frame_row_settings">Frame settings and help</string>
+    <string name="frame_settings_families">Families on this frame</string>
+    <string name="frame_settings_people">People of this frame</string>
+    <string name="frame_settings_device">Remote control, details and leaving</string>
+    <string name="frame_settings_display">Slideshow, display and photos by email</string>
+    <plurals name="frame_photo_count">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <string name="frame_extras_calendar">Calendar</string>
+    <string name="frame_extras_addons">Add-ons and weather</string>
+
+    <!-- The family as a profile -->
+    <plurals name="family_posts">
+        <item quantity="one">post</item>
+        <item quantity="other">posts</item>
+    </plurals>
+    <plurals name="family_people">
+        <item quantity="one">person</item>
+        <item quantity="other">people</item>
+    </plurals>
+    <plurals name="family_frames">
+        <item quantity="one">frame</item>
+        <item quantity="other">frames</item>
+    </plurals>
+    <string name="family_names_more">%1$s and %2$d more</string>
+    <string name="family_add_frame">Add a frame</string>
+    <string name="family_seg_photos">Photos</string>
+    <string name="family_seg_people">People</string>
+    <string name="family_seg_frames">Frames</string>
+    <string name="family_only_mine">Only mine</string>
+    <string name="family_photos_empty">No photos yet.</string>
+    <string name="family_photos_mine_empty">You haven’t shared anything here yet.</string>
+    <string name="family_frames_lede">Frames that show this family.</string>
+    <string name="add_frame_sheet_title">Add a frame to %1$s</string>
+    <string name="add_frame_sheet_body">It shows the family’s photos from now on, and the last 50 come along. You can change that in Frame settings.</string>
+    <string name="add_family_sheet_title">Add a family to %1$s</string>
+    <string name="frames_add_family">Add a family</string>
+    <string name="add_frame_pair">Pair a new frame</string>
+    <string name="add_frame_all_done">All your frames already show this family.</string>
+    <string name="add_frame_added">%1$s now shows %2$s</string>
+    <string name="add_frame_pending">Waiting for an admin of the family</string>
+
+    <!-- Settings -->
+    <string name="settings_this_family">This family</string>
+    <string name="settings_app">App</string>
+    <string name="settings_family_name_cover">Name, cover, invites and approvals</string>
+    <string name="settings_family_circles">Circles</string>
+    <string name="settings_family_birthdays">Birthdays</string>
+    <string name="settings_family_more_ways">More ways to add photos</string>
+    <string name="settings_family_leave">Leave the family</string>
+    <string name="settings_family_leave_delete">Leave or delete the family</string>
+    <string name="settings_simple_view">Simple view</string>
+    <string name="settings_simple_view_hint">Big photos and a heart, for Oma. Only on this phone.</string>
+    <string name="settings_sent_history">Sent history</string>
+
+    <!-- Simple view -->
+    <string name="simple_badge">Simple view</string>
+    <string name="simple_send_heart">Send a heart</string>
+    <string name="simple_heart_sent">Heart sent</string>
+    <string name="simple_next">Next photo</string>
+    <string name="simple_previous">Previous photo</string>
+    <string name="simple_empty">No photos yet. When someone in the family shares one, it appears here.</string>
+    <string name="simple_normal_view">Normal view</string>
+    <string name="view_question_title">How would you like to see the family?</string>
+    <string name="view_normal_body">Posts, comments and sharing</string>
+    <string name="view_simple_body">Big photos and a heart, for Oma</string>
+
+    <!-- Getting started -->
+    <string name="start_title">Share photos with your family</string>
+    <string name="start_lede">What would you like to do?</string>
+    <string name="start_family">Start a family</string>
+    <string name="start_family_body">Give it a name and invite the others. Add Oma’s frame now or later.</string>
+    <string name="start_join">Join my family</string>
+    <string name="start_join_body">Someone sent you a link or a code. One tap and you’re in.</string>
+    <string name="start_name_title">What’s your family called?</string>
+    <string name="start_name_default">%1$s family</string>
+    <string name="start_name_placeholder">Peeters family</string>
+    <string name="start_frame_title">Add Oma’s frame now?</string>
+    <string name="start_frame_body">Type the code the frame shows. It shows the family’s photos straight away. You can also do this later.</string>
+    <string name="start_frame_pair">Pair with code</string>
+    <string name="start_later">Later</string>
+    <string name="start_invite_title">Invite the family</string>
+    <string name="start_invite_body">Send them the link. They join %1$s with one tap.</string>
+    <string name="start_invite_share">Share the invite link</string>
+    <string name="join_title">Join my family</string>
+</resources>

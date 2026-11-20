@@ -3,6 +3,8 @@ package app.kinframe.family.ui.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.padding
@@ -84,12 +86,32 @@ fun SettingsScreen(
     /** "Send crash reports" (crash-reporting.md §4); null hides it. */
     sendCrashReports: Boolean? = null,
     onSendCrashReports: (Boolean) -> Unit = {},
+    /** Family › gear: back to the family. */
+    onBack: (() -> Unit)? = null,
+    /** "This family": the current family's settings (docs/spec/simple-app.md §3.4); null without a family. */
+    family: (@Composable () -> Unit)? = null,
+    /** Simple view on this device (§6); null hides it. */
+    simpleView: Boolean? = null,
+    onSimpleView: (Boolean) -> Unit = {},
+    /** Settings › Sent history; null hides it. */
+    onSentHistory: (() -> Unit)? = null,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
     var name by rememberSaveable(me.displayName) { mutableStateOf(me.displayName) }
-    PageColumn {
-        Text(stringResource(R.string.settings_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.semantics { heading() })
+    androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().background(c.paper)) {
+    if (onBack != null) app.kinframe.family.ui.KinTopBar(stringResource(R.string.settings_title), onBack = onBack)
+    PageColumn(Modifier.weight(1f)) {
+        if (onBack == null) Text(stringResource(R.string.settings_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.semantics { heading() })
+        family?.invoke()
+        if (family != null) Text(stringResource(R.string.settings_app), style = Kin.type.headline, color = c.ink, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
+
+        if (simpleView != null || onSentHistory != null) {
+            Surface(Modifier.fillMaxWidth()) {
+                if (simpleView != null) SwitchRow(stringResource(R.string.settings_simple_view), simpleView, onSimpleView, hint = stringResource(R.string.settings_simple_view_hint))
+                if (onSentHistory != null) app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.settings_sent_history), KinIcons.History, onSentHistory)
+            }
+        }
 
         SectionTitle(stringResource(R.string.settings_profile))
         Surface(Modifier.fillMaxWidth()) {
@@ -185,6 +207,7 @@ fun SettingsScreen(
                 QuietButton(stringResource(R.string.legal_terms), { onOpenWeb("/terms") })
             }
         }
+    }
     }
 }
 

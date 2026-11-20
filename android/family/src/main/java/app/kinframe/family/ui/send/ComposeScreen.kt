@@ -45,6 +45,7 @@ import app.kinframe.family.ui.ContentMaxWidth
 import app.kinframe.family.ui.EmptyState
 import app.kinframe.family.ui.ErrorPanel
 import app.kinframe.family.ui.FrameArt
+import app.kinframe.family.ui.KinTopBar
 import app.kinframe.family.ui.Load
 import app.kinframe.family.ui.Note
 import app.kinframe.family.ui.NoteTone
@@ -57,38 +58,11 @@ import app.kinframe.family.ui.ToggleChip
 import app.kinframe.family.util.Format
 import androidx.compose.ui.platform.LocalContext
 
-/** One server's frames and families in the Send tab ("Frames" and "Families" sections when both exist). */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun RecipientChips(
-    frames: List<app.kinframe.core.api.Frame>, feeds: List<app.kinframe.core.api.Feed>, state: ComposerState,
-    onToggleFrame: (String) -> Unit, onToggleFeed: (String) -> Unit, sections: Boolean,
-) {
-    val c = Kin.colors
-    if (frames.isNotEmpty()) {
-        if (sections) Text(stringResource(R.string.send_frames_section), style = Kin.type.label, color = c.inkSoft)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            frames.forEach { f ->
-                ToggleChip(f.name, f.id in state.selected, { onToggleFrame(f.id) }) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(if (f.online) c.sage else c.inkFaint))
-                }
-            }
-        }
-    }
-    // Feeds in their own section: "Peeters kids · 5 frames" (feeds.md §3.5).
-    if (feeds.isNotEmpty()) {
-        Text(stringResource(R.string.send_feeds_section), style = Kin.type.label, color = c.inkSoft)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            feeds.forEach { f ->
-                val label = f.name + " · " + pluralStringResource(R.plurals.feed_frames_count, f.subscriptionCount, f.subscriptionCount)
-                ToggleChip(label, f.id in state.selectedFeeds, { onToggleFeed(f.id) }) {
-                    Icon(KinIcons.People, null, Modifier.size(14.dp), tint = c.inkSoft)
-                }
-            }
-        }
-    }
-}
-
+/**
+ * The composer (`+`, docs/spec/simple-app.md §3.2): photos first, captions and framing per item, then one destination
+ * row — the current family ("everyone and its 3 frames"), a circle of it, or (from a frame's screen) that frame only —
+ * and "Share".
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ComposeScreen(
@@ -97,36 +71,30 @@ fun ComposeScreen(
     onEdit: (Int) -> Unit,
     onRemove: (String) -> Unit,
     onClear: () -> Unit,
-    onToggleFrame: (String) -> Unit,
     onSend: () -> Unit,
-    onAddFrame: () -> Unit,
-    onRetryFrames: () -> Unit,
-    onToggleFeed: (String) -> Unit = {},
-    /** Family social: "Share with" a circle per family, and "Answers this week's prompt". */
-    audience: (@Composable () -> Unit)? = null,
+    onCancel: () -> Unit,
+    onRetry: () -> Unit,
+    /** "Change": another family or a circle; null hides it (a frame-only send, or nothing to change to). */
+    onChange: (() -> Unit)? = null,
+    /** "Answers this week's prompt" for the destination family; null hides it. */
+    onAnswer: ((String?) -> Unit)? = null,
 ) {
     val c = Kin.colors
     val frames = state.frames
-    if (state.noRecipients) {
-        Box(Modifier.fillMaxSize().background(c.paper).padding(top = 40.dp)) {
-            EmptyState(stringResource(R.string.send_no_frames_title), stringResource(R.string.send_no_frames_body)) {
-                PrimaryButton(stringResource(R.string.frames_add), onAddFrame, icon = KinIcons.Plus)
-            }
+    Column(Modifier.fillMaxSize().background(c.surface)) {
+        KinTopBar(
+            state.destinationFrame?.let { stringResource(R.string.frames_send_to, it.name) } ?: stringResource(R.string.compose_title),
+            onBack = onCancel,
+        )
+        if (frames is Load.Error && state.items.isEmpty()) {
+            ErrorPanel(frames.message, onRetry, Modifier.padding(top = 80.dp)); return@Column
         }
-        return
-    }
-    if (frames is Load.Error && state.items.isEmpty()) {
-        ErrorPanel(frames.message, onRetryFrames, Modifier.padding(top = 80.dp)); return
-    }
-    Column(Modifier.fillMaxSize().background(c.paper)) {
         Box(Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
             Column(
-                Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                Text(stringResource(R.string.send_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.semantics { heading() })
                 if (state.items.isEmpty()) {
-                    Text(stringResource(R.string.send_lede), style = Kin.type.body, color = c.inkSoft)
                     PickerHero(state, onPick)
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -144,7 +112,6 @@ fun ComposeScreen(
                 }
                 if (state.skipped > 0) Note(pluralStringResource(R.plurals.send_skipped, state.skipped, state.skipped), tone = NoteTone.Warn)
                 if (state.overLimit > 0) Note(stringResource(R.string.send_over_limit, state.sendLimits.limits.maxItemsPerSend, state.overLimit), tone = NoteTone.Warn)
-                // Several servers: the strictest one's limit applies to the whole selection; say which server it is.
                 if (state.tooMany) Note(state.sendLimits.itemsServer?.let { stringResource(R.string.send_limit_items_server, it, state.sendLimits.limits.maxItemsPerSend) }
                     ?: stringResource(R.string.send_limit_items, state.sendLimits.limits.maxItemsPerSend), tone = NoteTone.Danger)
                 if (state.issues > 0) state.sendLimits.let { l ->
@@ -155,41 +122,107 @@ fun ComposeScreen(
                 }
                 if (state.issues > 0) Note(pluralStringResource(R.plurals.send_issues, state.issues, state.issues), tone = NoteTone.Danger)
 
-                SectionTitle(stringResource(R.string.send_to))
+                HorizontalDivider(color = c.line)
                 when (frames) {
                     Load.Loading -> SkeletonList(1, 48.dp)
-                    is Load.Error -> ErrorPanel(frames.message, onRetryFrames)
-                    is Load.Ready -> {
-                        // Several servers: recipients grouped per server (multi-server.md §2.2); a send to two
-                        // servers goes out as one upload per server.
-                        state.recipientGroups.forEach { g ->
-                            if (g.server != null) Text(g.server, style = Kin.type.title, color = c.ink)
-                            RecipientChips(g.frames, g.feeds, state, onToggleFrame, onToggleFeed, sections = state.feeds.isNotEmpty() && state.sendableFrames.isNotEmpty())
-                        }
-                        audience?.invoke()
-                        val anyOffline = state.sendableFrames.any { it.id in state.selected && !it.online }
-                        if (anyOffline) Note(stringResource(R.string.send_offline_note))
-                        if (state.items.isNotEmpty() && !state.hasRecipients) {
-                            Text(stringResource(if (state.feeds.isNotEmpty()) R.string.send_pick_recipient else R.string.send_pick_frame), style = Kin.type.caption, color = c.warn)
-                        }
-                    }
+                    else -> Destination(state, onChange)
                 }
+                state.destinationFamily?.let { f ->
+                    val prompt = state.prompts[f.id]
+                    if (prompt != null && onAnswer != null) ToggleChip(stringResource(R.string.engagement_answers_prompt, prompt.title), state.answering == prompt.id,
+                        { onAnswer(if (state.answering == prompt.id) null else prompt.id) }) { Icon(KinIcons.Star, null, Modifier.size(16.dp), tint = c.inkSoft) }
+                }
+                if (state.destinationFrame?.online == false) Note(stringResource(R.string.send_offline_note))
                 state.error?.let { Note(stringResource(it), tone = NoteTone.Danger) }
                 Spacer(Modifier.height(8.dp))
             }
         }
         if (state.items.isNotEmpty()) {
-            HorizontalDivider(color = c.line)
-            Box(Modifier.fillMaxWidth().background(c.surface).padding(horizontal = 20.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().background(c.surface).padding(horizontal = 16.dp, vertical = 12.dp).navigationBarsPadding(), contentAlignment = Alignment.Center) {
                 PrimaryButton(
-                    if (state.preparing) stringResource(R.string.send_preparing)
-                    else pluralStringResource(R.plurals.send_button, state.items.size, state.items.size),
-                    onSend, Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth(), enabled = state.canSend, busy = state.preparing, icon = KinIcons.Send,
+                    if (state.preparing) stringResource(R.string.send_preparing) else stringResource(R.string.compose_share),
+                    onSend, Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth(), enabled = state.canSend, busy = state.preparing,
                 )
             }
         }
     }
 }
+
+/** "Peeters family · Everyone in the family and its 3 frames · Change", or "Oma's frame · Only this frame". */
+@Composable
+private fun Destination(state: ComposerState, onChange: (() -> Unit)?) {
+    val c = Kin.colors
+    val frame = state.destinationFrame
+    val family = state.destinationFamily
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (frame != null) Box(Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(c.paperDeep), contentAlignment = Alignment.Center) { Icon(KinIcons.Frame, null, tint = c.inkSoft) }
+        else app.kinframe.family.ui.family.FamilyCover(family, 40)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            val families = state.destinationFamilies
+            Text(frame?.name ?: families.joinToString(", ") { it.name }, style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(destinationLine(state), style = Kin.type.caption, color = c.inkSoft)
+        }
+        if (onChange != null && frame == null) QuietButton(stringResource(R.string.compose_change), onChange)
+    }
+}
+
+/** The line under the destination's name. */
+@Composable
+fun destinationLine(state: ComposerState): String {
+    if (state.destinationFrame != null) return stringResource(R.string.compose_frame_only)
+    val families = state.destinationFamilies
+    if (families.size > 1) {
+        val frames = families.sumOf { it.subscriptionCount }
+        return pluralStringResource(R.plurals.compose_families, families.size, families.size) + " · " + pluralStringResource(R.plurals.compose_frames, frames, frames)
+    }
+    state.destinationCircle?.let { return stringResource(R.string.compose_circle, it.name) }
+    val n = state.destinationFamily?.subscriptionCount ?: 0
+    return if (n == 0) stringResource(R.string.compose_everyone_no_frames) else pluralStringResource(R.plurals.compose_everyone, n, n)
+}
+
+/**
+ * "Share with": the person's families as checkboxes (one post to several families), and per ticked family everyone
+ * or one of its circles. Not single frames.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun DestinationSheet(state: ComposerState, onFamily: (String) -> Unit, onCircle: (String, String?) -> Unit, onDismiss: () -> Unit) {
+    val c = Kin.colors
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = c.surface) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).navigationBarsPadding(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.compose_sheet_title), style = Kin.type.title, color = c.ink)
+            state.feeds.forEach { f ->
+                val on = f.id in state.selectedFeeds
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Checkbox) { onFamily(f.id) }.padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    androidx.compose.material3.Checkbox(on, null, colors = androidx.compose.material3.CheckboxDefaults.colors(checkedColor = c.accent))
+                    app.kinframe.family.ui.family.FamilyCover(f, 36)
+                    Column(Modifier.weight(1f)) {
+                        Text(f.name, style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        val n = f.subscriptionCount
+                        Text(if (n == 0) stringResource(R.string.compose_everyone_no_frames) else pluralStringResource(R.plurals.compose_everyone, n, n),
+                            style = Kin.type.caption, color = c.inkSoft)
+                    }
+                }
+                val circles = state.circles[f.id].orEmpty()
+                if (on && circles.isNotEmpty()) {
+                    Text(stringResource(R.string.compose_sheet_who, f.name), style = Kin.type.label, color = c.inkSoft, modifier = Modifier.padding(start = 48.dp))
+                    FlowRow(Modifier.padding(start = 48.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ToggleChip(stringResource(R.string.compose_sheet_everyone), state.audience[f.id] == null, { onCircle(f.id, null) })
+                        circles.forEach { ci -> ToggleChip(ci.name, state.audience[f.id] == ci.id, { onCircle(f.id, ci.id) }) }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+/** Whether "Change" has anything to offer. */
+fun canChangeDestination(state: ComposerState): Boolean =
+    !state.frameOnly && (state.feeds.size > 1 || state.destinationFamilies.any { state.circles[it.id].orEmpty().isNotEmpty() })
 
 @Composable
 private fun PickerHero(state: ComposerState, onPick: () -> Unit) {
@@ -202,6 +235,7 @@ private fun PickerHero(state: ComposerState, onPick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         FrameArt(width = 150.dp)
+        Text(stringResource(R.string.compose_choose_photos), style = Kin.type.body, color = c.inkSoft)
         PrimaryButton(stringResource(R.string.send_choose), onPick, icon = KinIcons.Image, busy = state.adding)
         Text(
             stringResource(R.string.send_choose_hint, state.sendLimits.limits.maxItemsPerSend), style = Kin.type.caption, color = c.inkSoft,

@@ -3,24 +3,42 @@ package app.kinframe.family.ui
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/** Where the app can be. The tabs are roots; everything else is pushed on top of one. */
+/**
+ * Where the app can be (docs/spec/simple-app.md §3). The tabs (Home, Frames, Chats, Family) are roots; everything else,
+ * the composer included, is pushed on top of one.
+ */
 sealed interface Route {
     data object Frames : Route
+    /** The Family tab: the profile of the person's one family, or the list of their families (docs/spec/simple-app.md §3.4). */
+    data object Family : Route
+    /** The composer (`+`): to one or more families (or circles of them), or (from a frame's screen) that frame only. */
     data object Send : Route
+    /** Settings › Sent history: what the person sent, with delivery per frame. */
     data object History : Route
-    data object Settings : Route
+    /** The gear: This family ([feedId], from a family's profile) and App; App only from the list of families. */
+    data class Settings(val feedId: String? = null) : Route
+    /** One frame: [tab] Overview is the frame's screen (a list); the others are the pages its rows open. */
     data class FrameDetail(val frameId: String, val tab: FrameTab = FrameTab.Overview) : Route
-    data class AddFrame(val code: String? = null) : Route
+    /**
+     * Pair a frame with its code ([code] from a link), or ([join]) type a family's invite code. With [family], a frame
+     * you manage that was paired is added to that family at once.
+     */
+    data class AddFrame(val code: String? = null, val family: String? = null, val join: Boolean = false) : Route
     data class Invite(val token: String) : Route
     data class SendDetail(val sendId: String, val highlightPlacement: String? = null) : Route
-    /** The Feeds tab; only when the server has feeds (discovery `feeds`). */
-    data object Feeds : Route
-    data class FeedDetail(val feedId: String, val tab: FeedTab = FeedTab.Posts, val postId: String? = null) : Route
+    /**
+     * A page of a family's settings: [tab] Birthdays, Sources or Settings (name, cover, rules, leaving). Posts, People
+     * and Frames show that family's profile.
+     */
+    data class FeedDetail(val feedId: String, val tab: FeedTab = FeedTab.Settings) : Route
     data class FeedInvite(val token: String) : Route
     /** Settings → My photo sources (docs/spec/photo-sources.md). */
     data object PhotoSources : Route
@@ -36,15 +54,21 @@ sealed interface Route {
     /** Settings → Accounts → one server: that server's own settings, with several accounts (multi-server.md §2.1). */
     data class AccountSettings(val accountId: String) : Route
 
-    val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Feeds || this == Settings || this is SocialTab
+    val isTab: Boolean get() = this == Frames || this == Family || this == HomeRoute || this == ChatsRoute
 }
 
-enum class FrameTab { Overview, Library, People, Feeds, Calendar, Settings }
+/**
+ * The pages of one frame. [Overview] is the frame's screen: the card and one list of rows. [Settings] is "Frame
+ * settings and help", which leads to [Feeds] (which family it shows), [People], [Device] (remote control, details,
+ * health, transfer and leaving) and [Display] (slideshow and display settings, email and Telegram). [Extras] is
+ * "Calendar, weather and add-ons".
+ */
+enum class FrameTab { Overview, Library, People, Feeds, Calendar, Settings, Device, Display, Extras }
 
-enum class FeedTab { Posts, People, Birthdays, Frames, Sources, Settings }
+enum class FeedTab { Posts, People, Frames, Birthdays, Sources, Settings }
 
 /** A tiny back stack: enough for four tabs with detail screens, no navigation library needed. */
-class Navigator(start: Route = Route.Frames) {
+class Navigator(start: Route = HomeRoute) {
     val stack = mutableStateListOf(start)
     val current: Route get() = stack.last()
     val tab: Route get() = stack.first()
@@ -63,6 +87,41 @@ class Navigator(start: Route = Route.Frames) {
     fun selectTab(tab: Route) {
         stack.clear()
         stack.add(tab)
+    }
+
+    /** The composer, on top of whatever is open. */
+    fun compose() = push(Route.Send)
+
+    /** A frame's screen, and on top of it one of its pages. */
+    fun openFrame(frameId: String, tab: FrameTab = FrameTab.Overview) {
+        selectTab(Route.Frames)
+        push(Route.FrameDetail(frameId))
+        when (tab) {
+            FrameTab.Overview -> Unit
+            // The pages under "Frame settings and help" open on top of it.
+            FrameTab.People, FrameTab.Feeds, FrameTab.Device, FrameTab.Display -> { push(Route.FrameDetail(frameId, FrameTab.Settings)); push(Route.FrameDetail(frameId, tab)) }
+            FrameTab.Calendar -> { push(Route.FrameDetail(frameId, FrameTab.Extras)); push(Route.FrameDetail(frameId, tab)) }
+            else -> push(Route.FrameDetail(frameId, tab))
+        }
+    }
+
+    /** The Family tab's segment (Photos, People, Frames) when it shows the one family's profile. */
+    var familySegment by mutableStateOf(FeedTab.Posts)
+
+    /** The person is in one family: the Family tab is its profile (else a list of families). */
+    var singleFamily = true
+
+    /**
+     * A family's profile on a segment, or a page of its settings (Birthdays, Sources, Settings) on top of its
+     * Settings.
+     */
+    fun openFamily(feedId: String, tab: FeedTab = FeedTab.Posts) {
+        selectTab(Route.Family)
+        val profile = tab == FeedTab.Posts || tab == FeedTab.People || tab == FeedTab.Frames
+        if (singleFamily) {
+            if (profile) familySegment = tab
+        } else push(Route.FeedDetail(feedId, if (profile) tab else FeedTab.Posts))
+        if (!profile) { push(Route.Settings(feedId)); push(Route.FeedDetail(feedId, tab)) }
     }
 
     /** Replace the top screen (e.g. "add frame" → its result). */

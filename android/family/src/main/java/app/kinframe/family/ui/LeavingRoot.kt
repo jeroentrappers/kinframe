@@ -234,11 +234,11 @@ fun FrameRemoteFollows(graph: AppGraph, frame: Frame) {
 fun openLeavingTarget(t: OpenTarget, nav: Navigator): Boolean {
     if (t.target != LeavingNotifications.TARGET) return false
     when (t.ids["leaving_key"]) {
-        LeavingPush.KEEP_REQUEST -> { nav.selectTab(Route.Settings); nav.push(KeepRequestsRoute(t.ids["request_id"])) }
+        LeavingPush.KEEP_REQUEST -> { nav.selectTab(Route.Family); nav.push(Route.Settings()); nav.push(KeepRequestsRoute(t.ids["request_id"])) }
         else -> when {
-            t.frameId != null -> { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(t.frameId, FrameTab.Library)) }
-            t.feedId != null -> { nav.selectTab(Route.Feeds); nav.push(Route.FeedDetail(t.feedId, FeedTab.Settings)) }
-            else -> nav.selectTab(Route.Settings)
+            t.frameId != null -> nav.openFrame(t.frameId, FrameTab.Library)
+            t.feedId != null -> { nav.selectTab(Route.Family); nav.push(Route.Settings(t.feedId)); nav.push(Route.FeedDetail(t.feedId, FeedTab.Settings)) }
+            else -> { nav.selectTab(Route.Family); nav.push(Route.Settings()) }
         }
     }
     return true

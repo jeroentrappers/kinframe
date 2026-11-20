@@ -1,6 +1,8 @@
 package app.kinframe.family.ui.frame
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,72 +75,115 @@ import app.kinframe.family.ui.SwitchRow
 import app.kinframe.family.ui.ToggleChip
 import app.kinframe.family.util.Format
 
+/** The frame screen's rows (docs/spec/simple-app.md §3.3); null hides a row. */
+class FrameHomeActions(
+    /** "Send something to this frame only": the composer preset to this frame. */
+    val sendOnly: (() -> Unit)?,
+    /** "Show on TV". */
+    val showOnTv: (() -> Unit)?,
+    /** The families the frame shows. */
+    val shows: List<app.kinframe.core.api.SubscriptionFeed> = emptyList(),
+    /** The frame's last placed photo. */
+    val thumb: String? = null,
+    /** Add-ons (plugins), with weather, under "Calendar, weather and add-ons"; null for people who don't manage it. */
+    val addons: (@Composable () -> Unit)? = null,
+)
+
+/**
+ * One frame. [FrameTab.Overview] is the frame's screen: its card, then one list (photos, send to this frame only,
+ * calendar and add-ons, Show on TV, settings and help); the other tabs are the pages those rows open.
+ */
 @Composable
 fun FrameDetailScreen(
     state: FrameDetailState,
     tab: FrameTab,
-    onTab: (FrameTab) -> Unit,
+    onOpen: (FrameTab) -> Unit,
     onBack: () -> Unit,
     onRetry: () -> Unit,
-    onSend: () -> Unit,
+    home: FrameHomeActions,
     overview: FrameActions,
     library: @Composable () -> Unit,
     settings: @Composable () -> Unit,
-    /** The Calendar tab; null when the server has calendars off. */
+    /** The calendar; null when the server has calendars off. */
     calendar: (@Composable () -> Unit)? = null,
-    /** The Feeds tab (the frame's subscriptions); null when the server has feeds off. */
+    /** Which family the frame shows (its subscriptions). */
     feeds: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val frame = (state.frame as? Load.Ready)?.value
+    val title = when (tab) {
+        FrameTab.Overview -> frame?.name.orEmpty()
+        FrameTab.Library -> stringResource(R.string.frame_row_photos)
+        FrameTab.People -> stringResource(R.string.frame_settings_people)
+        FrameTab.Feeds -> stringResource(R.string.frame_settings_families)
+        FrameTab.Calendar -> stringResource(R.string.frame_extras_calendar)
+        FrameTab.Settings -> stringResource(R.string.frame_row_settings)
+        FrameTab.Device -> stringResource(R.string.frame_settings_device)
+        FrameTab.Display -> stringResource(R.string.frame_settings_display)
+        FrameTab.Extras -> stringResource(R.string.frame_row_extras)
+    }
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(frame?.name ?: "", onBack = onBack) {
-            if (frame?.can { it.send } == true) IconButton(onSend) { Icon(KinIcons.Send, stringResource(R.string.frames_send_to, frame.name), tint = c.accent) }
-        }
+        KinTopBar(title, onBack = onBack, subtitle = frame?.name?.takeIf { tab != FrameTab.Overview })
         when (val f = state.frame) {
             Load.Loading -> SkeletonList(3, 140.dp)
             is Load.Error -> ErrorPanel(f.message, onRetry)
-            is Load.Ready -> {
-                val tabs = buildList {
-                    add(FrameTab.Overview); add(FrameTab.Library); add(FrameTab.People)
-                    if (feeds != null) add(FrameTab.Feeds)
-                    if (calendar != null && (f.value.can { it.changeSettings } || f.value.can { it.send })) add(FrameTab.Calendar)
-                    if (f.value.can { it.changeSettings }) add(FrameTab.Settings)
-                }
-                val current = if (tab in tabs) tab else FrameTab.Overview
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = tabs.indexOf(current), containerColor = c.paper, contentColor = c.accent, edgePadding = 12.dp,
-                    divider = { HorizontalDivider(color = c.line) },
-                    indicator = { TabRowDefaults.PrimaryIndicator(Modifier.tabIndicatorOffset(tabs.indexOf(current), matchContentSize = true), color = c.accent) },
-                ) {
-                    tabs.forEach { t ->
-                        Tab(
-                            selected = t == current, onClick = { onTab(t) },
-                            text = {
-                                Text(stringResource(when (t) {
-                                    FrameTab.Overview -> R.string.frame_tab_overview
-                                    FrameTab.Library -> R.string.frame_tab_library
-                                    FrameTab.People -> R.string.frame_tab_people
-                                    FrameTab.Feeds -> R.string.frame_tab_feeds
-                                    FrameTab.Calendar -> R.string.frame_tab_calendar
-                                    FrameTab.Settings -> R.string.frame_tab_settings
-                                }), style = Kin.type.label)
-                            },
-                            selectedContentColor = c.accent, unselectedContentColor = c.inkSoft,
-                        )
+            is Load.Ready -> Box(Modifier.weight(1f)) {
+                val fr = f.value
+                val manage = fr.can { it.changeSettings }
+                val hasCalendar = calendar != null && (manage || fr.can { it.send })
+                when (tab) {
+                    FrameTab.Overview -> FrameHome(fr, home, hasCalendar || home.addons != null, onOpen)
+                    FrameTab.Library -> library()
+                    FrameTab.People -> PeopleTab(fr, state, overview)
+                    FrameTab.Feeds -> feeds?.invoke()
+                    FrameTab.Calendar -> calendar?.invoke()
+                    FrameTab.Device -> OverviewTab(fr, state, overview)
+                    FrameTab.Display -> if (manage) settings()
+                    FrameTab.Extras -> PageColumn {
+                        if (hasCalendar) app.kinframe.family.ui.family.LinkList {
+                            app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_extras_calendar), KinIcons.Calendar, { onOpen(FrameTab.Calendar) })
+                        }
+                        home.addons?.invoke()
                     }
-                }
-                Box(Modifier.weight(1f)) {
-                    when (current) {
-                        FrameTab.Overview -> OverviewTab(f.value, state, overview)
-                        FrameTab.Library -> library()
-                        FrameTab.People -> PeopleTab(f.value, state, overview)
-                        FrameTab.Feeds -> feeds?.invoke()
-                        FrameTab.Calendar -> calendar?.invoke()
-                        FrameTab.Settings -> settings()
+                    FrameTab.Settings -> PageColumn {
+                        app.kinframe.family.ui.family.LinkList {
+                            if (feeds != null) app.kinframe.family.ui.family.SettingsLink(
+                                stringResource(R.string.frame_settings_families), KinIcons.People, { onOpen(FrameTab.Feeds) },
+                                hint = app.kinframe.family.ui.frames.showsLine(home.shows),
+                            )
+                            app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_settings_people), KinIcons.User, { onOpen(FrameTab.People) }, badge = state.requests.size)
+                            if (manage) app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_settings_display), KinIcons.Settings, { onOpen(FrameTab.Display) })
+                            app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_settings_device), KinIcons.Frame, { onOpen(FrameTab.Device) })
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+/** The frame's screen: its card, then one list. */
+@Composable
+private fun FrameHome(frame: Frame, home: FrameHomeActions, extras: Boolean, onOpen: (FrameTab) -> Unit) {
+    val c = Kin.colors
+    PageColumn(spacing = 14.dp) {
+        Column(Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)).background(c.surface)
+            .border(1.dp, c.line, androidx.compose.foundation.shape.RoundedCornerShape(20.dp))) {
+            app.kinframe.family.ui.frames.FrameHero(frame, home.thumb)
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(frame.name, style = Kin.type.headline, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val count = frame.placementCount?.let { " · " + pluralStringResource(R.plurals.frame_photo_count, it, it) }.orEmpty()
+                Text(app.kinframe.family.ui.frames.showsLine(home.shows) + count, style = Kin.type.body, color = c.inkSoft)
+                frame.location?.takeIf { it.isNotBlank() }?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
+                if (frame.needsUpdate) Note(stringResource(R.string.frames_needs_update), tone = NoteTone.Warn)
+            }
+        }
+        app.kinframe.family.ui.family.LinkList {
+            app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_row_photos), KinIcons.Image, { onOpen(FrameTab.Library) })
+            home.sendOnly?.let { app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_row_send), KinIcons.Send, it) }
+            if (extras) app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_row_extras), KinIcons.Calendar, { onOpen(FrameTab.Extras) })
+            home.showOnTv?.let { app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_row_tv), KinIcons.Tv, it) }
+            app.kinframe.family.ui.family.SettingsLink(stringResource(R.string.frame_row_settings), KinIcons.Settings, { onOpen(FrameTab.Settings) })
         }
     }
 }

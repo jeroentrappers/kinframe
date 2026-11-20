@@ -71,10 +71,12 @@ fun AddFrameScreen(
     onFeedInvite: (String) -> Unit = {},
     /** Several accounts: the server a typed code is for. */
     onServer: (String) -> Unit = {},
+    /** "Join my family": the same field, titled for a family's link or code. */
+    join: Boolean = false,
 ) {
     LaunchedEffect(state.feedInviteToken) { state.feedInviteToken?.let(onFeedInvite) }
     Column(Modifier.fillMaxSize().background(Kin.colors.paper)) {
-        KinTopBar(stringResource(if (state.feeds) R.string.add_title_code else R.string.add_title), onBack = onBack)
+        KinTopBar(stringResource(if (join) R.string.join_title else R.string.add_title_code), onBack = onBack)
         Box(Modifier.weight(1f).imePadding()) {
             val r = state.result
             if (r == null) CodeEntry(state, onInput, onSubmit, onServer)

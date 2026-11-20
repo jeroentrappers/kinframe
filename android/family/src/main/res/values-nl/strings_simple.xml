@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The simple family app (docs/spec/simple-app.md): one family, four tabs, simple view. -->
+<resources>
+    <!-- Navigation -->
+    <string name="nav_family">Familie</string>
+    <string name="nav_new_post">Nieuw bericht</string>
+
+    <!-- The person's families -->
+    <string name="family_list_title">Je families</string>
+    <string name="family_start_another">Een familie starten</string>
+    <string name="family_join_another">Bij een familie aansluiten</string>
+    <string name="home_all">Alle</string>
+
+    <!-- Home -->
+    <string name="home_activity">Activiteit</string>
+    <string name="home_invite">Uitnodigen</string>
+    <string name="home_empty_title">Deel je eerste foto</string>
+    <string name="home_empty_body">Foto’s die je deelt verschijnen hier en op de kaders van de familie.</string>
+    <string name="home_only_you">Je bent hier voorlopig alleen. Nodig de anderen uit.</string>
+    <string name="home_invite_family">Familie uitnodigen</string>
+    <plurals name="home_on_frames">
+        <item quantity="one">Op %1$d kader</item>
+        <item quantity="other">Op %1$d kaders</item>
+    </plurals>
+    <string name="home_frame_online">%1$s, online</string>
+    <string name="activity_title">Activiteit</string>
+    <string name="activity_empty">Niets nieuws. Nieuwe reacties, vermeldingen en fotoverzoeken verschijnen hier.</string>
+    <plurals name="activity_comments">
+        <item quantity="one">%1$d nieuwe reactie</item>
+        <item quantity="other">%1$d nieuwe reacties</item>
+    </plurals>
+
+    <!-- Composer -->
+    <string name="compose_title">Nieuw bericht</string>
+    <string name="compose_share">Delen</string>
+    <string name="compose_everyone_no_frames">Iedereen in de familie</string>
+    <plurals name="compose_everyone">
+        <item quantity="one">Iedereen in de familie en %1$d kader</item>
+        <item quantity="other">Iedereen in de familie en de %1$d kaders</item>
+    </plurals>
+    <plurals name="compose_families">
+        <item quantity="one">%1$d familie</item>
+        <item quantity="other">%1$d families</item>
+    </plurals>
+    <plurals name="compose_frames">
+        <item quantity="one">%1$d kader</item>
+        <item quantity="other">%1$d kaders</item>
+    </plurals>
+    <string name="compose_circle">Alleen %1$s</string>
+    <string name="compose_change">Wijzigen</string>
+    <string name="compose_frame_only">Alleen dit kader, niet de familie</string>
+    <string name="compose_sheet_title">Delen met</string>
+    <string name="compose_sheet_who">Wie in %1$s</string>
+    <string name="compose_sheet_everyone">Iedereen</string>
+    <string name="compose_choose_photos">Kies de foto’s die je wilt delen</string>
+
+    <!-- Frames -->
+    <string name="frames_shows">Toont %1$s</string>
+    <plurals name="frames_shows_more">
+        <item quantity="one">Toont %1$s en %2$d andere familie</item>
+        <item quantity="other">Toont %1$s en %2$d andere families</item>
+    </plurals>
+    <string name="frames_shows_none">Toont nog geen familie</string>
+    <string name="frames_online_now">Online · nu te zien</string>
+    <string name="frames_offline_since">Offline sinds %1$s</string>
+    <string name="frames_offline">Offline</string>
+    <string name="frames_other">Kaders die je families tonen</string>
+    <string name="frames_none_title">Nog geen kaders</string>
+    <string name="frames_none_body">Een kader toont de foto’s van de familie, bij oma of in je eigen woonkamer.</string>
+
+    <!-- One frame -->
+    <string name="frame_row_photos">Foto’s op dit kader</string>
+    <string name="frame_row_send">Iets naar alleen dit kader sturen</string>
+    <string name="frame_row_extras">Agenda, weer en extra’s</string>
+    <string name="frame_row_tv">Op tv tonen</string>
+    <string name="frame_row_settings">Instellingen en hulp</string>
+    <string name="frame_settings_families">Families op dit kader</string>
+    <string name="frame_settings_people">Mensen van dit kader</string>
+    <string name="frame_settings_device">Bediening, details en vertrekken</string>
+    <string name="frame_settings_display">Diavoorstelling, scherm en foto’s per e-mail</string>
+    <plurals name="frame_photo_count">
+        <item quantity="one">%1$d foto</item>
+        <item quantity="other">%1$d foto’s</item>
+    </plurals>
+    <string name="frame_extras_calendar">Agenda</string>
+    <string name="frame_extras_addons">Extra’s en weer</string>
+
+    <!-- The family as a profile -->
+    <plurals name="family_posts">
+        <item quantity="one">bericht</item>
+        <item quantity="other">berichten</item>
+    </plurals>
+    <plurals name="family_people">
+        <item quantity="one">persoon</item>
+        <item quantity="other">personen</item>
+    </plurals>
+    <plurals name="family_frames">
+        <item quantity="one">kader</item>
+        <item quantity="other">kaders</item>
+    </plurals>
+    <string name="family_names_more">%1$s en nog %2$d</string>
+    <string name="family_add_frame">Kader toevoegen</string>
+    <string name="family_seg_photos">Foto’s</string>
+    <string name="family_seg_people">Mensen</string>
+    <string name="family_seg_frames">Kaders</string>
+    <string name="family_only_mine">Alleen de mijne</string>
+    <string name="family_photos_empty">Nog geen foto’s.</string>
+    <string name="family_photos_mine_empty">Je hebt hier nog niets gedeeld.</string>
+    <string name="family_frames_lede">Kaders die deze familie tonen.</string>
+    <string name="add_frame_sheet_title">Kader toevoegen aan %1$s</string>
+    <string name="add_frame_sheet_body">Het toont vanaf nu de foto’s van de familie, en de laatste 50 komen mee. Dat kun je wijzigen in de instellingen van het kader.</string>
+    <string name="add_family_sheet_title">Een familie toevoegen aan %1$s</string>
+    <string name="frames_add_family">Een familie toevoegen</string>
+    <string name="add_frame_pair">Een nieuw kader koppelen</string>
+    <string name="add_frame_all_done">Al je kaders tonen deze familie al.</string>
+    <string name="add_frame_added">%1$s toont nu %2$s</string>
+    <string name="add_frame_pending">Wacht op een beheerder van de familie</string>
+
+    <!-- Settings -->
+    <string name="settings_this_family">Deze familie</string>
+    <string name="settings_app">App</string>
+    <string name="settings_family_name_cover">Naam, omslagfoto, uitnodigingen en goedkeuringen</string>
+    <string name="settings_family_circles">Kringen</string>
+    <string name="settings_family_birthdays">Verjaardagen</string>
+    <string name="settings_family_more_ways">Meer manieren om foto’s toe te voegen</string>
+    <string name="settings_family_leave">De familie verlaten</string>
+    <string name="settings_family_leave_delete">De familie verlaten of verwijderen</string>
+    <string name="settings_simple_view">Eenvoudige weergave</string>
+    <string name="settings_simple_view_hint">Grote foto’s en een hartje, voor oma. Alleen op deze telefoon.</string>
+    <string name="settings_sent_history">Verzonden</string>
+
+    <!-- Simple view -->
+    <string name="simple_badge">Eenvoudige weergave</string>
+    <string name="simple_send_heart">Een hartje sturen</string>
+    <string name="simple_heart_sent">Hartje verstuurd</string>
+    <string name="simple_next">Volgende foto</string>
+    <string name="simple_previous">Vorige foto</string>
+    <string name="simple_empty">Nog geen foto’s. Als iemand van de familie er een deelt, verschijnt ze hier.</string>
+    <string name="simple_normal_view">Normale weergave</string>
+    <string name="view_question_title">Hoe wil je de familie zien?</string>
+    <string name="view_normal_body">Berichten, reacties en zelf delen</string>
+    <string name="view_simple_body">Grote foto’s en een hartje, voor oma</string>
+
+    <!-- Getting started -->
+    <string name="start_title">Deel foto’s met je familie</string>
+    <string name="start_lede">Wat wil je doen?</string>
+    <string name="start_family">Een familie starten</string>
+    <string name="start_family_body">Geef ze een naam en nodig de anderen uit. Voeg oma’s kader nu of later toe.</string>
+    <string name="start_join">Bij mijn familie aansluiten</string>
+    <string name="start_join_body">Iemand stuurde je een link of een code. Eén tik en je bent erbij.</string>
+    <string name="start_name_title">Hoe heet je familie?</string>
+    <string name="start_name_default">Familie %1$s</string>
+    <string name="start_name_placeholder">Familie Peeters</string>
+    <string name="start_frame_title">Oma’s kader nu toevoegen?</string>
+    <string name="start_frame_body">Typ de code die het kader toont. Het toont meteen de foto’s van de familie. Je kunt dit ook later doen.</string>
+    <string name="start_frame_pair">Koppelen met code</string>
+    <string name="start_later">Later</string>
+    <string name="start_invite_title">Nodig de familie uit</string>
+    <string name="start_invite_body">Stuur hen de link. Met één tik zitten ze in %1$s.</string>
+    <string name="start_invite_share">Uitnodigingslink delen</string>
+    <string name="join_title">Bij mijn familie aansluiten</string>
+</resources>

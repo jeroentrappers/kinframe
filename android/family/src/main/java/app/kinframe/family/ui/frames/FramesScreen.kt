@@ -39,6 +39,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.api.Frame
+import app.kinframe.core.api.SubscriptionFeed
+import app.kinframe.core.api.SubscriptionFrame
+import app.kinframe.family.ui.Thumb
 import app.kinframe.core.design.Kin
 import app.kinframe.core.design.KinIcons
 import app.kinframe.family.R
@@ -54,6 +57,10 @@ import app.kinframe.family.ui.SecondaryButton
 import app.kinframe.family.ui.Skeleton
 import app.kinframe.family.ui.frameTint
 
+/**
+ * The Frames tab (docs/spec/simple-app.md §3.3): cards of the frames the person manages or is on, then the frames that
+ * show their families, and "Add a frame".
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FramesScreen(
@@ -61,7 +68,10 @@ fun FramesScreen(
     onRefresh: () -> Unit,
     onOpen: (Frame) -> Unit,
     onAdd: () -> Unit,
-    onSendTo: (Frame) -> Unit,
+    /** "Add a family" for a frame you manage that doesn't show a family yet; null hides it. */
+    onAddFamily: ((Frame) -> Unit)? = null,
+    /** A frame that shows your families but that you aren't on. */
+    onOpenFamilyFrame: ((SubscriptionFrame) -> Unit)? = null,
     /** A frame's server chip when signed in to several servers (multi-server.md §2.2), else null. */
     serverChip: (Frame) -> String? = { null },
 ) {
@@ -70,31 +80,32 @@ fun FramesScreen(
         when (val f = state.frames) {
             Load.Loading -> FramesSkeleton()
             is Load.Error -> ErrorPanel(f.message, onRefresh, Modifier.padding(top = 80.dp))
-            is Load.Ready -> if (f.value.isEmpty()) {
+            is Load.Ready -> if (f.value.isEmpty() && state.familyFrames.isEmpty()) {
                 Column(Modifier.fillMaxSize().padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     EmptyState(
-                        stringResource(R.string.frames_empty_title), stringResource(R.string.frames_empty_body),
+                        stringResource(R.string.frames_none_title), stringResource(R.string.frames_none_body),
                         art = { FrameArt(width = 180.dp) },
-                    ) { PrimaryButton(stringResource(R.string.frames_empty_cta), onAdd, icon = KinIcons.Plus) }
+                    ) { PrimaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus) }
                 }
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 300.dp),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        Column(Modifier.padding(top = 8.dp, bottom = 4.dp)) {
-                            Text(stringResource(R.string.frames_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.semantics { heading() })
-                            Text(
-                                pluralStringResource(R.plurals.frames_summary, f.value.size, f.value.size, state.online),
-                                style = Kin.type.caption, color = c.inkSoft,
-                            )
-                        }
+                        Text(stringResource(R.string.nav_frames), style = Kin.type.headline, color = c.ink, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
                     }
-                    items(f.value, key = { it.id }) { frame -> FrameCard(frame, { onOpen(frame) }, { onSendTo(frame) }, serverChip(frame)) }
+                    items(f.value, key = { it.id }) { frame ->
+                        val add = onAddFamily?.takeIf { frame.can { p -> p.changeSettings } && state.shows[frame.id].orEmpty().isEmpty() }
+                        FrameCard(frame, state, add?.let { a -> { a(frame) } }, { onOpen(frame) }, serverChip(frame))
+                    }
+                    if (state.familyFrames.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(stringResource(R.string.frames_other), style = Kin.type.title, color = c.ink, modifier = Modifier.padding(top = 8.dp))
+                    }
+                    items(state.familyFrames, key = { "ff" + it.frame.id }) { ff -> FamilyFrameCard(ff, onOpenFamilyFrame) }
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
                             SecondaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus)
@@ -106,11 +117,45 @@ fun FramesScreen(
     }
 }
 
+/** A frame that shows your families but that you aren't on: name, status, which families. */
 @Composable
-fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit, server: String? = null) {
+private fun FamilyFrameCard(ff: FamilyFrame, onOpen: ((SubscriptionFrame) -> Unit)?) {
     val c = Kin.colors
-    val (a, b) = frameTint(frame.id)
-    val status = stringResource(if (frame.online) R.string.a11y_frame_status_online else R.string.a11y_frame_status_offline, frame.name)
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(c.surface).border(1.dp, c.line, RoundedCornerShape(16.dp))
+            .let { m -> if (onOpen != null) m.clickable(role = Role.Button) { onOpen(ff.frame) } else m }.padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)).background(c.paperDeep), contentAlignment = Alignment.Center) { Icon(KinIcons.Frame, null, tint = c.inkSoft) }
+        Column(Modifier.weight(1f)) {
+            Text(ff.frame.name, style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(showsLine(ff.shows), style = Kin.type.caption, color = c.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(if (ff.frame.online) stringResource(R.string.frames_online_now) else stringResource(R.string.frames_offline), style = Kin.type.caption,
+                color = if (ff.frame.online) c.onSageSoft else c.inkFaint)
+        }
+    }
+}
+
+/** "Online · showing now" or "Offline since 2 hours ago". */
+@Composable
+fun frameStatus(frame: Frame): String = when {
+    frame.online -> stringResource(R.string.frames_online_now)
+    frame.lastSeenAt != null -> stringResource(R.string.frames_offline_since, app.kinframe.family.util.Format.relative(frame.lastSeenAt!!))
+    else -> stringResource(R.string.frames_offline)
+}
+
+/** "Shows Trappers", "Shows Trappers and 4 other families", or "Doesn't show a family yet". */
+@Composable
+fun showsLine(shows: List<SubscriptionFeed>): String = when (shows.size) {
+    0 -> stringResource(R.string.frames_shows_none)
+    1 -> stringResource(R.string.frames_shows, shows.single().name)
+    else -> pluralStringResource(R.plurals.frames_shows_more, shows.size - 1, shows.first().name, shows.size - 1)
+}
+
+/** A frame's card: what it shows now, its status, name, which family it shows. */
+@Composable
+fun FrameCard(frame: Frame, state: FramesState, onAddFamily: (() -> Unit)?, onOpen: () -> Unit, server: String? = null) {
+    val c = Kin.colors
     Column(
         Modifier
             .fillMaxWidth()
@@ -119,58 +164,48 @@ fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit, server: Stri
             .border(1.dp, c.line, RoundedCornerShape(20.dp))
             .clickable(role = Role.Button, onClickLabel = stringResource(R.string.frames_open, frame.name), onClick = onOpen),
     ) {
-        Box(
-            Modifier.fillMaxWidth().aspectRatio(16f / 6.5f)
-                .background(Brush.radialGradient(listOf(a, b), radius = 900f).let { if (c.isDark) Brush.linearGradient(listOf(a.copy(alpha = 0.55f), b.copy(alpha = 0.55f))) else it })
-                .semantics { contentDescription = status },
-            contentAlignment = Alignment.Center,
-        ) {
-            val portrait = frame.screen?.orientation == "portrait"
-            FrameArt(width = if (portrait) 64.dp else 128.dp, portrait = portrait)
-            if (frame.online) {
-                Row(
-                    Modifier.align(Alignment.TopEnd).padding(10.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.85f)).padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF3C6A49)))
-                    Text(stringResource(R.string.frame_online), style = Kin.type.caption, color = Color(0xFF2F5A3C))
-                }
-            }
-        }
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FrameHero(frame, state.thumbs[frame.id])
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(frame.name, style = Kin.type.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                RoleBadge(frame.role)
                 if (frame.deviceKind == "browser") Pill(stringResource(R.string.frames_browser_badge), Kin.colors.paperDeep, Kin.colors.inkSoft, icon = KinIcons.Tv)
             }
             server?.let { Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
-            frame.location?.takeIf { it.isNotBlank() }?.let {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Icon(KinIcons.MapPin, null, Modifier.size(15.dp), tint = c.inkSoft)
-                    Text(it, style = Kin.type.caption, color = c.inkSoft)
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OnlineStatus(frame.online, frame.lastSeenAt, Modifier.weight(1f))
-                if (frame.can { it.send }) {
-                    val sendLabel = stringResource(R.string.frames_send_to, frame.name)
-                    Row(
-                        Modifier.clip(CircleShape).clickable(role = Role.Button, onClick = onSend)
-                            .semantics(mergeDescendants = true) { contentDescription = sendLabel }
-                            .padding(horizontal = 12.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Icon(KinIcons.Send, null, Modifier.size(18.dp), tint = c.accent)
-                        Text(stringResource(R.string.nav_send), style = Kin.type.label, color = c.accent)
-                    }
-                }
-            }
+            Text(showsLine(state.shows[frame.id].orEmpty()), style = Kin.type.body, color = c.inkSoft)
+            if (onAddFamily != null) SecondaryButton(stringResource(R.string.frames_add_family), onAddFamily, enabled = state.adding == null, icon = KinIcons.Plus)
             if (frame.needsUpdate) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Icon(KinIcons.Info, null, Modifier.size(15.dp), tint = c.warn)
                     Text(stringResource(R.string.frames_needs_update), style = Kin.type.caption, color = c.warn)
                 }
             }
+        }
+    }
+}
+
+/** The photo the frame shows (the last placed one), or the frame drawing, with the status chip. */
+@Composable
+fun FrameHero(frame: Frame, thumb: String?, modifier: Modifier = Modifier) {
+    val c = Kin.colors
+    val (a, b) = frameTint(frame.id)
+    val status = frameStatus(frame)
+    Box(
+        modifier.fillMaxWidth().aspectRatio(16f / 9f)
+            .background(Brush.radialGradient(listOf(a, b), radius = 900f).let { if (c.isDark) Brush.linearGradient(listOf(a.copy(alpha = 0.55f), b.copy(alpha = 0.55f))) else it })
+            .semantics { contentDescription = status },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (thumb != null) Thumb(thumb, null, Modifier.fillMaxSize(), corner = 0.dp)
+        else {
+            val portrait = frame.screen?.orientation == "portrait"
+            FrameArt(width = if (portrait) 64.dp else 128.dp, portrait = portrait)
+        }
+        Row(
+            Modifier.align(Alignment.TopStart).padding(12.dp).clip(CircleShape).background(if (frame.online) c.sageSoft else c.paperDeep).padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(Modifier.size(8.dp).clip(CircleShape).background(if (frame.online) c.sage else c.inkFaint))
+            Text(status, style = Kin.type.caption, color = if (frame.online) c.onSageSoft else c.inkSoft)
         }
     }
 }

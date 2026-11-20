@@ -4,6 +4,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kinframe.core.api.Feed
+import app.kinframe.core.api.FeedMember
+import app.kinframe.core.api.SubscriptionFrame
+import app.kinframe.core.api.SubscriptionStatus
 import app.kinframe.core.api.Frame
 import app.kinframe.core.api.KinApi
 import app.kinframe.core.social.FeedPrompt
@@ -53,8 +56,16 @@ data class HomeState(
     /** Last week's "seen and loved" summaries: one per server that has one (multi-server.md §2.2). */
     val summaries: List<HomeSummary> = emptyList(),
     val reminders: ReminderPreferences? = null,
+    // ---- the current family (docs/spec/simple-app.md §3.1)
+    /** The family's people, for the row under the top bar. */
+    val members: List<FeedMember> = emptyList(),
+    /** The frames that show the family (active subscriptions). */
+    val familyFrames: List<SubscriptionFrame> = emptyList(),
+    /** A frame's last placed photo (frames the person may see the library of). */
+    val frameThumbs: Map<String, String> = emptyMap(),
 ) {
-    val entries: List<HomeEntry> get() = TimelineLogic.entries((posts as? Load.Ready)?.value.orEmpty())
+    /** A post sent to several families shows once (docs/spec/simple-app.md §3.1). */
+    val entries: List<HomeEntry> get() = TimelineLogic.entries(app.kinframe.family.ui.family.Families.once((posts as? Load.Ready)?.value.orEmpty()))
 
     /** Frames that asked for new photos and haven't been answered. */
     val openRequests: List<Frame> get() = frames.filter { it.photoRequest?.isOpen == true }
@@ -85,6 +96,10 @@ class HomeViewModel(
      * Servers without one that week are left out.
      */
     private val summaries: suspend (String) -> List<HomeSummary> = { week -> listOf(HomeSummary(api.weeklySummary(week))) },
+    /** Home's filter chip: that family's timeline only; null is every family together. */
+    val feedId: String? = null,
+    /** The family of the people and frames row (the filtered one; with All the home family). */
+    private val rowFeedId: String? = feedId,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -101,7 +116,7 @@ class HomeViewModel(
         launch { loadStrip() }
         if (engagement) launch { loadEngagement() }
         try {
-            val page = api.timeline()
+            val page = api.timeline(feedId = feedId)
             _state.update { it.copy(posts = Load.Ready(page.posts), nextBefore = page.nextBefore, refreshing = false) }
         } catch (e: Exception) {
             _state.update { s -> if (s.posts is Load.Ready) s.copy(refreshing = false) else s.copy(posts = Load.Error(SocialProblems.message(e)), refreshing = false) }
@@ -109,8 +124,18 @@ class HomeViewModel(
     }
 
     private suspend fun loadStrip() {
-        runCatching { kin.frames() }.onSuccess { f -> _state.update { it.copy(frames = f.sortedBy { x -> x.name.lowercase() }) } }
+        val frames = runCatching { kin.frames() }.getOrNull()
+        frames?.let { f -> _state.update { it.copy(frames = f.sortedBy { x -> x.name.lowercase() }) } }
         runCatching { kin.feeds() }.onSuccess { f -> _state.update { it.copy(feeds = f.sortedBy { x -> x.name.lowercase() }) } }
+        val id = rowFeedId ?: return
+        runCatching { kin.feedMembers(id) }.onSuccess { m -> _state.update { it.copy(members = HomeRow.people(m, me())) } }
+        val shown = runCatching { kin.feedSubscriptions(id, SubscriptionStatus.ACTIVE) }.getOrNull()?.map { it.frame } ?: return
+        _state.update { it.copy(familyFrames = shown.sortedBy { f -> f.name.lowercase() }) }
+        val thumbs = shown.mapNotNull { sf ->
+            val f = frames?.firstOrNull { it.id == sf.id }?.takeIf { it.can { p -> p.seeLibrary } } ?: return@mapNotNull null
+            runCatching { kin.placements(f.id, limit = 1).placements.firstOrNull()?.item?.thumbUrl }.getOrNull()?.let { f.id to it }
+        }.toMap()
+        _state.update { it.copy(frameThumbs = thumbs) }
     }
 
     private suspend fun loadEngagement() {
@@ -119,7 +144,7 @@ class HomeViewModel(
         runCatching { api.reminderPreferences() }.onSuccess { r -> _state.update { it.copy(reminders = r) } }
         // Last week's "seen and loved" summary, when there is one (404 otherwise).
         runCatching { summaries(lastWeek()) }.onSuccess { w -> _state.update { it.copy(summaries = w.filter { x -> x.summary.seenCount > 0 }) } }
-        val feeds = runCatching { kin.feeds() }.getOrDefault(emptyList())
+        val feeds = runCatching { kin.feeds() }.getOrDefault(emptyList()).filter { feedId == null || it.id == feedId }
         val prompts = feeds.take(MAX_PROMPT_FEEDS).mapNotNull { f ->
             runCatching { api.feedPrompts(f.id) }.getOrNull()?.firstOrNull { it.status == PromptStatus.CURRENT && it.title.isNotBlank() }
         }
@@ -136,7 +161,7 @@ class HomeViewModel(
         _state.update { it.copy(loadingMore = true) }
         viewModelScope.launch {
             try {
-                val page = api.timeline(before = cursor)
+                val page = api.timeline(before = cursor, feedId = feedId)
                 _state.update { st ->
                     val have = (st.posts as? Load.Ready)?.value.orEmpty()
                     st.copy(posts = Load.Ready(have + page.posts.filter { p -> have.none { it.id == p.id } }), nextBefore = page.nextBefore, loadingMore = false)
@@ -195,6 +220,7 @@ class HomeViewModel(
                 s.copy(prompts = if (e.prompt.status == PromptStatus.CURRENT && e.prompt.title.isNotBlank()) others + e.prompt else others)
             }
             is SocialLive.MilestoneAchieved -> _state.update { s -> s.copy(milestones = s.milestones.filterNot { it.key == e.milestone.key } + e.milestone) }
+            is LiveEvent.SubscriptionUpdated -> if (e.feedId == feedId) viewModelScope.launch { loadStrip() }
             is LiveEvent.FeedMembershipUpdated, is SocialLive.CircleUpdated, is SocialLive.CircleRemoved -> refresh()
             else -> Unit
         }
@@ -203,4 +229,17 @@ class HomeViewModel(
     companion object {
         const val MAX_PROMPT_FEEDS = 6
     }
+}
+
+/** The row of the family on Home (docs/spec/simple-app.md §3.1). */
+object HomeRow {
+    /** The people, the person first; nobody twice. */
+    fun people(members: List<FeedMember>, me: String?): List<FeedMember> =
+        members.distinctBy { it.userId }.sortedWith(compareBy<FeedMember>({ it.userId != me }, { it.displayName.lowercase() }))
+
+    /** Only the person is in the family: Home invites the others. */
+    fun alone(members: List<FeedMember>, me: String?): Boolean = members.isNotEmpty() && members.all { it.userId == me }
+
+    /** Posts with something new for the person: the Activity list. */
+    fun activity(posts: List<TimelinePost>): List<TimelinePost> = posts.filter { it.thread.unreadMentions > 0 || it.thread.unreadCount > 0 }
 }
