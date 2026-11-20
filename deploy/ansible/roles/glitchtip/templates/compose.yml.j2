@@ -3,7 +3,7 @@
 name: glitchtip
 
 x-environment: &env
-  DATABASE_URL: postgres://glitchtip:{{ glitchtip_db_password | urlencode }}@postgres:5432/glitchtip
+  DATABASE_URL: postgres://glitchtip:{{ glitchtip_db_password | urlencode | replace('/', '%2F') }}@postgres:5432/glitchtip
   VALKEY_URL: redis://valkey:6379
   SECRET_KEY: "{{ glitchtip_secret_key }}"
   EMAIL_URL: "{{ glitchtip_email_url }}"
