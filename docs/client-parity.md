@@ -416,6 +416,7 @@ session runs.
 | Link my Telegram: link (opens `?start=` in Telegram), show the linked name, unlink | planned | planned | planned | Only with discovery `telegram`. |
 | Sign out | yes | yes | yes | |
 | Privacy and terms links | yes | new | new | |
+| Crash reports to kinframe's GlitchTip, "Send crash reports" (default on) | planned | new | planned | `docs/spec/crash-reporting.md`. Only official builds (built with a DSN) report. Android: Settings → Privacy; off stops at once, on takes effect at the next start. The frame app reports too, without a switch. |
 
 ## Show on TV
 

@@ -188,9 +188,15 @@ Environment (`~/.config/play/kinframe-signing.env`, read by the Fastfile; never 
 | `KINFRAME_FRAME_UPLOAD_KEY_ALIAS` | The key alias. |
 | `KINFRAME_FRAME_UPLOAD_KEY_PASSWORD` | The key password. |
 | `SUPPLY_JSON_KEY` | The Play service account's JSON key (shared with the family app; it needs Release manager on the frame app too). |
+| `KINFRAME_SENTRY_DSN_FRAME` | The `frame-android` GlitchTip project's DSN (`docs/spec/crash-reporting.md`). Without it the build reports no crashes (the lane warns). The family lanes read `KINFRAME_SENTRY_DSN_FAMILY` (project `family-android`). |
+| `SENTRY_AUTH_TOKEN` | A GlitchTip auth token allowed to upload debug files. With it (and `sentry-cli` on the PATH) the lanes upload R8's `mapping.txt` to GlitchTip after building; without it they warn and skip the upload. |
+| `SENTRY_URL`, `SENTRY_ORG` | Optional; default `https://errors.kinframe.appmire.be` and `kinframe`. |
 
 Without `KINFRAME_FRAME_UPLOAD_KEYSTORE` the Gradle build falls back to the debug key (local testing only); the lane
 refuses to build.
+
+The GitHub build (`release-frame.yml`) takes the same two from repository secrets: `KINFRAME_SENTRY_DSN_FRAME` and
+`SENTRY_AUTH_TOKEN`, both optional. Play still gets the mapping too (`frame_internal`), for Android vitals.
 
 The store listing (en-US, nl-NL: title, short and full description, release notes) is in
 `android/fastlane/frame-metadata/android/`, separate from the family app's `fastlane/metadata/`. Graphics are not in
