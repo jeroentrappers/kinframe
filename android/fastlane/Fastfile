@@ -45,6 +45,8 @@ platform :android do
   end
 
   lane :internal do
+    # The real app root, signed in, every tab (family/src/test/.../SmokeTest.kt): 1.2 crashed at start and still uploaded.
+    gradle(task: ":family:testDebugUnitTest", flags: "--tests app.kinframe.family.SmokeTest", print_command: false)
     build
     # Release notes: metadata/android/<locale>/changelogs/<version code>.txt, else default.txt (max 500 characters).
     upload_to_play_store(track: "internal", release_status: options_status, skip_upload_apk: true,

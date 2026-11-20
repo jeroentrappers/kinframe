@@ -63,7 +63,7 @@ jobs:
         with:
           packages: platforms;android-37.0 build-tools;37.0.0
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew --no-daemon :core:testDebugUnitTest :frame:testGithubDebugUnitTest :frame:testPlayDebugUnitTest :frame:lintGithubDebug :frame:assembleGithubRelease :frame:bundlePlayRelease :family:assembleDebug
+      - run: ./gradlew --no-daemon :core:testDebugUnitTest :frame:testGithubDebugUnitTest :frame:testPlayDebugUnitTest :frame:lintGithubDebug :frame:assembleGithubRelease :frame:bundlePlayRelease :family:testDebugUnitTest :family:lintDebug :family:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: frame-release-apk
