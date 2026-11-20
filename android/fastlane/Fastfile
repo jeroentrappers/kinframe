@@ -49,7 +49,9 @@ platform :android do
     gradle(task: ":family:testDebugUnitTest", flags: "--tests app.kinframe.family.SmokeTest", print_command: false)
     build
     # Release notes: metadata/android/<locale>/changelogs/<version code>.txt, else default.txt (max 500 characters).
+    # R8's mapping.txt, so Android vitals shows readable stack traces.
     upload_to_play_store(track: "internal", release_status: options_status, skip_upload_apk: true,
+                         mapping: File.expand_path("../family/build/outputs/mapping/release/mapping.txt", __dir__),
                          skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true)
   end
 
@@ -71,6 +73,7 @@ platform :android do
   FRAME_PACKAGE = "app.kinframe.frame"
   FRAME_METADATA = File.expand_path("frame-metadata/android", __dir__)
   FRAME_AAB = File.expand_path("../frame/build/outputs/bundle/playRelease/frame-play-release.aab", __dir__)
+  FRAME_MAPPING = File.expand_path("../frame/build/outputs/mapping/playRelease/mapping.txt", __dir__)
 
   lane :frame_build do |options|
     UI.user_error!("KINFRAME_FRAME_UPLOAD_KEYSTORE is not set") if ENV["KINFRAME_FRAME_UPLOAD_KEYSTORE"].to_s.empty?
@@ -86,6 +89,7 @@ platform :android do
   lane :frame_internal do |options|
     frame_build(options)
     upload_to_play_store(package_name: FRAME_PACKAGE, metadata_path: FRAME_METADATA, aab: FRAME_AAB,
+                         mapping: FRAME_MAPPING,
                          track: "internal", release_status: options_status, skip_upload_apk: true,
                          skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true)
   end
