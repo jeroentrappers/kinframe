@@ -212,8 +212,8 @@
     "nl": "Wachtende mail"
   },
   "ios.em.introFeed": {
-    "en": "Give {name} an email address: photos mailed to it are posted to the family and reach every frame that follows it.",
-    "nl": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de familie en op elk kader dat de familie volgt."
+    "en": "Give {name} an email address: photos mailed to it are posted to the family and reach every frame that shows it.",
+    "nl": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de familie en op elk kader dat de familie toont."
   },
   "ios.em.introFrame": {
     "en": "Give {name} an email address: photos mailed to it appear on the frame. Handy for relatives without the app.",

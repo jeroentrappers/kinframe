@@ -4,8 +4,8 @@
     "nl": "Uitzetten"
   },
   "servers.remote.allowOffBody": {
-    "en": "Every frame on another server that follows {feed} stops getting its photos.",
-    "nl": "Elk kader op een andere server dat {feed} volgt, krijgt de foto’s niet meer."
+    "en": "Every frame on another server that shows {feed} stops getting its photos.",
+    "nl": "Elk kader op een andere server dat {feed} toont, krijgt de foto’s niet meer."
   },
   "servers.remote.allowOffTitle": {
     "en": "Stop frames on other servers?",
@@ -40,8 +40,8 @@
     "nl": "{feed} (op {server})"
   },
   "servers.remote.confirmTitle": {
-    "en": "Follow {feed}?",
-    "nl": "{feed} volgen?"
+    "en": "Show {feed} on this frame?",
+    "nl": "{feed} op dit kader tonen?"
   },
   "servers.remote.copied.one": {
     "en": "1 photo on this frame",
@@ -60,8 +60,8 @@
     "nl": "{count} gestopt"
   },
   "servers.remote.follow": {
-    "en": "Follow",
-    "nl": "Volgen"
+    "en": "Show on this frame",
+    "nl": "Op dit kader tonen"
   },
   "servers.remote.frameCount.one": {
     "en": "1 frame",
@@ -80,8 +80,8 @@
     "nl": "Je beheert nog geen kader op deze server."
   },
   "servers.remote.none": {
-    "en": "This frame follows no families on other servers.",
-    "nl": "Dit kader volgt geen families op andere servers."
+    "en": "This frame shows no families on other servers.",
+    "nl": "Dit kader toont geen families op andere servers."
   },
   "servers.remote.onEnd.hint": {
     "en": "What happens to the copied photos when the family or you stop it.",
@@ -124,8 +124,8 @@
     "nl": "Gestopt: het verzoek is ingetrokken"
   },
   "servers.remote.unsubscribe": {
-    "en": "Unsubscribe",
-    "nl": "Opzeggen"
+    "en": "Stop showing",
+    "nl": "Niet meer tonen"
   },
   "servers.remote.unsubscribeKeep": {
     "en": "Stop, keep the photos",
@@ -136,8 +136,8 @@
     "nl": "Stoppen en foto’s verwijderen"
   },
   "servers.remote.unsubscribed": {
-    "en": "{frame} no longer follows {feed}.",
-    "nl": "{frame} volgt {feed} niet meer."
+    "en": "{frame} no longer shows {feed}.",
+    "nl": "{frame} toont {feed} niet meer."
   },
   "servers.remote.urlPlaceholder": {
     "en": "https://kinframe.example.org/fi/…",

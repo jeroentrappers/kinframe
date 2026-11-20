@@ -264,8 +264,8 @@
     "nl": "{count} kaders"
   },
   "ios.feeds.frameNone": {
-    "en": "{frame} doesn’t follow any family yet.",
-    "nl": "{frame} volgt nog geen familie."
+    "en": "{frame} doesn’t show a family yet.",
+    "nl": "{frame} toont nog geen familie."
   },
   "ios.feeds.framesLede": {
     "en": "These frames show the family. Everyone in the family sees their names.",
@@ -296,8 +296,8 @@
     "nl": "De laatste {count} foto’s"
   },
   "ios.feeds.history.lastNHint": {
-    "en": "Counted from when the frame started following. Later posts are never taken off.",
-    "nl": "Geteld vanaf het moment dat het kader de familie volgt. Latere berichten worden nooit weggehaald."
+    "en": "Counted from when the frame started showing the family. Later posts are never taken off.",
+    "nl": "Geteld vanaf het moment dat het kader de familie toont. Latere berichten worden nooit weggehaald."
   },
   "ios.feeds.history.lastNShort": {
     "en": "The last",
@@ -336,8 +336,8 @@
     "nl": "Meedoen"
   },
   "ios.feeds.invite.joinBody": {
-    "en": "You can post photos to it. Frames that follow it show them.",
-    "nl": "Je kunt er foto’s in plaatsen. Kaders die de familie volgen, tonen ze."
+    "en": "You can share photos in it. The frames that show it show them too.",
+    "nl": "Je kunt er foto’s in delen. De kaders die de familie tonen, tonen ze ook."
   },
   "ios.feeds.invite.joinTitle": {
     "en": "Join {name}",
@@ -348,8 +348,8 @@
     "nl": "Je zit in {name}"
   },
   "ios.feeds.invite.joinedBody": {
-    "en": "Pick it under Send to post photos to every frame that follows it.",
-    "nl": "Kies de familie bij Sturen om foto’s te plaatsen naar elk kader dat de familie volgt."
+    "en": "Everything shared in the family is on Home. Tap + to share a photo.",
+    "nl": "Alles wat in de familie gedeeld wordt, staat bij Home. Tik op + om een foto te delen."
   },
   "ios.feeds.invite.needsApproval": {
     "en": "{owner} approves new members before they can post.",
@@ -420,8 +420,8 @@
     "nl": "Voor wie een kader beheert maar niet in de familie zit, zoals een woonzorgcentrum. Hun kaders tonen de familie meteen."
   },
   "ios.feeds.inviteSubscribeShort": {
-    "en": "Show on a frame",
-    "nl": "Op een kader tonen"
+    "en": "Add a frame",
+    "nl": "Kader toevoegen"
   },
   "ios.feeds.itemRemoved": {
     "en": "Photo removed from every frame",
@@ -624,8 +624,8 @@
     "nl": "Afgeleverd op {n} van {count} kaders"
   },
   "ios.feeds.receipts.noFrames": {
-    "en": "No frame follows this family yet",
-    "nl": "Nog geen kader volgt deze familie"
+    "en": "No frame shows this family yet",
+    "nl": "Nog geen kader toont deze familie"
   },
   "ios.feeds.receipts.onItsWay.one": {
     "en": "On its way to {count} frame",
@@ -868,8 +868,8 @@
     "nl": "Op {count} kaders tonen"
   },
   "ios.feeds.subscribe.title": {
-    "en": "Show on a frame",
-    "nl": "Op een kader tonen"
+    "en": "Add a frame",
+    "nl": "Kader toevoegen"
   },
   "ios.feeds.subscribe.whichFrames": {
     "en": "Which frames?",
@@ -892,8 +892,8 @@
     "nl": "Berichten"
   },
   "ios.feeds.title": {
-    "en": "Families",
-    "nl": "Families"
+    "en": "Family",
+    "nl": "Familie"
   },
   "ios.feeds.tooManyFeeds": {
     "en": "You can post to up to {max} families at a time.",

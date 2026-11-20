@@ -108,8 +108,8 @@
     "nl": "Nieuwe leden mogen plaatsen"
   },
   "social.family.newCanPostHint": {
-    "en": "Off: people who join follow along as members (they comment and chat) until an admin lets them post.",
-    "nl": "Uit: wie erbij komt, volgt mee als lid (plaatst opmerkingen en chat) tot een beheerder plaatsen toestaat."
+    "en": "Off: people who join see everything, comment and chat until an admin lets them share photos.",
+    "nl": "Uit: wie erbij komt, ziet alles, reageert en chat tot een beheerder foto’s delen toestaat."
   },
   "social.family.seeReactionsHint": {
     "en": "Everyone sees how the frames reacted and replied. People’s reactions are always visible.",
@@ -292,12 +292,12 @@
     "nl": "Lid"
   },
   "social.role.memberHint": {
-    "en": "Follows along: sees the posts, comments, reacts and chats, but doesn’t post photos.",
-    "nl": "Volgt mee: ziet de berichten, reageert en chat, maar plaatst geen foto’s."
+    "en": "Sees the posts, comments, reacts and chats, but doesn’t share photos.",
+    "nl": "Ziet de berichten, reageert en chat, maar deelt geen foto’s."
   },
   "social.role.rolesHint": {
-    "en": "Posters and admins post photos; members follow along, comment and chat. The frames are part of the family too.",
-    "nl": "Plaatsers en beheerders plaatsen foto’s; leden volgen mee, plaatsen opmerkingen en chatten. De kaders horen ook bij de familie."
+    "en": "Everyone in the family sees everything; admins also manage people and frames. The frames are part of the family too.",
+    "nl": "Iedereen in de familie ziet alles; beheerders beheren ook mensen en kaders. De kaders horen ook bij de familie."
   },
   "social.thread.comment": {
     "en": "Comment",

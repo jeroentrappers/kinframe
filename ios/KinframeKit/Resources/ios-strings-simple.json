@@ -1,0 +1,450 @@
+{
+  "remote.allowFramesHint": {
+    "en": "Frames on other kinframe servers may show this family with a frame invite that allows it. Turning this off ends them.",
+    "nl": "Kaders op andere kinframe-servers mogen deze familie tonen met een uitnodiging voor kaders die dat toestaat. Zet je dit uit, dan stopt dat."
+  },
+  "remote.feedBlockedHint": {
+    "en": "Frames on these servers can’t show this family.",
+    "nl": "Kaders op deze servers kunnen deze familie niet tonen."
+  },
+  "simple.addFamily.hint": {
+    "en": "The frame shows it at once, with the last 50 posts. Families you're not in are added with their invite link for frames.",
+    "nl": "Het kader toont ze meteen, met de laatste 50 berichten. Families waar je niet in zit, voeg je toe met hun uitnodigingslink voor kaders."
+  },
+  "simple.addFamily.none": {
+    "en": "This frame shows all your families already.",
+    "nl": "Dit kader toont al je families al."
+  },
+  "simple.addFamily.title": {
+    "en": "Add a family",
+    "nl": "Familie toevoegen"
+  },
+  "simple.addFrame.failed": {
+    "en": "{frame} couldn't be added to {family}.",
+    "nl": "{frame} kon niet aan {family} worden toegevoegd."
+  },
+  "simple.addFrame.hint": {
+    "en": "It shows the family at once, with the last 50 posts. You can change that in the frame's settings.",
+    "nl": "Het kader toont de familie meteen, met de laatste 50 berichten. Dat pas je aan in de instellingen van het kader."
+  },
+  "simple.addFrame.mine": {
+    "en": "Your frames",
+    "nl": "Jouw kaders"
+  },
+  "simple.addFrame.pair": {
+    "en": "Pair a new frame",
+    "nl": "Een nieuw kader koppelen"
+  },
+  "simple.addFrame.pairHint": {
+    "en": "Enter the code the frame shows.",
+    "nl": "Typ de code die het kader toont."
+  },
+  "simple.addFrame.showing": {
+    "en": "{frame} now shows {family}.",
+    "nl": "{frame} toont nu {family}."
+  },
+  "simple.addFrame.waiting": {
+    "en": "{frame}: waiting for an admin of {family}.",
+    "nl": "{frame}: wacht op een beheerder van {family}."
+  },
+  "simple.compose.change": {
+    "en": "Change",
+    "nl": "Wijzigen"
+  },
+  "simple.compose.families.one": {
+    "en": "{count} family",
+    "nl": "{count} familie"
+  },
+  "simple.compose.families.other": {
+    "en": "{count} families",
+    "nl": "{count} families"
+  },
+  "simple.compose.frameOnly": {
+    "en": "Only to {frame}",
+    "nl": "Alleen naar {frame}"
+  },
+  "simple.compose.frameOnlyHint": {
+    "en": "Sent to this frame only, not to the family.",
+    "nl": "Alleen naar dit kader, niet naar de familie."
+  },
+  "simple.compose.noFamily": {
+    "en": "You can't share in a family yet. Ask an admin of your family.",
+    "nl": "Je kunt nog niet delen in een familie. Vraag het aan een beheerder van je familie."
+  },
+  "simple.compose.share": {
+    "en": "Share",
+    "nl": "Delen"
+  },
+  "simple.compose.shared": {
+    "en": "Shared",
+    "nl": "Gedeeld"
+  },
+  "simple.compose.title": {
+    "en": "Share",
+    "nl": "Delen"
+  },
+  "simple.compose.to": {
+    "en": "To",
+    "nl": "Naar"
+  },
+  "simple.compose.toCircle": {
+    "en": "{family} · {circle}",
+    "nl": "{family} · {circle}"
+  },
+  "simple.compose.toFamily.one": {
+    "en": "{family} · everyone and its frame",
+    "nl": "{family} · iedereen en het kader"
+  },
+  "simple.compose.toFamily.other": {
+    "en": "{family} · everyone and its {count} frames",
+    "nl": "{family} · iedereen en de {count} kaders"
+  },
+  "simple.compose.toFamilyNoFrames": {
+    "en": "{family} · everyone",
+    "nl": "{family} · iedereen"
+  },
+  "simple.compose.toFrameTitle": {
+    "en": "To {frame}",
+    "nl": "Naar {frame}"
+  },
+  "simple.family.addFrame": {
+    "en": "Add a frame",
+    "nl": "Kader toevoegen"
+  },
+  "simple.family.frames.one": {
+    "en": "{count} frame",
+    "nl": "{count} kader"
+  },
+  "simple.family.frames.other": {
+    "en": "{count} frames",
+    "nl": "{count} kaders"
+  },
+  "simple.family.invite": {
+    "en": "Invite family",
+    "nl": "Familie uitnodigen"
+  },
+  "simple.family.namesMore": {
+    "en": "{names} and {n} more",
+    "nl": "{names} en nog {n}"
+  },
+  "simple.family.noMinePhotos": {
+    "en": "You haven't shared anything here yet",
+    "nl": "Je hebt hier nog niets gedeeld"
+  },
+  "simple.family.onlyMine": {
+    "en": "Only mine",
+    "nl": "Alleen van mij"
+  },
+  "simple.family.people.one": {
+    "en": "{count} person",
+    "nl": "{count} persoon"
+  },
+  "simple.family.people.other": {
+    "en": "{count} people",
+    "nl": "{count} personen"
+  },
+  "simple.family.photoBy": {
+    "en": "Photo by {name}, {when}",
+    "nl": "Foto van {name}, {when}"
+  },
+  "simple.family.posts.one": {
+    "en": "{count} post",
+    "nl": "{count} bericht"
+  },
+  "simple.family.posts.other": {
+    "en": "{count} posts",
+    "nl": "{count} berichten"
+  },
+  "simple.family.sections": {
+    "en": "Family",
+    "nl": "Familie"
+  },
+  "simple.family.tabFrames": {
+    "en": "Frames",
+    "nl": "Kaders"
+  },
+  "simple.family.tabPeople": {
+    "en": "People",
+    "nl": "Mensen"
+  },
+  "simple.family.tabPhotos": {
+    "en": "Photos",
+    "nl": "Foto's"
+  },
+  "simple.frame.extras": {
+    "en": "Calendar, weather and add-ons",
+    "nl": "Agenda, weer en extra's"
+  },
+  "simple.frame.extrasHint": {
+    "en": "Events, countdowns and what the frame shows beside the photos",
+    "nl": "Afspraken, aftellers en wat het kader naast de foto's toont"
+  },
+  "simple.frame.familiesOn": {
+    "en": "Families on this frame",
+    "nl": "Families op dit kader"
+  },
+  "simple.frame.offlineSince": {
+    "en": "Offline since {when}",
+    "nl": "Offline sinds {when}"
+  },
+  "simple.frame.onlineNow": {
+    "en": "Online · showing now",
+    "nl": "Online · toont nu"
+  },
+  "simple.frame.people": {
+    "en": "People of this frame",
+    "nl": "Mensen van dit kader"
+  },
+  "simple.frame.peopleHint": {
+    "en": "Who can send and manage, invites and requests",
+    "nl": "Wie mag sturen en beheren, uitnodigingen en verzoeken"
+  },
+  "simple.frame.photos": {
+    "en": "Photos on this frame",
+    "nl": "Foto's op dit kader"
+  },
+  "simple.frame.photosHint": {
+    "en": "Albums, hidden photos and the trash",
+    "nl": "Albums, verborgen foto's en de prullenbak"
+  },
+  "simple.frame.sendOnly": {
+    "en": "Send something to this frame only",
+    "nl": "Iets alleen naar dit kader sturen"
+  },
+  "simple.frame.sendOnlyHint": {
+    "en": "Only {frame} gets it, not the family",
+    "nl": "Alleen {frame} krijgt het, niet de familie"
+  },
+  "simple.frame.settings": {
+    "en": "Frame settings and help",
+    "nl": "Instellingen en hulp"
+  },
+  "simple.frame.settingsHint": {
+    "en": "Which family it shows, slideshow, screen, email and Telegram, leaving",
+    "nl": "Welke familie het toont, diavoorstelling, scherm, e-mail en Telegram, verlaten"
+  },
+  "simple.frame.shows": {
+    "en": "Shows {family}",
+    "nl": "Toont {family}"
+  },
+  "simple.frame.showsMore.one": {
+    "en": "Shows {family} and 1 other family",
+    "nl": "Toont {family} en 1 andere familie"
+  },
+  "simple.frame.showsMore.other": {
+    "en": "Shows {family} and {count} other families",
+    "nl": "Toont {family} en {count} andere families"
+  },
+  "simple.frame.showsNone": {
+    "en": "Doesn't show a family yet",
+    "nl": "Toont nog geen familie"
+  },
+  "simple.frame.tvHint": {
+    "en": "The photos on a TV, or the frame live",
+    "nl": "De foto's op een tv, of het kader live"
+  },
+  "simple.frames.emptyBody": {
+    "en": "No frames yet. Add one with the code it shows.",
+    "nl": "Nog geen kaders. Voeg er een toe met de code die het toont."
+  },
+  "simple.frames.ofFamilies": {
+    "en": "Frames that show your families",
+    "nl": "Kaders die je families tonen"
+  },
+  "simple.home.all": {
+    "en": "All",
+    "nl": "Alle"
+  },
+  "simple.home.emptyBody": {
+    "en": "Photos you share go to everyone in the family and to its frames.",
+    "nl": "Foto's die je deelt gaan naar iedereen in de familie en naar haar kaders."
+  },
+  "simple.home.emptyTitle": {
+    "en": "Share your first photo",
+    "nl": "Deel je eerste foto"
+  },
+  "simple.home.invite": {
+    "en": "Invite",
+    "nl": "Uitnodigen"
+  },
+  "simple.home.share": {
+    "en": "Share a photo",
+    "nl": "Een foto delen"
+  },
+  "simple.join.body": {
+    "en": "Paste the link you got, or type the code from the invitation.",
+    "nl": "Plak de link die je kreeg, of typ de code uit de uitnodiging."
+  },
+  "simple.join.title": {
+    "en": "Join my family",
+    "nl": "Bij mijn familie"
+  },
+  "simple.joined.open": {
+    "en": "Open the family",
+    "nl": "Familie openen"
+  },
+  "simple.nav.family": {
+    "en": "Family",
+    "nl": "Familie"
+  },
+  "simple.nav.frames": {
+    "en": "Frames",
+    "nl": "Kaders"
+  },
+  "simple.nav.home": {
+    "en": "Home",
+    "nl": "Home"
+  },
+  "simple.nav.share": {
+    "en": "Share",
+    "nl": "Delen"
+  },
+  "simple.settings.account": {
+    "en": "Account and app",
+    "nl": "Account en app"
+  },
+  "simple.settings.accountHint": {
+    "en": "Simple view, sent history, servers, notifications, privacy",
+    "nl": "Eenvoudige weergave, verstuurd, servers, meldingen, privacy"
+  },
+  "simple.settings.app": {
+    "en": "App",
+    "nl": "App"
+  },
+  "simple.settings.birthdaysHint": {
+    "en": "Birthdays the frames celebrate",
+    "nl": "Verjaardagen die de kaders vieren"
+  },
+  "simple.settings.circlesHint": {
+    "en": "Smaller groups to share with",
+    "nl": "Kleinere groepen om mee te delen"
+  },
+  "simple.settings.details": {
+    "en": "Name, cover and approvals",
+    "nl": "Naam, omslag en goedkeuringen"
+  },
+  "simple.settings.detailsHint": {
+    "en": "Who can invite, more ways to add photos (sources, email, Telegram)",
+    "nl": "Wie mag uitnodigen, meer manieren om foto's toe te voegen (bronnen, e-mail, Telegram)"
+  },
+  "simple.settings.leaveOrDelete": {
+    "en": "Leave or delete the family",
+    "nl": "Familie verlaten of verwijderen"
+  },
+  "simple.settings.sentHistory": {
+    "en": "Sent history",
+    "nl": "Verstuurd"
+  },
+  "simple.settings.sentHistoryHint": {
+    "en": "Everything you sent, with who saw it",
+    "nl": "Alles wat je verstuurde, en wie het zag"
+  },
+  "simple.settings.thisFamily": {
+    "en": "This family: {family}",
+    "nl": "Deze familie: {family}"
+  },
+  "simple.settings.title": {
+    "en": "Settings",
+    "nl": "Instellingen"
+  },
+  "simple.start.addFrameNow": {
+    "en": "Add Oma's frame now?",
+    "nl": "Het kader van oma nu toevoegen?"
+  },
+  "simple.start.body": {
+    "en": "Kinframe is where your family shares photos, and where frames show them.",
+    "nl": "In Kinframe deelt je familie foto's, en kaders tonen ze."
+  },
+  "simple.start.create": {
+    "en": "Start the family",
+    "nl": "Familie starten"
+  },
+  "simple.start.family": {
+    "en": "Start a family",
+    "nl": "Een familie starten"
+  },
+  "simple.start.familyBody": {
+    "en": "Give it a name, add a frame now or later, then invite everyone.",
+    "nl": "Geef haar een naam, voeg nu of later een kader toe en nodig iedereen uit."
+  },
+  "simple.start.familyName": {
+    "en": "{surname} family",
+    "nl": "Familie {surname}"
+  },
+  "simple.start.inviteBody": {
+    "en": "Send everyone the link to {family}. They see all photos and can share too.",
+    "nl": "Stuur iedereen de link naar {family}. Ze zien alle foto's en kunnen ook delen."
+  },
+  "simple.start.inviteCode": {
+    "en": "Or give them the code {code}",
+    "nl": "Of geef hen de code {code}"
+  },
+  "simple.start.inviteLater": {
+    "en": "Later",
+    "nl": "Later"
+  },
+  "simple.start.inviteTitle": {
+    "en": "Invite your family",
+    "nl": "Nodig je familie uit"
+  },
+  "simple.start.join": {
+    "en": "Join my family",
+    "nl": "Bij mijn familie"
+  },
+  "simple.start.joinBody": {
+    "en": "Someone sent you a link or a code.",
+    "nl": "Iemand stuurde je een link of een code."
+  },
+  "simple.start.nameBody": {
+    "en": "The name everyone in the family sees.",
+    "nl": "De naam die iedereen in de familie ziet."
+  },
+  "simple.start.namePlaceholder": {
+    "en": "Peeters family",
+    "nl": "Familie Peeters"
+  },
+  "simple.start.title": {
+    "en": "Welcome",
+    "nl": "Welkom"
+  },
+  "simple.view.empty": {
+    "en": "No photos yet",
+    "nl": "Nog geen foto's"
+  },
+  "simple.view.heart": {
+    "en": "Send a heart",
+    "nl": "Hartje sturen"
+  },
+  "simple.view.hearted": {
+    "en": "Heart sent",
+    "nl": "Hartje gestuurd"
+  },
+  "simple.view.next": {
+    "en": "Next",
+    "nl": "Volgende"
+  },
+  "simple.view.normal": {
+    "en": "Normal view",
+    "nl": "Gewone weergave"
+  },
+  "simple.view.question": {
+    "en": "How do you want to see the family?",
+    "nl": "Hoe wil je de familie zien?"
+  },
+  "simple.view.settings": {
+    "en": "Settings",
+    "nl": "Instellingen"
+  },
+  "simple.view.simple": {
+    "en": "Simple view",
+    "nl": "Eenvoudige weergave"
+  },
+  "simple.view.simpleChoice": {
+    "en": "Simple view: big photos and a heart, for Oma",
+    "nl": "Eenvoudige weergave: grote foto's en een hartje, voor oma"
+  },
+  "simple.view.simpleHint": {
+    "en": "Big photos one at a time and a heart, on this device",
+    "nl": "Grote foto's één voor één en een hartje, op dit toestel"
+  }
+}

@@ -72,8 +72,8 @@
     "nl": "{name} bewerken"
   },
   "ios.bday.emptyBody": {
-    "en": "Add the family’s birthdays. Every frame that follows this family shows a card on the day and a countdown the week before.",
-    "nl": "Voeg de verjaardagen van de familie toe. Elk kader dat deze familie volgt, toont op de dag zelf een kaartje en de week ervoor een aftelling."
+    "en": "Add the family’s birthdays. Every frame that shows this family shows a card on the day and a countdown the week before.",
+    "nl": "Voeg de verjaardagen van de familie toe. Elk kader dat deze familie toont, toont op de dag zelf een kaartje en de week ervoor een aftelling."
   },
   "ios.bday.emptyTitle": {
     "en": "No birthdays yet",

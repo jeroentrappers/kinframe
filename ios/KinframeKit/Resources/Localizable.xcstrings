@@ -26646,13 +26646,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add the family’s birthdays. Every frame that follows this family shows a card on the day and a countdown the week before."
+            "value": "Add the family’s birthdays. Every frame that shows this family shows a card on the day and a countdown the week before."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Voeg de verjaardagen van de familie toe. Elk kader dat deze familie volgt, toont op de dag zelf een kaartje en de week ervoor een aftelling."
+            "value": "Voeg de verjaardagen van de familie toe. Elk kader dat deze familie toont, toont op de dag zelf een kaartje en de week ervoor een aftelling."
           }
         }
       }
@@ -28805,13 +28805,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Give {name} an email address: photos mailed to it are posted to the family and reach every frame that follows it."
+            "value": "Give {name} an email address: photos mailed to it are posted to the family and reach every frame that shows it."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de familie en op elk kader dat de familie volgt."
+            "value": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de familie en op elk kader dat de familie toont."
           }
         }
       }
@@ -31763,13 +31763,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "{frame} doesn’t follow any family yet."
+            "value": "{frame} doesn’t show a family yet."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{frame} volgt nog geen familie."
+            "value": "{frame} toont nog geen familie."
           }
         }
       }
@@ -31899,13 +31899,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Counted from when the frame started following. Later posts are never taken off."
+            "value": "Counted from when the frame started showing the family. Later posts are never taken off."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geteld vanaf het moment dat het kader de familie volgt. Latere berichten worden nooit weggehaald."
+            "value": "Geteld vanaf het moment dat het kader de familie toont. Latere berichten worden nooit weggehaald."
           }
         }
       }
@@ -32069,13 +32069,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can post photos to it. Frames that follow it show them."
+            "value": "You can share photos in it. The frames that show it show them too."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je kunt er foto’s in plaatsen. Kaders die de familie volgen, tonen ze."
+            "value": "Je kunt er foto’s in delen. De kaders die de familie tonen, tonen ze ook."
           }
         }
       }
@@ -32120,13 +32120,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pick it under Send to post photos to every frame that follows it."
+            "value": "Everything shared in the family is on Home. Tap + to share a photo."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kies de familie bij Sturen om foto’s te plaatsen naar elk kader dat de familie volgt."
+            "value": "Alles wat in de familie gedeeld wordt, staat bij Home. Tik op + om een foto te delen."
           }
         }
       }
@@ -32426,13 +32426,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show on a frame"
+            "value": "Add a frame"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Op een kader tonen"
+            "value": "Kader toevoegen"
           }
         }
       }
@@ -33293,13 +33293,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No frame follows this family yet"
+            "value": "No frame shows this family yet"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nog geen kader volgt deze familie"
+            "value": "Nog geen kader toont deze familie"
           }
         }
       }
@@ -34330,13 +34330,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show on a frame"
+            "value": "Add a frame"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Op een kader tonen"
+            "value": "Kader toevoegen"
           }
         }
       }
@@ -34432,13 +34432,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Families"
+            "value": "Family"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Families"
+            "value": "Familie"
           }
         }
       }
@@ -42377,7 +42377,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Er staat dan “Reactie verwijderd”."
+            "value": "Er staat dan “Opmerking verwijderd”."
           }
         }
       }
@@ -42411,7 +42411,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je reacties ({n})"
+            "value": "Je opmerkingen ({n})"
           }
         }
       }
@@ -44162,7 +44162,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reacties verwijderd: {n}."
+            "value": "Opmerkingen verwijderd: {n}."
           }
         }
       }
@@ -50049,6 +50049,40 @@
         }
       }
     },
+    "problem.remote_help_active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This frame already has remote help running."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit kader heeft al hulp op afstand lopen."
+          }
+        }
+      }
+    },
+    "problem.remote_help_unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This frame can’t get remote help (Play build or no root)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit kader kan geen hulp op afstand krijgen (Play-versie of geen root)."
+          }
+        }
+      }
+    },
     "problem.server_error": {
       "extractionState": "manual",
       "localizations": {
@@ -50633,13 +50667,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frames on other kinframe servers may follow this family with a frame invite that allows it. Turning this off ends them."
+            "value": "Frames on other kinframe servers may show this family with a frame invite that allows it. Turning this off ends them."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kaders op andere kinframe-servers mogen deze familie volgen met een uitnodiging voor kaders die dat toestaat. Zet je dit uit, dan stopt dat."
+            "value": "Kaders op andere kinframe-servers mogen deze familie tonen met een uitnodiging voor kaders die dat toestaat. Zet je dit uit, dan stopt dat."
           }
         }
       }
@@ -50837,13 +50871,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frames on these servers can’t follow this family."
+            "value": "Frames on these servers can’t show this family."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kaders op deze servers kunnen deze familie niet volgen."
+            "value": "Kaders op deze servers kunnen deze familie niet tonen."
           }
         }
       }
@@ -51813,6 +51847,652 @@
           "stringUnit": {
             "state": "translated",
             "value": "{name} wil {feed} tonen op {frame} ({server})"
+          }
+        }
+      }
+    },
+    "remoteHelp.active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actief"
+          }
+        }
+      }
+    },
+    "remoteHelp.activeEmpty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No remote help is running."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er loopt geen hulp op afstand."
+          }
+        }
+      }
+    },
+    "remoteHelp.banner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote help is on until {time} — started by the server operator: {reason}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp op afstand staat aan tot {time} — gestart door de beheerder van de server: {reason}"
+          }
+        }
+      }
+    },
+    "remoteHelp.bannerStop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop remote help"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp op afstand stoppen"
+          }
+        }
+      }
+    },
+    "remoteHelp.copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ADB command copied."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ADB-commando gekopieerd."
+          }
+        }
+      }
+    },
+    "remoteHelp.copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiëren"
+          }
+        }
+      }
+    },
+    "remoteHelp.copyFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not copy."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiëren is niet gelukt."
+          }
+        }
+      }
+    },
+    "remoteHelp.endedExpired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time ran out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De tijd was om"
+          }
+        }
+      }
+    },
+    "remoteHelp.endedFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame could not connect"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het kader kon geen verbinding maken"
+          }
+        }
+      }
+    },
+    "remoteHelp.endedFrame": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped at the frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestopt aan het kader"
+          }
+        }
+      }
+    },
+    "remoteHelp.endedOperator": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped by the operator"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestopt door de beheerder"
+          }
+        }
+      }
+    },
+    "remoteHelp.endedOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped by {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestopt door {name}"
+          }
+        }
+      }
+    },
+    "remoteHelp.endedUnpaired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame was removed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het kader is verwijderd"
+          }
+        }
+      }
+    },
+    "remoteHelp.hour1": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hour"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 uur"
+          }
+        }
+      }
+    },
+    "remoteHelp.hour24": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24 hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24 uur"
+          }
+        }
+      }
+    },
+    "remoteHelp.hour8": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 uur"
+          }
+        }
+      }
+    },
+    "remoteHelp.hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How long"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoe lang"
+          }
+        }
+      }
+    },
+    "remoteHelp.ip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tailnet IP"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tailnet-IP"
+          }
+        }
+      }
+    },
+    "remoteHelp.log": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Past sessions"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorige sessies"
+          }
+        }
+      }
+    },
+    "remoteHelp.logEmpty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sessions yet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen sessies."
+          }
+        }
+      }
+    },
+    "remoteHelp.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No frames found."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen kaders gevonden."
+          }
+        }
+      }
+    },
+    "remoteHelp.opLede": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A temporary, encrypted tunnel from a frame to your tailnet, so you can use ADB on it. The family sees it and can stop it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een tijdelijke, versleutelde tunnel van een fotokader naar je tailnet, zodat je er ADB op kunt gebruiken. De familie ziet het en kan het stoppen."
+          }
+        }
+      }
+    },
+    "remoteHelp.opLink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote help"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp op afstand"
+          }
+        }
+      }
+    },
+    "remoteHelp.opLinkHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Look inside a frame over ADB when a family asks for help."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kijk via ADB in een fotokader als een familie om hulp vraagt."
+          }
+        }
+      }
+    },
+    "remoteHelp.reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reason (the family sees it)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reden (de familie ziet die)"
+          }
+        }
+      }
+    },
+    "remoteHelp.reasonHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: Ben asked by mail, no new photos."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bijvoorbeeld: Ben vroeg het per mail, geen nieuwe foto’s."
+          }
+        }
+      }
+    },
+    "remoteHelp.search": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frame, id, email or name"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kader, id, e-mail of naam"
+          }
+        }
+      }
+    },
+    "remoteHelp.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten"
+          }
+        }
+      }
+    },
+    "remoteHelp.startTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote help on {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp op afstand voor {name}"
+          }
+        }
+      }
+    },
+    "remoteHelp.started": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote help started on {name}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp op afstand gestart voor {name}."
+          }
+        }
+      }
+    },
+    "remoteHelp.startedBy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started by {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestart door {name}"
+          }
+        }
+      }
+    },
+    "remoteHelp.stateOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aan"
+          }
+        }
+      }
+    },
+    "remoteHelp.statePending": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wacht op het kader"
+          }
+        }
+      }
+    },
+    "remoteHelp.stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoppen"
+          }
+        }
+      }
+    },
+    "remoteHelp.stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote help stopped."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp op afstand gestopt."
+          }
+        }
+      }
+    },
+    "remoteHelp.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not available (Play build or no root)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet beschikbaar (Play-versie of geen root)"
+          }
+        }
+      }
+    },
+    "remoteHelp.until": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until {time}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot {time}"
+          }
+        }
+      }
+    },
+    "remoteHelp.upstream": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Headscale did not answer. No session was started."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Headscale antwoordde niet. Er is geen sessie gestart."
           }
         }
       }
@@ -54356,13 +55036,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Every frame on another server that follows {feed} stops getting its photos."
+            "value": "Every frame on another server that shows {feed} stops getting its photos."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Elk kader op een andere server dat {feed} volgt, krijgt de foto’s niet meer."
+            "value": "Elk kader op een andere server dat {feed} toont, krijgt de foto’s niet meer."
           }
         }
       }
@@ -54509,13 +55189,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Follow {feed}?"
+            "value": "Show {feed} on this frame?"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{feed} volgen?"
+            "value": "{feed} op dit kader tonen?"
           }
         }
       }
@@ -54594,13 +55274,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Follow"
+            "value": "Show on this frame"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volgen"
+            "value": "Op dit kader tonen"
           }
         }
       }
@@ -54679,13 +55359,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This frame follows no families on other servers."
+            "value": "This frame shows no families on other servers."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dit kader volgt geen families op andere servers."
+            "value": "Dit kader toont geen families op andere servers."
           }
         }
       }
@@ -54866,13 +55546,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unsubscribe"
+            "value": "Stop showing"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opzeggen"
+            "value": "Niet meer tonen"
           }
         }
       }
@@ -54917,13 +55597,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "{frame} no longer follows {feed}."
+            "value": "{frame} no longer shows {feed}."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{frame} volgt {feed} niet meer."
+            "value": "{frame} toont {feed} niet meer."
           }
         }
       }
@@ -55060,6 +55740,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Foto wijzigen"
+          }
+        }
+      }
+    },
+    "settings.crashReports": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send crash reports"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crashrapporten versturen"
+          }
+        }
+      }
+    },
+    "settings.crashReportsHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymous crash details help us fix bugs. No photos, messages or personal data."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonieme crashgegevens helpen ons fouten op te lossen. Geen foto’s, berichten of persoonsgegevens."
           }
         }
       }
@@ -58974,6 +59688,1876 @@
         }
       }
     },
+    "simple.addFamily.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame shows it at once, with the last 50 posts. Families you're not in are added with their invite link for frames."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het kader toont ze meteen, met de laatste 50 berichten. Families waar je niet in zit, voeg je toe met hun uitnodigingslink voor kaders."
+          }
+        }
+      }
+    },
+    "simple.addFamily.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This frame shows all your families already."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit kader toont al je families al."
+          }
+        }
+      }
+    },
+    "simple.addFamily.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie toevoegen"
+          }
+        }
+      }
+    },
+    "simple.addFrame.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} couldn't be added to {family}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} kon niet aan {family} worden toegevoegd."
+          }
+        }
+      }
+    },
+    "simple.addFrame.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It shows the family at once, with the last 50 posts. You can change that in the frame's settings."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het kader toont de familie meteen, met de laatste 50 berichten. Dat pas je aan in de instellingen van het kader."
+          }
+        }
+      }
+    },
+    "simple.addFrame.mine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jouw kaders"
+          }
+        }
+      }
+    },
+    "simple.addFrame.pair": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pair a new frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een nieuw kader koppelen"
+          }
+        }
+      }
+    },
+    "simple.addFrame.pairHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the code the frame shows."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typ de code die het kader toont."
+          }
+        }
+      }
+    },
+    "simple.addFrame.showing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} now shows {family}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} toont nu {family}."
+          }
+        }
+      }
+    },
+    "simple.addFrame.waiting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame}: waiting for an admin of {family}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame}: wacht op een beheerder van {family}."
+          }
+        }
+      }
+    },
+    "simple.compose.change": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wijzigen"
+          }
+        }
+      }
+    },
+    "simple.compose.families.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} familie"
+          }
+        }
+      }
+    },
+    "simple.compose.families.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} families"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} families"
+          }
+        }
+      }
+    },
+    "simple.compose.frameOnly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only to {frame}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen naar {frame}"
+          }
+        }
+      }
+    },
+    "simple.compose.frameOnlyHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent to this frame only, not to the family."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen naar dit kader, niet naar de familie."
+          }
+        }
+      }
+    },
+    "simple.compose.noFamily": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can't share in a family yet. Ask an admin of your family."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je kunt nog niet delen in een familie. Vraag het aan een beheerder van je familie."
+          }
+        }
+      }
+    },
+    "simple.compose.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delen"
+          }
+        }
+      }
+    },
+    "simple.compose.shared": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gedeeld"
+          }
+        }
+      }
+    },
+    "simple.compose.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delen"
+          }
+        }
+      }
+    },
+    "simple.compose.to": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naar"
+          }
+        }
+      }
+    },
+    "simple.compose.toCircle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · {circle}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · {circle}"
+          }
+        }
+      }
+    },
+    "simple.compose.toFamily.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · everyone and its frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · iedereen en het kader"
+          }
+        }
+      }
+    },
+    "simple.compose.toFamily.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · everyone and its {count} frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · iedereen en de {count} kaders"
+          }
+        }
+      }
+    },
+    "simple.compose.toFamilyNoFrames": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · everyone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{family} · iedereen"
+          }
+        }
+      }
+    },
+    "simple.compose.toFrameTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To {frame}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naar {frame}"
+          }
+        }
+      }
+    },
+    "simple.family.addFrame": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kader toevoegen"
+          }
+        }
+      }
+    },
+    "simple.family.frames.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} kader"
+          }
+        }
+      }
+    },
+    "simple.family.frames.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} kaders"
+          }
+        }
+      }
+    },
+    "simple.family.invite": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invite family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie uitnodigen"
+          }
+        }
+      }
+    },
+    "simple.family.namesMore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{names} and {n} more"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{names} en nog {n}"
+          }
+        }
+      }
+    },
+    "simple.family.noMinePhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You haven't shared anything here yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt hier nog niets gedeeld"
+          }
+        }
+      }
+    },
+    "simple.family.onlyMine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only mine"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen van mij"
+          }
+        }
+      }
+    },
+    "simple.family.people.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} person"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} persoon"
+          }
+        }
+      }
+    },
+    "simple.family.people.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} people"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} personen"
+          }
+        }
+      }
+    },
+    "simple.family.photoBy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo by {name}, {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto van {name}, {when}"
+          }
+        }
+      }
+    },
+    "simple.family.posts.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} bericht"
+          }
+        }
+      }
+    },
+    "simple.family.posts.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} posts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} berichten"
+          }
+        }
+      }
+    },
+    "simple.family.sections": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie"
+          }
+        }
+      }
+    },
+    "simple.family.tabFrames": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders"
+          }
+        }
+      }
+    },
+    "simple.family.tabPeople": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensen"
+          }
+        }
+      }
+    },
+    "simple.family.tabPhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto's"
+          }
+        }
+      }
+    },
+    "simple.frame.extras": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar, weather and add-ons"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agenda, weer en extra's"
+          }
+        }
+      }
+    },
+    "simple.frame.extrasHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Events, countdowns and what the frame shows beside the photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspraken, aftellers en wat het kader naast de foto's toont"
+          }
+        }
+      }
+    },
+    "simple.frame.familiesOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families on this frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families op dit kader"
+          }
+        }
+      }
+    },
+    "simple.frame.offlineSince": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline since {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline sinds {when}"
+          }
+        }
+      }
+    },
+    "simple.frame.onlineNow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Online · showing now"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Online · toont nu"
+          }
+        }
+      }
+    },
+    "simple.frame.people": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People of this frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensen van dit kader"
+          }
+        }
+      }
+    },
+    "simple.frame.peopleHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who can send and manage, invites and requests"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie mag sturen en beheren, uitnodigingen en verzoeken"
+          }
+        }
+      }
+    },
+    "simple.frame.photos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos on this frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto's op dit kader"
+          }
+        }
+      }
+    },
+    "simple.frame.photosHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albums, hidden photos and the trash"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albums, verborgen foto's en de prullenbak"
+          }
+        }
+      }
+    },
+    "simple.frame.sendOnly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send something to this frame only"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iets alleen naar dit kader sturen"
+          }
+        }
+      }
+    },
+    "simple.frame.sendOnlyHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only {frame} gets it, not the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen {frame} krijgt het, niet de familie"
+          }
+        }
+      }
+    },
+    "simple.frame.settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frame settings and help"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen en hulp"
+          }
+        }
+      }
+    },
+    "simple.frame.settingsHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which family it shows, slideshow, screen, email and Telegram, leaving"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welke familie het toont, diavoorstelling, scherm, e-mail en Telegram, verlaten"
+          }
+        }
+      }
+    },
+    "simple.frame.shows": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows {family}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont {family}"
+          }
+        }
+      }
+    },
+    "simple.frame.showsMore.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows {family} and 1 other family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont {family} en 1 andere familie"
+          }
+        }
+      }
+    },
+    "simple.frame.showsMore.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows {family} and {count} other families"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont {family} en {count} andere families"
+          }
+        }
+      }
+    },
+    "simple.frame.showsNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doesn't show a family yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont nog geen familie"
+          }
+        }
+      }
+    },
+    "simple.frame.tvHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The photos on a TV, or the frame live"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De foto's op een tv, of het kader live"
+          }
+        }
+      }
+    },
+    "simple.frames.emptyBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No frames yet. Add one with the code it shows."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen kaders. Voeg er een toe met de code die het toont."
+          }
+        }
+      }
+    },
+    "simple.frames.ofFamilies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames that show your families"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders die je families tonen"
+          }
+        }
+      }
+    },
+    "simple.home.all": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle"
+          }
+        }
+      }
+    },
+    "simple.home.emptyBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos you share go to everyone in the family and to its frames."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto's die je deelt gaan naar iedereen in de familie en naar haar kaders."
+          }
+        }
+      }
+    },
+    "simple.home.emptyTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share your first photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deel je eerste foto"
+          }
+        }
+      }
+    },
+    "simple.home.invite": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invite"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitnodigen"
+          }
+        }
+      }
+    },
+    "simple.home.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share a photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een foto delen"
+          }
+        }
+      }
+    },
+    "simple.join.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste the link you got, or type the code from the invitation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plak de link die je kreeg, of typ de code uit de uitnodiging."
+          }
+        }
+      }
+    },
+    "simple.join.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join my family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij mijn familie"
+          }
+        }
+      }
+    },
+    "simple.joined.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie openen"
+          }
+        }
+      }
+    },
+    "simple.nav.family": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie"
+          }
+        }
+      }
+    },
+    "simple.nav.frames": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders"
+          }
+        }
+      }
+    },
+    "simple.nav.home": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        }
+      }
+    },
+    "simple.nav.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delen"
+          }
+        }
+      }
+    },
+    "simple.settings.account": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account and app"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account en app"
+          }
+        }
+      }
+    },
+    "simple.settings.accountHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simple view, sent history, servers, notifications, privacy"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eenvoudige weergave, verstuurd, servers, meldingen, privacy"
+          }
+        }
+      }
+    },
+    "simple.settings.app": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App"
+          }
+        }
+      }
+    },
+    "simple.settings.birthdaysHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birthdays the frames celebrate"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verjaardagen die de kaders vieren"
+          }
+        }
+      }
+    },
+    "simple.settings.circlesHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smaller groups to share with"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleinere groepen om mee te delen"
+          }
+        }
+      }
+    },
+    "simple.settings.details": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name, cover and approvals"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naam, omslag en goedkeuringen"
+          }
+        }
+      }
+    },
+    "simple.settings.detailsHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who can invite, more ways to add photos (sources, email, Telegram)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie mag uitnodigen, meer manieren om foto's toe te voegen (bronnen, e-mail, Telegram)"
+          }
+        }
+      }
+    },
+    "simple.settings.leaveOrDelete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave or delete the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie verlaten of verwijderen"
+          }
+        }
+      }
+    },
+    "simple.settings.sentHistory": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent history"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verstuurd"
+          }
+        }
+      }
+    },
+    "simple.settings.sentHistoryHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything you sent, with who saw it"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles wat je verstuurde, en wie het zag"
+          }
+        }
+      }
+    },
+    "simple.settings.thisFamily": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This family: {family}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze familie: {family}"
+          }
+        }
+      }
+    },
+    "simple.settings.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen"
+          }
+        }
+      }
+    },
+    "simple.start.addFrameNow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Oma's frame now?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het kader van oma nu toevoegen?"
+          }
+        }
+      }
+    },
+    "simple.start.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kinframe is where your family shares photos, and where frames show them."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Kinframe deelt je familie foto's, en kaders tonen ze."
+          }
+        }
+      }
+    },
+    "simple.start.create": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie starten"
+          }
+        }
+      }
+    },
+    "simple.start.family": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een familie starten"
+          }
+        }
+      }
+    },
+    "simple.start.familyBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Give it a name, add a frame now or later, then invite everyone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geef haar een naam, voeg nu of later een kader toe en nodig iedereen uit."
+          }
+        }
+      }
+    },
+    "simple.start.familyName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{surname} family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie {surname}"
+          }
+        }
+      }
+    },
+    "simple.start.inviteBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send everyone the link to {family}. They see all photos and can share too."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stuur iedereen de link naar {family}. Ze zien alle foto's en kunnen ook delen."
+          }
+        }
+      }
+    },
+    "simple.start.inviteCode": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or give them the code {code}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Of geef hen de code {code}"
+          }
+        }
+      }
+    },
+    "simple.start.inviteLater": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        }
+      }
+    },
+    "simple.start.inviteTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invite your family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nodig je familie uit"
+          }
+        }
+      }
+    },
+    "simple.start.join": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join my family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij mijn familie"
+          }
+        }
+      }
+    },
+    "simple.start.joinBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Someone sent you a link or a code."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iemand stuurde je een link of een code."
+          }
+        }
+      }
+    },
+    "simple.start.nameBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The name everyone in the family sees."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De naam die iedereen in de familie ziet."
+          }
+        }
+      }
+    },
+    "simple.start.namePlaceholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peeters family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie Peeters"
+          }
+        }
+      }
+    },
+    "simple.start.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welkom"
+          }
+        }
+      }
+    },
+    "simple.view.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No photos yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen foto's"
+          }
+        }
+      }
+    },
+    "simple.view.heart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send a heart"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hartje sturen"
+          }
+        }
+      }
+    },
+    "simple.view.hearted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart sent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hartje gestuurd"
+          }
+        }
+      }
+    },
+    "simple.view.next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volgende"
+          }
+        }
+      }
+    },
+    "simple.view.normal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal view"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewone weergave"
+          }
+        }
+      }
+    },
+    "simple.view.question": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How do you want to see the family?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoe wil je de familie zien?"
+          }
+        }
+      }
+    },
+    "simple.view.settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen"
+          }
+        }
+      }
+    },
+    "simple.view.simple": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simple view"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eenvoudige weergave"
+          }
+        }
+      }
+    },
+    "simple.view.simpleChoice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simple view: big photos and a heart, for Oma"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eenvoudige weergave: grote foto's en een hartje, voor oma"
+          }
+        }
+      }
+    },
+    "simple.view.simpleHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Big photos one at a time and a heart, on this device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grote foto's één voor één en een hartje, op dit toestel"
+          }
+        }
+      }
+    },
     "social.backToTimeline": {
       "extractionState": "manual",
       "localizations": {
@@ -60170,13 +62754,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Off: people who join follow along as members (they comment and chat) until an admin lets them post."
+            "value": "Off: people who join see everything, comment and chat until an admin lets them share photos."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uit: wie erbij komt, volgt mee als lid (plaatst opmerkingen en chat) tot een beheerder plaatsen toestaat."
+            "value": "Uit: wie erbij komt, ziet alles, reageert en chat tot een beheerder foto’s delen toestaat."
           }
         }
       }
@@ -62023,13 +64607,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Follows along: sees the posts, comments, reacts and chats, but doesn’t post photos."
+            "value": "Sees the posts, comments, reacts and chats, but doesn’t share photos."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volgt mee: ziet de berichten, reageert en chat, maar plaatst geen foto’s."
+            "value": "Ziet de berichten, reageert en chat, maar deelt geen foto’s."
           }
         }
       }
@@ -62040,13 +64624,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Posters and admins post photos; members follow along, comment and chat. The frames are part of the family too."
+            "value": "Everyone in the family sees everything; admins also manage people and frames. The frames are part of the family too."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plaatsers en beheerders plaatsen foto’s; leden volgen mee, plaatsen opmerkingen en chatten. De kaders horen ook bij de familie."
+            "value": "Iedereen in de familie ziet alles; beheerders beheren ook mensen en kaders. De kaders horen ook bij de familie."
           }
         }
       }
