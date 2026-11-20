@@ -250,7 +250,7 @@ struct WeeklySummarySheet: View {
                         let details = SummaryText.details(s)
                         if !details.isEmpty { Text(details).foregroundStyle(Palette.textMuted) }
                         if let top = s.topItem {
-                            ItemThumb(item: top).frame(height: 240).clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            ItemThumb(item: top, large: true).frame(height: 240).clipShape(RoundedRectangle(cornerRadius: Radius.md))
                         }
                         VStack(spacing: 0) {
                             ForEach(Array(s.frames.enumerated()), id: \.offset) { n, f in

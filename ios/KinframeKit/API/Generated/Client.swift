@@ -18253,6 +18253,148 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Frame members. The frame's active remote help session (README §5.23), without `tailnet_ip` and `error`;
+    /// `204` when none is active.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)`.
+    public func getFrameRemoteHelp(_ input: Operations.GetFrameRemoteHelp.Input) async throws -> Operations.GetFrameRemoteHelp.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.GetFrameRemoteHelp.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/frames/{}/remote-help",
+                    parameters: [
+                        input.path.frameId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.GetFrameRemoteHelp.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.RemoteHelpSession.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 204:
+                    return .noContent(.init())
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
+    /// Owner and admins (`403 forbidden` for other members). Ends the active session (`ended_by: owner`); `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)`.
+    public func stopFrameRemoteHelp(_ input: Operations.StopFrameRemoteHelp.Input) async throws -> Operations.StopFrameRemoteHelp.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.StopFrameRemoteHelp.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/frames/{}/remote-help",
+                    parameters: [
+                        input.path.frameId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .delete
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 204:
+                    return .noContent(.init())
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
     /// What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
     /// caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
     /// subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
@@ -24399,6 +24541,65 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Stop tapped at the frame (README §5.23): ends the frame's active remote help session (`ended_by: frame`) and
+    /// sends `remote_help: null` on the change feed. `204` also when no session is active (idempotent).
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/device/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)`.
+    public func deviceStopRemoteHelp(_ input: Operations.DeviceStopRemoteHelp.Input) async throws -> Operations.DeviceStopRemoteHelp.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.DeviceStopRemoteHelp.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/device/remote-help",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .delete
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 204:
+                    return .noContent(.init())
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -25891,6 +26092,250 @@ public struct Client: APIProtocol {
                     case "application/json":
                         body = try await converter.getResponseBodyAsJSON(
                             Components.Schemas.OwnershipLogPage.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
+    /// Start remote help on a frame (README §5.23, docs/spec/remote-help.md §5.2): the server asks Headscale for a
+    /// one-time, ephemeral pre-auth key that expires at the session's end, stores the session and puts a
+    /// `remote_help` change on the frame's feed. The frame's members get `remote_help_started`.
+    /// `409 remote_help_active` when the frame already has a session, `409 remote_help_unsupported` when the
+    /// frame's latest heartbeat does not list the `remote_help` feature, `502 upstream_unavailable` when Headscale
+    /// fails (no session is stored), `503 feature_disabled` without discovery `remote_help`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/post(operatorStartRemoteHelp)`.
+    public func operatorStartRemoteHelp(_ input: Operations.OperatorStartRemoteHelp.Input) async throws -> Operations.OperatorStartRemoteHelp.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.OperatorStartRemoteHelp.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/operator/frames/{}/remote-help",
+                    parameters: [
+                        input.path.frameId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 201:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.OperatorStartRemoteHelp.Output.Created.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.RemoteHelpSession.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .created(.init(body: body))
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
+    /// Ends the frame's active session (`ended_by: operator`). `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)`.
+    public func operatorStopRemoteHelp(_ input: Operations.OperatorStopRemoteHelp.Input) async throws -> Operations.OperatorStopRemoteHelp.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.OperatorStopRemoteHelp.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/operator/frames/{}/remote-help",
+                    parameters: [
+                        input.path.frameId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .delete
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 204:
+                    return .noContent(.init())
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
+    /// Remote help sessions, active first, then newest (kept 2 years).
+    ///
+    /// - Remark: HTTP `GET /v1/operator/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/remote-help/get(operatorListRemoteHelp)`.
+    public func operatorListRemoteHelp(_ input: Operations.OperatorListRemoteHelp.Input) async throws -> Operations.OperatorListRemoteHelp.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.OperatorListRemoteHelp.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/operator/remote-help",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "cursor",
+                    value: input.query.cursor
+                )
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "limit",
+                    value: input.query.limit
+                )
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.OperatorListRemoteHelp.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.RemoteHelpPage.self,
                             from: responseBody,
                             transforming: { value in
                                 .json(value)

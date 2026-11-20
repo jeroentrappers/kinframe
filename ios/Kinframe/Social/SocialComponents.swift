@@ -292,7 +292,7 @@ struct MediaPager: View {
     var body: some View {
         TabView(selection: $index) {
             ForEach(Array(items.enumerated()), id: \.element.id) { n, item in
-                ItemThumb(item: item)
+                ItemThumb(item: item, large: true)
                     .livePlayback(api: app.api, item: item)
                     .overlay {
                         if item.kind == .video, item.status == .ready {

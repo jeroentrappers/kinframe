@@ -31,6 +31,12 @@ extension Components.Schemas.Frame: Identifiable {
     public var summary: FrameSummary { value1 }
 }
 
+extension Components.Schemas.Item {
+    /// For large images (feed and post photos): the uncropped display rendition (≤1600 px long edge, README §5.3),
+    /// else the 256 px square thumbnail (older items until the server's backfill reached them, older servers).
+    public var largeImageUrl: String? { displayUrl ?? thumbUrl }
+}
+
 extension Components.Schemas.FrameSummary: Identifiable {}
 extension Components.Schemas.Send: Identifiable {}
 extension Components.Schemas.Placement: Identifiable {}

@@ -351,4 +351,18 @@ final class ThreadModelTests: XCTestCase {
         await model.load()
         XCTAssertTrue(model.removed)
     }
+
+    // Post photos use the uncropped display rendition (README §5.3), else the square thumbnail.
+    func testPostPhotosPreferTheDisplayRendition() throws {
+        let item = try SocialFixtures.decode(Item.self, #"""
+        {"id":"i1","kind":"photo","status":"ready","sender_id":"u1","created_at":"2026-11-19T09:00:00Z",
+         "thumb_url":"https://x/t256","display_url":"https://x/d"}
+        """#)
+        XCTAssertEqual(item.displayUrl, "https://x/d")
+        XCTAssertEqual(item.largeImageUrl, "https://x/d")
+        XCTAssertEqual(item.thumbUrl, "https://x/t256")
+        let old = Item(id: "i2", kind: .photo, status: .ready, senderId: "u1", createdAt: Date(), thumbUrl: "https://x/t256")
+        XCTAssertNil(old.displayUrl)
+        XCTAssertEqual(old.largeImageUrl, "https://x/t256")
+    }
 }

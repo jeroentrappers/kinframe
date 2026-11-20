@@ -5634,11 +5634,12 @@ public enum Operations {
                 @frozen public enum VariantPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case thumb256 = "thumb_256"
                     case thumb512 = "thumb_512"
+                    case display = "display"
                     case master = "master"
                     case poster = "poster"
                     case motion = "motion"
                 }
-                /// `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.
+                /// `thumb_256`/`thumb_512` are square centre-cropped thumbnails; `display` is the uncropped display rendition (WebP, long edge ≤1600 px, README §5.3; 404 until made, then use `thumb_512`). `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.
                 ///
                 /// - Remark: Generated from `#/paths/v1/items/{itemId}/media/{variant}/GET/path/variant`.
                 public var variant: Operations.GetItemMedia.Input.Path.VariantPayload
@@ -5646,7 +5647,7 @@ public enum Operations {
                 ///
                 /// - Parameters:
                 ///   - itemId:
-                ///   - variant: `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.
+                ///   - variant: `thumb_256`/`thumb_512` are square centre-cropped thumbnails; `display` is the uncropped display rendition (WebP, long edge ≤1600 px, README §5.3; 404 until made, then use `thumb_512`). `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.
                 public init(
                     itemId: Components.Parameters.ItemId,
                     variant: Operations.GetItemMedia.Input.Path.VariantPayload
@@ -34229,6 +34230,327 @@ public enum Operations {
             }
         }
     }
+    /// Frame members. The frame's active remote help session (README §5.23), without `tailnet_ip` and `error`;
+    /// `204` when none is active.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)`.
+    public enum GetFrameRemoteHelp {
+        public static let id: Swift.String = "getFrameRemoteHelp"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.GetFrameRemoteHelp.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameRemoteHelp.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameRemoteHelp.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFrameRemoteHelp.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFrameRemoteHelp.Input.Path,
+                headers: Operations.GetFrameRemoteHelp.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.RemoteHelpSession)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.RemoteHelpSession {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFrameRemoteHelp.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFrameRemoteHelp.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Active session
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFrameRemoteHelp.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFrameRemoteHelp.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// No active session
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.GetFrameRemoteHelp.Output.NoContent)
+            /// No active session
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.GetFrameRemoteHelp.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Owner and admins (`403 forbidden` for other members). Ends the active session (`ended_by: owner`); `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)`.
+    public enum StopFrameRemoteHelp {
+        public static let id: Swift.String = "stopFrameRemoteHelp"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/DELETE/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.StopFrameRemoteHelp.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/remote-help/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.StopFrameRemoteHelp.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.StopFrameRemoteHelp.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.StopFrameRemoteHelp.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.StopFrameRemoteHelp.Input.Path,
+                headers: Operations.StopFrameRemoteHelp.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Ended
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.StopFrameRemoteHelp.Output.NoContent)
+            /// Ended
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.StopFrameRemoteHelp.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
     /// caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
     /// subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
@@ -45880,6 +46202,121 @@ public enum Operations {
             }
         }
     }
+    /// Stop tapped at the frame (README §5.23): ends the frame's active remote help session (`ended_by: frame`) and
+    /// sends `remote_help: null` on the change feed. `204` also when no session is active (idempotent).
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/device/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)`.
+    public enum DeviceStopRemoteHelp {
+        public static let id: Swift.String = "deviceStopRemoteHelp"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/remote-help/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceStopRemoteHelp.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceStopRemoteHelp.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceStopRemoteHelp.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.DeviceStopRemoteHelp.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Ended
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeviceStopRemoteHelp.Output.NoContent)
+            /// Ended
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeviceStopRemoteHelp.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -49027,6 +49464,465 @@ public enum Operations {
             /// Error (RFC 9457)
             ///
             /// - Remark: Generated from `#/paths//v1/operator/ownership-log/get(operatorListOwnershipLog)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Start remote help on a frame (README §5.23, docs/spec/remote-help.md §5.2): the server asks Headscale for a
+    /// one-time, ephemeral pre-auth key that expires at the session's end, stores the session and puts a
+    /// `remote_help` change on the frame's feed. The frame's members get `remote_help_started`.
+    /// `409 remote_help_active` when the frame already has a session, `409 remote_help_unsupported` when the
+    /// frame's latest heartbeat does not list the `remote_help` feature, `502 upstream_unavailable` when Headscale
+    /// fails (no session is stored), `503 feature_disabled` without discovery `remote_help`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/post(operatorStartRemoteHelp)`.
+    public enum OperatorStartRemoteHelp {
+        public static let id: Swift.String = "operatorStartRemoteHelp"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.OperatorStartRemoteHelp.Input.Path
+            /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorStartRemoteHelp.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorStartRemoteHelp.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorStartRemoteHelp.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.RemoteHelpStart)
+            }
+            public var body: Operations.OperatorStartRemoteHelp.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.OperatorStartRemoteHelp.Input.Path,
+                headers: Operations.OperatorStartRemoteHelp.Input.Headers = .init(),
+                body: Operations.OperatorStartRemoteHelp.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.RemoteHelpSession)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.RemoteHelpSession {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorStartRemoteHelp.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorStartRemoteHelp.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Started
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/post(operatorStartRemoteHelp)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.OperatorStartRemoteHelp.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.OperatorStartRemoteHelp.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/post(operatorStartRemoteHelp)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Ends the frame's active session (`ended_by: operator`). `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)`.
+    public enum OperatorStopRemoteHelp {
+        public static let id: Swift.String = "operatorStopRemoteHelp"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/DELETE/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.OperatorStopRemoteHelp.Input.Path
+            /// - Remark: Generated from `#/paths/v1/operator/frames/{frameId}/remote-help/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorStopRemoteHelp.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorStopRemoteHelp.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorStopRemoteHelp.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.OperatorStopRemoteHelp.Input.Path,
+                headers: Operations.OperatorStopRemoteHelp.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Ended
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.OperatorStopRemoteHelp.Output.NoContent)
+            /// Ended
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.OperatorStopRemoteHelp.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Remote help sessions, active first, then newest (kept 2 years).
+    ///
+    /// - Remark: HTTP `GET /v1/operator/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/remote-help/get(operatorListRemoteHelp)`.
+    public enum OperatorListRemoteHelp {
+        public static let id: Swift.String = "operatorListRemoteHelp"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/remote-help/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/remote-help/GET/query/cursor`.
+                public var cursor: Components.Parameters.Cursor?
+                /// - Remark: Generated from `#/paths/v1/operator/remote-help/GET/query/limit`.
+                public var limit: Components.Parameters.Limit?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - cursor:
+                ///   - limit:
+                public init(
+                    cursor: Components.Parameters.Cursor? = nil,
+                    limit: Components.Parameters.Limit? = nil
+                ) {
+                    self.cursor = cursor
+                    self.limit = limit
+                }
+            }
+            public var query: Operations.OperatorListRemoteHelp.Input.Query
+            /// - Remark: Generated from `#/paths/v1/operator/remote-help/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorListRemoteHelp.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorListRemoteHelp.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorListRemoteHelp.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.OperatorListRemoteHelp.Input.Query = .init(),
+                headers: Operations.OperatorListRemoteHelp.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/remote-help/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/remote-help/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.RemoteHelpPage)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.RemoteHelpPage {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorListRemoteHelp.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorListRemoteHelp.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Sessions
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/remote-help/get(operatorListRemoteHelp)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.OperatorListRemoteHelp.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.OperatorListRemoteHelp.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/remote-help/get(operatorListRemoteHelp)/responses/default`.
             ///
             /// HTTP response code: `default`.
             case `default`(statusCode: Swift.Int, Components.Responses.Problem)

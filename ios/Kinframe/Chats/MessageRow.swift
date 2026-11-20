@@ -131,7 +131,7 @@ struct MessageRow: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 3), count: columns), spacing: 3) {
             ForEach(items.prefix(4)) { item in
                 Button { if item.kind == .video { playing = item } } label: {
-                    ItemThumb(item: item)
+                    ItemThumb(item: item, large: items.count == 1)
                         .frame(height: items.count == 1 ? 220 : 110)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
                         .overlay {
@@ -281,7 +281,7 @@ struct RecapSheet: View {
                     if let loved = recap.mostLoved {
                         VStack(alignment: .leading, spacing: 6) {
                             SectionHeader(L("engagement.recapMostLoved"))
-                            ItemThumb(item: loved.item).frame(height: 240).clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            ItemThumb(item: loved.item, large: true).frame(height: 240).clipShape(RoundedRectangle(cornerRadius: Radius.md))
                         }
                     }
                     if let frames = recap.freshestFrames, !frames.isEmpty {

@@ -1299,6 +1299,18 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/frames/{frameId}/photo-requests`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/photo-requests/get(listFramePhotoRequests)`.
     func listFramePhotoRequests(_ input: Operations.ListFramePhotoRequests.Input) async throws -> Operations.ListFramePhotoRequests.Output
+    /// Frame members. The frame's active remote help session (README §5.23), without `tailnet_ip` and `error`;
+    /// `204` when none is active.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)`.
+    func getFrameRemoteHelp(_ input: Operations.GetFrameRemoteHelp.Input) async throws -> Operations.GetFrameRemoteHelp.Output
+    /// Owner and admins (`403 forbidden` for other members). Ends the active session (`ended_by: owner`); `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)`.
+    func stopFrameRemoteHelp(_ input: Operations.StopFrameRemoteHelp.Input) async throws -> Operations.StopFrameRemoteHelp.Output
     /// What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
     /// caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
     /// subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
@@ -1797,6 +1809,13 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/device/photo-requests`.
     /// - Remark: Generated from `#/paths//v1/device/photo-requests/post(deviceRequestPhotos)`.
     func deviceRequestPhotos(_ input: Operations.DeviceRequestPhotos.Input) async throws -> Operations.DeviceRequestPhotos.Output
+    /// Stop tapped at the frame (README §5.23): ends the frame's active remote help session (`ended_by: frame`) and
+    /// sends `remote_help: null` on the change feed. `204` also when no session is active (idempotent).
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/device/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)`.
+    func deviceStopRemoteHelp(_ input: Operations.DeviceStopRemoteHelp.Input) async throws -> Operations.DeviceStopRemoteHelp.Output
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -1917,6 +1936,27 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/operator/ownership-log`.
     /// - Remark: Generated from `#/paths//v1/operator/ownership-log/get(operatorListOwnershipLog)`.
     func operatorListOwnershipLog(_ input: Operations.OperatorListOwnershipLog.Input) async throws -> Operations.OperatorListOwnershipLog.Output
+    /// Start remote help on a frame (README §5.23, docs/spec/remote-help.md §5.2): the server asks Headscale for a
+    /// one-time, ephemeral pre-auth key that expires at the session's end, stores the session and puts a
+    /// `remote_help` change on the frame's feed. The frame's members get `remote_help_started`.
+    /// `409 remote_help_active` when the frame already has a session, `409 remote_help_unsupported` when the
+    /// frame's latest heartbeat does not list the `remote_help` feature, `502 upstream_unavailable` when Headscale
+    /// fails (no session is stored), `503 feature_disabled` without discovery `remote_help`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/post(operatorStartRemoteHelp)`.
+    func operatorStartRemoteHelp(_ input: Operations.OperatorStartRemoteHelp.Input) async throws -> Operations.OperatorStartRemoteHelp.Output
+    /// Ends the frame's active session (`ended_by: operator`). `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)`.
+    func operatorStopRemoteHelp(_ input: Operations.OperatorStopRemoteHelp.Input) async throws -> Operations.OperatorStopRemoteHelp.Output
+    /// Remote help sessions, active first, then newest (kept 2 years).
+    ///
+    /// - Remark: HTTP `GET /v1/operator/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/remote-help/get(operatorListRemoteHelp)`.
+    func operatorListRemoteHelp(_ input: Operations.OperatorListRemoteHelp.Input) async throws -> Operations.OperatorListRemoteHelp.Output
     /// Servers blocked for the whole instance (README §5.22 "Trust").
     ///
     /// - Remark: HTTP `GET /v1/operator/blocked-servers`.
@@ -4905,6 +4945,34 @@ extension APIProtocol {
             headers: headers
         ))
     }
+    /// Frame members. The frame's active remote help session (README §5.23), without `tailnet_ip` and `error`;
+    /// `204` when none is active.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/get(getFrameRemoteHelp)`.
+    public func getFrameRemoteHelp(
+        path: Operations.GetFrameRemoteHelp.Input.Path,
+        headers: Operations.GetFrameRemoteHelp.Input.Headers = .init()
+    ) async throws -> Operations.GetFrameRemoteHelp.Output {
+        try await getFrameRemoteHelp(Operations.GetFrameRemoteHelp.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner and admins (`403 forbidden` for other members). Ends the active session (`ended_by: owner`); `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/remote-help/delete(stopFrameRemoteHelp)`.
+    public func stopFrameRemoteHelp(
+        path: Operations.StopFrameRemoteHelp.Input.Path,
+        headers: Operations.StopFrameRemoteHelp.Input.Headers = .init()
+    ) async throws -> Operations.StopFrameRemoteHelp.Output {
+        try await stopFrameRemoteHelp(Operations.StopFrameRemoteHelp.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// What the leave sheet shows: counts of the caller's own photos and comments in the family (`feed_id`) or of the
     /// caller's own photos on the frame (`frame_id`), and for a family the frames the caller is a member of that
     /// subscribe to it. Exactly one of `feed_id` and `frame_id` (`422 validation_failed` otherwise). Works for
@@ -5959,6 +6027,15 @@ extension APIProtocol {
     public func deviceRequestPhotos(headers: Operations.DeviceRequestPhotos.Input.Headers = .init()) async throws -> Operations.DeviceRequestPhotos.Output {
         try await deviceRequestPhotos(Operations.DeviceRequestPhotos.Input(headers: headers))
     }
+    /// Stop tapped at the frame (README §5.23): ends the frame's active remote help session (`ended_by: frame`) and
+    /// sends `remote_help: null` on the change feed. `204` also when no session is active (idempotent).
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/device/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/device/remote-help/delete(deviceStopRemoteHelp)`.
+    public func deviceStopRemoteHelp(headers: Operations.DeviceStopRemoteHelp.Input.Headers = .init()) async throws -> Operations.DeviceStopRemoteHelp.Output {
+        try await deviceStopRemoteHelp(Operations.DeviceStopRemoteHelp.Input(headers: headers))
+    }
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -6217,6 +6294,53 @@ extension APIProtocol {
         headers: Operations.OperatorListOwnershipLog.Input.Headers = .init()
     ) async throws -> Operations.OperatorListOwnershipLog.Output {
         try await operatorListOwnershipLog(Operations.OperatorListOwnershipLog.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Start remote help on a frame (README §5.23, docs/spec/remote-help.md §5.2): the server asks Headscale for a
+    /// one-time, ephemeral pre-auth key that expires at the session's end, stores the session and puts a
+    /// `remote_help` change on the frame's feed. The frame's members get `remote_help_started`.
+    /// `409 remote_help_active` when the frame already has a session, `409 remote_help_unsupported` when the
+    /// frame's latest heartbeat does not list the `remote_help` feature, `502 upstream_unavailable` when Headscale
+    /// fails (no session is stored), `503 feature_disabled` without discovery `remote_help`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/post(operatorStartRemoteHelp)`.
+    public func operatorStartRemoteHelp(
+        path: Operations.OperatorStartRemoteHelp.Input.Path,
+        headers: Operations.OperatorStartRemoteHelp.Input.Headers = .init(),
+        body: Operations.OperatorStartRemoteHelp.Input.Body
+    ) async throws -> Operations.OperatorStartRemoteHelp.Output {
+        try await operatorStartRemoteHelp(Operations.OperatorStartRemoteHelp.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Ends the frame's active session (`ended_by: operator`). `404 not_found` when none is active.
+    ///
+    /// - Remark: HTTP `DELETE /v1/operator/frames/{frameId}/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/frames/{frameId}/remote-help/delete(operatorStopRemoteHelp)`.
+    public func operatorStopRemoteHelp(
+        path: Operations.OperatorStopRemoteHelp.Input.Path,
+        headers: Operations.OperatorStopRemoteHelp.Input.Headers = .init()
+    ) async throws -> Operations.OperatorStopRemoteHelp.Output {
+        try await operatorStopRemoteHelp(Operations.OperatorStopRemoteHelp.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Remote help sessions, active first, then newest (kept 2 years).
+    ///
+    /// - Remark: HTTP `GET /v1/operator/remote-help`.
+    /// - Remark: Generated from `#/paths//v1/operator/remote-help/get(operatorListRemoteHelp)`.
+    public func operatorListRemoteHelp(
+        query: Operations.OperatorListRemoteHelp.Input.Query = .init(),
+        headers: Operations.OperatorListRemoteHelp.Input.Headers = .init()
+    ) async throws -> Operations.OperatorListRemoteHelp.Output {
+        try await operatorListRemoteHelp(Operations.OperatorListRemoteHelp.Input(
             query: query,
             headers: headers
         ))

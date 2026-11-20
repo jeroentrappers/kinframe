@@ -127,6 +127,8 @@ extension Components {
             case cannotMessage = "cannot_message"
             case commentsClosed = "comments_closed"
             case audioTooLong = "audio_too_long"
+            case remoteHelpActive = "remote_help_active"
+            case remoteHelpUnsupported = "remote_help_unsupported"
             case serverError = "server_error"
         }
         /// Version policy for one family app platform (README §5.15).
@@ -390,12 +392,25 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/remote_families`.
             public var remoteFamilies: Swift.Bool?
+            /// True when the operator configured remote help (Headscale, ADB key and the checked tailnet policy;
+            /// docs/spec/remote-help.md §5.1). Frame pages show an active session either way (`FrameSummary.remote_help`).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/remote_help`.
+            public var remoteHelp: Swift.Bool?
             /// VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             /// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/webpush_public_key`.
             public var webpushPublicKey: Swift.String?
+            /// DSN of the Sentry-compatible server (GlitchTip) the web app sends its crash reports to
+            /// (docs/spec/crash-reporting.md): the operator's `KINFRAME_SENTRY_WEB_DSN`. Omitted when unset; the web app
+            /// then starts no crash reporting. Only the web app reads it; the native apps have their own DSN.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/sentry_dsn`.
+            public var sentryDsn: Swift.String?
             /// - Remark: Generated from `#/components/schemas/Discovery/shop`.
             public var shop: Components.Schemas.Shop?
             /// Creates a new `Discovery`.
@@ -436,7 +451,9 @@ extension Components {
             ///   - federation:
             ///   - leaving: True when the server has the leaving choices, take-away, keep requests, the account deletion handover and the memories filter (README §5.21).
             ///   - remoteFamilies: True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
+            ///   - remoteHelp: True when the operator configured remote help (Headscale, ADB key and the checked tailnet policy;
             ///   - webpushPublicKey: VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+            ///   - sentryDsn: DSN of the Sentry-compatible server (GlitchTip) the web app sends its crash reports to
             ///   - shop:
             public init(
                 name: Swift.String,
@@ -474,7 +491,9 @@ extension Components {
                 federation: Components.Schemas.FederationInfo? = nil,
                 leaving: Swift.Bool? = nil,
                 remoteFamilies: Swift.Bool? = nil,
+                remoteHelp: Swift.Bool? = nil,
                 webpushPublicKey: Swift.String? = nil,
+                sentryDsn: Swift.String? = nil,
                 shop: Components.Schemas.Shop? = nil
             ) {
                 self.name = name
@@ -512,7 +531,9 @@ extension Components {
                 self.federation = federation
                 self.leaving = leaving
                 self.remoteFamilies = remoteFamilies
+                self.remoteHelp = remoteHelp
                 self.webpushPublicKey = webpushPublicKey
+                self.sentryDsn = sentryDsn
                 self.shop = shop
             }
             public enum CodingKeys: String, CodingKey {
@@ -551,7 +572,9 @@ extension Components {
                 case federation
                 case leaving
                 case remoteFamilies = "remote_families"
+                case remoteHelp = "remote_help"
                 case webpushPublicKey = "webpush_public_key"
+                case sentryDsn = "sentry_dsn"
                 case shop
             }
         }
@@ -1807,6 +1830,10 @@ extension Components {
             public var timezone: Swift.String?
             /// - Remark: Generated from `#/components/schemas/User/is_operator`.
             public var isOperator: Swift.Bool?
+            /// Operators only (`getMe`), true when the server has remote help configured, so the operator's settings show Settings → Remote help.
+            ///
+            /// - Remark: Generated from `#/components/schemas/User/remote_help`.
+            public var remoteHelp: Swift.Bool?
             /// Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
             ///
             /// - Remark: Generated from `#/components/schemas/User/show_read_receipts`.
@@ -1824,6 +1851,7 @@ extension Components {
             ///   - locale:
             ///   - timezone: IANA time zone reported by the user's apps; null until one did.
             ///   - isOperator:
+            ///   - remoteHelp: Operators only (`getMe`), true when the server has remote help configured, so the operator's settings show Settings → Remote help.
             ///   - showReadReceipts: Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
             ///   - createdAt:
             public init(
@@ -1835,6 +1863,7 @@ extension Components {
                 locale: Swift.String? = nil,
                 timezone: Swift.String? = nil,
                 isOperator: Swift.Bool? = nil,
+                remoteHelp: Swift.Bool? = nil,
                 showReadReceipts: Swift.Bool? = nil,
                 createdAt: Foundation.Date? = nil
             ) {
@@ -1846,6 +1875,7 @@ extension Components {
                 self.locale = locale
                 self.timezone = timezone
                 self.isOperator = isOperator
+                self.remoteHelp = remoteHelp
                 self.showReadReceipts = showReadReceipts
                 self.createdAt = createdAt
             }
@@ -1858,6 +1888,7 @@ extension Components {
                 case locale
                 case timezone
                 case isOperator = "is_operator"
+                case remoteHelp = "remote_help"
                 case showReadReceipts = "show_read_receipts"
                 case createdAt = "created_at"
             }
@@ -2066,6 +2097,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FrameSummary/photo_request`.
             public var photoRequest: Components.Schemas.PhotoRequest?
+            /// The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSummary/remote_help`.
+            public var remoteHelp: Components.Schemas.FrameRemoteHelpSummary?
             /// Creates a new `FrameSummary`.
             ///
             /// - Parameters:
@@ -2083,6 +2118,7 @@ extension Components {
             ///   - deviceKind:
             ///   - freshness: How recently the frame got new photos from people (README §5.20). Absent on servers without `engagement`.
             ///   - photoRequest: The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
+            ///   - remoteHelp: The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
             public init(
                 id: Components.Schemas.Id,
                 name: Swift.String,
@@ -2097,7 +2133,8 @@ extension Components {
                 needsUpdate: Swift.Bool? = nil,
                 deviceKind: Components.Schemas.DeviceKind? = nil,
                 freshness: Components.Schemas.Freshness? = nil,
-                photoRequest: Components.Schemas.PhotoRequest? = nil
+                photoRequest: Components.Schemas.PhotoRequest? = nil,
+                remoteHelp: Components.Schemas.FrameRemoteHelpSummary? = nil
             ) {
                 self.id = id
                 self.name = name
@@ -2113,6 +2150,7 @@ extension Components {
                 self.deviceKind = deviceKind
                 self.freshness = freshness
                 self.photoRequest = photoRequest
+                self.remoteHelp = remoteHelp
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -2129,6 +2167,7 @@ extension Components {
                 case deviceKind = "device_kind"
                 case freshness
                 case photoRequest = "photo_request"
+                case remoteHelp = "remote_help"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Frame`.
@@ -2303,10 +2342,18 @@ extension Components {
             /// `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
             /// has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
             /// app"; nothing is withheld.
+            /// `remote_help`: the frame can join the operator's tailnet for remote help (the GitHub build on a rooted
+            /// frame, docs/spec/remote-help.md §5.4); only such frames can get a session.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Heartbeat/features`.
             public var features: [Swift.String]?
+            /// - Remark: Generated from `#/components/schemas/Heartbeat/remote_help`.
+            public var remoteHelp: Components.Schemas.HeartbeatRemoteHelp?
+            /// The device serial (as `adb devices` shows it), sent only by frames that list `remote_help`: the server names the tailnet host `kinframe-<serial>` after it (docs/spec/remote-help.md §5.2).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Heartbeat/serial`.
+            public var serial: Swift.String?
             /// - Remark: Generated from `#/components/schemas/Heartbeat/uptime_s`.
             public var uptimeS: Swift.Int
             /// - Remark: Generated from `#/components/schemas/Heartbeat/wifi_ssid`.
@@ -2394,6 +2441,8 @@ extension Components {
             ///   - appVersionCode:
             ///   - androidSdk:
             ///   - features: Optional capabilities of the frame app. `feed_backfill`: the frame shows `Placement.backfill` placements
+            ///   - remoteHelp:
+            ///   - serial: The device serial (as `adb devices` shows it), sent only by frames that list `remote_help`: the server names the tailnet host `kinframe-<serial>` after it (docs/spec/remote-help.md §5.2).
             ///   - uptimeS:
             ///   - wifiSsid:
             ///   - wifiRssiDbm:
@@ -2417,6 +2466,8 @@ extension Components {
                 appVersionCode: Swift.Int? = nil,
                 androidSdk: Swift.Int? = nil,
                 features: [Swift.String]? = nil,
+                remoteHelp: Components.Schemas.HeartbeatRemoteHelp? = nil,
+                serial: Swift.String? = nil,
                 uptimeS: Swift.Int,
                 wifiSsid: Swift.String? = nil,
                 wifiRssiDbm: Swift.Int? = nil,
@@ -2440,6 +2491,8 @@ extension Components {
                 self.appVersionCode = appVersionCode
                 self.androidSdk = androidSdk
                 self.features = features
+                self.remoteHelp = remoteHelp
+                self.serial = serial
                 self.uptimeS = uptimeS
                 self.wifiSsid = wifiSsid
                 self.wifiRssiDbm = wifiRssiDbm
@@ -2464,6 +2517,8 @@ extension Components {
                 case appVersionCode = "app_version_code"
                 case androidSdk = "android_sdk"
                 case features
+                case remoteHelp = "remote_help"
+                case serial
                 case uptimeS = "uptime_s"
                 case wifiSsid = "wifi_ssid"
                 case wifiRssiDbm = "wifi_rssi_dbm"
@@ -3192,10 +3247,20 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Item/motion`.
             public var motion: Components.Schemas.ItemMotion?
-            /// Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+            /// The 256 px square (centre-cropped) thumbnail, for small tiles and lists. Short-lived signed URL (about 1 h)
+            /// usable directly in <img src> without an Authorization header.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/Item/thumb_url`.
             public var thumbUrl: Swift.String?
+            /// The display rendition (README §5.3): the uncropped photo (for videos: the poster frame) as WebP, long edge
+            /// ≤1600 px, never upscaled. For large images such as feed post photos; clients crop or fit it to their
+            /// layout. Short-lived signed URL (about 1 h, like `thumb_url`). Absent until the server made it (older items
+            /// until the display backfill reached them); fall back to `thumb_url` then.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/display_url`.
+            public var displayUrl: Swift.String?
             /// Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.
             ///
             /// - Remark: Generated from `#/components/schemas/Item/remote_sender`.
@@ -3230,7 +3295,8 @@ extension Components {
             ///   - importedSenderName: The original sender's display name in that app, when known.
             ///   - via: Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
             ///   - motion: Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
-            ///   - thumbUrl: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+            ///   - thumbUrl: The 256 px square (centre-cropped) thumbnail, for small tiles and lists. Short-lived signed URL (about 1 h)
+            ///   - displayUrl: The display rendition (README §5.3): the uncropped photo (for videos: the poster frame) as WebP, long edge
             ///   - remoteSender: Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.
             ///   - formerSenderName: Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
             public init(
@@ -3256,6 +3322,7 @@ extension Components {
                 via: Components.Schemas.ItemVia? = nil,
                 motion: Components.Schemas.ItemMotion? = nil,
                 thumbUrl: Swift.String? = nil,
+                displayUrl: Swift.String? = nil,
                 remoteSender: Components.Schemas.ItemRemoteSender? = nil,
                 formerSenderName: Swift.String? = nil
             ) {
@@ -3281,6 +3348,7 @@ extension Components {
                 self.via = via
                 self.motion = motion
                 self.thumbUrl = thumbUrl
+                self.displayUrl = displayUrl
                 self.remoteSender = remoteSender
                 self.formerSenderName = formerSenderName
             }
@@ -3307,6 +3375,7 @@ extension Components {
                 case via
                 case motion
                 case thumbUrl = "thumb_url"
+                case displayUrl = "display_url"
                 case remoteSender = "remote_sender"
                 case formerSenderName = "former_sender_name"
             }
@@ -12463,6 +12532,7 @@ extension Components {
                 case comments = "comments"
                 case photoRequest = "photo_request"
                 case prompts = "prompts"
+                case remoteHelp = "remote_help"
                 case reset = "reset"
             }
             /// - Remark: Generated from `#/components/schemas/Change/type`.
@@ -12739,6 +12809,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Change/prompts`.
             public var prompts: Components.Schemas.FramePrompts?
+            /// `remote_help` change (entity `id` = the frame): the active remote help session, or null = no session (leave the tailnet and clean up). Old frame apps ignore it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Change/remote_help`.
+            public var remoteHelp: Components.Schemas.FrameRemoteHelp?
             /// Creates a new `Change`.
             ///
             /// - Parameters:
@@ -12756,6 +12830,7 @@ extension Components {
             ///   - comments: `comments` change (entity `id` = the placement): its newest comments, or null = drop them (show comments turned off, comments removed). Only for frames with `settings.social.show_comments`. Old frame apps ignore it.
             ///   - photoRequest: `photo_request` change (entity `id` = the frame): the frame's latest "Ask for new photos", or null when there is none in the last 7 days.
             ///   - prompts: `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.
+            ///   - remoteHelp: `remote_help` change (entity `id` = the frame): the active remote help session, or null = no session (leave the tailnet and clean up). Old frame apps ignore it.
             public init(
                 seq: Swift.Int,
                 _type: Components.Schemas.Change._TypePayload,
@@ -12770,7 +12845,8 @@ extension Components {
                 birthdays: Components.Schemas.FrameBirthdays? = nil,
                 comments: Components.Schemas.PlacementComments? = nil,
                 photoRequest: Components.Schemas.FramePhotoRequest? = nil,
-                prompts: Components.Schemas.FramePrompts? = nil
+                prompts: Components.Schemas.FramePrompts? = nil,
+                remoteHelp: Components.Schemas.FrameRemoteHelp? = nil
             ) {
                 self.seq = seq
                 self._type = _type
@@ -12786,6 +12862,7 @@ extension Components {
                 self.comments = comments
                 self.photoRequest = photoRequest
                 self.prompts = prompts
+                self.remoteHelp = remoteHelp
             }
             public enum CodingKeys: String, CodingKey {
                 case seq
@@ -12802,6 +12879,7 @@ extension Components {
                 case comments
                 case photoRequest = "photo_request"
                 case prompts
+                case remoteHelp = "remote_help"
             }
         }
         /// Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -18665,6 +18743,440 @@ extension Components {
                 case server
             }
         }
+        /// - Remark: Generated from `#/components/schemas/RemoteHelpStart`.
+        public struct RemoteHelpStart: Codable, Hashable, Sendable {
+            /// How long the session lasts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpStart/hours`.
+            @frozen public enum HoursPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _1 = 1
+                case _8 = 8
+                case _24 = 24
+            }
+            /// How long the session lasts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpStart/hours`.
+            public var hours: Components.Schemas.RemoteHelpStart.HoursPayload
+            /// Shown to the frame's members and kept in the log.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpStart/reason`.
+            public var reason: Swift.String
+            /// Creates a new `RemoteHelpStart`.
+            ///
+            /// - Parameters:
+            ///   - hours: How long the session lasts.
+            ///   - reason: Shown to the frame's members and kept in the log.
+            public init(
+                hours: Components.Schemas.RemoteHelpStart.HoursPayload,
+                reason: Swift.String
+            ) {
+                self.hours = hours
+                self.reason = reason
+            }
+            public enum CodingKeys: String, CodingKey {
+                case hours
+                case reason
+            }
+        }
+        /// A remote help session. Members (`getFrameRemoteHelp`, `remote_help.updated` to members) get it without
+        /// `tailnet_ip` and `error`.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteHelpSession`.
+        public struct RemoteHelpSession: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/frame_name`.
+            public var frameName: Swift.String
+            /// `pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/state`.
+            @frozen public enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "pending"
+                case on = "on"
+                case ended = "ended"
+            }
+            /// `pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/state`.
+            public var state: Components.Schemas.RemoteHelpSession.StatePayload
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/reason`.
+            public var reason: Swift.String
+            /// The operator who started it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/started_by_name`.
+            public var startedByName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/started_at`.
+            public var startedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/ends_at`.
+            public var endsAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/ended_at`.
+            public var endedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/ended_by`.
+            public var endedBy: Components.Schemas.RemoteHelpEndedBy
+            /// The person who ended it (operator or owner/admin).
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/ended_by_name`.
+            public var endedByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/hostname`.
+            public var hostname: Swift.String
+            /// Operator only. Reported by the frame.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/tailnet_ip`.
+            public var tailnetIp: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/adb_command`.
+            public var adbCommand: Swift.String
+            /// Operator only. Why the frame or Headscale failed.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpSession/error`.
+            public var error: Swift.String?
+            /// Creates a new `RemoteHelpSession`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - state: `pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.
+            ///   - reason:
+            ///   - startedByName: The operator who started it.
+            ///   - startedAt:
+            ///   - endsAt:
+            ///   - endedAt:
+            ///   - endedBy:
+            ///   - endedByName: The person who ended it (operator or owner/admin).
+            ///   - hostname:
+            ///   - tailnetIp: Operator only. Reported by the frame.
+            ///   - adbCommand:
+            ///   - error: Operator only. Why the frame or Headscale failed.
+            public init(
+                id: Components.Schemas.Id,
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                state: Components.Schemas.RemoteHelpSession.StatePayload,
+                reason: Swift.String,
+                startedByName: Swift.String,
+                startedAt: Foundation.Date,
+                endsAt: Foundation.Date,
+                endedAt: Foundation.Date? = nil,
+                endedBy: Components.Schemas.RemoteHelpEndedBy,
+                endedByName: Swift.String? = nil,
+                hostname: Swift.String,
+                tailnetIp: Swift.String? = nil,
+                adbCommand: Swift.String,
+                error: Swift.String? = nil
+            ) {
+                self.id = id
+                self.frameId = frameId
+                self.frameName = frameName
+                self.state = state
+                self.reason = reason
+                self.startedByName = startedByName
+                self.startedAt = startedAt
+                self.endsAt = endsAt
+                self.endedAt = endedAt
+                self.endedBy = endedBy
+                self.endedByName = endedByName
+                self.hostname = hostname
+                self.tailnetIp = tailnetIp
+                self.adbCommand = adbCommand
+                self.error = error
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case state
+                case reason
+                case startedByName = "started_by_name"
+                case startedAt = "started_at"
+                case endsAt = "ends_at"
+                case endedAt = "ended_at"
+                case endedBy = "ended_by"
+                case endedByName = "ended_by_name"
+                case hostname
+                case tailnetIp = "tailnet_ip"
+                case adbCommand = "adb_command"
+                case error
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteHelpEndedBy`.
+        @frozen public enum RemoteHelpEndedBy: String, Codable, Hashable, Sendable, CaseIterable {
+            case _operator = "operator"
+            case owner = "owner"
+            case frame = "frame"
+            case expired = "expired"
+            case unpaired = "unpaired"
+            case failed = "failed"
+        }
+        /// - Remark: Generated from `#/components/schemas/RemoteHelpPage`.
+        public struct RemoteHelpPage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpPage/sessions`.
+            public var sessions: [Components.Schemas.RemoteHelpSession]
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpPage/next_cursor`.
+            public var nextCursor: Swift.String?
+            /// Creates a new `RemoteHelpPage`.
+            ///
+            /// - Parameters:
+            ///   - sessions:
+            ///   - nextCursor:
+            public init(
+                sessions: [Components.Schemas.RemoteHelpSession],
+                nextCursor: Swift.String? = nil
+            ) {
+                self.sessions = sessions
+                self.nextCursor = nextCursor
+            }
+            public enum CodingKeys: String, CodingKey {
+                case sessions
+                case nextCursor = "next_cursor"
+            }
+        }
+        /// `FrameSummary.remote_help`: the active session in short.
+        ///
+        /// - Remark: Generated from `#/components/schemas/FrameRemoteHelpSummary`.
+        public struct FrameRemoteHelpSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelpSummary/ends_at`.
+            public var endsAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelpSummary/reason`.
+            public var reason: Swift.String
+            /// Creates a new `FrameRemoteHelpSummary`.
+            ///
+            /// - Parameters:
+            ///   - endsAt:
+            ///   - reason:
+            public init(
+                endsAt: Foundation.Date,
+                reason: Swift.String
+            ) {
+                self.endsAt = endsAt
+                self.reason = reason
+            }
+            public enum CodingKeys: String, CodingKey {
+                case endsAt = "ends_at"
+                case reason
+            }
+        }
+        /// Payload of the `remote_help` change (docs/spec/remote-help.md §5.2, §5.4). `auth_key` is present only until
+        /// the frame reported `on` or `failed` in a heartbeat; a new change without it follows.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp`.
+        public struct FrameRemoteHelp: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/session_id`.
+            public var sessionId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/state`.
+            @frozen public enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case active = "active"
+            }
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/state`.
+            public var state: Components.Schemas.FrameRemoteHelp.StatePayload
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/ends_at`.
+            public var endsAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/login_server`.
+            public var loginServer: Swift.String
+            /// One-time
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/auth_key`.
+            public var authKey: Swift.String?
+            /// The tailnet host name: `kinframe-<serial or short device id>`, lowercase `[a-z0-9-]`, at most 63.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/hostname`.
+            public var hostname: Swift.String
+            /// The operator's ADB public key, one line of `adbkey.pub`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/adb_key`.
+            public var adbKey: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/tailscale`.
+            public struct TailscalePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/tailscale/version`.
+                public var version: Swift.String
+                /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/tailscale/arm`.
+                public var arm: Components.Schemas.TailscaleBinary
+                /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/tailscale/arm64`.
+                public var arm64: Components.Schemas.TailscaleBinary
+                /// Creates a new `TailscalePayload`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - arm:
+                ///   - arm64:
+                public init(
+                    version: Swift.String,
+                    arm: Components.Schemas.TailscaleBinary,
+                    arm64: Components.Schemas.TailscaleBinary
+                ) {
+                    self.version = version
+                    self.arm = arm
+                    self.arm64 = arm64
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case version
+                    case arm
+                    case arm64
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FrameRemoteHelp/tailscale`.
+            public var tailscale: Components.Schemas.FrameRemoteHelp.TailscalePayload
+            /// Creates a new `FrameRemoteHelp`.
+            ///
+            /// - Parameters:
+            ///   - sessionId:
+            ///   - state:
+            ///   - endsAt:
+            ///   - loginServer:
+            ///   - authKey: One-time
+            ///   - hostname: The tailnet host name: `kinframe-<serial or short device id>`, lowercase `[a-z0-9-]`, at most 63.
+            ///   - adbKey: The operator's ADB public key, one line of `adbkey.pub`.
+            ///   - tailscale:
+            public init(
+                sessionId: Components.Schemas.Id,
+                state: Components.Schemas.FrameRemoteHelp.StatePayload,
+                endsAt: Foundation.Date,
+                loginServer: Swift.String,
+                authKey: Swift.String? = nil,
+                hostname: Swift.String,
+                adbKey: Swift.String,
+                tailscale: Components.Schemas.FrameRemoteHelp.TailscalePayload
+            ) {
+                self.sessionId = sessionId
+                self.state = state
+                self.endsAt = endsAt
+                self.loginServer = loginServer
+                self.authKey = authKey
+                self.hostname = hostname
+                self.adbKey = adbKey
+                self.tailscale = tailscale
+            }
+            public enum CodingKeys: String, CodingKey {
+                case sessionId = "session_id"
+                case state
+                case endsAt = "ends_at"
+                case loginServer = "login_server"
+                case authKey = "auth_key"
+                case hostname
+                case adbKey = "adb_key"
+                case tailscale
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TailscaleBinary`.
+        public struct TailscaleBinary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TailscaleBinary/url`.
+            public var url: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TailscaleBinary/sha256`.
+            public var sha256: Swift.String
+            /// Creates a new `TailscaleBinary`.
+            ///
+            /// - Parameters:
+            ///   - url:
+            ///   - sha256:
+            public init(
+                url: Swift.String,
+                sha256: Swift.String
+            ) {
+                self.url = url
+                self.sha256 = sha256
+            }
+            public enum CodingKeys: String, CodingKey {
+                case url
+                case sha256
+            }
+        }
+        /// The frame's remote help state (docs/spec/remote-help.md §5.4). The first heartbeat with `on` or `failed` for
+        /// the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
+        /// session (`ended_by: failed`, with `error` in the log), `off` for a session the server still has active ends
+        /// it like `deviceStopRemoteHelp` (`ended_by: frame`). Heartbeats for another session id are ignored.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/HeartbeatRemoteHelp`.
+        public struct HeartbeatRemoteHelp: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/HeartbeatRemoteHelp/session_id`.
+            public var sessionId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/HeartbeatRemoteHelp/state`.
+            @frozen public enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case starting = "starting"
+                case on = "on"
+                case failed = "failed"
+                case off = "off"
+            }
+            /// - Remark: Generated from `#/components/schemas/HeartbeatRemoteHelp/state`.
+            public var state: Components.Schemas.HeartbeatRemoteHelp.StatePayload
+            /// - Remark: Generated from `#/components/schemas/HeartbeatRemoteHelp/ip`.
+            public var ip: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/HeartbeatRemoteHelp/error`.
+            public var error: Swift.String?
+            /// Creates a new `HeartbeatRemoteHelp`.
+            ///
+            /// - Parameters:
+            ///   - sessionId:
+            ///   - state:
+            ///   - ip:
+            ///   - error:
+            public init(
+                sessionId: Components.Schemas.Id,
+                state: Components.Schemas.HeartbeatRemoteHelp.StatePayload,
+                ip: Swift.String? = nil,
+                error: Swift.String? = nil
+            ) {
+                self.sessionId = sessionId
+                self.state = state
+                self.ip = ip
+                self.error = error
+            }
+            public enum CodingKeys: String, CodingKey {
+                case sessionId = "session_id"
+                case state
+                case ip
+                case error
+            }
+        }
+        /// `remote_help.updated`: a session started, came on or ended (the frame's members get the member view, the operator who started or ended it the full one).
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteHelpEvent`.
+        public struct RemoteHelpEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpEvent/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case remoteHelp_updated = "remote_help.updated"
+            }
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpEvent/type`.
+            public var _type: Components.Schemas.RemoteHelpEvent._TypePayload
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpEvent/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/RemoteHelpEvent/session`.
+            public var session: Components.Schemas.RemoteHelpSession
+            /// Creates a new `RemoteHelpEvent`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - frameId:
+            ///   - session:
+            public init(
+                _type: Components.Schemas.RemoteHelpEvent._TypePayload,
+                frameId: Components.Schemas.Id,
+                session: Components.Schemas.RemoteHelpSession
+            ) {
+                self._type = _type
+                self.frameId = frameId
+                self.session = session
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case frameId = "frame_id"
+                case session
+            }
+        }
+        /// Push `key`s of remote help (README §5.23). `remote_help_started`: the frame's members, at start.
+        /// `remote_help_on`: the operator who started it, when the frame joined. `remote_help_ended`: members and the
+        /// operator, not whoever ended it. `ids`: `frame_id`, `session_id`; `tag`: `remote_help:<frame_id>`.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/RemoteHelpPushKey`.
+        @frozen public enum RemoteHelpPushKey: String, Codable, Hashable, Sendable, CaseIterable {
+            case remoteHelpStarted = "remote_help_started"
+            case remoteHelpOn = "remote_help_on"
+            case remoteHelpEnded = "remote_help_ended"
+        }
         /// `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
         ///
         /// - Remark: Generated from `#/components/schemas/PhotosChoice`.
@@ -19689,6 +20201,10 @@ extension Components {
             public var createdAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/OperatorScope/members`.
             public var members: [Components.Schemas.OperatorScopeMember]
+            /// Frames only. The frame's latest heartbeat lists the `remote_help` feature (docs/spec/remote-help.md §4); otherwise the operator's page says "not available (Play build or no root)".
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperatorScope/remote_help_supported`.
+            public var remoteHelpSupported: Swift.Bool?
             /// Creates a new `OperatorScope`.
             ///
             /// - Parameters:
@@ -19697,18 +20213,21 @@ extension Components {
             ///   - name:
             ///   - createdAt:
             ///   - members:
+            ///   - remoteHelpSupported: Frames only. The frame's latest heartbeat lists the `remote_help` feature (docs/spec/remote-help.md §4); otherwise the operator's page says "not available (Play build or no root)".
             public init(
                 kind: Components.Schemas.OperatorScope.KindPayload,
                 id: Components.Schemas.Id,
                 name: Swift.String,
                 createdAt: Foundation.Date? = nil,
-                members: [Components.Schemas.OperatorScopeMember]
+                members: [Components.Schemas.OperatorScopeMember],
+                remoteHelpSupported: Swift.Bool? = nil
             ) {
                 self.kind = kind
                 self.id = id
                 self.name = name
                 self.createdAt = createdAt
                 self.members = members
+                self.remoteHelpSupported = remoteHelpSupported
             }
             public enum CodingKeys: String, CodingKey {
                 case kind
@@ -19716,6 +20235,7 @@ extension Components {
                 case name
                 case createdAt = "created_at"
                 case members
+                case remoteHelpSupported = "remote_help_supported"
             }
         }
         /// - Remark: Generated from `#/components/schemas/OperatorOwnershipMatches`.

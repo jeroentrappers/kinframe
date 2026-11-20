@@ -309,9 +309,11 @@ struct FeedRecipientRow: View {
     }
 }
 
-/// An item's thumbnail with processing and failure states.
+/// An item's thumbnail with processing and failure states. `large` (feed and post photos, big cards) prefers the
+/// uncropped display rendition; it is still cropped to fill the frame.
 struct ItemThumb: View {
     let item: Item
+    var large = false
 
     var body: some View {
         Palette.surface2
@@ -322,7 +324,7 @@ struct ItemThumb: View {
                 case .processing:
                     ProgressView()
                 case .ready:
-                    RemoteThumb(url: item.thumbUrl, kind: item.kind)
+                    RemoteThumb(url: large ? item.largeImageUrl : item.thumbUrl, kind: item.kind)
                 }
             }
             .clipped()
