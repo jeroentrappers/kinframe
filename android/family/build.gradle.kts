@@ -46,7 +46,7 @@ android {
         versionCode = familyVersionCode
         versionName = familyVersionName
         buildConfigField("String", "DEFAULT_SERVER", "\"https://kinframe.appmire.be\"")
-        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
+        buildConfigField("String", "SENTRY_DSN", "\"\"")
         buildConfigField("boolean", "FCM_ENABLED", fcmEnabled.toString())
         // Logto's redirect receiver: we replace its filter with our own (app.kinframe:/callback, see the manifest).
         manifestPlaceholders["logtoRedirectScheme"] = "app.kinframe"
@@ -71,6 +71,8 @@ android {
 
     buildTypes {
         release {
+            // Only release builds report crashes, so tests run in the same build as a release stay quiet.
+            buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

@@ -69,6 +69,7 @@ object CrashReports {
         o.isEnableUserInteractionTracing = false
         o.isEnableFramesTracking = false
         o.isEnableAppStartProfiling = false
+        o.profileSessionSampleRate = 0.0
 
         // ANRs; native crashes from Android 12's tombstones, which go through beforeSend like any other event.
         o.isAnrEnabled = true

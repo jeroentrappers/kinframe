@@ -136,6 +136,7 @@ class CrashReportsTest {
         assertFalse(o.isAttachViewHierarchy)
         assertFalse(o.isEnableAutoSessionTracking)
         assertEquals(0.0, o.tracesSampleRate!!, 0.0)
+        assertEquals(0.0, o.profileSessionSampleRate!!, 0.0)
         assertEquals(0.0, o.sessionReplay.sessionSampleRate!!, 0.0)
         assertEquals(0.0, o.sessionReplay.onErrorSampleRate!!, 0.0)
         assertTrue(o.isAnrEnabled)
