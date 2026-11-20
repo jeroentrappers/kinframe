@@ -466,6 +466,11 @@ func (s *Server) spa() http.Handler {
 			return
 		}
 		p := filepath.Clean("/" + r.URL.Path)
+		if strings.HasSuffix(p, ".map") {
+			// Source maps are uploaded to the crash reporting server at build time, never served.
+			problem.Write(w, r, problem.New(problem.NotFound, ""))
+			return
+		}
 		if p != "/" {
 			if f, err := root.Open(p); err == nil {
 				st, err := f.Stat()
