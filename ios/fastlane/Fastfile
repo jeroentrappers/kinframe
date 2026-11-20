@@ -3,6 +3,8 @@
 # Needs an App Store Connect API key (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH, read from ~/.appstoreconnect/env when
 # not set) and MATCH_PASSWORD. Signing identities go into a dedicated keychain (KINFRAME_KEYCHAIN, default
 # ~/Library/Keychains/kinframe-signing.keychain-db, password KINFRAME_KEYCHAIN_PASSWORD), or a temporary one on CI.
+# Crash reports (docs/spec/crash-reporting.md): release and mac_release build with KINFRAME_SENTRY_DSN and upload the
+# dSYMs to GlitchTip with sentry-cli when SENTRY_AUTH_TOKEN is set (both also read from ~/.appstoreconnect/signing.env).
 default_platform(:ios)
 
 APP_IDS = ["app.kinframe.family", "app.kinframe.family.share"].freeze
@@ -50,8 +52,9 @@ platform :ios do
       configuration: "Release",
       output_directory: "build",
       export_options: "ExportOptions.plist",
-      xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}"
+      xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}#{sentry_xcargs}"
     )
+    upload_dsyms
     upload_to_testflight(api_key: asc_key, skip_waiting_for_build_processing: true) if options[:upload]
   end
 
@@ -104,8 +107,9 @@ platform :ios do
       output_directory: "build/mac",
       installer_cert_name: installer_identity,
       export_options: "ExportOptions-Mac.plist",
-      xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}"
+      xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}#{sentry_xcargs}"
     )
+    upload_dsyms
     upload_to_testflight(api_key: asc_key, app_platform: "osx", pkg: Dir["build/mac/*.pkg"].first,
                          skip_waiting_for_build_processing: true) if options[:upload]
   end
@@ -169,8 +173,8 @@ def keychain_path
   ENV["KINFRAME_KEYCHAIN"] || File.expand_path("~/Library/Keychains/kinframe-signing.keychain-db")
 end
 
-# ~/.appstoreconnect/env (API key) and ~/.appstoreconnect/signing.env (MATCH_PASSWORD, KINFRAME_KEYCHAIN_PASSWORD):
-# KEY=value lines; variables already set win.
+# ~/.appstoreconnect/env (API key) and ~/.appstoreconnect/signing.env (MATCH_PASSWORD, KINFRAME_KEYCHAIN_PASSWORD,
+# KINFRAME_SENTRY_DSN, SENTRY_AUTH_TOKEN): KEY=value lines; variables already set win.
 def load_local_env
   %w[env signing.env review.env].each do |name|
     path = File.expand_path("~/.appstoreconnect/#{name}")
@@ -180,6 +184,42 @@ def load_local_env
       next if key.nil? || key.start_with?("#") || value.nil?
       ENV[key] ||= value.gsub("$HOME", Dir.home)
     end
+  end
+end
+
+# The family-apple DSN as a build setting (Info.plist KinframeSentryDSN). Without it the build sends no crash reports.
+def sentry_xcargs
+  dsn = ENV["KINFRAME_SENTRY_DSN"].to_s.strip
+  if dsn.empty?
+    UI.important("KINFRAME_SENTRY_DSN is not set: this build sends no crash reports")
+    return ""
+  end
+  " KINFRAME_SENTRY_DSN=#{dsn.shellescape}"
+end
+
+# Uploads the archive's dSYMs (app, share extension, KinframeKit) to GlitchTip, project family-apple, so its crash
+# reports get symbols. Without SENTRY_AUTH_TOKEN or sentry-cli, or when the upload fails, it warns and the release
+# goes on; the command it prints uploads them later.
+def upload_dsyms
+  dsyms = File.join(lane_context[SharedValues::XCODEBUILD_ARCHIVE].to_s, "dSYMs")
+  env = {
+    "SENTRY_URL" => ENV["SENTRY_URL"] || "https://errors.kinframe.appmire.be",
+    "SENTRY_ORG" => ENV["SENTRY_ORG"] || "kinframe",
+  }
+  # On the PATH, or where Homebrew and sentry-cli's own installer put it (not on the PATH of every shell).
+  cli = [`command -v sentry-cli`.strip, "/opt/homebrew/bin/sentry-cli", "/usr/local/bin/sentry-cli"]
+        .find { |path| !path.empty? && File.executable?(path) }
+  command = "#{cli || "sentry-cli"} debug-files upload --project family-apple #{dsyms.shellescape}"
+  later = "#{env.map { |k, v| "#{k}=#{v}" }.join(" ")} SENTRY_AUTH_TOKEN=… #{command}"
+  if ENV["SENTRY_AUTH_TOKEN"].to_s.empty?
+    UI.important("SENTRY_AUTH_TOKEN is not set: dSYMs not uploaded to GlitchTip. Later: #{later}")
+  elsif cli.nil?
+    UI.important("sentry-cli is not installed (brew install getsentry/tools/sentry-cli): dSYMs not uploaded. Later: #{later}")
+  elsif !File.directory?(dsyms)
+    UI.important("No dSYMs in the archive (#{dsyms}): nothing uploaded")
+  else
+    sh(env.map { |k, v| "#{k}=#{v.shellescape}" }.join(" ") + " " + command,
+       error_callback: ->(_) { UI.important("dSYM upload failed; the release goes on. Later: #{later}") })
   end
 end
 
