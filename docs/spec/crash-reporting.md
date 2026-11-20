@@ -15,7 +15,7 @@ open-source server that accepts the Sentry SDKs' reports. Nothing goes to a thir
   | Project | Client | SDK |
   |---|---|---|
   | `kinframe-server` | Go server | `sentry-go` |
-  | `kinframe-web` | SvelteKit web app | `@sentry/sveltekit` (browser only) |
+  | `kinframe-web` | SvelteKit web app | `@sentry/browser` |
   | `family-android` | Android family app | `io.sentry:sentry-android` |
   | `frame-android` | Android frame app, GitHub and Play flavors | `io.sentry:sentry-android` |
   | `family-apple` | iOS and Mac Catalyst family app (and its share extension) | `sentry-cocoa` (SPM) |
@@ -34,8 +34,8 @@ debug builds, CI, forks and self-hosters' own builds send nothing.
   Info.plist key `KinframeSentryDSN`, read at launch.
 - **Server:** env `KINFRAME_SENTRY_DSN`, empty by default. A self-hoster may point it at their own GlitchTip/Sentry.
 - **Web:** env `KINFRAME_SENTRY_WEB_DSN` on the server, published in the discovery document as `sentry_dsn`
-  (omitted when unset); the web app starts the SDK after reading discovery. The desktop app loads the web app and
-  inherits it.
+  (omitted when unset); the web app starts the SDK after reading discovery. The desktop app is a native client
+  without crash reporting.
 
 A DSN is not a secret (it only allows sending events), but it still lives in env/config, not in the repo.
 
@@ -50,6 +50,8 @@ It never contains personal data:
   "scrub IP" on), cookies or `Authorization` headers.
 - HTTP breadcrumbs and request data keep method, host, path and status; query strings and bodies are dropped
   (tokens and file names travel in them).
+  The server and web also replace ids, tokens and file names in paths with `*` (invite, TV and signed media
+  links carry tokens in the path); web reports keep only the User-Agent header.
 - No screenshots, view hierarchy, session replay or attachments. Performance tracing off (sample rate 0); ANR /
   app-hang detection on.
 - Every SDK has a `beforeSend` hook that enforces the above, so a later SDK default can't widen it.
