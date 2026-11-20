@@ -15,6 +15,7 @@ class FamilyApp : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        FamilyCrashReports.start(this)
         Notifications.createChannels(this)
         graph = AppGraph(this)
     }

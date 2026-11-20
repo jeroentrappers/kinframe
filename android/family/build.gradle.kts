@@ -7,6 +7,9 @@ plugins {
 val familyVersionName: String = providers.gradleProperty("versionName").getOrElse("0.1.0")
 val familyVersionCode: Int = providers.gradleProperty("versionCode").map { it.toInt() }.getOrElse(1)
 
+// Crash reports (docs/spec/crash-reporting.md): only builds given -Pkinframe.sentryDsn=<DSN> (release tooling) report.
+val sentryDsn: String = providers.gradleProperty("kinframe.sentryDsn").getOrElse("").trim()
+
 // Push through Firebase Cloud Messaging is optional and off by default: UnifiedPush needs no Google services.
 // Store builds pass -Pkinframe.fcm=true and supply their own Firebase options as string resources
 // (google_app_id, gcm_defaultSenderId, google_api_key, project_id); no google-services.json lives in this repo.
@@ -43,6 +46,7 @@ android {
         versionCode = familyVersionCode
         versionName = familyVersionName
         buildConfigField("String", "DEFAULT_SERVER", "\"https://kinframe.appmire.be\"")
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         buildConfigField("boolean", "FCM_ENABLED", fcmEnabled.toString())
         // Logto's redirect receiver: we replace its filter with our own (app.kinframe:/callback, see the manifest).
         manifestPlaceholders["logtoRedirectScheme"] = "app.kinframe"
@@ -92,6 +96,17 @@ android {
         disable += "MissingTranslation"
     }
     packaging { resources.excludes += listOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/versions/9/OSGI-INF/MANIFEST.MF") }
+}
+
+androidComponents {
+    // Minified builds carry their R8 mapping's ProGuard UUID for GlitchTip (buildSrc/SentryProguardUuid.kt).
+    onVariants(selector().all()) { variant ->
+        if (!variant.isMinifyEnabled) return@onVariants
+        val uuid = tasks.register<SentryProguardUuid>("${variant.name}SentryProguardUuid") {
+            mapping.set(variant.artifacts.get(com.android.build.api.artifact.SingleArtifact.OBFUSCATION_MAPPING_FILE))
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(uuid, SentryProguardUuid::output)
+    }
 }
 
 kotlin {

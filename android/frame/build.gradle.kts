@@ -10,6 +10,9 @@ plugins {
 val frameVersionName: String = providers.gradleProperty("versionName").getOrElse("0.1.0")
 val frameVersionCode: Int = providers.gradleProperty("versionCode").map { it.toInt() }.getOrElse(1)
 
+// Crash reports (docs/spec/crash-reporting.md): only builds given -Pkinframe.sentryDsn=<DSN> (release tooling) report.
+val sentryDsn: String = providers.gradleProperty("kinframe.sentryDsn").getOrElse("").trim()
+
 // Release signing from the environment or Gradle properties; without them release builds use the debug key, so
 // local and pull-request builds still install on test frames. The keystore is never committed.
 fun signingValue(name: String): String? =
@@ -33,6 +36,7 @@ android {
         // -PemulatorAbis=x86_64 adds ABIs for local emulator runs (the instrumented Frameo import test); never in releases.
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") + emulatorAbis }
         buildConfigField("String", "DEFAULT_SERVER", "\"https://kinframe.appmire.be\"")
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         // The community plugin registry's public key (docs/plugins.md §7.1): only bundles in an index it signed run.
         buildConfigField("String", "PLUGIN_REGISTRY_KEY", "\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt0Z/3gbK9h78oVewOrMVTasFYG4af/w1D3eXmNJk2gCHgw8rEsrammSJXnMu6VXjp0rkz87UXXVOzaAep6fB+Q==\"")
         // Instrumented tests run on an emulator only (see FrameoDatabaseTest).
@@ -148,6 +152,14 @@ val bundlePlugins = tasks.register<BundlePlugins>("bundlePlugins") {
 }
 
 androidComponents {
+    // Minified builds carry their R8 mapping's ProGuard UUID for GlitchTip (buildSrc/SentryProguardUuid.kt).
+    onVariants(selector().all()) { variant ->
+        if (!variant.isMinifyEnabled) return@onVariants
+        val uuid = tasks.register<SentryProguardUuid>("${variant.name}SentryProguardUuid") {
+            mapping.set(variant.artifacts.get(com.android.build.api.artifact.SingleArtifact.OBFUSCATION_MAPPING_FILE))
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(uuid, SentryProguardUuid::output)
+    }
     onVariants { variant ->
         variant.sources.assets?.addGeneratedSourceDirectory(bundlePlugins, BundlePlugins::output)
     }

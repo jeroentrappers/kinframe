@@ -13,6 +13,8 @@ class FrameApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // First, so a crash while building the graph is reported too; the handler below runs before Sentry's.
+        FrameCrashReports.start(this)
         graph = FrameGraph(this)
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
