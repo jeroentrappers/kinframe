@@ -128,6 +128,7 @@ final class SmokeTests: XCTestCase {
         guard let app = accounts?.primary else { return }
         app[keyPath: path] = NavigationPath([route])
         await settle()
+        await quiet()
         app[keyPath: path] = NavigationPath()
         await settle(rounds: 2)
     }
@@ -137,6 +138,19 @@ final class SmokeTests: XCTestCase {
         for _ in 0..<rounds {
             try? await Task.sleep(for: .milliseconds(60))
             window?.layoutIfNeeded()
+        }
+    }
+
+    /// Until the app has sent no request for a moment (at most `limit`): slow CI runners start a screen's loads late,
+    /// and leaving it before they go out would make the test miss them.
+    private func quiet(limit: TimeInterval = 3) async {
+        let end = Date().addingTimeInterval(limit)
+        var last = SmokeServer.requests
+        while Date() < end {
+            await settle(rounds: 5)
+            let now = SmokeServer.requests
+            if now == last { return }
+            last = now
         }
     }
 
@@ -164,12 +178,14 @@ final class SmokeServer: URLProtocol, @unchecked Sendable {
     private struct State {
         var failing = false
         var paths: Set<String> = []
+        var requests = 0
         var unanswered: Set<String> = []
     }
     private static let state = OSAllocatedUnfairLock(initialState: State())
 
     static var failing: Bool { state.withLock { $0.failing } }
     static var paths: Set<String> { state.withLock { $0.paths } }
+    static var requests: Int { state.withLock { $0.requests } }
     static var unanswered: Set<String> { state.withLock { $0.unanswered } }
 
     static func reset(failing: Bool) {
@@ -215,6 +231,7 @@ final class SmokeServer: URLProtocol, @unchecked Sendable {
     private static func answer(_ method: String, _ path: String) -> (Int, String) {
         let failing = state.withLock { s in
             s.paths.insert(path)
+            s.requests += 1
             return s.failing
         }
         if method == "GET", let body = essential(path) ?? (failing ? nil : ordinary(path)) {
