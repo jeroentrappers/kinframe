@@ -1,3 +1,4 @@
+• 1.2.1: fixes the app closing right after it starts.
 • Home: everything your families share, with reactions from people and frames.
 • Comments on every photo, replies and @mentions.
 • Chats: one-to-one, groups, family and circle chats, voice messages, put a photo on a frame.
