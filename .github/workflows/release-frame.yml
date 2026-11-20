@@ -8,6 +8,8 @@ name: Release frame app
 #
 # Secrets: ANDROID_KEYSTORE_B64 (base64 of the release keystore), ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
 # ANDROID_KEY_PASSWORD.
+# Optional (docs/spec/crash-reporting.md): KINFRAME_SENTRY_DSN_FRAME, the crash reports DSN (without it the APK reports
+# nothing), and SENTRY_AUTH_TOKEN, to upload R8's mapping.txt to GlitchTip (skipped with a warning without it).
 
 on:
   push:
@@ -78,10 +80,31 @@ jobs:
           KINFRAME_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KINFRAME_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KINFRAME_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KINFRAME_SENTRY_DSN_FRAME: ${{ secrets.KINFRAME_SENTRY_DSN_FRAME }}
         run: |
+          if [[ -z "$KINFRAME_SENTRY_DSN_FRAME" ]]; then echo "::warning::secret KINFRAME_SENTRY_DSN_FRAME is not set: no crash reports"; fi
           # The `github` flavor: the self-updating build the convert tool installs (docs/play-frame.md for `play`).
           ./gradlew --no-daemon :frame:testGithubDebugUnitTest :frame:assembleGithubRelease \
-            -PversionName='${{ steps.version.outputs.name }}' -PversionCode='${{ steps.version.outputs.code }}'
+            -PversionName='${{ steps.version.outputs.name }}' -PversionCode='${{ steps.version.outputs.code }}' \
+            -Pkinframe.sentryDsn="$KINFRAME_SENTRY_DSN_FRAME"
+
+      - name: Upload mapping to GlitchTip
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_URL: https://errors.kinframe.appmire.be
+          SENTRY_ORG: kinframe
+          SENTRY_PROJECT: frame-android
+          SENTRY_CLI_VERSION: 3.8.2
+          SENTRY_CLI_SHA256: c958865f9d4000183509ea21b1f04925d5390de6d8d87386b9e69f2b305070c3
+        run: |
+          # R8's mapping.txt, so crash reports show readable stack traces; matched by the ProGuard UUID in the APK.
+          if [[ -z "$SENTRY_AUTH_TOKEN" ]]; then echo "::warning::secret SENTRY_AUTH_TOKEN is not set: mapping.txt not uploaded"; exit 0; fi
+          cli="$RUNNER_TEMP/sentry-cli"
+          curl -sSfL -o "$cli" "https://github.com/getsentry/sentry-cli/releases/download/$SENTRY_CLI_VERSION/sentry-cli-Linux-x86_64"
+          echo "$SENTRY_CLI_SHA256  $cli" | sha256sum -c -
+          chmod +x "$cli"
+          "$cli" upload-proguard frame/build/outputs/mapping/githubRelease/mapping.txt \
+            || echo "::warning::uploading mapping.txt to GlitchTip failed; upload it by hand"
 
       - name: Verify signature and package
         run: |
