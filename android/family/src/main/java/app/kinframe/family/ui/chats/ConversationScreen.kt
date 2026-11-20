@@ -365,7 +365,7 @@ private fun MediaGrid(items: List<Item>, onOpen: (Item) -> Unit) {
                 chunk.forEachIndexed { i, item ->
                     Box(Modifier.weight(1f).aspectRatio(if (cols == 1) (item.width?.toFloat()?.div(item.height ?: 1)?.coerceIn(0.7f, 1.6f) ?: 1f) else 1f)
                         .clip(RoundedCornerShape(10.dp)).clickable(role = Role.Image) { onOpen(item) }) {
-                        Thumb(item.thumbUrl, item.caption, Modifier.fillMaxSize(), corner = 10.dp)
+                        Thumb(if (cols == 1) item.largeImageUrl else item.thumbUrl, item.caption, Modifier.fillMaxSize(), corner = 10.dp)
                         if (item.status == "processing") CircularProgressIndicator(Modifier.align(Alignment.Center).size(22.dp), color = Color.White, strokeWidth = 2.dp)
                         if (item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(28.dp), tint = Color.White)
                         val index = row * cols + i

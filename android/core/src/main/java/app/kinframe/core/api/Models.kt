@@ -264,7 +264,10 @@ data class Item(
     val capturedAt: String? = null,
     val placeName: String? = null,
     val createdAt: String? = null,
+    /** The 256 px square thumbnail: small tiles and lists. */
     val thumbUrl: String? = null,
+    /** The uncropped display rendition (≤1600 px long edge, README §5.3); absent on older items until backfilled. */
+    val displayUrl: String? = null,
     /** Live items only: the motion clip (README §5.3 "Live Photos"). */
     val motion: ItemMotion? = null,
     /** Imported on the frame from another app's leftover data ([ItemOrigin]); the sender is then the frame. */
@@ -281,6 +284,9 @@ data class Item(
 ) {
     /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
     val isLive: Boolean get() = kind == MediaKind.LIVE
+
+    /** For large images (feed and post photos): the display rendition, else the square thumbnail. */
+    val largeImageUrl: String? get() = displayUrl ?: thumbUrl
 }
 
 @Serializable

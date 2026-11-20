@@ -65,7 +65,8 @@ fun PostMedia(items: List<Item>, modifier: Modifier = Modifier, onPage: (Int) ->
         HorizontalPager(pager, Modifier.fillMaxWidth().aspectRatio(aspectOf(items.first()))) { i ->
             val item = items[i]
             Box(Modifier.fillMaxSize().let { m -> if (onOpen != null) m.clickable(role = Role.Image) { onOpen(i) } else m }) {
-                Thumb(item.thumbUrl, item.caption, Modifier.fillMaxSize(), corner = 14.dp)
+                // Uncropped display rendition, cropped to the pager's aspect (Thumb crops by default).
+                Thumb(item.largeImageUrl, item.caption, Modifier.fillMaxSize(), corner = 14.dp)
                 if (item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, stringResource(R.string.social_video), Modifier.align(Alignment.Center).size(40.dp), tint = Color.White)
                 if (item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(8.dp))
                 overlay(i)

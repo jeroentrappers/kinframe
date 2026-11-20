@@ -307,7 +307,7 @@ fun WeeklySummaryScreen(s: Load<WeeklySummary>, onRetry: () -> Unit, onBack: () 
                         pluralStringResource(R.plurals.engagement_summary_comments, w.commentCount, w.commentCount),
                     style = Kin.type.body, color = c.inkSoft,
                 )
-                w.topItem?.let { Thumb(it.thumbUrl, it.caption, Modifier.fillMaxWidth().heightIn(min = 200.dp)) }
+                w.topItem?.let { Thumb(it.largeImageUrl, it.caption, Modifier.fillMaxWidth().heightIn(min = 200.dp)) }
                 w.frames.forEach { f ->
                     Row(Modifier.fillMaxWidth()) {
                         Text(f.frameName, style = Kin.type.body, color = c.ink, modifier = Modifier.weight(1f))
@@ -335,7 +335,7 @@ fun RecapScreen(s: Load<MonthlyRecap>, onRetry: () -> Unit, onBack: () -> Unit, 
                 r.mostLoved?.let { ml ->
                     SectionTitle(stringResource(R.string.engagement_recap_most_loved))
                     Surface(Modifier.fillMaxWidth(), onClick = { onOpenPost(ml.postId) }) {
-                        Thumb(ml.item.thumbUrl, ml.item.caption, Modifier.fillMaxWidth().heightIn(min = 200.dp))
+                        Thumb(ml.item.largeImageUrl, ml.item.caption, Modifier.fillMaxWidth().heightIn(min = 200.dp))
                         Text(pluralStringResource(R.plurals.social_reactions_count, ml.reactionCount, ml.reactionCount), style = Kin.type.caption, color = c.inkSoft)
                     }
                 }

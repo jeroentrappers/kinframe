@@ -5,6 +5,7 @@ import app.kinframe.core.api.ApiException
 import app.kinframe.core.api.Discovery
 import app.kinframe.core.api.Feed
 import app.kinframe.core.api.FeedRole
+import app.kinframe.core.api.Item
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.SendCreate
 import app.kinframe.core.api.SendItemCreate
@@ -201,5 +202,16 @@ class SocialApiTest {
         assertTrue(send.contains("\"circle_ids\":[\"c\"]") && send.contains("\"prompt_id\":\"pr\""))
         val plain = KinJson.encodeToString(SendCreate.serializer(), SendCreate.of(listOf("fr"), emptyList(), listOf(SendItemCreate("u"))))
         assertFalse(plain.contains("circle_ids") || plain.contains("prompt_id"))
+    }
+
+    @Test fun itemDisplayUrlIsForLargeImagesWithTheThumbnailAsFallback() {
+        val item = KinJson.decodeFromString(Item.serializer(), """{"id":"i1","kind":"photo","thumb_url":"https://x/t256","display_url":"https://x/d"}""")
+        assertEquals("https://x/d", item.displayUrl)
+        assertEquals("https://x/d", item.largeImageUrl)
+        assertEquals("https://x/t256", item.thumbUrl)
+        // Items from before the display rendition (or older servers): the square thumbnail.
+        val old = KinJson.decodeFromString(Item.serializer(), """{"id":"i2","kind":"photo","thumb_url":"https://x/t256"}""")
+        assertEquals(null, old.displayUrl)
+        assertEquals("https://x/t256", old.largeImageUrl)
     }
 }
