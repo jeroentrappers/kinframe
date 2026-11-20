@@ -14,12 +14,25 @@ places for people, two places for photos, and a three-step request to show a fam
 
 An Instagram for the family. Three words: **family**, **post**, **frame**.
 
-- **The family** is where photos are shared. Anyone can start one, with or without a frame. The app opens straight
-  into it; someone in one family never sees a list of families.
+- **The family** is where photos are shared: typically one household. Anyone can start one, with or without a frame.
+  People are often in several families (their own household, their parents', their children's); the app shows all
+  of them together (§3.1), so someone in one family never notices the concept of "several".
 - **Everyone is family.** One kind of member in the interface (the server keeps owner/admin/poster for permissions).
   Everyone sees everything and can post. Oma is a member like the rest; on her phone she can pick the simple view
   (§6).
-- **Frames show the family.** A frame "shows" a family (server: an active subscription). Added now or later.
+- **Frames show families.** A frame "shows" one or more families (server: active subscriptions). Added now or later.
+
+### 2.1 The reference family
+
+Jeroen and Line have 3 kids; Jeroen has 2 brothers and a sister, each with a partner and 2 kids; Jeroen's and Line's
+parents are alive. Each household is a family: "Trappers" (Jeroen, Line, kids), one per sibling, "Opa & Oma
+Trappers", and Line's parents' family. Everyone posts once, to their own family.
+
+- Jeroen's frame at home shows Trappers. Each sibling's frame shows their own family.
+- Jeroen's parents' frame shows five families: their own and their four children's. Line's parents' frame shows
+  Trappers and Line's siblings' families.
+- Jeroen's parents are members of their children's families too, so on their phones Home shows all five together.
+- When Opa and Oma want a photo to reach all their children, they pick several families when posting (§3.2).
 
 The words "follow", "follower", "subscription" and "feed" do not appear in the interface. Use "shows this family",
 "Add a frame", "frames that show this family".
@@ -30,26 +43,36 @@ Phone tab bar, in this order: **Home · Frames · [+] · Chats · Family**. `+` 
 opens the composer (§4). Chats only when the server has chats (discovery). Tablets and desktop: the same items in the
 rail/sidebar. There is no Send tab, no History tab, no Families tab and no Settings tab any more.
 
-The **current family** drives Home, Family and the composer default. With several families, tapping the family name
-on Home or Family opens a switcher sheet; the choice is remembered per device. With none, see §8.
+There is no "current family" and no switcher. Home and the composer work across all the person's families; the
+Family tab lists them when there are several. The **home family** is the family the person posts to most (ties: the
+one they created, else the oldest membership); it is the composer default and is listed first. With no family at
+all, see §8.
 
 ### 3.1 Home
 
-The current family's timeline (the existing social timeline, filtered to that family), newest first.
+One timeline of all the person's families together (the existing social timeline), newest first, like following
+several accounts.
 
-- Top bar: the family name (switcher affordance only with several families) and the activity (notifications) button.
-- Under it, a horizontal row of the family: people (avatars) and frames (now-showing thumbnail, a green ring when
-  online), ending with an "Invite" bubble that opens the family invite share sheet.
-- Posts: poster and time, the photo(s) edge to edge using `display_url` (fallback `thumb_url`), heart and comment
-  buttons, "On 3 frames · seen by Oma" (existing receipts), who loved it, caption, "View comments".
+- Top bar: "Home" with one family, or nothing extra; the activity (notifications) button.
+- With several families, a row of filter chips under the top bar: **All** · each family by name (home family first).
+  The choice is remembered per device. With one family there are no chips.
+- Under it, a horizontal row of people and frames of the filtered family (with "All": of the home family), ending
+  with an "Invite" bubble that opens that family's invite share sheet.
+- Posts: poster and time, **the family it was posted in** (small label next to the time, only when the person has
+  several families), the photo(s) edge to edge using `display_url` (fallback `thumb_url`), heart and comment buttons,
+  "On 3 frames · seen by Oma" (existing receipts), who loved it, caption, "View comments". A post sent to several
+  families appears once.
 - Empty state: "Share your first photo" with the `+` action, and "Invite family" when the family has only you.
 
 ### 3.2 Composer (`+`)
 
 Photos (picker first, as today), caption, trim/fit/focal tools as today. One destination row:
 
-- Default: the current family — "Peeters family · everyone and its 3 frames". Nothing to choose.
-- "Change" opens a sheet: another family (if in several), or a circle of the current family (existing circles).
+- Default: the home family — "Trappers · everyone and its 2 frames". With a Home filter chip on one family, that
+  family. Nothing to choose.
+- "Change" opens a sheet with the person's families as checkboxes (several can be ticked: one post to several
+  families, which the server already supports as one send to several feeds), and per family its circles (existing
+  circles) as an alternative to the whole family. The row then reads e.g. "3 families · 9 frames".
   Picking individual frames is **not** offered here.
 - Share button: "Share".
 
@@ -58,11 +81,11 @@ Sending to a single frame (a direct send, unchanged on the server) is only reach
 
 ### 3.3 Frames
 
-A list of frame cards: the current family's frames first, then other frames the person is a member of.
+A list of frame cards: frames the person manages or is a member of first, then frames showing their families.
 
 - Card: now-showing photo (or the last placed one), status chip (Online · showing now / Offline since …), name,
-  "Shows Peeters family" (or "Doesn't show a family yet" with an "Add to Peeters family" action for managers),
-  today's reactions ("Oma loved 3 photos today").
+  "Shows Trappers" / "Shows Trappers and 4 other families" (or "Doesn't show a family yet" with an "Add a family"
+  action for managers), today's reactions ("Oma loved 3 photos today").
 - "Add a frame" at the end (pair with code, as today).
 - Tapping a card opens the frame screen: the card on top, then one list —
   1. Photos on this frame (the existing library, albums inside)
@@ -73,10 +96,15 @@ A list of frame cards: the current family's frames first, then other frames the 
      remote help, leave/transfer)
 
   The frame's old tab row (Overview, Photos, People, Families, Calendar, Settings) is gone; the existing screens are
-  reused behind these rows. Which family the frame shows is a line in Frame settings ("Shows Peeters family ·
-  Change").
+  reused behind these rows. Frame settings has **Families on this frame**: the families it shows, each removable by a
+  manager, and "Add a family" (any family the manager is a member of; active at once, §7; families they are not in
+  are added through that family's invite link for frames, as today).
 
 ### 3.4 Family
+
+With one family, the tab opens straight into its profile. With several, it opens a list of the person's families
+(cover, name, "12 people · 3 frames", home family first, "Start a family" at the bottom); each opens its profile. The
+gear on the list opens the App settings.
 
 The family as a profile.
 
@@ -119,7 +147,8 @@ view: big photos and a heart, for Oma").
 - One photo at a time, large; poster name and time in large type; caption; a big "Send a heart" button; a "next"
   button and swipe up/down for the next/previous post.
 - No tab bar. A small "Settings" text button in the top corner opens a sheet with "Normal view" and the account.
-- Uses the current family. Hearts are the existing reaction (love). Comments are not shown in simple view.
+- Shows all the person's families together, like Home with "All", with the family name under the poster. Hearts are
+  the existing reaction (love). Comments are not shown in simple view.
 - Type at least 20 sp/pt for body, buttons at least 64 dp/pt high.
 
 ## 7. Server change: managing the frame is enough
