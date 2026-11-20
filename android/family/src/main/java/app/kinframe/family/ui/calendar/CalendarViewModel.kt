@@ -18,6 +18,7 @@ import app.kinframe.family.util.Problems
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -127,14 +128,17 @@ class CalendarViewModel(
         _state.update { it.copy(error = null) }
         viewModelScope.launch {
             try {
-                val jobs = buildList {
-                    if (manage) {
-                        add(async { _state.update { s -> s.copy(sources = api.calendars(frameId)) } })
-                        add(async { _state.update { s -> s.copy(view = api.frameCalendar(frameId)) } })
+                // In their own scope: a failing load ends up in the catch below instead of crashing the app.
+                coroutineScope {
+                    val jobs = buildList {
+                        if (manage) {
+                            add(async { _state.update { s -> s.copy(sources = api.calendars(frameId)) } })
+                            add(async { _state.update { s -> s.copy(view = api.frameCalendar(frameId)) } })
+                        }
+                        if (mayPut || manage) add(async { _state.update { s -> s.copy(invitations = api.eventInvitations(frameId)) } })
                     }
-                    if (mayPut || manage) add(async { _state.update { s -> s.copy(invitations = api.eventInvitations(frameId)) } })
+                    jobs.awaitAll()
                 }
-                jobs.awaitAll()
                 watchSyncing()
             } catch (e: CancellationException) {
                 throw e
