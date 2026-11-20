@@ -1,8 +1,8 @@
-• 1.2.1: fixes the app closing right after it starts.
+• 1.2.2: fixes crashes at start and in the calendar.
 • Home: everything your families share, with reactions from people and frames.
 • Comments on every photo, replies and @mentions.
 • Chats: one-to-one, groups, family and circle chats, voice messages, put a photo on a frame.
 • Feeds are now families, with circles and readers.
 • Gentle reminders, Ask for new photos, family streak and weekly theme.
-• Leaving a family: your photos stay or go, with notice.
+• Leaving a family: your photos stay or go.
 • Several kinframe servers in one app.
