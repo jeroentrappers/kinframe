@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacybeleid',
-	updated: '2026-11-14',
+	updated: '2026-11-20',
 	intro: [
 		'Met kinframe sturen families foto’s, video’s en berichten naar een fotokader thuis. Dit beleid legt uit welke persoonsgegevens de gehoste kinframe-dienst op https://kinframe.appmire.be verzamelt, waarom, wie er nog bij betrokken is, hoelang we ze bewaren en hoe je ze kunt laten wissen. Het geldt voor de website, de kinframe-apps en kaders wanneer ze deze server gebruiken, de aanmeldpagina’s op auth.kinframe.appmire.be en de webshop voor reservaties.',
 		'Kort gezegd: we gebruiken je gegevens alleen om de dienst te laten werken. Geen advertenties, geen analytics en geen tracking, en we verkopen of delen niets voor marketing. De servers staan in Duitsland.'
@@ -85,6 +85,16 @@ const doc: LegalDoc = {
 			]
 		},
 		{
+			id: 'crash',
+			title: 'Crashrapporten',
+			body: [
+				'Als een kinframe-app, de website of onze server crasht of op een onverwachte fout stoot, stuurt die een crashrapport zodat we de fout kunnen vinden en oplossen. Een rapport bevat de fout en waar in de code ze gebeurde (de stack trace), de versie van de app, het besturingssysteem en het toestelmodel, de toestand van de app op dat moment (bijvoorbeeld of ze op de voorgrond stond en hoeveel geheugen er vrij was) en de laatste stappen voor de fout, zoals welk scherm open stond. Webadressen in een rapport houden alleen de pagina of het eindpunt over, zonder alles na het “?”.',
+				'Een rapport bevat nooit je naam, e-mailadres, account, IP-adres, foto’s, video’s, berichten, bijschriften, bestandsnamen, wachtwoorden, aanmeldtokens of cookies. De apps, de website en de server halen die weg voor ze iets versturen, en de crashserver is ingesteld om ook IP-adressen weg te gooien. Er worden geen schermafbeeldingen of schermopnames gemaakt.',
+				'Rapporten gaan naar onze eigen crashserver op errors.kinframe.appmire.be (GlitchTip, opensourcesoftware), op onze servers in Duitsland; er gaat niets naar derden. Rapporten worden na 90 dagen automatisch gewist. De rechtsgrond is ons gerechtvaardigd belang om de dienst veilig en werkend te houden (artikel 6, lid 1, f).',
+				'Uitzetten: zet “Crashrapporten versturen” uit in de instellingen van de familie-app (Android, iPhone, iPad en Mac) of, op de website, bij Instellingen in elke browser die je gebruikt. De apps sturen niets meer vanaf de volgende keer dat ze starten. Kaders sturen altijd crashrapporten: een kader wordt beheerd door zijn eigenaar en zijn rapporten bevatten geen persoonsgegevens. kinframe-versies uit andere bronnen en servers van anderen sturen ons niets.'
+			]
+		},
+		{
 			id: 'retention',
 			title: 'Hoelang we gegevens bewaren',
 			body: [
@@ -98,6 +108,7 @@ const doc: LegalDoc = {
 						'Plug-ins: hun instellingen tot de eigenaar de widget of het kader verwijdert; de plug-inmelding van het kader: alleen de laatste.',
 						'Agenda’s: tot je de agenda of het kader verwijdert.',
 						'Reservaties in de webshop: automatisch gewist een jaar na de laatste wijziging, of 30 dagen nadat je annuleert. Onbetaalde bestellingen: 30 dagen. Betaalde bestellingen: zeven jaar bewaard, zoals de boekhoudwetgeving vraagt.',
+						'Crashrapporten: na 90 dagen automatisch gewist.',
 						'Logs: de kinframe-server logt bij normale werking geen verzoeken of IP-adressen. Onze webserver houdt toegangslogs bij (IP-adres, tijdstip, opgevraagd adres, browser), hoogstens 14 dagen, voor de beveiliging. De aanmelddienst houdt aanmeldingen bij (tijdstip, IP-adres en browser) om je account te beschermen.'
 					]
 				}
@@ -134,7 +145,7 @@ const doc: LegalDoc = {
 			id: 'storage',
 			title: 'Cookies en opslag op je toestel',
 			body: [
-				'De kinframe-website zet zelf geen cookies en gebruikt geen analytics of tracking. Ze bewaart een paar dingen in je browser die nodig zijn om te werken: je taal, je aanmeldsessie (beheerd door de aanmeldsoftware) en je instelling voor meldingen. De aanmeldpagina’s op auth.kinframe.appmire.be gebruiken strikt noodzakelijke cookies voor de aanmeldsessie. Alle lettertypes en scripts komen van onze eigen server; er wordt niets bij derden geladen, behalve de Cast-software van Google als je begint te casten.',
+				'De kinframe-website zet zelf geen cookies en gebruikt geen analytics of tracking. Ze bewaart een paar dingen in je browser die nodig zijn om te werken: je taal, je aanmeldsessie (beheerd door de aanmeldsoftware), je instelling voor meldingen en of je crashrapporten verstuurt. De aanmeldpagina’s op auth.kinframe.appmire.be gebruiken strikt noodzakelijke cookies voor de aanmeldsessie. Alle lettertypes en scripts komen van onze eigen server; er wordt niets bij derden geladen, behalve de Cast-software van Google als je begint te casten.',
 				'De apps bewaren je aanmelding veilig op je toestel. Het kader houdt een cache van zijn foto’s en video’s bij, zodat het ook offline werkt.'
 			]
 		},

@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacy policy',
-	updated: '2026-11-14',
+	updated: '2026-11-20',
 	intro: [
 		'kinframe lets families send photos, videos and messages to a photo frame at home. This policy explains which personal data the hosted kinframe service at https://kinframe.appmire.be collects, why, who else is involved, how long it is kept and how you can have it deleted. It covers the website, the kinframe apps and frames when they use this server, the sign-in pages at auth.kinframe.appmire.be and the pre-order shop.',
 		'In short: we only use your data to run the service. There are no ads, no analytics and no tracking, and nothing is sold or shared for marketing. The servers are in Germany.'
@@ -85,6 +85,16 @@ const doc: LegalDoc = {
 			]
 		},
 		{
+			id: 'crash',
+			title: 'Crash reports',
+			body: [
+				'When a kinframe app, the website or our server crashes or runs into an unexpected error, it sends a crash report so we can find and fix the fault. A report contains the error and where in the code it happened (the stack trace), the version of the app, the operating system and device model, the app’s state at that moment (for example whether it was in the foreground and how much memory was free) and the last steps before the error, such as which screen was open. Web addresses in a report keep only the page or endpoint, without anything after the “?”.',
+				'A report never contains your name, e-mail address, account, IP address, photos, videos, messages, captions, file names, passwords, sign-in tokens or cookies. The apps, the website and the server remove these before sending, and the crash server is set to drop IP addresses as well. There are no screenshots or recordings of the screen.',
+				'Reports go to our own crash server at errors.kinframe.appmire.be (GlitchTip, an open-source program), on our servers in Germany; nothing is sent to a third party. Reports are deleted automatically after 90 days. The legal basis is our legitimate interest in keeping the service secure and working (article 6(1)(f)).',
+				'Turning it off: switch off “Send crash reports” in the settings of the family app (Android, iPhone, iPad and Mac) or, on the website, in Settings in each browser you use. The apps stop sending from the next time they start. Frames always send crash reports: a frame is managed by its owner and its reports contain no personal data. kinframe builds from other sources and servers run by others send nothing to us.'
+			]
+		},
+		{
 			id: 'retention',
 			title: 'How long we keep data',
 			body: [
@@ -98,6 +108,7 @@ const doc: LegalDoc = {
 						'Plugins: their settings until the owner removes the widget or the frame; the frame’s plugin report: only the latest.',
 						'Calendars: until you remove the calendar or the frame.',
 						'Shop reservations: deleted automatically one year after the last change, or 30 days after you cancel. Unpaid orders: 30 days. Paid orders: kept for seven years, as accounting law requires.',
+						'Crash reports: deleted automatically after 90 days.',
 						'Logs: the kinframe server does not log requests or IP addresses in normal operation. Our web server keeps access logs (IP address, time, address requested, browser) for at most 14 days, for security. The sign-in service keeps a record of sign-ins (time, IP address and browser) to protect your account.'
 					]
 				}
@@ -134,7 +145,7 @@ const doc: LegalDoc = {
 			id: 'storage',
 			title: 'Cookies and storage on your device',
 			body: [
-				'The kinframe website sets no cookies of its own and uses no analytics or tracking. It stores a few things in your browser that it needs to work: your language, your sign-in session (managed by the sign-in software) and your notification setting. The sign-in pages at auth.kinframe.appmire.be use strictly necessary cookies for the sign-in session. All fonts and scripts are served by our own server; nothing is loaded from third parties, except Google’s Cast software when you start casting.',
+				'The kinframe website sets no cookies of its own and uses no analytics or tracking. It stores a few things in your browser that it needs to work: your language, your sign-in session (managed by the sign-in software), your notification setting and whether to send crash reports. The sign-in pages at auth.kinframe.appmire.be use strictly necessary cookies for the sign-in session. All fonts and scripts are served by our own server; nothing is loaded from third parties, except Google’s Cast software when you start casting.',
 				'The apps keep your sign-in securely on your device. The frame keeps a cache of its photos and videos so it works offline.'
 			]
 		},

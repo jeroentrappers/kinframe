@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Politique de confidentialité',
-	updated: '2026-11-14',
+	updated: '2026-11-20',
 	intro: [
 		'kinframe permet aux familles d’envoyer des photos, des vidéos et des messages vers un cadre photo à la maison. Cette politique explique quelles données personnelles le service kinframe hébergé sur https://kinframe.appmire.be collecte, pourquoi, qui d’autre intervient, combien de temps elles sont conservées et comment les faire supprimer. Elle couvre le site web, les applications et cadres kinframe lorsqu’ils utilisent ce serveur, les pages de connexion sur auth.kinframe.appmire.be et la boutique de précommande.',
 		'En bref : nous utilisons vos données uniquement pour faire fonctionner le service. Pas de publicité, pas de mesure d’audience, pas de pistage, et rien n’est vendu ni partagé à des fins de marketing. Les serveurs se trouvent en Allemagne.'
@@ -85,6 +85,16 @@ const doc: LegalDoc = {
 			]
 		},
 		{
+			id: 'crash',
+			title: 'Rapports de plantage',
+			body: [
+				'Lorsqu’une application kinframe, le site ou notre serveur plante ou rencontre une erreur inattendue, il envoie un rapport de plantage pour que nous puissions trouver et corriger le problème. Un rapport contient l’erreur et l’endroit du code où elle s’est produite (la trace d’appels), la version de l’application, le système d’exploitation et le modèle de l’appareil, l’état de l’application à ce moment (par exemple si elle était au premier plan et la mémoire libre) et les dernières étapes avant l’erreur, comme l’écran ouvert. Les adresses web d’un rapport ne gardent que la page ou le point d’accès, sans ce qui suit le « ? ».',
+				'Un rapport ne contient jamais votre nom, votre adresse e-mail, votre compte, votre adresse IP, vos photos, vidéos, messages, légendes, noms de fichiers, mots de passe, jetons de connexion ou cookies. Les applications, le site et le serveur les retirent avant l’envoi, et le serveur de plantages est réglé pour supprimer aussi les adresses IP. Aucune capture ni aucun enregistrement de l’écran n’est fait.',
+				'Les rapports sont envoyés à notre propre serveur de plantages, errors.kinframe.appmire.be (GlitchTip, un logiciel libre), sur nos serveurs en Allemagne ; rien n’est envoyé à des tiers. Les rapports sont supprimés automatiquement après 90 jours. La base légale est notre intérêt légitime à garder le service sûr et en état de marche (article 6, paragraphe 1, f).',
+				'Désactiver : coupez « Envoyer les rapports de plantage » dans les réglages de l’application famille (Android, iPhone, iPad et Mac) ou, sur le site, dans Réglages, dans chaque navigateur que vous utilisez. Les applications n’envoient plus rien dès leur prochain démarrage. Les cadres envoient toujours des rapports de plantage : un cadre est géré par son propriétaire et ses rapports ne contiennent aucune donnée personnelle. Les versions de kinframe d’autres sources et les serveurs gérés par d’autres ne nous envoient rien.'
+			]
+		},
+		{
 			id: 'retention',
 			title: 'Combien de temps nous conservons les données',
 			body: [
@@ -98,6 +108,7 @@ const doc: LegalDoc = {
 						'Plug-ins : leurs réglages jusqu’à ce que le propriétaire supprime le widget ou le cadre ; le rapport des plug-ins du cadre : uniquement le dernier.',
 						'Agendas : jusqu’à ce que vous supprimiez l’agenda ou le cadre.',
 						'Réservations dans la boutique : supprimées automatiquement un an après la dernière modification, ou 30 jours après votre annulation. Commandes non payées : 30 jours. Commandes payées : conservées sept ans, comme l’exige la législation comptable.',
+						'Rapports de plantage : supprimés automatiquement après 90 jours.',
 						'Journaux : en fonctionnement normal, le serveur kinframe n’enregistre ni les requêtes ni les adresses IP. Notre serveur web conserve des journaux d’accès (adresse IP, heure, adresse demandée, navigateur) pendant 14 jours au maximum, pour la sécurité. Le service de connexion garde une trace des connexions (heure, adresse IP et navigateur) pour protéger votre compte.'
 					]
 				}
@@ -134,7 +145,7 @@ const doc: LegalDoc = {
 			id: 'storage',
 			title: 'Cookies et stockage sur votre appareil',
 			body: [
-				'Le site kinframe ne dépose aucun cookie propre et n’utilise ni mesure d’audience ni pistage. Il conserve dans votre navigateur quelques éléments nécessaires à son fonctionnement : votre langue, votre session de connexion (gérée par le logiciel de connexion) et votre réglage de notifications. Les pages de connexion sur auth.kinframe.appmire.be utilisent des cookies strictement nécessaires pour la session de connexion. Toutes les polices et tous les scripts viennent de notre propre serveur ; rien n’est chargé depuis des tiers, sauf le logiciel Cast de Google lorsque vous lancez une diffusion.',
+				'Le site kinframe ne dépose aucun cookie propre et n’utilise ni mesure d’audience ni pistage. Il conserve dans votre navigateur quelques éléments nécessaires à son fonctionnement : votre langue, votre session de connexion (gérée par le logiciel de connexion), votre réglage de notifications et le choix d’envoyer ou non les rapports de plantage. Les pages de connexion sur auth.kinframe.appmire.be utilisent des cookies strictement nécessaires pour la session de connexion. Toutes les polices et tous les scripts viennent de notre propre serveur ; rien n’est chargé depuis des tiers, sauf le logiciel Cast de Google lorsque vous lancez une diffusion.',
 				'Les applications conservent votre connexion de manière sécurisée sur votre appareil. Le cadre garde ses photos et vidéos en cache pour fonctionner hors ligne.'
 			]
 		},
