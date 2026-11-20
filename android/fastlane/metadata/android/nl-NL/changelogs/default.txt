@@ -1,4 +1,4 @@
-• 1.2.3: anonieme crashrapporten helpen fouten oplossen (uitzetten in Instellingen → Privacy).
+• 1.2.3: anonieme crashrapporten helpen fouten oplossen (uit via Instellingen → Privacy).
 • Home: alles wat je families delen, met reacties van mensen en kaders.
 • Opmerkingen bij elke foto, antwoorden en @vermeldingen.
 • Chats: één-op-één, groepen, families en kringen, spraakberichten.
