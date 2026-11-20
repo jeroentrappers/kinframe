@@ -5,7 +5,7 @@ open-source server that accepts the Sentry SDKs' reports. Nothing goes to a thir
 
 ## 1. Where reports go
 
-- GlitchTip runs at `https://errors.kinframe.appmire.be` on appmire-hetz1 (kinframe-deploy, role `glitchtip`),
+- GlitchTip (7.0 or later) runs at `https://errors.kinframe.appmire.be` on appmire-hetz1 (kinframe-deploy, role `glitchtip`),
   organization `kinframe`, with sign-up closed.
 - Operators sign in with kinframe's Logto: `bootstrap-logto` registers the app `GlitchTip` and writes
   `glitchtip-oidc.json` (`KINFRAME_LOGTO_GLITCHTIP_URL`), and the role links each operator's Logto user to the GlitchTip
@@ -67,8 +67,9 @@ deletes events after 90 days) and the opt-out.
 
 ## 5. Readable stack traces
 
-- **Android:** release builds upload R8's `mapping.txt` to GlitchTip (`sentry-cli debug-files upload --type
-  proguard`, auth token `SENTRY_AUTH_TOKEN`) and to Play (Android vitals).
+- **Android:** release builds upload R8's `mapping.txt` to GlitchTip (`sentry-cli upload-proguard`, auth token
+  `SENTRY_AUTH_TOKEN`; GlitchTip 7.0 or later applies it) and to Play (Android vitals). The build writes the
+  mapping's ProGuard UUID into the app (`assets/sentry-debug-meta.properties`) so reports match their upload.
 - **Apple:** release lanes upload the dSYMs with `sentry-cli debug-files upload`.
 - **Web:** the build uploads source maps with `sentry-cli sourcemaps upload` and doesn't serve them.
 - **Server:** Go stack traces are readable as is.
