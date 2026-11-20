@@ -20,6 +20,7 @@ struct SettingsTab: View {
     @State private var pushOn = false
     @State private var pushStatus: UNAuthorizationStatus = .notDetermined
     @State private var pushBusy = false
+    @State private var sendCrashReports = CrashReporting.enabled
     @State private var debugReservations = false
     @State private var deletingAccount = false
     @Environment(\.openURL) private var openURL
@@ -43,6 +44,7 @@ struct SettingsTab: View {
                     profile
                     preferences
                     notifications
+                    crashReports
                     // Family social: read receipts, blocked people, reminders, milestones, operator reports.
                     SocialSettingsSections()
                     LeavingSettingsSection()
@@ -237,6 +239,23 @@ struct SettingsTab: View {
         .task { await refreshPush() }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             Task { await refreshPush() }
+        }
+    }
+
+    /// "Send crash reports" (docs/spec/crash-reporting.md §4): a device setting, shown only in builds that report.
+    @ViewBuilder
+    private var crashReports: some View {
+        if CrashReporting.available {
+            Section {
+                Toggle(isOn: $sendCrashReports) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L("ios.crashReports.toggle"))
+                        Text(L("ios.crashReports.hint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                    }
+                }
+                .tint(Palette.accent)
+                .onChange(of: sendCrashReports) { _, on in CrashReporting.enabled = on }
+            }
         }
     }
 

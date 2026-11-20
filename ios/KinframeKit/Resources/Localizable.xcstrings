@@ -27864,6 +27864,40 @@
         }
       }
     },
+    "ios.crashReports.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymous crash details help us fix bugs. No photos, messages or personal data."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonieme crashgegevens helpen ons fouten op te lossen. Geen foto’s, berichten of persoonsgegevens."
+          }
+        }
+      }
+    },
+    "ios.crashReports.toggle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send crash reports"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crashrapporten versturen"
+          }
+        }
+      }
+    },
     "ios.em.addSender": {
       "extractionState": "manual",
       "localizations": {

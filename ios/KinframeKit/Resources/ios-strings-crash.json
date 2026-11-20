@@ -1,0 +1,10 @@
+{
+  "ios.crashReports.hint": {
+    "en": "Anonymous crash details help us fix bugs. No photos, messages or personal data.",
+    "nl": "Anonieme crashgegevens helpen ons fouten op te lossen. Geen foto’s, berichten of persoonsgegevens."
+  },
+  "ios.crashReports.toggle": {
+    "en": "Send crash reports",
+    "nl": "Crashrapporten versturen"
+  }
+}
