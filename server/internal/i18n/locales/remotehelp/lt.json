@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Nuotolinė pagalba: {frame}",
+    "push.remote_help_started.body": "Serverio operatorius įjungė nuotolinę pagalbą rėmeliui {frame} iki {until}. Savininkai ir administratoriai gali ją sustabdyti rėmelio puslapyje.",
+    "push.remote_help_on.title": "Nuotolinė pagalba įjungta",
+    "push.remote_help_on.body": "{frame} prisijungė prie tailnet. Nuotolinė pagalba veiks iki {until}.",
+    "push.remote_help_ended.title": "Nuotolinė pagalba baigta",
+    "push.remote_help_ended.body": "Nuotolinė pagalba rėmeliui {frame} baigta.",
+    "problem.remote_help_active": "Šiam rėmeliui nuotolinė pagalba jau įjungta",
+    "problem.remote_help_unsupported": "Šis rėmelis negali gauti nuotolinės pagalbos (Play versija arba nėra root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "nuotolinė pagalba šiame serveryje nenustatyta",
+    "Headscale could not make a key for the frame": "Headscale nepavyko sukurti rakto rėmeliui",
+    "no remote help session is active on this frame": "šiame rėmelyje nuotolinė pagalba neveikia",
+    "hours must be 1, 8 or 24": "valandų turi būti 1, 8 arba 24"
+  }
+}

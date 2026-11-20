@@ -279,6 +279,7 @@ const (
 	ChangeTypePlacementRemove ChangeType = "placement.remove"
 	ChangeTypePlacementUpsert ChangeType = "placement.upsert"
 	ChangeTypePrompts         ChangeType = "prompts"
+	ChangeTypeRemoteHelp      ChangeType = "remote_help"
 	ChangeTypeReset           ChangeType = "reset"
 	ChangeTypeSettings        ChangeType = "settings"
 	ChangeTypeWeather         ChangeType = "weather"
@@ -310,6 +311,8 @@ func (e ChangeType) Valid() bool {
 	case ChangeTypePlacementUpsert:
 		return true
 	case ChangeTypePrompts:
+		return true
+	case ChangeTypeRemoteHelp:
 		return true
 	case ChangeTypeReset:
 		return true
@@ -1408,6 +1411,21 @@ func (e FrameCommandType) Valid() bool {
 	}
 }
 
+// Defines values for FrameRemoteHelpState.
+const (
+	FrameRemoteHelpStateActive FrameRemoteHelpState = "active"
+)
+
+// Valid indicates whether the value is a known member of the FrameRemoteHelpState enum.
+func (e FrameRemoteHelpState) Valid() bool {
+	switch e {
+	case FrameRemoteHelpStateActive:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameSettingsCalendarView.
 const (
 	FourDay FrameSettingsCalendarView = "four_day"
@@ -1882,6 +1900,30 @@ func (e HeartbeatUpdateState) Valid() bool {
 	case HeartbeatUpdateStateUpdated:
 		return true
 	case HeartbeatUpdateStateWaiting:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for HeartbeatRemoteHelpState.
+const (
+	HeartbeatRemoteHelpStateFailed   HeartbeatRemoteHelpState = "failed"
+	HeartbeatRemoteHelpStateOff      HeartbeatRemoteHelpState = "off"
+	HeartbeatRemoteHelpStateOn       HeartbeatRemoteHelpState = "on"
+	HeartbeatRemoteHelpStateStarting HeartbeatRemoteHelpState = "starting"
+)
+
+// Valid indicates whether the value is a known member of the HeartbeatRemoteHelpState enum.
+func (e HeartbeatRemoteHelpState) Valid() bool {
+	switch e {
+	case HeartbeatRemoteHelpStateFailed:
+		return true
+	case HeartbeatRemoteHelpStateOff:
+		return true
+	case HeartbeatRemoteHelpStateOn:
+		return true
+	case HeartbeatRemoteHelpStateStarting:
 		return true
 	default:
 		return false
@@ -3045,6 +3087,8 @@ const (
 	ProblemCodeNotFound              ProblemCode = "not_found"
 	ProblemCodeOwnerCannotLeave      ProblemCode = "owner_cannot_leave"
 	ProblemCodeRateLimited           ProblemCode = "rate_limited"
+	ProblemCodeRemoteHelpActive      ProblemCode = "remote_help_active"
+	ProblemCodeRemoteHelpUnsupported ProblemCode = "remote_help_unsupported"
 	ProblemCodeServerError           ProblemCode = "server_error"
 	ProblemCodeSourceTestFailed      ProblemCode = "source_test_failed"
 	ProblemCodeTelegramAlreadyLinked ProblemCode = "telegram_already_linked"
@@ -3116,6 +3160,10 @@ func (e ProblemCode) Valid() bool {
 	case ProblemCodeOwnerCannotLeave:
 		return true
 	case ProblemCodeRateLimited:
+		return true
+	case ProblemCodeRemoteHelpActive:
+		return true
+	case ProblemCodeRemoteHelpUnsupported:
 		return true
 	case ProblemCodeServerError:
 		return true
@@ -3391,6 +3439,114 @@ func (e RemoteEndReason) Valid() bool {
 	case RemoteEndReasonUnsubscribed:
 		return true
 	case RemoteEndReasonWithdrawn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteHelpEndedBy.
+const (
+	RemoteHelpEndedByExpired  RemoteHelpEndedBy = "expired"
+	RemoteHelpEndedByFailed   RemoteHelpEndedBy = "failed"
+	RemoteHelpEndedByFrame    RemoteHelpEndedBy = "frame"
+	RemoteHelpEndedByOperator RemoteHelpEndedBy = "operator"
+	RemoteHelpEndedByOwner    RemoteHelpEndedBy = "owner"
+	RemoteHelpEndedByUnpaired RemoteHelpEndedBy = "unpaired"
+)
+
+// Valid indicates whether the value is a known member of the RemoteHelpEndedBy enum.
+func (e RemoteHelpEndedBy) Valid() bool {
+	switch e {
+	case RemoteHelpEndedByExpired:
+		return true
+	case RemoteHelpEndedByFailed:
+		return true
+	case RemoteHelpEndedByFrame:
+		return true
+	case RemoteHelpEndedByOperator:
+		return true
+	case RemoteHelpEndedByOwner:
+		return true
+	case RemoteHelpEndedByUnpaired:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteHelpEventType.
+const (
+	RemoteHelpUpdated RemoteHelpEventType = "remote_help.updated"
+)
+
+// Valid indicates whether the value is a known member of the RemoteHelpEventType enum.
+func (e RemoteHelpEventType) Valid() bool {
+	switch e {
+	case RemoteHelpUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteHelpPushKey.
+const (
+	RemoteHelpEnded   RemoteHelpPushKey = "remote_help_ended"
+	RemoteHelpOn      RemoteHelpPushKey = "remote_help_on"
+	RemoteHelpStarted RemoteHelpPushKey = "remote_help_started"
+)
+
+// Valid indicates whether the value is a known member of the RemoteHelpPushKey enum.
+func (e RemoteHelpPushKey) Valid() bool {
+	switch e {
+	case RemoteHelpEnded:
+		return true
+	case RemoteHelpOn:
+		return true
+	case RemoteHelpStarted:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteHelpSessionState.
+const (
+	RemoteHelpSessionStateEnded   RemoteHelpSessionState = "ended"
+	RemoteHelpSessionStateOn      RemoteHelpSessionState = "on"
+	RemoteHelpSessionStatePending RemoteHelpSessionState = "pending"
+)
+
+// Valid indicates whether the value is a known member of the RemoteHelpSessionState enum.
+func (e RemoteHelpSessionState) Valid() bool {
+	switch e {
+	case RemoteHelpSessionStateEnded:
+		return true
+	case RemoteHelpSessionStateOn:
+		return true
+	case RemoteHelpSessionStatePending:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RemoteHelpStartHours.
+const (
+	RemoteHelpStartHoursN1  RemoteHelpStartHours = 1
+	RemoteHelpStartHoursN24 RemoteHelpStartHours = 24
+	RemoteHelpStartHoursN8  RemoteHelpStartHours = 8
+)
+
+// Valid indicates whether the value is a known member of the RemoteHelpStartHours enum.
+func (e RemoteHelpStartHours) Valid() bool {
+	switch e {
+	case RemoteHelpStartHoursN1:
+		return true
+	case RemoteHelpStartHoursN24:
+		return true
+	case RemoteHelpStartHoursN8:
 		return true
 	default:
 		return false
@@ -5276,7 +5432,10 @@ type Change struct {
 
 	// Prompts `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.
 	Prompts *FramePrompts `json:"prompts,omitempty"`
-	Seq     int           `json:"seq"`
+
+	// RemoteHelp `remote_help` change (entity `id` = the frame): the active remote help session, or null = no session (leave the tailnet and clean up). Old frame apps ignore it.
+	RemoteHelp *FrameRemoteHelp `json:"remote_help,omitempty"`
+	Seq        int              `json:"seq"`
 
 	// Settings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
 	Settings *FrameSettings `json:"settings,omitempty"`
@@ -5823,6 +5982,10 @@ type Discovery struct {
 
 	// RemoteFamilies True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
 	RemoteFamilies *bool `json:"remote_families,omitempty"`
+
+	// RemoteHelp True when the operator configured remote help (Headscale, ADB key and the checked tailnet policy;
+	// docs/spec/remote-help.md §5.1). Frame pages show an active session either way (`FrameSummary.remote_help`).
+	RemoteHelp *bool `json:"remote_help,omitempty"`
 
 	// ServerId Stable random id of this server (generated at first start), so apps signed in to several servers can tell
 	// them apart and deduplicate accounts (docs/spec/multi-server.md §2.3).
@@ -7132,8 +7295,11 @@ type Frame struct {
 	// PhotoRequest The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
 	PhotoRequest   *PhotoRequest `json:"photo_request,omitempty"`
 	PlacementCount *int          `json:"placement_count,omitempty"`
-	Role           Role          `json:"role"`
-	Screen         *Screen       `json:"screen,omitempty"`
+
+	// RemoteHelp The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
+	RemoteHelp *FrameRemoteHelpSummary `json:"remote_help,omitempty"`
+	Role       Role                    `json:"role"`
+	Screen     *Screen                 `json:"screen,omitempty"`
 }
 
 // FrameBirthday One person on the frame, merged across the frame's birthday subscriptions on normalized name + day + month
@@ -7254,6 +7420,45 @@ type FrameReactionRef struct {
 
 	// ServerName A frame on another server (README §5.22); `frame_id` is then the remote subscription's id.
 	ServerName *string `json:"server_name,omitempty"`
+}
+
+// FrameRemoteHelp Payload of the `remote_help` change (docs/spec/remote-help.md §5.2, §5.4). `auth_key` is present only until
+// the frame reported `on` or `failed` in a heartbeat; a new change without it follows.
+type FrameRemoteHelp struct {
+	// AdbKey The operator's ADB public key, one line of `adbkey.pub`.
+	AdbKey string `json:"adb_key"`
+
+	// AuthKey One-time
+	AuthKey *string   `json:"auth_key,omitempty"`
+	EndsAt  time.Time `json:"ends_at"`
+
+	// Hostname The tailnet host name: `kinframe-<serial or short device id>`, lowercase `[a-z0-9-]`, at most 63.
+	//
+	// Example: kinframe-36339301
+	Hostname string `json:"hostname"`
+
+	// LoginServer Example: https://headscale.appmire.be
+	LoginServer string `json:"login_server"`
+
+	// SessionId UUIDv7
+	SessionId Id                   `json:"session_id"`
+	State     FrameRemoteHelpState `json:"state"`
+	Tailscale struct {
+		Arm   TailscaleBinary `json:"arm"`
+		Arm64 TailscaleBinary `json:"arm64"`
+
+		// Version Example: 1.104.7
+		Version string `json:"version"`
+	} `json:"tailscale"`
+}
+
+// FrameRemoteHelpState defines model for FrameRemoteHelp.State.
+type FrameRemoteHelpState string
+
+// FrameRemoteHelpSummary `FrameSummary.remote_help`: the active session in short.
+type FrameRemoteHelpSummary struct {
+	EndsAt time.Time `json:"ends_at"`
+	Reason string    `json:"reason"`
 }
 
 // FrameSettings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
@@ -7480,8 +7685,11 @@ type FrameSummary struct {
 
 	// PhotoRequest The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
 	PhotoRequest *PhotoRequest `json:"photo_request,omitempty"`
-	Role         Role          `json:"role"`
-	Screen       *Screen       `json:"screen,omitempty"`
+
+	// RemoteHelp The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
+	RemoteHelp *FrameRemoteHelpSummary `json:"remote_help,omitempty"`
+	Role       Role                    `json:"role"`
+	Screen     *Screen                 `json:"screen,omitempty"`
 }
 
 // FrameUpdate A frame app release mirrored by the server.
@@ -7602,6 +7810,8 @@ type Heartbeat struct {
 	// `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
 	// has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
 	// app"; nothing is withheld.
+	// `remote_help`: the frame can join the operator's tailnet for remote help (the GitHub build on a rooted
+	// frame, docs/spec/remote-help.md §5.4); only such frames can get a session.
 	Features          *[]string `json:"features,omitempty"`
 	LastShutdownClean *bool     `json:"last_shutdown_clean,omitempty"`
 
@@ -7611,10 +7821,16 @@ type Heartbeat struct {
 	PlacementsCached *int       `json:"placements_cached,omitempty"`
 
 	// PlacementsEvicted Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
-	PlacementsEvicted *int                  `json:"placements_evicted,omitempty"`
-	PlacementsMissing *int                  `json:"placements_missing,omitempty"`
-	ScreenState       *HeartbeatScreenState `json:"screen_state,omitempty"`
-	StorageFreeBytes  *int                  `json:"storage_free_bytes,omitempty"`
+	PlacementsEvicted *int `json:"placements_evicted,omitempty"`
+	PlacementsMissing *int `json:"placements_missing,omitempty"`
+
+	// RemoteHelp The frame's remote help state (docs/spec/remote-help.md §5.4). The first heartbeat with `on` or `failed` for
+	// the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
+	// session (`ended_by: failed`, with `error` in the log), `off` for a session the server still has active ends
+	// it like `deviceStopRemoteHelp` (`ended_by: frame`). Heartbeats for another session id are ignored.
+	RemoteHelp       *HeartbeatRemoteHelp  `json:"remote_help,omitempty"`
+	ScreenState      *HeartbeatScreenState `json:"screen_state,omitempty"`
+	StorageFreeBytes *int                  `json:"storage_free_bytes,omitempty"`
 
 	// StorageState `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
 	StorageState      *HeartbeatStorageState `json:"storage_state,omitempty"`
@@ -7645,6 +7861,24 @@ type HeartbeatStorageState string
 // showing. `updated`: the last update succeeded. `failed`: the last attempt failed (see
 // `last_update_error`). `rolled_back`: the new version crash-looped and the previous one was reinstalled.
 type HeartbeatUpdateState string
+
+// HeartbeatRemoteHelp The frame's remote help state (docs/spec/remote-help.md §5.4). The first heartbeat with `on` or `failed` for
+// the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
+// session (`ended_by: failed`, with `error` in the log), `off` for a session the server still has active ends
+// it like `deviceStopRemoteHelp` (`ended_by: frame`). Heartbeats for another session id are ignored.
+type HeartbeatRemoteHelp struct {
+	Error *string `json:"error,omitempty"`
+
+	// Ip Example: 100.64.0.9
+	Ip *string `json:"ip,omitempty"`
+
+	// SessionId UUIDv7
+	SessionId Id                       `json:"session_id"`
+	State     HeartbeatRemoteHelpState `json:"state"`
+}
+
+// HeartbeatRemoteHelpState defines model for HeartbeatRemoteHelp.State.
+type HeartbeatRemoteHelpState string
 
 // Id UUIDv7
 type Id = openapi_types.UUID
@@ -8546,6 +8780,9 @@ type OperatorScope struct {
 	Kind    OperatorScopeKind     `json:"kind"`
 	Members []OperatorScopeMember `json:"members"`
 	Name    string                `json:"name"`
+
+	// RemoteHelpSupported Frames only. The frame's latest heartbeat lists the `remote_help` feature (docs/spec/remote-help.md §4); otherwise the operator's page says "not available (Play build or no root)".
+	RemoteHelpSupported *bool `json:"remote_help_supported,omitempty"`
 }
 
 // OperatorScopeKind defines model for OperatorScope.Kind.
@@ -9610,6 +9847,88 @@ type ReminderPreferencesUpdateAutoReducedSeen bool
 // RemoteEndReason defines model for RemoteEndReason.
 type RemoteEndReason string
 
+// RemoteHelpEndedBy defines model for RemoteHelpEndedBy.
+type RemoteHelpEndedBy string
+
+// RemoteHelpEvent `remote_help.updated`: a session started, came on or ended (the frame's members get the member view, the operator who started or ended it the full one).
+type RemoteHelpEvent struct {
+	// FrameId UUIDv7
+	FrameId Id `json:"frame_id"`
+
+	// Session A remote help session. Members (`getFrameRemoteHelp`, `remote_help.updated` to members) get it without
+	// `tailnet_ip` and `error`.
+	Session RemoteHelpSession   `json:"session"`
+	Type    RemoteHelpEventType `json:"type"`
+}
+
+// RemoteHelpEventType defines model for RemoteHelpEvent.Type.
+type RemoteHelpEventType string
+
+// RemoteHelpPage defines model for RemoteHelpPage.
+type RemoteHelpPage struct {
+	NextCursor *string             `json:"next_cursor"`
+	Sessions   []RemoteHelpSession `json:"sessions"`
+}
+
+// RemoteHelpPushKey Push `key`s of remote help (README §5.23). `remote_help_started`: the frame's members, at start.
+// `remote_help_on`: the operator who started it, when the frame joined. `remote_help_ended`: members and the
+// operator, not whoever ended it. `ids`: `frame_id`, `session_id`; `tag`: `remote_help:<frame_id>`.
+type RemoteHelpPushKey string
+
+// RemoteHelpSession A remote help session. Members (`getFrameRemoteHelp`, `remote_help.updated` to members) get it without
+// `tailnet_ip` and `error`.
+type RemoteHelpSession struct {
+	// AdbCommand Example: adb connect kinframe-36339301:5555
+	AdbCommand string             `json:"adb_command"`
+	EndedAt    *time.Time         `json:"ended_at"`
+	EndedBy    *RemoteHelpEndedBy `json:"ended_by"`
+
+	// EndedByName The person who ended it (operator or owner/admin).
+	EndedByName *string   `json:"ended_by_name"`
+	EndsAt      time.Time `json:"ends_at"`
+
+	// Error Operator only. Why the frame or Headscale failed.
+	Error *string `json:"error,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId   Id     `json:"frame_id"`
+	FrameName string `json:"frame_name"`
+
+	// Hostname Example: kinframe-36339301
+	Hostname string `json:"hostname"`
+
+	// Id UUIDv7
+	Id        Id        `json:"id"`
+	Reason    string    `json:"reason"`
+	StartedAt time.Time `json:"started_at"`
+
+	// StartedByName The operator who started it.
+	StartedByName string `json:"started_by_name"`
+
+	// State `pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.
+	State RemoteHelpSessionState `json:"state"`
+
+	// TailnetIp Operator only. Reported by the frame.
+	//
+	// Example: 100.64.0.9
+	TailnetIp *string `json:"tailnet_ip,omitempty"`
+}
+
+// RemoteHelpSessionState `pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.
+type RemoteHelpSessionState string
+
+// RemoteHelpStart defines model for RemoteHelpStart.
+type RemoteHelpStart struct {
+	// Hours How long the session lasts.
+	Hours RemoteHelpStartHours `json:"hours"`
+
+	// Reason Shown to the frame's members and kept in the log.
+	Reason string `json:"reason"`
+}
+
+// RemoteHelpStartHours How long the session lasts.
+type RemoteHelpStartHours int
+
 // RemoteInvitePreview defines model for RemoteInvitePreview.
 type RemoteInvitePreview struct {
 	// CoverUrl A signed thumbnail on A, valid for an hour.
@@ -10540,6 +10859,14 @@ type SystemMessage struct {
 // SystemMessageType defines model for SystemMessageType.
 type SystemMessageType string
 
+// TailscaleBinary defines model for TailscaleBinary.
+type TailscaleBinary struct {
+	Sha256 string `json:"sha256"`
+
+	// Url Example: https://pkgs.tailscale.com/stable/tailscale_1.104.7_arm.tgz
+	Url string `json:"url"`
+}
+
 // TakeAwayRequest defines model for TakeAwayRequest.
 type TakeAwayRequest struct {
 	// Comments `keep` (default) or `delete`: your comments in the family become tombstones ("Comment deleted").
@@ -11056,10 +11383,13 @@ type User struct {
 	Email       *string    `json:"email,omitempty"`
 
 	// Id UUIDv7
-	Id                 Id      `json:"id"`
-	IsOperator         *bool   `json:"is_operator,omitempty"`
-	Locale             *string `json:"locale,omitempty"`
-	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
+	Id         Id      `json:"id"`
+	IsOperator *bool   `json:"is_operator,omitempty"`
+	Locale     *string `json:"locale,omitempty"`
+
+	// RemoteHelp Operators only (`getMe`), true when the server has remote help configured, so the operator's settings show Settings → Remote help.
+	RemoteHelp         *bool `json:"remote_help,omitempty"`
+	ShareLocationNames *bool `json:"share_location_names,omitempty"`
 
 	// ShowReadReceipts Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
 	ShowReadReceipts *bool `json:"show_read_receipts,omitempty"`
@@ -11872,6 +12202,12 @@ type OperatorSearchOwnershipParams struct {
 	Q string `form:"q" json:"q"`
 }
 
+// OperatorListRemoteHelpParams defines parameters for OperatorListRemoteHelp.
+type OperatorListRemoteHelpParams struct {
+	Cursor *Cursor `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Limit  *Limit  `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // ListOperatorReportsParams defines parameters for ListOperatorReports.
 type ListOperatorReportsParams struct {
 	Status *ListOperatorReportsParamsStatus `form:"status,omitempty" json:"status,omitempty"`
@@ -12296,6 +12632,9 @@ type OperatorTransferFeedOwnerJSONRequestBody = OperatorOwnerTransfer
 // OperatorTransferFrameOwnerJSONRequestBody defines body for OperatorTransferFrameOwner for application/json ContentType.
 type OperatorTransferFrameOwnerJSONRequestBody = OperatorOwnerTransfer
 
+// OperatorStartRemoteHelpJSONRequestBody defines body for OperatorStartRemoteHelp for application/json ContentType.
+type OperatorStartRemoteHelpJSONRequestBody = RemoteHelpStart
+
 // OperatorSetLimitsJSONRequestBody defines body for OperatorSetLimits for application/json ContentType.
 type OperatorSetLimitsJSONRequestBody = Limits
 
@@ -12508,6 +12847,9 @@ type ServerInterface interface {
 
 	// (PUT /v1/device/plugins/status)
 	DevicePutPluginStatus(w http.ResponseWriter, r *http.Request)
+
+	// (DELETE /v1/device/remote-help)
+	DeviceStopRemoteHelp(w http.ResponseWriter, r *http.Request)
 
 	// (PATCH /v1/device/settings)
 	DevicePatchSettings(w http.ResponseWriter, r *http.Request, params DevicePatchSettingsParams)
@@ -12881,6 +13223,12 @@ type ServerInterface interface {
 	// (GET /v1/frames/{frameId}/plugins)
 	GetFramePlugins(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
+	// (DELETE /v1/frames/{frameId}/remote-help)
+	StopFrameRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (GET /v1/frames/{frameId}/remote-help)
+	GetFrameRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (GET /v1/frames/{frameId}/remote-subscriptions)
 	ListRemoteSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
@@ -13046,6 +13394,12 @@ type ServerInterface interface {
 	// (POST /v1/operator/frames/{frameId}/owner)
 	OperatorTransferFrameOwner(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
+	// (DELETE /v1/operator/frames/{frameId}/remote-help)
+	OperatorStopRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/operator/frames/{frameId}/remote-help)
+	OperatorStartRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(w http.ResponseWriter, r *http.Request)
 
@@ -13057,6 +13411,9 @@ type ServerInterface interface {
 
 	// (GET /v1/operator/ownership/search)
 	OperatorSearchOwnership(w http.ResponseWriter, r *http.Request, params OperatorSearchOwnershipParams)
+
+	// (GET /v1/operator/remote-help)
+	OperatorListRemoteHelp(w http.ResponseWriter, r *http.Request, params OperatorListRemoteHelpParams)
 
 	// (GET /v1/operator/remote-servers)
 	OperatorListRemoteServers(w http.ResponseWriter, r *http.Request)
@@ -14591,6 +14948,20 @@ func (siw *ServerInterfaceWrapper) DevicePutPluginStatus(w http.ResponseWriter, 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DevicePutPluginStatus(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceStopRemoteHelp operation middleware
+func (siw *ServerInterfaceWrapper) DeviceStopRemoteHelp(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceStopRemoteHelp(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -18939,6 +19310,58 @@ func (siw *ServerInterfaceWrapper) GetFramePlugins(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// StopFrameRemoteHelp operation middleware
+func (siw *ServerInterfaceWrapper) StopFrameRemoteHelp(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.StopFrameRemoteHelp(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFrameRemoteHelp operation middleware
+func (siw *ServerInterfaceWrapper) GetFrameRemoteHelp(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFrameRemoteHelp(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListRemoteSubscriptions operation middleware
 func (siw *ServerInterfaceWrapper) ListRemoteSubscriptions(w http.ResponseWriter, r *http.Request) {
 
@@ -20412,6 +20835,58 @@ func (siw *ServerInterfaceWrapper) OperatorTransferFrameOwner(w http.ResponseWri
 	handler.ServeHTTP(w, r)
 }
 
+// OperatorStopRemoteHelp operation middleware
+func (siw *ServerInterfaceWrapper) OperatorStopRemoteHelp(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorStopRemoteHelp(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorStartRemoteHelp operation middleware
+func (siw *ServerInterfaceWrapper) OperatorStartRemoteHelp(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorStartRemoteHelp(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // OperatorGetLimits operation middleware
 func (siw *ServerInterfaceWrapper) OperatorGetLimits(w http.ResponseWriter, r *http.Request) {
 
@@ -20510,6 +20985,52 @@ func (siw *ServerInterfaceWrapper) OperatorSearchOwnership(w http.ResponseWriter
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OperatorSearchOwnership(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorListRemoteHelp operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListRemoteHelp(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params OperatorListRemoteHelpParams
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "cursor", r.URL.Query(), &params.Cursor, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "cursor"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListRemoteHelp(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -22398,6 +22919,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/catalog", wrapper.DevicePutPluginCatalog)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/plugins/registry", wrapper.DeviceGetPluginRegistry)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/status", wrapper.DevicePutPluginStatus)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/remote-help", wrapper.DeviceStopRemoteHelp)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/settings", wrapper.DevicePatchSettings)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/state", wrapper.DeviceGetState)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/enroll", wrapper.EnrollDevice)
@@ -22521,6 +23043,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:bulk", wrapper.BulkUpdatePlacements)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:share", wrapper.SharePlacements)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/plugins", wrapper.GetFramePlugins)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/remote-help", wrapper.StopFrameRemoteHelp)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/remote-help", wrapper.GetFrameRemoteHelp)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions", wrapper.ListRemoteSubscriptions)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions", wrapper.CreateRemoteSubscription)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/remote-subscriptions/{remoteSubscriptionId}", wrapper.DeleteRemoteSubscription)
@@ -22577,10 +23101,13 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/operator/blocked-servers/{blockedServerId}", wrapper.OperatorUnblockServer)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/operator/feeds/{feedId}/owner", wrapper.OperatorTransferFeedOwner)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/operator/frames/{frameId}/owner", wrapper.OperatorTransferFrameOwner)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/operator/frames/{frameId}/remote-help", wrapper.OperatorStopRemoteHelp)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/operator/frames/{frameId}/remote-help", wrapper.OperatorStartRemoteHelp)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorGetLimits)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/ownership-log", wrapper.OperatorListOwnershipLog)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/ownership/search", wrapper.OperatorSearchOwnership)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/remote-help", wrapper.OperatorListRemoteHelp)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/remote-servers", wrapper.OperatorListRemoteServers)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reports", wrapper.ListOperatorReports)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
@@ -24155,6 +24682,38 @@ type DevicePutPluginStatusdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response DevicePutPluginStatusdefaultApplicationProblemPlusJSONResponse) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceStopRemoteHelpRequestObject struct {
+}
+
+type DeviceStopRemoteHelpResponseObject interface {
+	VisitDeviceStopRemoteHelpResponse(w http.ResponseWriter) error
+}
+
+type DeviceStopRemoteHelp204Response struct {
+}
+
+func (response DeviceStopRemoteHelp204Response) VisitDeviceStopRemoteHelpResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceStopRemoteHelpdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceStopRemoteHelpdefaultApplicationProblemPlusJSONResponse) VisitDeviceStopRemoteHelpResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -29354,6 +29913,86 @@ func (response GetFramePluginsdefaultApplicationProblemPlusJSONResponse) VisitGe
 	return err
 }
 
+type StopFrameRemoteHelpRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type StopFrameRemoteHelpResponseObject interface {
+	VisitStopFrameRemoteHelpResponse(w http.ResponseWriter) error
+}
+
+type StopFrameRemoteHelp204Response struct {
+}
+
+func (response StopFrameRemoteHelp204Response) VisitStopFrameRemoteHelpResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type StopFrameRemoteHelpdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response StopFrameRemoteHelpdefaultApplicationProblemPlusJSONResponse) VisitStopFrameRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFrameRemoteHelpRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type GetFrameRemoteHelpResponseObject interface {
+	VisitGetFrameRemoteHelpResponse(w http.ResponseWriter) error
+}
+
+type GetFrameRemoteHelp200JSONResponse RemoteHelpSession
+
+func (response GetFrameRemoteHelp200JSONResponse) VisitGetFrameRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFrameRemoteHelp204Response struct {
+}
+
+func (response GetFrameRemoteHelp204Response) VisitGetFrameRemoteHelpResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type GetFrameRemoteHelpdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFrameRemoteHelpdefaultApplicationProblemPlusJSONResponse) VisitGetFrameRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListRemoteSubscriptionsRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 }
@@ -31503,6 +32142,79 @@ func (response OperatorTransferFrameOwnerdefaultApplicationProblemPlusJSONRespon
 	return err
 }
 
+type OperatorStopRemoteHelpRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type OperatorStopRemoteHelpResponseObject interface {
+	VisitOperatorStopRemoteHelpResponse(w http.ResponseWriter) error
+}
+
+type OperatorStopRemoteHelp204Response struct {
+}
+
+func (response OperatorStopRemoteHelp204Response) VisitOperatorStopRemoteHelpResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type OperatorStopRemoteHelpdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorStopRemoteHelpdefaultApplicationProblemPlusJSONResponse) VisitOperatorStopRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorStartRemoteHelpRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Body    *OperatorStartRemoteHelpJSONRequestBody
+}
+
+type OperatorStartRemoteHelpResponseObject interface {
+	VisitOperatorStartRemoteHelpResponse(w http.ResponseWriter) error
+}
+
+type OperatorStartRemoteHelp201JSONResponse RemoteHelpSession
+
+func (response OperatorStartRemoteHelp201JSONResponse) VisitOperatorStartRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorStartRemoteHelpdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorStartRemoteHelpdefaultApplicationProblemPlusJSONResponse) VisitOperatorStartRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type OperatorGetLimitsRequestObject struct {
 }
 
@@ -31613,6 +32325,45 @@ type OperatorSearchOwnershipdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response OperatorSearchOwnershipdefaultApplicationProblemPlusJSONResponse) VisitOperatorSearchOwnershipResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListRemoteHelpRequestObject struct {
+	Params OperatorListRemoteHelpParams
+}
+
+type OperatorListRemoteHelpResponseObject interface {
+	VisitOperatorListRemoteHelpResponse(w http.ResponseWriter) error
+}
+
+type OperatorListRemoteHelp200JSONResponse RemoteHelpPage
+
+func (response OperatorListRemoteHelp200JSONResponse) VisitOperatorListRemoteHelpResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListRemoteHelpdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListRemoteHelpdefaultApplicationProblemPlusJSONResponse) VisitOperatorListRemoteHelpResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -34323,6 +35074,9 @@ type StrictServerInterface interface {
 	// (PUT /v1/device/plugins/status)
 	DevicePutPluginStatus(ctx context.Context, request DevicePutPluginStatusRequestObject) (DevicePutPluginStatusResponseObject, error)
 
+	// (DELETE /v1/device/remote-help)
+	DeviceStopRemoteHelp(ctx context.Context, request DeviceStopRemoteHelpRequestObject) (DeviceStopRemoteHelpResponseObject, error)
+
 	// (PATCH /v1/device/settings)
 	DevicePatchSettings(ctx context.Context, request DevicePatchSettingsRequestObject) (DevicePatchSettingsResponseObject, error)
 
@@ -34695,6 +35449,12 @@ type StrictServerInterface interface {
 	// (GET /v1/frames/{frameId}/plugins)
 	GetFramePlugins(ctx context.Context, request GetFramePluginsRequestObject) (GetFramePluginsResponseObject, error)
 
+	// (DELETE /v1/frames/{frameId}/remote-help)
+	StopFrameRemoteHelp(ctx context.Context, request StopFrameRemoteHelpRequestObject) (StopFrameRemoteHelpResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/remote-help)
+	GetFrameRemoteHelp(ctx context.Context, request GetFrameRemoteHelpRequestObject) (GetFrameRemoteHelpResponseObject, error)
+
 	// (GET /v1/frames/{frameId}/remote-subscriptions)
 	ListRemoteSubscriptions(ctx context.Context, request ListRemoteSubscriptionsRequestObject) (ListRemoteSubscriptionsResponseObject, error)
 
@@ -34860,6 +35620,12 @@ type StrictServerInterface interface {
 	// (POST /v1/operator/frames/{frameId}/owner)
 	OperatorTransferFrameOwner(ctx context.Context, request OperatorTransferFrameOwnerRequestObject) (OperatorTransferFrameOwnerResponseObject, error)
 
+	// (DELETE /v1/operator/frames/{frameId}/remote-help)
+	OperatorStopRemoteHelp(ctx context.Context, request OperatorStopRemoteHelpRequestObject) (OperatorStopRemoteHelpResponseObject, error)
+
+	// (POST /v1/operator/frames/{frameId}/remote-help)
+	OperatorStartRemoteHelp(ctx context.Context, request OperatorStartRemoteHelpRequestObject) (OperatorStartRemoteHelpResponseObject, error)
+
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(ctx context.Context, request OperatorGetLimitsRequestObject) (OperatorGetLimitsResponseObject, error)
 
@@ -34871,6 +35637,9 @@ type StrictServerInterface interface {
 
 	// (GET /v1/operator/ownership/search)
 	OperatorSearchOwnership(ctx context.Context, request OperatorSearchOwnershipRequestObject) (OperatorSearchOwnershipResponseObject, error)
+
+	// (GET /v1/operator/remote-help)
+	OperatorListRemoteHelp(ctx context.Context, request OperatorListRemoteHelpRequestObject) (OperatorListRemoteHelpResponseObject, error)
 
 	// (GET /v1/operator/remote-servers)
 	OperatorListRemoteServers(ctx context.Context, request OperatorListRemoteServersRequestObject) (OperatorListRemoteServersResponseObject, error)
@@ -36354,6 +37123,30 @@ func (sh *strictHandler) DevicePutPluginStatus(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DevicePutPluginStatusResponseObject); ok {
 		if err := validResponse.VisitDevicePutPluginStatusResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceStopRemoteHelp operation middleware
+func (sh *strictHandler) DeviceStopRemoteHelp(w http.ResponseWriter, r *http.Request) {
+	var request DeviceStopRemoteHelpRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceStopRemoteHelp(ctx, request.(DeviceStopRemoteHelpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceStopRemoteHelp")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceStopRemoteHelpResponseObject); ok {
+		if err := validResponse.VisitDeviceStopRemoteHelpResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -39987,6 +40780,58 @@ func (sh *strictHandler) GetFramePlugins(w http.ResponseWriter, r *http.Request,
 	}
 }
 
+// StopFrameRemoteHelp operation middleware
+func (sh *strictHandler) StopFrameRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request StopFrameRemoteHelpRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.StopFrameRemoteHelp(ctx, request.(StopFrameRemoteHelpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "StopFrameRemoteHelp")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(StopFrameRemoteHelpResponseObject); ok {
+		if err := validResponse.VisitStopFrameRemoteHelpResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFrameRemoteHelp operation middleware
+func (sh *strictHandler) GetFrameRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request GetFrameRemoteHelpRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFrameRemoteHelp(ctx, request.(GetFrameRemoteHelpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFrameRemoteHelp")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFrameRemoteHelpResponseObject); ok {
+		if err := validResponse.VisitGetFrameRemoteHelpResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListRemoteSubscriptions operation middleware
 func (sh *strictHandler) ListRemoteSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request ListRemoteSubscriptionsRequestObject
@@ -41538,6 +42383,65 @@ func (sh *strictHandler) OperatorTransferFrameOwner(w http.ResponseWriter, r *ht
 	}
 }
 
+// OperatorStopRemoteHelp operation middleware
+func (sh *strictHandler) OperatorStopRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request OperatorStopRemoteHelpRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorStopRemoteHelp(ctx, request.(OperatorStopRemoteHelpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorStopRemoteHelp")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorStopRemoteHelpResponseObject); ok {
+		if err := validResponse.VisitOperatorStopRemoteHelpResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorStartRemoteHelp operation middleware
+func (sh *strictHandler) OperatorStartRemoteHelp(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request OperatorStartRemoteHelpRequestObject
+
+	request.FrameId = frameId
+
+	var body OperatorStartRemoteHelpJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorStartRemoteHelp(ctx, request.(OperatorStartRemoteHelpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorStartRemoteHelp")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorStartRemoteHelpResponseObject); ok {
+		if err := validResponse.VisitOperatorStartRemoteHelpResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // OperatorGetLimits operation middleware
 func (sh *strictHandler) OperatorGetLimits(w http.ResponseWriter, r *http.Request) {
 	var request OperatorGetLimitsRequestObject
@@ -41638,6 +42542,32 @@ func (sh *strictHandler) OperatorSearchOwnership(w http.ResponseWriter, r *http.
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(OperatorSearchOwnershipResponseObject); ok {
 		if err := validResponse.VisitOperatorSearchOwnershipResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorListRemoteHelp operation middleware
+func (sh *strictHandler) OperatorListRemoteHelp(w http.ResponseWriter, r *http.Request, params OperatorListRemoteHelpParams) {
+	var request OperatorListRemoteHelpRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListRemoteHelp(ctx, request.(OperatorListRemoteHelpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListRemoteHelp")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListRemoteHelpResponseObject); ok {
+		if err := validResponse.VisitOperatorListRemoteHelpResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

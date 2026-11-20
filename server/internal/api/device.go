@@ -391,6 +391,19 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,
 			}})
+		case store.FeedRemoteHelp:
+			c, err := s.remoteHelpChange(ctx, f)
+			if err != nil {
+				return nil, err
+			}
+			if c == nil && snapshot {
+				continue
+			}
+			var payload any
+			if c != nil {
+				payload = c
+			}
+			out = append(out, map[string]any{"seq": e.Seq, "type": "remote_help", "id": f.ID, "remote_help": payload})
 		default:
 			// engagement: `comments`, `photo_request` and `prompts`
 			c, _, err := s.engagementChange(ctx, f, e, snapshot)
@@ -611,6 +624,9 @@ func (s *Server) DeviceHeartbeat(ctx context.Context, req gen.DeviceHeartbeatReq
 	}
 	if err := s.st.RecordHeartbeat(ctx, d.ID, raw, req.Body.AppVersion, req.Body.AppVersionCode, unclean, features); err != nil {
 		return nil, err
+	}
+	if req.Body.RemoteHelp != nil && d.FrameID != nil {
+		s.remoteHelpHeartbeat(ctx, *d.FrameID, req.Body.RemoteHelp)
 	}
 	// A frame app that now handles feed history quietly gets the backfill it was not sent.
 	upgraded := *d

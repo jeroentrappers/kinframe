@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Vzdialená pomoc: {frame}",
+    "push.remote_help_started.body": "Prevádzkovateľ servera spustil vzdialenú pomoc na rámčeku {frame} do {until}. Vlastníci a správcovia ju môžu zastaviť na stránke rámčeka.",
+    "push.remote_help_on.title": "Vzdialená pomoc je zapnutá",
+    "push.remote_help_on.body": "{frame} sa pripojil k tailnetu. Vzdialená pomoc beží do {until}.",
+    "push.remote_help_ended.title": "Vzdialená pomoc skončila",
+    "push.remote_help_ended.body": "Vzdialená pomoc na rámčeku {frame} skončila.",
+    "problem.remote_help_active": "Vzdialená pomoc je pre tento rámček už zapnutá",
+    "problem.remote_help_unsupported": "Tento rámček nemôže dostať vzdialenú pomoc (verzia z Play alebo bez rootu)"
+  },
+  "details": {
+    "remote help is not configured on this server": "vzdialená pomoc nie je na tomto serveri nastavená",
+    "Headscale could not make a key for the frame": "Headscale nedokázal vytvoriť kľúč pre rámček",
+    "no remote help session is active on this frame": "na tomto rámčeku nebeží žiadna vzdialená pomoc",
+    "hours must be 1, 8 or 24": "počet hodín musí byť 1, 8 alebo 24"
+  }
+}

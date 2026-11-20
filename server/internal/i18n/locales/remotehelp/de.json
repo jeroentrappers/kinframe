@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Fernhilfe für {frame}",
+    "push.remote_help_started.body": "Der Betreiber des Servers hat die Fernhilfe für {frame} gestartet, bis {until}. Eigentümer und Admins können sie auf der Seite des Bilderrahmens beenden.",
+    "push.remote_help_on.title": "Fernhilfe ist aktiv",
+    "push.remote_help_on.body": "{frame} ist mit dem Tailnet verbunden. Die Fernhilfe läuft bis {until}.",
+    "push.remote_help_ended.title": "Fernhilfe beendet",
+    "push.remote_help_ended.body": "Die Fernhilfe für {frame} ist beendet.",
+    "problem.remote_help_active": "Die Fernhilfe ist für diesen Bilderrahmen schon aktiv",
+    "problem.remote_help_unsupported": "Dieser Bilderrahmen kann keine Fernhilfe bekommen (Play-Version oder kein Root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "Fernhilfe ist auf diesem Server nicht eingerichtet",
+    "Headscale could not make a key for the frame": "Headscale konnte keinen Schlüssel für den Bilderrahmen erstellen",
+    "no remote help session is active on this frame": "für diesen Bilderrahmen läuft keine Fernhilfe",
+    "hours must be 1, 8 or 24": "Stunden muss 1, 8 oder 24 sein"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Hulp op afstand op {frame}",
+    "push.remote_help_started.body": "De beheerder van de server heeft hulp op afstand gestart op {frame}, tot {until}. Eigenaars en beheerders kunnen het stoppen op de pagina van de fotolijst.",
+    "push.remote_help_on.title": "Hulp op afstand staat aan",
+    "push.remote_help_on.body": "{frame} is verbonden met het tailnet. Hulp op afstand loopt tot {until}.",
+    "push.remote_help_ended.title": "Hulp op afstand is gestopt",
+    "push.remote_help_ended.body": "Hulp op afstand op {frame} is gestopt.",
+    "problem.remote_help_active": "Hulp op afstand staat al aan voor deze fotolijst",
+    "problem.remote_help_unsupported": "Deze fotolijst kan geen hulp op afstand krijgen (Play-versie of geen root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "hulp op afstand is niet ingesteld op deze server",
+    "Headscale could not make a key for the frame": "Headscale kon geen sleutel maken voor de fotolijst",
+    "no remote help session is active on this frame": "er loopt geen hulp op afstand op deze fotolijst",
+    "hours must be 1, 8 or 24": "uren moet 1, 8 of 24 zijn"
+  }
+}

@@ -177,6 +177,9 @@ type Config struct {
 
 	// Families on different servers (docs/spec/multi-server.md), config/federation.go.
 	Federation FederationConfig
+
+	// Remote help (docs/spec/remote-help.md §5.1), config/remotehelp.go.
+	RemoteHelp RemoteHelpConfig
 }
 
 // AppPlatforms are the family app platforms, as named in `X-Kinframe-App: kinframe-family-<platform>/…`.
@@ -467,6 +470,9 @@ func load(get func(string) string) (*Config, error) {
 		errs = append(errs, err)
 	}
 	if err := loadFederation(c, env); err != nil { // families on different servers (federation.go)
+		errs = append(errs, err)
+	}
+	if err := loadRemoteHelp(c, get, env); err != nil { // remote help (remotehelp.go)
 		errs = append(errs, err)
 	}
 	if c.WeatherRefresh < 15*time.Minute {

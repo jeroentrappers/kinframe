@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Attālā palīdzība: {frame}",
+    "push.remote_help_started.body": "Servera operators ieslēdza attālo palīdzību rāmim {frame} līdz {until}. Īpašnieki un administratori to var apturēt rāmja lapā.",
+    "push.remote_help_on.title": "Attālā palīdzība ir ieslēgta",
+    "push.remote_help_on.body": "{frame} pievienojās tailnet. Attālā palīdzība ilgs līdz {until}.",
+    "push.remote_help_ended.title": "Attālā palīdzība beigusies",
+    "push.remote_help_ended.body": "Attālā palīdzība rāmim {frame} ir beigusies.",
+    "problem.remote_help_active": "Šim rāmim attālā palīdzība jau ir ieslēgta",
+    "problem.remote_help_unsupported": "Šis rāmis nevar saņemt attālo palīdzību (Play versija vai nav root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "attālā palīdzība šajā serverī nav iestatīta",
+    "Headscale could not make a key for the frame": "Headscale neizdevās izveidot atslēgu rāmim",
+    "no remote help session is active on this frame": "šim rāmim nav aktīvas attālās palīdzības",
+    "hours must be 1, 8 or 24": "stundām jābūt 1, 8 vai 24"
+  }
+}

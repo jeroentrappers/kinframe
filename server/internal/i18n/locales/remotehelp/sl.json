@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Pomoč na daljavo: {frame}",
+    "push.remote_help_started.body": "Upravljavec strežnika je zagnal pomoč na daljavo na okvirju {frame} do {until}. Lastniki in skrbniki jo lahko ustavijo na strani okvirja.",
+    "push.remote_help_on.title": "Pomoč na daljavo je vklopljena",
+    "push.remote_help_on.body": "{frame} se je pridružil tailnetu. Pomoč na daljavo traja do {until}.",
+    "push.remote_help_ended.title": "Pomoč na daljavo je končana",
+    "push.remote_help_ended.body": "Pomoč na daljavo na okvirju {frame} je končana.",
+    "problem.remote_help_active": "Pomoč na daljavo je za ta okvir že vklopljena",
+    "problem.remote_help_unsupported": "Ta okvir ne more dobiti pomoči na daljavo (različica iz Play ali brez roota)"
+  },
+  "details": {
+    "remote help is not configured on this server": "pomoč na daljavo na tem strežniku ni nastavljena",
+    "Headscale could not make a key for the frame": "Headscale ni mogel ustvariti ključa za okvir",
+    "no remote help session is active on this frame": "na tem okvirju ne poteka pomoč na daljavo",
+    "hours must be 1, 8 or 24": "ure morajo biti 1, 8 ali 24"
+  }
+}

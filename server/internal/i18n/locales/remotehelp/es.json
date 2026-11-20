@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Ayuda remota en {frame}",
+    "push.remote_help_started.body": "El operador del servidor inició la ayuda remota en {frame}, hasta las {until}. Los propietarios y administradores pueden detenerla en la página del marco.",
+    "push.remote_help_on.title": "La ayuda remota está activa",
+    "push.remote_help_on.body": "{frame} se unió a la tailnet. La ayuda remota dura hasta las {until}.",
+    "push.remote_help_ended.title": "Ayuda remota finalizada",
+    "push.remote_help_ended.body": "La ayuda remota en {frame} ha finalizado.",
+    "problem.remote_help_active": "La ayuda remota ya está activa en este marco",
+    "problem.remote_help_unsupported": "Este marco no puede recibir ayuda remota (versión de Play o sin root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "la ayuda remota no está configurada en este servidor",
+    "Headscale could not make a key for the frame": "Headscale no pudo crear una clave para el marco",
+    "no remote help session is active on this frame": "no hay ayuda remota activa en este marco",
+    "hours must be 1, 8 or 24": "las horas deben ser 1, 8 o 24"
+  }
+}

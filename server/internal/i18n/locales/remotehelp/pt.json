@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Ajuda remota em {frame}",
+    "push.remote_help_started.body": "O operador do servidor iniciou a ajuda remota em {frame}, até às {until}. Os proprietários e administradores podem pará-la na página da moldura.",
+    "push.remote_help_on.title": "A ajuda remota está ativa",
+    "push.remote_help_on.body": "{frame} entrou na tailnet. A ajuda remota dura até às {until}.",
+    "push.remote_help_ended.title": "Ajuda remota terminada",
+    "push.remote_help_ended.body": "A ajuda remota em {frame} terminou.",
+    "problem.remote_help_active": "A ajuda remota já está ativa nesta moldura",
+    "problem.remote_help_unsupported": "Esta moldura não pode receber ajuda remota (versão da Play ou sem root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "a ajuda remota não está configurada neste servidor",
+    "Headscale could not make a key for the frame": "O Headscale não conseguiu criar uma chave para a moldura",
+    "no remote help session is active on this frame": "não há ajuda remota ativa nesta moldura",
+    "hours must be 1, 8 or 24": "as horas têm de ser 1, 8 ou 24"
+  }
+}

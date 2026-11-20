@@ -230,6 +230,8 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	wg.Add(2)
 	go func() { defer wg.Done(); a.API.RunLeaving(ctx) }()
 	go func() { defer wg.Done(); a.API.RunFederation(ctx) }()
+	wg.Add(1)
+	go func() { defer wg.Done(); a.API.RunRemoteHelp(ctx) }()
 	if a.Releases != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()

@@ -121,6 +121,8 @@ type Server struct {
 	em *emailInbox // email to frame (email.go)
 
 	fed *federationState // families on different servers (federation_identity.go)
+
+	rh *remoteHelp // remote help (remotehelp.go)
 }
 
 // now is the server's clock (birthday dates and windows).
@@ -251,6 +253,9 @@ func New(d Deps) (*Server, error) {
 	}
 	if err := s.setupFederation(); err != nil {
 		return nil, fmt.Errorf("federation: %w", err)
+	}
+	if err := s.setupRemoteHelp(); err != nil {
+		return nil, fmt.Errorf("remote help: %w", err)
 	}
 	return s, nil
 }

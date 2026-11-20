@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "مساعدة عن بُعد على {frame}",
+    "push.remote_help_started.body": "بدأ مشغّل الخادم المساعدة عن بُعد على {frame} حتى {until}. يمكن للمالكين والمشرفين إيقافها من صفحة الإطار.",
+    "push.remote_help_on.title": "المساعدة عن بُعد مفعّلة",
+    "push.remote_help_on.body": "انضم {frame} إلى شبكة tailnet. تستمر المساعدة عن بُعد حتى {until}.",
+    "push.remote_help_ended.title": "انتهت المساعدة عن بُعد",
+    "push.remote_help_ended.body": "انتهت المساعدة عن بُعد على {frame}.",
+    "problem.remote_help_active": "المساعدة عن بُعد مفعّلة بالفعل لهذا الإطار",
+    "problem.remote_help_unsupported": "لا يمكن لهذا الإطار الحصول على مساعدة عن بُعد (إصدار Play أو بدون صلاحيات root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "المساعدة عن بُعد غير مُعدّة على هذا الخادم",
+    "Headscale could not make a key for the frame": "تعذّر على Headscale إنشاء مفتاح للإطار",
+    "no remote help session is active on this frame": "لا توجد مساعدة عن بُعد نشطة على هذا الإطار",
+    "hours must be 1, 8 or 24": "يجب أن تكون الساعات 1 أو 8 أو 24"
+  }
+}

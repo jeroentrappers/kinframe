@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Fjärrhjälp på {frame}",
+    "push.remote_help_started.body": "Serverns operatör har startat fjärrhjälp på {frame} till {until}. Ägare och administratörer kan stoppa den på fotoramens sida.",
+    "push.remote_help_on.title": "Fjärrhjälp är på",
+    "push.remote_help_on.body": "{frame} har anslutit till tailnet. Fjärrhjälpen pågår till {until}.",
+    "push.remote_help_ended.title": "Fjärrhjälp avslutad",
+    "push.remote_help_ended.body": "Fjärrhjälpen på {frame} har avslutats.",
+    "problem.remote_help_active": "Fjärrhjälp är redan på för den här fotoramen",
+    "problem.remote_help_unsupported": "Den här fotoramen kan inte få fjärrhjälp (Play-version eller ingen root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "fjärrhjälp är inte konfigurerad på den här servern",
+    "Headscale could not make a key for the frame": "Headscale kunde inte skapa en nyckel för fotoramen",
+    "no remote help session is active on this frame": "ingen fjärrhjälp pågår på den här fotoramen",
+    "hours must be 1, 8 or 24": "timmar måste vara 1, 8 eller 24"
+  }
+}

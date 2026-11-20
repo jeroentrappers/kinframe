@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "{frame} için uzaktan yardım",
+    "push.remote_help_started.body": "Sunucu yöneticisi {frame} için {until} saatine kadar uzaktan yardımı başlattı. Sahipler ve yöneticiler çerçevenin sayfasından durdurabilir.",
+    "push.remote_help_on.title": "Uzaktan yardım açık",
+    "push.remote_help_on.body": "{frame} tailnet'e katıldı. Uzaktan yardım {until} saatine kadar sürecek.",
+    "push.remote_help_ended.title": "Uzaktan yardım sona erdi",
+    "push.remote_help_ended.body": "{frame} için uzaktan yardım sona erdi.",
+    "problem.remote_help_active": "Bu çerçeve için uzaktan yardım zaten açık",
+    "problem.remote_help_unsupported": "Bu çerçeve uzaktan yardım alamaz (Play sürümü veya root yok)"
+  },
+  "details": {
+    "remote help is not configured on this server": "bu sunucuda uzaktan yardım yapılandırılmamış",
+    "Headscale could not make a key for the frame": "Headscale çerçeve için anahtar oluşturamadı",
+    "no remote help session is active on this frame": "bu çerçevede etkin bir uzaktan yardım yok",
+    "hours must be 1, 8 or 24": "saat 1, 8 veya 24 olmalı"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "{frame} 원격 지원",
+    "push.remote_help_started.body": "서버 운영자가 {frame}에서 {until}까지 원격 지원을 시작했습니다. 소유자와 관리자는 액자 페이지에서 중지할 수 있습니다.",
+    "push.remote_help_on.title": "원격 지원이 켜졌습니다",
+    "push.remote_help_on.body": "{frame}이(가) tailnet에 연결되었습니다. 원격 지원은 {until}까지 진행됩니다.",
+    "push.remote_help_ended.title": "원격 지원이 끝났습니다",
+    "push.remote_help_ended.body": "{frame}의 원격 지원이 끝났습니다.",
+    "problem.remote_help_active": "이 액자에는 이미 원격 지원이 켜져 있습니다",
+    "problem.remote_help_unsupported": "이 액자는 원격 지원을 받을 수 없습니다 (Play 버전 또는 루트 없음)"
+  },
+  "details": {
+    "remote help is not configured on this server": "이 서버에는 원격 지원이 설정되어 있지 않습니다",
+    "Headscale could not make a key for the frame": "Headscale이 액자용 키를 만들지 못했습니다",
+    "no remote help session is active on this frame": "이 액자에서 진행 중인 원격 지원이 없습니다",
+    "hours must be 1, 8 or 24": "시간은 1, 8 또는 24여야 합니다"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Fjernhjælp på {frame}",
+    "push.remote_help_started.body": "Serverens operatør har startet fjernhjælp på {frame} indtil {until}. Ejere og administratorer kan stoppe den på billedrammens side.",
+    "push.remote_help_on.title": "Fjernhjælp er slået til",
+    "push.remote_help_on.body": "{frame} har forbundet sig til tailnettet. Fjernhjælpen kører indtil {until}.",
+    "push.remote_help_ended.title": "Fjernhjælp er afsluttet",
+    "push.remote_help_ended.body": "Fjernhjælpen på {frame} er afsluttet.",
+    "problem.remote_help_active": "Fjernhjælp er allerede slået til for denne billedramme",
+    "problem.remote_help_unsupported": "Denne billedramme kan ikke få fjernhjælp (Play-version eller ingen root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "fjernhjælp er ikke sat op på denne server",
+    "Headscale could not make a key for the frame": "Headscale kunne ikke lave en nøgle til billedrammen",
+    "no remote help session is active on this frame": "der kører ingen fjernhjælp på denne billedramme",
+    "hours must be 1, 8 or 24": "timer skal være 1, 8 eller 24"
+  }
+}

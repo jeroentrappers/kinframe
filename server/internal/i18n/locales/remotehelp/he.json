@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "עזרה מרחוק ב-{frame}",
+    "push.remote_help_started.body": "מפעיל השרת הפעיל עזרה מרחוק ב-{frame} עד {until}. בעלים ומנהלים יכולים לעצור אותה בדף המסגרת.",
+    "push.remote_help_on.title": "העזרה מרחוק פועלת",
+    "push.remote_help_on.body": "{frame} הצטרפה ל-tailnet. העזרה מרחוק פועלת עד {until}.",
+    "push.remote_help_ended.title": "העזרה מרחוק הסתיימה",
+    "push.remote_help_ended.body": "העזרה מרחוק ב-{frame} הסתיימה.",
+    "problem.remote_help_active": "העזרה מרחוק כבר פועלת במסגרת הזו",
+    "problem.remote_help_unsupported": "המסגרת הזו לא יכולה לקבל עזרה מרחוק (גרסת Play או בלי root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "עזרה מרחוק לא מוגדרת בשרת הזה",
+    "Headscale could not make a key for the frame": "Headscale לא הצליח ליצור מפתח למסגרת",
+    "no remote help session is active on this frame": "אין עזרה מרחוק פעילה במסגרת הזו",
+    "hours must be 1, 8 or 24": "מספר השעות חייב להיות 1, 8 או 24"
+  }
+}

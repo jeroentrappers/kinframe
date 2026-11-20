@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Etätuki: {frame}",
+    "push.remote_help_started.body": "Palvelimen ylläpitäjä käynnisti etätuen kuvakehyksessä {frame} klo {until} asti. Omistajat ja ylläpitäjät voivat lopettaa sen kuvakehyksen sivulla.",
+    "push.remote_help_on.title": "Etätuki on päällä",
+    "push.remote_help_on.body": "{frame} liittyi tailnetiin. Etätuki jatkuu klo {until} asti.",
+    "push.remote_help_ended.title": "Etätuki päättyi",
+    "push.remote_help_ended.body": "Etätuki kuvakehyksessä {frame} on päättynyt.",
+    "problem.remote_help_active": "Etätuki on jo päällä tässä kuvakehyksessä",
+    "problem.remote_help_unsupported": "Tämä kuvakehys ei voi saada etätukea (Play-versio tai ei root-oikeuksia)"
+  },
+  "details": {
+    "remote help is not configured on this server": "etätukea ei ole määritetty tällä palvelimella",
+    "Headscale could not make a key for the frame": "Headscale ei voinut luoda avainta kuvakehykselle",
+    "no remote help session is active on this frame": "tässä kuvakehyksessä ei ole käynnissä etätukea",
+    "hours must be 1, 8 or 24": "tuntien on oltava 1, 8 tai 24"
+  }
+}

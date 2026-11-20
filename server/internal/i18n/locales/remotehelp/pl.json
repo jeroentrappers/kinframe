@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Pomoc zdalna: {frame}",
+    "push.remote_help_started.body": "Operator serwera uruchomił pomoc zdalną na ramce {frame} do {until}. Właściciele i administratorzy mogą ją zatrzymać na stronie ramki.",
+    "push.remote_help_on.title": "Pomoc zdalna jest włączona",
+    "push.remote_help_on.body": "{frame} dołączyła do tailnetu. Pomoc zdalna potrwa do {until}.",
+    "push.remote_help_ended.title": "Pomoc zdalna zakończona",
+    "push.remote_help_ended.body": "Pomoc zdalna na ramce {frame} została zakończona.",
+    "problem.remote_help_active": "Pomoc zdalna jest już włączona dla tej ramki",
+    "problem.remote_help_unsupported": "Ta ramka nie może otrzymać pomocy zdalnej (wersja z Play lub brak roota)"
+  },
+  "details": {
+    "remote help is not configured on this server": "pomoc zdalna nie jest skonfigurowana na tym serwerze",
+    "Headscale could not make a key for the frame": "Headscale nie mógł utworzyć klucza dla ramki",
+    "no remote help session is active on this frame": "na tej ramce nie trwa pomoc zdalna",
+    "hours must be 1, 8 or 24": "liczba godzin musi wynosić 1, 8 lub 24"
+  }
+}

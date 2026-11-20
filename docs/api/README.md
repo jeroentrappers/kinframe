@@ -1833,7 +1833,9 @@ it (`DELETE /v1/device/remote-help`). One session per frame at a time.
 **The frame** gets `remote_help {session_id, state: active, ends_at, login_server, auth_key, hostname, adb_key,
 tailscale {version, arm, arm64: {url, sha256}}}` and reports in its heartbeat `remote_help {session_id, state:
 starting|on|failed|off, ip, error}`. The first `on` stores the IP, forgets the key (a new change without `auth_key`)
-and pushes `remote_help_on` to the operator; `failed` ends the session (`ended_by: failed`, the error in the log).
+and pushes `remote_help_on` to the operator; `failed` ends the session (`ended_by: failed`, the error in the log);
+`off` for a session still active ends it like the frame's Stop (`ended_by: frame`, a Stop whose DELETE was lost). A
+snapshot (`since=0`, after a `reset`) carries the active session again, without `auth_key` once it was used.
 `hostname` is `kinframe-<hardware.serial if the frame sent one, else the last 8 hex digits of the device id>`.
 
 **Ending**: at `ends_at` (`expired`), by Stop (`operator`, `owner`, `frame`), when a `pending` session saw no `on`

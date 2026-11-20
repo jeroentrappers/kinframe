@@ -140,6 +140,13 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_FEDERATION` | `on` | Families on different servers (API README §5.22): frames here may follow families on other kinframe servers and families here may allow frames on other servers (each family opts in). `off` turns it all off: discovery `federation.enabled: false` and `remote_families: false`, every `/federation/v1/...` call answers `403`. Other servers are reached at public addresses only, with signed requests (Ed25519 key made at first start, stored in the database, sealed with `KINFRAME_SECRETS_KEY` when set, rotated every 180 days with the old key valid 7 more days) |
 | `KINFRAME_FEDERATION_ALLOW` | — | Comma-separated hosts (`kinframe.example.org`, with `:port` when not 443): when set, this server federates with these servers only |
 | `KINFRAME_FEDERATION_DEV_LOOPBACK` | off | Local development only: `1` lets this server reach other servers on `127.0.0.1` (two local servers on two ports, e.g. the web's two-server integration specs). Refused unless `KINFRAME_DEV_AUTH=1`; production servers reach public addresses only |
+| `KINFRAME_REMOTE_HELP` | `off` | `on` lets the server operator start remote help: a temporary tailnet tunnel from a rooted frame to the operator's Headscale for ADB (docs/spec/remote-help.md, API README §5.23). Needs all of the variables below; discovery `remote_help` is true only then |
+| `KINFRAME_HEADSCALE_URL` | — | Headscale control URL, e.g. `https://headscale.example.org` (also the frame's `--login-server`) |
+| `KINFRAME_HEADSCALE_API_KEY` (or `_FILE`) | — | Headscale API key (`headscale apikeys create`), sent as `Authorization: Bearer` |
+| `KINFRAME_HEADSCALE_USER` | — | Headscale user frames register under, e.g. `kinframe-frames` (looked up to its id) |
+| `KINFRAME_REMOTE_HELP_ADB_KEY` | — | The operator's ADB public key, one line of `~/.android/adbkey.pub`; frames allow it for the session only |
+| `KINFRAME_REMOTE_HELP_POLICY_CHECKED` | — | `1`: you confirm the Headscale ACL of docs/spec/remote-help.md §5.3 is in place (support devices reach frames on port 5555 only, frames reach nothing). Sessions can't start without it |
+| `KINFRAME_REMOTE_HELP_TAILSCALE_VERSION` | `1.104.7` | Tailscale release frames download (static linux arm/arm64 tarballs from pkgs.tailscale.com); another version needs `KINFRAME_REMOTE_HELP_TAILSCALE_SHA256_ARM` and `…_ARM64`. Pre-auth keys are sealed at rest with `KINFRAME_SECRETS_KEY` (else a key derived from the signing key) |
 | `KINFRAME_SERVER_LABEL` | the host of `KINFRAME_PUBLIC_URL` | This server's name for apps signed in to several servers (discovery `server_name`, the server chip) and for other servers ("Oma's frame (Appmire)") |
 
 ### Calendars

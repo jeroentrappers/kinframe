@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Pomoć na daljinu: {frame}",
+    "push.remote_help_started.body": "Operater servera je pokrenuo pomoć na daljinu na ramu {frame} do {until}. Vlasnici i administratori mogu da je zaustave na stranici rama.",
+    "push.remote_help_on.title": "Pomoć na daljinu je uključena",
+    "push.remote_help_on.body": "{frame} se pridružio tailnetu. Pomoć na daljinu traje do {until}.",
+    "push.remote_help_ended.title": "Pomoć na daljinu je završena",
+    "push.remote_help_ended.body": "Pomoć na daljinu na ramu {frame} je završena.",
+    "problem.remote_help_active": "Pomoć na daljinu je već uključena za ovaj ram",
+    "problem.remote_help_unsupported": "Ovaj ram ne može da dobije pomoć na daljinu (verzija iz Play-a ili bez root-a)"
+  },
+  "details": {
+    "remote help is not configured on this server": "pomoć na daljinu nije podešena na ovom serveru",
+    "Headscale could not make a key for the frame": "Headscale nije mogao da napravi ključ za ram",
+    "no remote help session is active on this frame": "na ovom ramu nije aktivna pomoć na daljinu",
+    "hours must be 1, 8 or 24": "sati moraju biti 1, 8 ili 24"
+  }
+}

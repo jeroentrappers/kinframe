@@ -59,6 +59,7 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	s.engagementDiscovery(&d)
 	s.leavingDiscovery(&d)
 	s.federationDiscovery(&d)
+	d.RemoteHelp = ptr(s.remoteHelpReady())
 	d.EmailInbox, d.EmailInboxDomain = s.emailDiscovery()
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
@@ -127,7 +128,11 @@ func (s *Server) devToken(w http.ResponseWriter, r *http.Request) {
 // ---------------------------------------------------------------- me
 
 func (s *Server) GetMe(ctx context.Context, _ gen.GetMeRequestObject) (gen.GetMeResponseObject, error) {
-	return ok(s.userJSON(ctx, me(ctx))), nil
+	u := s.userJSON(ctx, me(ctx))
+	if isOperator(ctx) {
+		u.RemoteHelp = ptr(s.remoteHelpReady())
+	}
+	return ok(u), nil
 }
 
 func (s *Server) UpdateMe(ctx context.Context, req gen.UpdateMeRequestObject) (gen.UpdateMeResponseObject, error) {

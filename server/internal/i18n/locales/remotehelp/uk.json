@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Віддалена допомога: {frame}",
+    "push.remote_help_started.body": "Оператор сервера увімкнув віддалену допомогу для {frame} до {until}. Власники й адміністратори можуть зупинити її на сторінці рамки.",
+    "push.remote_help_on.title": "Віддалену допомогу ввімкнено",
+    "push.remote_help_on.body": "{frame} підключилася до tailnet. Віддалена допомога триватиме до {until}.",
+    "push.remote_help_ended.title": "Віддалену допомогу завершено",
+    "push.remote_help_ended.body": "Віддалену допомогу для {frame} завершено.",
+    "problem.remote_help_active": "Віддалену допомогу для цієї рамки вже ввімкнено",
+    "problem.remote_help_unsupported": "Ця рамка не може отримати віддалену допомогу (версія з Play або немає root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "віддалену допомогу не налаштовано на цьому сервері",
+    "Headscale could not make a key for the frame": "Headscale не зміг створити ключ для рамки",
+    "no remote help session is active on this frame": "для цієї рамки немає активної віддаленої допомоги",
+    "hours must be 1, 8 or 24": "годин може бути 1, 8 або 24"
+  }
+}

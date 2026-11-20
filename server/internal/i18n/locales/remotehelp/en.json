@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Remote help on {frame}",
+    "push.remote_help_started.body": "The server operator started remote help on {frame}, until {until}. Owners and admins can stop it on the frame's page.",
+    "push.remote_help_on.title": "Remote help is on",
+    "push.remote_help_on.body": "{frame} joined the tailnet. Remote help runs until {until}.",
+    "push.remote_help_ended.title": "Remote help ended",
+    "push.remote_help_ended.body": "Remote help on {frame} has ended.",
+    "problem.remote_help_active": "Remote help is already on for this frame",
+    "problem.remote_help_unsupported": "This frame can't get remote help (Play build or no root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "remote help is not configured on this server",
+    "Headscale could not make a key for the frame": "Headscale could not make a key for the frame",
+    "no remote help session is active on this frame": "no remote help session is active on this frame",
+    "hours must be 1, 8 or 24": "hours must be 1, 8 or 24"
+  }
+}

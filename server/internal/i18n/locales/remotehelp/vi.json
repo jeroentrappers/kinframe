@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Hỗ trợ từ xa trên {frame}",
+    "push.remote_help_started.body": "Người vận hành máy chủ đã bật hỗ trợ từ xa trên {frame} đến {until}. Chủ sở hữu và quản trị viên có thể dừng trên trang của khung ảnh.",
+    "push.remote_help_on.title": "Hỗ trợ từ xa đang bật",
+    "push.remote_help_on.body": "{frame} đã tham gia tailnet. Hỗ trợ từ xa kéo dài đến {until}.",
+    "push.remote_help_ended.title": "Hỗ trợ từ xa đã kết thúc",
+    "push.remote_help_ended.body": "Hỗ trợ từ xa trên {frame} đã kết thúc.",
+    "problem.remote_help_active": "Hỗ trợ từ xa đã được bật cho khung ảnh này",
+    "problem.remote_help_unsupported": "Khung ảnh này không thể nhận hỗ trợ từ xa (bản Play hoặc không có root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "hỗ trợ từ xa chưa được thiết lập trên máy chủ này",
+    "Headscale could not make a key for the frame": "Headscale không thể tạo khóa cho khung ảnh",
+    "no remote help session is active on this frame": "không có hỗ trợ từ xa nào đang chạy trên khung ảnh này",
+    "hours must be 1, 8 or 24": "số giờ phải là 1, 8 hoặc 24"
+  }
+}

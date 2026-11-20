@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "ความช่วยเหลือระยะไกลบน {frame}",
+    "push.remote_help_started.body": "ผู้ดูแลเซิร์ฟเวอร์เริ่มความช่วยเหลือระยะไกลบน {frame} จนถึง {until} เจ้าของและผู้ดูแลหยุดได้ที่หน้าของกรอบรูป",
+    "push.remote_help_on.title": "ความช่วยเหลือระยะไกลเปิดอยู่",
+    "push.remote_help_on.body": "{frame} เข้าร่วม tailnet แล้ว ความช่วยเหลือระยะไกลจะทำงานจนถึง {until}",
+    "push.remote_help_ended.title": "ความช่วยเหลือระยะไกลสิ้นสุดแล้ว",
+    "push.remote_help_ended.body": "ความช่วยเหลือระยะไกลบน {frame} สิ้นสุดแล้ว",
+    "problem.remote_help_active": "ความช่วยเหลือระยะไกลเปิดอยู่แล้วสำหรับกรอบรูปนี้",
+    "problem.remote_help_unsupported": "กรอบรูปนี้รับความช่วยเหลือระยะไกลไม่ได้ (เวอร์ชัน Play หรือไม่มี root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "ยังไม่ได้ตั้งค่าความช่วยเหลือระยะไกลบนเซิร์ฟเวอร์นี้",
+    "Headscale could not make a key for the frame": "Headscale สร้างคีย์สำหรับกรอบรูปไม่ได้",
+    "no remote help session is active on this frame": "ไม่มีความช่วยเหลือระยะไกลที่ทำงานอยู่บนกรอบรูปนี้",
+    "hours must be 1, 8 or 24": "จำนวนชั่วโมงต้องเป็น 1, 8 หรือ 24"
+  }
+}

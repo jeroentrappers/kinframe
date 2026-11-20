@@ -1083,6 +1083,11 @@ components:
                         - $ref: '#/components/schemas/FramePrompts'
                     description: '`prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none.'
                     nullable: true
+                remote_help:
+                    allOf:
+                        - $ref: '#/components/schemas/FrameRemoteHelp'
+                    description: '`remote_help` change (entity `id` = the frame): the active remote help session, or null = no session (leave the tailnet and clean up). Old frame apps ignore it.'
+                    nullable: true
                 seq:
                     type: integer
                 settings:
@@ -1103,6 +1108,7 @@ components:
                         - comments
                         - photo_request
                         - prompts
+                        - remote_help
                         - reset
                     type: string
                 weather:
@@ -1928,6 +1934,12 @@ components:
                 remote_families:
                     default: false
                     description: True when frames here can follow families on other servers and families here can allow frames on other servers (README §5.22). False when federation is off.
+                    type: boolean
+                remote_help:
+                    default: false
+                    description: |
+                        True when the operator configured remote help (Headscale, ADB key and the checked tailnet policy;
+                        docs/spec/remote-help.md §5.1). Frame pages show an active session either way (`FrameSummary.remote_help`).
                     type: boolean
                 server_id:
                     description: |
@@ -4283,6 +4295,70 @@ components:
                 - frame_name
                 - reaction
             type: object
+        FrameRemoteHelp:
+            description: |
+                Payload of the `remote_help` change (docs/spec/remote-help.md §5.2, §5.4). `auth_key` is present only until
+                the frame reported `on` or `failed` in a heartbeat; a new change without it follows.
+            properties:
+                adb_key:
+                    description: The operator's ADB public key, one line of `adbkey.pub`.
+                    type: string
+                auth_key:
+                    description: One-time
+                    ephemeral Headscale pre-auth key.: null
+                    type: string
+                ends_at:
+                    format: date-time
+                    type: string
+                hostname:
+                    description: 'The tailnet host name: `kinframe-<serial or short device id>`, lowercase `[a-z0-9-]`, at most 63.'
+                    example: kinframe-36339301
+                    type: string
+                login_server:
+                    example: https://headscale.appmire.be
+                    format: uri
+                    type: string
+                session_id:
+                    $ref: '#/components/schemas/Id'
+                state:
+                    enum:
+                        - active
+                    type: string
+                tailscale:
+                    properties:
+                        arm:
+                            $ref: '#/components/schemas/TailscaleBinary'
+                        arm64:
+                            $ref: '#/components/schemas/TailscaleBinary'
+                        version:
+                            example: 1.104.7
+                            type: string
+                    required:
+                        - version
+                        - arm
+                        - arm64
+                    type: object
+            required:
+                - session_id
+                - state
+                - ends_at
+                - login_server
+                - hostname
+                - adb_key
+                - tailscale
+            type: object
+        FrameRemoteHelpSummary:
+            description: '`FrameSummary.remote_help`: the active session in short.'
+            properties:
+                ends_at:
+                    format: date-time
+                    type: string
+                reason:
+                    type: string
+            required:
+                - ends_at
+                - reason
+            type: object
         FrameSettings:
             description: Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
             properties:
@@ -4692,6 +4768,11 @@ components:
                         - $ref: '#/components/schemas/PhotoRequest'
                     description: 'The frame''s "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.'
                     nullable: true
+                remote_help:
+                    allOf:
+                        - $ref: '#/components/schemas/FrameRemoteHelpSummary'
+                    description: The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
+                    nullable: true
                 role:
                     $ref: '#/components/schemas/Role'
                 screen:
@@ -4907,6 +4988,8 @@ components:
                         `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
                         has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
                         app"; nothing is withheld.
+                        `remote_help`: the frame can join the operator's tailnet for remote help (the GitHub build on a rooted
+                        frame, docs/spec/remote-help.md §5.4); only such frames can get a session.
                     items:
                         type: string
                     type: array
@@ -4926,6 +5009,8 @@ components:
                     type: integer
                 placements_missing:
                     type: integer
+                remote_help:
+                    $ref: '#/components/schemas/HeartbeatRemoteHelp'
                 screen_state:
                     enum:
                         - "on"
@@ -4977,6 +5062,34 @@ components:
             required:
                 - app_version
                 - uptime_s
+            type: object
+        HeartbeatRemoteHelp:
+            description: |
+                The frame's remote help state (docs/spec/remote-help.md §5.4). The first heartbeat with `on` or `failed` for
+                the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
+                session (`ended_by: failed`, with `error` in the log), `off` for a session the server still has active ends
+                it like `deviceStopRemoteHelp` (`ended_by: frame`). Heartbeats for another session id are ignored.
+            properties:
+                error:
+                    maxLength: 500
+                    nullable: true
+                    type: string
+                ip:
+                    example: 100.64.0.9
+                    nullable: true
+                    type: string
+                session_id:
+                    $ref: '#/components/schemas/Id'
+                state:
+                    enum:
+                        - starting
+                        - "on"
+                        - failed
+                        - "off"
+                    type: string
+            required:
+                - session_id
+                - state
             type: object
         Id:
             description: UUIDv7
@@ -6525,6 +6638,9 @@ components:
                     type: array
                 name:
                     type: string
+                remote_help_supported:
+                    description: Frames only. The frame's latest heartbeat lists the `remote_help` feature (docs/spec/remote-help.md §4); otherwise the operator's page says "not available (Play build or no root)".
+                    type: boolean
             required:
                 - kind
                 - id
@@ -7877,6 +7993,8 @@ components:
                 - cannot_message
                 - comments_closed
                 - audio_too_long
+                - remote_help_active
+                - remote_help_unsupported
                 - server_error
             type: string
         PromptEvent:
@@ -8293,6 +8411,143 @@ components:
                 - withdrawn
                 - rejected
             type: string
+        RemoteHelpEndedBy:
+            enum:
+                - operator
+                - owner
+                - frame
+                - expired
+                - unpaired
+                - failed
+            type: string
+        RemoteHelpEvent:
+            description: '`remote_help.updated`: a session started, came on or ended (the frame''s members get the member view, the operator who started or ended it the full one).'
+            properties:
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                session:
+                    $ref: '#/components/schemas/RemoteHelpSession'
+                type:
+                    enum:
+                        - remote_help.updated
+                    type: string
+            required:
+                - type
+                - frame_id
+                - session
+            type: object
+        RemoteHelpPage:
+            properties:
+                next_cursor:
+                    nullable: true
+                    type: string
+                sessions:
+                    items:
+                        $ref: '#/components/schemas/RemoteHelpSession'
+                    type: array
+            required:
+                - sessions
+                - next_cursor
+            type: object
+        RemoteHelpPushKey:
+            description: |
+                Push `key`s of remote help (README §5.23). `remote_help_started`: the frame's members, at start.
+                `remote_help_on`: the operator who started it, when the frame joined. `remote_help_ended`: members and the
+                operator, not whoever ended it. `ids`: `frame_id`, `session_id`; `tag`: `remote_help:<frame_id>`.
+            enum:
+                - remote_help_started
+                - remote_help_on
+                - remote_help_ended
+            type: string
+        RemoteHelpSession:
+            description: |
+                A remote help session. Members (`getFrameRemoteHelp`, `remote_help.updated` to members) get it without
+                `tailnet_ip` and `error`.
+            properties:
+                adb_command:
+                    example: adb connect kinframe-36339301:5555
+                    type: string
+                ended_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                ended_by:
+                    allOf:
+                        - $ref: '#/components/schemas/RemoteHelpEndedBy'
+                    nullable: true
+                ended_by_name:
+                    description: The person who ended it (operator or owner/admin).
+                    nullable: true
+                    type: string
+                ends_at:
+                    format: date-time
+                    type: string
+                error:
+                    description: Operator only. Why the frame or Headscale failed.
+                    nullable: true
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                frame_name:
+                    type: string
+                hostname:
+                    example: kinframe-36339301
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                reason:
+                    type: string
+                started_at:
+                    format: date-time
+                    type: string
+                started_by_name:
+                    description: The operator who started it.
+                    type: string
+                state:
+                    description: '`pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.'
+                    enum:
+                        - pending
+                        - "on"
+                        - ended
+                    type: string
+                tailnet_ip:
+                    description: Operator only. Reported by the frame.
+                    example: 100.64.0.9
+                    nullable: true
+                    type: string
+            required:
+                - id
+                - frame_id
+                - frame_name
+                - state
+                - reason
+                - started_by_name
+                - started_at
+                - ends_at
+                - ended_at
+                - ended_by
+                - ended_by_name
+                - hostname
+                - adb_command
+            type: object
+        RemoteHelpStart:
+            properties:
+                hours:
+                    description: How long the session lasts.
+                    enum:
+                        - 1
+                        - 8
+                        - 24
+                    type: integer
+                reason:
+                    description: Shown to the frame's members and kept in the log.
+                    maxLength: 500
+                    minLength: 1
+                    type: string
+            required:
+                - hours
+                - reason
+            type: object
         RemoteInvitePreview:
             properties:
                 cover_url:
@@ -9855,6 +10110,18 @@ components:
                 - member_joined
                 - member_left
             type: string
+        TailscaleBinary:
+            properties:
+                sha256:
+                    type: string
+                url:
+                    example: https://pkgs.tailscale.com/stable/tailscale_1.104.7_arm.tgz
+                    format: uri
+                    type: string
+            required:
+                - url
+                - sha256
+            type: object
         TakeAwayRequest:
             properties:
                 comments:
@@ -10734,6 +11001,9 @@ components:
                 locale:
                     nullable: true
                     type: string
+                remote_help:
+                    description: Operators only (`getMe`), true when the server has remote help configured, so the operator's settings show Settings → Remote help.
+                    type: boolean
                 share_location_names:
                     type: boolean
                 show_read_receipts:
@@ -12422,6 +12692,22 @@ paths:
                 - deviceAuth: []
             tags:
                 - device
+    /v1/device/remote-help:
+        delete:
+            description: |
+                Stop tapped at the frame (README §5.23): ends the frame's active remote help session (`ended_by: frame`) and
+                sends `remote_help: null` on the change feed. `204` also when no session is active (idempotent).
+            operationId: deviceStopRemoteHelp
+            responses:
+                "204":
+                    description: Ended
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+                - remote-help
     /v1/device/settings:
         patch:
             description: Settings changed locally on the frame. Same semantics as updateFrameSettings.
@@ -15419,6 +15705,39 @@ paths:
                 - settings
         parameters:
             - $ref: '#/components/parameters/FrameId'
+    /v1/frames/{frameId}/remote-help:
+        delete:
+            description: 'Owner and admins (`403 forbidden` for other members). Ends the active session (`ended_by: owner`); `404 not_found` when none is active.'
+            operationId: stopFrameRemoteHelp
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "204":
+                    description: Ended
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - remote-help
+        get:
+            description: |
+                Frame members. The frame's active remote help session (README §5.23), without `tailnet_ip` and `error`;
+                `204` when none is active.
+            operationId: getFrameRemoteHelp
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RemoteHelpSession'
+                    description: Active session
+                "204":
+                    description: No active session
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - remote-help
     /v1/frames/{frameId}/remote-subscriptions:
         get:
             description: |
@@ -16861,6 +17180,55 @@ paths:
                     - kinframe:operate
             tags:
                 - operator
+    /v1/operator/frames/{frameId}/remote-help:
+        delete:
+            description: 'Ends the frame''s active session (`ended_by: operator`). `404 not_found` when none is active.'
+            operationId: operatorStopRemoteHelp
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "204":
+                    description: Ended
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - remote-help
+                - operator
+        post:
+            description: |
+                Start remote help on a frame (README §5.23, docs/spec/remote-help.md §5.2): the server asks Headscale for a
+                one-time, ephemeral pre-auth key that expires at the session's end, stores the session and puts a
+                `remote_help` change on the frame's feed. The frame's members get `remote_help_started`.
+                `409 remote_help_active` when the frame already has a session, `409 remote_help_unsupported` when the
+                frame's latest heartbeat does not list the `remote_help` feature, `502 upstream_unavailable` when Headscale
+                fails (no session is stored), `503 feature_disabled` without discovery `remote_help`.
+            operationId: operatorStartRemoteHelp
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RemoteHelpStart'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RemoteHelpSession'
+                    description: Started
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - remote-help
+                - operator
     /v1/operator/limits:
         get:
             operationId: operatorGetLimits
@@ -16944,6 +17312,28 @@ paths:
                 - userAuth:
                     - kinframe:operate
             tags:
+                - operator
+    /v1/operator/remote-help:
+        get:
+            description: Remote help sessions, active first, then newest (kept 2 years).
+            operationId: operatorListRemoteHelp
+            parameters:
+                - $ref: '#/components/parameters/Cursor'
+                - $ref: '#/components/parameters/Limit'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RemoteHelpPage'
+                    description: Sessions
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - remote-help
                 - operator
     /v1/operator/remote-servers:
         get:
@@ -18614,6 +19004,8 @@ tags:
       name: leaving
     - description: Frames following a family on another kinframe server, as frame managers and family admins see it (docs/spec/multi-server.md §3).
       name: remote
+    - description: A temporary tailnet tunnel from a frame to the server operator for ADB, started by the operator only, visible to and stoppable by the frame's family and at the frame (docs/spec/remote-help.md).
+      name: remote-help
     - description: Server-to-server calls between kinframe servers, signed with HTTP Message Signatures (RFC 9421, Ed25519). Not for apps (README §5.22).
       name: federation
     - name: settings

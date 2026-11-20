@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "{frame} 的远程协助",
+    "push.remote_help_started.body": "服务器运营者已在 {frame} 上开启远程协助，直到 {until}。所有者和管理员可以在相框页面上停止。",
+    "push.remote_help_on.title": "远程协助已开启",
+    "push.remote_help_on.body": "{frame} 已加入 tailnet。远程协助持续到 {until}。",
+    "push.remote_help_ended.title": "远程协助已结束",
+    "push.remote_help_ended.body": "{frame} 上的远程协助已结束。",
+    "problem.remote_help_active": "此相框的远程协助已开启",
+    "problem.remote_help_unsupported": "此相框无法获得远程协助（Play 版本或没有 root）"
+  },
+  "details": {
+    "remote help is not configured on this server": "此服务器未配置远程协助",
+    "Headscale could not make a key for the frame": "Headscale 无法为相框创建密钥",
+    "no remote help session is active on this frame": "此相框上没有正在进行的远程协助",
+    "hours must be 1, 8 or 24": "小时数必须是 1、8 或 24"
+  }
+}

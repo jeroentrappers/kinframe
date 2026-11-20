@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Távoli segítség: {frame}",
+    "push.remote_help_started.body": "A szerver üzemeltetője távoli segítséget indított a(z) {frame} képkereten {until}-ig. A tulajdonosok és adminisztrátorok a képkeret oldalán leállíthatják.",
+    "push.remote_help_on.title": "A távoli segítség be van kapcsolva",
+    "push.remote_help_on.body": "A(z) {frame} csatlakozott a tailnethez. A távoli segítség {until}-ig tart.",
+    "push.remote_help_ended.title": "A távoli segítség véget ért",
+    "push.remote_help_ended.body": "A távoli segítség a(z) {frame} képkereten véget ért.",
+    "problem.remote_help_active": "Ezen a képkereten már be van kapcsolva a távoli segítség",
+    "problem.remote_help_unsupported": "Ez a képkeret nem kaphat távoli segítséget (Play-verzió vagy nincs root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "a távoli segítség nincs beállítva ezen a szerveren",
+    "Headscale could not make a key for the frame": "A Headscale nem tudott kulcsot készíteni a képkeretnek",
+    "no remote help session is active on this frame": "ezen a képkereten nem fut távoli segítség",
+    "hours must be 1, 8 or 24": "az óraszám csak 1, 8 vagy 24 lehet"
+  }
+}

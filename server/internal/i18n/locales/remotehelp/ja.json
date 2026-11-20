@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "{frame} のリモートサポート",
+    "push.remote_help_started.body": "サーバーの運営者が {frame} のリモートサポートを {until} まで開始しました。オーナーと管理者はフォトフレームのページで停止できます。",
+    "push.remote_help_on.title": "リモートサポートがオンです",
+    "push.remote_help_on.body": "{frame} が tailnet に参加しました。リモートサポートは {until} まで続きます。",
+    "push.remote_help_ended.title": "リモートサポートが終了しました",
+    "push.remote_help_ended.body": "{frame} のリモートサポートが終了しました。",
+    "problem.remote_help_active": "このフォトフレームのリモートサポートはすでにオンです",
+    "problem.remote_help_unsupported": "このフォトフレームはリモートサポートを受けられません（Play 版または root なし）"
+  },
+  "details": {
+    "remote help is not configured on this server": "このサーバーではリモートサポートが設定されていません",
+    "Headscale could not make a key for the frame": "Headscale がフォトフレーム用のキーを作成できませんでした",
+    "no remote help session is active on this frame": "このフォトフレームで有効なリモートサポートはありません",
+    "hours must be 1, 8 or 24": "時間は 1、8、24 のいずれかにしてください"
+  }
+}

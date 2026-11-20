@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Ajutor la distanță pe {frame}",
+    "push.remote_help_started.body": "Operatorul serverului a pornit ajutorul la distanță pe {frame}, până la {until}. Proprietarii și administratorii îl pot opri din pagina ramei.",
+    "push.remote_help_on.title": "Ajutorul la distanță este pornit",
+    "push.remote_help_on.body": "{frame} s-a conectat la tailnet. Ajutorul la distanță durează până la {until}.",
+    "push.remote_help_ended.title": "Ajutorul la distanță s-a încheiat",
+    "push.remote_help_ended.body": "Ajutorul la distanță pe {frame} s-a încheiat.",
+    "problem.remote_help_active": "Ajutorul la distanță este deja pornit pentru această ramă",
+    "problem.remote_help_unsupported": "Această ramă nu poate primi ajutor la distanță (versiunea din Play sau fără root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "ajutorul la distanță nu este configurat pe acest server",
+    "Headscale could not make a key for the frame": "Headscale nu a putut crea o cheie pentru ramă",
+    "no remote help session is active on this frame": "nu rulează niciun ajutor la distanță pe această ramă",
+    "hours must be 1, 8 or 24": "orele trebuie să fie 1, 8 sau 24"
+  }
+}

@@ -38,6 +38,9 @@ func (s *Server) OperatorSearchOwnership(ctx context.Context, req gen.OperatorSe
 	if out.Frames, err = s.operatorScopes(ctx, frames, false); err != nil {
 		return nil, err
 	}
+	if err := s.remoteHelpSupported(ctx, out.Frames); err != nil {
+		return nil, err
+	}
 	if out.Feeds, err = s.operatorScopes(ctx, feeds, true); err != nil {
 		return nil, err
 	}

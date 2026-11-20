@@ -98,6 +98,7 @@ func (r Response) VisitDeviceRequestPhotosResponse(w http.ResponseWriter) error 
 func (r Response) VisitDeviceSendReplyResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitDeviceSetReactionResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitDeviceStopRemoteHelpResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitDeviceSyncCalendarsResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitDeviceTokenResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitDisconnectTelegramChatResponse(w http.ResponseWriter) error { return r.write(w) }
@@ -121,6 +122,7 @@ func (r Response) VisitGetFrameResponse(w http.ResponseWriter) error            
 func (r Response) VisitGetFrameCalendarResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetFrameHealthResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitGetFramePluginsResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitGetFrameRemoteHelpResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitGetFrameSettingsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetGoogleImportResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetKeepRequestResponse(w http.ResponseWriter) error         { return r.write(w) }
@@ -223,6 +225,7 @@ func (r Response) VisitOperatorListBlockedServersResponse(w http.ResponseWriter)
 func (r Response) VisitOperatorListOwnershipLogResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
+func (r Response) VisitOperatorListRemoteHelpResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitOperatorListRemoteServersResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
@@ -235,7 +238,11 @@ func (r Response) VisitOperatorSearchOwnershipResponse(w http.ResponseWriter) er
 }
 func (r Response) VisitOperatorSetLimitsResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitOperatorSetShopStockResponse(w http.ResponseWriter) error { return r.write(w) }
-func (r Response) VisitOperatorStatsResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitOperatorStartRemoteHelpResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitOperatorStatsResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitOperatorStopRemoteHelpResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitOperatorTransferFeedOwnerResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
@@ -290,6 +297,7 @@ func (r Response) VisitSetThreadMuteResponse(w http.ResponseWriter) error       
 func (r Response) VisitSetThreadStateResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitSharePlacementsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitStartGoogleImportResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitStopFrameRemoteHelpResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitSyncCalendarResponse(w http.ResponseWriter) error          { return r.write(w) }
 func (r Response) VisitSyncPhotoSourceResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitTagPostPromptResponse(w http.ResponseWriter) error         { return r.write(w) }

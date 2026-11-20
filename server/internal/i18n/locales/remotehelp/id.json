@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Bantuan jarak jauh di {frame}",
+    "push.remote_help_started.body": "Operator server memulai bantuan jarak jauh di {frame} sampai {until}. Pemilik dan admin dapat menghentikannya di halaman bingkai.",
+    "push.remote_help_on.title": "Bantuan jarak jauh aktif",
+    "push.remote_help_on.body": "{frame} sudah bergabung ke tailnet. Bantuan jarak jauh berjalan sampai {until}.",
+    "push.remote_help_ended.title": "Bantuan jarak jauh berakhir",
+    "push.remote_help_ended.body": "Bantuan jarak jauh di {frame} telah berakhir.",
+    "problem.remote_help_active": "Bantuan jarak jauh sudah aktif untuk bingkai ini",
+    "problem.remote_help_unsupported": "Bingkai ini tidak bisa mendapat bantuan jarak jauh (versi Play atau tanpa root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "bantuan jarak jauh belum diatur di server ini",
+    "Headscale could not make a key for the frame": "Headscale tidak dapat membuat kunci untuk bingkai",
+    "no remote help session is active on this frame": "tidak ada bantuan jarak jauh yang aktif di bingkai ini",
+    "hours must be 1, 8 or 24": "jam harus 1, 8, atau 24"
+  }
+}

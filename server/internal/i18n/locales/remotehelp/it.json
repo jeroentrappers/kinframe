@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Assistenza remota su {frame}",
+    "push.remote_help_started.body": "L'operatore del server ha avviato l'assistenza remota su {frame}, fino alle {until}. Proprietari e amministratori possono interromperla dalla pagina della cornice.",
+    "push.remote_help_on.title": "L'assistenza remota è attiva",
+    "push.remote_help_on.body": "{frame} si è unita alla tailnet. L'assistenza remota dura fino alle {until}.",
+    "push.remote_help_ended.title": "Assistenza remota terminata",
+    "push.remote_help_ended.body": "L'assistenza remota su {frame} è terminata.",
+    "problem.remote_help_active": "L'assistenza remota è già attiva per questa cornice",
+    "problem.remote_help_unsupported": "Questa cornice non può ricevere assistenza remota (versione Play o senza root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "l'assistenza remota non è configurata su questo server",
+    "Headscale could not make a key for the frame": "Headscale non è riuscito a creare una chiave per la cornice",
+    "no remote help session is active on this frame": "nessuna assistenza remota attiva su questa cornice",
+    "hours must be 1, 8 or 24": "le ore devono essere 1, 8 o 24"
+  }
+}

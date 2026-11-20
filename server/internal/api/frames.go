@@ -28,6 +28,7 @@ func (s *Server) ListMyFrames(ctx context.Context, _ gen.ListMyFramesRequestObje
 		out[i] = s.frameSummary(&views[i])
 	}
 	s.frameFreshness(ctx, out) // engagement: freshness and photo_request
+	s.fillFrameRemoteHelp(ctx, out)
 	return ok(out), nil
 }
 
@@ -45,7 +46,8 @@ func (s *Server) GetFrame(ctx context.Context, req gen.GetFrameRequestObject) (g
 	// engagement: freshness and photo_request
 	fs := []gen.FrameSummary{{Id: out.Id}}
 	s.frameFreshness(ctx, fs)
-	out.Freshness, out.PhotoRequest = fs[0].Freshness, fs[0].PhotoRequest
+	s.fillFrameRemoteHelp(ctx, fs)
+	out.Freshness, out.PhotoRequest, out.RemoteHelp = fs[0].Freshness, fs[0].PhotoRequest, fs[0].RemoteHelp
 	return ok(out), nil
 }
 

@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "{frame} पर रिमोट सहायता",
+    "push.remote_help_started.body": "सर्वर ऑपरेटर ने {frame} पर {until} तक रिमोट सहायता शुरू की है। मालिक और एडमिन इसे फ़्रेम के पेज पर रोक सकते हैं।",
+    "push.remote_help_on.title": "रिमोट सहायता चालू है",
+    "push.remote_help_on.body": "{frame} tailnet से जुड़ गया। रिमोट सहायता {until} तक चलेगी।",
+    "push.remote_help_ended.title": "रिमोट सहायता खत्म हुई",
+    "push.remote_help_ended.body": "{frame} पर रिमोट सहायता खत्म हो गई है।",
+    "problem.remote_help_active": "इस फ़्रेम के लिए रिमोट सहायता पहले से चालू है",
+    "problem.remote_help_unsupported": "इस फ़्रेम को रिमोट सहायता नहीं मिल सकती (Play बिल्ड या root नहीं)"
+  },
+  "details": {
+    "remote help is not configured on this server": "इस सर्वर पर रिमोट सहायता सेट अप नहीं है",
+    "Headscale could not make a key for the frame": "Headscale फ़्रेम के लिए कुंजी नहीं बना सका",
+    "no remote help session is active on this frame": "इस फ़्रेम पर कोई रिमोट सहायता चालू नहीं है",
+    "hours must be 1, 8 or 24": "घंटे 1, 8 या 24 होने चाहिए"
+  }
+}

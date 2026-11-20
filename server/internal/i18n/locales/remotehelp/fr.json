@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Aide à distance sur {frame}",
+    "push.remote_help_started.body": "L'opérateur du serveur a lancé l'aide à distance sur {frame}, jusqu'à {until}. Les propriétaires et administrateurs peuvent l'arrêter sur la page du cadre.",
+    "push.remote_help_on.title": "L'aide à distance est active",
+    "push.remote_help_on.body": "{frame} a rejoint le tailnet. L'aide à distance dure jusqu'à {until}.",
+    "push.remote_help_ended.title": "Aide à distance terminée",
+    "push.remote_help_ended.body": "L'aide à distance sur {frame} est terminée.",
+    "problem.remote_help_active": "L'aide à distance est déjà active pour ce cadre",
+    "problem.remote_help_unsupported": "Ce cadre ne peut pas recevoir d'aide à distance (version Play ou pas de root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "l'aide à distance n'est pas configurée sur ce serveur",
+    "Headscale could not make a key for the frame": "Headscale n'a pas pu créer de clé pour le cadre",
+    "no remote help session is active on this frame": "aucune aide à distance n'est active sur ce cadre",
+    "hours must be 1, 8 or 24": "les heures doivent valoir 1, 8 ou 24"
+  }
+}

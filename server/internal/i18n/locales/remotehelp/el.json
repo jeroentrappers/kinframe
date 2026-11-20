@@ -1,0 +1,18 @@
+{
+  "messages": {
+    "push.remote_help_started.title": "Απομακρυσμένη βοήθεια στο {frame}",
+    "push.remote_help_started.body": "Ο διαχειριστής του διακομιστή ξεκίνησε απομακρυσμένη βοήθεια στο {frame}, έως τις {until}. Οι ιδιοκτήτες και οι διαχειριστές μπορούν να τη σταματήσουν από τη σελίδα της κορνίζας.",
+    "push.remote_help_on.title": "Η απομακρυσμένη βοήθεια είναι ενεργή",
+    "push.remote_help_on.body": "Το {frame} συνδέθηκε στο tailnet. Η απομακρυσμένη βοήθεια διαρκεί έως τις {until}.",
+    "push.remote_help_ended.title": "Η απομακρυσμένη βοήθεια τελείωσε",
+    "push.remote_help_ended.body": "Η απομακρυσμένη βοήθεια στο {frame} τελείωσε.",
+    "problem.remote_help_active": "Η απομακρυσμένη βοήθεια είναι ήδη ενεργή για αυτή την κορνίζα",
+    "problem.remote_help_unsupported": "Αυτή η κορνίζα δεν μπορεί να λάβει απομακρυσμένη βοήθεια (έκδοση Play ή χωρίς root)"
+  },
+  "details": {
+    "remote help is not configured on this server": "η απομακρυσμένη βοήθεια δεν έχει ρυθμιστεί σε αυτόν τον διακομιστή",
+    "Headscale could not make a key for the frame": "Το Headscale δεν μπόρεσε να δημιουργήσει κλειδί για την κορνίζα",
+    "no remote help session is active on this frame": "δεν υπάρχει ενεργή απομακρυσμένη βοήθεια σε αυτή την κορνίζα",
+    "hours must be 1, 8 or 24": "οι ώρες πρέπει να είναι 1, 8 ή 24"
+  }
+}

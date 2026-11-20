@@ -9825,7 +9825,8 @@ export interface components {
         /**
          * @description The frame's remote help state (docs/spec/remote-help.md §5.4). The first heartbeat with `on` or `failed` for
          *     the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
-         *     session (`ended_by: failed`, with `error` in the log). Heartbeats for another session id are ignored.
+         *     session (`ended_by: failed`, with `error` in the log), `off` for a session the server still has active ends
+         *     it like `deviceStopRemoteHelp` (`ended_by: frame`). Heartbeats for another session id are ignored.
          */
         HeartbeatRemoteHelp: {
             session_id: components["schemas"]["Id"];
