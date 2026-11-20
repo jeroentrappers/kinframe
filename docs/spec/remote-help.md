@@ -141,3 +141,8 @@ On a `remote_help` change with a key:
   `su 0 sh script` work. Background processes die with the ADB shell unless started with `setsid nohup`.
 - Restarting adbd from the ADB shell (`stop adbd; start adbd`) killed the shell before `start adbd` ran and left the
   frame without ADB until a restart: hence the detached restart in §5.3 step 5.
+- After the restart, a plain `setsid nohup tailscaled … &` at the end of a script died silently with the script.
+  Starting it from a subshell (`( setsid nohup … & )`) and letting the script wait a few seconds kept it running
+  (parent pid 1). The adbd restart works the same way: a detached script that sleeps, sets
+  `service.adb.tcp.port 5555`, then runs `stop adbd` and `start adbd`. USB ADB came back by itself, and
+  `adb connect 100.64.0.9:5555` from a laptop on the tailnet reached the frame.
