@@ -458,6 +458,7 @@ class FrameController(val g: FrameGraph) {
         val placements = runCatching { g.db.placements().countCached() to g.db.placements().countMissing() }.getOrNull()
         val evicted = runCatching { g.db.placements().countEvicted() }.getOrNull()
         val (updateState, updateError) = update.heartbeatState()
+        val remoteHelpFeatures = remoteHelp.features()
         return Heartbeat(
             appVersion = BuildConfig.VERSION_NAME,
             appVersionCode = BuildConfig.VERSION_CODE,
@@ -480,8 +481,9 @@ class FrameController(val g: FrameGraph) {
             timezone = g.clock.zone.id,
             updateState = updateState,
             lastUpdateError = updateError,
-            features = Distribution.heartbeatFeatures() + remoteHelp.features(),
+            features = Distribution.heartbeatFeatures() + remoteHelpFeatures,
             remoteHelp = remoteHelp.report(),
+            serial = if (remoteHelpFeatures.isNotEmpty()) remoteHelp.serial() else null,
         )
     }
 

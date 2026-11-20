@@ -29,8 +29,9 @@ import (
 const (
 	// featureRemoteHelp (Heartbeat.features): the frame can join the tailnet (GitHub build, rooted).
 	featureRemoteHelp = "remote_help"
-	// remoteHelpPending is how long a session waits for the frame to report `on` before it ends as failed.
-	remoteHelpPending = 15 * time.Minute
+	// remoteHelpPending is how long a session waits for the frame to report `on` before it ends as failed. The first
+	// session downloads Tailscale (≈37 MB), which took 7 minutes on a frame's slow Wi-Fi.
+	remoteHelpPending = 30 * time.Minute
 	// remoteHelpRetention is how long ended sessions stay in the log.
 	remoteHelpRetention = 2 * 365 * 24 * time.Hour
 	// remoteHelpTick is how often RunRemoteHelp looks for sessions to end.
@@ -90,13 +91,19 @@ func (s *Server) headscaleUserID(ctx context.Context) (headscale.ID, error) {
 
 var hostnameUnsafe = regexp.MustCompile(`[^a-z0-9-]+`)
 
-// remoteHelpHostname is `kinframe-<device serial or short device id>`, lowercase [a-z0-9-], at most 63.
+// remoteHelpHostname is `kinframe-<device serial or short device id>`, lowercase [a-z0-9-], at most 63. The serial
+// comes from enrolment (`hardware.serial`) or, for frames enrolled before, from the latest heartbeat's `serial`.
 func remoteHelpHostname(d *store.Device) string {
-	var hw struct {
+	var hw, hb struct {
 		Serial string `json:"serial"`
 	}
 	_ = json.Unmarshal(d.Hardware, &hw)
-	id := strings.Trim(hostnameUnsafe.ReplaceAllString(strings.ToLower(hw.Serial), "-"), "-")
+	_ = json.Unmarshal(d.LastHeartbeat, &hb)
+	serial := hw.Serial
+	if serial == "" || strings.EqualFold(serial, "unknown") {
+		serial = hb.Serial
+	}
+	id := strings.Trim(hostnameUnsafe.ReplaceAllString(strings.ToLower(serial), "-"), "-")
 	if id == "" || strings.EqualFold(id, "unknown") {
 		hex := strings.ReplaceAll(d.ID.String(), "-", "")
 		id = hex[len(hex)-8:] // the random end of the UUIDv7
@@ -626,6 +633,6 @@ func (s *Server) RemoteHelpTick(ctx context.Context, now time.Time) error {
 	}
 	end(unpaired, "unpaired", nil)
 	end(expired, "expired", nil)
-	end(failed, "failed", ptr("the frame did not report within 15 minutes"))
+	end(failed, "failed", ptr("the frame did not report within 30 minutes"))
 	return nil
 }

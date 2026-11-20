@@ -5018,6 +5018,12 @@ components:
                         - dimmed
                         - sleeping
                     type: string
+                serial:
+                    description: 'The device serial (as `adb devices` shows it), sent only by frames that list `remote_help`: the server names the tailnet host `kinframe-<serial>` after it (docs/spec/remote-help.md §5.2).'
+                    example: "36339301"
+                    maxLength: 64
+                    nullable: true
+                    type: string
                 storage_free_bytes:
                     type: integer
                 storage_state:
@@ -8504,7 +8510,7 @@ components:
                     description: The operator who started it.
                     type: string
                 state:
-                    description: '`pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.'
+                    description: '`pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.'
                     enum:
                         - pending
                         - "on"

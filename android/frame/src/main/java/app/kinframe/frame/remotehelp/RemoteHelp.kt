@@ -27,6 +27,9 @@ interface RemoteHelp {
     /** Heartbeat `features` this build adds: `remote_help` when it can do it. */
     suspend fun features(): List<String>
 
+    /** Heartbeat `serial`, sent only while the frame offers remote help: the server names the tailnet host after it. */
+    fun serial(): String? = null
+
     /** Stop tapped at the frame (after the PIN, if one is set): tell the server, then clean up. */
     fun stopHere()
 

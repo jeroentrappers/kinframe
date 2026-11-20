@@ -45,6 +45,11 @@ class RemoteHelpManager(private val c: FrameController) : RemoteHelp {
 
     override suspend fun features(): List<String> = if (g.root.isAvailable()) listOf(FrameFeatures.REMOTE_HELP) else emptyList()
 
+    /** `Build.SERIAL` (the serial `adb devices` shows) on Android 7 and older; newer Android hides it from apps. */
+    @Suppress("DEPRECATION")
+    override fun serial(): String? =
+        if (Build.VERSION.SDK_INT < 26) Build.SERIAL?.takeUnless { it.isBlank() || it.equals(Build.UNKNOWN, true) } else null
+
     override fun stopHere() {
         c.scope.launch(Dispatchers.Default) {
             // Tell the server first (it logs "ended at the frame" and tells the family), then clean up either way.

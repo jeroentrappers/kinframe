@@ -1836,10 +1836,11 @@ starting|on|failed|off, ip, error}`. The first `on` stores the IP, forgets the k
 and pushes `remote_help_on` to the operator; `failed` ends the session (`ended_by: failed`, the error in the log);
 `off` for a session still active ends it like the frame's Stop (`ended_by: frame`, a Stop whose DELETE was lost). A
 snapshot (`since=0`, after a `reset`) carries the active session again, without `auth_key` once it was used.
-`hostname` is `kinframe-<hardware.serial if the frame sent one, else the last 8 hex digits of the device id>`.
+`hostname` is `kinframe-<serial>`: `hardware.serial` from enrolment, else the latest heartbeat's `serial` (sent by frames that
+list `remote_help`), else the last 8 hex digits of the device id.
 
 **Ending**: at `ends_at` (`expired`), by Stop (`operator`, `owner`, `frame`), when a `pending` session saw no `on`
-within 15 minutes (`failed`) or when the frame was removed or re-paired (`unpaired`). The frame gets
+within 30 minutes (`failed`) or when the frame was removed or re-paired (`unpaired`). The frame gets
 `remote_help: null`; the server deletes the frame's node in Headscale (`GET /api/v1/node?user=`, match `givenName` or
 `name`, `DELETE /api/v1/node/{id}`) and expires the key if it was never used (`POST /api/v1/preauthkey/expire {id}`).
 Headscale errors while ending are logged (and noted in the session's `error`), never fatal. Members and the operator

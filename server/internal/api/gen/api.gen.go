@@ -7828,9 +7828,14 @@ type Heartbeat struct {
 	// the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
 	// session (`ended_by: failed`, with `error` in the log), `off` for a session the server still has active ends
 	// it like `deviceStopRemoteHelp` (`ended_by: frame`). Heartbeats for another session id are ignored.
-	RemoteHelp       *HeartbeatRemoteHelp  `json:"remote_help,omitempty"`
-	ScreenState      *HeartbeatScreenState `json:"screen_state,omitempty"`
-	StorageFreeBytes *int                  `json:"storage_free_bytes,omitempty"`
+	RemoteHelp  *HeartbeatRemoteHelp  `json:"remote_help,omitempty"`
+	ScreenState *HeartbeatScreenState `json:"screen_state,omitempty"`
+
+	// Serial The device serial (as `adb devices` shows it), sent only by frames that list `remote_help`: the server names the tailnet host `kinframe-<serial>` after it (docs/spec/remote-help.md §5.2).
+	//
+	// Example: 36339301
+	Serial           *string `json:"serial,omitempty"`
+	StorageFreeBytes *int    `json:"storage_free_bytes,omitempty"`
 
 	// StorageState `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
 	StorageState      *HeartbeatStorageState `json:"storage_state,omitempty"`
@@ -9905,7 +9910,7 @@ type RemoteHelpSession struct {
 	// StartedByName The operator who started it.
 	StartedByName string `json:"started_by_name"`
 
-	// State `pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.
+	// State `pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.
 	State RemoteHelpSessionState `json:"state"`
 
 	// TailnetIp Operator only. Reported by the frame.
@@ -9914,7 +9919,7 @@ type RemoteHelpSession struct {
 	TailnetIp *string `json:"tailnet_ip,omitempty"`
 }
 
-// RemoteHelpSessionState `pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.
+// RemoteHelpSessionState `pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.
 type RemoteHelpSessionState string
 
 // RemoteHelpStart defines model for RemoteHelpStart.

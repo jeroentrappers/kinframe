@@ -288,13 +288,13 @@ func TestRemoteHelp(t *testing.T) {
 	// The worker: the pending timeout, then the end time.
 	ctx := context.Background()
 	s4 := start(op, 1).m(t)
-	if err := e.app.API.RemoteHelpTick(ctx, time.Now().Add(10*time.Minute)); err != nil {
+	if err := e.app.API.RemoteHelpTick(ctx, time.Now().Add(20*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	if r := e.do(req{method: "GET", path: "/v1/frames/" + frame + "/remote-help", token: anna.token}); r.StatusCode != 200 {
 		t.Fatalf("ended too early: %d", r.StatusCode)
 	}
-	if err := e.app.API.RemoteHelpTick(ctx, time.Now().Add(16*time.Minute)); err != nil {
+	if err := e.app.API.RemoteHelpTick(ctx, time.Now().Add(31*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	s5 := start(op, 8).m(t)

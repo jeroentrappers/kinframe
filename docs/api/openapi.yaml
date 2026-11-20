@@ -5636,6 +5636,7 @@ components:
           items: { type: string }
         remote_help:
           $ref: '#/components/schemas/HeartbeatRemoteHelp'
+        serial: { type: [string, 'null'], maxLength: 64, description: 'The device serial (as `adb devices` shows it), sent only by frames that list `remote_help`: the server names the tailnet host `kinframe-<serial>` after it (docs/spec/remote-help.md §5.2).', examples: ['36339301'] }
         uptime_s: { type: integer }
         wifi_ssid: { type: [string, 'null'] }
         wifi_rssi_dbm: { type: [integer, 'null'] }
@@ -9741,7 +9742,7 @@ components:
         state:
           type: string
           enum: [pending, 'on', ended]
-          description: '`pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.'
+          description: '`pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.'
         reason: { type: string }
         started_by_name: { type: string, description: The operator who started it. }
         started_at: { type: string, format: date-time }

@@ -5722,6 +5722,11 @@ export interface components {
              */
             features?: string[];
             remote_help?: components["schemas"]["HeartbeatRemoteHelp"];
+            /**
+             * @description The device serial (as `adb devices` shows it), sent only by frames that list `remote_help`: the server names the tailnet host `kinframe-<serial>` after it (docs/spec/remote-help.md §5.2).
+             * @example 36339301
+             */
+            serial?: string | null;
             uptime_s: number;
             wifi_ssid?: string | null;
             wifi_rssi_dbm?: number | null;
@@ -9743,7 +9748,7 @@ export interface components {
             frame_id: components["schemas"]["Id"];
             frame_name: string;
             /**
-             * @description `pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.
+             * @description `pending`: waiting for the frame to join the tailnet (ends as `failed` after 30 minutes). `on`: the frame reported it joined.
              * @enum {string}
              */
             state: "pending" | "on" | "ended";

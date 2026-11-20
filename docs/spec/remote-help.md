@@ -124,7 +124,9 @@ hostname, tailnet_ip|null, adb_command ("adb connect <hostname>:5555"), error|nu
 ```
 
 `auth_key` is present only until the frame reported `on`/`failed`. Ending a session sends `remote_help: null`.
-`hostname` is `kinframe-<device serial or short device id>`, lowercase, `[a-z0-9-]`, ≤ 63.
+`hostname` is `kinframe-<device serial or short device id>`, lowercase, `[a-z0-9-]`, ≤ 63. The serial comes from
+enrolment (`hardware.serial`) or from the heartbeat's `serial`, which frames that offer remote help send (Android 7 and
+older; newer Android hides it, and the short device id is used).
 
 **Events:** push keys `remote_help_started` (to frame members, at start), `remote_help_on` (to the operator who
 started it), `remote_help_ended` (members and operator; not to whoever ended it). Websocket `remote_help.updated`
@@ -132,7 +134,7 @@ with the session to the frame's members and operators. Owner/admin push is in th
 and end time.
 
 **Background:** a worker ends sessions at `ends_at` (`expired`), ends `pending` sessions whose frame never reported
-within 15 minutes as `failed`, and ends sessions of frames that are unpaired or deleted (`unpaired`). Ending always
+within 30 minutes as `failed` (the first session downloads ≈37 MB), and ends sessions of frames that are unpaired or deleted (`unpaired`). Ending always
 deletes the frame's node in Headscale (`GET /api/v1/node?user=…`, match on `given_name`/`name` = hostname, then
 `DELETE /api/v1/node/{id}`), and expires the pre-auth key (`POST /api/v1/preauthkey/expire`) if it is still unused.
 

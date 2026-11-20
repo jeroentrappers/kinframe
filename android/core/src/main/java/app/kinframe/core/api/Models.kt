@@ -479,6 +479,8 @@ data class Heartbeat(
     val features: List<String>? = null,
     /** The frame's side of a remote help session (docs/spec/remote-help.md §5.2); absent when it never had one. */
     val remoteHelp: RemoteHelpReport? = null,
+    /** The device serial, only from frames that offer remote help (its tailnet host name, docs/spec/remote-help.md). */
+    val serial: String? = null,
 )
 
 /** Heartbeat `remote_help`: how far the frame got with a remote help session. */
