@@ -7,7 +7,7 @@
 	import { formatDateTime, relativeTime } from '$lib/format';
 	import { live } from '$lib/live.svelte';
 	import { isCode, problemMessage } from '$lib/problem';
-	import { authorCredit } from '$lib/sender';
+	import { withVia } from '$lib/sender';
 	import { posterName, postPlace } from '$lib/social';
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
@@ -180,7 +180,7 @@
 				<Avatar name={poster} url={post.poster.former_member ? null : post.poster.avatar_url} size={44} />
 				<div class="who">
 					<h1 id="post-who" class="name">
-						{#if !post.poster.former_member}<a href="/people/{post.poster.user_id}">{authorCredit(poster, post.via)}</a>{:else}{poster}{/if}
+						{#if !post.poster.former_member}<a href="/people/{post.poster.user_id}">{withVia(poster, post.via)}</a>{:else}{poster}{/if}
 					</h1>
 					<span class="meta muted small">
 						{#if place?.kind === 'frame'}

@@ -3,7 +3,7 @@
 	import { auth } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { formatDateTime, relativeTime } from '$lib/format';
-	import { authorCredit } from '$lib/sender';
+	import { withVia } from '$lib/sender';
 	import { personName, posterName, postPlace } from '$lib/social';
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import { softFly } from '$lib/motion';
@@ -43,7 +43,7 @@
 		</a>
 		<div class="who">
 			<span id="post-{post.id}-who" class="name">
-				{authorCredit(poster, post.via)}{#if own}<span class="faint you"> ({t('people.you')})</span>{/if}
+				{withVia(poster, post.via)}{#if own}<span class="faint you"> ({t('people.you')})</span>{/if}
 			</span>
 			<span class="meta muted small">
 				{#if place.kind === 'frame'}

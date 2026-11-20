@@ -18,7 +18,7 @@ export async function sendToFrame(frameId: string, files: File[]) {
 		if (overLimit > 0) toasts.error(t('send.overLimit', { max: discovery.limits.max_items_per_send, n: overLimit }));
 		if (unsupported > 0) toasts.show(tn('send.skipped', unsupported));
 	}
-	await goto('/send');
+	await goto(`/send?frame=${frameId}`);
 }
 
 /**
