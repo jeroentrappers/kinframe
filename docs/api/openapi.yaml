@@ -1387,8 +1387,8 @@ paths:
       operationId: requestSubscription
       description: |
         Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
-        `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
-        has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+        `change_settings`). The subscription is `active` at once for any feed role, poster too (feeds.md §4.1); only
+        frames on other servers wait for approval.
         `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
         this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
       parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
@@ -1396,7 +1396,7 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/SubscriptionRequest' } } }
       responses:
-        '201': { description: Created (pending or active), content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '201': { description: Created (active), content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
         '403': { $ref: '#/components/responses/Problem' }
         '409': { $ref: '#/components/responses/Problem' }
         default: { $ref: '#/components/responses/Problem' }
@@ -6250,7 +6250,7 @@ components:
         cover_item_id:
           oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
           description: An item of a live post of this feed; null removes the cover.
-        auto_approve_subscriptions: { type: boolean, description: Requests by non-admin members become active without approval. }
+        auto_approve_subscriptions: { type: boolean, description: Frames on other servers become active without approval (members' requests always are). }
         invite_requires_approval: { type: boolean, description: Join invites need an admin's approval. }
         members_see_reactions: { type: boolean, description: Every member sees frames' reactions and quick replies on every post. }
         members_see_receipts: { type: boolean, description: Every member sees per-frame receipts of every post. }

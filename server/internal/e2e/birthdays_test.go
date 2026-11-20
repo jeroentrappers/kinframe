@@ -303,26 +303,24 @@ func TestBirthdayFramesAndGreetings(t *testing.T) {
 	e.setClock(time.Date(2027, 3, 12, 9, 0, 0, 0, time.UTC))
 
 	omaA := e.addBirthday(anna, sideA, map[string]any{"display_name": "Oma", "day": 12, "month": 3, "birth_year": 1946, "show_age": true}, 201)["id"].(string)
-	// Carla subscribes her frame to side A; side B is requested with birthdays off.
+	// Carla (a poster who manages her frame) subscribes it to side A, active at once; side B with birthdays off.
 	subA := e.expect(req{method: "POST", path: "/v1/feeds/" + sideA + "/subscriptions", token: carla.token, body: map[string]any{"frame_id": kitchen}}, 201).m(t)
-	if subA["status"] != "pending" || subA["birthdays"] != true || subA["birthday_count"] != float64(1) || dig(subA, "frame", "birthdays_supported") != false {
+	if subA["status"] != "active" || subA["birthdays"] != true || subA["birthday_count"] != float64(1) || dig(subA, "frame", "birthdays_supported") != false {
 		t.Fatalf("subscription: %v", subA)
 	}
-	if p, present, _ := e.lastBirthdays(dK, 0); present || p != nil {
-		t.Fatal("pending subscriptions contribute nothing")
-	}
-	e.expect(req{method: "POST", path: "/v1/subscriptions/" + subA["id"].(string) + "/approve", token: anna.token}, 200)
 	p, present, head := e.lastBirthdays(dK, 0)
 	ps := people(p)
 	if !present || len(ps) != 1 || ps[0]["id"] != omaA || ps[0]["name"] != "Oma" || ps[0]["birth_year"] != float64(1946) || ps[0]["month"] != float64(3) {
-		t.Fatalf("after approval: %v", p)
+		t.Fatalf("after subscribing: %v", p)
 	}
 	subB := e.expect(req{method: "POST", path: "/v1/feeds/" + sideB + "/subscriptions", token: anna.token,
 		body: map[string]any{"frame_id": kitchen}}, 404) // Anna does not manage Carla's frame
 	_ = subB
 	sb := e.expect(req{method: "POST", path: "/v1/feeds/" + sideB + "/subscriptions", token: carla.token,
 		body: map[string]any{"frame_id": kitchen, "birthdays": false}}, 201).m(t)
-	e.expect(req{method: "POST", path: "/v1/subscriptions/" + sb["id"].(string) + "/approve", token: anna.token}, 200)
+	if sb["status"] != "active" {
+		t.Fatalf("side B subscription: %v", sb)
+	}
 	if _, present, _ := e.lastBirthdays(dK, head); present {
 		t.Fatal("a subscription with birthdays off changed the list")
 	}

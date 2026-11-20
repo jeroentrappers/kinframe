@@ -7213,7 +7213,7 @@ type FeedUpdate struct {
 	// AllowRemoteFrames Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`).
 	AllowRemoteFrames *bool `json:"allow_remote_frames,omitempty"`
 
-	// AutoApproveSubscriptions Requests by non-admin members become active without approval.
+	// AutoApproveSubscriptions Frames on other servers become active without approval (members' requests always are).
 	AutoApproveSubscriptions *bool `json:"auto_approve_subscriptions,omitempty"`
 
 	// CoverItemId An item of a live post of this feed; null removes the cover.

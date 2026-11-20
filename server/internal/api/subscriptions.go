@@ -290,7 +290,10 @@ func (s *Server) RequestSubscription(ctx context.Context, req gen.RequestSubscri
 	if err != nil {
 		return nil, err
 	}
-	active := fv.IsAdmin() || fv.AutoApproveSubscriptions
+	// The caller is a member of the feed (any role, feedView) and manages the frame (managedFrames): that is
+	// enough for the subscription to be active at once (feeds.md §4.1). Only frames on other servers can still
+	// wait for approval (federation_family.go).
+	fresh := true // false when an idempotent replay found the earlier request
 	limit := s.Limits(ctx).MaxSubscriptionsPerFeed
 	id := store.NewID()
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
@@ -313,14 +316,12 @@ func (s *Server) RequestSubscription(ctx context.Context, req gen.RequestSubscri
 			HistoryCount: count, RequestedBy: &u.ID, Birthdays: b.Birthdays == nil || *b.Birthdays}); err != nil {
 			return err
 		}
-		if active {
-			var by *uuid.UUID
-			if fv.IsAdmin() {
-				by = &u.ID
-			}
-			if err := tx.ActivateSubscription(ctx, id, by); err != nil {
-				return err
-			}
+		var by *uuid.UUID
+		if fv.IsAdmin() {
+			by = &u.ID
+		}
+		if err := tx.ActivateSubscription(ctx, id, by); err != nil {
+			return err
 		}
 		if key != "" {
 			return tx.SaveIdempotent(ctx, u.ID, "subscription", key, subRef{id})
@@ -330,7 +331,7 @@ func (s *Server) RequestSubscription(ctx context.Context, req gen.RequestSubscri
 	if db.IsUniqueViolation(err, "idempotency_keys_pkey") {
 		var prev subRef
 		if found, _ := store.IdempotentResult(ctx, s.st.Q(), u.ID, "subscription", key, &prev); found {
-			id, err, active = prev.SubscriptionID, nil, false
+			id, err, fresh = prev.SubscriptionID, nil, false
 		}
 	}
 	if db.IsUniqueViolation(err, "subscriptions_one_live") {
@@ -339,10 +340,8 @@ func (s *Server) RequestSubscription(ctx context.Context, req gen.RequestSubscri
 	if err != nil {
 		return nil, err
 	}
-	if active {
+	if fresh {
 		s.publishSubscription(ctx, id, nil)
-	} else {
-		s.announceSubscriptionRequest(ctx, id)
 	}
 	out, err := s.renderSubscription(ctx, id)
 	if err != nil {

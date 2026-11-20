@@ -207,28 +207,6 @@ func (s *Server) publishSubscription(ctx context.Context, subID uuid.UUID, pushe
 	}
 }
 
-// announceSubscriptionRequest tells the feed's owner and admins that a frame asks to subscribe.
-func (s *Server) announceSubscriptionRequest(ctx context.Context, subID uuid.UUID) {
-	sv, err := s.st.GetSubscriptionView(ctx, s.st.Q(), subID)
-	if err != nil {
-		return
-	}
-	admins, err := s.st.FeedAdminIDs(ctx, s.st.Q(), sv.FeedID)
-	if err != nil {
-		return
-	}
-	name := ""
-	if sv.RequestedByName != nil {
-		name = *sv.RequestedByName
-	}
-	for _, uid := range admins {
-		v := s.viewerOf(ctx, uid, sv)
-		s.notify.User(uid, notify.Event{"type": "subscription.request", "feed_id": sv.FeedID, "subscription": s.subscriptionOut(ctx, sv, v)},
-			&notify.Push{Key: "subscription_request", Args: map[string]string{"name": name, "feed": sv.FeedName, "frame": sv.FrameName},
-				IDs: map[string]string{"feed_id": sv.FeedID.String(), "frame_id": sv.FrameID.String(), "subscription_id": sv.ID.String()}})
-	}
-}
-
 // notifySubscriptionRemoved tells a frame's managers that a subscription ended
 // from the feed side (feed deleted), pushing its owner and admins. The row may
 // already be gone, so the event carries what is known.

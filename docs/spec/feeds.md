@@ -21,8 +21,9 @@ send, and without every poster having to be a member of every frame.
 ## 2. Concepts
 
 - **Feed**: a named channel with an optional cover (one of its own photos). Lives on the server, belongs to nobody's
-  frame. Settings: *auto-approve subscriptions* (default off), *invites need approval* (default on), *members see
-  reactions* (default off), *posters can invite* (default off, §11).
+  frame. Settings: *auto-approve subscriptions* (default off; only frames on other servers wait for approval, §4.2),
+  *invites need approval* (default on), *members see reactions* (default off), *posters can invite* (default off,
+  §11).
 - **Feed membership**: links an account to a feed with a role. Separate from frame membership: being in a feed gives
   no rights on any frame, and being on a frame gives no rights in a feed.
   - `owner`: exactly one. Everything, including transferring ownership and deleting the feed.
@@ -95,7 +96,7 @@ send, and without every poster having to be a member of every frame.
 | Change roles (poster ↔ admin) | ✓ | posters only | — |
 | Remove members (optionally with their posts) | ✓ | posters only | — |
 | See pending/rejected subscriptions and who asked; approve, reject, remove any subscription | ✓ | ✓ | — |
-| Request a subscription for a frame you manage | ✓ (active at once) | ✓ (active at once) | ✓ (needs approval) |
+| Request a subscription for a frame you manage | ✓ (active at once) | ✓ (active at once) | ✓ (active at once) |
 | Transfer ownership, delete the feed | ✓ | — | — |
 | Leave the feed | after transfer | ✓ | ✓ |
 
@@ -105,7 +106,7 @@ send, and without every poster having to be a member of every frame.
 
 | Action | frame manager | other frame member | feed admin (not frame manager) |
 |---|---|---|---|
-| Request a subscription (needs feed membership or a `subscribe` invite) | ✓ | — | — |
+| Request a subscription (needs feed membership or a `subscribe` invite; active at once) | ✓ | — | — |
 | Withdraw a pending request | ✓ (and the requester) | — | — |
 | Pause, resume, change the history option | ✓ | — | — |
 | Unsubscribe | ✓ | — | — |
@@ -115,14 +116,18 @@ send, and without every poster having to be a member of every frame.
 | Set feed mode (`slideshow.feed_id`) | ✓ | — | — |
 | Hide, trash, purge, approve (moderation) feed placements on the frame | as for any placement (*manage library*, moderation: owner/admin) | as for any placement | — |
 
-A person who is both a feed admin and a manager of the frame gets an active subscription without approval.
+A person who is both a member of the feed (any role, poster too) and a manager of the frame gets an active
+subscription without approval: they already may post to the feed and change the frame's settings, so an approval
+step would only ask an admin to confirm what the requester could arrange anyway. Approval remains for frames on
+other servers (`multi-server.md` §3.4), whose requesters are not feed members; a `subscribe` invite made by an
+admin pre-approves (§11, decision 2).
 
 ## 5. States
 
 ### 5.1 Subscription
 
 ```
-             request (requester is feed admin, auto-approve on, or subscribe invite by an admin)
+             request (requester is a feed member, or subscribe invite by an admin)
    ┌──────────────────────────────────────────────────────────────┐
    │                                                              ▼
 request ──▶ pending ──approve──▶ active ◀──resume── paused
@@ -136,7 +141,7 @@ request ──▶ pending ──approve──▶ active ◀──resume── pa
 
 | Status | Meaning | Placements on the frame |
 |---|---|---|
-| `pending` | Waiting for a feed admin. | None. |
+| `pending` | Waiting for a feed admin (a frame on another server, §4.2). | None. |
 | `active` | Posts are placed on the frame. | Per the history option, plus every new post. |
 | `paused` | The frame side paused it. | Kept on the server but **not shown**: they leave the frame (rendered as `placement.remove`) and come back on resume. No new placements are made while paused; on resume the posts made in the meantime are placed quietly. |
 | `rejected` | A feed admin said no. Kept 30 days so the requester can see it, then deleted. A new request is allowed. | None. |
@@ -284,7 +289,7 @@ available), localized, carrying IDs only (API guide §6.3).
 
 | Event | Who | Push key |
 |---|---|---|
-| Subscription requested | Feed owner and admins | `subscription_request` |
+| Subscription requested (a frame on another server, §4.2) | Feed owner and admins | `subscription_request` |
 | Subscription approved / rejected | The requester | `subscription_decided` |
 | Subscription removed by a feed admin, or feed deleted | Frame owner and admins | `subscription_removed` |
 | Frame side unsubscribed | Feed owner and admins (websocket only; no push) | — |

@@ -249,31 +249,27 @@ func TestFeedPostsAndSubscriptions(t *testing.T) {
 	e.heartbeat(dK, "feed_backfill")
 	e.heartbeat(dO, "feed_backfill")
 
-	// --- Ben (poster, manages Oma's frame) asks; Anna approves.
+	// --- Ben (poster, manages Oma's frame) asks: active at once, no approval (feeds.md §4.2).
 	annaWS := e.dialWS("/v1/ws?access_token="+anna.token, "")
 	benWS := e.dialWS("/v1/ws?access_token="+ben.token, "")
 	sub := e.expect(req{method: "POST", path: "/v1/feeds/" + feed + "/subscriptions", token: ben.token,
 		body: map[string]any{"frame_id": oma, "history": "none"}}, 201).m(t)
-	if sub["status"] != "pending" || sub["can_manage"] != true || sub["can_decide"] != false || dig(sub, "feed", "member_count") != float64(3) {
+	if sub["status"] != "active" || sub["activated_at"] == nil || sub["can_manage"] != true || sub["can_decide"] != false ||
+		dig(sub, "feed", "member_count") != float64(3) {
 		t.Fatalf("request: %v", sub)
 	}
 	subO := sub["id"].(string)
-	annaWS.await("subscription.request", 5*time.Second)
+	annaWS.awaitWhere("subscription.updated", 5*time.Second, func(m map[string]any) bool {
+		return dig(m, "subscription", "id") == subO && dig(m, "subscription", "status") == "active" && dig(m, "subscription", "requested_by_name") == "Ben"
+	})
 	if r := e.do(req{method: "POST", path: "/v1/subscriptions/" + subO + "/approve", token: ben.token}); r.StatusCode != 403 {
 		t.Fatalf("poster approves: %d", r.StatusCode)
 	}
-	// Dave (another poster) doesn't see pending subscriptions.
-	if l := e.list("/v1/feeds/"+feed+"/subscriptions", dave.token); len(l) != 0 {
-		t.Fatalf("poster sees pending: %v", l)
+	// Dave (another poster) sees the active subscription, without who asked.
+	if l := e.list("/v1/feeds/"+feed+"/subscriptions", dave.token); len(l) != 1 || l[0]["status"] != "active" || l[0]["requested_by_name"] != nil {
+		t.Fatalf("poster's view: %v", l)
 	}
-	if r := e.do(req{method: "GET", path: "/v1/subscriptions/" + subO, token: dave.token}); r.StatusCode != 404 {
-		t.Fatalf("poster gets pending: %d", r.StatusCode)
-	}
-	ap := e.expect(req{method: "POST", path: "/v1/subscriptions/" + subO + "/approve", token: anna.token}, 200).m(t)
-	if ap["status"] != "active" || ap["activated_at"] == nil || ap["requested_by_name"] != "Ben" {
-		t.Fatalf("approve: %v", ap)
-	}
-	e.expect(req{method: "POST", path: "/v1/subscriptions/" + subO + "/approve", token: anna.token}, 200) // repeat: unchanged
+	e.expect(req{method: "POST", path: "/v1/subscriptions/" + subO + "/approve", token: anna.token}, 200) // already active: unchanged
 	if r := e.do(req{method: "POST", path: "/v1/subscriptions/" + subO + "/reject", token: anna.token}); r.StatusCode != 409 || r.code() != "already_decided" {
 		t.Fatalf("reject active: %d %s", r.StatusCode, r.body)
 	}
@@ -627,6 +623,92 @@ func TestFeedBackfillAndRemovals(t *testing.T) {
 	// The items stay in the poster's sent history.
 	if sd := e.get("/v1/sends/"+s1, anna.token).m(t); len(sd["items"].([]any)) != 2 {
 		t.Fatalf("sent history after feed delete: %v", sd)
+	}
+}
+
+// Any feed member who manages the frame (owner, admin or change_settings)
+// gets an active subscription at once, with the history option the simple
+// apps send (last_n 50); everyone else is refused (feeds.md §4.1, §4.2).
+func TestFeedSubscriptionByFrameManager(t *testing.T) {
+	requireMedia(t)
+	e := newEnv(t)
+	anna, ben, carla, dave, eve := e.user("anna@x.org", "Anna"), e.user("ben@x.org", "Ben"), e.user("carla@x.org", "Carla"),
+		e.user("dave@x.org", "Dave"), e.user("eve@x.org", "Eve")
+	feed := e.createFeed(anna, map[string]any{"name": "Peeters kids"})
+	for _, u := range []*user{ben, carla, dave} {
+		e.joinFeed(anna, u, feed)
+	}
+	s1 := e.post(anna, []string{}, []string{feed}, e.photo(anna, 1), e.photo(anna, 2), e.photo(anna, 3))
+	eventually(t, 60*time.Second, "items processed", func() bool {
+		for _, it := range e.get("/v1/sends/"+s1, anna.token).m(t)["items"].([]any) {
+			if it.(map[string]any)["status"] != "ready" {
+				return false
+			}
+		}
+		return true
+	})
+	subscribe := func(u *user, frame string, status int) map[string]any {
+		t.Helper()
+		r := e.expect(req{method: "POST", path: "/v1/feeds/" + feed + "/subscriptions", token: u.token,
+			body: map[string]any{"frame_id": frame, "history": "last_n", "history_count": 50}}, status)
+		if status != 201 {
+			return map[string]any{"code": r.code()}
+		}
+		return r.m(t)
+	}
+	backfilled := func(u *user, frame string, n int) {
+		t.Helper()
+		eventually(t, 60*time.Second, "backfill on "+frame, func() bool {
+			lib := e.library(u, frame, "")
+			if len(lib) != n {
+				return false
+			}
+			for _, p := range lib {
+				if p["status"] == "pending" || p["backfill"] != true || p["origin"] != "feed" {
+					return false
+				}
+			}
+			return true
+		})
+	}
+
+	// Ben, a poster, owns his frame.
+	dB, benFrame := e.claimSized(ben, 1280, 800)
+	e.heartbeat(dB, "feed_backfill")
+	s := subscribe(ben, benFrame, 201)
+	if s["status"] != "active" || s["activated_at"] == nil || s["history"] != "last_n" || s["history_count"] != float64(50) || s["can_decide"] != false {
+		t.Fatalf("poster owning the frame: %v", s)
+	}
+	backfilled(ben, benFrame, 3)
+
+	// Carla, a poster, is admin of Eve's frame; Dave, a poster, has only change_settings on it.
+	dE, eveFrame := e.claimSized(eve, 1280, 800)
+	e.heartbeat(dE, "feed_backfill")
+	e.join(carla, dE)
+	e.join(dave, dE)
+	e.expect(req{method: "PATCH", path: "/v1/frames/" + eveFrame + "/members/" + carla.id, token: eve.token, body: map[string]any{"role": "admin"}}, 200)
+	if r := subscribe(dave, eveFrame, 403); r["code"] != "missing_permission" {
+		t.Fatalf("poster without change_settings: %v", r)
+	}
+	if s := subscribe(carla, eveFrame, 201); s["status"] != "active" {
+		t.Fatalf("poster who is frame admin: %v", s)
+	} else {
+		e.expect(req{method: "DELETE", path: "/v1/subscriptions/" + s["id"].(string), token: carla.token}, 204)
+	}
+	e.setPerms(eve, eveFrame, dave, map[string]any{"change_settings": true})
+	if s := subscribe(dave, eveFrame, 201); s["status"] != "active" {
+		t.Fatalf("poster with change_settings: %v", s)
+	}
+	backfilled(eve, eveFrame, 3)
+
+	// Eve manages her frame but is no member of the feed: not found, as for any outsider.
+	_, eveOther := e.claim(eve)
+	if r := subscribe(eve, eveOther, 404); r["code"] != "not_found" {
+		t.Fatalf("outsider: %v", r)
+	}
+	// Nothing waited for approval.
+	for _, l := range e.list("/v1/feeds/"+feed+"/subscriptions?status=pending", anna.token) {
+		t.Fatalf("pending subscription: %v", l)
 	}
 }
 

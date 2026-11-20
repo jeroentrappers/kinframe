@@ -11,7 +11,8 @@ import (
 // expiry), the purge with a controlled clock, admin removal, account deletion (take and leave), the memories
 // filter, read-only direct chats and operator ownership transfers.
 
-// subscribeFeed subscribes a frame (managed by u) to a family and approves it as admin when needed.
+// subscribeFeed subscribes a frame (managed by u) to a family; members' requests are active at once, the
+// approval by admin is only a fallback.
 func (e *env) subscribeFeed(u, admin *user, feed, frame string) string {
 	e.t.Helper()
 	s := e.expect(req{method: "POST", path: "/v1/feeds/" + feed + "/subscriptions", token: u.token,

@@ -641,9 +641,9 @@ says `feeds: true` when the server supports them.
 
 **Subscriptions**
 - `POST /v1/feeds/{id}/subscriptions {frame_id, history, history_count}`: the caller is a feed member and a frame
-  manager (owner, admin or `change_settings`). `active` at once for feed owners/admins or with
-  `auto_approve_subscriptions`, else `pending` until `POST /v1/subscriptions/{sid}/approve` or `/reject` by a feed
-  owner/admin.
+  manager (owner, admin or `change_settings`), so the subscription is `active` at once, whatever the caller's feed
+  role (`feeds.md` §4.1). Only remote frames (§5.22) can be `pending` until `POST /v1/subscriptions/{sid}/approve`
+  or `/reject` by a feed owner/admin.
 - Frame side (frame managers): `POST …/pause`, `POST …/resume`, `PATCH /v1/subscriptions/{sid} {history,
   history_count}`, `DELETE` (unsubscribe, or withdraw a pending request). Feed owners/admins may `DELETE` any
   subscription. Lists: `GET /v1/feeds/{id}/subscriptions` and `GET /v1/frames/{id}/subscriptions` (`?status=`).
@@ -1761,7 +1761,7 @@ each other's document (`remote_servers`), refresh it daily and on a signature fa
    `pending`, even with a pre-approved `subscribe` invite (unlike local subscriptions), so the family's admins see
    which server will get copies before anything is shared. A's admins see it in `listFeedSubscriptions` with
    `remote` set and decide with the usual `approve`/`reject`/`DELETE /v1/subscriptions/{sid}`
-   (`subscription.request` / `subscription_request` push as for local requests: "Tom wants to show Janssens on Oma's
+   (`subscription.request` / `subscription_request` push: "Tom wants to show Janssens on Oma's
    frame (kinframe.appmire.be)"). B keeps a `remote_follows` row (`RemoteSubscription`).
 3. Remote subscriptions count against `limits.max_subscriptions_per_feed`. One live remote subscription per B frame
    and family (`409 already_subscribed`).

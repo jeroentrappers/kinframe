@@ -3954,7 +3954,7 @@ components:
                     description: Owner and admins. Turning it off ends every remote subscription of the family (`removed_by_feed`).
                     type: boolean
                 auto_approve_subscriptions:
-                    description: Requests by non-admin members become active without approval.
+                    description: Frames on other servers become active without approval (members' requests always are).
                     type: boolean
                 cover_item_id:
                     allOf:
@@ -14481,8 +14481,8 @@ paths:
         post:
             description: |
                 Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
-                `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
-                has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+                `change_settings`). The subscription is `active` at once for any feed role, poster too (feeds.md §4.1); only
+                frames on other servers wait for approval.
                 `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
                 this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
             operationId: requestSubscription
@@ -14500,7 +14500,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Subscription'
-                    description: Created (pending or active)
+                    description: Created (active)
                 "403":
                     $ref: '#/components/responses/Problem'
                 "409":
