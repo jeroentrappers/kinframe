@@ -63,13 +63,7 @@ class LegacyTrustTest {
 class LegacyTrustApplyTest {
     private val app get() = RuntimeEnvironment.getApplication()
 
-    @Config(sdk = [23])
-    @Test fun marshmallowTrustsTheBundledRoots() {
-        val client = LegacyTrust.apply(OkHttpClient.Builder(), app).build()
-        val names = client.x509TrustManager!!.acceptedIssuers.map { it.subjectX500Principal.name }
-        assertTrue(names.any { "CN=ISRG Root X1" in it })
-        assertTrue(names.any { "CN=ISRG Root X2" in it })
-    }
+    // Android 6 (API 23) only runs the GitHub build (the Play build needs 24): testGithub/.../LegacyTrustMarshmallowTest.
 
     @Config(sdk = [24])
     @Test fun nougatLeavesItToTheNetworkSecurityConfig() {
