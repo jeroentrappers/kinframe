@@ -193,3 +193,24 @@ func TestAppVersions(t *testing.T) {
 		}
 	}
 }
+
+func TestSentry(t *testing.T) {
+	base := map[string]string{"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_DEV_AUTH": "1",
+		"KINFRAME_SIGNING_KEY": strings.Repeat("ab", 32), "KINFRAME_DATA_DIR": t.TempDir()}
+	c, err := load(func(k string) string { return base[k] })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.SentryDSN != "" || c.SentryWebDSN != "" || c.Revision != "" {
+		t.Fatalf("defaults: %q %q %q", c.SentryDSN, c.SentryWebDSN, c.Revision)
+	}
+	base["KINFRAME_SENTRY_DSN"] = " https://a@errors.example/1 "
+	base["KINFRAME_SENTRY_WEB_DSN"] = "https://b@errors.example/2"
+	base["KINFRAME_REVISION"] = "1a2b3c4d"
+	if c, err = load(func(k string) string { return base[k] }); err != nil {
+		t.Fatal(err)
+	}
+	if c.SentryDSN != "https://a@errors.example/1" || c.SentryWebDSN != "https://b@errors.example/2" || c.Revision != "1a2b3c4d" {
+		t.Fatalf("set: %q %q %q", c.SentryDSN, c.SentryWebDSN, c.Revision)
+	}
+}

@@ -5987,6 +5987,11 @@ type Discovery struct {
 	// docs/spec/remote-help.md §5.1). Frame pages show an active session either way (`FrameSummary.remote_help`).
 	RemoteHelp *bool `json:"remote_help,omitempty"`
 
+	// SentryDsn DSN of the Sentry-compatible server (GlitchTip) the web app sends its crash reports to
+	// (docs/spec/crash-reporting.md): the operator's `KINFRAME_SENTRY_WEB_DSN`. Omitted when unset; the web app
+	// then starts no crash reporting. Only the web app reads it; the native apps have their own DSN.
+	SentryDsn *string `json:"sentry_dsn,omitempty"`
+
 	// ServerId Stable random id of this server (generated at first start), so apps signed in to several servers can tell
 	// them apart and deduplicate accounts (docs/spec/multi-server.md §2.3).
 	ServerId *string `json:"server_id,omitempty"`

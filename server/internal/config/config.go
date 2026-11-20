@@ -34,6 +34,8 @@ type Config struct {
 
 	// SentryDSN turns on crash reporting of the server itself (docs/spec/crash-reporting.md); empty = off.
 	SentryDSN string
+	// SentryWebDSN is published in discovery (`sentry_dsn`) for the web app's own reports; empty = omitted.
+	SentryWebDSN string
 
 	DatabaseURL string
 	DataDir     string // media (fs backend), uploads, scratch space
@@ -332,6 +334,7 @@ func load(get func(string) string) (*Config, error) {
 		Version:            env("KINFRAME_VERSION", "0.1.0"),
 		Revision:           env("KINFRAME_REVISION", ""),
 		SentryDSN:          strings.TrimSpace(env("KINFRAME_SENTRY_DSN", "")),
+		SentryWebDSN:       strings.TrimSpace(env("KINFRAME_SENTRY_WEB_DSN", "")),
 		DatabaseURL:        env("KINFRAME_DATABASE_URL", ""),
 		DataDir:            env("KINFRAME_DATA_DIR", "./data"),
 		WebDir:             env("KINFRAME_WEB_DIR", ""),

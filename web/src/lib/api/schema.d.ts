@@ -5175,6 +5175,12 @@ export interface components {
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
              */
             webpush_public_key?: string | null;
+            /**
+             * @description DSN of the Sentry-compatible server (GlitchTip) the web app sends its crash reports to
+             *     (docs/spec/crash-reporting.md): the operator's `KINFRAME_SENTRY_WEB_DSN`. Omitted when unset; the web app
+             *     then starts no crash reporting. Only the web app reads it; the native apps have their own DSN.
+             */
+            sentry_dsn?: string;
             shop?: components["schemas"]["Shop"];
         };
         /**

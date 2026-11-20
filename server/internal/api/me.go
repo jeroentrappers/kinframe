@@ -60,6 +60,9 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	s.leavingDiscovery(&d)
 	s.federationDiscovery(&d)
 	d.RemoteHelp = ptr(s.remoteHelpReady())
+	if s.cfg.SentryWebDSN != "" {
+		d.SentryDsn = ptr(s.cfg.SentryWebDSN)
+	}
 	d.EmailInbox, d.EmailInboxDomain = s.emailDiscovery()
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
