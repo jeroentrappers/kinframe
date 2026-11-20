@@ -20,7 +20,8 @@ struct FeedInviteView: View {
     @State private var error: String?
     @State private var busy = false
     @State private var chosen: Set<String> = []
-    @State private var history: HistoryChoice = .none
+    /// No question (docs/spec/simple-app.md §5): the last 50 posts come along, changeable in Frame settings.
+    private let history = SimpleDefaults.addFrameHistory
     @State private var birthdays = true
     @State private var idempotencyKey = UUID().uuidString.lowercased()
 
@@ -136,7 +137,6 @@ struct FeedInviteView: View {
                 }
                 .card(padding: 0)
             }
-            HistoryPicker(choice: $history, maxAll: app.limits.maxFeedBackfillItems)
             if app.birthdaysEnabled { BirthdaysSwitch(on: $birthdays) }
             Callout(L("ios.feeds.subscribe.privacy", ["feed": p.feedName]))
             Button {
@@ -161,18 +161,21 @@ struct FeedInviteView: View {
             Button(L("common.done")) { dismiss() }.buttonStyle(.kf(.primary, large: true, fill: true))
         case .joined, .alreadyMember:
             Text(L("ios.feeds.invite.joined", ["name": r.feed.name])).font(.display(.title))
-            Text(L("ios.feeds.invite.joinedBody")).foregroundStyle(Palette.textMuted)
-            Button(L("ios.feeds.postFirst")) {
-                app.composeFeedIds = [r.feed.id]
-                app.tab = .send
-                dismiss()
+            if ViewMode.asked() {
+                Text(L("ios.feeds.invite.joinedBody")).foregroundStyle(Palette.textMuted)
+                Button(L("simple.joined.open")) {
+                    dismiss()
+                    app.tab = .home
+                }
+                .buttonStyle(.kf(.primary, large: true, fill: true))
+            } else {
+                // Asked once on this device (§6): the normal app, or big photos and a heart.
+                ViewModeQuestion { mode in
+                    app.accounts?.viewMode = mode
+                    app.tab = .home
+                    dismiss()
+                }
             }
-            .buttonStyle(.kf(.primary, large: true, fill: true))
-            Button(L("ios.feeds.open")) {
-                dismiss()
-                app.openFeed(r.feed.id)
-            }
-            .buttonStyle(.kf(.secondary, fill: true))
         case .subscribed:
             Text(L("ios.feeds.invite.subscribed", ["name": r.feed.name])).font(.display(.title))
             ForEach(r.subscriptions ?? []) { s in
@@ -229,9 +232,9 @@ struct FeedInviteView: View {
     private func openFeedByName(_ name: String) {
         dismiss()
         if let feed = app.feeds.first(where: { $0.name == name }) {
-            app.openFeed(feed.id)
+            app.openFamily(feed.id)
         } else {
-            app.tab = .feeds
+            app.tab = .family
         }
     }
 }

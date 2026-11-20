@@ -1,8 +1,8 @@
 import KinframeKit
 import SwiftUI
 
-/// Welcome → server → sign in → name (only when needed) → first frame. The step is persisted, so onboarding
-/// resumes where it stopped.
+/// Welcome → server → sign in → name (only when needed). The step is persisted, so onboarding resumes where it
+/// stopped. Without a family the app then shows getting started (Family/GettingStarted.swift).
 struct OnboardingFlow: View {
     @Environment(AppModel.self) private var app
     @State private var step: Onboarding.Step = .welcome
@@ -22,16 +22,6 @@ struct OnboardingFlow: View {
             case .name:
                 NamePromptView { go(nextAfterName) }
                     .transition(slide)
-            case .firstFrame:
-                if let api = app.api {
-                    NavigationStack {
-                        AddFrameView(api: api, context: .onboarding) { send in
-                            app.finishOnboarding()
-                            if send { app.tab = .send }
-                        }
-                    }
-                    .transition(slide)
-                }
             case .done:
                 Color.clear.onAppear { app.finishOnboarding() }
             }
@@ -59,10 +49,7 @@ struct OnboardingFlow: View {
         return stored == .welcome || stored == .server ? stored : .signIn
     }
 
-    /// Skip "add your first frame" for people who already have frames, or arrived with a frame or invite link.
-    private var nextAfterName: Onboarding.Step {
-        app.frames.isEmpty && app.pendingLink == nil ? .firstFrame : .done
-    }
+    private var nextAfterName: Onboarding.Step { .done }
 
     private func afterSignIn() async {
         if app.me?.displayName == PLACEHOLDER_NAME {

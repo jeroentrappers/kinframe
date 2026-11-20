@@ -31,10 +31,9 @@ extension AppModel {
         case .takenAway(let frameId, let feedId, _), .keepAnswered(_, let frameId, let feedId):
             if let frameId {
                 leaving.trashFrameId = frameId
-                tab = .frames
-                framesPath = NavigationPath([FrameRoute(id: frameId, section: .photos, account: accountId)])
+                openFrame(frameId, page: .photos)
             } else if let feedId {
-                openFeed(feedId, section: .members)
+                openFamily(feedId, section: .members)
             }
         case .keepRequest(let requestId):
             // A sheet over whatever is on screen, talking to this account (the presenters in MainTabs).
@@ -42,11 +41,10 @@ extension AppModel {
         case .ownership(let frameId, let feedId):
             if let frameId {
                 Task { await loadFrames() }
-                tab = .frames
-                framesPath = NavigationPath([FrameRoute(id: frameId, account: accountId)])
+                openFrame(frameId)
             } else if let feedId {
                 Task { await loadFeeds() }
-                openFeed(feedId)
+                openFamily(feedId)
             }
         }
     }

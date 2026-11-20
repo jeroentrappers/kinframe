@@ -149,7 +149,7 @@ struct ConversationView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(L("chat.invite.title")).font(.subheadline.weight(.semibold))
                     Text(L("chat.invite.body")).font(.footnote).foregroundStyle(Palette.textMuted)
-                    Button(L("chat.invite.action")) { app.openFeed(feedId, section: .members) }.buttonStyle(.kf(.soft))
+                    Button(L("chat.invite.action")) { app.openFamily(feedId, section: .members) }.buttonStyle(.kf(.soft))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .card(padding: 12)

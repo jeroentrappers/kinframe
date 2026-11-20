@@ -69,9 +69,8 @@ struct InviteView: View {
             Text(L("add.joinedTitle", ["name": r.frame.name])).font(.display(.title))
             Text(L("invite.joinedBody")).foregroundStyle(Palette.textMuted)
             Button(L("add.sendFirst")) {
-                app.composeFrameIds = [r.frame.id]
-                app.tab = .send
                 dismiss()
+                app.composeAfterSheet(frame: r.frame.id)
             }
             .buttonStyle(.kf(.primary, large: true, fill: true))
         }

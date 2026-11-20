@@ -276,10 +276,7 @@ struct FrameLibrarySection: View {
             case .visible:
                 EmptyStateView(systemImage: "photo.on.rectangle", title: L("library.emptyTitle"), message: L("library.emptyBody")) {
                     if frame.can(\.send) {
-                        Button(L("nav.sendPhotos")) {
-                            app.composeFrameIds = [frame.id]
-                            app.tab = .send
-                        }
+                        Button(L("simple.frame.sendOnly")) { app.compose(frame: frame.id) }
                         .buttonStyle(.kf(.primary))
                     }
                 }

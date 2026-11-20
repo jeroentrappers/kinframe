@@ -7,9 +7,9 @@ import UIKit
 import XCTest
 
 /// Starts the real app root (`AccountsRoot`, what `KinframeApp`'s window shows) signed in to a fake kinframe server
-/// with every optional feature on, in a window of its own, then opens every tab, a frame on each of its sections, a
-/// family on each of its sections, Settings → Photo sources and a few pushed screens of Home, Chats and History,
-/// through the app's own navigation state. Each screen renders and runs its tasks against the fake server. A crash
+/// with every optional feature on, in a window of its own, then opens every tab, the composer, a frame on each of
+/// its pages, the family's segments and settings pages, Settings › App (photo sources, sent history), a few pushed
+/// screens of Home and Chats and the simple view, through the app's own navigation state. Each screen renders and runs its tasks against the fake server. A crash
 /// in a view's body, a task or a model ends the test process, which fails the test.
 ///
 /// Guards against crashes no screen-level test sees (like the Android app's 1.2, which crashed on every start after
@@ -30,7 +30,11 @@ final class SmokeTests: XCTestCase {
         for key in ["accounts", "server", AuthService.name("authMode", Self.accountId)] {
             saved.append((group, key, group.object(forKey: key)))
         }
-        saved.append((.standard, "onboardingStep", UserDefaults.standard.object(forKey: "onboardingStep")))
+        for key in ["onboardingStep", "homeFilter", "familyPostCounts", "viewMode", "viewModeAsked"] {
+            saved.append((.standard, key, UserDefaults.standard.object(forKey: key)))
+        }
+        UserDefaults.standard.removeObject(forKey: "viewMode")
+        UserDefaults.standard.removeObject(forKey: "homeFilter")
         // Signed in as the app finds it at launch: an account record with the server's discovery, a dev session.
         AccountStore.save([AccountRecord(id: Self.accountId, server: ServerConfig(url: SmokeServer.base, discovery: SmokeServer.discovery))])
         AuthService(account: Self.accountId).devSignIn(token: "t-smoke")
@@ -77,28 +81,52 @@ final class SmokeTests: XCTestCase {
         try await waitFor("signed in and loaded") { app.phase == .main && app.me != nil && app.framesLoaded && app.feedsLoaded }
         await settle()
 
-        for tab: AppModel.Tab in [.home, .chats, .frames, .feeds, .send, .history, .settings] {
+        for tab: AppModel.Tab in [.home, .chats, .frames, .family] {
             app.tab = tab
             await settle()
         }
+        XCTAssertEqual(accounts.homeFamily?.value.id, accounts.feeds.first?.value.id, "a home family")
 
-        // A frame you own on each section, then one you're a member of.
+        // The composer (`+`): the current family, then one frame only.
+        app.compose()
+        await settle()
+        await quiet()
+        app.composer = nil
+        await settle(rounds: 2)
+        app.compose(frame: "f-oma")
+        await settle()
+        app.composer = nil
+        await settle(rounds: 2)
+
+        // A frame you own on each of its pages, then one you're a member of.
         app.tab = .frames
-        for section in FrameSection.allCases {
-            await push(FrameRoute(id: "f-oma", section: section, account: app.accountId), on: \.framesPath)
+        await push(FrameRoute(id: "f-oma", account: app.accountId), on: \.framesPath)
+        for page in FramePage.allCases {
+            await push(FrameRoute(id: "f-oma", page: page, account: app.accountId), on: \.framesPath)
         }
         await push(FrameRoute(id: "f-opa", account: app.accountId), on: \.framesPath)
 
-        app.tab = .feeds
-        for section in FeedSection.allCases {
-            await push(FeedRoute(id: "feed-1", section: section, account: app.accountId), on: \.feedsPath)
+        // The family's segments, then its settings and their pages.
+        app.tab = .family
+        for segment in FamilySegment.allCases {
+            app.familySegment = segment
+            await settle()
+            await quiet()
         }
+        await push(FamilyProfileRoute(feedId: "feed-1", account: app.accountId), on: \.familyPath)
+        for page: FamilyRoute.Page in [.settings, .details, .circles, .birthdays, .leave] {
+            await push(FamilyRoute(feedId: "feed-1", page: page, account: app.accountId), on: \.familyPath)
+        }
+        await push(SentHistoryRoute(account: app.accountId), on: \.familyPath)
+        await push(HistoryRoute(sendId: "s-1", account: app.accountId), on: \.familyPath)
 
-        // Settings → My photo sources, the way a photo source's notification opens it.
+        // Settings › App › My photo sources, the way a photo source's notification opens it.
         app.open(.photoSource(sourceId: "ps-1", frameId: nil, albumId: nil, feedId: nil))
         await settle()
-        XCTAssertEqual(app.tab, .settings)
+        await quiet()
+        XCTAssertEqual(app.tab, .family)
         app.showMyPhotoSources = false
+        app.familyPath = NavigationPath()
         await settle()
 
         app.tab = .home
@@ -106,8 +134,12 @@ final class SmokeTests: XCTestCase {
         await push(PersonRoute(userId: "u-lies", account: app.accountId), on: \.homePath)
         app.tab = .chats
         await push(ChatRoute(id: "c-1", account: app.accountId), on: \.chatsPath)
-        app.tab = .history
-        await push(HistoryRoute(sendId: "s-1", account: app.accountId), on: \.historyPath)
+
+        // The simple view, then back.
+        accounts.viewMode = .simple
+        await settle()
+        await quiet()
+        accounts.viewMode = .normal
         app.tab = .frames
         await settle()
 

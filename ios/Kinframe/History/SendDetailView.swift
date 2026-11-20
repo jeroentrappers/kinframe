@@ -415,6 +415,15 @@ private struct ForwardToFeedSheet: View {
 }
 
 /// The per-frame receipts of one of your feed posts, opened from the sent history.
+/// A family post whose receipts open from the sent history.
+struct FeedPostRoute: Hashable, Identifiable {
+    var feedId: String
+    var postId: String
+    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
+    var account: String? = nil
+    var id: String { postId }
+}
+
 private struct SendFeedReceiptsSheet: View {
     @Environment(\.dismiss) private var dismiss
     let api: API

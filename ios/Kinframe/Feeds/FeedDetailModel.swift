@@ -1,8 +1,8 @@
 import KinframeKit
 import SwiftUI
 
-/// One feed: its posts, members (with join requests and invites), the frames it's shown on, its birthdays (when the
-/// server has them) and (owner and admins) its settings. Kept fresh from the user websocket.
+/// One family: its posts, members (with join requests and invites), the frames that show it, its birthdays and
+/// (owner and admins) its settings, for the Family profile and its settings. Kept fresh from the user websocket.
 @MainActor
 @Observable
 final class FeedDetailModel {
@@ -280,135 +280,5 @@ final class FeedDetailModel {
 
     func setBirthdayNotifications(_ on: Bool) async throws {
         feed = try await api.setBirthdayNotifications(id, on: on)
-    }
-}
-
-struct FeedDetailView: View {
-    @Environment(AppModel.self) private var app
-    let route: FeedRoute
-    @State private var model: FeedDetailModel?
-    @State private var section: FeedSection = .posts
-    @State private var receipts: FeedPostRoute?
-
-    var body: some View {
-        Group {
-            if let model, let feed = model.feed {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        header(feed)
-                        FamilySocialHeader(model: model)
-                        FeedSectionPicker(sections: sections(model), section: $section)
-                        switch section {
-                        case .posts:
-                            if app.social.features.social {
-                                FamilyTimelineSection(feedId: feed.id)
-                            } else {
-                                FeedPostsSection(model: model, openReceipts: { receipts = FeedPostRoute(feedId: feed.id, postId: $0.id, account: app.accountId) })
-                            }
-                        case .members: FeedMembersSection(model: model)
-                        case .frames: FeedFramesSection(model: model)
-                        case .birthdays: FeedBirthdaysSection(model: model)
-                        case .settings: FeedSettingsSection(model: model)
-                        case .circles: CirclesSection(model: model)
-                        }
-                    }
-                    .padding(16)
-                    .frame(maxWidth: 720)
-                    .frame(maxWidth: .infinity)
-                }
-                .refreshable { await model.load() }
-            } else if let error = model?.error {
-                ErrorRetryView(message: error) { Task { await model?.load() } }.padding(16)
-            } else {
-                LoadingView()
-            }
-        }
-        .pageBackground()
-        .navigationTitle(model?.feed?.name ?? app.feed(route.id)?.name ?? "")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // Members (family social's `member` role) follow along but don't post photos.
-            if model?.feed != nil, model?.abilities?.canPost != false {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if PhotoSourceFeatures(app.discovery).googleImport, let feed = model?.feed {
-                        // Any member may import into a feed (an import is a send, spec §4.4).
-                        Menu {
-                            Button {
-                                app.composeFeedIds = [route.id]
-                                app.tab = .send
-                            } label: {
-                                Label(L("ios.feeds.post"), systemImage: "paperplane")
-                            }
-                            Button {
-                                app.googleImport.start(.feed(feed.id), name: feed.name)
-                            } label: {
-                                Label(L("ios.gi.add"), systemImage: "photo.badge.plus")
-                            }
-                        } label: {
-                            Label(L("ios.feeds.post"), systemImage: "paperplane")
-                        }
-                    } else {
-                        Button {
-                            app.composeFeedIds = [route.id]
-                            app.tab = .send
-                        } label: {
-                            Label(L("ios.feeds.post"), systemImage: "paperplane")
-                        }
-                    }
-                }
-            }
-        }
-        .task {
-            guard model == nil, let api = app.api else { return }
-            section = route.section
-            let m = FeedDetailModel(api: api, id: route.id, birthdaysEnabled: app.birthdaysEnabled)
-            model = m
-            await m.load()
-            if let f = m.feed { app.updateFeed(f.summary) }
-            openPendingPost()
-        }
-        .onChange(of: app.pendingFeedPost) { openPendingPost() }
-        .onLiveEvent(app.events) { model?.apply($0) }
-        .sheet(item: $receipts) { r in
-            if let model { FeedReceiptsSheet(model: model, postId: r.postId) }
-        }
-    }
-
-    private func openPendingPost() {
-        guard let p = app.pendingFeedPost, p.feedId == route.id, model?.feed != nil else { return }
-        app.pendingFeedPost = nil
-        section = .posts
-        receipts = p
-    }
-
-    private func sections(_ model: FeedDetailModel) -> [FeedSection] {
-        var list: [FeedSection] = [.posts, .members, .frames]
-        if model.birthdaysEnabled { list.append(.birthdays) }
-        if app.social.features.social { list.append(.circles) }
-        if model.abilities?.canManage == true { list.append(.settings) }
-        return list
-    }
-
-    private func header(_ feed: Feed) -> some View {
-        HStack(alignment: .center, spacing: 14) {
-            FeedCover(url: feed.summary.coverUrl, name: feed.name, size: 72)
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(feed.name).font(.display(.title)).foregroundStyle(Palette.text).accessibilityAddTraits(.isHeader)
-                    Spacer()
-                    FeedRoleBadge(role: feed.role)
-                }
-                Text([
-                    Lp("ios.feeds.frameCount", count: feed.summary.subscriptionCount),
-                    Lp("ios.feeds.memberCount", count: feed.summary.memberCount),
-                    feed.value2.postCount.map { Lp("ios.feeds.postCount", count: $0) },
-                ].compactMap { $0 }.joined(separator: " · "))
-                .font(.subheadline)
-                .foregroundStyle(Palette.textMuted)
-                if let owner = feed.value2.ownerName, feed.role != .owner {
-                    Text(L("ios.feeds.invite.owner", ["name": owner])).font(.footnote).foregroundStyle(Palette.textFaint)
-                }
-            }
-        }
     }
 }

@@ -86,72 +86,47 @@ private struct LaunchView: View {
     }
 }
 
-/// A frame to open in the Frames tab, optionally on a section.
-struct FrameRoute: Hashable {
-    var id: String
-    var section: FrameSection = .overview
-    /// Open this album in the photos (a photo source's notification).
-    var albumId: String? = nil
-    /// The account (`AccountRecord.id`) the screen talks to; nil is the primary account.
-    var account: String? = nil
-}
-
-enum FrameSection: String, Hashable, CaseIterable {
-    case overview, photos, people, calendar, settings
-}
-
 struct MainTabs: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
 
+    /// Every signed-in account has said which families it is in.
+    private var familiesKnown: Bool { !accounts.active.isEmpty && accounts.active.allSatisfy(\.feedsLoaded) }
+
     var body: some View {
         @Bindable var app = app
         @Bindable var accounts = accounts
-        TabView(selection: $app.tab) {
-            // Family social: Home (timeline and strip) and Chats, each only when the server has it.
-            // Each tab shows when any account has it (docs/spec/multi-server.md §2.2).
-            if accounts.features.home {
-                HomeTab()
-                    .tabItem { Label(L("social.homeTitle"), systemImage: "house") }
-                    .tag(AppModel.Tab.home)
+        Group {
+            if accounts.feeds.isEmpty, !familiesKnown {
+                LoadingView().frame(maxWidth: .infinity, maxHeight: .infinity).pageBackground()
+            } else if accounts.feeds.isEmpty {
+                // No family yet: only the getting-started choices (docs/spec/simple-app.md §8).
+                GettingStartedView()
+            } else if accounts.viewMode == .simple {
+                SimpleView()
+            } else {
+                tabs
             }
-            if accounts.features.chats {
-                ChatsTab()
-                    .tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
-                    .badge(accounts.unreadChats)
-                    .tag(AppModel.Tab.chats)
-            }
-            FramesTab()
-                .tabItem { Label(L("nav.frames"), systemImage: "photo.on.rectangle") }
-                .tag(AppModel.Tab.frames)
-            // Only when a server has feeds (discovery `feeds`).
-            if accounts.feedsEnabled {
-                FeedsTab()
-                    .tabItem { Label(L("ios.feeds.title"), systemImage: "rectangle.stack.badge.person.crop") }
-                    .tag(AppModel.Tab.feeds)
-            }
-            ComposeTab()
-                .tabItem { Label(L("nav.send"), systemImage: "paperplane") }
-                .tag(AppModel.Tab.send)
-            HistoryTab()
-                .tabItem { Label(L("nav.history"), systemImage: "clock.arrow.circlepath") }
-                .tag(AppModel.Tab.history)
-            SettingsTab()
-                .tabItem { Label(L("nav.settings"), systemImage: "gearshape") }
-                .tag(AppModel.Tab.settings)
         }
-        .adaptiveTabStyle()
         .onAppear { app.consumePendingLink() }
-        .onChange(of: accounts.feedsEnabled) { _, on in
-            if !on, app.tab == .feeds { app.tab = .frames }
-        }
         .onChange(of: accounts.features) { _, f in
-            if !f.home, app.tab == .home { app.tab = .frames }
-            if !f.chats, app.tab == .chats { app.tab = .frames }
+            if !f.chats, app.tab == .chats { app.tab = .home }
         }
-        // Home is the start once a server has family social (unless something else was opened already).
-        .task(id: accounts.features.home) {
-            if accounts.features.home, app.tab == .frames, app.framesPath.isEmpty { app.tab = .home }
+        .sheet(item: $app.composer) { request in
+            ComposerSheet(request: request)
+                .environment(accounts.model(for: request.account))
+                .environment(accounts)
+        }
+        .sheet(item: $accounts.startSheet) { sheet in
+            Group {
+                switch sheet {
+                case .start: StartFamilySheet()
+                case .join:
+                    if let api = app.api { NavigationStack { AddFrameView(api: api, context: .join) } }
+                }
+            }
+            .environment(app)
+            .environment(accounts)
         }
         .sheet(item: Binding(get: { app.social.sheet }, set: { app.social.sheet = $0 })) { sheet in
             switch sheet {
@@ -234,8 +209,37 @@ struct MainTabs: View {
     }
 }
 
+private extension MainTabs {
+    /// Home · Frames · [+] · Chats · Family. `+` opens the composer instead of becoming the selected tab.
+    var tabs: some View {
+        TabView(selection: Binding(get: { app.tab }, set: { t in
+            if t == .compose { app.compose() } else { app.tab = t }
+        })) {
+            HomeTab()
+                .tabItem { Label(L("simple.nav.home"), systemImage: "house") }
+                .tag(AppModel.Tab.home)
+            FramesTab()
+                .tabItem { Label(L("simple.nav.frames"), systemImage: "photo.on.rectangle") }
+                .tag(AppModel.Tab.frames)
+            Color.clear
+                .tabItem { Label(L("simple.nav.share"), systemImage: "plus.app.fill") }
+                .tag(AppModel.Tab.compose)
+            if accounts.features.chats {
+                ChatsTab()
+                    .tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
+                    .badge(accounts.unreadChats)
+                    .tag(AppModel.Tab.chats)
+            }
+            FamilyTab()
+                .tabItem { Label(L("simple.nav.family"), systemImage: "person.3") }
+                .tag(AppModel.Tab.family)
+        }
+        .adaptiveTabStyle()
+    }
+}
+
 private extension View {
-    /// iPad: the tab bar can also be shown as a sidebar (iOS 18+). iPhone keeps the tab bar.
+    /// iPad and Mac: the tab bar can also be shown as a sidebar (iOS 18+). iPhone keeps the tab bar.
     @ViewBuilder
     func adaptiveTabStyle() -> some View {
         if #available(iOS 18.0, *) {

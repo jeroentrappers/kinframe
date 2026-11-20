@@ -1,7 +1,7 @@
 import KinframeKit
 import SwiftUI
 
-/// One frame: Overview, Photos, People and (with change_settings) Settings, like the web's frame page.
+/// One frame's details and commands, for its screen and its pages.
 @MainActor
 @Observable
 final class FrameDetailModel {
@@ -120,41 +120,26 @@ final class FrameDetailModel {
     }
 }
 
+/// A frame's screen (docs/spec/simple-app.md §3.3): the card on top, then one list: photos on this frame, send
+/// something to this frame only, calendar and add-ons, show on TV, frame settings and help. The pages behind the rows
+/// are the frame's existing sections (`FramePageView`).
 struct FrameDetailView: View {
     @Environment(AppModel.self) private var app
     let route: FrameRoute
     @State private var model: FrameDetailModel?
-    @State private var section: FrameSection = .overview
+    @State private var tv: TvRequest?
 
     var body: some View {
         Group {
             if let model, let frame = model.summary {
-                ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        header(frame)
-                        sectionPicker(frame)
-                        switch section {
-                        case .overview: FrameOverviewSection(model: model)
-                        case .photos: FrameLibrarySection(api: model.api, frame: frame, albumId: route.albumId)
-                        case .people: FramePeopleSection(api: model.api, frame: model.frame!)
-                        case .calendar: FrameCalendarSection(api: model.api, frame: frame)
-                        case .settings: FrameSettingsSection(api: model.api, frame: frame)
-                        }
+                        FrameCard(frame: frame)
+                        VStack(spacing: 0) { rows(frame) }.card(padding: 0)
                     }
-                    // Photos and the calendar use the extra room on iPad; the other sections stay at reading width.
-                    .pageColumn(section == .photos || section == .calendar ? PageWidth.wide : PageWidth.text)
+                    .pageColumn(PageWidth.text)
                 }
                 .refreshable { await model.load() }
-                #if DEBUG
-                .task {
-                    if let target = UserDefaults.standard.string(forKey: "kfScrollTo"), !target.isEmpty {
-                        try? await Task.sleep(for: .seconds(2.5))
-                        withAnimation { proxy.scrollTo(target, anchor: .top) }
-                    }
-                }
-                #endif
-                }
             } else if let error = model?.error {
                 ErrorRetryView(message: error) { Task { await model?.load() } }.padding(16)
             } else {
@@ -164,21 +149,127 @@ struct FrameDetailView: View {
         .pageBackground()
         .navigationTitle(model?.summary?.name ?? app.frame(route.id)?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if let frame = model?.summary, frame.can(\.send) {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        app.composeFrameIds = [frame.id]
-                        app.tab = .send
-                    } label: {
-                        Label(L("nav.send"), systemImage: "paperplane")
-                    }
-                }
-            }
-        }
         .task {
             guard model == nil, let api = app.api else { return }
-            section = route.section
+            let m = FrameDetailModel(api: api, id: route.id)
+            model = m
+            await m.load()
+            if let s = m.summary { app.updateFrame(s) }
+        }
+        .onLiveEvent(app.events) { model?.apply($0) }
+        .sheet(item: $tv) { r in
+            if let api = app.api { TvSheet(api: api, frameId: r.frameId, frameName: r.frameName, scope: r.scope) }
+        }
+    }
+
+    @ViewBuilder
+    private func rows(_ frame: FrameSummary) -> some View {
+        let page = { (p: FramePage) in FrameRoute(id: frame.id, page: p, account: app.accountId) }
+        NavigationLink(value: page(.photos)) {
+            FrameRow(symbol: "photo.on.rectangle.angled", title: L("simple.frame.photos"), detail: L("simple.frame.photosHint"))
+        }
+        if frame.can(\.send) {
+            Divider().overlay(Palette.border).padding(.leading, 56)
+            Button { app.compose(frame: frame.id) } label: {
+                FrameRow(symbol: "paperplane", title: L("simple.frame.sendOnly"), detail: L("simple.frame.sendOnlyHint", ["frame": frame.name]), chevron: false)
+            }
+        }
+        if frame.can(\.changeSettings) || frame.can(\.send) {
+            Divider().overlay(Palette.border).padding(.leading, 56)
+            NavigationLink(value: page(.calendar)) {
+                FrameRow(symbol: "calendar", title: L("simple.frame.extras"), detail: L("simple.frame.extrasHint"))
+            }
+        }
+        if frame.can(\.seeLibrary) {
+            Divider().overlay(Palette.border).padding(.leading, 56)
+            Button { tv = TvRequest(frameId: frame.id, frameName: frame.name, scope: .all) } label: {
+                FrameRow(symbol: "tv", title: L("tv.show"), detail: L("simple.frame.tvHint"), chevron: false)
+            }
+        }
+        Divider().overlay(Palette.border).padding(.leading, 56)
+        NavigationLink(value: page(.settings)) {
+            FrameRow(symbol: "gearshape", title: L("simple.frame.settings"), detail: L("simple.frame.settingsHint"))
+        }
+    }
+}
+
+/// One row of a frame's screen.
+struct FrameRow: View {
+    let symbol: String
+    let title: String
+    var detail: String? = nil
+    var chevron = true
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: symbol).font(.title3).foregroundStyle(Palette.primary).frame(width: 28).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                if let detail { Text(detail).font(.footnote).foregroundStyle(Palette.textMuted).multilineTextAlignment(.leading) }
+            }
+            Spacer()
+            if chevron { Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Palette.textFaint) }
+        }
+        .padding(.horizontal, 14)
+        .frame(minHeight: 64)
+        .contentShape(Rectangle())
+    }
+}
+
+/// A page behind a frame's row: its photos, calendar and add-ons, settings and help (with people), or people.
+struct FramePageView: View {
+    @Environment(AppModel.self) private var app
+    let route: FrameRoute
+    let page: FramePage
+    @State private var model: FrameDetailModel?
+
+    var body: some View {
+        Group {
+            if let model, let frame = model.summary {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 16) {
+                            switch page {
+                            case .photos:
+                                FrameLibrarySection(api: model.api, frame: frame, albumId: route.albumId)
+                            case .calendar:
+                                if app.discovery?.calendar == true { FrameCalendarSection(api: model.api, frame: frame) }
+                                if frame.can(\.changeSettings) { PluginsSection(api: model.api, frame: frame) }
+                            case .settings:
+                                NavigationLink(value: FrameRoute(id: frame.id, page: .people, account: app.accountId)) {
+                                    FrameRow(symbol: "person.2", title: L("simple.frame.people"), detail: L("simple.frame.peopleHint"))
+                                }
+                                .card(padding: 0)
+                                if frame.can(\.changeSettings) { FrameSettingsSection(api: model.api, frame: frame) }
+                                FrameOverviewSection(model: model)
+                            case .people:
+                                if let detail = model.frame { FramePeopleSection(api: model.api, frame: detail) }
+                            }
+                        }
+                        // Photos and the calendar use the extra room on iPad; the other pages stay at reading width.
+                        .pageColumn(page == .photos || page == .calendar ? PageWidth.wide : PageWidth.text)
+                    }
+                    .refreshable { await model.load() }
+                    #if DEBUG
+                    .task {
+                        if let target = UserDefaults.standard.string(forKey: "kfScrollTo"), !target.isEmpty {
+                            try? await Task.sleep(for: .seconds(2.5))
+                            withAnimation { proxy.scrollTo(target, anchor: .top) }
+                        }
+                    }
+                    #endif
+                }
+            } else if let error = model?.error {
+                ErrorRetryView(message: error) { Task { await model?.load() } }.padding(16)
+            } else {
+                LoadingView()
+            }
+        }
+        .pageBackground()
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            guard model == nil, let api = app.api else { return }
             let m = FrameDetailModel(api: api, id: route.id)
             model = m
             await m.load()
@@ -187,73 +278,12 @@ struct FrameDetailView: View {
         .onLiveEvent(app.events) { model?.apply($0) }
     }
 
-    private func header(_ frame: FrameSummary) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(frame.name).font(.display(.largeTitle)).foregroundStyle(Palette.text).accessibilityAddTraits(.isHeader)
-                Spacer()
-                RoleBadge(role: frame.role)
-            }
-            HStack(spacing: 14) {
-                OnlineStatus(online: frame.online, lastSeen: frame.lastSeenAt)
-                if let location = frame.location, !location.isEmpty {
-                    Label(location, systemImage: "mappin").labelStyle(TightLabelStyle()).font(.subheadline).foregroundStyle(Palette.textMuted)
-                }
-            }
-        }
-    }
-
-    /// The sections as a segmented control; with five of them (Calendar) a scrolling row of capsules, so long labels
-    /// (Dutch "Instellingen") aren't cut off on a phone.
-    @ViewBuilder
-    private func sectionPicker(_ frame: FrameSummary) -> some View {
-        let list = sections(frame)
-        if list.count <= 4 {
-            Picker(L("frame.sections"), selection: $section) {
-                ForEach(list, id: \.self) { s in Text(title(s)).tag(s) }
-            }
-            .pickerStyle(.segmented)
-        } else {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    ForEach(list, id: \.self) { s in
-                        let on = section == s
-                        Button { withAnimation(.snappy) { section = s } } label: {
-                            Text(title(s))
-                                .font(.subheadline.weight(.semibold))
-                                .padding(.horizontal, 13)
-                                .frame(minHeight: 34)
-                                .foregroundStyle(on ? Palette.text : Palette.textMuted)
-                                .background(Capsule().fill(on ? Palette.surface : .clear))
-                                .shadow(color: on ? .black.opacity(0.08) : .clear, radius: 2, y: 1)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(on ? [.isSelected, .isButton] : .isButton)
-                    }
-                }
-                .padding(3)
-            }
-            .background(Capsule().fill(Palette.surface2))
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(L("frame.sections"))
-        }
-    }
-
-    private func sections(_ frame: FrameSummary) -> [FrameSection] {
-        var list: [FrameSection] = [.overview, .photos, .people]
-        // Calendars, sent events and countdowns (web: the Calendar tab), when the server has them.
-        if app.discovery?.calendar == true, frame.can(\.changeSettings) || frame.can(\.send) { list.append(.calendar) }
-        if frame.can(\.changeSettings) { list.append(.settings) }
-        return list
-    }
-
-    private func title(_ s: FrameSection) -> String {
-        switch s {
-        case .overview: L("frame.tabOverview")
-        case .photos: L("frame.tabLibrary")
-        case .people: L("frame.tabPeople")
-        case .calendar: L("frame.tabCalendar")
-        case .settings: L("frame.tabSettings")
+    private var title: String {
+        switch page {
+        case .photos: L("simple.frame.photos")
+        case .calendar: L("simple.frame.extras")
+        case .settings: L("simple.frame.settings")
+        case .people: L("simple.frame.people")
         }
     }
 }

@@ -195,7 +195,7 @@ struct FeedSettingsSection: View {
         do {
             try await model.delete()
             app.removeFeed(model.id)
-            app.feedsPath = NavigationPath()
+            app.familyPath = NavigationPath()
             app.toasts.show(L("ios.feeds.deleted", ["name": name]))
         } catch {
             app.toasts.error(error)

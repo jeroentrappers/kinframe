@@ -2,94 +2,6 @@ import KinframeKit
 import PhotosUI
 import SwiftUI
 
-/// The strip above the timeline: your frames and families with a freshness ring ("Fresh", "4 days", "2 weeks
-/// quiet") and the badge when a frame asked for photos ("Oma would like new photos"). Tapping a frame opens "Send
-/// something to Oma's frame"; a family opens the family.
-struct HomeStrip: View {
-    @Environment(AppModel.self) private var app
-
-    private var frames: [FrameSummary] { app.frames.filter { $0.can(\.send) } }
-
-    /// Open requests of frames you send to, then those that reached you through a family (frames you're not on).
-    private var requests: [PhotoRequest] {
-        frames.compactMap { f in PhotoRequestText.isOpen(f.photoRequest) ? f.photoRequest : nil }
-            + app.social.familyRequests.values
-                .filter { r in PhotoRequestText.isOpen(r) && !frames.contains { $0.id == r.frameId } }
-                .sorted { $0.createdAt > $1.createdAt }
-    }
-
-    var body: some View {
-        if !frames.isEmpty || !app.feeds.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(requests) { r in
-                    if let text = PhotoRequestText.badge(r) {
-                        Button { app.social.sheet = .freshSend(frameId: r.frameId, requestId: r.id) } label: {
-                            HStack {
-                                Text("💛")
-                                Text(text).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
-                                Spacer()
-                                Text(L("engagement.request.send")).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.primary)
-                            }
-                            .padding(12)
-                            .background(Palette.warnSoft, in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .top, spacing: 14) {
-                        ForEach(frames) { f in
-                            Button { app.social.sheet = .freshSend(frameId: f.id, requestId: f.photoRequest?.id) } label: {
-                                StripBubble(name: f.name, freshness: f.freshness, asking: PhotoRequestText.isOpen(f.photoRequest)) {
-                                    Image(systemName: "photo.on.rectangle").font(.title3).foregroundStyle(Palette.text)
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity).background(Palette.tint(for: f.id).0)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        ForEach(app.feeds) { feed in
-                            Button { app.openFeed(feed.id) } label: {
-                                StripBubble(name: feed.name, freshness: feed.freshness, asking: false, streak: feed.streak) {
-                                    FeedCover(url: feed.coverUrl, name: feed.name, size: 54)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 2)
-                }
-            }
-        }
-    }
-}
-
-private struct StripBubble<Picture: View>: View {
-    let name: String
-    let freshness: Freshness?
-    let asking: Bool
-    var streak: FeedStreakSummary? = nil
-    @ViewBuilder var picture: Picture
-
-    var body: some View {
-        VStack(spacing: 4) {
-            FreshnessRing(freshness: freshness, size: 64) { picture }
-                .overlay(alignment: .topTrailing) {
-                    if asking { Text("💛").font(.caption).padding(3).background(Circle().fill(Palette.surface)) }
-                }
-            Text(name).font(.caption.weight(.semibold)).foregroundStyle(Palette.text).lineLimit(1)
-            if let f = freshness {
-                Text(FreshnessText.label(f)).font(.caption2).foregroundStyle(Palette.textMuted).lineLimit(1)
-            }
-            if let s = streak, let h = StreakText.headline(s) {
-                Text(h).font(.caption2).foregroundStyle(Palette.textMuted).lineLimit(1)
-            }
-        }
-        .frame(width: 84)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel([name, freshness.map(FreshnessText.label), asking ? L("engagement.request.asking") : nil].compactMap { $0 }.joined(separator: ", "))
-    }
-}
-
 /// "Send something to Oma's frame": who asked or how quiet it is, then the ways to send: pick photos (the newest
 /// come first in the picker; nothing leaves the phone until picked), On this day and the week's prompt.
 struct FreshSendSheet: View {
@@ -163,13 +75,18 @@ struct FreshSendSheet: View {
                         EmptyView()
                     }
                     Button {
+                        let request: (String?, String?)
                         switch target {
-                        case .frame(let id)?: app.composeFrameIds = [id]
-                        case .families(let ids)?: app.composeFeedIds = Set(ids)
+                        case .frame(let id)?: request = (id, nil)
+                        case .families(let ids)?: request = (nil, ids.first)
                         default: return
                         }
-                        app.tab = .send
                         dismiss()
+                        // The composer is a sheet too: once this one is gone.
+                        Task {
+                            try? await Task.sleep(for: .milliseconds(450))
+                            app.compose(frame: request.0, family: request.1)
+                        }
                     } label: {
                         if target == nil {
                             ProgressView()

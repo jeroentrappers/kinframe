@@ -49,7 +49,6 @@ struct FrameSettingsSection: View {
                 // Family social on the frame: comments, "Ask for new photos", prompt cards (Social/FrameSocialSettings).
                 FrameSocialSettingsCard(model: model, frame: frame)
                 weather
-                PluginsSection(api: model.api, frame: frame).id("plugins")
             }
         }
         .safeAreaInset(edge: .bottom) {

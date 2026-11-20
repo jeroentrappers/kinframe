@@ -1,112 +1,74 @@
 import KinframeKit
 import SwiftUI
 
-/// Home (docs/spec/family-social.md §4): the strip of frames and families with freshness rings and photo requests,
-/// your milestones, On this day, this week's prompts, then every family's posts, newest first.
-///
-/// Several accounts (docs/spec/multi-server.md §2.2): every account with family social contributes: its strip, its
-/// milestones, prompts, On this day and weekly summary (each card talks to its own account), and its posts, merged
-/// strictly by time.
+/// Home (docs/spec/simple-app.md §3.1): one timeline of all the person's families (of every account), newest first.
+/// With several families, filter chips (All · each family, remembered on this device) and a family label on each
+/// post; a post sent to several families shows once. Under the chips the people and frames of the filtered family
+/// (with All: the home family) and "Invite".
 struct HomeTab: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
-    /// Each account's timeline (accounts with `social`), by account id.
+    /// Each account's timeline (or the filtered family's), by account id.
     @State private var timelines: [String: TimelineModel] = [:]
-    @State private var onThisDay: [String: OnThisDay] = [:]
-    @State private var summaries: [String: WeeklySummary] = [:]
 
-    private var features: SocialFeatures { accounts.features }
-    /// Accounts whose server has the timeline / the engagement cards.
-    private var socialAccounts: [AppModel] { accounts.active.filter(\.social.features.social) }
-    private var engagementAccounts: [AppModel] { accounts.active.filter(\.social.features.engagement) }
+    private var filter: FamilyChoice? { accounts.homeFilter }
+    /// The family of the people row and the empty state.
+    private var rowFamily: Accounts.Owned<FeedSummary>? { filter.flatMap(accounts.family) ?? accounts.homeFamily }
+    private var key: String { accounts.active.map(\.accountId).joined(separator: ",") + "|" + (filter.map { $0.account + "/" + $0.feedId } ?? "all") }
 
     var body: some View {
         @Bindable var app = app
         NavigationStack(path: $app.homePath) {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    if features.engagement { engagementCards }
-                    if features.social { timeline } else if features.engagement { framesOnlyNote }
+                    if accounts.hasSeveralFamilies { chips }
+                    if let fam = rowFamily {
+                        HomeFamilyHeader(feed: fam.value)
+                            .environment(fam.model)
+                            .id(fam.model.accountId + "/" + fam.value.id)
+                    }
+                    timeline
                 }
                 .padding(16)
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
             }
-            .refreshable { await reload() }
+            .refreshable { await reload(fresh: false) }
             .pageBackground()
-            .navigationTitle(L("social.homeTitle"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { app.tab = .send } label: { Image(systemName: "plus").frame(width: 44, height: 44) }
-                        .accessibilityLabel(L("nav.sendPhotos"))
-                }
-            }
+            .navigationTitle(L("simple.nav.home"))
+            .navigationBarTitleDisplayMode(.inline)
             .socialDestinations()
         }
-        .task(id: accounts.active.map(\.accountId)) { await reload() }
+        .task(id: key) { await reload(fresh: true) }
         .onLiveEvent(app.events) { timelines[app.accountId]?.apply($0) }
         .onOtherAccountsLiveEvents(accounts) { m, e in timelines[m.accountId]?.apply(e) }
     }
 
-    // MARK: Engagement
+    // MARK: Chips
 
-    @ViewBuilder private var engagementCards: some View {
-        ForEach(engagementAccounts, id: \.accountId) { m in
-            HomeStrip().environment(m)
-        }
-        // The newest milestone not seen yet, of any account.
-        if let pick = newestMilestone {
-            MilestoneCard(milestone: pick.1).environment(pick.0)
-        }
-        ForEach(promptCards, id: \.id) { card in
-            PromptCard(feed: card.feed, prompt: card.prompt)
-                .overlay(alignment: .topTrailing) { ServerChip(model: card.model).padding(10) }
-                .environment(card.model)
-        }
-        ForEach(engagementAccounts, id: \.accountId) { m in
-            if let day = onThisDay[m.accountId], !day.groups.isEmpty {
-                OnThisDayCard(day: day)
-                    .overlay(alignment: .topTrailing) { ServerChip(model: m).padding(10) }
-                    .environment(m)
-            }
-        }
-        ForEach(engagementAccounts, id: \.accountId) { m in
-            if let s = summaries[m.accountId], s.seenCount > 0 {
-                Button { m.social.sheet = .weeklySummary(weekOf: s.weekOf) } label: {
-                    HStack(spacing: 12) {
-                        Text("❤️").font(.title2)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(L("engagement.summary.title")).font(.headline).foregroundStyle(Palette.text)
-                            Text(SummaryText.seen(s)).font(.footnote).foregroundStyle(Palette.textMuted).multilineTextAlignment(.leading)
-                        }
-                        Spacer()
-                        ServerChip(model: m)
-                        Image(systemName: "chevron.right").foregroundStyle(Palette.textFaint)
-                    }
-                    .card()
+    private var chips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                chip(L("simple.home.all"), on: filter == nil) { accounts.homeFilter = nil }
+                ForEach(accounts.orderedFamilies, id: \.value.id) { o in
+                    chip(o.value.name, on: filter == o.choice) { accounts.homeFilter = o.choice }
                 }
-                .buttonStyle(.plain)
             }
         }
     }
 
-    private var newestMilestone: (AppModel, Milestone)? {
-        engagementAccounts
-            .compactMap { m in MilestoneLogic.unseen(m.social.milestones).first.map { (m, $0) } }
-            .max { $0.1.achievedAt < $1.1.achievedAt }
-    }
-
-    private struct PromptCardRow {
-        let model: AppModel
-        let feed: FeedSummary
-        let prompt: FeedPrompt
-        var id: String { model.accountId + "/" + feed.id }
-    }
-
-    private var promptCards: [PromptCardRow] {
-        engagementAccounts.flatMap { m in
-            m.feeds.compactMap { f in m.social.prompts[f.id].map { PromptCardRow(model: m, feed: f, prompt: $0) } }
+    private func chip(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .padding(.horizontal, 14)
+                .frame(minHeight: 36)
+                .foregroundStyle(on ? Palette.onPrimary : Palette.text)
+                .background(Capsule().fill(on ? Palette.primary : Palette.surface2))
         }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? [.isSelected, .isButton] : .isButton)
     }
 
     // MARK: Timeline
@@ -118,24 +80,25 @@ struct HomeTab: View {
         var id: String { owner.accountId + "/" + entry.id }
     }
 
-    /// Every account's posts interleaved by time, only as far back as every timeline has loaded.
+    private var sources: [(AppModel, TimelineModel)] {
+        accounts.active.compactMap { m in timelines[m.accountId].map { (m, $0) } }
+    }
+
+    private func entries(_ t: TimelineModel) -> [TimelineEntry] { TimelineLogic.entries(HomeTimeline.families(t.posts)) }
+
+    /// Every account's family posts interleaved by time, only as far back as every timeline has loaded.
     private var rows: [Row] {
         let sources = sources
-        let lists = sources.map { m, t in t.entries.map { Row(owner: m, timeline: t, entry: $0) } }
+        let lists = sources.map { m, t in entries(t).map { Row(owner: m, timeline: t, entry: $0) } }
         return AccountMerge.merged(lists, hasMore: sources.map { $0.1.nextBefore != nil }) { $0.entry.post.createdAt }
     }
 
-    private var sources: [(AppModel, TimelineModel)] {
-        socialAccounts.compactMap { m in timelines[m.accountId].map { (m, $0) } }
-    }
-
-    /// Page the timelines that hold the merged list back.
     private func loadMoreAll() async {
         let sources = sources
-        let next = AccountMerge.toLoad(sources.map { $0.1.entries }, hasMore: sources.map { $0.1.nextBefore != nil }) { $0.post.createdAt }
-        let timelines = next.map { sources[$0].1 }
+        let next = AccountMerge.toLoad(sources.map { entries($0.1) }, hasMore: sources.map { $0.1.nextBefore != nil }) { $0.post.createdAt }
+        let chosen = next.map { sources[$0].1 }
         await withTaskGroup(of: Void.self) { g in
-            for t in timelines { g.addTask { await t.loadMore() } }
+            for t in chosen { g.addTask { await t.loadMore() } }
         }
     }
 
@@ -144,10 +107,10 @@ struct HomeTab: View {
         if sources.isEmpty || !sources.allSatisfy(\.1.loaded) {
             LoadingView()
         } else if sources.allSatisfy({ $0.1.error != nil }), let error = sources.first?.1.error {
-            ErrorRetryView(message: error) { Task { await reload() } }
-        } else if sources.allSatisfy(\.1.posts.isEmpty) {
-            EmptyStateView(systemImage: "house", title: L("social.emptyTitle"), message: L("social.home.emptyBody")) {
-                Button(L("nav.sendPhotos")) { app.tab = .send }.buttonStyle(.kf(.primary, large: true))
+            ErrorRetryView(message: error) { Task { await reload(fresh: false) } }
+        } else if sources.allSatisfy({ HomeTimeline.families($0.1.posts).isEmpty }) {
+            EmptyStateView(systemImage: "photo.on.rectangle.angled", title: L("simple.home.emptyTitle"), message: L("simple.home.emptyBody")) {
+                Button(L("simple.home.share")) { app.compose(family: filter?.feedId) }.buttonStyle(.kf(.primary, large: true))
             }
             .card(padding: 8)
         } else {
@@ -158,12 +121,13 @@ struct HomeTab: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Palette.primarySoftText)
                 }
-                TimelinePostCard(post: row.entry.post, model: row.timeline) { app.homePath.append($0) }
-                    .overlay(alignment: .topTrailing) { ServerChip(model: row.owner).padding(10) }
-                    .environment(row.owner)
-                    .onAppear {
-                        if row.id == rows.last?.id { Task { await loadMoreAll() } }
-                    }
+                TimelinePostCard(post: row.entry.post, model: row.timeline, showFamily: accounts.hasSeveralFamilies && filter == nil) {
+                    app.homePath.append($0)
+                }
+                .environment(row.owner)
+                .onAppear {
+                    if row.id == rows.last?.id { Task { await loadMoreAll() } }
+                }
             }
             if sources.contains(where: \.1.loadingMore) {
                 ProgressView().frame(maxWidth: .infinity).padding()
@@ -174,50 +138,65 @@ struct HomeTab: View {
         }
     }
 
-    private var framesOnlyNote: some View {
-        Text(L("social.home.stripOnly")).font(.footnote).foregroundStyle(Palette.textMuted)
-    }
-
-    private func reload() async {
-        let social = socialAccounts
+    /// One timeline per account (All), or the filtered family's.
+    private func reload(fresh: Bool) async {
         var next: [String: TimelineModel] = [:]
-        for m in social {
+        for m in accounts.active {
             guard let api = m.api else { continue }
-            let existing = timelines[m.accountId]
-            next[m.accountId] = existing?.api.baseURL == api.baseURL ? existing : TimelineModel(api: api)
+            if let filter {
+                guard filter.account == m.accountId else { continue }
+                next[m.accountId] = !fresh ? timelines[m.accountId] ?? TimelineModel(api: api, feedId: filter.feedId)
+                    : TimelineModel(api: api, feedId: filter.feedId)
+            } else {
+                let existing = timelines[m.accountId]
+                next[m.accountId] = !fresh && existing?.feedId == nil ? existing ?? TimelineModel(api: api) : TimelineModel(api: api)
+            }
         }
         timelines = next
-        async let loaded: Void = Self.load(Array(next.values))
-        async let cards = Self.engagement(engagementAccounts)
-        _ = await loaded
-        for (id, day, summary) in await cards {
-            onThisDay[id] = day
-            summaries[id] = summary
-        }
-    }
-
-    private static func load(_ timelines: [TimelineModel]) async {
         await withTaskGroup(of: Void.self) { g in
-            for t in timelines { g.addTask { await t.load() } }
+            for t in next.values { g.addTask { await t.load() } }
+        }
+        // What Home shows of your own posts counts towards the home family.
+        var own: [FamilyChoice: Int] = [:]
+        for (id, t) in next {
+            guard let me = accounts.model(for: id).me?.id else { continue }
+            for p in t.posts where p.kind == .feed && p.poster.userId == me {
+                if let f = p.feedId { own[FamilyChoice(account: id, feedId: f), default: 0] += 1 }
+            }
+        }
+        accounts.noteOwnPosts(own)
+    }
+}
+
+/// The people and frames of one family with "Invite", and its prompt of the week.
+private struct HomeFamilyHeader: View {
+    @Environment(AppModel.self) private var app
+    let feed: FeedSummary
+    @State private var family: FeedDetailModel?
+    @State private var inviter = FamilyInviter()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if let family { FamilyRow(model: family) { invite() } }
+            if feed.role != .member, let prompt = app.social.prompts[feed.id] {
+                PromptCard(feed: feed, prompt: prompt)
+            }
+        }
+        .task {
+            guard family == nil, let api = app.api else { return }
+            let m = FeedDetailModel(api: api, id: feed.id)
+            family = m
+            await m.load()
+        }
+        .onLiveEvent(app.events) { family?.apply($0) }
+        .sheet(item: $inviter.shown) { invite in
+            FeedInviteShareSheet(invite: invite, feedName: feed.name)
         }
     }
 
-    /// On this day and last week's summary of each account, and its milestones.
-    private static func engagement(_ accounts: [AppModel]) async -> [(String, OnThisDay?, WeeklySummary?)] {
-        await withTaskGroup(of: (String, OnThisDay?, WeeklySummary?).self) { g in
-            for m in accounts {
-                g.addTask {
-                    guard let api = await m.api else { return (await m.accountId, nil, nil) }
-                    async let day = try? api.onThisDay()
-                    async let summary = try? api.weeklySummary(WeekOf.previousMonday())
-                    await m.social.loadMilestones()
-                    return (await m.accountId, await day, await summary)
-                }
-            }
-            var out: [(String, OnThisDay?, WeeklySummary?)] = []
-            for await r in g { out.append(r) }
-            return out
-        }
+    private func invite() {
+        guard let family else { return }
+        Task { await inviter.invite(family, toasts: app.toasts) }
     }
 }
 
@@ -270,41 +249,6 @@ private struct OtherAccountsLiveEvents: ViewModifier {
 
 // MARK: Cards
 
-/// A milestone you just reached, private to you: dismiss, or show it on your profile.
-struct MilestoneCard: View {
-    @Environment(AppModel.self) private var app
-    let milestone: Milestone
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: milestone.key.symbol)
-                .font(.title3).foregroundStyle(Palette.accentText)
-                .frame(width: 44, height: 44).background(Circle().fill(Palette.accentSoft))
-            VStack(alignment: .leading, spacing: 6) {
-                Text(milestone.key.title).font(.headline).foregroundStyle(Palette.text)
-                Text(L("engagement.milestone.private")).font(.footnote).foregroundStyle(Palette.textMuted)
-                HStack {
-                    if !milestone.shown {
-                        Button(L("engagement.milestoneShow")) { Task { await update(shown: true, seen: true) } }.buttonStyle(.kf(.soft))
-                    }
-                    Button(L("common.dismiss")) { Task { await update(shown: nil, seen: true) } }.buttonStyle(.kf(.ghost))
-                }
-            }
-            Spacer(minLength: 0)
-        }
-        .card()
-    }
-
-    private func update(shown: Bool?, seen: Bool) async {
-        guard let api = app.api else { return }
-        do {
-            app.social.setMilestone(try await api.updateMilestone(milestone.key, shown: shown, seen: seen))
-        } catch {
-            app.toasts.error(error)
-        }
-    }
-}
-
 /// "This week in Peeters: Your view right now", with Answer (the composer, tagged with the prompt).
 struct PromptCard: View {
     @Environment(AppModel.self) private var app
@@ -323,49 +267,12 @@ struct PromptCard: View {
                 }
                 if feed.role != .member {
                     Button(L("engagement.answerPrompt")) {
-                        app.composeFeedIds = [feed.id]
-                        app.composePromptId = prompt.id
-                        app.tab = .send
+                        app.compose(family: feed.id, prompt: prompt.id)
                     }
                     .buttonStyle(.kf(.soft))
                 }
             }
             Spacer(minLength: 0)
-        }
-        .card()
-    }
-}
-
-/// "1 year ago in Peeters" with the photos of that day; one tap opens the post to share it again.
-struct OnThisDayCard: View {
-    @Environment(AppModel.self) private var app
-    let day: OnThisDay
-    /// Leaving: memories hidden with "Don't show this memory again" leave the card at once.
-    @State private var hiddenPosts: Set<String> = []
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(L("engagement.onThisDay"))
-            ForEach(Array(day.groups.filter { !$0.postIds.allSatisfy(hiddenPosts.contains) }.enumerated()), id: \.offset) { _, g in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(Lp("engagement.otd.yearsAgo", count: g.yearsAgo, ["feed": g.feedName]))
-                        .font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(g.items) { item in
-                                ItemThumb(item: item).frame(width: 96, height: 96).clipShape(RoundedRectangle(cornerRadius: Radius.sm))
-                            }
-                        }
-                    }
-                    HStack {
-                        if let first = g.postIds.first {
-                            Button(L("engagement.otd.open")) { app.homePath.append(PostRoute(postId: first, account: app.accountId)) }.buttonStyle(.kf(.secondary))
-                        }
-                        Spacer()
-                        HideMemoryButton(postIds: g.postIds) { hiddenPosts.formUnion(g.postIds) }
-                    }
-                }
-            }
         }
         .card()
     }

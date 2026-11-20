@@ -42,96 +42,99 @@ struct PickedMedia: Transferable {
     }
 }
 
-struct ComposeTab: View {
+/// The composer (`+`, docs/spec/simple-app.md §3.2): photos first, a caption, the trim/fit/focal tools, then one
+/// destination row: the home family ("Trappers · everyone and its 2 frames", or Home's chosen family), changeable to
+/// several families at once ("3 families · 9 frames") or a circle per family. Sent to one frame only when opened from that frame's screen.
+struct ComposerSheet: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
+    @Environment(\.dismiss) private var dismiss
+    let request: ComposeRequest
     @State private var model = ComposeModel(limits: .defaults)
+    @State private var destination: ComposeDestination?
     @State private var picks: [PhotosPickerItem] = []
     @State private var importing = 0
     @State private var editing: Draft.ID?
     @State private var sendingJob: UUID?
-    @State private var sendingAccount: AppModel?
     @State private var showCamera = false
+    @State private var changing = false
+    /// Circle names of the chosen circles, by circle id (for the row).
+    @State private var circleNames: [String: String] = [:]
     @FocusState private var captionFocused: Bool
-    @State private var width: CGFloat = 0
 
-    /// Photos and caption beside the frame list once both fit comfortably (iPad; not the iPhone Duo's inner screen).
-    private var twoColumns: Bool { width >= 760 }
+    /// Families you may post to (not those where you are `member`), of every account.
+    private var postable: [Accounts.Owned<FeedSummary>] { accounts.feeds.filter { $0.value.role != .member } }
 
-    /// Frames of every account (docs/spec/multi-server.md §2.2), grouped per server in account order.
-    private var sendable: [FrameSummary] { accounts.active.flatMap { m in m.frames.filter { $0.can(\.send) } } }
-    /// Every feed you're in takes posts (any role), when the server has feeds.
-    /// Families you may post to: not those where you are `member` (family social: follow along, no posting).
-    private var feeds: [FeedSummary] { accounts.active.flatMap { m in m.feedsEnabled ? m.feeds.filter { $0.role != .member } : [] } }
-
-    /// The account a recipient belongs to.
-    private func owner(frame id: String) -> AppModel { accounts.active.first { m in m.frames.contains { $0.id == id } } ?? app }
-    private func owner(feed id: String) -> AppModel { accounts.active.first { m in m.feeds.contains { $0.id == id } } ?? app }
-
-    /// The limits the send is checked against: those of every server it goes to (the strictest of each), or before
-    /// anything is chosen, of every server it could go to.
-    private var effectiveLimits: Limits {
-        let servers = accounts.active.filter { m in
-            m.frames.contains { $0.can(\.send) } || (m.feedsEnabled && m.feeds.contains { $0.role != .member })
-        }
-        return ComposeLimits.effective((servers.isEmpty ? [app] : servers).map { m in
-            (m.limits, m.frames.contains { model.frameIds.contains($0.id) } || m.feeds.contains { model.feedIds.contains($0.id) })
-        })
-    }
-
-    /// "Janssens" above the first recipient of each server, when there are several accounts.
-    @ViewBuilder
-    private func serverHeader(_ m: AppModel, first: Bool) -> some View {
-        if accounts.several {
-            if !first { Divider().overlay(Palette.border) }
-            Text(m.serverName)
-                .font(.footnote.weight(.semibold))
-                .textCase(.uppercase)
-                .foregroundStyle(Palette.textFaint)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 14)
-                .padding(.top, 10)
-                .accessibilityAddTraits(.isHeader)
+    /// The accounts the destination belongs to (one family post per server, one job each).
+    private var owners: [AppModel] {
+        switch destination {
+        case .frame(let id)?: [accounts.active.first { m in m.frames.contains { $0.id == id } } ?? app]
+        case .families(let list)?:
+            accounts.active.filter { m in list.contains { $0.choice.account == m.accountId } }
+        case nil: [app]
         }
     }
+
+    private var owner: AppModel { owners.first ?? app }
+
+    /// The chosen families with their circle.
+    private var families: [(Accounts.Owned<FeedSummary>, String?)] {
+        guard case .families(let list)? = destination else { return [] }
+        return list.compactMap { t in accounts.family(t.choice).map { ($0, t.circleId) } }
+    }
+
+    /// The strictest limits of the servers it goes to.
+    private var limits: Limits {
+        ComposeLimits.effective(owners.map { ($0.limits, true) })
+    }
+
+    private var frame: FrameSummary? {
+        if case .frame(let id)? = destination { return owner.frame(id) }
+        return nil
+    }
+
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text(L("send.lede"))
-                        .foregroundStyle(Palette.textMuted)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if accounts.framesLoaded, sendable.isEmpty, feeds.isEmpty {
-                        noFrames
-                    } else if let id = sendingJob, let job = app.outbox.job(id) {
+                    if let id = sendingJob, let job = app.outbox.job(id) {
                         SendingCard(job: job, onRetry: { app.outbox.retry(id) }, onCancel: {
                             app.outbox.cancel(id)
                             sendingJob = nil
                         })
-                    } else if twoColumns {
-                        // iPad and other wide screens: what you send on the left, where it goes on the right.
-                        HStack(alignment: .top, spacing: 24) {
-                            composer.frame(maxWidth: .infinity)
-                            frameList.frame(width: 340)
-                        }
+                    } else if destination == nil {
+                        Callout(L("simple.compose.noFamily"), kind: .info)
                     } else {
-                        composer
-                        frameList
-                        if !feeds.isEmpty { feedList }
+                        if model.drafts.isEmpty && importing == 0 {
+                            pickerHero
+                        } else {
+                            items
+                            captionField
+                        }
+                        destinationRow
                     }
                 }
-                .pageColumn(twoColumns ? 1100 : PageWidth.text)
+                .pageColumn(PageWidth.text)
             }
-            .onWidthChange { width = $0 }
             .scrollDismissesKeyboard(.interactively)
             .pageBackground()
-            .navigationTitle(L("send.title"))
+            .navigationTitle(frame.map { L("simple.compose.toFrameTitle", ["frame": $0.name]) } ?? L("simple.compose.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
+            }
             .safeAreaInset(edge: .bottom) {
-                if sendingJob == nil, !model.drafts.isEmpty || importing > 0 { sendBar }
+                if sendingJob == nil, destination != nil, !model.drafts.isEmpty || importing > 0 { sendBar }
             }
             .sheet(item: Binding(get: { editing.map(EditingID.init) }, set: { editing = $0?.id })) { item in
-                ItemEditorSheet(model: model, draftId: item.id, frames: sendable.filter { model.frameIds.contains($0.id) })
+                ItemEditorSheet(model: model, draftId: item.id, frames: frame.map { [$0] } ?? [])
+            }
+            .sheet(isPresented: $changing) {
+                DestinationSheet(current: destination, postable: postable) { d, names in
+                    destination = d
+                    circleNames.merge(names) { $1 }
+                }
             }
             .fullScreenCover(isPresented: $showCamera) {
                 CameraPicker { url, name in
@@ -140,14 +143,15 @@ struct ComposeTab: View {
                 .ignoresSafeArea()
             }
         }
+        .interactiveDismissDisabled(!model.drafts.isEmpty && sendingJob == nil)
         .onChange(of: picks) { _, items in
             guard !items.isEmpty else { return }
             picks = []
             Task { await load(items) }
         }
         .onAppear {
-            model.limits = effectiveLimits
-            preselect()
+            if destination == nil { destination = initialDestination() }
+            apply()
             #if DEBUG
             // -kfCompose /a.heic,/b.mp4 stages files, -kfAutoSend YES sends them (screenshots, manual tests).
             if let list = UserDefaults.standard.string(forKey: "kfCompose"), model.drafts.isEmpty {
@@ -168,44 +172,78 @@ struct ComposeTab: View {
             }
             #endif
         }
-        .onChange(of: app.composeFrameIds) { preselect() }
-        .onChange(of: app.composeFeedIds) { preselect() }
-        // Every account's recipients (a request of another account preselects its families).
-        .onChange(of: feeds.map(\.id)) { preselect() }
-        .onChange(of: sendable.map(\.id)) { preselect() }
-        .onChange(of: accounts.framesLoaded) { preselect() }
-        .onChange(of: accounts.feedsLoaded) { preselect() }
-        // The limits follow the servers the send goes to.
-        .onChange(of: effectiveLimits) { _, limits in model.limits = limits }
+        .onChange(of: destination) { apply() }
+        .onChange(of: limits) { _, limits in model.limits = limits }
         .onChange(of: sendingJob.flatMap { app.outbox.job($0)?.state }) { _, state in
-            if case .sent(let sendId) = state {
-                finished(sendId)
-            }
+            if case .sent = state { finished() }
         }
     }
 
     private struct EditingID: Identifiable { let id: UUID }
 
-    // MARK: Sections
+    /// The frame it was opened for, else the requested family, else Home's chosen family, else the home family.
+    private func initialDestination() -> ComposeDestination? {
+        if let id = request.frameId { return .frame(frameId: id) }
+        let account = request.account ?? app.accountId
+        let wanted = [request.feedId.map { FamilyChoice(account: account, feedId: $0) }, accounts.homeFilter, accounts.homeFamily?.choice]
+        for c in wanted.compactMap({ $0 }) where postable.contains(where: { $0.choice == c }) {
+            return .families([.init(c)])
+        }
+        return postable.first.map { .families([.init($0.choice)]) }
+    }
 
-    @ViewBuilder
-    private var composer: some View {
-        if model.drafts.isEmpty && importing == 0 {
-            pickerHero
-        } else {
-            VStack(alignment: .leading, spacing: 20) {
-                items
-                captionField
-            }
+    /// The destination as the send's recipients.
+    private func apply() {
+        model.limits = limits
+        switch destination {
+        case .frame(let id)?:
+            model.frameIds = [id]
+            model.feedIds = []
+            model.circleByFeed = [:]
+            model.promptId = nil
+        case .families(let list)?:
+            model.frameIds = []
+            model.feedIds = Set(list.map(\.choice.feedId))
+            model.circleByFeed = Dictionary(list.compactMap { t in t.circleId.map { (t.choice.feedId, $0) } }) { a, _ in a }
+            model.promptId = list.count == 1 && request.feedId == list[0].choice.feedId ? request.promptId : nil
+        case nil:
+            model.frameIds = []
+            model.feedIds = []
         }
     }
 
-    private var noFrames: some View {
-        EmptyStateView(systemImage: "photo.on.rectangle", title: L("send.noFramesTitle"), message: L("send.noFramesBody")) {
-            Button(L("frames.add")) { app.tab = .frames }
-                .buttonStyle(.kf(.primary, large: true))
+    // MARK: Sections
+
+    /// "Peeters family · everyone and its 3 frames" with Change, or "Only to Oma's frame".
+    private var destinationRow: some View {
+        HStack(spacing: 12) {
+            if let frame {
+                FrameThumb(id: frame.id, size: 40).clipShape(RoundedRectangle(cornerRadius: 10))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("simple.compose.frameOnly", ["frame": frame.name])).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                    Text(L("simple.compose.frameOnlyHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                }
+                Spacer()
+            } else if let first = families.first {
+                FeedCover(url: first.0.value.coverUrl, name: first.0.value.name, size: 40, round: true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("simple.compose.to")).font(.caption.weight(.semibold)).foregroundStyle(Palette.textFaint).textCase(.uppercase)
+                    Text(families.count == 1
+                         ? FamilyText.destination(family: first.0.value.name, frames: first.0.value.subscriptionCount,
+                                                  circle: first.1.flatMap { circleNames[$0] })
+                         : FamilyText.destination(families: families.count, frames: families.reduce(0) { $0 + $1.0.value.subscriptionCount }))
+                        .font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                    if families.count > 1 {
+                        Text(ListText.join(families.map(\.0.value.name))).font(.footnote).foregroundStyle(Palette.textMuted).lineLimit(2)
+                    }
+                }
+                Spacer()
+                Button(L("simple.compose.change")) { changing = true }.buttonStyle(.kf(.soft))
+            }
         }
-        .card(padding: 8)
+        .padding(14)
+        .card(padding: 0)
+        .accessibilityElement(children: .combine)
     }
 
     private var pickerHero: some View {
@@ -314,96 +352,6 @@ struct ComposeTab: View {
         }
     }
 
-    @ViewBuilder
-    private var frameList: some View {
-        if !sendable.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(L("send.to"))
-                VStack(spacing: 0) {
-                    let list = sendable
-                    ForEach(Array(list.enumerated()), id: \.element.id) { n, frame in
-                        let o = owner(frame: frame.id)
-                        if n == 0 || owner(frame: list[n - 1].id) !== o {
-                            serverHeader(o, first: n == 0)
-                        } else if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
-                        let on = model.frameIds.contains(frame.id)
-                        Button {
-                            withAnimation(.snappy) { model.toggle(frame: frame.id) }
-                            UISelectionFeedbackGenerator().selectionChanged()
-                        } label: {
-                            HStack(spacing: 14) {
-                                Image(systemName: on ? "checkmark.circle.fill" : "circle")
-                                    .font(.title2)
-                                    .foregroundStyle(on ? Palette.primary : Palette.borderStrong)
-                                    .frame(width: 30)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(frame.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
-                                    OnlineStatus(online: frame.online, lastSeen: frame.lastSeenAt)
-                                }
-                                Spacer()
-                            }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .frame(minHeight: 60)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(on ? .isSelected : [])
-                    }
-                }
-                .card(padding: 0)
-                if sendable.contains(where: { model.frameIds.contains($0.id) && !$0.online }) {
-                    Text(L("send.offlineNote")).font(.footnote).foregroundStyle(Palette.textMuted)
-                }
-            }
-        }
-    }
-
-    /// Feeds as recipients, in their own section ("Peeters kids · 5 frames"): one post per feed, and every frame
-    /// that follows it gets the photos.
-    private var feedList: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(sendable.isEmpty ? L("send.to") : L("ios.feeds.sendToFeeds"))
-            VStack(spacing: 0) {
-                let list = feeds
-                ForEach(Array(list.enumerated()), id: \.element.id) { n, feed in
-                    let o = owner(feed: feed.id)
-                    if n == 0 || owner(feed: list[n - 1].id) !== o {
-                        serverHeader(o, first: n == 0)
-                    } else if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
-                    let on = model.feedIds.contains(feed.id)
-                    Button {
-                        withAnimation(.snappy) { model.toggle(feed: feed.id) }
-                        UISelectionFeedbackGenerator().selectionChanged()
-                    } label: {
-                        HStack(spacing: 14) {
-                            Image(systemName: on ? "checkmark.circle.fill" : "circle")
-                                .font(.title2)
-                                .foregroundStyle(on ? Palette.primary : Palette.borderStrong)
-                                .frame(width: 30)
-                            FeedCover(url: feed.coverUrl, name: feed.name, size: 36)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(feed.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
-                                Text(Lp("ios.feeds.frameCount", count: feed.subscriptionCount)).font(.footnote).foregroundStyle(Palette.textMuted)
-                            }
-                            Spacer()
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .frame(minHeight: 60)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(on ? .isSelected : [])
-                    // Family social: "Share with: whole family / The cousins", and this week's prompt.
-                    if on { ComposeAudience(feed: feed, model: model).environment(o) }
-                }
-            }
-            .card(padding: 0)
-            Text(L("ios.feeds.sendHint")).font(.footnote).foregroundStyle(Palette.textMuted)
-        }
-    }
-
     private var sendBar: some View {
         VStack(spacing: 8) {
             if let hint = blockerText {
@@ -412,54 +360,29 @@ struct ComposeTab: View {
             Button {
                 send()
             } label: {
-                Label(Lp("send.sendN", count: model.drafts.count), systemImage: "paperplane.fill")
+                Label(L("simple.compose.share"), systemImage: "paperplane.fill")
             }
             .buttonStyle(.kf(.primary, large: true, fill: true))
             .disabled(!model.canSend || importing > 0)
         }
-        // Two columns: under the frame list rather than a button across the whole page.
-        .frame(maxWidth: twoColumns ? 340 : .infinity)
-        .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 8)
-        .frame(maxWidth: twoColumns ? 1100 : PageWidth.text)
+        .frame(maxWidth: PageWidth.text)
         .frame(maxWidth: .infinity)
         .background(.bar)
     }
 
     private var blockerText: String? {
         switch model.blocker {
-        case .noFrames: feeds.isEmpty ? L("send.pickFrame") : L("ios.feeds.pickRecipient")
-        case .tooManyFeeds(let max): L("ios.feeds.tooManyFeeds", ["max": max])
         case .overLimit(let max): L("send.overLimit", ["max": max, "n": model.drafts.count - max])
+        case .tooManyFeeds(let max): L("ios.feeds.tooManyFeeds", ["max": max])
         case .captionTooLong: L("send.charsLeft", ["n": 0, "max": Format.captionMax])
         default: nil
         }
     }
 
     // MARK: Actions
-
-    private func preselect() {
-        // Wait for the frame lists: until then the wanted frames can't be checked.
-        guard accounts.framesLoaded else { return }
-        if !app.composeFeedIds.isEmpty, accounts.feedsLoaded {
-            // "Post" in a feed: that feed only.
-            model.feedIds = app.composeFeedIds.filter { id in feeds.contains { $0.id == id } }
-            model.frameIds = []
-            app.composeFeedIds = []
-            model.promptId = app.composePromptId
-            app.composePromptId = nil
-        } else if !app.composeFrameIds.isEmpty {
-            model.frameIds = app.composeFrameIds.filter { id in sendable.contains { $0.id == id } }
-            model.feedIds = []
-            app.composeFrameIds = []
-        } else if model.frameIds.isEmpty, model.feedIds.isEmpty, sendable.count == 1, feeds.isEmpty, let only = sendable.first {
-            model.frameIds = [only.id]
-        }
-        // Drop recipients that are gone (left a feed, lost `send`).
-        model.feedIds = Set(Recipients.valid(model.feedIds, among: feeds.map(\.id)))
-    }
 
     private func load(_ items: [PhotosPickerItem]) async {
         let take = Array(items.prefix(model.room))
@@ -503,16 +426,17 @@ struct ComposeTab: View {
 
     private func send() {
         guard model.canSend else { return }
+        let sentTo = families.map(\.0.choice)
         do {
-            // One job per server with chosen recipients; the first prepares the media for all (one upload each).
-            let targets = accounts.active.compactMap { m in
+            // One job per server with chosen families; the first prepares the media for all (one upload each).
+            let targets = owners.compactMap { m in
                 m.server.map { ComposeModel.ServerTargets(server: $0.apiBase, serverName: m.serverName, frames: m.frames,
-                                                          feeds: m.feedsEnabled ? m.feeds.filter { $0.role != .member } : []) }
+                                                          feeds: m.feeds.filter { $0.role != .member }) }
             }
             let jobs = try model.makeJobs(targets, store: app.outbox.store)
+            accounts.notePosted(sentTo)
             guard let job = jobs.first else { return }
             try app.outbox.enqueue(jobs)
-            sendingAccount = accounts.active.first { $0.server?.apiBase == job.server }
             withAnimation { sendingJob = job.id }
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         } catch {
@@ -520,13 +444,118 @@ struct ComposeTab: View {
         }
     }
 
-    private func finished(_ sendId: String) {
+    /// Shared: back to Home, where the post comes in on top (a frame-only send stays on the frame's screen).
+    private func finished() {
         sendingJob = nil
-        app.toasts.show(L("send.sent"))
+        app.toasts.show(L("simple.compose.shared"))
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        app.historyPath = NavigationPath([HistoryRoute(sendId: sendId, account: (sendingAccount ?? app).accountId)])
-        sendingAccount = nil
-        app.tab = .history
+        if frame == nil { app.tab = .home }
+        dismiss()
+    }
+}
+
+/// "Change": the person's families as checkboxes (one post to several families), and per ticked family its circles
+/// as an alternative to the whole family. Single frames aren't offered here.
+private struct DestinationSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State var current: ComposeDestination?
+    let postable: [Accounts.Owned<FeedSummary>]
+    let choose: (ComposeDestination, _ circleNames: [String: String]) -> Void
+    @State private var circles: [String: [FamilyCircle]] = [:]
+
+    init(current: ComposeDestination?, postable: [Accounts.Owned<FeedSummary>],
+         choose: @escaping (ComposeDestination, [String: String]) -> Void) {
+        _current = State(initialValue: current)
+        self.postable = postable
+        self.choose = choose
+    }
+
+    private var chosen: [ComposeDestination.FamilyTarget] {
+        if case .families(let list)? = current { return list }
+        return []
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(postable, id: \.value.id) { owned in
+                    let target = chosen.first { $0.choice == owned.choice }
+                    Section {
+                        Button {
+                            current = (current ?? .families([])).toggling(owned.choice)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: target != nil ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2).foregroundStyle(target != nil ? Palette.primary : Palette.borderStrong)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(owned.value.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                                    Text(Lp("simple.family.frames", count: owned.value.subscriptionCount)).font(.footnote).foregroundStyle(Palette.textMuted)
+                                }
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(target != nil ? .isSelected : [])
+                        if let target, let list = circles[owned.value.id], !CircleLogic.audience(list).isEmpty {
+                            row(L("social.compose.wholeFamily"), detail: nil, on: target.circleId == nil) {
+                                current = current?.with(circle: nil, for: owned.choice)
+                            }
+                            ForEach(CircleLogic.audience(list)) { c in
+                                row(c.name, detail: (c.framesReached ?? []).isEmpty ? nil : ListText.join((c.framesReached ?? []).map(\.frameName)),
+                                    on: target.circleId == c.id) {
+                                    current = current?.with(circle: c.id, for: owned.choice)
+                                }
+                            }
+                        }
+                    }
+                    .listRowBackground(Palette.surface)
+                    .task(id: target != nil) {
+                        guard target != nil, circles[owned.value.id] == nil else { return }
+                        circles[owned.value.id] = await owned.model.social.circles(of: owned.value.id)
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .pageBackground()
+            .navigationTitle(L("simple.compose.change"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L("common.done")) {
+                        if let current {
+                            var names: [String: String] = [:]
+                            for list in circles.values { for c in list { names[c.id] = c.name } }
+                            choose(current, names)
+                        }
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(chosen.isEmpty)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func row(_ title: String, detail: String?, on: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+        } label: {
+            HStack {
+                Image(systemName: on ? "largecircle.fill.circle" : "circle").foregroundStyle(on ? Palette.primary : Palette.borderStrong)
+                    .padding(.leading, 34)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).foregroundStyle(Palette.text)
+                    if let detail { Text(detail).font(.footnote).foregroundStyle(Palette.textMuted) }
+                }
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 }
 

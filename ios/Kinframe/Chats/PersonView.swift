@@ -41,7 +41,7 @@ struct PersonView: View {
                         if !p.feeds.isEmpty {
                             group(L("chat.person.families")) {
                                 ForEach(Array(p.feeds.enumerated()), id: \.offset) { _, f in
-                                    Button { close(); app.openFeed(f.feedId) } label: { row(f.feedName, "rectangle.stack.badge.person.crop") }
+                                    Button { close(); app.openFamily(f.feedId) } label: { row(f.feedName, "rectangle.stack.badge.person.crop") }
                                         .buttonStyle(.plain)
                                 }
                             }

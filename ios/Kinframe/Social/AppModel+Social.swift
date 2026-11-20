@@ -113,9 +113,9 @@ extension AppModel {
             if f.home { tab = .home }
             social.sheet = .freshSend(frameId: frameId, requestId: requestId)
         case .feedStreak(let feedId):
-            openFeed(feedId)
+            openFamily(feedId)
         case .birthdayReminder(let feedId, _):
-            openFeed(feedId, section: birthdaysEnabled ? .birthdays : .posts)
+            openFamily(feedId, section: birthdaysEnabled ? .birthdays : .posts)
         case .weeklySummary(let weekOf):
             if f.home { tab = .home }
             social.sheet = .weeklySummary(weekOf: weekOf ?? WeekOf.previousMonday())

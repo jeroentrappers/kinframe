@@ -5,8 +5,12 @@ import SwiftUI
 /// Who is in the feed: join requests (owner and admins), members with their roles, invites (link, QR and code; join
 /// and subscribe invites), and leaving the feed.
 struct FeedMembersSection: View {
+    /// Family › People shows the people; Settings › Leave the family the way out.
+    enum Part { case people, leave }
+
     @Environment(AppModel.self) private var app
     let model: FeedDetailModel
+    var part: Part = .people
     @State private var editing: FeedMember?
     @State private var inviting = false
     @State private var showing: FeedInvite?
@@ -19,11 +23,15 @@ struct FeedMembersSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if !model.requests.isEmpty { requests }
-            members
-            if abilities?.canSeeInvites == true { invites }
-            if app.leavingEnabled, abilities?.isAdmin == true { TakenAwayCard(api: model.api, scope: .feed(model.id)) }
-            leave
+            switch part {
+            case .people:
+                if !model.requests.isEmpty { requests }
+                members
+                if abilities?.canSeeInvites == true { invites }
+                if app.leavingEnabled, abilities?.isAdmin == true { TakenAwayCard(api: model.api, scope: .feed(model.id)) }
+            case .leave:
+                leave
+            }
         }
         .sheet(item: $editing) { m in
             FeedMemberSheet(model: model, member: m)
@@ -32,7 +40,7 @@ struct FeedMembersSection: View {
             LeaveFeedSheet(api: model.api, feedId: model.id, name: model.feed?.name ?? "") { line, leftFrames in
                 app.removeFeed(model.id)
                 leftFrames.forEach(app.removeFrame)
-                app.feedsPath = NavigationPath()
+                app.familyPath = NavigationPath()
                 app.toasts.show([L("ios.feeds.left", ["name": model.feed?.name ?? ""]), line].compactMap { $0 }.joined(separator: " "))
             }
         }
@@ -238,7 +246,7 @@ struct FeedMembersSection: View {
         do {
             try await model.leave(removeMyPosts: removeMyPosts)
             app.removeFeed(model.id)
-            app.feedsPath = NavigationPath()
+            app.familyPath = NavigationPath()
             app.toasts.show(L("ios.feeds.left", ["name": model.feed?.name ?? ""]))
         } catch {
             app.toasts.error(error)

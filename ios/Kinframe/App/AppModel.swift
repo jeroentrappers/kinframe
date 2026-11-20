@@ -14,8 +14,9 @@ final class AppModel {
         case main
     }
 
+    /// Home · Frames · [+] · Chats · Family (docs/spec/simple-app.md §3). `+` isn't a tab: it opens the composer.
     enum Tab: Hashable {
-        case home, chats, frames, feeds, send, history, settings
+        case home, frames, compose, chats, family
     }
 
     /// A deep link that arrived for another server, waiting for the person to confirm switching.
@@ -53,22 +54,24 @@ final class AppModel {
         get { host?.tab ?? own_tab }
         set { if let host { host.tab = newValue } else { own_tab = newValue } }
     }
-    private var own_tab: Tab = .frames
+    private var own_tab: Tab = .home
     var framesPath: NavigationPath {
         get { host?.framesPath ?? own_framesPath }
         set { if let host { host.framesPath = newValue } else { own_framesPath = newValue } }
     }
     private var own_framesPath: NavigationPath = NavigationPath()
-    var historyPath: NavigationPath {
-        get { host?.historyPath ?? own_historyPath }
-        set { if let host { host.historyPath = newValue } else { own_historyPath = newValue } }
+    /// Family: the profile, its settings, sent history.
+    var familyPath: NavigationPath {
+        get { host?.familyPath ?? own_familyPath }
+        set { if let host { host.familyPath = newValue } else { own_familyPath = newValue } }
     }
-    private var own_historyPath: NavigationPath = NavigationPath()
-    var feedsPath: NavigationPath {
-        get { host?.feedsPath ?? own_feedsPath }
-        set { if let host { host.feedsPath = newValue } else { own_feedsPath = newValue } }
+    private var own_familyPath: NavigationPath = NavigationPath()
+    /// The Family profile's segment (Photos, People, Frames), so a notification can open People or Frames.
+    var familySegment: FamilySegment {
+        get { host?.familySegment ?? own_familySegment }
+        set { if let host { host.familySegment = newValue } else { own_familySegment = newValue } }
     }
-    private var own_feedsPath: NavigationPath = NavigationPath()
+    private var own_familySegment: FamilySegment = .photos
     /// Family social: Home (timeline) and Chats.
     var homePath: NavigationPath {
         get { host?.homePath ?? own_homePath }
@@ -88,30 +91,12 @@ final class AppModel {
         set { if let host { host.serverSwitch = newValue } else { own_serverSwitch = newValue } }
     }
     private var own_serverSwitch: ServerSwitch? = nil
-    /// Frames preselected for the next compose.
-    var composeFrameIds: Set<String> {
-        get { host?.composeFrameIds ?? own_composeFrameIds }
-        set { if let host { host.composeFrameIds = newValue } else { own_composeFrameIds = newValue } }
+    /// The composer sheet (`+`), when open.
+    var composer: ComposeRequest? {
+        get { host?.composer ?? own_composer }
+        set { if let host { host.composer = newValue } else { own_composer = newValue } }
     }
-    private var own_composeFrameIds: Set<String> = []
-    /// Feeds preselected for the next compose ("Post" in a feed).
-    var composeFeedIds: Set<String> {
-        get { host?.composeFeedIds ?? own_composeFeedIds }
-        set { if let host { host.composeFeedIds = newValue } else { own_composeFeedIds = newValue } }
-    }
-    private var own_composeFeedIds: Set<String> = []
-    /// The weekly prompt the next compose answers ("Answer" on a prompt card).
-    var composePromptId: String? {
-        get { host?.composePromptId ?? own_composePromptId }
-        set { if let host { host.composePromptId = newValue } else { own_composePromptId = newValue } }
-    }
-    private var own_composePromptId: String? = nil
-    /// A feed post to open from a notification (its receipts).
-    var pendingFeedPost: FeedPostRoute? {
-        get { host?.pendingFeedPost ?? own_pendingFeedPost }
-        set { if let host { host.pendingFeedPost = newValue } else { own_pendingFeedPost = newValue } }
-    }
-    private var own_pendingFeedPost: FeedPostRoute? = nil
+    private var own_composer: ComposeRequest? = nil
     /// Bumped when history should reload (a send was created, live events).
     var historyVersion: Int {
         get { host?.historyVersion ?? own_historyVersion }
@@ -205,7 +190,7 @@ final class AppModel {
             phase = .main
             await refreshDiscovery()
             await loadMe()
-            if me?.displayName == PLACEHOLDER_NAME || Onboarding.step == .firstFrame {
+            if me?.displayName == PLACEHOLDER_NAME {
                 phase = .onboarding
             }
         } else {
@@ -350,11 +335,11 @@ final class AppModel {
         // Another account's sign-out leaves the app's navigation alone (it belongs to the primary account).
         if isPrimary {
             framesPath = NavigationPath()
-            historyPath = NavigationPath()
-            feedsPath = NavigationPath()
+            familyPath = NavigationPath()
             homePath = NavigationPath()
             chatsPath = NavigationPath()
-            tab = .frames
+            composer = nil
+            tab = .home
         }
         social.reset()
         accounts?.syncOutbox()
@@ -482,34 +467,76 @@ final class AppModel {
         feeds.removeAll { $0.id == id }
     }
 
-    /// Open a feed in the Feeds tab, optionally on a section.
-    func openFeed(_ id: String, section: FeedSection = .posts) {
-        guard feedsEnabled else { return }
-        tab = .feeds
-        feedsPath = NavigationPath([FeedRoute(id: id, section: section, account: accountId)])
+    /// Open the composer (`+`): the current family, or (from a frame's screen) that frame only, or a family with a
+    /// prompt to answer.
+    func compose(frame frameId: String? = nil, family feedId: String? = nil, prompt promptId: String? = nil) {
+        composer = ComposeRequest(frameId: frameId, feedId: feedId, promptId: promptId, account: accountId)
+    }
+
+    /// The composer from inside another sheet, once that sheet is gone (one sheet at a time).
+    func composeAfterSheet(frame frameId: String? = nil, family feedId: String? = nil) {
+        Task {
+            try? await Task.sleep(for: .milliseconds(450))
+            compose(frame: frameId, family: feedId)
+        }
+    }
+
+    /// Open a family in Family, optionally on a part of it. With several families the list is underneath.
+    func openFamily(_ id: String, section: FeedSection = .posts) {
+        tab = .family
+        var path = NavigationPath()
+        if accounts?.hasSeveralFamilies == true { path.append(FamilyProfileRoute(feedId: id, account: accountId)) }
+        let page = { (p: FamilyRoute.Page) in FamilyRoute(feedId: id, page: p, account: self.accountId) }
+        switch section {
+        case .posts: familySegment = .photos
+        case .members: familySegment = .people
+        case .frames: familySegment = .frames
+        case .settings: path.append(page(.settings))
+        case .birthdays: path.append(page(.settings)); path.append(page(.birthdays))
+        case .circles: path.append(page(.settings)); path.append(page(.circles))
+        }
+        familyPath = path
+    }
+
+    /// Settings › This family › the family's details (name, cover, approvals, sources, email, Telegram).
+    func openFamilyDetails(_ id: String) {
+        openFamily(id, section: .settings)
+        familyPath.append(FamilyRoute(feedId: id, page: .details, account: accountId))
+    }
+
+    /// A frame's screen, optionally one of its pages on top (photos, settings, people).
+    func openFrame(_ id: String, page: FramePage? = nil, albumId: String? = nil) {
+        tab = .frames
+        var path = NavigationPath([FrameRoute(id: id, account: accountId)])
+        if let page { path.append(FrameRoute(id: id, page: page, albumId: albumId, account: accountId)) }
+        framesPath = path
+    }
+
+    /// A send in Family › Settings › Sent history.
+    func openSend(_ sendId: String) {
+        tab = .family
+        var path = NavigationPath([SentHistoryRoute(account: accountId)])
+        path.append(HistoryRoute(sendId: sendId, account: accountId))
+        familyPath = path
     }
 
     /// Where a tapped notification leads.
     func open(_ route: PushRoute) {
         switch route {
         case .feed(let feedId, let section):
-            openFeed(feedId, section: FeedSection(section))
+            openFamily(feedId, section: FeedSection(section))
         case .feedPost(let feedId, let postId):
-            openFeed(feedId)
-            pendingFeedPost = FeedPostRoute(feedId: feedId, postId: postId, account: accountId)
+            tab = .home
+            homePath = NavigationPath([PostRoute(postId: postId, account: accountId)])
         case .frameFeeds(let frameId):
-            tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings, account: accountId)])
+            openFrame(frameId, page: .settings)
         case .framePeople(let frameId):
-            tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .people, account: accountId)])
+            openFrame(frameId, page: .people)
         case .send(let sendId):
-            tab = .history
-            historyPath = NavigationPath([HistoryRoute(sendId: sendId, account: accountId)])
+            openSend(sendId)
         case .feeds:
-            guard feedsEnabled else { return }
-            tab = .feeds
-            feedsPath = NavigationPath()
+            tab = .family
+            familyPath = NavigationPath()
         case .photoSource(_, let frameId, let albumId, let feedId):
             openPhotoSourceTarget(frameId: frameId, albumId: albumId, feedId: feedId)
         case .googleImport(let importId):
@@ -532,13 +559,11 @@ final class AppModel {
     /// target is looked up first.
     func openChannel(_ focus: ChannelFocus, frameId: String?, feedId: String?) {
         if let feedId {
-            guard feedsEnabled else { return }
             channelFocus = focus
-            openFeed(feedId, section: .settings)
+            openFamilyDetails(feedId)
         } else if let frameId {
             channelFocus = focus
-            tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings, account: accountId)])
+            openFrame(frameId, page: .settings)
         } else if let api {
             Task {
                 let target: ChannelTarget?
@@ -555,16 +580,16 @@ final class AppModel {
         }
     }
 
-    /// Where a source's album or feed is: the frame's photos (with the album open) or the feed's settings, else
-    /// Settings → Photo sources.
+    /// Where a source's album or feed is: the frame's photos (with the album open) or the family's settings, else
+    /// Settings › App › My photo sources.
     func openPhotoSourceTarget(frameId: String?, albumId: String?, feedId: String?) {
-        if let feedId, feedsEnabled {
-            openFeed(feedId, section: .settings)
+        if let feedId {
+            openFamilyDetails(feedId)
         } else if let frameId {
-            tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .photos, albumId: albumId, account: accountId)])
+            openFrame(frameId, page: .photos, albumId: albumId)
         } else {
-            tab = .settings
+            tab = .family
+            familyPath = NavigationPath([AppSettingsRoute(account: accountId)])
             showMyPhotoSources = true
         }
     }
@@ -603,9 +628,7 @@ final class AppModel {
         case .joinRequest(let frameId, let name):
             let frameName = frame(frameId)?.name ?? ""
             toasts.show(L("live.joinRequest", ["name": name ?? "?", "frame": frameName]), action: .init(title: L("common.review")) { [weak self] in
-                guard let self else { return }
-                self.tab = .frames
-                self.framesPath = NavigationPath([FrameRoute(id: frameId, section: .people, account: self.accountId)])
+                self?.openFrame(frameId, page: .people)
             })
         case .membershipUpdated:
             Task { await loadFrames() }
@@ -626,13 +649,13 @@ final class AppModel {
         case .feedJoinRequest(let feedId, let name):
             let feedName = feed(feedId)?.name ?? ""
             toasts.show(L("ios.feeds.live.joinRequest", ["name": name ?? "?", "feed": feedName]), action: .init(title: L("common.review")) { [weak self] in
-                self?.openFeed(feedId, section: .members)
+                self?.openFamily(feedId, section: .members)
             })
         case .subscriptionRequest(let feedId, let sub):
             let feedName = sub?.feed.name ?? feed(feedId)?.name ?? ""
             toasts.show(L("ios.feeds.live.subscriptionRequest", ["frame": sub?.frame.name ?? "?", "feed": feedName]),
                         action: .init(title: L("common.review")) { [weak self] in
-                self?.openFeed(feedId, section: .frames)
+                self?.openFamily(feedId, section: .frames)
             })
         case .subscriptionUpdated(_, _, let sub):
             // The frame side hears how its request went: a first activation just now is an approval (a resume keeps
@@ -654,13 +677,13 @@ final class AppModel {
             guard let b else { break }
             toasts.show(L("ios.bday.live.suggested", ["name": b.createdByName ?? L("ios.bday.formerMember"), "person": b.displayName]),
                         action: .init(title: L("common.review")) { [weak self] in
-                self?.openFeed(feedId, section: .birthdays)
+                self?.openFamily(feedId, section: .birthdays)
             })
         case .birthdayDecided(let feedId, let b):
             guard let b, b.status == .approved || b.status == .rejected else { break }
             toasts.show(L(b.status == .approved ? "ios.bday.live.approved" : "ios.bday.live.rejected", ["person": b.displayName]),
                         action: .init(title: L("ios.bday.tab")) { [weak self] in
-                self?.openFeed(feedId, section: .birthdays)
+                self?.openFamily(feedId, section: .birthdays)
             })
         case .birthdayGreeting(let feedId, let g):
             // One greeting is recorded in every feed that lists the person: say it once.
@@ -731,7 +754,7 @@ final class AppModel {
         guard !names.isEmpty else { return }
         let feedIds = Set(refs.map(\.feedId))
         toasts.show(L("ios.bday.live.today", ["names": names.joined(separator: ", ")]), action: .init(title: L("ios.bday.tab")) { [weak self] in
-            if feedIds.count == 1, let id = feedIds.first { self?.openFeed(id, section: .birthdays) } else { self?.open(.feeds) }
+            if feedIds.count == 1, let id = feedIds.first { self?.openFamily(id, section: .birthdays) } else { self?.open(.feeds) }
         })
     }
 
@@ -797,7 +820,7 @@ let PLACEHOLDER_NAME = "New member"
 /// Where onboarding resumes: persisted per step (product spec §4.1).
 enum Onboarding {
     enum Step: String {
-        case welcome, server, signIn, name, firstFrame, done
+        case welcome, server, signIn, name, done
     }
 
     private static let key = "onboardingStep"

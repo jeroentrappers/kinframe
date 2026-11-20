@@ -149,7 +149,7 @@ struct ConversationInfoView: View {
                             }
                         }
                         if c.kind == .family, let feedId = c.feedId {
-                            Button(L("chat.openFamily")) { dismiss(); app.openFeed(feedId) }
+                            Button(L("chat.openFamily")) { dismiss(); app.openFamily(feedId) }
                         }
                         if c.kind == .direct, let other = c.other, other.formerMember != true {
                             Button(L("chat.viewProfile")) { dismiss(); app.social.personSheet = PersonRoute(userId: other.userId, account: app.accountId) }

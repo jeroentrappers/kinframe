@@ -1,10 +1,10 @@
 import KinframeKit
 import SwiftUI
 
-/// Frame settings → Feeds: the feeds this frame subscribes to, with their status and history option. Frame managers
-/// pause (the feed's photos leave the frame until resumed), resume, change the history option, show or hide the
-/// feed's birthdays (with a hint when the frame app is too old for them) or unsubscribe, and
-/// add a feed they're in or one from a subscribe invite (docs/spec/feeds.md §3 story 8, §4.2).
+/// Frame settings › Families on this frame (docs/spec/simple-app.md §3.3): the families this frame shows, with their
+/// status and history option. Frame managers pause, resume, change the history option, show or hide the family's
+/// birthdays (with a hint when the frame app is too old for them) or remove one, and add a family they're in (shown
+/// at once, no questions) or one from a frame invite code.
 struct FrameFeedsCard: View {
     @Environment(AppModel.self) private var app
     let api: API
@@ -27,7 +27,7 @@ struct FrameFeedsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(L("ios.feeds.title"), trailing: frame.can(\.changeSettings) ? AnyView(addMenu) : nil)
+            SectionHeader(L("simple.frame.familiesOn"), trailing: frame.can(\.changeSettings) ? AnyView(addMenu) : nil)
             if current.isEmpty {
                 Text(L("ios.feeds.frameNone", ["frame": frame.name]))
                     .font(.subheadline)
@@ -61,7 +61,7 @@ struct FrameFeedsCard: View {
             }
         }
         .sheet(isPresented: $adding) {
-            SubscribeSheet(api: api, mode: .feedFor(frame: frame), existing: subscriptions) { s in
+            AddFamilyToFrameSheet(frame: frame, showing: Set(subscriptions.filter { SubscriptionLogic.isLive($0.status) }.map(\.feed.id))) { s in
                 subscriptions = SubscriptionLogic.sorted(subscriptions.filter { $0.id != s.id } + [s])
             }
         }

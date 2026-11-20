@@ -75,46 +75,6 @@ struct FamilySocialHeader: View {
     }
 }
 
-/// The family's timeline (social servers): its posts with threads and reactions, like Home.
-struct FamilyTimelineSection: View {
-    @Environment(AppModel.self) private var app
-    let feedId: String
-    @State private var model: TimelineModel?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            if let model {
-                if !model.loaded {
-                    LoadingView()
-                } else if model.posts.isEmpty {
-                    EmptyStateView(systemImage: "photo.stack", title: L("ios.feeds.noPostsTitle"), message: L("ios.feeds.noPostsBody")).card(padding: 8)
-                } else {
-                    ForEach(model.entries) { e in
-                        if let h = e.promptHeader {
-                            Label(Lp("engagement.prompt.answers", count: h.count, ["title": h.title]), systemImage: "sparkles")
-                                .font(.subheadline.weight(.semibold)).foregroundStyle(Palette.primarySoftText)
-                        }
-                        TimelinePostCard(post: e.post, model: model) { route in
-                            app.tab = .home
-                            app.homePath = NavigationPath([route])
-                        }
-                        .onAppear { if e.id == model.posts.last?.id { Task { await model.loadMore() } } }
-                    }
-                }
-            } else {
-                LoadingView()
-            }
-        }
-        .task {
-            guard model == nil, let api = app.api else { return }
-            let m = TimelineModel(api: api, feedId: feedId)
-            model = m
-            await m.load()
-        }
-        .onLiveEvent(app.events) { model?.apply($0) }
-    }
-}
-
 /// Owner and admins: the family-social settings (who sees receipts, who may post and create circles), the
 /// encouragement settings (streak, prompts, quiet frames, recap, time zone), this week's and the coming prompts, and
 /// the reports to handle.
@@ -320,45 +280,6 @@ struct FamilySocialSettings: View {
             await app.social.loadPrompts()
         } catch {
             app.toasts.error(error)
-        }
-    }
-}
-
-/// The family page's sections: segmented up to four, a scrolling row of capsules with more (circles, birthdays), so
-/// Dutch labels aren't cut off on a phone (like the frame page).
-struct FeedSectionPicker: View {
-    let sections: [FeedSection]
-    @Binding var section: FeedSection
-
-    var body: some View {
-        if sections.count <= 4 {
-            Picker(L("ios.feeds.sections"), selection: $section) {
-                ForEach(sections, id: \.self) { s in Text(s.title).tag(s) }
-            }
-            .pickerStyle(.segmented)
-        } else {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    ForEach(sections, id: \.self) { s in
-                        let on = section == s
-                        Button { withAnimation(.snappy) { section = s } } label: {
-                            Text(s.title)
-                                .font(.subheadline.weight(.semibold))
-                                .padding(.horizontal, 13)
-                                .frame(minHeight: 34)
-                                .foregroundStyle(on ? Palette.text : Palette.textMuted)
-                                .background(Capsule().fill(on ? Palette.surface : .clear))
-                                .shadow(color: on ? .black.opacity(0.08) : .clear, radius: 2, y: 1)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(on ? [.isSelected, .isButton] : .isButton)
-                    }
-                }
-                .padding(3)
-            }
-            .background(Capsule().fill(Palette.surface2))
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(L("ios.feeds.sections"))
         }
     }
 }

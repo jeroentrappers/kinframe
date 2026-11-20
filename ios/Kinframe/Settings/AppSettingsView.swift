@@ -4,9 +4,10 @@ import PhotosUI
 import SwiftUI
 import UserNotifications
 
-/// Profile (name, photo), language, server, sign-out and account deletion. With several accounts, Settings → Accounts
+/// Family › Settings › App › Account (docs/spec/simple-app.md §3.4): accounts and servers, profile (name, photo),
+/// language, notifications, privacy (crash reports), sign-out and account deletion. With several accounts, Accounts
 /// opens the same page for each of them (`embedded`, the account's model in the environment).
-struct SettingsTab: View {
+struct AppSettingsView: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
     var embedded = false
@@ -27,20 +28,31 @@ struct SettingsTab: View {
     @FocusState private var nameFocused: Bool
 
     var body: some View {
-        if embedded {
-            page
-        } else {
-            NavigationStack { page }
-        }
-    }
-
-    private var page: some View {
         Group {
             ScrollViewReader { proxy in
             Form {
                 Group {
                     // Several servers (docs/spec/multi-server.md §2.1): the accounts, adding one, the primary one.
-                    if !embedded { AccountsSection() }
+                    if !embedded {
+                        // The simple view (docs/spec/simple-app.md §6) and the sent history, on this device.
+                        Section {
+                            @Bindable var accounts = accounts
+                            Toggle(isOn: Binding(get: { accounts.viewMode == .simple }, set: { accounts.viewMode = $0 ? .simple : .normal })) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(L("simple.view.simple"))
+                                    Text(L("simple.view.simpleHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                                }
+                            }
+                            .tint(Palette.accent)
+                            NavigationLink(value: SentHistoryRoute(account: app.accountId)) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(L("simple.settings.sentHistory"))
+                                    Text(L("simple.settings.sentHistoryHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                                }
+                            }
+                        }
+                        AccountsSection()
+                    }
                     profile
                     preferences
                     notifications
@@ -102,7 +114,7 @@ struct SettingsTab: View {
             #endif
             }
             .pageBackground()
-            .navigationTitle(embedded ? app.serverName : L("settings.title"))
+            .navigationTitle(embedded ? app.serverName : L("simple.settings.account"))
             .confirmationDialog(L("settings.signOut"), isPresented: $confirmSignOut, titleVisibility: .hidden) {
                 Button(L("settings.signOut"), role: .destructive) { Task { await accounts.signOut(app) } }
             }

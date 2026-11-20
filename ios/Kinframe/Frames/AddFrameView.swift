@@ -1,23 +1,30 @@
 import KinframeKit
 import SwiftUI
 
-/// Enter the code shown on a frame. Used from the Frames tab, from onboarding and for `/f/<code>` links. When the
-/// server has feeds it also takes feed invite codes (letters, `KF7Q-M2XA`) and continues as a feed invite.
+/// Enter the code shown on a frame. Used from Frames, from "Add a frame" in a family (the paired frame then shows
+/// that family at once), when starting a family, for "Join my family" and for `/f/<code>` links. It also takes
+/// family invite codes (letters, `KF7Q-M2XA`) and links, and continues as a family invite.
 struct AddFrameView: View {
     enum Context {
-        case sheet, onboarding
+        /// A sheet; `onboarding` is embedded in a flow (with "Later"); `join` is "Join my family" (a link or code).
+        case sheet, onboarding, join
     }
 
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @State private var model: AddFrameModel
     let context: Context
-    /// Onboarding: continue (to Send when `send` is true).
+    /// Embedded in a flow (`.onboarding`): continue (to the composer when `send` is true).
     var onFinish: ((_ send: Bool) -> Void)?
+    /// The family the paired frame starts showing (§3.4 "Add a frame").
+    let family: FeedSummary?
+    var onAdded: ((FeedSubscription) -> Void)?
+    @State private var added: FeedSubscription?
 
     private let api: API
 
-    init(api: API, prefill: String? = nil, context: Context = .sheet, onFinish: ((Bool) -> Void)? = nil) {
+    init(api: API, prefill: String? = nil, context: Context = .sheet, family: FeedSummary? = nil,
+         onFinish: ((Bool) -> Void)? = nil, onAdded: ((FeedSubscription) -> Void)? = nil) {
         // Family codes only where this server (the account `api` talks to) has families.
         let records = AccountStore.load()
         let server = records.first { $0.server.apiBase == api.baseURL }?.server ?? records.first?.server
@@ -25,7 +32,9 @@ struct AddFrameView: View {
         _model = State(initialValue: AddFrameModel(api: api, prefill: prefill, allowsLetters: feeds))
         self.api = api
         self.context = context
+        self.family = family
         self.onFinish = onFinish
+        self.onAdded = onAdded
     }
 
     var body: some View {
@@ -54,10 +63,10 @@ struct AddFrameView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .pageBackground()
-        .navigationTitle(context == .sheet ? L("add.title") : "")
+        .navigationTitle(context == .sheet ? L("add.title") : context == .join ? L("simple.start.join") : "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if context == .sheet {
+            if context != .onboarding {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L("common.close")) { dismiss() }
                 }
@@ -74,11 +83,11 @@ struct AddFrameView: View {
                 .frame(height: 120)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 8)
-            Text(L("add.title"))
+            Text(context == .join ? L("simple.join.title") : L("add.title"))
                 .font(.display(.largeTitle))
                 .foregroundStyle(Palette.text)
                 .accessibilityAddTraits(.isHeader)
-            Text(L("add.body"))
+            Text(context == .join ? L("simple.join.body") : L("add.body"))
                 .foregroundStyle(Palette.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
             if model.allowsLetters {
@@ -144,7 +153,7 @@ struct AddFrameView: View {
             return true
         }
         guard let accounts = app.accounts else { return false }
-        if context == .sheet { dismiss() }
+        if context != .onboarding { dismiss() }
         // After this sheet is gone, so the link's own sheet can show.
         Task {
             try? await Task.sleep(for: .milliseconds(500))
@@ -157,20 +166,24 @@ struct AddFrameView: View {
         guard let result = await model.redeem() else { return }
         if result.status != .pending { app.updateFrame(result.frame) }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        // A frame you manage now shows the family it was added for, at once (no questions, the last 50 posts).
+        if let family, result.status != .pending, result.frame.can(\.changeSettings) {
+            added = await FamilyFrames.add(frameId: result.frame.id, frameName: result.frame.name, to: family, app: app)
+        }
     }
 
     private func finish(_ send: Bool, frameId: String?) {
+        if let added { onAdded?(added) }
         if context == .onboarding {
-            if send, let frameId { app.composeFrameIds = [frameId] }
             onFinish?(send)
             return
         }
         dismiss()
         if send {
-            if let frameId { app.composeFrameIds = [frameId] }
-            app.tab = .send
-        } else if let frameId {
-            app.framesPath.append(FrameRoute(id: frameId, account: app.accountId))
+            // Shared with the family it now shows, else sent to the frame only.
+            if let family, added != nil { app.composeAfterSheet(family: family.id) } else if let frameId { app.composeAfterSheet(frame: frameId) }
+        } else if let frameId, family == nil {
+            app.openFrame(frameId)
         }
     }
 }

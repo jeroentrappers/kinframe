@@ -169,8 +169,7 @@ final class Accounts {
         for m in models.dropFirst() { m.host = p }
         p.tab = tab
         p.framesPath = NavigationPath()
-        p.feedsPath = NavigationPath()
-        p.historyPath = NavigationPath()
+        p.familyPath = NavigationPath()
         p.homePath = NavigationPath()
         p.chatsPath = NavigationPath()
         if p.phase != .main, p.auth.isSignedIn { p.phase = .main }
@@ -248,6 +247,7 @@ final class Accounts {
         let value: T
     }
 
+
     var frames: [Owned<FrameSummary>] {
         active.flatMap { m in m.frames.map { Owned(model: m, value: $0) } }
     }
@@ -274,6 +274,75 @@ final class Accounts {
     var framesLoaded: Bool { active.allSatisfy(\.framesLoaded) }
     /// Every account with families has loaded them (accounts without families never load any).
     var feedsLoaded: Bool { active.filter(\.feedsEnabled).allSatisfy(\.feedsLoaded) }
+
+    // MARK: Families (docs/spec/simple-app.md §3)
+
+    /// Every account's families as choices, in list order.
+    var familyChoices: [FamilyChoice] { feeds.map { FamilyChoice(account: $0.model.accountId, feedId: $0.value.id) } }
+
+    /// Several families: Home has filter chips, Family a list, posts a family label.
+    var hasSeveralFamilies: Bool { feeds.count > 1 }
+
+    /// Posts per family seen on this device (sent here, or the person's own posts Home showed).
+    private(set) var postCounts: [String: Int] = FamilyPostCounts.load()
+
+    /// The family the person posts to most: the composer's default, first in lists.
+    var homeFamily: Owned<FeedSummary>? {
+        let counts = postCounts
+        let candidates = feeds.map { o in
+            let c = FamilyChoice(account: o.model.accountId, feedId: o.value.id)
+            return HomeFamily.Candidate(choice: c, posts: FamilyPostCounts.count(c, in: counts), isOwner: o.value.role == .owner,
+                                        since: o.value.createdAt)
+        }
+        guard let home = HomeFamily.pick(candidates) else { return nil }
+        return family(home)
+    }
+
+    /// The families with the home family first.
+    var orderedFamilies: [Owned<FeedSummary>] {
+        HomeFamily.ordered(feeds, home: homeFamily.map(\.choice)) { $0.choice }
+    }
+
+    func family(_ c: FamilyChoice) -> Owned<FeedSummary>? {
+        feeds.first { $0.model.accountId == c.account && $0.value.id == c.feedId }
+    }
+
+    func family(account: String, id: String) -> Owned<FeedSummary>? { family(FamilyChoice(account: account, feedId: id)) }
+
+    /// Home's filter chip (nil is All), remembered per device.
+    private var storedHomeFilter: FamilyChoice? = HomeFilter.load()
+
+    var homeFilter: FamilyChoice? {
+        get { HomeFilter.resolve(stored: storedHomeFilter, available: familyChoices) }
+        set {
+            storedHomeFilter = newValue
+            HomeFilter.save(newValue)
+        }
+    }
+
+    func notePosted(_ families: [FamilyChoice]) {
+        FamilyPostCounts.posted(families)
+        postCounts = FamilyPostCounts.load()
+    }
+
+    func noteOwnPosts(_ counts: [FamilyChoice: Int]) {
+        FamilyPostCounts.observed(counts)
+        let fresh = FamilyPostCounts.load()
+        if fresh != postCounts { postCounts = fresh }
+    }
+
+    /// Getting started's sheets (§8). Shown by `MainTabs`, so they stay while the first family arrives.
+    enum StartSheet: String, Identifiable {
+        case start, join
+        var id: String { rawValue }
+    }
+
+    var startSheet: StartSheet?
+
+    /// Normal or simple view on this device (§6).
+    var viewMode: ViewMode = ViewMode.load() {
+        didSet { ViewMode.save(viewMode) }
+    }
 
     // MARK: What the app shows
 
@@ -329,4 +398,8 @@ extension View {
     func account(_ id: String?, in accounts: Accounts) -> some View {
         environment(accounts.model(for: id))
     }
+}
+
+extension Accounts.Owned where T == FeedSummary {
+    var choice: FamilyChoice { FamilyChoice(account: model.accountId, feedId: value.id) }
 }

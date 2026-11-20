@@ -7,6 +7,8 @@ struct TimelinePostCard: View {
     @Environment(AppModel.self) private var app
     let post: TimelinePost
     let model: TimelineModel
+    /// The family the post is in, next to the time (with several families, docs/spec/simple-app.md §3.1).
+    var showFamily = true
     var openThread: (PostRoute) -> Void
     @State private var index = 0
     @State private var itemReactions: [String: ReactionSummary] = [:]
@@ -58,7 +60,7 @@ struct TimelinePostCard: View {
                 HStack(spacing: 4) {
                     if post.kind == .frame { Image(systemName: "photo.on.rectangle").font(.caption2) }
                     if post.circleId != nil { Image(systemName: "person.2.circle").font(.caption2) }
-                    Text(TimelineLogic.label(post) + " · " + Format.relative(post.createdAt, locale: L10n.locale))
+                    Text((showFamily || post.circleId != nil ? TimelineLogic.label(post) + " · " : "") + Format.relative(post.createdAt, locale: L10n.locale))
                         .lineLimit(1)
                 }
                 .font(.footnote).foregroundStyle(Palette.textMuted)

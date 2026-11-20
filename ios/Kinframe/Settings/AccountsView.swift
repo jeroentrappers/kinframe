@@ -70,7 +70,7 @@ private struct AccountDetailView: View {
             }
             .navigationTitle(model.serverName)
         } else {
-            SettingsTab(embedded: true)
+            AppSettingsView(embedded: true)
                 .environment(model)
                 .safeAreaInset(edge: .bottom) {
                     if accounts.several, model !== accounts.primary {

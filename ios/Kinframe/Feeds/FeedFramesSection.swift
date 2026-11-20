@@ -1,13 +1,12 @@
 import KinframeKit
 import SwiftUI
 
-/// The frames a feed is shown on. Everyone sees the active and paused ones; owners and admins also see who asked,
-/// approve or reject requests, and remove subscriptions. "Show on a frame" subscribes a frame you manage.
+/// Family › Frames: the frames that show the family. Everyone sees the active and paused ones; owners and admins also
+/// see who asked, approve or reject requests, and remove frames. Frames are added with "Add a frame" in the header.
 struct FeedFramesSection: View {
     @Environment(AppModel.self) private var app
     let model: FeedDetailModel
     @State private var actions: SubscriptionActions
-    @State private var subscribing = false
     /// "Block this server" from a remote frame's row (README §5.22).
     @State private var blockingServer: FeedSubscription?
 
@@ -16,24 +15,8 @@ struct FeedFramesSection: View {
         _actions = State(initialValue: SubscriptionActions(api: model.api))
     }
 
-    private var manageable: [FrameSummary] { SubscriptionLogic.manageable(app.frames) }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text(L("ios.feeds.framesLede")).font(.subheadline).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
-                if !manageable.isEmpty {
-                    Button {
-                        subscribing = true
-                    } label: {
-                        Label(L("ios.feeds.showOnFrame"), systemImage: "photo.badge.plus")
-                    }
-                    .buttonStyle(.kf(.primary))
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .card(padding: 16)
-
             let pending = model.subscriptions.filter { $0.status == .pending }
             let live = model.subscriptions.filter { $0.status == .active || $0.status == .paused }
             let ended = model.subscriptions.filter { $0.status == .rejected || $0.status == .removed }
@@ -57,13 +40,6 @@ struct FeedFramesSection: View {
         .sheet(item: $blockingServer) { s in
             RemoteBlockServerSheet(api: model.api, feedId: model.id, host: s.remote?.host ?? s.remote?.serverUrl ?? "") { _ in
                 Task { await model.loadSubscriptions() }
-            }
-        }
-        .sheet(isPresented: $subscribing) {
-            if let feed = model.feed {
-                SubscribeSheet(api: model.api, mode: .frameFor(feed: feed.summary), existing: model.subscriptions) { s in
-                    model.added(s)
-                }
             }
         }
     }

@@ -7,7 +7,9 @@ struct HistoryRoute: Hashable {
     var account: String? = nil
 }
 
-struct HistoryTab: View {
+/// Family › Settings › Sent history (docs/spec/simple-app.md §3.4): every send of every account, with its detail
+/// (`HistoryRoute`, pushed in Family).
+struct SentHistoryView: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
     @State private var model: HistoryModel?
@@ -15,27 +17,15 @@ struct HistoryTab: View {
     @State private var others: [String: HistoryModel] = [:]
 
     var body: some View {
-        @Bindable var app = app
-        NavigationStack(path: $app.historyPath) {
-            Group {
-                if let model {
-                    HistoryList(model: model, others: accounts.active.dropFirst().compactMap { m in others[m.accountId].map { (m, $0) } })
-                } else {
-                    LoadingView()
-                }
-            }
-            .pageBackground()
-            .navigationTitle(L("history.title"))
-            .navigationDestination(for: HistoryRoute.self) { route in
-                let owner = accounts.model(for: route.account)
-                let list = owner === app ? model : others[owner.accountId]
-                if let api = owner.api {
-                    SendDetailView(model: SendDetailModel(api: api, id: route.sendId, send: list?.sends.first { $0.id == route.sendId }),
-                                   onRemoved: { list?.remove(route.sendId) })
-                        .environment(owner)
-                }
+        Group {
+            if let model {
+                HistoryList(model: model, others: accounts.active.dropFirst().compactMap { m in others[m.accountId].map { (m, $0) } })
+            } else {
+                LoadingView()
             }
         }
+        .pageBackground()
+        .navigationTitle(L("simple.settings.sentHistory"))
         .task(id: app.api?.baseURL) {
             guard let api = app.api else { return }
             if model == nil { model = HistoryModel(api: api) }
@@ -148,7 +138,7 @@ private struct HistoryList: View {
                 } else if allEmpty, app.outbox.active.isEmpty {
                     if model.filter == .all {
                         EmptyStateView(systemImage: "paperplane", title: L("history.emptyTitle"), message: L("history.emptyBody")) {
-                            Button(L("nav.sendPhotos")) { app.tab = .send }.buttonStyle(.kf(.primary, large: true))
+                            Button(L("simple.home.share")) { app.compose() }.buttonStyle(.kf(.primary, large: true))
                         }
                         .card(padding: 8)
                         .frame(maxWidth: PageWidth.text)

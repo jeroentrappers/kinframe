@@ -74,10 +74,10 @@ enum DebugLaunch {
     static func afterLaunch(_ app: AppModel) {
         switch args.string(forKey: "kfTab") {
         case "frames": app.tab = .frames; app.framesPath = NavigationPath()
-        case "feeds": app.tab = .feeds
-        case "send": app.tab = .send
-        case "history": app.tab = .history; app.historyPath = NavigationPath()
-        case "settings": app.tab = .settings
+        case "family", "feeds": app.tab = .family; app.familyPath = NavigationPath()
+        case "send": app.compose()
+        case "history": app.tab = .family; app.familyPath = NavigationPath([SentHistoryRoute(account: app.accountId)])
+        case "settings": app.tab = .family; app.familyPath = NavigationPath([AppSettingsRoute(account: app.accountId)])
         case "home": app.tab = .home
         case "chats": app.tab = .chats
         default: break
@@ -86,16 +86,16 @@ enum DebugLaunch {
         if let id = args.string(forKey: "kfPost") { app.openSocial(.post(postId: id, commentId: nil)) }
         if let id = args.string(forKey: "kfChat") { app.openSocial(.conversation(conversationId: id, messageId: nil)) }
         if let id = args.string(forKey: "kfSend") {
-            app.historyPath = NavigationPath([HistoryRoute(sendId: id, account: app.accountId)])
+            app.openSend(id)
         }
         if let ids = args.string(forKey: "kfComposeFrames") {
-            app.composeFrameIds = Set(ids.split(separator: ",").map(String.init))
+            app.compose(frame: ids.split(separator: ",").first.map(String.init))
         }
         if let id = args.string(forKey: "kfFrame") {
-            app.framesPath = NavigationPath([FrameRoute(id: id, section: args.string(forKey: "kfSection").flatMap(FrameSection.init(rawValue:)) ?? .overview, account: app.accountId)])
+            app.openFrame(id, page: args.string(forKey: "kfSection").flatMap(FramePage.init(rawValue:)))
         }
         if let id = args.string(forKey: "kfFeed") {
-            app.openFeed(id, section: args.string(forKey: "kfFeedSection").flatMap(FeedSection.init(rawValue:)) ?? .posts)
+            app.openFamily(id, section: args.string(forKey: "kfFeedSection").flatMap(FeedSection.init(rawValue:)) ?? .posts)
         }
         if let link = args.string(forKey: "kfOpen").flatMap(URL.init(string:)) {
             app.open(link)
