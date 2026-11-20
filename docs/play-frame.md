@@ -14,6 +14,7 @@ Both are built from the same code as two **build flavors** of `android/frame` (d
 | Updates | Self-update from the server (docs/api/README.md §5.7): root `pm install` or the system installer, rollback on a crash loop | Google Play in-app updates; never downloads or installs an APK |
 | Root | Used where the frame has it (backlight off, clock, power-off remount, reboot, installer) | Never tried: `su` is never started |
 | Heartbeat `features` | `feed_backfill`, `birthdays` (unchanged) | the same plus `play` |
+| Minimum Android | 6 (API 23) | 7 (API 24): Play's automatic protection requires it |
 | Default | yes (`isDefault`, Android Studio, `./gradlew assemble…` without a flavor builds both) | |
 
 Both use the application id `app.kinframe.frame` and the version scheme of the GitHub release for a tag

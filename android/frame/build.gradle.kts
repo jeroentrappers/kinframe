@@ -77,6 +77,8 @@ android {
         }
         create("play") {
             dimension = "distribution"
+            // Play's automatic protection needs Android 7 (API 24); the GitHub build keeps 23 for older frames.
+            minSdk = 24
             buildConfigField("String", "DISTRIBUTION", "\"play\"")
             buildConfigField("boolean", "ROOT_ALLOWED", "false")
         }
