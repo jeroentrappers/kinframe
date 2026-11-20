@@ -428,6 +428,21 @@ These differ from the WordPress vhosts:
   25 s).
 - `proxy_buffering off` for media `Range` responses.
 
+### Crash reporting
+
+The hosted server and its web app report crashes to the self-hosted GlitchTip at `https://errors.kinframe.appmire.be`
+([spec](spec/crash-reporting.md)). Both DSNs go through `kinframe_extra_env` in the private repo's `group_vars`:
+
+```yaml
+kinframe_extra_env:
+  KINFRAME_SENTRY_DSN: https://<key>@errors.kinframe.appmire.be/<kinframe-server project id>
+  KINFRAME_SENTRY_WEB_DSN: https://<key>@errors.kinframe.appmire.be/<kinframe-web project id>
+```
+
+Without them nothing is reported. The image's web build uploads its source maps when the Docker build gets the
+`sentry_auth_token` secret (CI passes the repository secret `SENTRY_AUTH_TOKEN`); without it the upload is skipped
+with a warning. The maps are never served.
+
 ### Ansible: public role, private deployment repo
 
 The kinframe repo is public, so **nothing hosting-specific or secret lives in it**, not even in encrypted form.
