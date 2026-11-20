@@ -95,8 +95,8 @@ On a `remote_help` change with a key:
    self-hosted control server. With root, the frame writes `/system/etc/resolv.conf` (the current `net.dns1`/`dns2`
    plus `1.1.1.1`), remounting `/system` read-write and back read-only as the convert tool does for `hosts`, and
    rewrites it when the network changes during a session. Removed when the session ends.
-3. **Start** (all through a root shell script, because this `su` splits `sh -c` arguments into words): `setsid
-   nohup tailscaled --tun=userspace-networking --statedir=… --socket=… --port=0 &` — user-space networking needs no
+3. **Start** (all through a root shell script, because this `su` splits `sh -c` arguments into words): `( setsid
+   nohup tailscaled --tun=userspace-networking --statedir=… --socket=… --port=0 & )` from a subshell — user-space networking needs no
    TUN device and no VPN permission prompt; `setsid nohup` keeps it alive after the shell ends.
 4. **Join**: `tailscale up --login-server=<url> --authkey=<key> --hostname=kinframe-<serial> --accept-dns=false
    --accept-routes=false`; report the tailnet IP back (heartbeat field `remote_help: {state, ip}`).
