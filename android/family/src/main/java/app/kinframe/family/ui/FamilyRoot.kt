@@ -413,7 +413,8 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         }
     }
     AskForNotifications()
-    PhotoSourcesHome(graph, ready, nav)
+    // Outside the screen's CompositionLocalProvider below, so it gets the toaster here (1.2 crashed at start).
+    CompositionLocalProvider(LocalToaster provides toaster) { PhotoSourcesHome(graph, ready, nav) }
     if (BuildConfig.DEBUG) DebugLaunch.Effect(nav, composer)
     // Someone asks to join a frame you manage while the app is open (web: a toast with Review).
     LaunchedEffect(graph) {
