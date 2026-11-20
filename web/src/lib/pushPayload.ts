@@ -70,12 +70,12 @@ export function pushUrl(p: PushPayload): string {
 	// Feeds (README §6.3).
 	if (p.key === 'subscription_request' && feed) return `/feeds/${feed}?tab=subscriptions`;
 	if (p.key === 'feed_join_request' && feed) return `/feeds/${feed}?tab=members`;
-	if (p.key === 'feed_membership') return feed ? `/feeds/${feed}` : '/feeds';
-	if ((p.key === 'subscription_decided' || p.key === 'subscription_removed') && frame) return `/frames/${frame}?tab=feeds`;
+	if (p.key === 'feed_membership') return feed ? `/feeds/${feed}` : '/home';
+	if ((p.key === 'subscription_decided' || p.key === 'subscription_removed') && frame) return `/frames/${frame}?tab=settings`;
 	if ((p.key === 'subscription_decided' || p.key === 'subscription_removed') && feed) return `/feeds/${feed}`;
-	if ((p.key === 'reaction' || p.key === 'reply') && feed && post) return `/feeds/${feed}?post=${post}`;
+	if ((p.key === 'reaction' || p.key === 'reply') && feed && post) return `/posts/${post}`;
 	// Birthdays (README §6.3): the feed's Birthdays tab.
-	if (p.key?.startsWith('birthday_')) return feed ? `/feeds/${feed}?tab=birthdays` : '/feeds';
+	if (p.key?.startsWith('birthday_')) return feed ? `/feeds/${feed}?tab=birthdays` : '/home';
 	// Photo sources (README §6.3): the source's album or feed, else the list of my sources; a finished Google import.
 	if (p.key === 'photo_source_attention') {
 		const album = id(p.ids?.album_id);
@@ -92,16 +92,16 @@ export function pushUrl(p: PushPayload): string {
 		const address = id(p.ids?.address_id);
 		const q = address ? `&email=${address}` : '';
 		if (frame) return `/frames/${frame}?tab=settings${q}`;
-		if (feed) return `/feeds/${feed}?tab=settings${q}`;
+		if (feed) return `/feeds/${feed}?tab=sources${q}`;
 	}
 	// Telegram (README §5.17): the chat in the frame's or feed's settings.
 	if (p.key === 'telegram_attention') {
 		const chat = id(p.ids?.chat_id);
 		const q = chat ? `&telegram=${chat}` : '';
 		if (frame) return `/frames/${frame}?tab=settings${q}`;
-		if (feed) return `/feeds/${feed}?tab=settings${q}`;
+		if (feed) return `/feeds/${feed}?tab=sources${q}`;
 	}
-	if (p.key === 'join_request' && frame) return `/frames/${frame}?tab=people`;
+	if (p.key === 'join_request' && frame) return `/frames/${frame}?tab=settings`;
 	if ((p.type === 'event_invitation.decided' || p.key?.startsWith('event_invitation')) && frame) return `/frames/${frame}?tab=calendar`;
 	if (send) return `/history/${send}`;
 	if (frame) return `/frames/${frame}`;

@@ -9,6 +9,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { frames } from '$lib/frames.svelte';
 	import { feeds } from '$lib/feeds.svelte';
+	import { directory, shows } from '$lib/family.svelte';
 	import { live } from '$lib/live.svelte';
 	import { push } from '$lib/push.svelte';
 	import { badge, chats } from '$lib/social.svelte';
@@ -98,17 +99,17 @@
 		void boot();
 		const off = live.on((e) => {
 			chats.handle(e);
-			if (e.type === 'frame.status') frames.setStatus(e.frame_id, e.online, e.last_seen_at);
+			if (e.type === 'frame.status') (frames.setStatus(e.frame_id, e.online, e.last_seen_at), directory.setOnline(e.frame_id, e.online, e.last_seen_at ?? null));
 			else if (e.type === 'membership.updated') void frames.load(true);
 			else if (e.type === 'join_request') {
 				const name = frames.get(e.frame_id)?.name ?? '';
 				toasts.show(t('live.joinRequest', { name: e.request.user?.display_name ?? '?', frame: name }), {
-					action: { label: t('common.review'), run: () => goto(`/frames/${e.frame_id}?tab=people`) },
+					action: { label: t('common.review'), run: () => goto(`/frames/${e.frame_id}?tab=settings`) },
 					duration: 9000
 				});
 			}
 			// Feeds (docs/spec/feeds.md §8). Pages that show the feed or frame refresh themselves.
-			else if (e.type === 'feed.membership_updated') void feeds.load(true);
+			else if (e.type === 'feed.membership_updated') (void feeds.load(true), void directory.load(e.feed_id, true));
 			else if (e.type === 'feed.join_request') {
 				const feed = feeds.get(e.feed_id)?.name ?? '';
 				toasts.show(t('live.feedJoinRequest', { name: e.request.user?.display_name ?? '?', feed }), {
@@ -125,6 +126,8 @@
 			} else if (e.type === 'subscription.updated') {
 				// For the frame side; the feed admin who decided already saw it happen.
 				const s = e.subscription;
+				if (shows.byFrame[s.frame.id]) void shows.load(s.frame.id, true);
+				if (directory.frames[e.feed_id]) void directory.load(e.feed_id, true);
 				if (s.can_decide) return;
 				if (s.status === 'active' && s.activated_at && Date.now() - Date.parse(s.activated_at) < 60_000)
 					toasts.success(t('live.subscriptionApproved', { feed: s.feed.name, frame: s.frame.name }));
@@ -208,12 +211,22 @@
 			live.stop();
 			frames.reset();
 			feeds.reset();
+			untrack(() => {
+				directory.reset();
+				shows.reset();
+			});
 			// These read what they reset (the badge paints the title): untracked, or signed-out pages loop forever.
 			untrack(() => {
 				chats.reset();
 				badge.reset();
 			});
 		}
+	});
+
+	// Each family's people and frames: the home family (who posts where), Home's row, the frame cards.
+	$effect(() => {
+		if (auth.status !== 'signed_in') return;
+		for (const f of feeds.list) void directory.load(f.id);
 	});
 
 	$effect(() => {

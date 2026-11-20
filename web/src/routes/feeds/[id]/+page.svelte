@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, call, type Feed } from '$lib/api/client';
 	import { discovery } from '$lib/discovery.svelte';
-	import { canInviteToFeed, isFeedAdmin } from '$lib/feeds';
+	import { canInviteToFeed, canPostToFeed, isFeedAdmin } from '$lib/feeds';
+	import GoogleImport from '$components/sources/GoogleImport.svelte';
 	import { feeds } from '$lib/feeds.svelte';
+	import { auth } from '$lib/auth.svelte';
+	import { directory } from '$lib/family.svelte';
 	import { live } from '$lib/live.svelte';
 	import { isCode, problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
@@ -14,8 +18,6 @@
 	import FeedCover from '$components/feed/FeedCover.svelte';
 	import FeedInvites from '$components/feed/FeedInvites.svelte';
 	import FeedMembers from '$components/feed/FeedMembers.svelte';
-	import FeedPosts from '$components/feed/FeedPosts.svelte';
-	import FeedRoleBadge from '$components/feed/FeedRoleBadge.svelte';
 	import FeedSettings from '$components/feed/FeedSettings.svelte';
 	import FeedSubscriptions from '$components/feed/FeedSubscriptions.svelte';
 	import PhotoSources from '$components/sources/PhotoSources.svelte';
@@ -24,13 +26,16 @@
 	import EngagementSettings from '$components/social/EngagementSettings.svelte';
 	import FeedCircles from '$components/social/FeedCircles.svelte';
 	import FeedSocialBar from '$components/social/FeedSocialBar.svelte';
-	import FeedTimeline from '$components/social/FeedTimeline.svelte';
+	import AddFrameSheet from '$components/family/AddFrameSheet.svelte';
+	import FamilyPhotos from '$components/family/FamilyPhotos.svelte';
+	import InviteSheet from '$components/family/InviteSheet.svelte';
 	import ReportList from '$components/social/ReportList.svelte';
 	import TakenAwayGroups from '$components/leaving/TakenAwayGroups.svelte';
 
-	type Tab = 'posts' | 'birthdays' | 'members' | 'circles' | 'subscriptions' | 'sources' | 'invites' | 'reports' | 'settings';
-	/** Family social: the posts tab is a timeline with threads; the classic list keeps the per-frame details. */
-	let classicPosts = $state(false);
+	// The family as a profile (simple-app.md §3.4): segments Photos, People and Frames. The other ids are the family's
+	// settings sections, opened from Settings › This family (one section per page, back to Settings).
+	type Segment = 'posts' | 'members' | 'subscriptions';
+	type Section = 'birthdays' | 'circles' | 'sources' | 'invites' | 'reports' | 'settings';
 
 	let feed = $state<Feed | null>(null);
 	let error = $state<unknown>(null);
@@ -43,10 +48,10 @@
 			error = null;
 		} catch (e) {
 			if (feed && isCode(e, 'not_found')) {
-				// Removed from the feed, or the feed was deleted, while we were looking at it.
+				// Removed from the family, or it was deleted, while we were looking at it.
 				feeds.remove(feedId);
 				toasts.show(t('feed.gone'));
-				void goto('/feeds');
+				void goto('/home');
 				return;
 			}
 			error = e;
@@ -58,39 +63,49 @@
 		feed = null;
 		error = null;
 		void load(feedId);
+		void directory.load(feedId, true);
 		return live.on((e) => {
-			if (e.type === 'feed.membership_updated' && e.feed_id === feedId) void load(feedId);
-			if ((e.type === 'subscription.request' || e.type === 'feed.join_request') && e.feed_id === feedId) void load(feedId);
+			if (e.type === 'feed.membership_updated' && e.feed_id === feedId) (void load(feedId), void directory.load(feedId, true));
+			if ((e.type === 'subscription.request' || e.type === 'subscription.updated') && e.feed_id === feedId) (void load(feedId), void directory.load(feedId, true));
+			if (e.type === 'feed.join_request' && e.feed_id === feedId) void load(feedId);
 			// The suggestion badge (pending_birthday_count) and the birthday count.
 			if ((e.type === 'birthday.suggested' || e.type === 'birthday.decided' || e.type === 'birthday.removed') && e.feed_id === feedId) void load(feedId);
 		});
 	});
 
-	const tabs = $derived.by(() => {
+	const sections = $derived.by(() => {
+		if (!feed) return [] as Section[];
+		const list: Section[] = ['circles'];
+		if (discovery.birthdays) list.push('birthdays');
+		if (isFeedAdmin(feed.role) || (discovery.googlePhotosImport && canPostToFeed(feed.role))) list.push('sources');
+		if (canInviteToFeed(feed)) list.push('invites');
+		if (discovery.chats && isFeedAdmin(feed.role)) list.push('reports');
+		if (isFeedAdmin(feed.role)) list.push('settings');
+		return list;
+	});
+	const SECTION_TITLE: Record<Section, MessageKey> = {
+		birthdays: 'feed.tabBirthdays',
+		circles: 'social.tabCircles',
+		sources: 'family.sectionWays',
+		invites: 'family.sectionInvites',
+		reports: 'social.tabReports',
+		settings: 'family.sectionGeneral'
+	};
+
+	const q = $derived(page.url.searchParams.get('tab'));
+	const section = $derived(sections.includes(q as Section) ? (q as Section) : null);
+	const segment = $derived<Segment>(q === 'members' || q === 'subscriptions' ? q : 'posts');
+	const segments = $derived.by(() => {
 		if (!feed) return [];
-		const list: { id: Tab; label: MessageKey; icon: IconName; badge?: number }[] = [
-			{ id: 'posts', label: 'feed.tabPosts', icon: 'image' },
-			...(discovery.birthdays
-				? [{ id: 'birthdays' as const, label: 'feed.tabBirthdays' as const, icon: 'cake' as const, badge: (isFeedAdmin(feed.role) && feed.pending_birthday_count) || undefined }]
-				: []),
-			{ id: 'members', label: 'feed.tabMembers', icon: 'users', badge: feed.pending_join_request_count || undefined },
-			...(discovery.social ? [{ id: 'circles' as const, label: 'social.tabCircles' as const, icon: 'users' as const }] : []),
-			{ id: 'subscriptions', label: 'feed.tabFrames', icon: 'frame', badge: feed.pending_subscription_count || undefined }
+		const list: { id: Segment; label: MessageKey; icon: IconName; badge?: number }[] = [
+			{ id: 'posts', label: 'family.photos', icon: 'image' },
+			{ id: 'members', label: 'family.peopleTab', icon: 'users', badge: feed.pending_join_request_count || undefined },
+			{ id: 'subscriptions', label: 'family.framesTab', icon: 'frame', badge: (isFeedAdmin(feed.role) && feed.pending_subscription_count) || undefined }
 		];
-		// Photo sources (photo-sources.md §4.2): the feed's owner and admins.
-		if (discovery.photoSources && isFeedAdmin(feed.role)) list.push({ id: 'sources', label: 'feed.tabSources', icon: 'refresh' });
-		if (canInviteToFeed(feed)) list.push({ id: 'invites', label: 'feed.tabInvites', icon: 'link' });
-		if (discovery.chats && isFeedAdmin(feed.role)) list.push({ id: 'reports', label: 'social.tabReports', icon: 'flag' });
-		if (isFeedAdmin(feed.role)) list.push({ id: 'settings', label: 'feed.tabSettings', icon: 'settings' });
 		return list;
 	});
 
-	const tab = $derived.by((): Tab => {
-		const q = page.url.searchParams.get('tab') as Tab | null;
-		return tabs.some((x) => x.id === q) ? q! : 'posts';
-	});
-
-	function selectTab(next: Tab) {
+	function selectSegment(next: Segment) {
 		const url = new URL(page.url);
 		url.searchParams.delete('post');
 		if (next === 'posts') url.searchParams.delete('tab');
@@ -104,42 +119,101 @@
 		const dir = e.key === forward ? 1 : e.key === back ? -1 : 0;
 		if (!dir) return;
 		e.preventDefault();
-		const next = tabs[(index + dir + tabs.length) % tabs.length]!;
-		selectTab(next.id);
+		const next = segments[(index + dir + segments.length) % segments.length]!;
+		selectSegment(next.id);
 		document.getElementById(`ftab-${next.id}`)?.focus();
 	}
+
+	// ---- the header: counts, member names, Invite family and Add a frame
+	const members = $derived(directory.members[id] ?? []);
+	const memberLine = $derived.by(() => {
+		const names = members.map((m) => (m.user_id === auth.me?.id ? t('family.you') : m.display_name));
+		if (names.length <= 4) return new Intl.ListFormat(i18n.tag, { type: 'conjunction' }).format(names);
+		return tn('family.namesAndMore', names.length - 3, { names: names.slice(0, 3).join(', ') });
+	});
+	let inviteOpen = $state(false);
+	let addOpen = $state(false);
+	// "?invite=1": straight from getting started after pairing a frame, open the invite sheet.
+	$effect(() => {
+		if (page.url.searchParams.get('invite') === '1' && feed) untrack(() => (inviteOpen = true));
+	});
+	let subsVersion = $state(0);
+	$effect(() => {
+		// A frame was added from the sheet: refresh the Frames segment.
+		void directory.frames[id];
+		untrack(() => subsVersion++);
+	});
 </script>
 
-<svelte:head><title>{feed?.name ?? t('feeds.title')} · kinframe</title></svelte:head>
+<svelte:head><title>{feed?.name ?? t('nav.family')} · kinframe</title></svelte:head>
 
 <div class="container page">
-	<a href="/feeds" class="back"><Icon name="chevronLeft" size={18} />{t('feeds.title')}</a>
+	{#if section}<a href="/settings?family={id}" class="back"><Icon name="chevronLeft" size={18} />{t('nav.settings')}</a>{/if}
 
-	{#if !discovery.feeds}
-		<p class="callout"><Icon name="info" size={18} />{t('feeds.offBody')}</p>
-	{:else if error}
+	{#if error}
 		<div class="callout callout-error" role="alert">
 			<Icon name="alert" />
 			<div class="stack-sm">
 				<span>{isCode(error, 'not_found') ? t('feed.notFound') : problemMessage(error)}</span>
-				<a class="btn btn-sm" href="/feeds">{t('feeds.title')}</a>
+				<a class="btn btn-sm" href="/home">{t('nav.home')}</a>
 			</div>
 		</div>
 	{:else if !feed}
 		<div class="stack" aria-busy="true" aria-label={t('common.loading')}>
-			<div class="skeleton" style="height:56px;width:45%"></div>
+			<div class="skeleton" style="height:96px;width:60%"></div>
 			<div class="skeleton" style="height:44px;width:100%;max-width:520px"></div>
 			<div class="skeleton" style="height:220px"></div>
 		</div>
-	{:else}
-		<header class="head">
-			<FeedCover name={feed.name} url={feed.cover_url} size={64} />
-			<div class="title">
-				<h1>{feed.name}</h1>
-				<div class="row-wrap meta">
-					<FeedRoleBadge role={feed.role} />
-					<span class="muted small">{tn('feeds.frames', feed.subscription_count)} · {tn('feeds.members', feed.member_count)}{#if feed.owner_name && feed.role !== 'owner'} · {t('feed.ownedBy', { name: feed.owner_name })}{/if}</span>
+	{:else if section}
+		<h1 class="section-h">{t(SECTION_TITLE[section])}</h1>
+		<p class="muted section-of">{feed.name}</p>
+		<div class="panel">
+			{#if section === 'circles'}
+				<FeedCircles {feed} />
+			{:else if section === 'reports'}
+				<ReportList feedId={feed.id} load={() => call(api.GET('/v1/feeds/{feedId}/reports', { params: { path: { feedId: feed!.id } } }))} />
+			{:else if section === 'birthdays'}
+				<FeedBirthdays {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
+			{:else if section === 'sources'}
+				<div class="stack">
+					{#if discovery.googlePhotosImport && canPostToFeed(feed.role)}
+						<div><GoogleImport target={{ kind: 'feed', feedId: feed.id, name: feed.name }} backPath="/feeds/{feed.id}?tab=sources" /></div>
+					{/if}
+					{#if discovery.photoSources && isFeedAdmin(feed.role)}<PhotoSources target={{ kind: 'feed', feedId: feed.id, name: feed.name }} />{/if}
+					<!-- Email and Telegram post to the family (email-inbox.md §4.2, telegram.md §4.2): the owner and admins. -->
+					{#if discovery.emailInbox && isFeedAdmin(feed.role)}
+						<EmailInbox target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('email')} />
+					{/if}
+					{#if discovery.telegram && isFeedAdmin(feed.role)}
+						<TelegramSection target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('telegram')} />
+					{/if}
 				</div>
+			{:else if section === 'invites'}
+				<FeedInvites {feed} />
+			{:else if section === 'settings'}
+				<FeedSettings {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
+				{#if discovery.engagement}<EngagementSettings {feed} />{/if}
+			{/if}
+		</div>
+	{:else}
+		<header class="profile">
+			<div class="top-row">
+				{#if feeds.list.length > 1}<a class="btn btn-ghost btn-icon" href="/family" aria-label={t('family.switchTitle')}><Icon name="chevronLeft" size={22} /></a>{/if}
+				<h1>{feed.name}</h1>
+				<a class="btn btn-ghost btn-icon gear" href="/settings?family={feed.id}" aria-label={t('nav.settings')}><Icon name="settings" size={22} /></a>
+			</div>
+			<div class="id-row">
+				<span class="round"><FeedCover name={feed.name} url={feed.cover_url} size={84} /></span>
+				<dl class="counts">
+					<div><dt>{tn('family.postsLabel', feed.post_count ?? 0)}</dt><dd class="num">{feed.post_count ?? 0}</dd></div>
+					<div><dt>{tn('family.peopleLabel', feed.member_count)}</dt><dd class="num">{feed.member_count}</dd></div>
+					<div><dt>{tn('family.framesLabel', feed.subscription_count)}</dt><dd class="num">{feed.subscription_count}</dd></div>
+				</dl>
+			</div>
+			{#if memberLine}<p class="muted small names">{memberLine}</p>{/if}
+			<div class="buttons">
+				<button class="btn btn-primary" onclick={() => (inviteOpen = true)}><Icon name="users" size={18} />{t('family.invite')}</button>
+				<button class="btn" onclick={() => (addOpen = true)}><Icon name="frame" size={18} />{t('family.addFrame')}</button>
 			</div>
 		</header>
 
@@ -148,14 +222,14 @@
 		{/if}
 
 		<div class="tabs segmented" role="tablist" aria-label={t('feed.sections')}>
-			{#each tabs as tb, i (tb.id)}
+			{#each segments as tb, i (tb.id)}
 				<button
 					id="ftab-{tb.id}"
 					role="tab"
-					aria-selected={tab === tb.id}
+					aria-selected={segment === tb.id}
 					aria-controls="fpanel-{tb.id}"
-					tabindex={tab === tb.id ? 0 : -1}
-					onclick={() => selectTab(tb.id)}
+					tabindex={segment === tb.id ? 0 : -1}
+					onclick={() => selectSegment(tb.id)}
 					onkeydown={(e) => onTabKey(e, i)}
 				>
 					<Icon name={tb.icon} size={16} />{t(tb.label)}{#if tb.badge}<span class="count num" aria-label={tn('feed.pending', tb.badge)}>{tb.badge}</span>{/if}
@@ -163,41 +237,19 @@
 			{/each}
 		</div>
 
-		<div id="fpanel-{tab}" role="tabpanel" aria-labelledby="ftab-{tab}" class="panel" tabindex="-1">
-			{#if tab === 'posts'}
+		<div id="fpanel-{segment}" role="tabpanel" aria-labelledby="ftab-{segment}" class="panel" tabindex="-1">
+			{#if segment === 'posts'}
 				{#if discovery.leaving && isFeedAdmin(feed.role)}<TakenAwayGroups scope="feed" id={feed.id} />{/if}
-				{#if discovery.social && !classicPosts}
-					<FeedTimeline {feed} ondetails={() => (classicPosts = true)} />
-				{:else}
-					{#if discovery.social}<button class="btn btn-ghost btn-sm back-timeline" onclick={() => (classicPosts = false)}><Icon name="chevronLeft" size={16} />{t('social.backToTimeline')}</button>{/if}
-					<FeedPosts {feed} />
-				{/if}
-			{:else if tab === 'circles'}
-				<FeedCircles {feed} />
-			{:else if tab === 'reports'}
-				<ReportList feedId={feed.id} load={() => call(api.GET('/v1/feeds/{feedId}/reports', { params: { path: { feedId: feed!.id } } }))} />
-			{:else if tab === 'birthdays'}
-				<FeedBirthdays {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
-			{:else if tab === 'members'}
-				<FeedMembers {feed} onchanged={() => void load(feed!.id)} />
-			{:else if tab === 'subscriptions'}
-				<FeedSubscriptions {feed} onchanged={() => void load(feed!.id)} />
-			{:else if tab === 'sources'}
-				<PhotoSources target={{ kind: 'feed', feedId: feed.id, name: feed.name }} />
-			{:else if tab === 'invites'}
-				<FeedInvites {feed} />
-			{:else if tab === 'settings'}
-				<FeedSettings {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
-				{#if discovery.engagement}<EngagementSettings {feed} />{/if}
-				<!-- Email and Telegram post to the feed (email-inbox.md §4.2, telegram.md §4.2): the owner and admins. -->
-				{#if discovery.emailInbox}
-					<EmailInbox target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('email')} />
-				{/if}
-				{#if discovery.telegram}
-					<TelegramSection target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('telegram')} />
-				{/if}
+				<FamilyPhotos feedId={feed.id} />
+			{:else if segment === 'members'}
+				<FeedMembers {feed} onchanged={() => (void load(feed!.id), void directory.load(feed!.id, true))} />
+			{:else}
+				{#key subsVersion}<FeedSubscriptions {feed} onchanged={() => (void load(feed!.id), void directory.load(feed!.id, true))} />{/key}
 			{/if}
 		</div>
+
+		<InviteSheet bind:open={inviteOpen} {feed} />
+		<AddFrameSheet bind:open={addOpen} {feed} />
 	{/if}
 </div>
 
@@ -211,23 +263,67 @@
 		font-weight: 600;
 		margin-bottom: var(--s-4);
 	}
-	.head {
-		display: flex;
-		align-items: center;
-		gap: var(--s-4);
-		margin-bottom: var(--s-5);
-	}
-	.title {
+	.profile {
 		display: flex;
 		flex-direction: column;
-		gap: var(--s-2);
-		min-width: 0;
+		gap: var(--s-3);
+		margin-bottom: var(--s-4);
+		max-width: 620px;
 	}
-	h1 {
+	.top-row {
+		display: flex;
+		align-items: center;
+		gap: var(--s-2);
+	}
+	.top-row h1 {
+		font-size: 1.6rem;
+		margin: 0;
 		overflow-wrap: anywhere;
 	}
-	.meta {
-		gap: var(--s-3);
+	.gear {
+		margin-inline-start: auto;
+	}
+	.id-row {
+		display: flex;
+		align-items: center;
+		gap: var(--s-5);
+	}
+	.round :global(*) {
+		border-radius: 50% !important;
+	}
+	.counts {
+		display: flex;
+		flex: 1;
+		justify-content: space-around;
+		margin: 0;
+	}
+	.counts div {
+		display: flex;
+		flex-direction: column-reverse;
+		align-items: center;
+	}
+	.counts dd {
+		margin: 0;
+		font-size: 1.3rem;
+		font-weight: 800;
+	}
+	.counts dt {
+		font-size: 0.85rem;
+		color: var(--text-muted);
+	}
+	.names {
+		margin: 0;
+	}
+	.buttons {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--s-2);
+	}
+	.section-h {
+		margin-bottom: 0;
+	}
+	.section-of {
+		margin-bottom: var(--s-4);
 	}
 	.tabs {
 		margin-bottom: var(--s-5);
@@ -253,8 +349,5 @@
 	}
 	.panel {
 		outline: none;
-	}
-	.back-timeline {
-		margin-bottom: var(--s-3);
 	}
 </style>

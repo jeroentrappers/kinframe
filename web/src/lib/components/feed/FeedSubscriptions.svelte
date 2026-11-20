@@ -10,7 +10,6 @@
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
 	import OnlineStatus from '../OnlineStatus.svelte';
-	import SubscribeDialog from './SubscribeDialog.svelte';
 	import SubscriptionStatusBadge from './SubscriptionStatusBadge.svelte';
 	// Frames on other servers (README §5.22): server names, blocking a server.
 	import { discovery } from '$lib/discovery.svelte';
@@ -42,7 +41,6 @@
 	});
 
 	const groups = $derived(groupSubscriptions(subs ?? [], 'frame'));
-	const taken = $derived((subs ?? []).filter((s) => !s.remote && s.status === 'pending' || s.status === 'active' || s.status === 'paused').map((s) => s.frame.id));
 
 	function replace(s: Subscription) {
 		subs = (subs ?? []).some((x) => x.id === s.id) ? (subs ?? []).map((x) => (x.id === s.id ? s : x)) : [s, ...(subs ?? [])];
@@ -79,15 +77,8 @@
 		}
 	}
 
-	let subscribeOpen = $state(false);
 </script>
 
-<div class="toolbar">
-	<button class="btn btn-primary" onclick={() => (subscribeOpen = true)}><Icon name="frame" size={18} />{t('subs.showOnFrame')}</button>
-	{#if admin}
-		<a class="btn" href="?tab=invites"><Icon name="link" size={18} />{t('subs.inviteFrame')}</a>
-	{/if}
-</div>
 
 {#if error}
 	<div class="callout callout-error" role="alert"><Icon name="alert" />{problemMessage(error)}</div>
@@ -190,7 +181,6 @@
 	<div class="blocked"><BlockedServers scope={{ kind: 'feed', feedId: feed.id }} bind:prefill={blockHost} onchange={load} /></div>
 {/if}
 
-<SubscribeDialog bind:open={subscribeOpen} feedId={feed.id} {taken} onsubscribed={(s) => (replace(s), onchanged?.())} />
 
 <Dialog bind:open={removeOpen} title={t('subs.removeConfirm', { frame: removing?.frame.name ?? '' })}>
 	<p class="muted">{t('subs.removeBody', { feed: feed.name })}</p>
@@ -203,12 +193,6 @@
 <style>
 	.blocked {
 		margin-top: var(--s-4);
-	}
-	.toolbar {
-		display: flex;
-		gap: var(--s-3);
-		flex-wrap: wrap;
-		margin-bottom: var(--s-4);
 	}
 	.requests {
 		border-color: color-mix(in srgb, var(--primary) 40%, var(--border));

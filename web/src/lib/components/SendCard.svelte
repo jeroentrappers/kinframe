@@ -64,7 +64,7 @@
 			{#each send.feeds ?? [] as f (f.post_id)}
 				<li class="frame-row" data-testid="send-feed">
 					<div class="fr-top">
-						<a class="fname feed-name" href="/feeds/{f.feed_id}?post={f.post_id}"><Icon name="feed" size={14} />{f.feed_name}</a>
+						<a class="fname feed-name" href="/posts/{f.post_id}"><Icon name="feed" size={14} />{f.feed_name}</a>
 						{#if f.removed}<span class="badge">{t('history.feedRemoved')}</span>{/if}
 					</div>
 					{#if !f.removed}<ReceiptSummary summary={f.summary} compact />{/if}

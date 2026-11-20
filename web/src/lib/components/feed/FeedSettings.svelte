@@ -120,7 +120,7 @@
 			deleteOpen = false;
 			feeds.remove(feed.id);
 			toasts.success(t('feedSettings.deleted', { feed: feed.name }));
-			await goto('/feeds');
+			await goto('/home');
 		} catch (err) {
 			toasts.error(problemMessage(err));
 		} finally {

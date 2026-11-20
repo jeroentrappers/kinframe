@@ -56,7 +56,7 @@
 	--s-8: 72px;
 
 	--content: 1120px;
-	--nav-h: 64px;
+	--nav-h: 0px; /* no top bar: pages carry their own headers (simple-app.md §3) */
 	--tabbar-h: 64px;
 	--ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 	--dur: 180ms;

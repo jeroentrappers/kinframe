@@ -8,7 +8,7 @@ describe('push payloads', () => {
 	it('opens the most useful page', () => {
 		expect(pushUrl({ key: 'delivered', ids: { send_id: SEND, frame_id: FRAME } })).toBe(`/history/${SEND}`);
 		expect(pushUrl({ key: 'reaction', ids: { send_id: SEND, placement_id: 'x', frame_id: FRAME } })).toBe(`/history/${SEND}`);
-		expect(pushUrl({ key: 'join_request', ids: { frame_id: FRAME, request_id: 'r' } })).toBe(`/frames/${FRAME}?tab=people`);
+		expect(pushUrl({ key: 'join_request', ids: { frame_id: FRAME, request_id: 'r' } })).toBe(`/frames/${FRAME}?tab=settings`);
 		expect(pushUrl({ key: 'membership', ids: { frame_id: FRAME } })).toBe(`/frames/${FRAME}`);
 		expect(pushUrl({ type: 'event_invitation.decided', key: 'event_invitation.accepted', ids: { frame_id: FRAME } })).toBe(`/frames/${FRAME}?tab=calendar`);
 		expect(pushUrl({})).toBe('/history');
@@ -21,9 +21,9 @@ describe('push payloads', () => {
 		const ADDR = '0192f0a0-0020-7000-8000-000000000006';
 		const CHAT = '0192f0a0-0021-7000-8000-000000000007';
 		expect(pushUrl({ key: 'email_pending_sender', ids: { frame_id: FRAME, address_id: ADDR, sender_id: SEND } })).toBe(`/frames/${FRAME}?tab=settings&email=${ADDR}`);
-		expect(pushUrl({ key: 'email_pending_sender', ids: { feed_id: FEED, address_id: ADDR } })).toBe(`/feeds/${FEED}?tab=settings&email=${ADDR}`);
+		expect(pushUrl({ key: 'email_pending_sender', ids: { feed_id: FEED, address_id: ADDR } })).toBe(`/feeds/${FEED}?tab=sources&email=${ADDR}`);
 		expect(pushUrl({ key: 'telegram_attention', ids: { frame_id: FRAME, chat_id: CHAT } })).toBe(`/frames/${FRAME}?tab=settings&telegram=${CHAT}`);
-		expect(pushUrl({ key: 'telegram_attention', ids: { feed_id: FEED, chat_id: CHAT } })).toBe(`/feeds/${FEED}?tab=settings&telegram=${CHAT}`);
+		expect(pushUrl({ key: 'telegram_attention', ids: { feed_id: FEED, chat_id: CHAT } })).toBe(`/feeds/${FEED}?tab=sources&telegram=${CHAT}`);
 		expect(pushUrl({ key: 'telegram_attention', ids: { frame_id: FRAME, chat_id: '../x' } })).toBe(`/frames/${FRAME}?tab=settings`);
 		expect(pushTag({ key: 'email_pending_sender', ids: { address_id: ADDR, sender_id: SEND, frame_id: FRAME } })).toBe(`email_pending_sender:${SEND}`);
 		expect(pushTag({ key: 'telegram_attention', ids: { chat_id: CHAT, frame_id: FRAME } })).toBe(`telegram_attention:${CHAT}`);
@@ -35,12 +35,12 @@ describe('push payloads', () => {
 		expect(pushUrl({ key: 'subscription_request', ids: { feed_id: FEED, subscription_id: 's' } })).toBe(`/feeds/${FEED}?tab=subscriptions`);
 		expect(pushUrl({ key: 'feed_join_request', ids: { feed_id: FEED, request_id: 'r' } })).toBe(`/feeds/${FEED}?tab=members`);
 		expect(pushUrl({ key: 'feed_membership', ids: { feed_id: FEED } })).toBe(`/feeds/${FEED}`);
-		expect(pushUrl({ key: 'feed_membership' })).toBe('/feeds');
-		expect(pushUrl({ key: 'subscription_decided', ids: { feed_id: FEED, frame_id: FRAME } })).toBe(`/frames/${FRAME}?tab=feeds`);
-		expect(pushUrl({ key: 'subscription_removed', ids: { feed_id: FEED, frame_id: FRAME } })).toBe(`/frames/${FRAME}?tab=feeds`);
+		expect(pushUrl({ key: 'feed_membership' })).toBe('/home');
+		expect(pushUrl({ key: 'subscription_decided', ids: { feed_id: FEED, frame_id: FRAME } })).toBe(`/frames/${FRAME}?tab=settings`);
+		expect(pushUrl({ key: 'subscription_removed', ids: { feed_id: FEED, frame_id: FRAME } })).toBe(`/frames/${FRAME}?tab=settings`);
 		expect(pushUrl({ key: 'subscription_decided', ids: { feed_id: FEED } })).toBe(`/feeds/${FEED}`);
 		// Reactions on a feed post open the post, not the send.
-		expect(pushUrl({ key: 'reaction', ids: { send_id: SEND, feed_id: FEED, post_id: POST, frame_id: FRAME } })).toBe(`/feeds/${FEED}?post=${POST}`);
+		expect(pushUrl({ key: 'reaction', ids: { send_id: SEND, feed_id: FEED, post_id: POST, frame_id: FRAME } })).toBe(`/posts/${POST}`);
 		expect(pushTag({ key: 'reaction', ids: { send_id: SEND, post_id: POST } })).toBe(`reaction:${POST}`);
 	});
 
@@ -49,7 +49,7 @@ describe('push payloads', () => {
 		const BDAY = '0192f0a0-0012-7000-8000-000000000005';
 		for (const key of ['birthday_suggestion', 'birthday_decided', 'birthday_today', 'birthday_greeting'])
 			expect(pushUrl({ key, ids: { feed_id: FEED, birthday_id: BDAY } })).toBe(`/feeds/${FEED}?tab=birthdays`);
-		expect(pushUrl({ key: 'birthday_today' })).toBe('/feeds');
+		expect(pushUrl({ key: 'birthday_today' })).toBe('/home');
 		const now = new Date(2026, 2, 12, 10, 14);
 		expect(pushTag({ key: 'birthday_greeting', ids: { feed_id: FEED, birthday_id: BDAY, greeting_id: 'g' } }, now)).toBe(`birthday:${BDAY}:2026-03-12`);
 		expect(pushTag({ key: 'birthday_suggestion', ids: { feed_id: FEED, birthday_id: BDAY } })).toBe(`birthday_suggestion:${BDAY}`);

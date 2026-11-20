@@ -157,7 +157,7 @@
 			leaveOpen = false;
 			feeds.remove(feed.id);
 			toasts.success(t('feedMembers.left', { feed: feed.name }));
-			await goto('/feeds');
+			await goto('/home');
 		} catch (e) {
 			toasts.error(isCode(e, 'owner_cannot_leave') ? t('feedMembers.ownerCannotLeave') : problemMessage(e));
 		} finally {
@@ -318,7 +318,7 @@
 			feeds.remove(feed.id);
 			for (const f of result?.left_frame_ids ?? []) frames.remove(f);
 			toasts.success(resultMessage(result, frameNames, feed.name));
-			await goto('/feeds');
+			await goto('/home');
 		}}
 	/>
 {/if}

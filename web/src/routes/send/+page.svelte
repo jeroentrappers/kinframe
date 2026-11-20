@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -10,7 +10,10 @@
 	import { can, frames } from '$lib/frames.svelte';
 	import { feeds } from '$lib/feeds.svelte';
 	import FeedCover from '$components/feed/FeedCover.svelte';
-	import AudiencePicker from '$components/social/AudiencePicker.svelte';
+	import DestinationSheet from '$components/family/DestinationSheet.svelte';
+	import { myCircles } from '$components/social/AudiencePicker.svelte';
+	import { families } from '$lib/family.svelte';
+	import type { Circle } from '$lib/api/client';
 	import { canPostToFeed } from '$lib/feeds';
 	import { api, call } from '$lib/api/client';
 	import { currentPrompt, familiesToPreselect } from '$lib/engagement';
@@ -24,7 +27,6 @@
 	import Icon from '$components/Icon.svelte';
 	import Illustration from '$components/Illustration.svelte';
 	import ItemEditor from '$components/ItemEditor.svelte';
-	import OnlineStatus from '$components/OnlineStatus.svelte';
 
 	let fileInput: HTMLInputElement | undefined = $state();
 	let folderInput: HTMLInputElement | undefined = $state();
@@ -34,7 +36,7 @@
 
 	const sendable = $derived(frames.list.filter((f) => can(f, 'send')));
 	/** Every feed role but `member` ("Reader", family social) can post (feeds.md §4.1). Hidden without feeds. */
-	const postable = $derived(discovery.feeds ? feeds.list.filter((f) => canPostToFeed(f.role)) : []);
+	const postable = $derived(discovery.feeds ? families.ranked.filter((f) => canPostToFeed(f.role)) : []);
 	const recipientsLoaded = $derived(frames.loaded && (!discovery.feeds || feeds.loaded || feeds.error !== null));
 	const recipientNames = $derived(
 		[...compose.frameIds.map((id) => frames.get(id)?.name), ...compose.feedIds.map((id) => feeds.get(id)?.name)].filter(Boolean).join(', ')
@@ -49,19 +51,73 @@
 	});
 	const totalBytes = $derived(compose.items.reduce((s, i) => s + i.bytes, 0));
 
-	// Preselect: ?frame=<id> or ?feed=<id>, or the only frame you can send to when there are no feeds.
+	// One destination row (simple-app.md §3.2): the home family (or Home's filtered family); "Change" for several
+	// families at once and per family a circle. A single frame only from that frame's screen (?frame=<id>).
+	const frameOnly = $derived(compose.frameIds.length > 0 ? (frames.get(compose.frameIds[0]!) ?? null) : null);
+	const chosen = $derived(compose.feedIds.map((id) => feeds.get(id)).filter((f) => f !== undefined));
+	const destination = $derived(chosen[0] ?? null);
+	const circleId = $derived(destination ? (compose.circleOf[destination.id] ?? null) : null);
+	let circles = $state<Circle[]>([]);
 	$effect(() => {
-		if (!recipientsLoaded || compose.hasRecipients) return;
+		const id = destination?.id;
+		circles = [];
+		if (id && discovery.social) void myCircles(id).then((c) => id === destination?.id && (circles = c));
+	});
+	const circleName = $derived(circleId ? (circles.find((c) => c.id === circleId)?.name ?? null) : null);
+	let changeOpen = $state(false);
+	/** "Trappers · everyone and its 2 frames", the circle, "3 families · 9 frames", or "Only Oma's frame". */
+	const destinationLine = $derived(
+		frameOnly
+			? t('compose.onlyFrame', { frame: frameOnly.name })
+			: chosen.length > 1
+				? `${tn('family.families', chosen.length)} · ${tn('family.frames', chosen.reduce((n, f) => n + f.subscription_count, 0))}`
+				: destination
+					? circleName
+						? t('compose.toCircle', { family: destination.name, circle: circleName })
+						: tn('compose.toFamily', destination.subscription_count, { family: destination.name })
+					: ''
+	);
+	/** The default: Home's filtered family when it is one you post to, else the home family. */
+	const defaultFamily = $derived(
+		(families.filter && postable.find((f) => f.id === families.filter!.id)) || families.ranked.find((f) => postable.some((p) => p.id === f.id)) || null
+	);
+
+	function chooseFamilies(ids: string[], circleOf: Record<string, string | null>) {
+		compose.frameIds = [];
+		compose.feedIds = ids;
+		compose.circleOf = Object.fromEntries(ids.map((id) => [id, circleOf[id] ?? null]));
+	}
+	const chooseFamily = (id: string, circle: string | null) => chooseFamilies([id], { [id]: circle });
+
+	// The composer keeps its draft between visits: follow the entry point (?frame= from a frame's screen, else a family).
+	$effect(() => {
+		if (!recipientsLoaded || locked) return;
 		const wanted = page.url.searchParams.get('frame');
 		const wantedFeed = page.url.searchParams.get('feed');
-		if (wanted && sendable.some((f) => f.id === wanted)) compose.frameIds = [wanted];
-		else if (wantedFeed && postable.some((f) => f.id === wantedFeed)) compose.feedIds = [wantedFeed];
-		else if (wanted && postable.length) void preselectFamiliesOf(wanted, page.url.searchParams.get('request'));
-		else if (!wanted && !wantedFeed && sendable.length === 1 && postable.length === 0) compose.frameIds = [sendable[0]!.id];
+		const request = page.url.searchParams.get('request');
+		untrack(() => {
+			if (wanted && !request && sendable.some((f) => f.id === wanted)) {
+				if (compose.frameIds[0] !== wanted || compose.feedIds.length) {
+					compose.feedIds = [];
+					compose.frameIds = [wanted];
+				}
+				return;
+			}
+			if (compose.frameIds.length) compose.frameIds = [];
+			if (wantedFeed && postable.some((f) => f.id === wantedFeed)) {
+				if (compose.feedIds[0] !== wantedFeed) chooseFamily(wantedFeed, null);
+				return;
+			}
+			if (compose.feedIds.some((id) => postable.some((f) => f.id === id))) return;
+			if (wanted && postable.length) void preselectFamiliesOf(wanted, request);
+			else {
+				if (defaultFamily) chooseFamily(defaultFamily.id, null);
+			}
+		});
 	});
 
-	// A frame you're not on (a frame request or a quiet-frame reminder reached you through a family): preselect the
-	// families whose posts reach it. The request names them (`PhotoRequest.feed_ids`); otherwise ask the families.
+	// A frame request or a quiet-frame reminder: the family whose posts reach that frame (the request names them,
+	// `PhotoRequest.feed_ids`; otherwise ask the families), else the home family.
 	async function preselectFamiliesOf(frameId: string, requestId: string | null) {
 		let reaching: string[] = [];
 		if (requestId && discovery.engagement) {
@@ -80,7 +136,8 @@
 			reaching = subs.filter((x): x is string => !!x);
 		}
 		const ids = familiesToPreselect(reaching, postable.map((f) => f.id));
-		if (ids.length && !compose.hasRecipients) compose.feedIds = ids;
+		if (ids.length && !compose.hasRecipients) chooseFamilies(ids, {});
+		else if (defaultFamily && !compose.hasRecipients) chooseFamily(defaultFamily.id, null);
 	}
 
 	// Answer a weekly prompt: ?feed=<id>&prompt=<id> from the prompt card (README §5.20).
@@ -93,7 +150,7 @@
 				const p = list.find((x) => x.id === pid && (x.status === 'current' || x.status === 'past'));
 				if (p) {
 					compose.prompt = { id: p.id, feedId: fid, title: p.title };
-					if (!compose.feedIds.includes(fid) && postable.some((f) => f.id === fid)) compose.toggleFeed(fid);
+					if (!compose.feedIds.includes(fid) && postable.some((f) => f.id === fid)) chooseFamily(fid, null);
 				}
 			})
 			.catch(() => {});
@@ -159,11 +216,12 @@
 	}
 
 	async function send() {
+		const toFamily = compose.feedIds.length > 0;
 		const result = await compose.send();
 		if (result) {
-			toasts.success(t('send.sent'));
+			toasts.success(toFamily ? t('compose.shared') : t('send.sent'));
 			push.justSent = true;
-			await goto(`/history/${result.id}`);
+			await goto(toFamily ? '/home' : `/history/${result.id}`);
 		} else if (compose.error) {
 			toasts.error(problemMessage(compose.error));
 		}
@@ -199,15 +257,14 @@
 		</div>
 	</div>
 
-	{#if recipientsLoaded && sendable.length === 0 && postable.length === 0}
+	{#if recipientsLoaded && postable.length === 0 && !frameOnly}
 		<div class="card">
 			<div class="no-frames">
-				<Icon name="frame" size={28} />
+				<Icon name="users" size={28} />
 				<div class="stack-sm">
-					<h2>{t('send.noFramesTitle')}</h2>
-					<p class="muted">{t('send.noFramesBody')}</p>
+					<h2>{t('compose.readerTitle')}</h2>
+					<p class="muted">{t('compose.readerBody')}</p>
 				</div>
-				<a class="btn btn-primary" href="/frames/add"><Icon name="plus" size={18} />{t('frames.add')}</a>
 			</div>
 		</div>
 	{:else}
@@ -260,56 +317,29 @@
 
 			<aside class="side">
 				<div class="card card-pad stack sticky">
-					<fieldset class="recipients" id="recipients">
-						<legend><h2>{t('send.to')}</h2></legend>
-						{#if postable.length > 0 && sendable.length > 0}<h3 class="r-group">{t('send.framesGroup')}</h3>{/if}
-						{#if !frames.loaded}
+					<section class="destination" id="recipients" aria-labelledby="dest-title">
+						<h2 id="dest-title" class="visually-hidden">{t('send.to')}</h2>
+						{#if !recipientsLoaded}
 							<div class="skeleton" style="height:56px"></div>
-							<div class="skeleton" style="height:56px"></div>
+						{:else if frameOnly}
+							<div class="dest-row">
+								<span class="dest-icon"><Icon name="frame" size={22} /></span>
+								<span class="dest-body"><span class="dest-name" data-testid="destination">{destinationLine}</span><span class="hint">{t('compose.onlyFrameHint')}</span></span>
+								{#if postable.length}<button class="btn btn-ghost btn-sm" onclick={() => (changeOpen = true)} disabled={locked}>{t('compose.change')}</button>{/if}
+							</div>
+						{:else if destination}
+							<div class="dest-row">
+								{#if chosen.length > 1}<span class="dest-icon"><Icon name="users" size={22} /></span>{:else}<FeedCover name={destination.name} url={destination.cover_url} size={40} />{/if}
+								<span class="dest-body"><span class="dest-name" data-testid="destination">{destinationLine}</span></span>
+								{#if postable.length > 1 || circles.length > 0}<button class="btn btn-ghost btn-sm" onclick={() => (changeOpen = true)} disabled={locked}>{t('compose.change')}</button>{/if}
+							</div>
 						{:else}
-							{#each sendable as frame (frame.id)}
-								<label class="recipient" class:checked={compose.frameIds.includes(frame.id)}>
-									<input
-										type="checkbox"
-										checked={compose.frameIds.includes(frame.id)}
-										onchange={() => compose.toggleFrame(frame.id)}
-										disabled={locked}
-									/>
-									<span class="r-body">
-										<span class="r-name">{frame.name}</span>
-										<OnlineStatus online={frame.online} lastSeen={frame.last_seen_at} />
-									</span>
-									<span class="check" aria-hidden="true"><Icon name="check" size={16} stroke={3} /></span>
-								</label>
-							{/each}
-							{#if compose.frameIds.some((id) => !frames.get(id)?.online)}
-								<p class="hint offline-note"><Icon name="info" size={15} />{t('send.offlineNote')}</p>
-							{/if}
+							<p class="muted small">{t('compose.noFamily')}</p>
 						{/if}
-						{#if postable.length > 0}
-							<h3 class="r-group">{t('send.feedsGroup')}</h3>
-							{#each postable as feed (feed.id)}
-								<label class="recipient" class:checked={compose.feedIds.includes(feed.id)}>
-									<input
-										type="checkbox"
-										checked={compose.feedIds.includes(feed.id)}
-										onchange={() => compose.toggleFeed(feed.id)}
-										disabled={locked}
-										data-testid="feed-recipient"
-									/>
-									<FeedCover name={feed.name} url={feed.cover_url} size={32} />
-									<span class="r-body">
-										<span class="r-name">{feed.name}</span>
-										<span class="muted tiny">{tn('feeds.frames', feed.subscription_count)}</span>
-									</span>
-									<span class="check" aria-hidden="true"><Icon name="check" size={16} stroke={3} /></span>
-								</label>
-								{#if discovery.social && compose.feedIds.includes(feed.id)}
-									<AudiencePicker feedId={feed.id} feedName={feed.name} bind:value={compose.circleOf[feed.id]} disabled={locked} />
-								{/if}
-							{/each}
+						{#if frameOnly && !frameOnly.online}
+							<p class="hint offline-note"><Icon name="info" size={15} />{t('send.offlineNote')}</p>
 						{/if}
-					</fieldset>
+					</section>
 
 					{#if compose.prompt && compose.feedIds.includes(compose.prompt.feedId)}
 						<p class="prompt-chip small"><span aria-hidden="true">💡</span><span>{t('engagement.answers', { title: compose.prompt.title })}</span><button class="btn btn-ghost btn-icon btn-sm" aria-label={t('engagement.untag')} onclick={() => (compose.prompt = null)} disabled={locked}><Icon name="x" size={14} /></button></p>
@@ -339,10 +369,10 @@
 					{:else}
 						<button class="btn btn-primary btn-lg btn-block" onclick={send} disabled={!compose.canSend}>
 							<Icon name="send" size={20} />
-							{compose.items.length > 0 ? tn('send.sendN', compose.items.length) : t('send.sendButton')}
+							{t('nav.share')}
 						</button>
 						{#if compose.items.length > 0 && !compose.hasRecipients}
-							<p class="hint center-text">{postable.length > 0 ? t('send.pickRecipient') : t('send.pickFrame')}</p>
+							<p class="hint center-text">{t('compose.noFamily')}</p>
 						{/if}
 					{/if}
 				</div>
@@ -357,11 +387,10 @@
 			<div class="mb-status small" role="status"><span class="spinner" aria-hidden="true"></span>{status}</div>
 			<div class="progress mb-progress"><span style="width:{Math.round(compose.progress * 100)}%"></span></div>
 		{:else if !compose.hasRecipients}
-			<span class="small muted">{postable.length > 0 ? t('send.pickRecipient') : t('send.pickFrame')}</span>
-			<button class="btn btn-soft btn-sm" onclick={() => document.getElementById('recipients')?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth' })}>{t('send.to')}</button>
+			<span class="small muted">{t('compose.noFamily')}</span>
 		{:else}
 			<span class="small muted mb-to">{recipientNames}</span>
-			<button class="btn btn-primary" onclick={send} disabled={!compose.canSend}><Icon name="send" size={18} />{tn('send.sendN', compose.items.length)}</button>
+			<button class="btn btn-primary" onclick={send} disabled={!compose.canSend}><Icon name="send" size={18} />{t('nav.share')}</button>
 		{/if}
 	</div>
 {/if}
@@ -371,6 +400,8 @@
 		<div class="veil-card"><Icon name="upload" size={32} />{t('send.dropNow')}</div>
 	</div>
 {/if}
+
+<DestinationSheet bind:open={changeOpen} families={postable} chosen={compose.feedIds} circleOf={compose.circleOf} onchoose={chooseFamilies} />
 
 <Dialog bind:open={editorOpen} title={t('send.adjustTitle')} size="md">
 	{#if editing}
@@ -390,6 +421,31 @@
 </Dialog>
 
 <style>
+	.dest-row {
+		display: flex;
+		align-items: center;
+		gap: var(--s-3);
+	}
+	.dest-icon {
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: var(--r);
+		background: var(--surface-2);
+		flex: none;
+	}
+	.dest-body {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.dest-name {
+		font-weight: 650;
+		overflow-wrap: anywhere;
+	}
 	.prompt-chip {
 		display: flex;
 		align-items: center;
@@ -494,86 +550,6 @@
 	.sticky {
 		position: sticky;
 		top: calc(var(--nav-h) + 16px);
-	}
-	.recipients {
-		border: 0;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-	.r-group {
-		font-family: var(--font-body);
-		font-size: 0.75rem;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--text-faint);
-		margin: 6px 0 0;
-	}
-	.recipients legend {
-		padding: 0;
-		margin-bottom: 6px;
-	}
-	.recipients h2 {
-		font-size: 1.1rem;
-	}
-	.recipient {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 10px 12px;
-		border-radius: var(--r);
-		border: 1.5px solid var(--border);
-		background: var(--surface);
-		cursor: pointer;
-		transition:
-			border-color var(--dur) var(--ease),
-			background var(--dur) var(--ease);
-	}
-	.recipient:hover {
-		border-color: var(--border-strong);
-	}
-	.recipient.checked {
-		border-color: var(--primary);
-		background: color-mix(in srgb, var(--primary-soft) 55%, var(--surface));
-	}
-	.recipient:has(input:focus-visible) {
-		outline: 3px solid var(--focus);
-		outline-offset: 2px;
-	}
-	.recipient input {
-		position: absolute;
-		opacity: 0;
-		pointer-events: none;
-	}
-	.r-body {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-		min-width: 0;
-	}
-	.r-name {
-		font-weight: 650;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.check {
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		display: grid;
-		place-items: center;
-		border: 1.5px solid var(--border-strong);
-		color: transparent;
-		flex: none;
-		transition: all var(--dur) var(--ease);
-	}
-	.checked .check {
-		background: var(--primary);
-		border-color: var(--primary);
-		color: var(--on-primary);
 	}
 	.offline-note {
 		display: flex;

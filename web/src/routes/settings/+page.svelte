@@ -21,6 +21,28 @@
 	import ChoiceGroup from '$components/leaving/ChoiceGroup.svelte';
 	import OtherServers from '$components/remote/OtherServers.svelte';
 	import { crashReportsEnabled, setCrashReportsEnabled } from '$lib/crash';
+	import { familyHref, view } from '$lib/family.svelte';
+	import { feeds } from '$lib/feeds.svelte';
+	import { canInviteToFeed, canPostToFeed, isFeedAdmin } from '$lib/feeds';
+	import FeedCover from '$components/feed/FeedCover.svelte';
+
+	// Settings (simple-app.md §3.4): from a family profile's gear (?family=<id>) "This family", then "App"; from the
+	// family list only "App".
+	const fam = $derived(feeds.get(page.url.searchParams.get('family') ?? '') ?? null);
+	const familyRows = $derived.by(() => {
+		const f = fam;
+		if (!f) return [];
+		const admin = isFeedAdmin(f.role);
+		const rows: { href: string; label: 'family.rowGeneral' | 'family.rowCircles' | 'family.rowBirthdays' | 'family.rowWays' | 'family.rowInvites' | 'family.rowReports' | 'family.rowLeave'; hint?: 'family.rowGeneralHint' | 'family.rowWaysHint' | 'family.rowInvitesHint' | 'family.rowLeaveHint' }[] = [];
+		if (admin) rows.push({ href: `/feeds/${f.id}?tab=settings`, label: 'family.rowGeneral', hint: 'family.rowGeneralHint' });
+		if (discovery.social) rows.push({ href: `/feeds/${f.id}?tab=circles`, label: 'family.rowCircles' });
+		if (discovery.birthdays) rows.push({ href: `/feeds/${f.id}?tab=birthdays`, label: 'family.rowBirthdays' });
+		if ((admin && (discovery.photoSources || discovery.emailInbox || discovery.telegram)) || (discovery.googlePhotosImport && canPostToFeed(f.role))) rows.push({ href: `/feeds/${f.id}?tab=sources`, label: 'family.rowWays', hint: 'family.rowWaysHint' });
+		if (canInviteToFeed(f as { role: typeof f.role; posters_can_invite?: boolean })) rows.push({ href: `/feeds/${f.id}?tab=invites`, label: 'family.rowInvites', hint: 'family.rowInvitesHint' });
+		if (admin && discovery.chats) rows.push({ href: `/feeds/${f.id}?tab=reports`, label: 'family.rowReports' });
+		rows.push({ href: `/feeds/${f.id}?tab=members#fyou-title`, label: 'family.rowLeave', hint: 'family.rowLeaveHint' });
+		return rows;
+	});
 
 	// After a first sign-in without a name claim: ask once, then continue where they were going.
 	const welcome = page.url.searchParams.get('welcome') === '1';
@@ -158,9 +180,26 @@
 <svelte:head><title>{t('settings.title')} · kinframe</title></svelte:head>
 
 <div class="container page narrow">
+	{#if fam}<a href="/feeds/{fam.id}" class="back"><Icon name="chevronLeft" size={18} />{fam.name}</a>{:else if feeds.list.length}<a href={familyHref()} class="back"><Icon name="chevronLeft" size={18} />{t('nav.family')}</a>{/if}
 	<div class="page-header"><h1>{t('settings.title')}</h1></div>
 
 	<div class="stack">
+		{#if fam && !welcome}
+			<h2 class="group-h">{t('family.thisFamily')}</h2>
+			<section class="card links" aria-label={t('family.thisFamily')}>
+				<div class="fam-head">
+					<FeedCover name={fam.name} url={fam.cover_url} size={40} />
+					<span class="s-label">{fam.name}</span>
+				</div>
+				{#each familyRows as r (r.label)}
+					<a class="row between link-row" href={r.href}>
+						<span><span class="s-label">{t(r.label)}</span>{#if r.hint}<span class="hint">{t(r.hint)}</span>{/if}</span>
+						<Icon name="chevronRight" size={20} />
+					</a>
+				{/each}
+			</section>
+			<h2 class="group-h">{t('family.app')}</h2>
+		{/if}
 		<section class="card card-pad" aria-labelledby="profile-title">
 			<div class="section-title"><h2 id="profile-title">{t('settings.profile')}</h2></div>
 			<div class="profile">
@@ -220,6 +259,22 @@
 				</label>
 			{/if}
 		</section>
+
+		<section class="card card-pad" aria-labelledby="view-title">
+			<div class="section-title"><h2 id="view-title">{t('simple.settingTitle')}</h2></div>
+			<label class="switch">
+				<input type="checkbox" checked={view.simple} onchange={(e) => view.set(e.currentTarget.checked)} data-testid="simple-view" />
+				<span>
+					<span class="s-label">{t('simple.simpleView')}</span>
+					<span class="hint">{t('simple.settingHint')}</span>
+				</span>
+			</label>
+		</section>
+
+		<a class="card card-pad row between shop-link" href="/history">
+			<span><span class="s-label">{t('family.sentHistory')}</span><span class="hint">{t('family.sentHistoryHint')}</span></span>
+			<Icon name="chevronRight" size={20} />
+		</a>
 
 		<section class="card card-pad" aria-labelledby="push-title">
 			<div class="section-title"><h2 id="push-title">{t('push.title')}</h2></div>
@@ -357,6 +412,45 @@
 </Dialog>
 
 <style>
+	.back {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		color: var(--text-muted);
+		text-decoration: none;
+		font-weight: 600;
+		margin-bottom: var(--s-4);
+	}
+	.group-h {
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--text-faint);
+		font-family: var(--font-body);
+		margin: var(--s-2) 0 0;
+	}
+	.links {
+		padding: 0;
+		overflow: hidden;
+	}
+	.fam-head {
+		display: flex;
+		align-items: center;
+		gap: var(--s-3);
+		padding: var(--s-3) var(--s-4);
+	}
+	.link-row {
+		padding: var(--s-3) var(--s-4);
+		border-top: 1px solid var(--border);
+		color: inherit;
+		text-decoration: none;
+	}
+	.link-row:hover {
+		background: var(--surface-2);
+	}
+	.link-row .hint {
+		display: block;
+	}
 	.delete-row {
 		justify-content: center;
 	}

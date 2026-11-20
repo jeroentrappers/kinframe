@@ -217,7 +217,7 @@
 					<div class="feed-sum">
 						<div class="row">
 							<Icon name="feed" size={16} />
-							<a class="fname" href="/feeds/{f.feed_id}?post={f.post_id}">{f.feed_name}</a>
+							<a class="fname" href="/posts/{f.post_id}">{f.feed_name}</a>
 							<span class="spacer"></span>
 							{#if f.removed}<span class="badge">{t('history.feedRemoved')}</span>{/if}
 						</div>

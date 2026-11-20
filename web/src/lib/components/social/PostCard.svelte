@@ -14,7 +14,18 @@
 	import RichText from './RichText.svelte';
 	import ShareInChatDialog from './ShareInChatDialog.svelte';
 
-	let { post, onreactions, showPrompt = true }: { post: TimelinePost; onreactions?: (s: ReactionSummary) => void; showPrompt?: boolean } = $props();
+	let {
+		post,
+		onreactions,
+		showPrompt = true,
+		showFamily = true
+	}: {
+		post: TimelinePost;
+		onreactions?: (s: ReactionSummary) => void;
+		showPrompt?: boolean;
+		/** The family label next to the time: only when the person has several families (simple-app.md §3.1). */
+		showFamily?: boolean;
+	} = $props();
 
 	const place = $derived(postPlace(post));
 	const poster = $derived(posterName(post, t('social.formerMember'), (name) => t('leaving.formerMember', { name })));
@@ -39,10 +50,10 @@
 					<Icon name="frame" size={14} />{t('social.toFrame', { frame: place.name })}
 				{:else if place.kind === 'circle'}
 					<a href="/feeds/{post.feed_id}">{place.name}</a><span aria-hidden="true">·</span><Icon name="lock" size={13} /><span>{place.circle}</span>
-				{:else}
+				{:else if showFamily}
 					<a href="/feeds/{post.feed_id}">{place.name}</a>
 				{/if}
-				<span aria-hidden="true">·</span>
+				{#if place.kind !== 'feed' || showFamily}<span aria-hidden="true">·</span>{/if}
 				<a class="time" href="/posts/{post.id}"><time datetime={post.created_at} title={formatDateTime(post.created_at, i18n.tag)}>{relativeTime(post.created_at, i18n.tag)}</time></a>
 			</span>
 		</div>

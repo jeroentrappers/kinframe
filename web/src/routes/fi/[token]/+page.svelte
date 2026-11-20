@@ -4,6 +4,9 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { canPostToFeed, HISTORY_DEFAULT_N, historyBody, type HistoryChoice } from '$lib/feeds';
 	import { feeds } from '$lib/feeds.svelte';
+	import { view } from '$lib/family.svelte';
+	import ViewQuestion from '$components/family/ViewQuestion.svelte';
+	import { goto } from '$app/navigation';
 	import { frames } from '$lib/frames.svelte';
 	import { newIdempotencyKey } from '$lib/logic';
 	import { problemMessage } from '$lib/problem';
@@ -48,6 +51,9 @@
 		chosen = chosen.includes(id) ? chosen.filter((x) => x !== id) : [...chosen, id];
 	}
 
+	/** After joining someone else's family: normal or simple view, once per device (simple-app.md §6, §8). */
+	let askView = $state(false);
+
 	async function accept() {
 		if (subscribe && chosen.length === 0) return;
 		accepting = true;
@@ -59,7 +65,10 @@
 					body: subscribe ? { frame_ids: chosen, ...historyBody(history), ...(discovery.birthdays ? { birthdays } : {}) } : {}
 				})
 			);
-			if (result.status === 'joined' || result.status === 'already_member') feeds.upsert(result.feed);
+			if (result.status === 'joined' || result.status === 'already_member') {
+				feeds.upsert(result.feed);
+				askView = result.status === 'joined' && !view.asked;
+			}
 			if (result.status === 'subscribed') void frames.load(true);
 		} catch (e) {
 			acceptError = problemMessage(e);
@@ -78,7 +87,7 @@
 			<span class="big-icon bad"><Icon name="link" size={28} /></span>
 			<h1>{t('invite.invalidTitle')}</h1>
 			<p class="muted">{problemMessage(error)}</p>
-			<a class="btn btn-primary" href="/feeds">{t('fi.toFeeds')}</a>
+			<a class="btn btn-primary" href="/home">{t('fi.toFeeds')}</a>
 		{:else if !preview}
 			<div class="skeleton" style="width:96px;height:96px"></div>
 			<div class="skeleton" style="width:70%;height:28px"></div>
@@ -89,13 +98,13 @@
 					<span class="big-icon wait"><Icon name="clock" size={28} /></span>
 					<h1>{t('invite.pendingTitle')}</h1>
 					<p class="muted">{t('fi.pendingBody', { feed: preview.feed_name })}</p>
-					<a class="btn btn-primary" href="/feeds">{t('fi.toFeeds')}</a>
+					<a class="btn btn-primary" href="/home">{t('fi.toFeeds')}</a>
 				{:else if result.status === 'subscribed'}
 					<span class="big-icon ok"><Icon name="check" size={28} /></span>
 					<h1>{t('fi.subscribedTitle', { feed: preview.feed_name })}</h1>
 					<ul class="subs" role="list">
 						{#each result.subscriptions ?? [] as s (s.id)}
-							<li><a href="/frames/{s.frame.id}?tab=feeds">{s.frame.name}</a> <SubscriptionStatusBadge status={s.status} /></li>
+							<li><a href="/frames/{s.frame.id}?tab=settings">{s.frame.name}</a> <SubscriptionStatusBadge status={s.status} /></li>
 						{/each}
 					</ul>
 					<p class="muted">{t('fi.subscribedBody')}</p>
@@ -103,16 +112,18 @@
 				{:else}
 					<span class="big-icon ok"><Icon name="check" size={28} /></span>
 					<h1>{t('fi.joinedTitle', { feed: result.feed.name })}</h1>
-					{#if canPostToFeed(result.feed.role)}
+					{#if askView}
+						<ViewQuestion onchosen={() => goto('/home')} />
+					{:else if canPostToFeed(result.feed.role)}
 						<p class="muted">{t('fi.joinedBody')}</p>
 						<div class="row-wrap center-row">
-							<a class="btn btn-primary btn-lg" href="/send?feed={result.feed.id}"><Icon name="send" size={18} />{t('fi.postFirst')}</a>
-							<a class="btn" href="/feeds/{result.feed.id}">{t('fi.viewFeed')}</a>
+							<a class="btn btn-primary btn-lg" href="/send?feed={result.feed.id}"><Icon name="plus" size={18} />{t('fi.postFirst')}</a>
+							<a class="btn" href="/home">{t('fi.viewFeed')}</a>
 						</div>
 					{:else}
 						<!-- Joined as a Reader (the family's new members don't post): no "Post photos". -->
 						<p class="muted">{t('social.readerHint')}</p>
-						<a class="btn btn-primary btn-lg" href="/feeds/{result.feed.id}">{t('fi.viewFeed')}</a>
+						<a class="btn btn-primary btn-lg" href="/home">{t('fi.viewFeed')}</a>
 					{/if}
 				{/if}
 			</div>
@@ -125,7 +136,7 @@
 			</p>
 			{#if !subscribe && preview.already_member}
 				<p class="callout"><Icon name="info" size={18} />{t('fi.already')}</p>
-				<a class="btn btn-primary" href="/feeds">{t('fi.toFeeds')}</a>
+				<a class="btn btn-primary" href="/home">{t('fi.toFeeds')}</a>
 			{:else if subscribe}
 				<p class="muted">{t('fi.subscribeBody')}</p>
 				{#if (preview.frames ?? []).length === 0}
@@ -160,7 +171,7 @@
 				<button class="btn btn-primary btn-lg" onclick={accept} disabled={accepting}>
 					{#if accepting}<span class="spinner" aria-hidden="true"></span>{/if}{t('fi.join')}
 				</button>
-				<a class="btn btn-ghost" href="/feeds">{t('invite.notNow')}</a>
+				<a class="btn btn-ghost" href="/home">{t('invite.notNow')}</a>
 			{/if}
 		{/if}
 	</section>
