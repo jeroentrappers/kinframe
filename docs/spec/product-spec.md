@@ -330,7 +330,8 @@ Decided by the project owner on 2026-10-22.
    - **One master rendition:** photos at most 2560 px on the long edge (WebP q90, capture time and orientation
      applied, GPS stripped); videos at most 1080p H.264/AAC.
    - **Per-frame-size renditions and thumbnails**, derived from the master and regenerable at any time. Frames up to
-     1440p, including ones added later, get full quality.
+     1440p, including ones added later, get full quality. Apps show small square thumbnails in lists and an uncropped
+     display rendition (≤1600 px long edge, WebP q82) for large photos such as feed posts (API README §5.3).
    - The upload is deleted as soon as the master is written.
    - Phones and browsers may make the master themselves (smaller uploads, less server CPU). The server verifies it
      and keeps it without re-encoding, but always strips metadata itself; anything that doesn't conform is processed

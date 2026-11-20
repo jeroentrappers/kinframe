@@ -27,6 +27,8 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   added `Album.only_in_album_mode`; the server implements it. `ImmichAlbum.thumbnail_url` is always null (no proxy
   endpoint exists in the contract for it).
 - Telegram (docs/spec/telegram.md, README §5.17): no changes to the contract were needed.
+- Display rendition (README §5.3): `Item.display_url` (optional, absent until made) and the `display` variant of
+  `GET /v1/items/{id}/media/{variant}`.
 - Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
@@ -103,8 +105,10 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Duplicates: `Kinframe-Existing-Item` is matched on the client-supplied sha256 against the caller's own items
   (untrimmed, with audio). Sending that item id creates a new item (own caption/focal point) that shares the stored
   media; such items cannot be trimmed (`422`). The server records the real sha256 of every processed source.
-- Storage model: `media` holds the master and per-device renditions; `items` hold per-send metadata and thumbnails
-  (thumbnails depend on the item's focal point and are regenerated when it changes).
+- Storage model: `media` holds the master and per-device renditions; `items` hold per-send metadata, thumbnails
+  (they depend on the item's focal point and are regenerated when it changes) and the display rendition
+  (`items.display_key`, `items/<id>/display-<suffix>.webp`, remade with the thumbnails under the same suffix and deleted
+  with them). `backfill-display` (server/README.md) fills it in for older items via the `display_backfill` job.
 - Rendition variants: photos `frame_<long>x<short>` (screen), videos `frame_<long>x<short>_v<decode long>x<decode short>`
   because the decode box also matters. Devices that report no `max_video_decode` get 1920×1080.
 - A photo master that already fits the frame is reused as the frame rendition (no second lossy encode).

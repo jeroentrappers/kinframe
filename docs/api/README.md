@@ -282,7 +282,13 @@ A **live item** is a still plus a short motion clip (≤ 10 s; longer clips are 
 - `frame_<w>x<h>`: short edge equals the frame's long screen edge, never upscaled, WebP q85. For video: H.264
   High@4.1 (or Main for older decoders), at most the device's `max_video_decode` size, 30 fps, bitrate w·h·4 capped
   at 8 Mbps, AAC-LC 96 kbps, faststart.
-- `thumb_256` and `thumb_512`: square, centred on the focal point, WebP q75.
+- `thumb_256` and `thumb_512`: square, centred on the focal point, WebP q75. `Item.thumb_url` is `thumb_256`, for
+  small tiles and lists.
+- `display`: the whole picture uncropped (for videos: the poster frame), long edge at most 1600 px, never upscaled,
+  WebP q82. Made with the thumbnails; `Item.display_url` (signed, about 1 h, like `thumb_url`) and
+  `GET /v1/items/{id}/media/display`. For large images in apps (feed and post photos), which crop or fit it to their
+  layout. Absent on items processed before it existed until the operator's backfill reached them
+  (`kinframe-server backfill-display`, server/README.md); clients fall back to `thumb_url` (or `thumb_512`).
 - A poster image for each video.
 
 **Sharing between frames**
