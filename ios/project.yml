@@ -27,6 +27,9 @@ settings:
     KINFRAME_APNS_ENABLED: YES
     # Shared between the app, the share extension and the keychain.
     KINFRAME_APP_GROUP: group.app.kinframe.family
+    # Crash reports (docs/spec/crash-reporting.md): the family-apple DSN, passed by the release lanes. Empty means the
+    # SDK isn't started (debug builds, CI, forks).
+    KINFRAME_SENTRY_DSN: ""
   configs:
     # aps-environment in Kinframe.entitlements: debug builds get sandbox device tokens, store builds production ones.
     Debug:
@@ -44,6 +47,11 @@ packages:
   LogtoSDK:
     url: https://github.com/logto-io/swift
     from: 2.0.0
+  # Crash reports to GlitchTip (docs/spec/crash-reporting.md). SentrySPM compiles the SDK from source: the prebuilt
+  # XCFrameworks of releases before 9.30.3/9.35.0 carry a revoked signing certificate (sentry-cocoa#9645).
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    exactVersion: 9.33.0
 
 targets:
   KinframeKit:
@@ -64,6 +72,8 @@ targets:
       - package: OpenAPIURLSession
       - package: LogtoSDK
         product: LogtoClient
+      - package: Sentry
+        product: SentrySPM
 
   Kinframe:
     type: application

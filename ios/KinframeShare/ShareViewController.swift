@@ -9,6 +9,7 @@ final class ShareViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        CrashReporting.start(.shareExtension)
         L10n.bootstrap()
         model = ShareModel(context: extensionContext)
         let host = UIHostingController(rootView: ShareRootView(model: model))

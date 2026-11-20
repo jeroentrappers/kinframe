@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>KinframeAppGroup</key>
 	<string>$(KINFRAME_APP_GROUP)</string>
+	<key>KinframeSentryDSN</key>
+	<string>$(KINFRAME_SENTRY_DSN)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

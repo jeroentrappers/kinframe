@@ -51,6 +51,7 @@
 		2D497F87FBF686E84E6B4AB0 /* SessionRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590A5CDE8213F0747D1C2870 /* SessionRefresh.swift */; };
 		2DF8BBC83A97514D321B63EA /* FeedMembersSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937CA70A5C3723D91B9D11EA /* FeedMembersSection.swift */; };
 		2E4F61E2E9F02B64E8DA962E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382A1212FCA5D117241CFA53 /* SmokeTests.swift */; };
+		2FB7FDFFD87F0E471A6FBB67 /* SentrySPM in Frameworks */ = {isa = PBXBuildFile; productRef = A247622A1837884DA9ECEB47 /* SentrySPM */; };
 		302DB100309D35A18429E343 /* KinframeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; };
 		3045AA1D4F38BC04305444F0 /* ChatSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7972082AFB98A5D868E7FD1 /* ChatSheets.swift */; };
 		32026BE44AAFB4EC2623EB1B /* HistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F267B5F96C70904A64F27F7 /* HistoryModel.swift */; };
@@ -127,6 +128,7 @@
 		8A0CC3743AC9372A10354F4D /* LiveSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465B551DEF2F47DBC201DE51 /* LiveSocket.swift */; };
 		8B55F2B904CB717185F45DDA /* ios-strings-channels.json in Resources */ = {isa = PBXBuildFile; fileRef = 65940FCE4AC3DE5F74411415 /* ios-strings-channels.json */; };
 		8DDF0E39CF427CC1A9E0AFC8 /* AccountContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D945A4FE47A4036732D7AA0 /* AccountContext.swift */; };
+		8FF58E0A431C88FBCED8D11D /* ios-strings-crash.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A84753AAF7C9C53BBDBDC27 /* ios-strings-crash.json */; };
 		90D7C76365AFD7B13EAB056F /* FeedsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489A1AC2431E18A94468A4B8 /* FeedsTab.swift */; };
 		90F63E921EA8694E3CA06AEF /* TvTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD53D4C6674E895B4B89A3 /* TvTests.swift */; };
 		92DF6BC9682F0F47F5138218 /* ComposeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D25D28D1E1CEF9EF4908A99 /* ComposeModel.swift */; };
@@ -155,6 +157,7 @@
 		A2B279D90FB0A11F93C83A9F /* Social.swift in Sources */ = {isa = PBXBuildFile; fileRef = 994A4AB87D1AA63A62180575 /* Social.swift */; };
 		A2E09BB78EA407B1D1F51585 /* SmokeFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CEE96CEB373C20B896F9B94 /* SmokeFixtures.swift */; };
 		A4E07F52F222C718ADB310B1 /* ReservationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC1CFE4CFDF03453E4DB04B /* ReservationsView.swift */; };
+		A66A862F67763436B634BBE0 /* CrashReportingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2755127C47BC516EBF18E88 /* CrashReportingTests.swift */; };
 		A7EFD5CFA75D8B5E17C340C0 /* ItemEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93993AAB7D50559BF46380E5 /* ItemEditorSheet.swift */; };
 		A915ED1DB0E01CB71324EDB6 /* FrameDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CDD5D821D96018CD29538B /* FrameDetailView.swift */; };
 		A94BB4542D573B2DDDF202C2 /* ChatsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933F24096A0C359D6982A91F /* ChatsTab.swift */; };
@@ -202,6 +205,7 @@
 		D9540BA606DB3B6F14152173 /* ios-strings-engagement.json in Resources */ = {isa = PBXBuildFile; fileRef = 4533A15B04A4983C42D4889A /* ios-strings-engagement.json */; };
 		DA011316811059CC781A8061 /* LeaveSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01864E57287DB0D0E6E83E8 /* LeaveSheets.swift */; };
 		DC767168F15BB39B8F6FA7ED /* PrepTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B68A605A5C83A17BE9C7211 /* PrepTests.swift */; };
+		DC77E580E10C6D9487274B8F /* CrashReporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F279481685C8F48DA11DEC61 /* CrashReporting.swift */; };
 		DD2BC21883DE9FE8EA4F8233 /* AppUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE55DB93DC5E383460A2DF8D /* AppUpdateView.swift */; };
 		DDC293BDDE5548BA4DB234BE /* TvLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E11C71AEC875688FFC8AC9B /* TvLogic.swift */; };
 		DE35A20A448D0C309DB5F5F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6E231649ABA1EA8177F46ECF /* PrivacyInfo.xcprivacy */; };
@@ -361,6 +365,7 @@
 		38AC1387BAF177D57626F8B2 /* Telegram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Telegram.swift; sourceTree = "<group>"; };
 		391A0551D41EECEB970D8CC3 /* ios-strings-albums.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-albums.json"; sourceTree = "<group>"; };
 		395E28EFE78058A2D5D4CC79 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		3A84753AAF7C9C53BBDBDC27 /* ios-strings-crash.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-crash.json"; sourceTree = "<group>"; };
 		3B4962DE7DA96805F67CF88F /* TransferSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferSheet.swift; sourceTree = "<group>"; };
 		3D25D28D1E1CEF9EF4908A99 /* ComposeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeModel.swift; sourceTree = "<group>"; };
 		3D2A49FFFAAAD3115598D094 /* FrameSocialSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameSocialSettings.swift; sourceTree = "<group>"; };
@@ -454,6 +459,7 @@
 		9E90AE4F27C7148E4CAE893D /* Birthdays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Birthdays.swift; sourceTree = "<group>"; };
 		9F02060356BBD5558CCA76D0 /* FeedSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSettingsSection.swift; sourceTree = "<group>"; };
 		A1DA2D779BDDF473E22D8080 /* ChatUpload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatUpload.swift; sourceTree = "<group>"; };
+		A2755127C47BC516EBF18E88 /* CrashReportingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashReportingTests.swift; sourceTree = "<group>"; };
 		A2A9535A041673E5D7017784 /* FrameSettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameSettingsModel.swift; sourceTree = "<group>"; };
 		A448FD447CB60EF68884CFF4 /* TvSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvSheet.swift; sourceTree = "<group>"; };
 		A56E7B23C3C07AAC50936473 /* SharingAndPluginsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingAndPluginsTests.swift; sourceTree = "<group>"; };
@@ -527,6 +533,7 @@
 		EE55DB93DC5E383460A2DF8D /* AppUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateView.swift; sourceTree = "<group>"; };
 		F07BB259B84B784F5FFE7797 /* FramesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FramesTab.swift; sourceTree = "<group>"; };
 		F273118D6B0D2D3AF7223EFB /* OutboxRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxRunner.swift; sourceTree = "<group>"; };
+		F279481685C8F48DA11DEC61 /* CrashReporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashReporting.swift; sourceTree = "<group>"; };
 		F38B4269ECC77AA69A914EAB /* ios-strings-photo-sources.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-photo-sources.json"; sourceTree = "<group>"; };
 		F4044479D484B980C1BD853D /* ConversationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationModel.swift; sourceTree = "<group>"; };
 		F451FC2D334E344D628EB0B8 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -552,6 +559,7 @@
 				EF9D7C1B5655433944604940 /* OpenAPIRuntime in Frameworks */,
 				5E1019AFF427927E9F944048 /* OpenAPIURLSession in Frameworks */,
 				98F0A39DF3A2B99CAE5E845D /* LogtoClient in Frameworks */,
+				2FB7FDFFD87F0E471A6FBB67 /* SentrySPM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -611,6 +619,7 @@
 				E959208C46D4DA74789056FB /* ios-strings-birthdays.json */,
 				65940FCE4AC3DE5F74411415 /* ios-strings-channels.json */,
 				FD7A3BB7DD790DFE1557B5D8 /* ios-strings-chat.json */,
+				3A84753AAF7C9C53BBDBDC27 /* ios-strings-crash.json */,
 				4232E4765634635925710AC6 /* ios-strings-email.json */,
 				4533A15B04A4983C42D4889A /* ios-strings-engagement.json */,
 				33A5B24DE5030B4656B843FF /* ios-strings-feeds.json */,
@@ -881,6 +890,7 @@
 				19FFC500B71512BBE9F896A0 /* CalendarTests.swift */,
 				719EA491881A4A13C3C68EA1 /* ChannelTests.swift */,
 				08242B9F376A9BCDA88E1FAC /* ChatTests.swift */,
+				A2755127C47BC516EBF18E88 /* CrashReportingTests.swift */,
 				DA506D651A51FED47F90D5DB /* FeedTests.swift */,
 				3F61810B48E7A43B0E15485F /* FormatTests.swift */,
 				C69BCC8DB970C83955622AF0 /* LeavingTests.swift */,
@@ -1078,6 +1088,7 @@
 				11C3E26B5035B2BD2D831155 /* Channels.swift */,
 				261ACB19625F0A557E96AAF5 /* Chat.swift */,
 				6D9DF6CD9D75158079385D0C /* ComposeRules.swift */,
+				F279481685C8F48DA11DEC61 /* CrashReporting.swift */,
 				21FAFB345F3139690C2D96E5 /* DeepLink.swift */,
 				B68564A9DE041D7F48543CE1 /* Delivery.swift */,
 				C5418B2798C13F1DFA42C1A4 /* Discovery.swift */,
@@ -1169,6 +1180,7 @@
 				940029789BBFBA9CB5DD5B2D /* OpenAPIRuntime */,
 				D816333C87146CF3E60C5244 /* OpenAPIURLSession */,
 				18865B310341BDAAE07B316B /* LogtoClient */,
+				A247622A1837884DA9ECEB47 /* SentrySPM */,
 			);
 			productName = KinframeKit;
 			productReference = DE8CD09A02084E881578698C /* KinframeKit.framework */;
@@ -1264,6 +1276,7 @@
 				980E15EA13C128DFD972FBD2 /* XCRemoteSwiftPackageReference "swift" */,
 				38B95C30236A306489F00AA4 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
 				6DF1AEA7389F9BF2FC5258A9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
+				2131416D45CCB13B2BD1055E /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6705CD1BCCFD05C10D1A0C48 /* Products */;
@@ -1292,6 +1305,7 @@
 				D000399324FCCF4209B82185 /* ios-strings-birthdays.json in Resources */,
 				8B55F2B904CB717185F45DDA /* ios-strings-channels.json in Resources */,
 				543CD8C0FA56B268B4368AAB /* ios-strings-chat.json in Resources */,
+				8FF58E0A431C88FBCED8D11D /* ios-strings-crash.json in Resources */,
 				B7EBFE31288FEE1DD4BA4F5A /* ios-strings-email.json in Resources */,
 				D9540BA606DB3B6F14152173 /* ios-strings-engagement.json in Resources */,
 				3EF38EAAEBCB5BD02D82E3DD /* ios-strings-feeds.json in Resources */,
@@ -1351,6 +1365,7 @@
 				B066DFC91CFCDE4AB74BF4CD /* Client.swift in Sources */,
 				92DF6BC9682F0F47F5138218 /* ComposeModel.swift in Sources */,
 				DF144CDA419275D4B86288E5 /* ComposeRules.swift in Sources */,
+				DC77E580E10C6D9487274B8F /* CrashReporting.swift in Sources */,
 				E47CFE459FA435EB434745E5 /* DeepLink.swift in Sources */,
 				92F2657134DB285A68B0C2CF /* Delivery.swift in Sources */,
 				1A0A800957271F400B380788 /* Discovery.swift in Sources */,
@@ -1534,6 +1549,7 @@
 				36CB91858D78D1430B60858A /* CalendarTests.swift in Sources */,
 				7438DA47426E0B36CA1F547D /* ChannelTests.swift in Sources */,
 				D0FB1663CDBED628E7A7789B /* ChatTests.swift in Sources */,
+				A66A862F67763436B634BBE0 /* CrashReportingTests.swift in Sources */,
 				19016132EAA70A9C73F322DD /* FeedTests.swift in Sources */,
 				B7A0822ED5441F5C997AA802 /* FormatTests.swift in Sources */,
 				67B8BF69E21A845EE7DA0F22 /* LeavingTests.swift in Sources */,
@@ -1720,6 +1736,7 @@
 				KINFRAME_APNS_ENABLED = YES;
 				KINFRAME_APP_GROUP = group.app.kinframe.family;
 				KINFRAME_APS_ENVIRONMENT = production;
+				KINFRAME_SENTRY_DSN = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -1810,6 +1827,7 @@
 				KINFRAME_APNS_ENABLED = YES;
 				KINFRAME_APP_GROUP = group.app.kinframe.family;
 				KINFRAME_APS_ENVIRONMENT = development;
+				KINFRAME_SENTRY_DSN = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -2013,6 +2031,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2131416D45CCB13B2BD1055E /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
+			requirement = {
+				kind = exactVersion;
+				version = 9.33.0;
+			};
+		};
 		38B95C30236A306489F00AA4 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-openapi-runtime";
@@ -2049,6 +2075,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 38B95C30236A306489F00AA4 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */;
 			productName = OpenAPIRuntime;
+		};
+		A247622A1837884DA9ECEB47 /* SentrySPM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2131416D45CCB13B2BD1055E /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = SentrySPM;
 		};
 		D816333C87146CF3E60C5244 /* OpenAPIURLSession */ = {
 			isa = XCSwiftPackageProductDependency;

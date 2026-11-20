@@ -42,6 +42,8 @@
 	<string>$(KINFRAME_APNS_ENABLED)</string>
 	<key>KinframeAppGroup</key>
 	<string>$(KINFRAME_APP_GROUP)</string>
+	<key>KinframeSentryDSN</key>
+	<string>$(KINFRAME_SENTRY_DSN)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.photography</string>
 	<key>LSRequiresIPhoneOS</key>

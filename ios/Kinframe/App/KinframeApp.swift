@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     @MainActor var model: AppModel { accounts.primary }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        CrashReporting.start(.app)
         UNUserNotificationCenter.current().delegate = self
         Self.styleNavigationBars()
         MainActor.assumeIsolated {
