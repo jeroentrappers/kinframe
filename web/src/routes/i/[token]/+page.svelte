@@ -63,8 +63,7 @@
 					<h1>{t('add.joinedTitle', { name: result.frame.name })}</h1>
 					<p class="muted">{t('invite.joinedBody')}</p>
 					<div class="row-wrap center-row">
-						<a class="btn btn-primary btn-lg" href="/send?frame={result.frame.id}"><Icon name="send" size={18} />{t('add.sendFirst')}</a>
-						<a class="btn" href="/frames/{result.frame.id}">{t('add.viewFrame')}</a>
+						<a class="btn btn-primary btn-lg" href="/frames/{result.frame.id}"><Icon name="frame" size={18} />{t('add.viewFrame')}</a>
 					</div>
 				{/if}
 			</div>

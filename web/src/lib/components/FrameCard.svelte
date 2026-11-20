@@ -1,25 +1,34 @@
 <script lang="ts">
 	import type { FrameSummary } from '$lib/api/client';
 	import { DROP_FRAME_ATTR } from '$lib/dropfiles';
+	import { shows } from '$lib/family.svelte';
+	import AddFamilySheet from './family/AddFamilySheet.svelte';
+	import { lastPhoto, type FramePhoto } from '$lib/frameFace';
 	import { can } from '$lib/frames.svelte';
-	import { t } from '$lib/i18n/index.svelte';
+	import { relativeTime } from '$lib/format';
+	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import Icon from './Icon.svelte';
-	import OnlineStatus from './OnlineStatus.svelte';
-	import RoleBadge from './RoleBadge.svelte';
+	import Thumb from './Thumb.svelte';
 
+	/**
+	 * A frame card (simple-app.md §3.3): its last photo, online or offline, its name and the family it shows. On the
+	 * list it opens the frame; on the frame's own page (`link = false`) it is the header.
+	 */
 	let {
 		frame,
+		link = true,
 		dragging = false,
 		dropOver = false
 	}: {
 		frame: FrameSummary;
+		link?: boolean;
 		/** Files are being dragged over the page: show whether this card takes them. */
 		dragging?: boolean;
 		/** The dragged files are right over this card. */
 		dropOver?: boolean;
 	} = $props();
 
-	// A calm, per-frame tint so frames are recognisable at a glance.
+	// A calm, per-frame tint for frames without a photo yet.
 	const TINTS = [
 		['#f6d9c2', '#e9b38f'],
 		['#dbe8d6', '#a9c7a1'],
@@ -29,43 +38,58 @@
 		['#d8e9e7', '#97c3bd']
 	];
 	const tint = $derived(TINTS[[...frame.id].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length]!);
-	const portrait = $derived(frame.screen?.orientation === 'portrait');
 	const sendable = $derived(can(frame, 'send'));
+	const manager = $derived(can(frame, 'change_settings'));
+
+	let photo = $state<FramePhoto | null>(null);
+	$effect(() => {
+		const id = frame.id;
+		void lastPhoto(id).then((p) => id === frame.id && (photo = p));
+		void shows.load(id);
+	});
+	const subs = $derived(shows.byFrame[frame.id]);
+	const showing = $derived((subs ?? []).filter((s) => s.status !== 'pending'));
+	const waiting = $derived((subs ?? []).filter((s) => s.status === 'pending'));
+	let addOpen = $state(false);
 </script>
 
 <article
 	class="card frame-card"
+	class:static={!link}
 	class:drop-ready={dragging && sendable}
 	class:drop-over={dragging && sendable && dropOver}
 	class:drop-off={dragging && !sendable}
 	{...sendable ? { [DROP_FRAME_ATTR]: frame.id } : {}}
 >
-	<a href="/frames/{frame.id}" class="cover" style="--a:{tint[0]}; --b:{tint[1]}" aria-label={t('frames.open', { name: frame.name })}>
-		<span class="mini-frame" class:portrait>
-			<span class="mini-screen">
-				<span class="sun"></span>
-				<span class="hill"></span>
-			</span>
+	<svelte:element this={link ? 'a' : 'div'} href={link ? `/frames/${frame.id}` : undefined} class="cover" style="--a:{tint[0]}; --b:{tint[1]}" aria-label={link ? t('frames.open', { name: frame.name }) : undefined}>
+		{#if photo}
+			<Thumb itemId={photo.itemId} kind={photo.kind} radius="0" />
+		{:else}
+			<span class="no-photo" aria-hidden="true"><Icon name="frame" size={34} /></span>
+		{/if}
+		<span class="chip" class:on={frame.online}>
+			<span class="dot" class:dot-online={frame.online} aria-hidden="true"></span>
+			{#if frame.online}{t('frameCard.showingNow')}{:else if frame.last_seen_at}{t('frameCard.offlineSince', { when: relativeTime(frame.last_seen_at, i18n.tag) })}{:else}{t('frame.offline')}{/if}
 		</span>
-		{#if frame.online}<span class="live-badge"><span class="dot dot-online"></span>{t('frame.online')}</span>{/if}
-	</a>
+	</svelte:element>
 	<div class="body">
 		<div class="title-row">
-			<h2><a href="/frames/{frame.id}">{frame.name}</a></h2>
+			{#if link}<h2><a href="/frames/{frame.id}">{frame.name}</a></h2>{:else}<h1>{frame.name}</h1>{/if}
 			{#if frame.device_kind === 'browser'}<span class="badge browser" title={t('frames.browserBadge')}><Icon name="globe" size={13} />{t('frames.browserBadge')}</span>{/if}
-			<RoleBadge role={frame.role} />
 		</div>
-		{#if frame.location}
-			<p class="loc"><Icon name="mapPin" size={15} />{frame.location}</p>
-		{/if}
-		<div class="meta">
-			<OnlineStatus online={frame.online} lastSeen={frame.last_seen_at} />
-			{#if can(frame, 'send')}
-				<a class="btn btn-ghost btn-sm" href="/send?frame={frame.id}">
-					<Icon name="send" size={16} />{t('nav.send')}
-				</a>
+		{#if frame.location}<p class="loc"><Icon name="mapPin" size={15} />{frame.location}</p>{/if}
+		{#if subs}
+			{#if showing.length > 0}
+				<p class="shows"><Icon name="users" size={15} />{showing.length === 1 ? t('frameCard.shows', { family: showing[0]!.feed.name }) : tn('frameCard.showsMore', showing.length - 1, { family: showing[0]!.feed.name })}</p>
+			{:else if waiting.length > 0}
+				<p class="shows muted"><Icon name="clock" size={15} />{t('family.waitingAdmin')}</p>
+			{:else}
+				<p class="shows muted"><Icon name="users" size={15} />{t('frameCard.noFamily')}</p>
+				{#if manager}
+					<button class="btn btn-soft btn-sm add" onclick={() => (addOpen = true)}><Icon name="plus" size={16} />{t('frameCard.addFamily')}</button>
+				{/if}
 			{/if}
-		</div>
+		{/if}
 		{#if frame.needs_update}
 			<p class="update"><Icon name="info" size={15} />{t('frames.needsUpdate')}</p>
 		{/if}
@@ -78,6 +102,8 @@
 		</div>
 	{/if}
 </article>
+
+{#if manager}<AddFamilySheet bind:open={addOpen} frameId={frame.id} frameName={frame.name} />{/if}
 
 <style>
 	.badge.browser {
@@ -140,73 +166,55 @@
 		position: relative;
 		display: grid;
 		place-items: center;
-		aspect-ratio: 16 / 8;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
 		background: radial-gradient(120% 120% at 20% 0%, var(--a), var(--b));
 		border-radius: 0;
+		color: rgb(47 40 35 / 0.6);
 	}
-	@media (max-width: 520px) {
-		.cover {
-			aspect-ratio: 16 / 6.5;
-		}
-	}
-	@media (prefers-color-scheme: dark) {
-		.cover {
-			filter: saturate(0.8) brightness(0.72);
-		}
-	}
-	.mini-frame {
-		width: 42%;
-		aspect-ratio: 16 / 10;
-		padding: 5px;
-		border-radius: 8px;
-		background: #2f2823;
-		box-shadow: 0 10px 22px -10px rgb(40 20 0 / 0.5);
-		transform: rotate(-2deg);
-	}
-	.mini-frame.portrait {
-		width: 22%;
-		aspect-ratio: 10 / 16;
-	}
-	.mini-screen {
-		position: relative;
-		display: block;
+	.cover :global(img),
+	.cover :global(.thumb) {
+		position: absolute;
+		inset: 0;
 		width: 100%;
 		height: 100%;
-		overflow: hidden;
-		border-radius: 3px;
-		background: linear-gradient(#fde7cf, #f3c9a3);
+		object-fit: cover;
 	}
-	.sun {
-		position: absolute;
-		inset-inline-end: 18%;
-		top: 18%;
-		width: 16%;
-		aspect-ratio: 1;
-		border-radius: 50%;
-		background: #e7a23a;
+	.static:hover {
+		transform: none;
+		box-shadow: var(--shadow-sm);
 	}
-	.hill {
-		position: absolute;
-		left: -10%;
-		right: -10%;
-		bottom: -40%;
-		height: 80%;
-		border-radius: 50%;
-		background: #4f7a5a;
-	}
-	.live-badge {
+	.chip {
 		position: absolute;
 		top: 10px;
-		inset-inline-end: 10px;
+		inset-inline-start: 10px;
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
 		padding: 3px 10px;
 		border-radius: var(--r-full);
-		background: rgb(255 255 255 / 0.85);
-		color: #2f5a3c;
+		background: rgb(255 255 255 / 0.9);
+		color: #5a4d43;
 		font-size: 0.75rem;
 		font-weight: 700;
+	}
+	.chip.on {
+		color: #2f5a3c;
+	}
+	.shows {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		font-size: 0.9rem;
+	}
+	.add {
+		align-self: flex-start;
+	}
+	h1 {
+		font-size: 1.6rem;
+		margin: 0;
+		overflow-wrap: anywhere;
 	}
 	.body {
 		padding: var(--s-4);
@@ -239,13 +247,6 @@
 		gap: 5px;
 		color: var(--text-muted);
 		font-size: 0.9rem;
-	}
-	.meta {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-top: auto;
-		padding-top: var(--s-2);
 	}
 	.update {
 		display: flex;

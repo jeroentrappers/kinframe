@@ -17,7 +17,7 @@
 	import Icon from '../Icon.svelte';
 	import FeedCover from '../feed/FeedCover.svelte';
 	import HistoryPicker from '../feed/HistoryPicker.svelte';
-	import SubscribeDialog from '../feed/SubscribeDialog.svelte';
+	import AddFamilySheet from '../family/AddFamilySheet.svelte';
 	import SubscriptionStatusBadge from '../feed/SubscriptionStatusBadge.svelte';
 	// Families on other servers (multi-server.md §3, README §5.22)
 	import RemoteFollows from '../remote/RemoteFollows.svelte';
@@ -68,7 +68,6 @@
 	});
 
 	const groups = $derived(groupSubscriptions(subs ?? [], 'feed'));
-	const taken = $derived((subs ?? []).filter((s) => s.status === 'pending' || s.status === 'active' || s.status === 'paused').map((s) => s.feed.id));
 
 	function replace(s: Subscription) {
 		subs = (subs ?? []).some((x) => x.id === s.id) ? (subs ?? []).map((x) => (x.id === s.id ? s : x)) : [s, ...(subs ?? [])];
@@ -207,10 +206,11 @@
 	const historyText = (s: Subscription) => t(`subs.historyShort.${s.history}`, { n: s.history_count ?? 0 });
 </script>
 
+<h2 class="ff-title">{t('frameFeeds.title')}</h2>
 {#if manage}
 	<div class="toolbar">
 		{#if feeds.list.length > 0}
-			<button class="btn btn-primary" onclick={() => (subscribeOpen = true)}><Icon name="feed" size={18} />{t('frameFeeds.subscribe')}</button>
+			<button class="btn btn-primary" onclick={() => (subscribeOpen = true)}><Icon name="users" size={18} />{t('frameCard.addFamily')}</button>
 		{/if}
 		<button class="btn" onclick={() => ((codeText = ''), (codeError = null), (codeOpen = true))}><Icon name="link" size={18} />{t('frameFeeds.useInvite')}</button>
 	</div>
@@ -306,7 +306,7 @@
 
 {#if discovery.remoteFamilies}<RemoteFollows {frame} bind:addUrl={remoteAddUrl} />{/if}
 
-<SubscribeDialog bind:open={subscribeOpen} frameId={frame.id} {taken} onsubscribed={replace} />
+<AddFamilySheet bind:open={subscribeOpen} frameId={frame.id} frameName={frame.name} onadded={replace} />
 
 <Dialog bind:open={editOpen} title={t('frameFeeds.historyTitle', { feed: editing?.feed.name ?? '' })}>
 	{#if editing}
@@ -358,6 +358,10 @@
 </Dialog>
 
 <style>
+	.ff-title {
+		font-size: 1.2rem;
+		margin-bottom: var(--s-3);
+	}
 	.toolbar {
 		display: flex;
 		gap: var(--s-3);

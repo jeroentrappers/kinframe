@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { can, frames } from '$lib/frames.svelte';
+	import { directory, families } from '$lib/family.svelte';
+	import FrameFace from '$components/family/FrameFace.svelte';
 	import { FrameDrop } from '$lib/framedrop.svelte';
 	import { problemMessage } from '$lib/problem';
 	import { t, tn } from '$lib/i18n/index.svelte';
@@ -8,6 +10,20 @@
 	import Icon from '$components/Icon.svelte';
 
 	const online = $derived(frames.list.filter((f) => f.online).length);
+	// Frames you manage or are on first, then frames that show your families (simple-app.md §3.3).
+	const sorted = $derived([...frames.list].sort((a, b) => Number(can(b, 'change_settings')) - Number(can(a, 'change_settings')) || a.name.localeCompare(b.name)));
+	const others = $derived.by(() => {
+		const mine = new Set(frames.list.map((f) => f.id));
+		const out = new Map<string, { id: string; name: string; online: boolean; families: string[] }>();
+		for (const fam of families.ranked)
+			for (const f of directory.frames[fam.id] ?? []) {
+				if (mine.has(f.id) || f.status === 'pending') continue;
+				const o = out.get(f.id) ?? { id: f.id, name: f.name, online: f.online, families: [] };
+				o.families.push(fam.name);
+				out.set(f.id, o);
+			}
+		return [...out.values()];
+	});
 
 	// Drag photos from the computer straight onto a frame's card to start a send to it.
 	const drop = new FrameDrop((id) => {
@@ -70,20 +86,61 @@
 		</div>
 	{:else}
 		<ul class="grid" role="list">
-			{#each frames.list as frame (frame.id)}
+			{#each sorted as frame (frame.id)}
 				<li><FrameCard {frame} dragging={drop.active} dropOver={drop.target === frame.id} /></li>
 			{/each}
 			<li>
-				<a href="/frames/add" class="add-tile">
+				<a href="/frames/add" class="add-tile" data-testid="add-frame-tile">
 					<span class="plus"><Icon name="plus" size={26} /></span>
 					<span>{t('frames.add')}</span>
 				</a>
 			</li>
 		</ul>
 	{/if}
+
+	{#if others.length > 0}
+		<h2 class="others-h">{t('frames.othersTitle')}</h2>
+		<ul class="others" role="list">
+			{#each others as f (f.id)}
+				<li class="card other">
+					<FrameFace frameId={f.id} online={f.online} size={52} />
+					<span class="o-body">
+						<span class="o-name">{f.name}</span>
+						<span class="muted small">{f.families.length === 1 ? t('frameCard.shows', { family: f.families[0]! }) : tn('frameCard.showsMore', f.families.length - 1, { family: f.families[0]! })}</span>
+					</span>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 </div>
 
 <style>
+	.others-h {
+		font-size: 1.1rem;
+		margin: var(--s-6) 0 var(--s-3);
+	}
+	.others {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: var(--s-3);
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	}
+	.other {
+		display: flex;
+		align-items: center;
+		gap: var(--s-3);
+		padding: var(--s-3) var(--s-4);
+	}
+	.o-body {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.o-name {
+		font-weight: 650;
+	}
 	.grid {
 		display: grid;
 		gap: var(--s-4);

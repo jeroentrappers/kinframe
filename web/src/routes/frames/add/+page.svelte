@@ -4,6 +4,8 @@
 	import { page } from '$app/state';
 	import { api, call, type RedeemResult } from '$lib/api/client';
 	import { frames } from '$lib/frames.svelte';
+	import { addFrameToFamily } from '$lib/family.svelte';
+	import { feeds } from '$lib/feeds.svelte';
 	import { normalizeEnteredCode, parseEnteredCode } from '$lib/codes';
 	import { discovery } from '$lib/discovery.svelte';
 	import { normalizeCode } from '$lib/format';
@@ -27,6 +29,19 @@
 	const withFeeds = $derived(discovery.feeds);
 	const entered = $derived(parseEnteredCode(code, withFeeds));
 	const complete = $derived(entered.kind !== 'empty' && entered.complete);
+
+	// "Add a frame" from a family or getting started (?family=<id>): the new frame shows that family right away.
+	const familyId = $derived(page.url.searchParams.get('family'));
+	const familyName = $derived(familyId ? (feeds.get(familyId)?.name ?? '') : '');
+	async function afterClaim(frameId: string) {
+		if (!familyId) return goto(`/frames/${frameId}`);
+		try {
+			await addFrameToFamily(familyId, frameId);
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		}
+		await goto(page.url.searchParams.get('then') === 'invite' ? `/feeds/${familyId}?invite=1` : `/feeds/${familyId}?tab=subscriptions`);
+	}
 
 	// Naming step after a claim.
 	let name = $state('');
@@ -102,7 +117,7 @@
 			);
 			frames.upsert(updated);
 			toasts.success(t('add.named', { name: updated.name }));
-			await goto(`/send?frame=${updated.id}`);
+			await afterClaim(updated.id);
 		} catch (err) {
 			toasts.error(problemMessage(err));
 		} finally {
@@ -177,17 +192,16 @@
 					</div>
 					<button class="btn btn-primary btn-lg" type="submit" disabled={saving || !name.trim()}>
 						{#if saving}<span class="spinner" aria-hidden="true"></span>{/if}
-						{t('add.saveAndSend')}
+						{familyName ? t('add.saveAndShow', { family: familyName }) : t('common.save')}
 					</button>
-					<a href="/frames/{result.frame.id}" class="btn btn-ghost">{t('add.later')}</a>
+					<button type="button" class="btn btn-ghost" onclick={() => afterClaim(result!.frame.id)}>{t('add.later')}</button>
 				</form>
 			{:else if result.status === 'joined'}
 				<span class="big-icon ok"><Icon name="check" size={30} /></span>
 				<h1>{t('add.joinedTitle', { name: result.frame.name })}</h1>
 				<p class="muted">{t('add.joinedBody', { owner: result.frame.owner_name ?? '' })}</p>
 				<div class="row-wrap center">
-					<a class="btn btn-primary btn-lg" href="/send?frame={result.frame.id}"><Icon name="send" size={18} />{t('add.sendFirst')}</a>
-					<a class="btn" href="/frames/{result.frame.id}">{t('add.viewFrame')}</a>
+					<a class="btn btn-primary btn-lg" href="/frames/{result.frame.id}"><Icon name="frame" size={18} />{t('add.viewFrame')}</a>
 				</div>
 			{:else if result.status === 'already_member'}
 				<span class="big-icon"><Icon name="info" size={30} /></span>

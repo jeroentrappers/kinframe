@@ -7,10 +7,10 @@
 	import { live } from '$lib/live.svelte';
 	import { softFade } from '$lib/motion';
 	import { problemMessage } from '$lib/problem';
-	import { i18n, t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { t, type MessageKey } from '$lib/i18n/index.svelte';
 	import Icon, { type IconName } from '$components/Icon.svelte';
-	import OnlineStatus from '$components/OnlineStatus.svelte';
-	import RoleBadge from '$components/RoleBadge.svelte';
+	import FrameCard from '$components/FrameCard.svelte';
+	import TvDialog from '$components/TvDialog.svelte';
 	import FrameOverview from '$components/frame/FrameOverview.svelte';
 	import FrameLibrary from '$components/frame/FrameLibrary.svelte';
 	import FramePeople from '$components/frame/FramePeople.svelte';
@@ -22,8 +22,6 @@
 	import TelegramSection from '$components/telegram/TelegramSection.svelte';
 	import FrameFreshness from '$components/social/FrameFreshness.svelte';
 	import RemoteHelpBanner from '$components/frame/RemoteHelpBanner.svelte';
-
-	type Tab = 'overview' | 'library' | 'people' | 'feeds' | 'calendar' | 'settings';
 
 	let frame = $state<Frame | null>(null);
 	let error = $state<unknown>(null);
@@ -53,44 +51,21 @@
 		});
 	});
 
-	const tabs = $derived.by(() => {
-		if (!frame) return [];
-		const list: { id: Tab; label: MessageKey; icon: IconName }[] = [
-			{ id: 'overview', label: 'frame.tabOverview', icon: 'frame' },
-			{ id: 'library', label: 'frame.tabLibrary', icon: 'image' },
-			{ id: 'people', label: 'frame.tabPeople', icon: 'users' }
-		];
-		// Feeds the frame subscribes to (docs/spec/feeds.md §4.2): managers manage, members see the active ones.
-		if (discovery.feeds) list.push({ id: 'feeds', label: 'frame.tabFeeds', icon: 'feed' });
-		if (discovery.doc?.calendar && (can(frame, 'change_settings') || can(frame, 'send')))
-			list.push({ id: 'calendar', label: 'frame.tabCalendar', icon: 'calendar' });
-		if (can(frame, 'change_settings')) list.push({ id: 'settings', label: 'frame.tabSettings', icon: 'settings' });
-		return list;
+	// The frame screen (simple-app.md §3.3): the card on top, then one list. Each row opens one section (`?tab=`).
+	type Section = 'library' | 'calendar' | 'settings';
+	const calendarOk = $derived(!!frame && !!discovery.doc?.calendar && (can(frame, 'change_settings') || can(frame, 'send')));
+	const section = $derived.by((): Section | null => {
+		const q = page.url.searchParams.get('tab');
+		if (q === 'library' || q === 'settings') return q;
+		if (q === 'calendar' && calendarOk) return q;
+		return null;
 	});
-
-	const tab = $derived.by((): Tab => {
-		const q = page.url.searchParams.get('tab') as Tab | null;
-		return tabs.some((x) => x.id === q) ? q! : 'overview';
-	});
-
-	function selectTab(next: Tab) {
-		const url = new URL(page.url);
-		if (next === 'overview') url.searchParams.delete('tab');
-		else url.searchParams.set('tab', next);
-		void goto(url, { replaceState: true, noScroll: true, keepFocus: true });
-	}
-
-	function onTabKey(e: KeyboardEvent, index: number) {
-		// Tabs run right to left in Arabic and Hebrew, so the arrow keys follow the reading direction.
-		const forward = i18n.dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
-		const back = i18n.dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
-		const dir = e.key === forward ? 1 : e.key === back ? -1 : 0;
-		if (!dir) return;
-		e.preventDefault();
-		const next = tabs[(index + dir + tabs.length) % tabs.length]!;
-		selectTab(next.id);
-		document.getElementById(`tab-${next.id}`)?.focus();
-	}
+	const SECTION_TITLE: Record<Section, MessageKey> = {
+		library: 'frameRows.photos',
+		calendar: 'frameRows.calendar',
+		settings: 'frameRows.settings'
+	};
+	let tvOpen = $state(false);
 
 	// Photos dragged in from the computer and dropped anywhere on the page are sent to this frame.
 	const drop = new FrameDrop(() => (frame && can(frame, 'send') ? frame.id : null));
@@ -108,7 +83,11 @@
 <p class="visually-hidden" role="status" aria-live="polite">{drop.active && drop.target && frame ? t('frames.dropTo', { name: frame.name }) : ''}</p>
 
 <div class="container page">
-	<a href="/frames" class="back"><Icon name="chevronLeft" size={18} />{t('frames.title')}</a>
+	{#if section && frame}
+		<a href="/frames/{frame.id}" class="back"><Icon name="chevronLeft" size={18} />{frame.name}</a>
+	{:else}
+		<a href="/frames" class="back"><Icon name="chevronLeft" size={18} />{t('frames.title')}</a>
+	{/if}
 
 	{#if error}
 		<div class="callout callout-error" role="alert">
@@ -120,66 +99,80 @@
 		</div>
 	{:else if !frame}
 		<div class="stack" aria-busy="true" aria-label={t('common.loading')}>
-			<div class="skeleton" style="height:40px;width:45%"></div>
-			<div class="skeleton" style="height:18px;width:30%"></div>
-			<div class="skeleton" style="height:44px;width:100%;max-width:520px"></div>
 			<div class="skeleton" style="height:220px"></div>
+			<div class="skeleton" style="height:18px;width:30%"></div>
+			<div class="skeleton" style="height:180px"></div>
+		</div>
+	{:else if section}
+		<h1 class="section-h">{t(SECTION_TITLE[section])}</h1>
+		<div class="panel">
+			{#if section === 'library'}
+				<FrameLibrary {frame} />
+			{:else if section === 'calendar'}
+				<FrameCalendar {frame} />
+				{#if can(frame, 'change_settings')}
+					<a class="card card-pad row between more-link" href="/frames/{frame.id}?tab=settings#wx-title">
+						<span><span class="s-label">{t('frameRows.weatherAddons')}</span><span class="hint">{t('frameRows.weatherAddonsHint')}</span></span>
+						<Icon name="chevronRight" size={20} />
+					</a>
+				{/if}
+			{:else}
+				<div class="stack">
+					{#if discovery.feeds}<FrameFeeds {frame} />{/if}
+					{#if can(frame, 'change_settings')}
+						<FrameSettingsForm {frame} />
+						<!-- Email to frame and Telegram (email-inbox.md, telegram.md): frame managers only, like these settings. -->
+						{#if discovery.emailInbox}
+							<EmailInbox target={{ kind: 'frame', id: frame.id, name: frame.name }} focus={page.url.searchParams.get('email')} />
+						{/if}
+						{#if discovery.telegram}
+							<TelegramSection target={{ kind: 'frame', id: frame.id, name: frame.name }} focus={page.url.searchParams.get('telegram')} />
+						{/if}
+					{/if}
+					<FramePeople {frame} manage={canManage(frame)} onchanged={() => void load(frame!.id)} />
+					<FrameOverview {frame} onupdated={onUpdated} />
+				</div>
+			{/if}
 		</div>
 	{:else}
-		<header class="head">
-			<div class="title">
-				<h1>{frame.name}</h1>
-				<div class="row-wrap meta">
-					<OnlineStatus online={frame.online} lastSeen={frame.last_seen_at} />
-					{#if frame.location}<span class="loc"><Icon name="mapPin" size={15} />{frame.location}</span>{/if}
-					<RoleBadge role={frame.role} />
-				</div>
-			</div>
+		<div class="top">
+			<FrameCard {frame} link={false} />
+			<RemoteHelpBanner {frame} />
+			{#if discovery.engagement}<FrameFreshness {frame} />{/if}
+		</div>
+
+		<ul class="rows" role="list">
+			<li>
+				<a class="row-link" href="/frames/{frame.id}?tab=library">
+					<span class="ri"><Icon name="image" size={20} /></span><span class="rt">{t('frameRows.photos')}<span class="hint">{t('frameRows.photosHint')}</span></span><Icon name="chevronRight" size={18} />
+				</a>
+			</li>
 			{#if can(frame, 'send')}
-				<a class="btn btn-primary" href="/send?frame={frame.id}"><Icon name="send" size={18} />{t('nav.sendPhotos')}</a>
+				<li>
+					<a class="row-link" href="/send?frame={frame.id}">
+						<span class="ri"><Icon name="send" size={20} /></span><span class="rt">{t('frameRows.sendOnly')}<span class="hint">{t('frameRows.sendOnlyHint')}</span></span><Icon name="chevronRight" size={18} />
+					</a>
+				</li>
 			{/if}
-		</header>
-		<RemoteHelpBanner {frame} />
-		{#if discovery.engagement}<FrameFreshness {frame} />{/if}
-
-		<div class="tabs segmented" role="tablist" aria-label={t('frame.sections')}>
-			{#each tabs as tb, i (tb.id)}
-				<button
-					id="tab-{tb.id}"
-					role="tab"
-					aria-selected={tab === tb.id}
-					aria-controls="panel-{tb.id}"
-					tabindex={tab === tb.id ? 0 : -1}
-					onclick={() => selectTab(tb.id)}
-					onkeydown={(e) => onTabKey(e, i)}
-				>
-					<Icon name={tb.icon} size={16} />{t(tb.label)}
+			{#if calendarOk}
+				<li>
+					<a class="row-link" href="/frames/{frame.id}?tab=calendar">
+						<span class="ri"><Icon name="calendar" size={20} /></span><span class="rt">{t('frameRows.calendar')}</span><Icon name="chevronRight" size={18} />
+					</a>
+				</li>
+			{/if}
+			<li>
+				<button class="row-link" onclick={() => (tvOpen = true)}>
+					<span class="ri"><Icon name="tv" size={20} /></span><span class="rt">{t('tv.show')}</span><Icon name="chevronRight" size={18} />
 				</button>
-			{/each}
-		</div>
-
-		<div id="panel-{tab}" role="tabpanel" aria-labelledby="tab-{tab}" class="panel" tabindex="-1">
-			{#if tab === 'overview'}
-				<FrameOverview {frame} onupdated={onUpdated} />
-			{:else if tab === 'library'}
-				<FrameLibrary {frame} />
-			{:else if tab === 'people'}
-				<FramePeople {frame} manage={canManage(frame)} onchanged={() => void load(frame!.id)} />
-			{:else if tab === 'feeds'}
-				<FrameFeeds {frame} />
-			{:else if tab === 'calendar'}
-				<FrameCalendar {frame} />
-			{:else if tab === 'settings'}
-				<FrameSettingsForm {frame} />
-				<!-- Email to frame and Telegram (email-inbox.md, telegram.md): frame managers only, like these settings. -->
-				{#if discovery.emailInbox}
-					<EmailInbox target={{ kind: 'frame', id: frame.id, name: frame.name }} focus={page.url.searchParams.get('email')} />
-				{/if}
-				{#if discovery.telegram}
-					<TelegramSection target={{ kind: 'frame', id: frame.id, name: frame.name }} focus={page.url.searchParams.get('telegram')} />
-				{/if}
-			{/if}
-		</div>
+			</li>
+			<li>
+				<a class="row-link" href="/frames/{frame.id}?tab=settings">
+					<span class="ri"><Icon name="settings" size={20} /></span><span class="rt">{t('frameRows.settings')}<span class="hint">{t('frameRows.settingsHint')}</span></span><Icon name="chevronRight" size={18} />
+				</a>
+			</li>
+		</ul>
+		<TvDialog bind:open={tvOpen} frameId={frame.id} frameName={frame.name} scope={{ kind: 'all' }} />
 	{/if}
 </div>
 
@@ -226,44 +219,73 @@
 		font-weight: 600;
 		margin-bottom: var(--s-4);
 	}
-	.head {
-		display: flex;
-		align-items: flex-end;
-		justify-content: space-between;
-		gap: var(--s-4);
-		flex-wrap: wrap;
-		margin-bottom: var(--s-5);
-	}
-	.title {
+	.top {
 		display: flex;
 		flex-direction: column;
-		gap: var(--s-2);
-		min-width: 0;
-	}
-	h1 {
-		overflow-wrap: anywhere;
-	}
-	.meta {
 		gap: var(--s-3);
+		max-width: 620px;
+		margin-bottom: var(--s-4);
 	}
-	.loc {
-		display: inline-flex;
+	.section-h {
+		margin-bottom: var(--s-4);
+	}
+	.rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-width: 620px;
+		display: flex;
+		flex-direction: column;
+		border: 1px solid var(--border);
+		border-radius: var(--r-lg);
+		background: var(--surface);
+		overflow: hidden;
+	}
+	.rows li + li {
+		border-top: 1px solid var(--border);
+	}
+	.row-link {
+		width: 100%;
+		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: var(--s-3);
+		padding: var(--s-3) var(--s-4);
+		min-height: 60px;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		text-align: start;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.row-link:hover {
+		background: var(--surface-2);
+	}
+	.ri {
+		display: grid;
+		place-items: center;
+		width: 36px;
+		height: 36px;
+		border-radius: var(--r);
+		background: var(--surface-2);
 		color: var(--text-muted);
-		font-size: 0.9rem;
+		flex: none;
 	}
-	.tabs {
-		margin-bottom: var(--s-5);
+	.rt {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 	}
-	@media (max-width: 480px) {
-		.tabs :global(svg) {
-			display: none;
-		}
-		.tabs button {
-			padding: 0 9px; /* six tabs: long labels (German, Russian) still fit on a phone */
-			font-size: 0.88rem;
-		}
+	.rt .hint {
+		font-weight: 400;
+	}
+	.more-link {
+		margin-top: var(--s-4);
+		text-decoration: none;
+		color: inherit;
 	}
 	.panel {
 		outline: none;
