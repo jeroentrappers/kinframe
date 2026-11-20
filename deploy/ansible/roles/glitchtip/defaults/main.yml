@@ -5,6 +5,7 @@
 # Required:  glitchtip_domain, glitchtip_secret_key (openssl rand -hex 32), glitchtip_db_password, glitchtip_email_url
 #            (django-environ form, e.g. smtp+tls://user:password@host:587 with user/password URL-encoded).
 # First run: files/bootstrap.py creates the operator account, organization, projects and an upload token.
+# Operators sign in with kinframe's Logto when glitchtip_oidc_file is set (docs/spec/crash-reporting.md §1).
 ---
 glitchtip_dir: /opt/glitchtip
 glitchtip_domain: ""
@@ -18,3 +19,10 @@ glitchtip_db_password: ""
 glitchtip_email_url: "consolemail://"
 glitchtip_from_email: ""
 glitchtip_mem_limit: 2g
+# Logto sign-in for kinframe's operators. Set kinframe_logto_glitchtip_url: "https://<glitchtip_domain>" (role kinframe),
+# so bootstrap-logto registers the "GlitchTip" app and writes glitchtip-oidc.json to its data dir (the kinframe media
+# volume), then point this at that file on the host, e.g.
+# /var/lib/docker/volumes/kinframe_media/_data/glitchtip-oidc.json. Each run upserts the "kinframe" social app and
+# links each operator's Logto user to the GlitchTip user with the same email; anyone else is refused (sign-up stays
+# closed). Empty = leave GlitchTip's social sign-in alone.
+glitchtip_oidc_file: ""

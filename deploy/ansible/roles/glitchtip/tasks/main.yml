@@ -33,3 +33,50 @@
   retries: 30
   delay: 5
   until: gt_check.status == 200
+
+# Logto sign-in for the operators (docs/spec/crash-reporting.md §1), when glitchtip_oidc_file is set: files/sso.py
+# upserts the "kinframe" social app and links the operators' Logto accounts. The secret goes over stdin only.
+- name: Logto sign-in settings exist
+  ansible.builtin.stat:
+    path: "{{ glitchtip_oidc_file }}"
+  register: gt_oidc_stat
+  when: glitchtip_oidc_file | length > 0
+
+- name: Logto sign-in settings were written by bootstrap-logto
+  ansible.builtin.assert:
+    that: gt_oidc_stat.stat.exists
+    fail_msg: >-
+      {{ glitchtip_oidc_file }} does not exist: set kinframe_logto_glitchtip_url (role kinframe) and run that role
+      first, or point glitchtip_oidc_file at the file bootstrap-logto writes (KINFRAME_LOGTO_GLITCHTIP_FILE).
+    quiet: true
+  when: glitchtip_oidc_file | length > 0
+
+- name: Read the Logto sign-in settings
+  ansible.builtin.slurp:
+    src: "{{ glitchtip_oidc_file }}"
+  register: gt_oidc
+  no_log: true
+  when: glitchtip_oidc_file | length > 0
+
+- name: Logto sign-in (social app, operator links)
+  ansible.builtin.command:
+    argv: [ docker, compose, exec, -T, web, ./manage.py, shell, -c, "{{ lookup('ansible.builtin.file', 'sso.py') }}" ]
+    chdir: "{{ glitchtip_dir }}"
+    stdin: "{{ gt_oidc.content | b64decode }}"
+  register: gt_sso
+  changed_when: "'CHANGED' in gt_sso.stdout"
+  failed_when: false   # judged below, so the error is visible despite no_log
+  no_log: true
+  when: glitchtip_oidc_file | length > 0
+
+- name: Logto sign-in result
+  ansible.builtin.debug:
+    msg: "{{ gt_sso.stdout_lines + (gt_sso.stderr_lines[-20:] if gt_sso.rc != 0 else []) }}"
+  when: glitchtip_oidc_file | length > 0 and gt_sso is not skipped
+
+- name: Logto sign-in succeeded
+  ansible.builtin.assert:
+    that: gt_sso.rc == 0
+    fail_msg: files/sso.py failed (exit {{ gt_sso.rc }}); see the output above.
+    quiet: true
+  when: glitchtip_oidc_file | length > 0 and gt_sso is not skipped
