@@ -108,7 +108,27 @@ data class ComposerState(
     val serverOf: Map<String, String> = emptyMap(),
     /** Each frame's and family's server limits; missing ones use [limits] (the primary account's). */
     val limitsOf: Map<String, ServerLimits> = emptyMap(),
+    /**
+     * "Send something to this frame only" (docs/spec/simple-app.md §3.2): the frame's own screen opened the composer
+     * for that frame alone; otherwise the destination is a family (or one of its circles).
+     */
+    val frameOnly: Boolean = false,
 ) {
+    /** The families this goes to (one send to several families), none for a frame-only send. */
+    val destinationFamilies: List<Feed> get() = if (frameOnly) emptyList() else feeds.filter { it.id in selectedFeeds }
+
+    /** The family this goes to when it is one; null for several or a frame-only send. */
+    val destinationFamily: Feed? get() = destinationFamilies.singleOrNull()
+
+    /** The circle of [destinationFamily] it goes to; null is everyone in the family. */
+    val destinationCircle: app.kinframe.core.social.Circle? get() = destinationFamily?.let { circleOf(it.id) }
+
+    /** The circle chosen for one of the families; null is the whole family. */
+    fun circleOf(feedId: String): app.kinframe.core.social.Circle? = audience[feedId]?.let { id -> circles[feedId].orEmpty().firstOrNull { it.id == id } }
+
+    /** The frame of a frame-only send. */
+    val destinationFrame: Frame? get() = if (frameOnly) sendableFrames.firstOrNull { it.id in selected } else null
+
     /**
      * What applies to this send: the strictest limits of the chosen recipients' servers (multi-server.md §2.2), else
      * [limits]. Validation, trimming and the per-send count all use these.
@@ -181,7 +201,7 @@ class ComposerViewModel(
     private val newId: () -> String = { UUID.randomUUID().toString() },
     private val now: () -> Long = { System.currentTimeMillis() },
     /** Discovery `feeds`: offer feeds as recipients. */
-    private val feedsEnabled: () -> Boolean = { false },
+    private val feedsEnabled: () -> Boolean = { true },
     /** Family social: circles as audience and weekly prompts; null without it. */
     private val social: () -> app.kinframe.core.social.SocialApi? = { null },
     /** A frame's or family's server label when signed in to several servers, else null. */
@@ -213,17 +233,15 @@ class ComposerViewModel(
             _state.update { s ->
                 val sendable = frames.filter { it.can { p -> p.send } }
                 val keep = s.selected.filter { id -> sendable.any { it.id == id } }.toSet()
+                // Frames are only chosen for a frame-only send; everything else goes to a family.
                 val sel = when {
                     preselect != null && sendable.any { it.id == preselect } -> setOf(preselect!!)
                     // A frame you can't send to: its families are preselected instead (below).
                     preselect != null -> emptySet()
-                    keep.isNotEmpty() -> keep
-                    // "Post to this feed": no frame on top of it.
-                    preselectFeed != null || s.selectedFeeds.isNotEmpty() -> emptySet()
-                    sendable.size == 1 -> setOf(sendable.single().id)
+                    s.frameOnly -> keep
                     else -> emptySet()
                 }
-                s.copy(frames = Load.Ready(frames), selected = sel, serverOf = s.serverOf + labels(frames.map { it.id }),
+                s.copy(frames = Load.Ready(frames), selected = sel, frameOnly = sel.isNotEmpty(), serverOf = s.serverOf + labels(frames.map { it.id }),
                     limitsOf = s.limitsOf + serverLimits(frames.map { it.id }))
             }
             // A frame you're not on asked for photos (or went quiet) and reached you through a family: preselect the
@@ -297,12 +315,28 @@ class ComposerViewModel(
     /** Tag these photos as an answer to a weekly prompt, or (null) not. */
     fun answer(promptId: String?) = _state.update { it.copy(answering = promptId) }
 
-    /** "Post to this feed" from a feed: the feed alone is selected. */
+    /**
+     * The composer's destination is this family (the current one, or one picked under "Change"); a circle chosen for it
+     * before is kept, other families' circles are dropped.
+     */
     fun preselectFeed(feedId: String) {
         preselectFeed = feedId
         preselect = null
-        _state.update { s -> s.copy(selected = emptySet(), selectedFeeds = if (s.feeds.any { it.id == feedId }) setOf(feedId) else s.selectedFeeds) }
+        preselectRequest = null
+        _state.update { s ->
+            s.copy(selected = emptySet(), frameOnly = false, audience = s.audience.filterKeys { it == feedId },
+                answering = s.answering?.takeIf { s.prompts[feedId]?.id == it },
+                selectedFeeds = if (s.feeds.any { it.id == feedId }) setOf(feedId) else s.selectedFeeds)
+        }
         loadFrames()
+    }
+
+    /** "Change": tick or untick a family; at least one stays ticked. */
+    fun toggleFamily(feedId: String) {
+        val s = state.value
+        if (feedId in s.selectedFeeds && s.selectedFeeds.size == 1) return
+        _state.update { it.copy(frameOnly = false, selected = emptySet()) }
+        toggleFeed(feedId)
     }
 
     fun toggleFeed(feedId: String) = _state.update { s ->
@@ -325,7 +359,8 @@ class ComposerViewModel(
         preselect = frameId
         _state.update { s ->
             val sendable = s.sendableFrames.any { it.id == frameId }
-            if (sendable) s.copy(selected = setOf(frameId)) else s.copy(selected = emptySet())
+            if (sendable) s.copy(selected = setOf(frameId), frameOnly = true, audience = emptyMap(), answering = null)
+            else s.copy(selected = emptySet(), frameOnly = false)
         }
         loadFrames()
     }
