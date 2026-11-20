@@ -176,6 +176,8 @@ const (
 	JobProcessMedia     = "process_media"
 	JobEnsureRenditions = "ensure_renditions"
 	JobThumbs           = "thumbs"
+	// JobDisplayBackfill {after}: make the display rendition of existing items, a batch per run (worker.go).
+	JobDisplayBackfill = "display_backfill"
 	// Feeds (docs/spec/feeds-data-model.md §2.3); run by the API's job handler.
 	JobFeedFanout    = "feed_fanout"    // {post_id}: place a new post on every active subscription
 	JobFeedReconcile = "feed_reconcile" // {subscription_id, version, start}: backfill or trim history
@@ -200,6 +202,27 @@ func (tx *Tx) Enqueue(ctx context.Context, kind string, payload any) error {
 	}
 	tx.jobs++
 	return nil
+}
+
+// EnqueueOnce adds a job of a kind unless one is already queued; false means
+// one was. Used for one-off runs such as backfills.
+func (s *Store) EnqueueOnce(ctx context.Context, kind string, payload any) (bool, error) {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return false, err
+	}
+	tag, err := s.Pool.Exec(ctx, `INSERT INTO jobs (kind, payload) SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM jobs WHERE kind = $1)`, kind, b)
+	return tag.RowsAffected() > 0, err
+}
+
+// EnqueueAfter adds a job that becomes runnable after delay.
+func (s *Store) EnqueueAfter(ctx context.Context, kind string, payload any, delay time.Duration) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	_, err = s.Pool.Exec(ctx, `INSERT INTO jobs (kind, payload, run_after) VALUES ($1, $2, now() + make_interval(secs => $3))`, kind, b, delay.Seconds())
+	return err
 }
 
 // ClaimJob leases the next runnable job for lease, or returns nil.

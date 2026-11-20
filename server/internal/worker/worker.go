@@ -184,6 +184,12 @@ func (w *Worker) handle(ctx context.Context, job *store.Job) error {
 			return err
 		}
 		return w.thumbs(ctx, p.ItemID)
+	case store.JobDisplayBackfill:
+		var p DisplayBackfillJob
+		if err := json.Unmarshal(job.Payload, &p); err != nil {
+			return err
+		}
+		return w.displayBackfill(ctx, p)
 	}
 	if w.Jobs != nil {
 		if handled, err := w.Jobs(ctx, job); handled {
@@ -556,6 +562,89 @@ func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 		}
 	}
 	return nil
+}
+
+// display makes an item's display rendition if it has none (the backfill of
+// items from before display renditions); thumbnails are left alone.
+func (w *Worker) display(ctx context.Context, itemID uuid.UUID) error {
+	tmp, err := w.tempDir()
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+	it, src, err := w.itemSource(ctx, itemID, tmp)
+	if err != nil || it == nil || it.DisplayKey != nil {
+		return err
+	}
+	key, err := w.putDisplay(ctx, itemID, src, tmp, uuid.NewString()[:8])
+	if err != nil {
+		return err
+	}
+	set, err := w.Store.SetItemDisplay(ctx, itemID, key)
+	if err != nil || !set {
+		// A thumbs run stored one meanwhile (or the update failed): drop ours.
+		if derr := w.Blob.Delete(ctx, key); derr != nil {
+			w.Log.Warn("delete display rendition", "key", key, "err", derr)
+		}
+	}
+	return err
+}
+
+// Display backfill pacing defaults (DisplayBackfillJob.Batch, .PauseMS).
+const (
+	DefaultDisplayBatch   = 20
+	DefaultDisplayPauseMS = 5000
+	maxDisplayBatch       = 500
+)
+
+// DisplayBackfillJob is the payload of store.JobDisplayBackfill. Items are
+// visited in id order after the cursor, so every run makes progress and the
+// backfill ends even when some items cannot get a display rendition.
+type DisplayBackfillJob struct {
+	After   uuid.UUID `json:"after"`
+	Batch   int       `json:"batch,omitempty"`    // items per run (default 20)
+	PauseMS int       `json:"pause_ms,omitempty"` // between runs (default 5 s)
+}
+
+// EnqueueDisplayBackfill queues the display backfill unless one is already
+// queued or running (false then). Zero batch/pause mean the defaults.
+func EnqueueDisplayBackfill(ctx context.Context, st *store.Store, batch int, pause time.Duration) (bool, error) {
+	return st.EnqueueOnce(ctx, store.JobDisplayBackfill, DisplayBackfillJob{Batch: batch, PauseMS: int(pause.Milliseconds())})
+}
+
+// displayBackfill makes the display rendition of one batch of items that lack
+// it, one item at a time, then queues the next batch after a pause. Items that
+// fail are logged and skipped; a later backfill run retries them.
+func (w *Worker) displayBackfill(ctx context.Context, p DisplayBackfillJob) error {
+	if p.Batch < 1 {
+		p.Batch = DefaultDisplayBatch
+	}
+	p.Batch = min(p.Batch, maxDisplayBatch)
+	if p.PauseMS <= 0 {
+		p.PauseMS = DefaultDisplayPauseMS
+	}
+	ids, err := w.Store.ItemsMissingDisplay(ctx, p.After, p.Batch)
+	if err != nil {
+		return err
+	}
+	made := 0
+	for _, id := range ids {
+		if err := w.display(ctx, id); err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			w.Log.Warn("display backfill: item skipped", "item", id, "err", err)
+			continue
+		}
+		made++
+	}
+	if len(ids) < p.Batch {
+		w.Log.Info("display backfill done", "last_batch", made)
+		return nil
+	}
+	p.After = ids[len(ids)-1]
+	w.Log.Info("display backfill: batch done", "made", made, "after", p.After)
+	return w.Store.EnqueueAfter(ctx, store.JobDisplayBackfill, p, time.Duration(p.PauseMS)*time.Millisecond)
 }
 
 // Variant returns the rendition variant a device needs for a media kind.

@@ -277,6 +277,18 @@ then `migrate-blobs --from fs --to s3` (twice, as above).
 `kinframe_media_redirect: presigned` makes signed media URLs and avatars redirect to presigned bucket URLs, which
 only helps when clients can reach the bucket (`kinframe_s3_public_endpoint`); with the bundled store it stays `off`.
 
+### Display rendition backfill
+
+Servers from before the display rendition (API README §5.3, `Item.display_url`) need it made once for existing
+photos and videos; until then apps show the square thumbnail for those posts. After deploying that server version
+(it migrates on start), queue the backfill once:
+```
+ssh appmire-hetz1 'cd /opt/kinframe && docker compose exec -T server kinframe-server backfill-display </dev/null'
+```
+The server's workers run it in throttled batches (20 items, 5 s apart; `--batch`/`--pause` change that) and log
+`display backfill done` at the end. It is idempotent; rerun it to retry items it logged as skipped. Details in
+`server/README.md` ("backfill-display").
+
 ### Pre-order shop
 
 The hosted server can take **reservations for frames** (no payment) while stock is being arranged: a "Get a …"

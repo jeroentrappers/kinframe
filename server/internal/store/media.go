@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 )
@@ -415,6 +416,33 @@ func (tx *Tx) UpdateItem(ctx context.Context, id uuid.UUID, p ItemPatch) error {
 func (s *Store) SetItemThumbs(ctx context.Context, id uuid.UUID, k256, k512, display string) error {
 	_, err := s.Pool.Exec(ctx, `UPDATE items SET thumb256_key = $2, thumb512_key = $3, display_key = $4 WHERE id = $1`, id, k256, k512, display)
 	return err
+}
+
+// SetItemDisplay stores an item's display rendition if it has none yet; false
+// means another run got there first (the caller deletes its copy).
+func (s *Store) SetItemDisplay(ctx context.Context, id uuid.UUID, key string) (bool, error) {
+	tag, err := s.Pool.Exec(ctx, `UPDATE items SET display_key = $2 WHERE id = $1 AND display_key IS NULL`, id, key)
+	return tag.RowsAffected() > 0, err
+}
+
+const missingDisplayWhere = `i.display_key IS NULL AND m.status = 'ready' AND m.kind IN ('photo', 'video')`
+
+// CountItemsMissingDisplay counts the items ItemsMissingDisplay would visit.
+func (s *Store) CountItemsMissingDisplay(ctx context.Context) (int, error) {
+	var n int
+	err := s.Pool.QueryRow(ctx, `SELECT count(*) FROM items i JOIN media m ON m.id = i.media_id WHERE `+missingDisplayWhere).Scan(&n)
+	return n, err
+}
+
+// ItemsMissingDisplay lists up to limit items after the cursor (id order) whose
+// media is a ready photo or video and that have no display rendition yet.
+func (s *Store) ItemsMissingDisplay(ctx context.Context, after uuid.UUID, limit int) ([]uuid.UUID, error) {
+	rows, err := s.Pool.Query(ctx, `SELECT i.id FROM items i JOIN media m ON m.id = i.media_id
+		WHERE `+missingDisplayWhere+` AND i.id > $1 ORDER BY i.id LIMIT $2`, after, limit)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
 }
 
 // UserCanSeeItem: the sender, a member who shared a live placement of it, a

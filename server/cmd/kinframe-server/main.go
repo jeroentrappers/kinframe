@@ -6,6 +6,7 @@
 //	kinframe-server bootstrap-logto  configure Logto for kinframe (idempotent, see server/README.md)
 //	kinframe-server migrate-blobs --from fs --to s3  copy stored media between blob backends
 //	kinframe-server deliver-email --recipient … [--sender …]  post a mail from stdin to the inbound webhook (Postfix pipe)
+//	kinframe-server backfill-display [--batch n] [--pause d]  queue the display rendition backfill (server/README.md)
 package main
 
 import (
@@ -88,6 +89,8 @@ func run() error {
 		}
 		log.Info("migrations applied")
 		return nil
+	case "backfill-display":
+		return backfillDisplay(ctx, cfg, log, os.Args[2:])
 	case "serve":
 		a, err := app.New(ctx, cfg, log)
 		if err != nil {
@@ -99,7 +102,7 @@ func run() error {
 		}
 		return a.Serve(ctx, l)
 	default:
-		return fmt.Errorf("unknown command %q (want serve, migrate, healthcheck, bootstrap-logto or migrate-blobs)", cmd)
+		return fmt.Errorf("unknown command %q (want serve, migrate, healthcheck, bootstrap-logto, migrate-blobs, deliver-email or backfill-display)", cmd)
 	}
 }
 
