@@ -95,6 +95,37 @@ func (s *Server) NowShowing(frameID uuid.UUID, raw json.RawMessage) {
 	s.mirrorFanOut(frameID)
 }
 
+// mirrorReport is the slide a connected frame last reported on screen (FrameSummary.now_showing).
+type mirrorReport struct {
+	placementID uuid.UUID
+	since       time.Time // server time it came on screen
+}
+
+// mirrorReported returns the slide the frame's latest now_showing report has on screen (the first tile of a
+// collage); false while nothing shows or nothing was reported since the frame connected.
+func (s *Server) mirrorReported(frameID uuid.UUID) (mirrorReport, bool) {
+	h := &s.mirror
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	f := h.frames[frameID]
+	if f == nil || f.report == nil {
+		return mirrorReport{}, false
+	}
+	n := f.report
+	id := n.PlacementId
+	if id == nil && n.PlacementIds != nil && len(*n.PlacementIds) > 0 {
+		id = &(*n.PlacementIds)[0]
+	}
+	if id == nil {
+		return mirrorReport{}, false
+	}
+	since := f.recvAt
+	if n.StartedAt != nil {
+		since = f.recvAt.Add(n.StartedAt.Sub(n.SentAt)) // the frame's clock: only differences count
+	}
+	return mirrorReport{placementID: *id, since: since.UTC()}, true
+}
+
 // mirrorOnline records a frame connecting or disconnecting (DeviceConnection).
 func (s *Server) mirrorOnline(frameID uuid.UUID, online bool) {
 	h := &s.mirror

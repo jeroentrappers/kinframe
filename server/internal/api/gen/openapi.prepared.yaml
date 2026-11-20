@@ -3929,6 +3929,9 @@ components:
                     type: string
                 member_count:
                     type: integer
+                my_post_count:
+                    description: Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1).
+                    type: integer
                 name:
                     type: string
                 role:
@@ -3947,6 +3950,7 @@ components:
                 - role
                 - member_count
                 - subscription_count
+                - my_post_count
             type: object
         FeedUpdate:
             properties:
@@ -4186,6 +4190,39 @@ components:
                 online:
                     type: boolean
             type: object
+        FrameNowShowing:
+            description: '`FrameSummary.now_showing`.'
+            properties:
+                display_url:
+                    description: Short-lived signed URL of the display rendition (`Item.display_url`), for a large card.
+                    format: uri
+                    nullable: true
+                    type: string
+                item_id:
+                    $ref: '#/components/schemas/Id'
+                placement_id:
+                    $ref: '#/components/schemas/Id'
+                since:
+                    description: '`screen`: when the slide came on screen (server time). `last_placed`: when it was placed on the frame (`Placement.received_at`).'
+                    format: date-time
+                    type: string
+                source:
+                    description: '`screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn''t connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).'
+                    enum:
+                        - screen
+                        - last_placed
+                    type: string
+                thumb_url:
+                    description: Short-lived signed thumbnail URL (thumb_512, else thumb_256), usable in <img src>.
+                    format: uri
+                    nullable: true
+                    type: string
+            required:
+                - placement_id
+                - item_id
+                - since
+                - source
+            type: object
         FramePhotoRequest:
             description: The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change).
             properties:
@@ -4300,6 +4337,22 @@ components:
                 - frame_id
                 - frame_name
                 - reaction
+            type: object
+        FrameReactionsToday:
+            description: |
+                `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+                sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+                placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+            properties:
+                count:
+                    description: Reactions plus quick replies.
+                    type: integer
+                item_count:
+                    description: Distinct items they were on ("Oma loved 3 photos today").
+                    type: integer
+            required:
+                - count
+                - item_count
             type: object
         FrameRemoteHelp:
             description: |
@@ -4763,6 +4816,15 @@ components:
                     type: string
                 needs_update:
                     type: boolean
+                now_showing:
+                    allOf:
+                        - $ref: '#/components/schemas/FrameNowShowing'
+                    description: |
+                        The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+                        screen reports (`source: screen`, the device websocket's `now_showing`); otherwise its most recently placed
+                        visible item (`source: last_placed`). Absent (null) when there is neither, and when the caller can't see
+                        the library (`see_library`).
+                    nullable: true
                 online:
                     type: boolean
                 owner_name:
@@ -4774,6 +4836,9 @@ components:
                         - $ref: '#/components/schemas/PhotoRequest'
                     description: 'The frame''s "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.'
                     nullable: true
+                reactions_today:
+                    $ref: '#/components/schemas/FrameReactionsToday'
+                    description: Reactions and quick replies sent from the frame today (README §5.5, "Frame cards"); absent when the caller can't see the library (`see_library`).
                 remote_help:
                     allOf:
                         - $ref: '#/components/schemas/FrameRemoteHelpSummary'

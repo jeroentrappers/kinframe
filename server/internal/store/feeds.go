@@ -43,6 +43,7 @@ type FeedView struct {
 	MemberCount              int        `db:"member_count"`
 	SubscriptionCount        int        `db:"subscription_count"`
 	PostCount                int        `db:"post_count"`
+	MyPostCount              int        `db:"my_post_count"` // the viewer's live posts
 	PendingSubscriptionCount int        `db:"pending_subscription_count"`
 	PendingJoinRequestCount  int        `db:"pending_join_request_count"`
 	LastPostAt               *time.Time `db:"last_post_at"`
@@ -69,6 +70,7 @@ const feedViewSelect = `SELECT ` + feedCols + `, COALESCE(m.role, '') AS role,
 	(SELECT count(*) FROM feed_members x WHERE x.feed_id = f.id)::int AS member_count,
 	(SELECT count(*) FROM subscriptions s WHERE s.feed_id = f.id AND s.status IN ('active', 'paused'))::int AS subscription_count,
 	(SELECT count(*) FROM feed_posts p WHERE p.feed_id = f.id AND p.removed_at IS NULL)::int AS post_count,
+	(SELECT count(*) FROM feed_posts p WHERE p.poster_user_id = $1 AND p.feed_id = f.id AND p.removed_at IS NULL)::int AS my_post_count,
 	(SELECT count(*) FROM subscriptions s WHERE s.feed_id = f.id AND s.status = 'pending')::int AS pending_subscription_count,
 	(SELECT count(*) FROM feed_join_requests j WHERE j.feed_id = f.id AND j.status = 'pending')::int AS pending_join_request_count,
 	(SELECT max(p.created_at) FROM feed_posts p WHERE p.feed_id = f.id AND p.removed_at IS NULL) AS last_post_at,

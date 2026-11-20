@@ -5587,6 +5587,16 @@ components:
         remote_help:
           description: The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
           oneOf: [ { $ref: '#/components/schemas/FrameRemoteHelpSummary' }, { type: 'null' } ]
+        now_showing:
+          description: |
+            The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+            screen reports (`source: screen`, the device websocket's `now_showing`); otherwise its most recently placed
+            visible item (`source: last_placed`). Absent (null) when there is neither, and when the caller can't see
+            the library (`see_library`).
+          oneOf: [ { $ref: '#/components/schemas/FrameNowShowing' }, { type: 'null' } ]
+        reactions_today:
+          description: Reactions and quick replies sent from the frame today (README §5.5, "Frame cards"); absent when the caller can't see the library (`see_library`).
+          $ref: '#/components/schemas/FrameReactionsToday'
 
     Frame:
       allOf:
@@ -6178,7 +6188,7 @@ components:
 
     FeedSummary:
       type: object
-      required: [id, name, role, member_count, subscription_count]
+      required: [id, name, role, member_count, subscription_count, my_post_count]
       properties:
         id: { $ref: '#/components/schemas/Id' }
         name: { type: string }
@@ -6189,6 +6199,7 @@ components:
         role: { $ref: '#/components/schemas/FeedRole' }
         member_count: { type: integer }
         subscription_count: { type: integer, description: Active and paused subscriptions. }
+        my_post_count: { type: integer, description: 'Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1).' }
         last_post_at: { type: [string, 'null'], format: date-time }
         created_at: { type: string, format: date-time }
         freshness:
@@ -9784,6 +9795,38 @@ components:
       properties:
         sessions: { type: array, items: { $ref: '#/components/schemas/RemoteHelpSession' } }
         next_cursor: { type: [string, 'null'] }
+
+    FrameNowShowing:
+      type: object
+      description: '`FrameSummary.now_showing`.'
+      required: [placement_id, item_id, since, source]
+      properties:
+        placement_id: { $ref: '#/components/schemas/Id' }
+        source:
+          type: string
+          enum: [screen, last_placed]
+          description: '`screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn''t connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).'
+        item_id: { $ref: '#/components/schemas/Id' }
+        thumb_url:
+          type: [string, 'null']
+          format: uri
+          description: Short-lived signed thumbnail URL (thumb_512, else thumb_256), usable in <img src>.
+        display_url:
+          type: [string, 'null']
+          format: uri
+          description: Short-lived signed URL of the display rendition (`Item.display_url`), for a large card.
+        since: { type: string, format: date-time, description: '`screen`: when the slide came on screen (server time). `last_placed`: when it was placed on the frame (`Placement.received_at`).' }
+
+    FrameReactionsToday:
+      type: object
+      description: |
+        `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+        sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+        placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+      required: [count, item_count]
+      properties:
+        count: { type: integer, description: Reactions plus quick replies. }
+        item_count: { type: integer, description: Distinct items they were on ("Oma loved 3 photos today"). }
 
     FrameRemoteHelpSummary:
       type: object

@@ -1411,6 +1411,24 @@ func (e FrameCommandType) Valid() bool {
 	}
 }
 
+// Defines values for FrameNowShowingSource.
+const (
+	FrameNowShowingSourceLastPlaced FrameNowShowingSource = "last_placed"
+	FrameNowShowingSourceScreen     FrameNowShowingSource = "screen"
+)
+
+// Valid indicates whether the value is a known member of the FrameNowShowingSource enum.
+func (e FrameNowShowingSource) Valid() bool {
+	switch e {
+	case FrameNowShowingSourceLastPlaced:
+		return true
+	case FrameNowShowingSourceScreen:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameRemoteHelpState.
 const (
 	FrameRemoteHelpStateActive FrameRemoteHelpState = "active"
@@ -6736,7 +6754,10 @@ type Feed struct {
 	// mentions still notify); `chat` (no pushes from the family chat and its circle chats); `all` (both, and
 	// mentions too). Websocket events still arrive.
 	Mute *FeedMute `json:"mute,omitempty"`
-	Name string    `json:"name"`
+
+	// MyPostCount Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1).
+	MyPostCount int    `json:"my_post_count"`
+	Name        string `json:"name"`
 
 	// NewMembersCanPost Joiners become `poster` (default) or, when off, `member`.
 	NewMembersCanPost *bool   `json:"new_members_can_post,omitempty"`
@@ -7196,7 +7217,10 @@ type FeedSummary struct {
 	Id          Id         `json:"id"`
 	LastPostAt  *time.Time `json:"last_post_at,omitempty"`
 	MemberCount int        `json:"member_count"`
-	Name        string     `json:"name"`
+
+	// MyPostCount Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1).
+	MyPostCount int    `json:"my_post_count"`
+	Name        string `json:"name"`
 
 	// Role `member` reads, comments, reacts and chats but does not post photos (docs/spec/family-social.md §3). Joiners get `poster` or `member` by the feed's `new_members_can_post`.
 	Role FeedRole `json:"role"`
@@ -7285,21 +7309,32 @@ type Frame struct {
 	Freshness *Freshness `json:"freshness,omitempty"`
 
 	// Id UUIDv7
-	Id                     Id          `json:"id"`
-	InviteRequiresApproval *bool       `json:"invite_requires_approval,omitempty"`
-	LastSeenAt             *time.Time  `json:"last_seen_at,omitempty"`
-	Location               *string     `json:"location,omitempty"`
-	MemberCount            *int        `json:"member_count,omitempty"`
-	Moderation             *bool       `json:"moderation,omitempty"`
-	Name                   string      `json:"name"`
-	NeedsUpdate            *bool       `json:"needs_update,omitempty"`
-	Online                 bool        `json:"online"`
-	OwnerName              *string     `json:"owner_name,omitempty"`
-	Permissions            Permissions `json:"permissions"`
+	Id                     Id         `json:"id"`
+	InviteRequiresApproval *bool      `json:"invite_requires_approval,omitempty"`
+	LastSeenAt             *time.Time `json:"last_seen_at,omitempty"`
+	Location               *string    `json:"location,omitempty"`
+	MemberCount            *int       `json:"member_count,omitempty"`
+	Moderation             *bool      `json:"moderation,omitempty"`
+	Name                   string     `json:"name"`
+	NeedsUpdate            *bool      `json:"needs_update,omitempty"`
+
+	// NowShowing The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+	// screen reports (`source: screen`, the device websocket's `now_showing`); otherwise its most recently placed
+	// visible item (`source: last_placed`). Absent (null) when there is neither, and when the caller can't see
+	// the library (`see_library`).
+	NowShowing  *FrameNowShowing `json:"now_showing,omitempty"`
+	Online      bool             `json:"online"`
+	OwnerName   *string          `json:"owner_name,omitempty"`
+	Permissions Permissions      `json:"permissions"`
 
 	// PhotoRequest The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
 	PhotoRequest   *PhotoRequest `json:"photo_request,omitempty"`
 	PlacementCount *int          `json:"placement_count,omitempty"`
+
+	// ReactionsToday `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+	// sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+	// placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+	ReactionsToday *FrameReactionsToday `json:"reactions_today,omitempty"`
 
 	// RemoteHelp The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
 	RemoteHelp *FrameRemoteHelpSummary `json:"remote_help,omitempty"`
@@ -7365,6 +7400,30 @@ type FrameHealth struct {
 	Online                *bool      `json:"online,omitempty"`
 }
 
+// FrameNowShowing `FrameSummary.now_showing`.
+type FrameNowShowing struct {
+	// DisplayUrl Short-lived signed URL of the display rendition (`Item.display_url`), for a large card.
+	DisplayUrl *string `json:"display_url,omitempty"`
+
+	// ItemId UUIDv7
+	ItemId Id `json:"item_id"`
+
+	// PlacementId UUIDv7
+	PlacementId Id `json:"placement_id"`
+
+	// Since `screen`: when the slide came on screen (server time). `last_placed`: when it was placed on the frame (`Placement.received_at`).
+	Since time.Time `json:"since"`
+
+	// Source `screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn't connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).
+	Source FrameNowShowingSource `json:"source"`
+
+	// ThumbUrl Short-lived signed thumbnail URL (thumb_512, else thumb_256), usable in <img src>.
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+}
+
+// FrameNowShowingSource `screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn't connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).
+type FrameNowShowingSource string
+
 // FramePhotoRequest The frame's view of its latest request (`deviceRequestPhotos`, and the `photo_request` change).
 type FramePhotoRequest struct {
 	AnsweredAt *time.Time `json:"answered_at,omitempty"`
@@ -7425,6 +7484,17 @@ type FrameReactionRef struct {
 
 	// ServerName A frame on another server (README §5.22); `frame_id` is then the remote subscription's id.
 	ServerName *string `json:"server_name,omitempty"`
+}
+
+// FrameReactionsToday `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+// sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+// placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+type FrameReactionsToday struct {
+	// Count Reactions plus quick replies.
+	Count int `json:"count"`
+
+	// ItemCount Distinct items they were on ("Oma loved 3 photos today").
+	ItemCount int `json:"item_count"`
 }
 
 // FrameRemoteHelp Payload of the `remote_help` change (docs/spec/remote-help.md §5.2, §5.4). `auth_key` is present only until
@@ -7679,17 +7749,28 @@ type FrameSummary struct {
 	Freshness *Freshness `json:"freshness,omitempty"`
 
 	// Id UUIDv7
-	Id          Id          `json:"id"`
-	LastSeenAt  *time.Time  `json:"last_seen_at,omitempty"`
-	Location    *string     `json:"location,omitempty"`
-	Name        string      `json:"name"`
-	NeedsUpdate *bool       `json:"needs_update,omitempty"`
-	Online      bool        `json:"online"`
-	OwnerName   *string     `json:"owner_name,omitempty"`
-	Permissions Permissions `json:"permissions"`
+	Id          Id         `json:"id"`
+	LastSeenAt  *time.Time `json:"last_seen_at,omitempty"`
+	Location    *string    `json:"location,omitempty"`
+	Name        string     `json:"name"`
+	NeedsUpdate *bool      `json:"needs_update,omitempty"`
+
+	// NowShowing The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+	// screen reports (`source: screen`, the device websocket's `now_showing`); otherwise its most recently placed
+	// visible item (`source: last_placed`). Absent (null) when there is neither, and when the caller can't see
+	// the library (`see_library`).
+	NowShowing  *FrameNowShowing `json:"now_showing,omitempty"`
+	Online      bool             `json:"online"`
+	OwnerName   *string          `json:"owner_name,omitempty"`
+	Permissions Permissions      `json:"permissions"`
 
 	// PhotoRequest The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
 	PhotoRequest *PhotoRequest `json:"photo_request,omitempty"`
+
+	// ReactionsToday `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+	// sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+	// placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+	ReactionsToday *FrameReactionsToday `json:"reactions_today,omitempty"`
 
 	// RemoteHelp The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
 	RemoteHelp *FrameRemoteHelpSummary `json:"remote_help,omitempty"`

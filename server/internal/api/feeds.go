@@ -30,6 +30,7 @@ type feedSummaryJSON struct {
 	Role              string     `json:"role"`
 	MemberCount       int        `json:"member_count"`
 	SubscriptionCount int        `json:"subscription_count"`
+	MyPostCount       int        `json:"my_post_count"` // the caller's live posts (home family, simple-app.md §3)
 	LastPostAt        *time.Time `json:"last_post_at,omitempty"`
 	CreatedAt         time.Time  `json:"created_at"`
 	ConversationID    *uuid.UUID `json:"conversation_id,omitempty"` // the family chat (chats: feedChats)
@@ -72,7 +73,7 @@ func (s *Server) feedCoverURL(key *string) *string {
 func (s *Server) feedSummaryOut(v *store.FeedView) feedSummaryJSON {
 	return feedSummaryJSON{
 		ID: v.ID, Name: v.Name, CoverURL: s.feedCoverURL(v.CoverThumbKey), Role: v.Role, MemberCount: v.MemberCount,
-		SubscriptionCount: v.SubscriptionCount, LastPostAt: v.LastPostAt, CreatedAt: v.CreatedAt,
+		SubscriptionCount: v.SubscriptionCount, MyPostCount: v.MyPostCount, LastPostAt: v.LastPostAt, CreatedAt: v.CreatedAt,
 	}
 }
 

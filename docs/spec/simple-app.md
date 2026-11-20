@@ -46,7 +46,8 @@ rail/sidebar. There is no Send tab, no History tab, no Families tab and no Setti
 There is no "current family" and no switcher. Home and the composer work across all the person's families; the
 Family tab lists them when there are several. The **home family** is the family the person posts to most (ties: the
 one they created, else the oldest membership); it is the composer default and is listed first. With no family at
-all, see §8.
+all, see §8. The server gives the counts as `FeedSummary.my_post_count` in `GET /v1/feeds` (the caller's live
+posts per family); the apps apply the tie rules.
 
 ### 3.1 Home
 
@@ -86,6 +87,13 @@ A list of frame cards: frames the person manages or is a member of first, then f
 - Card: now-showing photo (or the last placed one), status chip (Online · showing now / Offline since …), name,
   "Shows Trappers" / "Shows Trappers and 4 other families" (or "Doesn't show a family yet" with an "Add a family"
   action for managers), today's reactions ("Oma loved 3 photos today").
+
+  Server: `FrameSummary.now_showing` (`thumb_url`, `display_url`, `since`, `source`) and
+  `FrameSummary.reactions_today` (`count`, `item_count`, the frame's local day) in `GET /v1/frames` and
+  `GET /v1/frames/{id}`, for members who can see the library (API README §5.5, "Frame cards"). `source: screen` is
+  the slide an online frame reports on screen ("showing now"); `last_placed` is the fallback for offline frames (the
+  last placed photo). Frames that only show a family the person is in (not their own frames) aren't in
+  `GET /v1/frames`; their cards come from the family's frames (`Subscription.frame`) without these fields.
 - "Add a frame" at the end (pair with code, as today).
 - Tapping a card opens the frame screen: the card on top, then one list —
   1. Photos on this frame (the existing library, albums inside)

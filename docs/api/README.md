@@ -382,6 +382,21 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   frame entries in its thread; on photos put on a frame from a chat, under the chat message (`frame_activity`).
   People react to posts, items, comments and messages with `PUT /v1/reactions/{target_kind}/{id}`.
 
+**Frame cards** (`listMyFrames`, `getFrame`): for callers who can see the library (`see_library`; owner and admins
+always), `FrameSummary` has
+
+- `now_showing {placement_id, item_id, source, thumb_url, display_url, since}`, absent when there is nothing.
+  `source: screen`: the slide the connected frame last reported over its websocket (`now_showing`, §6.1; the first
+  tile of a collage), `since` when it came on screen in server time; the report is kept in memory and dropped when
+  the frame disconnects (§6.4). `source: last_placed`: otherwise, the newest visible placement (delivered or seen,
+  not hidden, trashed, waiting for moderation or suspended), `since` its `received_at`. URLs are signed like item
+  thumbnails.
+- `reactions_today {count, item_count}`: reactions and quick replies sent from the frame since midnight in the
+  frame's time zone (settings `locale.timezone`, else UTC), on placements still in its library; `item_count` is the
+  number of distinct items ("Oma loved 3 photos today"). A changed reaction counts once, a removed one not at all.
+
+Members without `see_library` get neither field: those reactions are on other people's photos.
+
 ### 5.6 Remote settings and commands
 
 - `GET` and `PATCH /v1/frames/{id}/settings` (needs `change_settings`). The `If-Match` version is required. The frame
@@ -623,6 +638,8 @@ says `feeds: true` when the server supports them.
 - A feed has a name, an optional cover (`cover_item_id`, one of its own items) and members with roles `owner` (one),
   `admin` and `poster`. Feed membership is independent of frame membership. Unknown feeds and feeds the caller is
   not a member of both answer `404 not_found`; there is no listing beyond `GET /v1/feeds` (your own feeds).
+- `FeedSummary.my_post_count`: the caller's live posts in the feed (removed ones don't count). The apps pick the
+  home family with it (`docs/spec/simple-app.md` §2.1).
 - Members: `GET /feeds/{id}/members`, `PATCH …/members/{userId} {role}`, `DELETE …/members/{userId}?remove_posts=`,
   `POST /feeds/{id}/leave {photos, comments, leave_frame_ids}` (§5.21; the older `remove_my_posts` still works),
   `POST /feeds/{id}/transfer {user_id}`. Admins cannot change or remove the owner or other admins (as for frames).
