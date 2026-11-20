@@ -333,6 +333,7 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `comments` | The newest comments of one placement's post (entity = the placement), with *Show comments* on (§5.20), or `comments: null` |
   | `photo_request` | The frame's latest "Ask for new photos" (§5.20), or `photo_request: null` |
   | `prompts` | The current weekly prompts of the frame's families (§5.20), or `prompts: null` |
+  | `remote_help` | The frame's active remote help session with its one-time Headscale key until the frame reported `on` (§5.23), or `remote_help: null` = leave the tailnet and clean up |
   | `reset` | The frame must discard local state and re-sync from 0 |
 
 - **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
@@ -911,6 +912,7 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `report.created` | `report` (`Report`) | A new report to handle (the feed's owner/admins, or operators) |
 | `photo_request.created` | `request` (`PhotoRequest`) | A frame asked for new photos (its recipients, §5.20, with the push; everyone else who can see the request, i.e. the frame's members and its families' members, without one) |
 | `photo_request.updated` | `request` | Answered or expired (the same people) |
+| `remote_help.updated` | `frame_id`, `session` (`RemoteHelpSession`) | Remote help started, came on or ended (§5.23): the frame's members (without `tailnet_ip`, `error`) and the operator who started or stopped it |
 | `streak.updated` | `feed_id`, `streak` (`FeedStreakSummary`) | This week's count, the goal or the streak changed (family members) |
 | `prompt.updated` | `feed_id`, `prompt` (`FeedPrompt`) | The week's prompt started, or an admin changed it |
 | `milestone.achieved` | `milestone` (`Milestone`) | The receiver reached a personal milestone (websocket only) |
@@ -993,6 +995,10 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   Remote families (§5.22) add no keys: remote subscription requests use `subscription_request`, ends use
   `subscription_removed`, and reactions and replies of remote frames use `reaction`/`reply` with `feed_id` and
   `post_id`.
+- Remote help keys (§5.23, `RemoteHelpPushKey`): `remote_help_started` (the frame's members, at start),
+  `remote_help_on` (the operator who started it, when the frame joined), `remote_help_ended` (members and the
+  operator, not whoever ended it). Texts carry the frame name and the end time (`until`, HH:MM in the receiver's
+  time zone, else the frame's); `ids`: `frame_id`, `session_id`; `tag`: `remote_help:<frame_id>`.
 - Chat `message` and chat `mention` pushes, and comment `mention`/`comment_reply` pushes, carry `badge`: the receiver's
   unread total (`GET /v1/me/badge`) when the push was made. APNs puts it in `aps.badge`, FCM in the `badge` data value.
   Chat `message`/`mention` pushes use APNs category `kinframe.message` (the app adds a reply field). APNs `thread-id` is
@@ -1798,6 +1804,44 @@ receipts, and pushes `reaction`/`reply` to the poster as for local frames. Event
   `DELETE {B}/federation/v1/subscriptions/{id}?reason=` and the changes feed says `removed`; B removes or keeps the
   copied placements per `on_end` (story 4) and the follow shows `removed` with the reason.
 - B's frame removed: its follows end and A is told.
+
+### 5.23 Remote help
+
+Product spec: `docs/spec/remote-help.md`. The server operator switches on a temporary, encrypted tunnel from a frame
+to their tailnet (Tailscale on the frame against a self-hosted Headscale) to use ADB on it. Off by default; only
+servers with `KINFRAME_REMOTE_HELP=on`, Headscale, the operator's ADB key and `KINFRAME_REMOTE_HELP_POLICY_CHECKED=1`
+have discovery `remote_help: true` (and `remote_help: true` in the operator's `GET /v1/me`); otherwise the start
+endpoint answers `503 feature_disabled`.
+
+**Who**: only the operator (`kinframe:operate`) starts a session. Every member of the frame sees it
+(`FrameSummary.remote_help {ends_at, reason}`, `GET /v1/frames/{id}/remote-help`, the push and the websocket event);
+owner and admins stop it (`DELETE /v1/frames/{id}/remote-help`, `403` for other members); anyone at the frame stops
+it (`DELETE /v1/device/remote-help`). One session per frame at a time.
+
+**Operator**
+- `GET /v1/operator/ownership/search?q=` has `remote_help_supported` per frame: its latest heartbeat lists the
+  `remote_help` feature (the GitHub build on a rooted frame). Others can't get a session (`409
+  remote_help_unsupported`).
+- `POST /v1/operator/frames/{id}/remote-help {hours: 1|8|24, reason}` → `201 RemoteHelpSession` (`pending`). The
+  server looks up `KINFRAME_HEADSCALE_USER`'s id, creates a pre-auth key (`POST /api/v1/preauthkey`, one-time,
+  ephemeral, tagged `tag:kinframe-frame`, expiring at `ends_at`), seals it at rest and puts the `remote_help` change
+  on the frame's feed. `409 remote_help_active` with a session already running; `502 upstream_unavailable` when
+  Headscale fails (nothing stored).
+- `DELETE /v1/operator/frames/{id}/remote-help` ends it; `GET /v1/operator/remote-help` is the log (active first,
+  then newest, kept 2 years) with `tailnet_ip`, `adb_command` (`adb connect <hostname>:5555`) and `error`.
+
+**The frame** gets `remote_help {session_id, state: active, ends_at, login_server, auth_key, hostname, adb_key,
+tailscale {version, arm, arm64: {url, sha256}}}` and reports in its heartbeat `remote_help {session_id, state:
+starting|on|failed|off, ip, error}`. The first `on` stores the IP, forgets the key (a new change without `auth_key`)
+and pushes `remote_help_on` to the operator; `failed` ends the session (`ended_by: failed`, the error in the log).
+`hostname` is `kinframe-<hardware.serial if the frame sent one, else the last 8 hex digits of the device id>`.
+
+**Ending**: at `ends_at` (`expired`), by Stop (`operator`, `owner`, `frame`), when a `pending` session saw no `on`
+within 15 minutes (`failed`) or when the frame was removed or re-paired (`unpaired`). The frame gets
+`remote_help: null`; the server deletes the frame's node in Headscale (`GET /api/v1/node?user=`, match `givenName` or
+`name`, `DELETE /api/v1/node/{id}`) and expires the key if it was never used (`POST /api/v1/preauthkey/expire {id}`).
+Headscale errors while ending are logged (and noted in the session's `error`), never fatal. Members and the operator
+get `remote_help_ended`, except whoever ended it.
 
 
 ## 7. Versioning
