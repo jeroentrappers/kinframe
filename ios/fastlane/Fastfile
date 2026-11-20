@@ -39,6 +39,7 @@ platform :ios do
 
   desc "Archive a Release build for the App Store into build/; upload: true also sends it to TestFlight"
   lane :release do |options|
+    smoke_test
     sync(type: "appstore")
     version = ENV["MARKETING_VERSION"] || last_tag_version
     build = ENV["BUILD_NUMBER"] || sh("git rev-list --count HEAD").strip
@@ -89,6 +90,7 @@ platform :ios do
 
   desc "Archive the Mac Catalyst build for the Mac App Store into build/mac; upload: true also sends it to App Store Connect"
   lane :mac_release do |options|
+    smoke_test(platform: "mac")
     sync(type: "appstore", platform: "catalyst")
     version = ENV["MARKETING_VERSION"] || last_tag_version
     build = ENV["BUILD_NUMBER"] || sh("git rev-list --count HEAD").strip
@@ -106,6 +108,29 @@ platform :ios do
     )
     upload_to_testflight(api_key: asc_key, app_platform: "osx", pkg: Dir["build/mac/*.pkg"].first,
                          skip_waiting_for_build_processing: true) if options[:upload]
+  end
+
+  desc "Smoke test: the signed-in app opens every screen against a fake server without crashing (KinframeTests/SmokeTests)."
+  desc "platform: \"mac\" runs it as Mac Catalyst; SMOKE_SIMULATOR picks the simulator. No signing. Runs before release, mac_release."
+  lane :smoke_test do |options|
+    destination = if options[:platform] == "mac"
+      "platform=macOS,variant=Mac Catalyst"
+    else
+      "platform=iOS Simulator,name=#{ENV["SMOKE_SIMULATOR"] || smoke_simulator}"
+    end
+    run_tests(
+      project: "Kinframe.xcodeproj",
+      scheme: "Kinframe",
+      destination: destination,
+      only_testing: ["KinframeTests/SmokeTests"],
+      xcargs: "CODE_SIGNING_ALLOWED=NO",
+      # The unsigned Mac test host hung at launch (in dyld, opening its frameworks) when built on an external volume,
+      # so its build goes to the start disk.
+      derived_data_path: options[:platform] == "mac" ? File.expand_path("~/Library/Caches/kinframe-smoke") : nil,
+      output_directory: "build/smoke",
+      output_types: "junit",
+      skip_slack: true
+    )
   end
 
   private_lane :sync do |options|
@@ -162,6 +187,15 @@ end
 def last_tag_version
   tag = sh("git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo v0.1.0").strip
   tag.delete_prefix("v").split("-").first
+end
+
+# An available iPhone simulator for the smoke test, a booted one first.
+def smoke_simulator
+  devices = JSON.parse(sh("xcrun simctl list devices available -j", log: false))["devices"].values.flatten
+  phones = devices.select { |d| d["name"].include?("iPhone") }
+  phone = phones.find { |d| d["state"] == "Booted" } || phones.last
+  UI.user_error!("No iPhone simulator for the smoke test; set SMOKE_SIMULATOR") unless phone
+  phone["name"]
 end
 
 # The "3rd Party Mac Developer Installer" identity match put in the signing keychain (signs the Mac .pkg).

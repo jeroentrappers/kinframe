@@ -149,6 +149,14 @@ jobs:
             -clonedSourcePackagesDirPath .spm \
             CODE_SIGNING_ALLOWED=NO \
             test
+      # The same tests as Mac Catalyst (the Mac App Store build), SmokeTests included.
+      - name: Run unit tests on Mac Catalyst (no signing)
+        run: |
+          xcodebuild -project Kinframe.xcodeproj -scheme Kinframe \
+            -destination 'platform=macOS,variant=Mac Catalyst' \
+            -clonedSourcePackagesDirPath .spm \
+            CODE_SIGNING_ALLOWED=NO \
+            test
 
   publish:
     name: Publish server image

@@ -18,7 +18,15 @@ xcodebuild -project Kinframe.xcodeproj -scheme Kinframe \
 ```
 
 `Kinframe` runs the unit tests (`KinframeTests`, no network). `KinframeUITests` is a separate scheme for tests
-against a dev server (see below). CI runs the unit tests on `macos-latest` without signing.
+against a dev server (see below). CI runs the unit tests on `macos-latest` without signing, on the simulator and as
+Mac Catalyst (`-destination 'platform=macOS,variant=Mac Catalyst'`).
+
+`SmokeTests` (in `KinframeTests`) starts the real app root signed in to a fake server with every optional feature on
+and opens every tab, a frame and a family on each of their sections, the photo sources and a few pushed screens, once
+with a working server and once with failing requests; any crash fails it. The fake server answers what it has no
+hand-written answer for from `KinframeTests/Support/SmokeFixtures.swift`, generated from `docs/api/openapi.yaml` by
+`python3 ios/tools/smoke-fixtures.py` (rerun after API changes). `bundle exec fastlane smoke_test [platform:mac]` runs
+it alone; `release` and `mac_release` run it first.
 
 ### Signing
 
@@ -40,7 +48,8 @@ keychain (`~/Library/Keychains/kinframe-signing.keychain-db`, password `KINFRAME
 | `certificates` | Fetch the development and App Store certificates and profiles, read-only |
 | `register_device name:"…" udid:…` | Register a device and regenerate the development profiles with it |
 | `renew_certificates` | Create missing certificates and profiles (changes the Apple account) |
-| `release [upload:true]` | Archive Release and export the .ipa to `ios/build`; `upload:true` sends it to TestFlight |
+| `smoke_test [platform:mac]` | Run `SmokeTests` on an iPhone simulator (`SMOKE_SIMULATOR` picks one) or as Mac Catalyst, no signing |
+| `release [upload:true]` | Run the smoke test, archive Release and export the .ipa to `ios/build`; `upload:true` sends it to TestFlight |
 
 The app and the share extension share data through the App Group `group.app.kinframe.family` and the keychain group
 `$(AppIdentifierPrefix)app.kinframe.family.shared`. Universal Links use the associated domain
