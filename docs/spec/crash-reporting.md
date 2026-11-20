@@ -52,6 +52,7 @@ It never contains personal data:
   (tokens and file names travel in them).
   The server and web also replace ids, tokens and file names in paths with `*` (invite, TV and signed media
   links carry tokens in the path); web reports keep only the User-Agent header.
+- Sessions (release health, which carry an installation id), failed-request events and click breadcrumbs off.
 - No screenshots, view hierarchy, session replay or attachments. Performance tracing off (sample rate 0); ANR /
   app-hang detection on.
 - Every SDK has a `beforeSend` hook that enforces the above, so a later SDK default can't widen it.
@@ -72,7 +73,8 @@ deletes events after 90 days) and the opt-out.
 - **Android:** release builds upload R8's `mapping.txt` to GlitchTip (`sentry-cli upload-proguard`, auth token
   `SENTRY_AUTH_TOKEN`; GlitchTip 7.0 or later applies it) and to Play (Android vitals). The build writes the
   mapping's ProGuard UUID into the app (`assets/sentry-debug-meta.properties`) so reports match their upload.
-- **Apple:** release lanes upload the dSYMs with `sentry-cli debug-files upload`.
+- **Apple:** release lanes upload the dSYMs with `sentry-cli debug-files upload` (GlitchTip 7.0 or later for the
+  universal Mac Catalyst dSYMs).
 - **Web:** the build uploads source maps with `sentry-cli sourcemaps upload` and doesn't serve them.
 - **Server:** Go stack traces are readable as is.
 
