@@ -894,11 +894,11 @@ func (s *Server) purgeRemoteItems(ctx context.Context) {
 		err := s.st.InTx(ctx, func(tx *store.Tx) error {
 			keys = nil
 			var motion *uuid.UUID
-			var t256, t512 *string
-			if err := tx.QueryRow(ctx, `SELECT motion_media_id, thumb256_key, thumb512_key FROM items WHERE id = $1 FOR UPDATE`, g.ItemID).Scan(&motion, &t256, &t512); err != nil {
+			var t256, t512, display *string
+			if err := tx.QueryRow(ctx, `SELECT motion_media_id, thumb256_key, thumb512_key, display_key FROM items WHERE id = $1 FOR UPDATE`, g.ItemID).Scan(&motion, &t256, &t512, &display); err != nil {
 				return err
 			}
-			for _, k := range []*string{t256, t512} {
+			for _, k := range []*string{t256, t512, display} {
 				if k != nil {
 					keys = append(keys, *k)
 				}

@@ -861,6 +861,8 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 		key = it.Thumb256Key
 	case "thumb_512":
 		key = it.Thumb512Key
+	case "display":
+		key = it.DisplayKey
 	case "master":
 		key = it.MasterKey
 	case "poster":

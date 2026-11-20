@@ -173,6 +173,8 @@ func sendLoop(t *testing.T, e *env) {
 	if k, _ := media.SniffBytes(th.body); k != media.Photo {
 		t.Fatalf("thumb not an image")
 	}
+	// The display rendition: uncropped, long edge 1600 (README §5.3).
+	e.checkDisplay(dig(final, "items").([]any)[0].(map[string]any), media.Size{W: 1600, H: 1067})
 	// Item media redirects to a signed URL.
 	loc := e.expect(req{method: "GET", path: "/v1/items/" + pl["item_id"].(string) + "/media/master", token: oma.token}, 302).Header.Get("Location")
 	e.get(loc, "")

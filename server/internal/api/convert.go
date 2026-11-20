@@ -200,6 +200,9 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if it.Thumb256Key != nil {
 		out.ThumbUrl = ptr(s.signedURL(*it.Thumb256Key, thumbURLTTL))
 	}
+	if it.DisplayKey != nil {
+		out.DisplayUrl = ptr(s.signedURL(*it.DisplayKey, thumbURLTTL))
+	}
 	out.RemoteSender = remoteSenderJSON(it) // federation_items.go
 	return out
 }

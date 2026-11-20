@@ -15,6 +15,7 @@ const (
 	MasterPhotoQ    = 90
 	RenditionPhotoQ = 85
 	ThumbQ          = 75
+	DisplayQ        = 82
 	PosterQ         = 85
 )
 
@@ -63,6 +64,16 @@ func (t Tools) ResizeImage(ctx context.Context, src string, box Size, q int, dst
 	_, err := run(ctx, t.bin(t.Vips, "vips"), "thumbnail", src, webp(dst, q),
 		strconv.Itoa(box.W), "--height", strconv.Itoa(box.H), "--size", "down")
 	return err
+}
+
+// Display writes the uncropped display rendition of a photo master or video
+// poster: WebP, long edge at most DisplayEdge, never upscaled.
+func (t Tools) Display(ctx context.Context, src, dst string) (Size, error) {
+	if err := t.ResizeImage(ctx, src, Size{DisplayEdge, DisplayEdge}, DisplayQ, dst); err != nil {
+		return Size{}, err
+	}
+	hdr, err := t.ImageHeader(ctx, dst)
+	return hdr.Size, err
 }
 
 // Thumb writes an n×n WebP square centred on the focal point (fx, fy in 0..1).

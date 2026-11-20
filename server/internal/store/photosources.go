@@ -496,7 +496,7 @@ func (tx *Tx) SetCapturedOverride(ctx context.Context, itemID uuid.UUID, at *tim
 // SwapItemMedia points an item at new media (an upstream file changed):
 // same item, same placements.
 func (tx *Tx) SwapItemMedia(ctx context.Context, itemID, mediaID uuid.UUID) error {
-	_, err := tx.Exec(ctx, `UPDATE items SET media_id = $2, thumb256_key = NULL, thumb512_key = NULL WHERE id = $1`, itemID, mediaID)
+	_, err := tx.Exec(ctx, `UPDATE items SET media_id = $2, thumb256_key = NULL, thumb512_key = NULL, display_key = NULL WHERE id = $1`, itemID, mediaID)
 	return err
 }
 

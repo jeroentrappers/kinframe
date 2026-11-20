@@ -321,6 +321,7 @@ type ItemRow struct {
 	Fit             *string    `db:"fit"`
 	Thumb256Key     *string    `db:"thumb256_key"`
 	Thumb512Key     *string    `db:"thumb512_key"`
+	DisplayKey      *string    `db:"display_key"`
 	ItemCreatedAt   time.Time  `db:"item_created_at"`
 	CapturedHint    *time.Time `db:"captured_hint"`
 	Kind            string     `db:"kind"`
@@ -369,7 +370,7 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	COALESCE(i.former_sender_name, su.display_name, sf.name, (SELECT rsd.display_name FROM remote_senders rsd WHERE rsd.id = i.remote_sender_id), '') AS sender_name,
 	su.avatar_key AS sender_avatar_key,
 	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.thumb256_key, i.thumb512_key,
-	i.created_at AS item_created_at, i.captured_hint,
+	i.display_key, i.created_at AS item_created_at, i.captured_hint,
 	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio,
 	COALESCE(i.captured_override, m.captured_at) AS captured_at,
 	m.master_key, m.master_mime, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
@@ -410,8 +411,9 @@ func (tx *Tx) UpdateItem(ctx context.Context, id uuid.UUID, p ItemPatch) error {
 	return err
 }
 
-func (s *Store) SetItemThumbs(ctx context.Context, id uuid.UUID, k256, k512 string) error {
-	_, err := s.Pool.Exec(ctx, `UPDATE items SET thumb256_key = $2, thumb512_key = $3 WHERE id = $1`, id, k256, k512)
+// SetItemThumbs stores an item's square thumbnails and its display rendition.
+func (s *Store) SetItemThumbs(ctx context.Context, id uuid.UUID, k256, k512, display string) error {
+	_, err := s.Pool.Exec(ctx, `UPDATE items SET thumb256_key = $2, thumb512_key = $3, display_key = $4 WHERE id = $1`, id, k256, k512, display)
 	return err
 }
 

@@ -69,6 +69,10 @@ func TestGeometry(t *testing.T) {
 		{"video odd rounded even", FitWithin(Size{1281, 721}, Size{1920, 1080}, true), Size{1280, 720}},
 		{"video decode box 720p", FitWithin(Size{1920, 1080}, Size{1280, 720}, true), Size{1280, 720}},
 		{"video ultrawide", FitWithin(Size{3000, 1000}, Size{1920, 1080}, true), Size{1920, 640}},
+		{"display landscape", DisplaySize(Size{2560, 1920}), Size{1600, 1200}},
+		{"display portrait", DisplaySize(Size{1920, 2560}), Size{1200, 1600}},
+		{"display panorama", DisplaySize(Size{2560, 640}), Size{1600, 400}},
+		{"display never upscale", DisplaySize(Size{1024, 768}), Size{1024, 768}},
 	}
 	for _, tt := range tests {
 		if tt.got != tt.want {
@@ -197,6 +201,18 @@ func TestPhotoPipeline(t *testing.T) {
 		t.Errorf("rendition %v", rs)
 	}
 
+	disp := filepath.Join(dir, "display.webp")
+	ds, err := tools.Display(ctx, master, disp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ds != (Size{1200, 1600}) || ds != DisplaySize(size) {
+		t.Errorf("display %v, want 1200x1600 (uncropped, long edge 1600)", ds)
+	}
+	if _, m, _ := Sniff(disp); m != "image/webp" {
+		t.Errorf("display type %s", m)
+	}
+
 	for _, n := range ThumbSizes {
 		th := filepath.Join(dir, "thumb.webp")
 		if err := tools.Thumb(ctx, master, size, n, 0.5, 0.2, th); err != nil {
@@ -226,6 +242,9 @@ func TestPhotoSmallNotUpscaled(t *testing.T) {
 	rs, err := tools.PhotoRendition(ctx, master, size, 1280, filepath.Join(dir, "r.webp"))
 	if err != nil || rs != size {
 		t.Errorf("rendition %v %v", rs, err)
+	}
+	if ds, err := tools.Display(ctx, master, filepath.Join(dir, "d.webp")); err != nil || ds != size {
+		t.Errorf("display %v %v", ds, err)
 	}
 }
 

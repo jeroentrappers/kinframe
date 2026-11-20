@@ -7954,9 +7954,15 @@ type Item struct {
 	CaptionEdited *bool      `json:"caption_edited,omitempty"`
 	CapturedAt    *time.Time `json:"captured_at,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
-	DurationMs    *int       `json:"duration_ms,omitempty"`
-	FailureCode   *string    `json:"failure_code,omitempty"`
-	Fit           *Fit       `json:"fit,omitempty"`
+
+	// DisplayUrl The display rendition (README §5.3): the uncropped photo (for videos: the poster frame) as WebP, long edge
+	// ≤1600 px, never upscaled. For large images such as feed post photos; clients crop or fit it to their
+	// layout. Short-lived signed URL (about 1 h, like `thumb_url`). Absent until the server made it (older items
+	// until the display backfill reached them); fall back to `thumb_url` then.
+	DisplayUrl  *string `json:"display_url,omitempty"`
+	DurationMs  *int    `json:"duration_ms,omitempty"`
+	FailureCode *string `json:"failure_code,omitempty"`
+	Fit         *Fit    `json:"fit,omitempty"`
 
 	// FocalPoint Relative to the master rendition, 0..1 from top-left.
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
@@ -7995,7 +8001,8 @@ type Item struct {
 	SenderName *string    `json:"sender_name,omitempty"`
 	Status     ItemStatus `json:"status"`
 
-	// ThumbUrl Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+	// ThumbUrl The 256 px square (centre-cropped) thumbnail, for small tiles and lists. Short-lived signed URL (about 1 h)
+	// usable directly in <img src> without an Authorization header.
 	ThumbUrl *string `json:"thumb_url,omitempty"`
 
 	// Via Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or

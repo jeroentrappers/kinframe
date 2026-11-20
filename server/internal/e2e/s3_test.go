@@ -28,7 +28,7 @@ func withS3(t *testing.T, redirect string) option {
 // Only processed media may reach the bucket: masters, posters, frame
 // renditions (and their posters), thumbnails and avatars. Never originals.
 var allowedKey = regexp.MustCompile(`^(media/[0-9a-f-]{36}/(master\.(webp|mp4)|poster\.webp|frame_[0-9x_v]+(\.webp|\.mp4|-poster\.webp))` +
-	`|items/[0-9a-f-]{36}/thumb_(256|512)-[0-9a-f-]{8}\.webp|avatars/[0-9a-f-]{36}/[A-Za-z0-9_-]+\.webp)$`)
+	`|items/[0-9a-f-]{36}/(thumb_(256|512)|display)-[0-9a-f-]{8}\.webp|avatars/[0-9a-f-]{36}/[A-Za-z0-9_-]+\.webp)$`)
 
 func checkBucket(t *testing.T, e *env, wantPrefixes ...string) {
 	t.Helper()
@@ -67,14 +67,14 @@ func TestSendLoopS3(t *testing.T) {
 	requireMedia(t)
 	e := newEnv(t, withS3(t, ""))
 	sendLoop(t, e)
-	checkBucket(t, e, "/master.webp", "/frame_", "/thumb_256-", "/thumb_512-")
+	checkBucket(t, e, "/master.webp", "/frame_", "/thumb_256-", "/thumb_512-", "/display-")
 }
 
 func TestVideoSendS3(t *testing.T) {
 	requireMedia(t)
 	e := newEnv(t, withS3(t, ""))
 	videoSend(t, e)
-	checkBucket(t, e, "/master.mp4", "/poster.webp", "-poster.webp")
+	checkBucket(t, e, "/master.mp4", "/poster.webp", "-poster.webp", "/display-")
 }
 
 func TestPresignedRedirect(t *testing.T) {

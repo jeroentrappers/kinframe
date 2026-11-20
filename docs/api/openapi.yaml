@@ -627,8 +627,8 @@ paths:
         - name: variant
           in: path
           required: true
-          description: '`motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.'
-          schema: { type: string, enum: [thumb_256, thumb_512, master, poster, motion] }
+          description: '`thumb_256`/`thumb_512` are square centre-cropped thumbnails; `display` is the uncropped display rendition (WebP, long edge ≤1600 px, README §5.3; 404 until made, then use `thumb_512`). `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). For a voice message (`VoiceClip.item_id`) `master` is the AAC recording (`audio/mp4`) and there are no thumbnails.'
+          schema: { type: string, enum: [thumb_256, thumb_512, display, master, poster, motion] }
       responses:
         '302': { description: Redirect to signed media URL }
         default: { $ref: '#/components/responses/Problem' }
@@ -5933,7 +5933,17 @@ components:
         thumb_url:
           type: [string, 'null']
           format: uri
-          description: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+          description: |
+            The 256 px square (centre-cropped) thumbnail, for small tiles and lists. Short-lived signed URL (about 1 h)
+            usable directly in <img src> without an Authorization header.
+        display_url:
+          type: string
+          format: uri
+          description: |
+            The display rendition (README §5.3): the uncropped photo (for videos: the poster frame) as WebP, long edge
+            ≤1600 px, never upscaled. For large images such as feed post photos; clients crop or fit it to their
+            layout. Short-lived signed URL (about 1 h, like `thumb_url`). Absent until the server made it (older items
+            until the display backfill reached them); fall back to `thumb_url` then.
         remote_sender:
           oneOf: [ { $ref: '#/components/schemas/ItemRemoteSender' }, { type: 'null' } ]
           description: Copied from a family on another server (README §5.22); show `remote_sender.name` instead of a local person.

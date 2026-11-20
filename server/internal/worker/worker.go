@@ -469,31 +469,56 @@ func (w *Worker) preparedMaster(ctx context.Context, m *store.Media, kind media.
 	return "", media.Rejection(fmt.Sprintf("profile %s does not match a %s", *m.Prepared, kind))
 }
 
-func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
+// itemSource downloads the image an item's thumbnails and display rendition
+// are made from (the photo master or the video poster) into dir; a nil row
+// means there is nothing to make (yet).
+func (w *Worker) itemSource(ctx context.Context, itemID uuid.UUID, dir string) (*store.ItemRow, string, error) {
 	it, err := w.Store.GetItemRow(ctx, w.Store.Q(), itemID)
 	if errors.Is(err, store.ErrNotFound) {
-		return nil
+		return nil, "", nil
 	}
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 	if it.MediaStatus != "ready" || it.Width == nil || it.Height == nil {
-		return nil // process_media generates thumbs once the master exists
+		return nil, "", nil // process_media generates thumbs once the master exists
 	}
 	srcKey := it.MasterKey
 	if it.Kind == string(media.Video) {
 		srcKey = it.PosterKey
 	}
 	if srcKey == nil {
-		return nil
+		return nil, "", nil
 	}
+	src, err := blob.LocalFile(ctx, w.Blob, *srcKey, dir)
+	if err != nil {
+		return nil, "", err
+	}
+	return it, src, nil
+}
+
+// putDisplay makes and stores the display rendition of src (README §5.3).
+func (w *Worker) putDisplay(ctx context.Context, itemID uuid.UUID, src, dir, suffix string) (string, error) {
+	p := filepath.Join(dir, "display.webp")
+	if _, err := w.Tools.Display(ctx, src, p); err != nil {
+		return "", err
+	}
+	key := fmt.Sprintf("items/%s/display-%s.webp", itemID, suffix)
+	if err := w.Blob.PutFile(ctx, key, p, blob.PutOptions{ContentType: "image/webp"}); err != nil {
+		return "", err
+	}
+	return key, nil
+}
+
+// thumbs (re)makes an item's square thumbnails and its display rendition.
+func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 	tmp, err := w.tempDir()
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(tmp)
-	src, err := blob.LocalFile(ctx, w.Blob, *srcKey, tmp)
-	if err != nil {
+	it, src, err := w.itemSource(ctx, itemID, tmp)
+	if err != nil || it == nil {
 		return err
 	}
 	fx, fy := 0.5, 0.5
@@ -516,10 +541,14 @@ func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 			return err
 		}
 	}
-	if err := w.Store.SetItemThumbs(ctx, itemID, keys[0], keys[1]); err != nil {
+	display, err := w.putDisplay(ctx, itemID, src, tmp, suffix)
+	if err != nil {
 		return err
 	}
-	for _, old := range []*string{it.Thumb256Key, it.Thumb512Key} {
+	if err := w.Store.SetItemThumbs(ctx, itemID, keys[0], keys[1], display); err != nil {
+		return err
+	}
+	for _, old := range []*string{it.Thumb256Key, it.Thumb512Key, it.DisplayKey} {
 		if old != nil {
 			if err := w.Blob.Delete(ctx, *old); err != nil {
 				w.Log.Warn("delete old thumbnail", "key", *old, "err", err)

@@ -108,6 +108,7 @@ func videoSend(t *testing.T, e *env) {
 	if d := it["duration_ms"].(float64); d < 2800 || d > 3300 {
 		t.Fatalf("trimmed duration %v", d)
 	}
+	e.checkDisplay(it, media.Size{W: 1280, H: 720}) // from the poster frame
 	ch := e.get("/v1/device/changes?since=0", d.token).m(t)
 	ups := changesOf(ch, "placement.upsert")
 	if len(ups) != 1 {

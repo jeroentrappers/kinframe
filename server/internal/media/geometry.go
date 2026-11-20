@@ -11,6 +11,10 @@ func (s Size) Short() int { return min(s.W, s.H) }
 // MasterPhotoEdge is the maximum long edge of a stored photo master.
 const MasterPhotoEdge = 2560
 
+// DisplayEdge is the maximum long edge of an item's display rendition: the
+// uncropped image apps show large (feed posts, viewers), never upscaled.
+const DisplayEdge = 1600
+
 // MasterVideoBox is the maximum stored video master size (1080p, either orientation).
 var MasterVideoBox = Size{1920, 1080}
 
@@ -30,6 +34,12 @@ func FitWithin(src, box Size, even bool) Size {
 func PhotoRenditionSize(src Size, screenLong int) Size {
 	scale := math.Min(1, float64(screenLong)/float64(src.Short()))
 	return scaled(src, scale, false)
+}
+
+// DisplaySize returns the display rendition size for a photo or poster: the
+// long edge fits DisplayEdge, aspect kept, never upscaled.
+func DisplaySize(src Size) Size {
+	return FitWithin(src, Size{DisplayEdge, DisplayEdge}, false)
 }
 
 func scaled(src Size, scale float64, even bool) Size {
