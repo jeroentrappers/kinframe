@@ -1,0 +1,35 @@
+# GlitchTip (crash reports) in Docker Compose, behind a TLS reverse proxy at glitchtip_domain. Migrations run at start.
+# First deploy: files/bootstrap.py (usage in its header) creates the account, organization, projects and token.
+---
+- name: Required settings
+  ansible.builtin.assert:
+    that: [ glitchtip_domain | length > 0, glitchtip_secret_key | length > 0, glitchtip_db_password | length > 0 ]
+    fail_msg: set glitchtip_domain, glitchtip_secret_key and glitchtip_db_password
+    quiet: true
+
+- name: Directory
+  ansible.builtin.file:
+    path: "{{ glitchtip_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: Compose file (holds secrets)
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ glitchtip_dir }}/compose.yml"
+    mode: "0600"
+
+- name: Start
+  ansible.builtin.command: docker compose up -d --remove-orphans
+  args: { chdir: "{{ glitchtip_dir }}" }
+  register: up
+  changed_when: "'Started' in up.stderr or 'Recreated' in up.stderr or 'Created' in up.stderr"
+
+- name: Answers
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ glitchtip_port }}/_health/"
+    timeout: 30
+  register: gt_check
+  retries: 30
+  delay: 5
+  until: gt_check.status == 200

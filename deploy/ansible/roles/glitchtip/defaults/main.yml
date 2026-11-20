@@ -1,0 +1,20 @@
+# GlitchTip: a self-hosted, Sentry-compatible server for crash and error reports (docs/spec/crash-reporting.md).
+# Optional and separate from the kinframe stack; put a TLS reverse proxy in front of 127.0.0.1:glitchtip_port and
+# point KINFRAME_SENTRY_DSN (server), KINFRAME_SENTRY_WEB_DSN (web) and the app builds' DSNs at its projects.
+#
+# Required:  glitchtip_domain, glitchtip_secret_key (openssl rand -hex 32), glitchtip_db_password, glitchtip_email_url
+#            (django-environ form, e.g. smtp+tls://user:password@host:587 with user/password URL-encoded).
+# First run: files/bootstrap.py creates the operator account, organization, projects and an upload token.
+---
+glitchtip_dir: /opt/glitchtip
+glitchtip_domain: ""
+glitchtip_version: "6.2.6"           # https://glitchtip.com/blog for new major versions
+glitchtip_postgres_version: "18"
+glitchtip_valkey_version: "9"
+glitchtip_port: 8130                 # loopback port for the reverse proxy
+glitchtip_event_days: 90             # events older than this are deleted
+glitchtip_secret_key: ""
+glitchtip_db_password: ""
+glitchtip_email_url: "consolemail://"
+glitchtip_from_email: ""
+glitchtip_mem_limit: 2g
