@@ -2,7 +2,7 @@
 	import { api, call, type Item, type ReactionSummary } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { mediaObjectUrl } from '$lib/media';
-	import { summaryFromList } from '$lib/social';
+	import { postImageVariant, summaryFromList } from '$lib/social';
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
@@ -66,7 +66,7 @@
 	<div class="track" bind:this={track} onscroll={onScroll} role="group" aria-roledescription={t('social.carousel')} aria-label={alt}>
 		{#each items as it, i (it.id)}
 			<button class="slide" onclick={() => open(it)} aria-label={many ? t('social.photoOf', { n: i + 1, total: items.length }) : t('social.openPhoto')}>
-				<Thumb itemId={it.id} variant="thumb_512" kind={it.kind} radius="0" alt={it.caption ?? ''} />
+				<Thumb itemId={it.id} variant={postImageVariant(it)} kind={it.kind} radius="0" alt={it.caption ?? ''} />
 			</button>
 		{/each}
 	</div>

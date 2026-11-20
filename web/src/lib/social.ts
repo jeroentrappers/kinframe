@@ -1,7 +1,15 @@
 // Family social (docs/spec/family-social.md, README §5.18): reactions, threads, mentions and the timeline. Pure:
 // unit-tested in social.test.ts.
 
-import type { Comment, Mention, PersonReaction, PersonRef, ReactionList, ReactionSummary, ThreadSummary, TimelinePost } from './api/client';
+import type { Comment, Item, Mention, PersonReaction, PersonRef, ReactionList, ReactionSummary, ThreadSummary, TimelinePost } from './api/client';
+
+/**
+ * The media variant for a large post photo: the uncropped display rendition once the server has made it
+ * (`display_url`), else the 512 px square thumbnail (older items until the backfill reached them, older servers).
+ */
+export function postImageVariant(item: Pick<Item, 'display_url'>): 'display' | 'thumb_512' {
+	return item.display_url ? 'display' : 'thumb_512';
+}
 
 // ---------------------------------------------------------------- reactions
 

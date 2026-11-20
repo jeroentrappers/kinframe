@@ -1,6 +1,7 @@
 import { authFetch } from './api/client';
 
-export type MediaVariant = 'thumb_256' | 'thumb_512' | 'master' | 'poster' | 'motion';
+/** `display` is the uncropped large image (≤1600 px long edge, README §5.3); thumbnails are squares. */
+export type MediaVariant = 'thumb_256' | 'thumb_512' | 'display' | 'master' | 'poster' | 'motion';
 
 /**
  * <img> can't send a bearer token, so media is fetched with auth and shown via an object URL.

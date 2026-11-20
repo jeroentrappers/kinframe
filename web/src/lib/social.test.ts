@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Comment, ReactionSummary, TimelinePost } from './api/client';
 import {
+	postImageVariant,
 	posterName,
 	appendPosts,
 	badgeTitle,
@@ -255,5 +256,15 @@ describe('posterName', () => {
 		expect(posterName({ poster, items: [{ former_sender_name: null }, { former_sender_name: 'Tom' }] }, 'Former member', named)).toBe('Tom (former member)');
 		expect(posterName({ poster, items: [] }, 'Former member', named)).toBe('Former member');
 		expect(posterName({ poster: { user_id: 'u2', display_name: 'Lies' }, items: [{ former_sender_name: 'Tom' }] }, 'Former member', named)).toBe('Lies');
+	});
+});
+
+describe('postImageVariant', () => {
+	it('uses the display rendition when the item has one', () => {
+		expect(postImageVariant({ display_url: 'https://x/d' })).toBe('display');
+	});
+	it('falls back to the square thumbnail for items without it', () => {
+		expect(postImageVariant({})).toBe('thumb_512');
+		expect(postImageVariant({ display_url: '' })).toBe('thumb_512');
 	});
 });
