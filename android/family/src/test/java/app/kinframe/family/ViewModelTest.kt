@@ -128,8 +128,16 @@ class ViewModelTest {
             enqueue = { queued = it },
             newId = { "id${id++}" },
         )
-        // Only frames we may send to; the single one is preselected.
+        // A family is the destination: no frame is chosen until a frame's screen asks for a frame-only send.
+        assertEquals(emptySet<String>(), vm.state.value.selected)
+        vm.preselectFrame("f1")
         assertEquals(setOf("f1"), vm.state.value.selected)
+        assertTrue(vm.state.value.frameOnly)
+        assertEquals("f1", vm.state.value.destinationFrame?.id)
+        // Only frames we may send to.
+        vm.preselectFrame("f2")
+        assertTrue(vm.state.value.selected.isEmpty())
+        vm.preselectFrame("f1")
         vm.add(listOf(Uri.parse("content://media/1"), Uri.parse("content://media/2"), Uri.parse("content://x"), Uri.parse("content://media/3"), Uri.parse("content://media/4")))
         val s = vm.state.value
         assertEquals(3, s.items.size)

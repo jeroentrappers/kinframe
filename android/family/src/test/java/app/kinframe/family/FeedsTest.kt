@@ -208,13 +208,20 @@ class FeedsTest {
         assertEquals(setOf("fd2", "fd3"), vm.state.value.selectedFeeds)
     }
 
-    @Test fun composerHidesFeedsWhenTheServerHasNone() = runTest {
+    @Test fun composerNeverPicksAFrameOnItsOwn() = runTest {
+        // One frame you may send to: still the family is the destination (docs/spec/simple-app.md §3.2).
         val vm = ComposerViewModel(
-            api = { object : FakeApi() { override suspend fun frames() = listOf(frame("f1", "Oma")) } },
-            limits = { Limits() }, server = { "" }, inspect = { null }, enqueue = {}, feedsEnabled = { false },
+            api = { object : FakeApi() {
+                override suspend fun frames() = listOf(frame("f1", "Oma"))
+                override suspend fun feeds() = listOf(feed("fd1", "Peeters", FeedRole.POSTER))
+            } },
+            limits = { Limits() }, server = { "" }, inspect = { null }, enqueue = {},
         )
-        assertTrue(vm.state.value.feeds.isEmpty())
-        assertEquals(setOf("f1"), vm.state.value.selected)
+        assertTrue(vm.state.value.selected.isEmpty())
+        vm.preselectFeed("fd1")
+        assertEquals("fd1", vm.state.value.destinationFamily?.id)
+        assertFalse(vm.state.value.frameOnly)
+        assertNull(vm.state.value.destinationFrame)
     }
 
     // ---------------------------------------------------------------------------------------------- rules

@@ -1,5 +1,6 @@
 package app.kinframe.family
 
+import app.kinframe.family.ui.family.FamilyPrefs
 import android.app.Application
 import android.content.Context
 import androidx.activity.ComponentActivity
@@ -58,8 +59,8 @@ import java.util.Collections
 
 /**
  * Starts the real app root ([FamilyRoot], with the content `MainActivity` sets) signed in to a fake kinframe server
- * with every optional feature on, taps every bottom tab, then opens a frame and a family and taps each of their
- * sections. Any exception while composing, in an effect or in a view model's coroutine fails the test.
+ * with every optional feature on, taps every bottom tab, `+`, the family's segments and settings, then opens a frame
+ * and taps through its rows. Any exception while composing, in an effect or in a view model's coroutine fails the test.
  *
  * Guards against crashes no screen-level test sees, like 1.2 crashing on every start after sign-in with
  * `IllegalStateException: no toaster` (a composable of the home screen read `LocalToaster` outside its provider).
@@ -84,7 +85,7 @@ class SmokeTest {
         Frame("f-oma", "Oma’s frame", "Living room", "Jeroen", role = "owner", permissions = Permissions.ALL, online = true),
         Frame("f-opa", "Opa Jos", "Kitchen", "Lies", role = "member", permissions = Permissions(send = true), online = false),
     )
-    private val feeds = listOf(Feed("feed-1", "Trappers family", role = FeedRole.OWNER, memberCount = 3))
+    private var feeds = listOf(Feed("feed-1", "Trappers family", role = FeedRole.OWNER, memberCount = 3))
 
     private fun <T> json(s: KSerializer<T>, v: T) = KinJson.encodeToString(s, v)
 
@@ -113,7 +114,7 @@ class SmokeTest {
     private val lists = Regex(
         "/v1/(conversations|google-imports|photo-sources|me/milestones|" +
             "frames/[^/]+/(albums|calendars|events|invites|join-requests|members|remote-subscriptions|subscriptions)|" +
-            "feeds/[^/]+/(birthdays|blocked-servers|invites|join-requests|members|photo-sources|prompts|reports|subscriptions))",
+            "feeds/[^/]+/(birthdays|blocked-servers|circles|invites|join-requests|members|photo-sources|prompts|reports|subscriptions))",
     )
 
     /** Documents whose fields all have defaults. */
@@ -180,31 +181,31 @@ class SmokeTest {
         compose.waitForIdle()
     }
 
-    /** A bottom tab; History and Settings sit in Home's top bar when the bottom bar is full. */
+    /** A tab of the bottom bar: Home, Frames, Chats, Family. */
     private fun openTab(label: Int) {
-        val l = app.getString(label)
-        if (compose.onAllNodes(hasText(l) and isTab).fetchSemanticsNodes().isNotEmpty()) {
-            compose.onAllNodes(hasText(l) and isTab).onFirst().performClick()
-        } else {
-            openTab(R.string.social_nav_home)
-            compose.onAllNodes(hasContentDescription(l) and hasClickAction()).onFirst().performClick()
-        }
+        compose.onAllNodes(hasText(app.getString(label)) and isTab).onFirst().performClick()
         settle()
     }
 
-    /** Every section tab of the open detail screen. */
-    private fun openEverySection(): Int {
-        val count = compose.onAllNodes(isTab).fetchSemanticsNodes().size
-        repeat(count) { i ->
-            val tab = compose.onAllNodes(isTab)[i]
-            runCatching { tab.performScrollTo() }
-            tab.performClick()
-            settle()
-        }
-        return count
+    private fun click(label: Int) {
+        val l = app.getString(label)
+        val byText = compose.onAllNodes(hasText(l) and hasClickAction()).fetchSemanticsNodes()
+        val node = if (byText.isNotEmpty()) compose.onAllNodes(hasText(l) and hasClickAction()).onFirst()
+        else compose.onAllNodes(hasContentDescription(l) and hasClickAction()).onFirst()
+        runCatching { node.performScrollTo() }
+        node.performClick()
+        settle()
     }
 
-    private fun tapThroughTheApp() {
+    /** Opens a row of the open screen and comes back. */
+    private fun openAndBack(activity: ComponentActivity, label: Int, inside: () -> Unit = {}) {
+        click(label)
+        inside()
+        activity.onBackPressedDispatcher.onBackPressed()
+        settle()
+    }
+
+    private fun start(): Triple<AppGraph, AppViewModel, ComponentActivity> {
         val graph = AppGraph(app) { id -> secures.getOrPut(id) { MemorySecureStore() } }
         val vm = AppViewModel(graph)
         val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
@@ -214,31 +215,68 @@ class SmokeTest {
         settle()
         compose.waitUntil(10_000) { vm.phase.value is Phase.Ready }
         settle()
+        return Triple(graph, vm, activity)
+    }
 
-        listOf(
-            R.string.social_nav_home, R.string.nav_frames, R.string.nav_send, R.string.chat_nav,
-            R.string.nav_feeds, R.string.nav_history, R.string.nav_settings,
-        ).forEach(::openTab)
-        // Settings is open: "Send crash reports" (on by default) turns off.
+    private fun tapThroughTheApp() {
+        val (graph, vm, activity) = start()
+
+        listOf(R.string.social_nav_home, R.string.nav_frames, R.string.chat_nav, R.string.nav_family).forEach(::openTab)
+        // The family's segments.
+        listOf(R.string.family_seg_people, R.string.family_seg_frames, R.string.family_seg_photos).forEach(::click)
+        // `+`: the composer, then back.
+        openAndBack(activity, R.string.nav_new_post)
+        // Family › gear: Settings with This family and App.
+        openTab(R.string.nav_family)
+        click(R.string.nav_settings)
+        listOf(R.string.settings_family_name_cover, R.string.settings_family_circles, R.string.settings_family_birthdays,
+            R.string.settings_family_more_ways, R.string.settings_sent_history).forEach { openAndBack(activity, it) }
+        // "Send crash reports" (on by default) turns off.
         assertTrue(FamilyCrashReports.enabled(app))
         compose.onAllNodes(hasText(app.getString(R.string.settings_crash_reports))).onFirst().performScrollTo().performClick()
         settle()
         assertTrue("Send crash reports turned off", !FamilyCrashReports.enabled(app))
 
-        // Pushed screens, the way a notification tap opens them.
+        // A frame, the way a notification tap opens it: its screen is one list.
         graph.openTarget.value = OpenTarget(Notifications.TARGET_FRAME, frameId = "f-oma")
         settle()
-        val frameSections = openEverySection()
-        graph.openTarget.value = OpenTarget(Notifications.TARGET_FEED, feedId = "feed-1")
+        var rows = 0
+        openAndBack(activity, R.string.frame_row_photos).also { rows++ }
+        openAndBack(activity, R.string.frame_row_extras) { openAndBack(activity, R.string.frame_extras_calendar) }.also { rows++ }
+        openAndBack(activity, R.string.frame_row_settings) {
+            listOf(R.string.frame_settings_people, R.string.frame_settings_display, R.string.frame_settings_device).forEach { openAndBack(activity, it); rows++ }
+            openAndBack(activity, R.string.frames_shows_none).also { rows++ }
+        }.also { rows++ }
+        graph.openTarget.value = OpenTarget(Notifications.TARGET_FEED_PEOPLE, feedId = "feed-1")
         settle()
-        val feedSections = openEverySection()
         graph.openTarget.value = OpenTarget(Notifications.TARGET_PHOTO_SOURCES)
         settle()
 
-        assertTrue("a frame you own has sections ($frameSections)", frameSections >= 5)
-        assertTrue("a family you own has sections ($feedSections)", feedSections >= 5)
+        assertTrue("a frame you own has its rows ($rows)", rows >= 7)
         assertTrue("still signed in: ${vm.phase.value}", vm.phase.value is Phase.Ready)
         println("SmokeTest (failing=$failing): requests answered with an error: $unanswered")
+    }
+
+    /** No family yet: only getting started shows; starting one asks for its name. */
+    @Test
+    fun withoutAFamilyOnlyGettingStartedShows() {
+        feeds = emptyList()
+        start()
+        assertTrue(compose.onAllNodes(isTab).fetchSemanticsNodes().isEmpty())
+        click(R.string.start_family)
+        compose.onAllNodes(hasText(app.getString(R.string.start_name_title))).onFirst().assertExists()
+    }
+
+    /** The simple view: no tab bar, a big "Send a heart", and "Normal view" in its settings sheet. */
+    @Test
+    fun theSimpleViewOpensWithoutTabs() {
+        app.getSharedPreferences(FamilyPrefs.NAME, Context.MODE_PRIVATE).edit(commit = true) { putBoolean("simple_view", true) }
+        start()
+        assertTrue(compose.onAllNodes(isTab).fetchSemanticsNodes().isEmpty())
+        click(R.string.nav_settings)
+        click(R.string.simple_normal_view)
+        assertTrue(compose.onAllNodes(isTab).fetchSemanticsNodes().isNotEmpty())
+        app.getSharedPreferences(FamilyPrefs.NAME, Context.MODE_PRIVATE).edit(commit = true) { clear() }
     }
 
     @Test

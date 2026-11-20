@@ -65,6 +65,7 @@ import app.kinframe.family.ui.frame.AlbumScheduleDialog
 import app.kinframe.family.ui.frame.FrameActions
 import app.kinframe.family.ui.frame.FrameDetailScreen
 import app.kinframe.family.ui.frame.FrameDetailState
+import app.kinframe.family.ui.frame.FrameHomeActions
 import app.kinframe.family.ui.frame.FrameSettingsViewModel
 import app.kinframe.family.ui.frame.LibraryAlbumActions
 import app.kinframe.family.ui.frame.LibraryState
@@ -188,7 +189,7 @@ class ParityScreenshotTest {
     @Test fun calendarTab() {
         val s = settingsVm()
         both("calendar_tab") {
-            FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Calendar, {}, {}, {}, {}, noop, {}, {}, calendar = { calendarTab(s) })
+            FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Calendar, {}, {}, {}, FrameHomeActions({}, {}), noop, {}, {}, calendar = { calendarTab(s) })
         }
     }
 
@@ -250,21 +251,21 @@ class ParityScreenshotTest {
     private val albumActions = LibraryAlbumActions({}, {}, { _, _ -> }, { _, _, _ -> }, {}, {}, { _, _, _ -> }, {}, { _, _ -> }, {}, { _, _ -> }, {}, {}, { _, _ -> }, {})
 
     @Test fun libraryAlbumsAndMemories() = both("library_albums_memories") {
-        FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Library, {}, {}, {}, {}, noop, {
+        FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Library, {}, {}, {}, FrameHomeActions({}, {}), noop, {
             LibraryTab(owner, LibraryState(placements = Load.Ready(placements), counts = PlacementCounts(photos = 290, videos = 22, hidden = 3),
                 albums = albums, playingAlbumId = "a1", memories = placements.take(4)), 30, {}, {}, {}, {}, {}, {}, {}, onShare = {}, albums = albumActions)
         }, {})
     }
 
     @Test fun libraryAlbumOpen() = both("library_album_open") {
-        FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Library, {}, {}, {}, {}, noop, {
+        FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Library, {}, {}, {}, FrameHomeActions({}, {}), noop, {
             LibraryTab(owner, LibraryState(placements = Load.Ready(placements.take(6)), albums = albums, albumId = "a1", playingAlbumId = "a1"),
                 30, {}, {}, {}, {}, {}, {}, {}, onShare = {}, albums = albumActions)
         }, {})
     }
 
     @Test fun libraryAlbumArrange() = both("library_album_arrange") {
-        FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Library, {}, {}, {}, {}, noop, {
+        FrameDetailScreen(FrameDetailState(Load.Ready(owner)), FrameTab.Library, {}, {}, {}, FrameHomeActions({}, {}), noop, {
             LibraryTab(owner, LibraryState(placements = Load.Ready(placements.take(6)), albums = albums, albumId = "a1", arranging = placements.take(6).map { it.id }.reversed()),
                 30, {}, {}, {}, {}, {}, {}, {}, albums = albumActions)
         }, {})
@@ -281,7 +282,7 @@ class ParityScreenshotTest {
     // ---------------------------------------------------------------- ownership
 
     @Test fun overviewOwner() = both("overview_owner") {
-        FrameDetailScreen(FrameDetailState(Load.Ready(owner), members = members), FrameTab.Overview, {}, {}, {}, {}, noop, {}, {})
+        FrameDetailScreen(FrameDetailState(Load.Ready(owner), members = members), FrameTab.Overview, {}, {}, {}, FrameHomeActions({}, {}), noop, {}, {})
     }
 
     @Test fun transferOwnership() = both("transfer_ownership") {

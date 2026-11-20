@@ -52,6 +52,7 @@ import app.kinframe.family.ui.Toaster
 import app.kinframe.family.ui.frame.FrameActions
 import app.kinframe.family.ui.frame.FrameDetailScreen
 import app.kinframe.family.ui.frame.FrameDetailState
+import app.kinframe.family.ui.frame.FrameHomeActions
 import app.kinframe.family.ui.frame.LibraryState
 import app.kinframe.family.ui.frame.LibraryTab
 import app.kinframe.family.ui.frames.AddFrameScreen
@@ -159,7 +160,8 @@ class ScreenshotTest {
         DraftItem("d4", MediaInfo(Uri.parse("content://m/4"), "cake.jpg", "image/jpeg", 1_800_000, "photo", width = 4000, height = 3000), fill = false),
     )
 
-    private val composer = ComposerState(items = draft, frames = Load.Ready(frames), selected = setOf("f-oma", "f-opa"), limits = Limits())
+    private val family = app.kinframe.core.api.Feed("fd1", "Peeters family", memberCount = 7, subscriptionCount = 3)
+    private val composer = ComposerState(items = draft, frames = Load.Ready(frames), feeds = listOf(family), selectedFeeds = setOf("fd1"), limits = Limits())
 
     private val noop = FrameActions(null, {}, { _, _ -> }, { _, _ -> }, {}, {}, { _, _ -> }, { _, _, _ -> }, { _, _ -> }, { _, _, _ -> }, {}, {}, {})
 
@@ -173,12 +175,12 @@ class ScreenshotTest {
         SignInScreen(server.copy(discovery = server.discovery.copy(devAuth = true)), OnboardingState(devEmail = "anna@example.org"), false, SignInReason.Frame, {}, {}, {}, {}, {})
     }
 
-    @Test fun framesList() = both("frames_list") { FramesScreen(FramesState(Load.Ready(frames)), {}, {}, {}, {}) }
+    @Test fun framesList() = both("frames_list") { FramesScreen(FramesState(Load.Ready(frames)), {}, {}, {}) }
 
-    @Test fun framesEmpty() = both("frames_empty") { FramesScreen(FramesState(Load.Ready(emptyList())), {}, {}, {}, {}) }
+    @Test fun framesEmpty() = both("frames_empty") { FramesScreen(FramesState(Load.Ready(emptyList())), {}, {}, {}) }
 
     @Test @Config(qualifiers = "w900dp-h1200dp-xhdpi")
-    fun framesTablet() = shot("frames_tablet_light", dark = false) { FramesScreen(FramesState(Load.Ready(frames)), {}, {}, {}, {}) }
+    fun framesTablet() = shot("frames_tablet_light", dark = false) { FramesScreen(FramesState(Load.Ready(frames)), {}, {}, {}) }
 
     @Test fun addFrameCode() = both("add_frame_code") {
         AddFrameScreen(AddFrameState(digits = "482139"), {}, {}, {}, {}, {}, {}, {}, {}, {})
@@ -189,9 +191,9 @@ class ScreenshotTest {
             {}, {}, {}, {}, {}, {}, {}, {}, {})
     }
 
-    @Test fun sendEmpty() = both("send_empty") { ComposeScreen(ComposerState(frames = Load.Ready(frames)), {}, {}, {}, {}, {}, {}, {}, {}) }
+    @Test fun sendEmpty() = both("send_empty") { ComposeScreen(ComposerState(frames = Load.Ready(frames), feeds = listOf(family), selectedFeeds = setOf("fd1")), {}, {}, {}, {}, {}, {}, {}, onChange = {}) }
 
-    @Test fun sendCompose() = both("send_compose") { ComposeScreen(composer, {}, {}, {}, {}, {}, {}, {}, {}) }
+    @Test fun sendCompose() = both("send_compose") { ComposeScreen(composer, {}, {}, {}, {}, {}, {}, {}, onChange = {}) }
 
     @Test fun sendEditPhoto() = both("send_edit_photo") {
         ItemEditor(composer, 0, {}, {}, { _, _ -> }, {}, { _, _ -> }, { _, _, _ -> }, { _, _, _, _ -> }, { _, _ -> }, {})
@@ -244,25 +246,113 @@ class ScreenshotTest {
     )
 
     @Test fun frameOverview() = both("frame_overview") {
-        FrameDetailScreen(detail, FrameTab.Overview, {}, {}, {}, {}, noop.copyMe("u1"), {}, {})
+        FrameDetailScreen(detail, FrameTab.Overview, {}, {}, {}, FrameHomeActions({}, {}), noop.copyMe("u1"), {}, {})
     }
 
     @Test fun framePeople() = both("frame_people") {
-        FrameDetailScreen(detail, FrameTab.People, {}, {}, {}, {}, noop.copyMe("u1"), {}, {})
+        FrameDetailScreen(detail, FrameTab.People, {}, {}, {}, FrameHomeActions({}, {}), noop.copyMe("u1"), {}, {})
     }
 
     @Test fun frameLibrary() = both("frame_library") {
         val placements = (1..14).map { i ->
             Placement("pl$i", "f-oma", item("x$i", kind = if (i % 5 == 0) "video" else "photo"), receivedAt = ago(i * 60L), sharedByName = if (i == 4) "Lies" else null)
         }
-        FrameDetailScreen(detail, FrameTab.Library, {}, {}, {}, {}, noop, {
+        FrameDetailScreen(detail, FrameTab.Library, {}, {}, {}, FrameHomeActions({}, {}), noop, {
             LibraryTab(frames[0], LibraryState(placements = Load.Ready(placements), counts = PlacementCounts(photos = 290, videos = 22, hidden = 3, trashed = 1),
                 selected = setOf("pl2", "pl3")), 30, {}, {}, {}, {}, {}, {}, {}, onShare = {})
         }, {})
     }
 
     @Test fun appSettings() = both("settings") {
-        SettingsScreen(User("u1", "Jeroen", "jeroen@example.org"), server, false, PushStatus.Active("ntfy"), true, false, {}, {}, {}, {}, {})
+        SettingsScreen(User("u1", "Jeroen", "jeroen@example.org"), server, false, PushStatus.Active("ntfy"), true, false, {}, {}, {}, {}, {},
+            onBack = {}, simpleView = false, onSentHistory = {}, family = {
+                androidx.compose.material3.Text("This family", style = app.kinframe.core.design.Kin.type.headline)
+            })
+    }
+
+    // ---------------------------------------------------------------- the simple app (docs/spec/simple-app.md)
+
+    private val peeters = app.kinframe.core.api.Feed("fd1", "Peeters family", role = "owner", memberCount = 4, subscriptionCount = 2, postCount = 248)
+    private val people = listOf(
+        app.kinframe.core.api.FeedMember("u1", "Jeroen", role = "owner"), app.kinframe.core.api.FeedMember("u2", "Oma Maria"),
+        app.kinframe.core.api.FeedMember("u3", "Anna"), app.kinframe.core.api.FeedMember("u4", "Ben"),
+    )
+    private fun person(id: String, name: String) = app.kinframe.core.social.PersonRef(id, name)
+    private val timeline = listOf(
+        app.kinframe.core.social.TimelinePost("tp1", feedId = "fd1", feedName = "Peeters family", poster = person("u3", "Anna"), createdAt = ago(120),
+            items = listOf(item("tu1", "The tulips are out!")), seen = app.kinframe.core.social.PostSeen(frames = 2, seen = 2),
+            thread = app.kinframe.core.social.ThreadSummary("tp1", commentCount = 2, reactions = app.kinframe.core.social.ReactionSummary(total = 3, mine = "love"))),
+        app.kinframe.core.social.TimelinePost("tp2", feedId = "fd1", feedName = "Peeters family", poster = person("u4", "Ben"), createdAt = ago(60 * 26),
+            items = listOf(item("tu2", "Sunday breakfast at Oma’s"), item("tu3")), thread = app.kinframe.core.social.ThreadSummary("tp2")),
+    )
+    private val feedPosts = (1..9).map { i ->
+        app.kinframe.core.api.FeedPost("fp$i", "fd1", app.kinframe.core.api.FeedPoster(if (i % 2 == 0) "u1" else "u3", "Anna"), createdAt = ago(i * 90L), items = listOf(item("g$i")))
+    }
+
+    private fun feedActions(): app.kinframe.family.ui.feeds.FeedActions {
+        val vm = app.kinframe.family.ui.feeds.FeedDetailViewModel(object : FakeApi() {}, "fd1", { "u1" }, kotlinx.coroutines.flow.emptyFlow())
+        return app.kinframe.family.ui.feeds.FeedActions(vm, "u1", emptyList(), {}, {}, {}, {}, addFrame = {})
+    }
+
+    @Test fun familyProfile() { val actions = feedActions(); both("family_profile") {
+        app.kinframe.family.ui.family.FamilyProfileScreen(
+            app.kinframe.family.ui.feeds.FeedDetailState(Load.Ready(peeters), Load.Ready(feedPosts), members = people),
+            app.kinframe.family.ui.FeedTab.Posts, {}, actions,
+            app.kinframe.family.ui.family.ProfileActions({}, {}, {}, {}),
+        )
+    } }
+
+    @Test fun familyProfilePeople() { val actions = feedActions(); both("family_profile_people") {
+        app.kinframe.family.ui.family.FamilyProfileScreen(
+            app.kinframe.family.ui.feeds.FeedDetailState(Load.Ready(peeters), Load.Ready(feedPosts), members = people),
+            app.kinframe.family.ui.FeedTab.People, {}, actions,
+            app.kinframe.family.ui.family.ProfileActions({}, {}, {}, {}),
+        )
+    } }
+
+    @Test fun simpleView() = both("simple_view") {
+        app.kinframe.family.ui.family.SimpleViewScreen("Peeters family", app.kinframe.family.ui.home.HomeState(posts = Load.Ready(timeline)),
+            User("u2", "Oma Maria"), showFamily = true, a = app.kinframe.family.ui.family.SimpleViewActions({}, {}, {}, {}, {}))
+    }
+
+    @Test fun gettingStarted() = both("getting_started") {
+        app.kinframe.family.ui.family.GettingStartedScreen(app.kinframe.family.ui.family.SetupStep.Choice, "", false, null,
+            app.kinframe.family.ui.family.SetupActions({}, {}, {}, {}, { _, _ -> }))
+    }
+
+    @Test fun gettingStartedName() = both("getting_started_name") {
+        app.kinframe.family.ui.family.GettingStartedScreen(app.kinframe.family.ui.family.SetupStep.Name, "Trappers family", false, null,
+            app.kinframe.family.ui.family.SetupActions({}, {}, {}, {}, { _, _ -> }))
+    }
+
+    @Test fun home() {
+        val vm = app.kinframe.family.ui.home.HomeViewModel(object : FakeSocial() {}, object : FakeApi() {}, { "u1" }, kotlinx.coroutines.flow.emptyFlow(), engagement = false)
+        both("home") { app.kinframe.family.ui.home.HomeScreen(
+            app.kinframe.family.ui.home.HomeState(posts = Load.Ready(timeline), members = people,
+                familyFrames = listOf(app.kinframe.core.api.SubscriptionFrame("f-oma", "Oma’s frame", online = true), app.kinframe.core.api.SubscriptionFrame("f-opa", "Opa Jos")),
+                frameThumbs = mapOf("f-oma" to "photo:now")),
+            app.kinframe.family.ui.home.HomeActions(vm, "u1", {}, {}, {}, {}, {}, null, {}, {}, {}, {}, {},
+                families = listOf(peeters, app.kinframe.core.api.Feed("fd2", "Opa & Oma Trappers")), activityBadge = 2, invite = {}),
+        ) }
+    }
+
+    @Test fun framesOfTheFamilies() = both("frames_families") {
+        val shows = listOf(app.kinframe.core.api.SubscriptionFeed("fd1", "Trappers"), app.kinframe.core.api.SubscriptionFeed("fd2", "Opa & Oma Trappers"))
+        FramesScreen(FramesState(Load.Ready(frames), shows = mapOf("f-oma" to shows, "f-opa" to shows.take(1)), thumbs = mapOf("f-oma" to "photo:oma"),
+            familyFrames = listOf(app.kinframe.family.ui.frames.FamilyFrame(app.kinframe.core.api.SubscriptionFrame("f-x", "Line’s parents", online = true), shows))),
+            {}, {}, {}, onAddFamily = {}, onOpenFamilyFrame = {})
+    }
+
+    @Test fun familyList() = both("family_list") {
+        app.kinframe.family.ui.family.FamilyListScreen(listOf(peeters, app.kinframe.core.api.Feed("fd2", "Opa & Oma Trappers", memberCount = 2, subscriptionCount = 1)), "fd1", {}, {}, {}, {})
+    }
+
+    @Test fun frameSettingsAndHelp() = both("frame_settings_help") {
+        FrameDetailScreen(detail, FrameTab.Settings, {}, {}, {}, FrameHomeActions({}, {}), noop.copyMe("u1"), {}, {}, feeds = {})
+    }
+
+    @Test fun frameDevice() = both("frame_device") {
+        FrameDetailScreen(detail, FrameTab.Device, {}, {}, {}, FrameHomeActions({}, {}), noop.copyMe("u1"), {}, {})
     }
 
     // ---------------------------------------------------------------- plugins
