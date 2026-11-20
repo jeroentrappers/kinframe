@@ -58,6 +58,13 @@ type Config struct {
 	TermsURL   string // KINFRAME_TERMS_URL; empty = no terms link
 	PrivacyURL string // KINFRAME_PRIVACY_URL; empty = no privacy link
 
+	// GlitchTipURL is the origin of a GlitchTip instance that operators sign
+	// in to with Logto (KINFRAME_LOGTO_GLITCHTIP_URL); nil = no GlitchTip app.
+	// Its client settings and the operators' Logto user IDs go to
+	// GlitchTipFile (KINFRAME_LOGTO_GLITCHTIP_FILE).
+	GlitchTipURL  *url.URL
+	GlitchTipFile string
+
 	// Warnings are logged at the start of a run.
 	Warnings []string
 
@@ -200,13 +207,18 @@ func loadConfig(get func(string) string) (*Config, error) {
 		*x.dst = v
 	}
 
+	dataDir := env("KINFRAME_DATA_DIR")
+	if dataDir == "" {
+		dataDir = "./data"
+	}
 	c.OutputFile = env("KINFRAME_LOGTO_CONFIG_FILE")
 	if c.OutputFile == "" {
-		dir := env("KINFRAME_DATA_DIR")
-		if dir == "" {
-			dir = "./data"
-		}
-		c.OutputFile = filepath.Join(dir, "logto.json")
+		c.OutputFile = filepath.Join(dataDir, "logto.json")
+	}
+	c.GlitchTipURL = parseURL("KINFRAME_LOGTO_GLITCHTIP_URL", env("KINFRAME_LOGTO_GLITCHTIP_URL"), false)
+	c.GlitchTipFile = env("KINFRAME_LOGTO_GLITCHTIP_FILE")
+	if c.GlitchTipFile == "" {
+		c.GlitchTipFile = filepath.Join(dataDir, "glitchtip-oidc.json")
 	}
 
 	if len(errs) > 0 {

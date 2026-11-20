@@ -160,6 +160,10 @@ func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) err
 		return fmt.Errorf("access token claims: %w", err)
 	}
 
+	if err := b.ensureGlitchTip(ctx, issuer); err != nil {
+		return fmt.Errorf("GlitchTip app: %w", err)
+	}
+
 	if err := b.writeOutput(config.LogtoFile{
 		Issuer:          issuer,
 		WebClientID:     webID,
@@ -735,33 +739,52 @@ func (b *Bootstrapper) writeOutput(lf config.LogtoFile) error {
 	if err != nil {
 		return err
 	}
-	data = append(data, '\n')
-	path := b.cfg.OutputFile
-	if old, err := os.ReadFile(path); err == nil && bytes.Equal(old, data) {
-		return nil
-	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".logto-*.json")
+	changed, err := writeFileAtomic(b.cfg.OutputFile, append(data, '\n'), 0o644)
 	if err != nil {
 		return err
 	}
+	if changed {
+		b.changed("wrote Logto client settings for discovery", "file", b.cfg.OutputFile)
+	}
+	return nil
+}
+
+// writeFileAtomic replaces path with data (through a temporary file in the
+// same directory) unless it already has exactly that content and mode.
+func writeFileAtomic(path string, data []byte, mode os.FileMode) (bool, error) {
+	if old, err := os.ReadFile(path); err == nil && bytes.Equal(old, data) {
+		st, err := os.Stat(path)
+		if err != nil {
+			return false, err
+		}
+		if st.Mode().Perm() == mode {
+			return false, nil
+		}
+		return true, os.Chmod(path, mode)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return false, err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+"-*")
+	if err != nil {
+		return false, err
+	}
 	defer os.Remove(tmp.Name())
+	// CreateTemp makes the file 0600, so secrets are never readable by others,
+	// not even briefly.
 	if _, err := tmp.Write(data); err != nil {
 		tmp.Close()
-		return err
+		return false, err
 	}
-	if err := tmp.Chmod(0o644); err != nil {
+	if err := tmp.Chmod(mode); err != nil {
 		tmp.Close()
-		return err
+		return false, err
 	}
 	if err := tmp.Close(); err != nil {
-		return err
+		return false, err
 	}
 	if err := os.Rename(tmp.Name(), path); err != nil {
-		return err
+		return false, err
 	}
-	b.changed("wrote Logto client settings for discovery", "file", path)
-	return nil
+	return true, nil
 }

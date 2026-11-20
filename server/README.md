@@ -303,8 +303,12 @@ What it ensures: API resource `<KINFRAME_PUBLIC_URL>/v1` (1 h tokens, scope `kin
 native app `kinframe app`; the SMTP connector with English code emails; sign-in experience (passwordless email codes
 for sign-up and sign-in, passkeys, required `name` at sign-up, language from the browser); social sign-in connectors
 for the providers configured below, shown on the sign-in page in the order Apple, Google, Microsoft, Facebook, GitHub;
-the kinframe look on Logto's pages (logo, colours, dark mode, `internal/logtoboot/signin.css`); and a custom
-access-token script that adds `name` and `email` to tokens for the kinframe API only.
+the kinframe look on Logto's pages (logo, colours, dark mode, `internal/logtoboot/signin.css`); a custom
+access-token script that adds `name` and `email` to tokens for the kinframe API only; and, with
+`KINFRAME_LOGTO_GLITCHTIP_URL`, a Traditional web app `GlitchTip` (redirect `<url>/accounts/oidc/logto/login/callback/`)
+whose client ID, a client secret (Logto's existing one is reused; a new one only when none stays valid for a day),
+the issuer and the operators' Logto user IDs go to `KINFRAME_LOGTO_GLITCHTIP_FILE` (mode 0600) for the glitchtip
+Ansible role (`docs/spec/crash-reporting.md` §1).
 
 Social connectors get fixed IDs, so their callback URLs are known before the first run:
 `<KINFRAME_LOGTO_ENDPOINT>/callback/{apple,google,microsoft,facebook,github}`. A provider is on when its client ID is
@@ -347,6 +351,8 @@ Management API access, in order of preference:
 | `KINFRAME_LOGTO_PASSWORD_SIGNIN` | `false` | Let accounts that have a password (set by an admin, e.g. an App Review account) sign in with it next to email codes; sign-up stays passwordless |
 | `KINFRAME_TERMS_URL` / `KINFRAME_PRIVACY_URL` | — | Legal links on the sign-up page; none when unset |
 | `KINFRAME_LOGTO_CONFIG_FILE` | `$KINFRAME_DATA_DIR/logto.json` | Output file |
+| `KINFRAME_LOGTO_GLITCHTIP_URL` | — | GlitchTip's origin (e.g. `https://errors.example.org`); when set, operators can sign in to GlitchTip with Logto |
+| `KINFRAME_LOGTO_GLITCHTIP_FILE` | `$KINFRAME_DATA_DIR/glitchtip-oidc.json` | GlitchTip sign-in settings, with the client secret (mode 0600) |
 
 ## Layout
 
