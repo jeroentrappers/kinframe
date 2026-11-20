@@ -139,13 +139,10 @@ First start (signed in, no family, no frame): two choices —
 
 After joining someone else's family: the normal/simple view question (§6).
 
-Existing users with frames but no family keep working: `+` sends to their frames (the composer shows a frame picker
-in place of the family row, as before), and Home shows a card "Start a family for Oma's frame" that creates a family,
-adds the frame(s) they manage to it (active at once) and offers the invite link. Existing families and subscriptions
-need no migration.
-
-When the server has no feeds (discovery `feeds` off, self-hosted older servers), the apps keep the old frame-only
-navigation.
+There are no existing users or older servers to stay compatible with. The apps assume a server with families
+(discovery `feeds`) and social; no legacy frame-only navigation, no "start a family for your frame" migration card,
+and no fallbacks for old flows. Someone without a family sees only the getting-started choices. Old app routes and
+screens that the new navigation no longer reaches are deleted, not kept or redirected.
 
 ## 9. Out of scope
 
