@@ -9,7 +9,7 @@
 ---
 glitchtip_dir: /opt/glitchtip
 glitchtip_domain: ""
-glitchtip_version: "6.2.6"           # https://glitchtip.com/blog for new major versions
+glitchtip_version: "7.0.0"           # https://glitchtip.com/blog for new major versions
 glitchtip_postgres_version: "18"
 glitchtip_valkey_version: "9"
 glitchtip_port: 8130                 # loopback port for the reverse proxy
