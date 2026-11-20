@@ -96,7 +96,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 }
 
 /// The primary account's model for the app's screens, and every account for merged lists; a new primary swaps it.
-private struct AccountsRoot: View {
+struct AccountsRoot: View {
     let accounts: Accounts
 
     var body: some View {
