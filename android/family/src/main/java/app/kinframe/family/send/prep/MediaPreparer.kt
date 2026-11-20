@@ -22,6 +22,7 @@ import androidx.media3.effect.Presentation
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.DefaultEncoderFactory
 import androidx.media3.transformer.EditedMediaItem
+import androidx.media3.transformer.EditedMediaItemSequence
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
@@ -88,7 +89,9 @@ class MediaPreparer(private val context: Context) {
                 warn("prepare motion", e)
                 videoFallback(motion, e.javaClass.simpleName)
             }
-            out = out.copy(motion = motion.withPrep(mr))
+            // A clip this phone can't prepare doesn't stop the send: the still goes on its own (PrepPolicy.motionOutcome).
+            out = out.copy(motion = PrepPolicy.motionOutcome(mr)?.let { motion.withPrep(it) })
+            if (out.motion == null) motion.localPath?.let { File(it).delete() }
         }
         onProgress(1f)
         out
@@ -264,7 +267,12 @@ class MediaPreparer(private val context: Context) {
                         .build()
                     transformer = t
                     cont.invokeOnCancellation { Handler(Looper.getMainLooper()).post { t.cancel() } }
-                    t.start(edited, out.path)
+                    // HDR sources (10-bit HLG/PQ/Dolby Vision, e.g. Oppo and Samsung live photo clips and HDR videos)
+                    // become SDR: the master is 8-bit H.264, which can't carry HDR, and the encoder refuses otherwise.
+                    val composition = Composition.Builder(EditedMediaItemSequence.Builder(edited).build())
+                        .apply { if (sdk >= 29) setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL) }
+                        .build()
+                    t.start(composition, out.path)
                 }
             } finally {
                 poll.cancel()

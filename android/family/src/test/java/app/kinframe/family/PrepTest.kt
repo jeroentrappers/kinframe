@@ -202,4 +202,9 @@ class PrepTest {
         assertNull(MotionPhotos.find(ArrayReader(broken)))
         assertEquals(emptyList<Long>(), MotionPhotos.candidateOffsets("<x:xmpmeta></x:xmpmeta>", 1000))
     }
+
+    @Test fun aLiveClipThatCantBePreparedLeavesTheStillToGoAlone() {
+        assertNull(PrepPolicy.motionOutcome(PrepResult.Failed("ExportException")))
+        assertEquals(PrepResult.AsIs("sdk"), PrepPolicy.motionOutcome(PrepResult.AsIs("sdk")))
+    }
 }

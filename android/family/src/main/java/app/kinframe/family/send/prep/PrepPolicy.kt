@@ -69,6 +69,12 @@ object PrepPolicy {
     fun unprepared(withinLimits: Boolean, reason: String): PrepResult =
         if (withinLimits) PrepResult.AsIs(reason) else PrepResult.Failed(reason)
 
+    /**
+     * The clip of a live photo: kept when prepared (or fine as it is), dropped (null) when it failed, so the still is
+     * sent as an ordinary photo instead of the whole send stopping over a clip this phone can't convert.
+     */
+    fun motionOutcome(r: PrepResult): PrepResult? = if (r is PrepResult.Failed) null else r
+
     /** The prepared photo size: long edge ≤ 2560, never upscaled. */
     fun photoTarget(src: PxSize): PxSize {
         val scale = min(1.0, PHOTO_MAX_EDGE.toDouble() / src.long)
