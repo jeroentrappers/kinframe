@@ -1,7 +1,7 @@
-• 1.2.1: de app sluit niet meer meteen na het opstarten.
+• 1.2.1: de app sluit niet meer na het opstarten.
 • Home: alles wat je families delen, met reacties van mensen en kaders.
 • Opmerkingen bij elke foto, antwoorden en @vermeldingen.
-• Chats: één-op-één, groepen, familie- en kringchats, spraakberichten, foto op een kader zetten.
+• Chats: één-op-één, groepen, familie- en kringchats, spraakberichten.
 • Feeds heten nu families, met kringen en meelezers.
 • Zachte herinneringen, Vraag om nieuwe foto's, familiereeks en weekthema.
 • Familie verlaten: je foto's blijven of gaan mee, met een seintje.
