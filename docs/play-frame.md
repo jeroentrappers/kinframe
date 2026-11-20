@@ -200,9 +200,22 @@ The GitHub build (`release-frame.yml`) takes the same two from repository secret
 `SENTRY_AUTH_TOKEN`, both optional. Play still gets the mapping too (`frame_internal`), for Android vitals.
 
 The store listing (en-US, nl-NL: title, short and full description, release notes) is in
-`android/fastlane/frame-metadata/android/`, separate from the family app's `fastlane/metadata/`. Graphics are not in
-the repository yet: add `images/icon.png` (512×512), `images/featureGraphic.png` (1024×500) and tablet screenshots
-(`images/sevenInchScreenshots/`, `images/tenInchScreenshots/`) per locale, or upload them in Play Console.
+`android/fastlane/frame-metadata/android/`, separate from the family app's `fastlane/metadata/`. The graphics are
+there too, per locale under `images/`, and `frame_metadata` uploads them with the texts: `icon.png` (512×512, the
+launcher icon), `featureGraphic.png` (1024×500) and five landscape screenshots each in `tenInchScreenshots/`
+(2560×1440: photo with caption, quick menu, pair, forecast, setup code) and `sevenInchScreenshots/` (1920×1080: the
+welcome after claiming instead of the forecast, whose sheet needs the 10-inch width).
+They match the family listing (`android/tools/storeshots/compose.mjs`): the same headline type, colours and framing.
+
+To regenerate them (after a UI change, or to change a headline):
+
+1. `./gradlew :frame:testGithubDebugUnitTest --tests app.kinframe.frame.StoreScreenshotTest` renders the real
+   composables with Robolectric, in English and Dutch on a 10-inch (1280×800 dp, xhdpi) and a 7-inch (1024×600 dp,
+   hdpi) screen, to `android/frame/build/screenshots/store/`. The photos are the CC0 / public-domain ones in
+   `ios/tools/storeshots/photos/` (licences in `CREDITS.md` there); the people's names and captions are made up.
+2. `npm ci` in `ios/tools/storeshots/` (once, for Playwright), then `node android/tools/storeshots/compose-frame.mjs`
+   adds the headlines (in that script) and writes the images, the feature graphic and the icon. It flattens with
+   ImageMagick, as Play wants no alpha channel in screenshots and the feature graphic.
 
 ## Play App Signing: handing over the release key
 
