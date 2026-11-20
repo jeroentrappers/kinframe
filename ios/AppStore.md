@@ -121,8 +121,12 @@ Tracking: **No**. Data linked to the user, all for **App Functionality** only (n
 | User Content → Other User Content | captions, albums, replies, calendar links and events, frame settings | "What you send", "Calendars" |
 | Identifiers → User ID | technical user ID | "Account" |
 
+Data **not linked** to the user, for **App Functionality**: Diagnostics → Crash Data and Other Diagnostic Data (app
+hangs), the crash reports of official builds (`docs/spec/crash-reporting.md`, privacy policy "Crash reports"; off
+with Settings → "Send crash reports").
+
 Not collected by the app: location (EXIF/GPS is removed; a frame's place is entered by its owner as text, which
-falls under Other User Content), contacts, browsing history, diagnostics, purchases. When APNs is turned on,
+falls under Other User Content), contacts, browsing history, performance data, purchases. When APNs is turned on,
 add **Identifiers → Device ID** (push token) and update `PrivacyInfo.xcprivacy` to match.
 
 ## Age rating questionnaire

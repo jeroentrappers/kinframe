@@ -64,9 +64,36 @@ the latest `vX.Y.Z` tag without its pre-release suffix and the build number is t
 `MARKETING_VERSION=…` and `BUILD_NUMBER=…`.
 
 The app, the share extension and KinframeKit each carry a `PrivacyInfo.xcprivacy`: no tracking, UserDefaults
-(`CA92.1`, `1C8F.1` for the App Group) and file timestamps (`C617.1`, the outbox) as required-reason APIs, and the
-collected data (email, name, user ID, photos and videos, other user content, all for app functionality). Keep them
-in step with the App Privacy answers in App Store Connect (drafted in `ios/AppStore.md`).
+(`CA92.1`, `1C8F.1` for the App Group), file timestamps (`C617.1`, the outbox) and system boot time (`35F9.1`, the
+crash reporter) as required-reason APIs, and the collected data (email, name, user ID, photos and videos, other user
+content, all for app functionality; crash and other diagnostic data, not linked). Keep them in step with the App
+Privacy answers in App Store Connect (drafted in `ios/AppStore.md`).
+
+### Crash reports
+
+Official builds report crashes, app hangs and watchdog terminations to kinframe's GlitchTip, project `family-apple`
+(`docs/spec/crash-reporting.md`), with sentry-cocoa (SPM product `SentrySPM`, which compiles it from source, linked
+into KinframeKit; `KinframeKit/Core/CrashReporting.swift`). The app and the share extension each start it at launch.
+
+- The build setting `KINFRAME_SENTRY_DSN` (empty by default) becomes Info.plist `KinframeSentryDSN`. Without a DSN the
+  SDK isn't started at all, so debug builds, CI and other people's builds send nothing.
+- Settings → **Send crash reports** (default on, kept in the App Group so the share extension follows it, applies at
+  the next start) turns it off. It shows only in builds with a DSN.
+- Reports carry no user, IP, device name, cookies, headers, query strings or bodies, no screenshots, view hierarchy
+  or replay; tracing, sessions and failed-request events are off. `beforeSend`/`beforeBreadcrumb` enforce it
+  (`KinframeTests/CrashReportingTests.swift`). Release `family-apple@<version>+<build>`, environment `production`,
+  tags `app.platform` (`ios`, `mac-catalyst`) and `component` (`app`, `share-extension`).
+- `release` and `mac_release` pass `KINFRAME_SENTRY_DSN` from the environment, and after archiving upload the
+  archive's dSYMs (app, extension, KinframeKit) with `sentry-cli debug-files upload --project family-apple`, using
+  `SENTRY_AUTH_TOKEN`, `SENTRY_URL` (default `https://errors.kinframe.appmire.be`) and `SENTRY_ORG` (default
+  `kinframe`). Without the token or sentry-cli (`brew install getsentry/tools/sentry-cli`), or when the upload fails,
+  they warn, print the command to upload later and go on. Both variables are read from
+  `~/.appstoreconnect/signing.env` when not set.
+
+To see what a build sends, point it at any HTTP server that logs requests, e.g.
+`KINFRAME_SENTRY_DSN=http://0123456789abcdef0123456789abcdef@127.0.0.1:8977/1` in `xcodebuild … build`; envelopes
+arrive at `POST /api/1/envelope/` (gzip). A crash is sent at the next start; run the app without the debugger
+attached (`xcrun simctl launch`, or open the .app), which otherwise catches the crash first.
 
 ### Against a dev server
 
