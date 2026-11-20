@@ -29,8 +29,11 @@ androidxTestRunner = "1.7.0"
 androidxTestJunit = "1.3.0"
 playAppUpdate = "2.1.0"
 fragment = "1.8.9"
+sentry = "8.63.0"
 
 [libraries]
+# Crash reports to kinframe's GlitchTip, only in builds given a DSN (docs/spec/crash-reporting.md).
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry" }
 # Frame, Google Play flavor only: Play in-app updates (docs/play-frame.md).
 play-app-update = { module = "com.google.android.play:app-update", version.ref = "playAppUpdate" }
 # Play services pull in Fragment 1.0, whose activity results are broken; the activity-result API needs 1.3+.

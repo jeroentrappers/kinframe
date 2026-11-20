@@ -33,6 +33,12 @@ dependencies {
     api(libs.kotlinx.serialization.json)
     api(libs.kotlinx.coroutines.android)
     api(libs.androidx.core.ktx)
+    // Crash reports (docs/spec/crash-reporting.md, CrashReports.kt). Without session replay, so it can't be switched on,
+    // and without the NDK integration: sentry-native sends native crashes past the Java beforeSend that scrubs them.
+    api(libs.sentry.android) {
+        exclude(group = "io.sentry", module = "sentry-android-replay")
+        exclude(group = "io.sentry", module = "sentry-android-ndk")
+    }
 
     api(platform(libs.compose.bom))
     api(libs.compose.ui)
