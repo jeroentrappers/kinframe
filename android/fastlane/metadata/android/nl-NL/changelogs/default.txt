@@ -1,8 +1,8 @@
-• 1.2.2: geen crashes meer bij het starten en in de kalender.
+• 1.2.3: anonieme crashrapporten helpen fouten oplossen (uitzetten in Instellingen → Privacy).
 • Home: alles wat je families delen, met reacties van mensen en kaders.
 • Opmerkingen bij elke foto, antwoorden en @vermeldingen.
-• Chats: één-op-één, groepen, familie- en kringchats, spraakberichten.
+• Chats: één-op-één, groepen, families en kringen, spraakberichten.
 • Feeds heten nu families, met kringen en meelezers.
-• Zachte herinneringen, Vraag om nieuwe foto's, familiereeks en weekthema.
+• Herinneringen, Vraag om nieuwe foto's, familiereeks en weekthema.
 • Familie verlaten: je foto's blijven of gaan mee.
 • Meerdere kinframe-servers in één app.

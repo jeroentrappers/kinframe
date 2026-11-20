@@ -1,7 +1,7 @@
-• 1.2.2: fixes crashes at start and in the calendar.
+• 1.2.3: anonymous crash reports help us fix bugs (Settings → Privacy to turn off).
 • Home: everything your families share, with reactions from people and frames.
 • Comments on every photo, replies and @mentions.
-• Chats: one-to-one, groups, family and circle chats, voice messages, put a photo on a frame.
+• Chats: one-to-one, groups, families and circles, voice messages.
 • Feeds are now families, with circles and readers.
 • Gentle reminders, Ask for new photos, family streak and weekly theme.
 • Leaving a family: your photos stay or go.
