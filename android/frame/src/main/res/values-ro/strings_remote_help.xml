@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Ajutor de la distanță</string>
+    <string name="remote_help_badge">Ajutorul de la distanță este activ până la %1$s</string>
+    <string name="remote_help_stop_question">Operatorul kinframe poate vedea această ramă pentru a ajuta. Oprești?</string>
+    <string name="remote_help_stop">Oprește ajutorul de la distanță</string>
+    <string name="remote_help_keep">Lasă-l activ</string>
+    <string name="pin_reason_remote_help">pentru a opri ajutorul de la distanță</string>
+</resources>

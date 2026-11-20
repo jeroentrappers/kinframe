@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Fjärrhjälp</string>
+    <string name="remote_help_badge">Fjärrhjälp är på till %1$s</string>
+    <string name="remote_help_stop_question">kinframes operatör kan titta på den här fotoramen för att hjälpa till. Stoppa?</string>
+    <string name="remote_help_stop">Stoppa fjärrhjälp</string>
+    <string name="remote_help_keep">Låt den vara på</string>
+    <string name="pin_reason_remote_help">för att stoppa fjärrhjälp</string>
+</resources>

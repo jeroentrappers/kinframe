@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Assistenza remota</string>
+    <string name="remote_help_badge">Assistenza remota attiva fino alle %1$s</string>
+    <string name="remote_help_stop_question">L\'operatore di kinframe può vedere questa cornice per aiutarti. Interrompere?</string>
+    <string name="remote_help_stop">Interrompi l\'assistenza remota</string>
+    <string name="remote_help_keep">Lasciala attiva</string>
+    <string name="pin_reason_remote_help">per interrompere l\'assistenza remota</string>
+</resources>

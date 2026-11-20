@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">עזרה מרחוק</string>
+    <string name="remote_help_badge">העזרה מרחוק פעילה עד %1$s</string>
+    <string name="remote_help_stop_question">המפעיל של kinframe יכול להסתכל על המסגרת הזו כדי לעזור. להפסיק?</string>
+    <string name="remote_help_stop">הפסקת העזרה מרחוק</string>
+    <string name="remote_help_keep">להשאיר פעילה</string>
+    <string name="pin_reason_remote_help">כדי להפסיק את העזרה מרחוק</string>
+</resources>

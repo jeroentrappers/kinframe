@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Bantuan jarak jauh</string>
+    <string name="remote_help_badge">Bantuan jarak jauh aktif sampai %1$s</string>
+    <string name="remote_help_stop_question">Operator kinframe dapat melihat bingkai ini untuk membantu. Hentikan?</string>
+    <string name="remote_help_stop">Hentikan bantuan jarak jauh</string>
+    <string name="remote_help_keep">Biarkan aktif</string>
+    <string name="pin_reason_remote_help">untuk menghentikan bantuan jarak jauh</string>
+</resources>

@@ -244,6 +244,14 @@ class DeviceApi(
         url(endpoint("device/photo-requests")).post(ByteArray(0).toRequestBody(null))
     }.decode(FramePhotoRequest.serializer())
 
+    /**
+     * `DELETE /device/remote-help`: Stop tapped at the frame (docs/spec/remote-help.md §5.2), `204`. A session that
+     * already ended (`404`) counts as stopped too.
+     */
+    suspend fun endRemoteHelp() = authed { url(endpoint("device/remote-help")).delete() }.use { r ->
+        if (!r.isSuccessful && r.code != 404) r.throwForStatus()
+    }
+
     /** `POST /device/calendar/sync`: "Sync now" for all of the frame's calendars (the server does the work). */
     suspend fun syncCalendars() = authed { url(endpoint("device/calendar/sync")).post(ByteArray(0).toRequestBody(null)) }.expectOk()
 

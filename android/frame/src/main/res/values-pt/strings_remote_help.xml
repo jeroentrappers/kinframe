@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Ajuda remota</string>
+    <string name="remote_help_badge">A ajuda remota está ativa até às %1$s</string>
+    <string name="remote_help_stop_question">O operador do kinframe pode ver este porta-retrato para ajudar. Parar?</string>
+    <string name="remote_help_stop">Parar a ajuda remota</string>
+    <string name="remote_help_keep">Manter ativa</string>
+    <string name="pin_reason_remote_help">para parar a ajuda remota</string>
+</resources>

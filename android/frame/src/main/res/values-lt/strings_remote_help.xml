@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Nuotolinė pagalba</string>
+    <string name="remote_help_badge">Nuotolinė pagalba įjungta iki %1$s</string>
+    <string name="remote_help_stop_question">kinframe operatorius gali pažiūrėti į šį rėmelį ir padėti. Sustabdyti?</string>
+    <string name="remote_help_stop">Sustabdyti nuotolinę pagalbą</string>
+    <string name="remote_help_keep">Palikti įjungtą</string>
+    <string name="pin_reason_remote_help">kad sustabdytumėte nuotolinę pagalbą</string>
+</resources>

@@ -30,6 +30,11 @@ class GithubBuildTest {
         assertEquals(app.kinframe.core.api.FrameFeatures.SUPPORTED, Distribution.heartbeatFeatures())
     }
 
+    @Test fun remoteHelpIsPartOfThisBuild() {
+        assertTrue(runCatching { Class.forName("app.kinframe.frame.remotehelp.RemoteHelpEngine") }.isSuccess)
+        assertTrue(app.kinframe.frame.remotehelp.RemoteHelp::class.java.isAssignableFrom(app.kinframe.frame.remotehelp.RemoteHelpManager::class.java))
+    }
+
     @Test fun selfUpdatesFromTheServer() {
         // The self-update and its installer are part of this build (docs/api/README.md §5.7).
         assertTrue(runCatching { Class.forName("app.kinframe.frame.update.Installer") }.isSuccess)

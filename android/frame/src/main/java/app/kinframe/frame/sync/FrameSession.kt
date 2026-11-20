@@ -60,6 +60,8 @@ class FrameSession(
         fun onEventInvitation(invitation: JsonObject) {}
         suspend fun heartbeat(): Heartbeat
         fun onPulled(result: SyncEngine.PullResult) {}
+        /** A `remote_help` change: the session payload, or null (see [SyncEngine]). Must return quickly. */
+        fun onRemoteHelp(payload: JsonObject?) {}
     }
 
     enum class Connection { Connecting, Online, ServerUnreachable, Offline }
@@ -67,7 +69,7 @@ class FrameSession(
     private val scope = CoroutineScope(SupervisorJob(parent.coroutineContext[Job]) + Dispatchers.Default)
     val acks = AckQueue(db, clock::nowMs)
     val outbox = Outbox(db, clock::nowMs)
-    val sync = SyncEngine(api, db, media, clock::nowMs)
+    val sync = SyncEngine(api, db, media, clock::nowMs).apply { onRemoteHelp = events::onRemoteHelp }
     val downloader = Downloader(api, db, media, acks, clock::nowMs, makeRoom = makeRoom)
     private val pullRequests = Channel<Unit>(Channel.CONFLATED)
 

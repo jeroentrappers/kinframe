@@ -412,6 +412,8 @@ object ChangeType {
     const val COMMENTS = "comments"
     const val PHOTO_REQUEST = "photo_request"
     const val PROMPTS = "prompts"
+    /** Remote help (docs/spec/remote-help.md §5.2): entity = the frame; `remote_help: null` means no session (clean up). */
+    const val REMOTE_HELP = "remote_help"
     const val RESET = "reset"
 }
 
@@ -434,6 +436,8 @@ data class Change(
     val comments: JsonObject? = null,
     val photoRequest: JsonObject? = null,
     val prompts: JsonObject? = null,
+    /** Remote help session for this frame (the GitHub frame build's `RemoteHelpPayload`); null means "no session". */
+    val remoteHelp: JsonObject? = null,
 )
 
 @Serializable
@@ -473,7 +477,29 @@ data class Heartbeat(
     val lastUpdateError: String? = null,
     /** What this frame app understands beyond the base protocol ([FrameFeatures]); the server adapts to it. */
     val features: List<String>? = null,
+    /** The frame's side of a remote help session (docs/spec/remote-help.md §5.2); absent when it never had one. */
+    val remoteHelp: RemoteHelpReport? = null,
 )
+
+/** Heartbeat `remote_help`: how far the frame got with a remote help session. */
+@Serializable
+data class RemoteHelpReport(
+    val sessionId: String,
+    /** [RemoteHelpState]. */
+    val state: String,
+    /** The frame's tailnet IPv4 address once [RemoteHelpState.ON]. */
+    val ip: String? = null,
+    /** Why it [RemoteHelpState.FAILED]: the last line of the failing step's output. */
+    val error: String? = null,
+)
+
+/** `RemoteHelpReport.state` values. */
+object RemoteHelpState {
+    const val STARTING = "starting"
+    const val ON = "on"
+    const val FAILED = "failed"
+    const val OFF = "off"
+}
 
 /** `Heartbeat.features` values. */
 object FrameFeatures {
@@ -493,6 +519,12 @@ object FrameFeatures {
     const val COMMENTS = "comments"
     const val PHOTO_REQUESTS = "photo_requests"
     const val PROMPTS = "prompts"
+
+    /**
+     * Remote help (docs/spec/remote-help.md): only the GitHub build on a rooted frame can join the operator's
+     * tailnet, so it is not in [SUPPORTED]; that build adds it once it found root.
+     */
+    const val REMOTE_HELP = "remote_help"
 
     /** Everything this build supports, sent in every heartbeat. */
     val SUPPORTED: List<String> = listOf(FEED_BACKFILL, BIRTHDAYS, COMMENTS, PHOTO_REQUESTS, PROMPTS)

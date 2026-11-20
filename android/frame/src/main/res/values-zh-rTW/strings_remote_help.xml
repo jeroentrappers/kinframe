@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">遠端協助</string>
+    <string name="remote_help_badge">遠端協助開啟至 %1$s</string>
+    <string name="remote_help_stop_question">kinframe 營運方可以查看此相框以提供協助。要停止嗎？</string>
+    <string name="remote_help_stop">停止遠端協助</string>
+    <string name="remote_help_keep">保持開啟</string>
+    <string name="pin_reason_remote_help">以停止遠端協助</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Attālā palīdzība</string>
+    <string name="remote_help_badge">Attālā palīdzība ir ieslēgta līdz %1$s</string>
+    <string name="remote_help_stop_question">kinframe operators var apskatīt šo rāmi, lai palīdzētu. Apturēt?</string>
+    <string name="remote_help_stop">Apturēt attālo palīdzību</string>
+    <string name="remote_help_keep">Atstāt ieslēgtu</string>
+    <string name="pin_reason_remote_help">lai apturētu attālo palīdzību</string>
+</resources>

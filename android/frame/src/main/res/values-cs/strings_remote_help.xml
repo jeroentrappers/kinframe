@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_help_title">Vzdálená pomoc</string>
+    <string name="remote_help_badge">Vzdálená pomoc je zapnutá do %1$s</string>
+    <string name="remote_help_stop_question">Provozovatel kinframe se může na tento rámeček podívat a pomoci. Ukončit?</string>
+    <string name="remote_help_stop">Ukončit vzdálenou pomoc</string>
+    <string name="remote_help_keep">Nechat zapnuté</string>
+    <string name="pin_reason_remote_help">pro ukončení vzdálené pomoci</string>
+</resources>
