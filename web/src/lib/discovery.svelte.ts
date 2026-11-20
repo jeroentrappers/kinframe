@@ -178,6 +178,11 @@ class DiscoveryState {
 		return this.doc?.remote_families === true;
 	}
 
+	/** Remote help: the operator can open a temporary tailnet tunnel to a frame (docs/spec/remote-help.md). */
+	get remoteHelp() {
+		return this.doc?.remote_help === true;
+	}
+
 	/** The server's stable id (set by servers that know about other servers; the web stays single-server). */
 	get serverId() {
 		return this.doc?.server_id ?? null;

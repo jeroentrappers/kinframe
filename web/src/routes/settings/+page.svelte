@@ -260,6 +260,13 @@
 			</a>
 		{/if}
 
+		{#if auth.me?.is_operator && (auth.me.remote_help === true || discovery.remoteHelp)}
+			<a class="card card-pad row between shop-link" href="/settings/remote-help">
+				<span><span class="s-label">{t('remoteHelp.opLink')}</span><span class="hint">{t('remoteHelp.opLinkHint')}</span></span>
+				<Icon name="chevronRight" size={20} />
+			</a>
+		{/if}
+
 		{#if auth.me?.is_operator && discovery.shop}
 			<a class="card card-pad row between shop-link" href="/settings/reservations">
 				<span>

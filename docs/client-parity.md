@@ -390,6 +390,20 @@ Frames need nothing new (remote placements look like feed placements, taken-away
 | Remote frames in threads and reaction rows ("❤ Oma's frame (kinframe.appmire.be)") and remote photos credited "Lies · Janssens" | yes | new | new | `Comment.frame.server_name`, `FrameReactionRef.server_name`, `Placement.origin_remote`, `Item.remote_sender`. Android: thread frame entries, who-reacted rows and the library viewer's credit. |
 | Operator: blocked servers, known servers | yes | skipped | skipped | `operatorListBlockedServers`, `operatorBlockServer`, `operatorUnblockServer`, `operatorListRemoteServers`. |
 
+## Remote help
+
+A temporary tailnet tunnel from a frame to the server operator for ADB (`docs/spec/remote-help.md`, API guide §5.23).
+Only the operator starts it; the frame's members see it, owner and admins can stop it, and so can anyone at the frame.
+Hidden unless discovery (or the operator's `/v1/me`) says `remote_help`; the frame page banner shows whenever a
+session runs. Frame cells say **in progress** while the frame app part is being built.
+
+| Feature | Web | Android | iOS | Frame | Notes |
+|---|---|---|---|---|---|
+| Operator: find a frame, start for 1, 8 or 24 hours with a reason, "not available (Play build or no root)" | yes | skipped | skipped | — | `operatorSearchOwnership` (`remote_help_supported`), `operatorStartRemoteHelp`. Web: Settings → Remote help. Operator tools are on the web. |
+| Operator: active sessions with state, end time, tailnet IP, copyable `adb connect`, Stop; log of past sessions | yes | skipped | skipped | — | `operatorListRemoteHelp`, `operatorStopRemoteHelp`; event `remote_help.updated`; push `remote_help_on`, `remote_help_ended`. |
+| Frame page banner "Remote help is on until 18:00 — started by the server operator: …", Stop for owner/admins | yes | planned | planned | — | `FrameSummary.remote_help`, `stopFrameRemoteHelp`, event `remote_help.updated`; push `remote_help_started`, `remote_help_ended`. |
+| Join the tailnet, ADB over it, corner badge with Stop (frame PIN if set), clean-up at the end | — | — | — | in progress | `remote_help` change, `deviceStopRemoteHelp`, heartbeat `remote_help` and feature `remote_help`. GitHub build on rooted frames only. |
+
 ## Account settings
 
 | Feature | Web | Android | iOS | Notes |

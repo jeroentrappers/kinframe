@@ -3067,6 +3067,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/frames/{frameId}/remote-help": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Frame members. The frame's active remote help session (README §5.23), without `tailnet_ip` and `error`;
+         *     `204` when none is active.
+         */
+        get: operations["getFrameRemoteHelp"];
+        put?: never;
+        post?: never;
+        /** @description Owner and admins (`403 forbidden` for other members). Ends the active session (`ended_by: owner`); `404 not_found` when none is active. */
+        delete: operations["stopFrameRemoteHelp"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/leave-preview": {
         parameters: {
             query?: never;
@@ -4374,6 +4395,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/remote-help": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Stop tapped at the frame (README §5.23): ends the frame's active remote help session (`ended_by: frame`) and
+         *     sends `remote_help: null` on the change feed. `204` also when no session is active (idempotent).
+         */
+        delete: operations["deviceStopRemoteHelp"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/device/update": {
         parameters: {
             query?: never;
@@ -4718,6 +4759,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/operator/frames/{frameId}/remote-help": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Start remote help on a frame (README §5.23, docs/spec/remote-help.md §5.2): the server asks Headscale for a
+         *     one-time, ephemeral pre-auth key that expires at the session's end, stores the session and puts a
+         *     `remote_help` change on the frame's feed. The frame's members get `remote_help_started`.
+         *     `409 remote_help_active` when the frame already has a session, `409 remote_help_unsupported` when the
+         *     frame's latest heartbeat does not list the `remote_help` feature, `502 upstream_unavailable` when Headscale
+         *     fails (no session is stored), `503 feature_disabled` without discovery `remote_help`.
+         */
+        post: operations["operatorStartRemoteHelp"];
+        /** @description Ends the frame's active session (`ended_by: operator`). `404 not_found` when none is active. */
+        delete: operations["operatorStopRemoteHelp"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/remote-help": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Remote help sessions, active first, then newest (kept 2 years). */
+        get: operations["operatorListRemoteHelp"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/operator/blocked-servers": {
         parameters: {
             query?: never;
@@ -4902,7 +4985,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "duplicate_sender" | "telegram_already_linked" | "cannot_message" | "comments_closed" | "audio_too_long" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "duplicate_sender" | "telegram_already_linked" | "cannot_message" | "comments_closed" | "audio_too_long" | "remote_help_active" | "remote_help_unsupported" | "server_error";
         /** @description Version policy for one family app platform (README §5.15). */
         AppVersionPolicy: {
             /** @description Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum. */
@@ -5081,6 +5164,12 @@ export interface components {
              * @default false
              */
             remote_families?: boolean;
+            /**
+             * @description True when the operator configured remote help (Headscale, ADB key and the checked tailnet policy;
+             *     docs/spec/remote-help.md §5.1). Frame pages show an active session either way (`FrameSummary.remote_help`).
+             * @default false
+             */
+            remote_help?: boolean;
             /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
@@ -5530,6 +5619,8 @@ export interface components {
              */
             timezone?: string | null;
             is_operator?: boolean;
+            /** @description Operators only (`getMe`), true when the server has remote help configured, so the operator's settings show Settings → Remote help. */
+            remote_help?: boolean;
             /**
              * @description Show "Seen" to others in direct chats and small groups; off also hides others' read state from this user (README §5.19).
              * @default true
@@ -5582,6 +5673,8 @@ export interface components {
             freshness?: components["schemas"]["Freshness"];
             /** @description The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise. */
             photo_request?: components["schemas"]["PhotoRequest"] | null;
+            /** @description The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner. */
+            remote_help?: components["schemas"]["FrameRemoteHelpSummary"] | null;
         };
         Frame: components["schemas"]["FrameSummary"] & {
             default_permissions?: components["schemas"]["Permissions"];
@@ -5624,8 +5717,11 @@ export interface components {
              *     `comments`, `photo_requests`, `prompts`: informational (README §5.20); the frame shows the `comments` change,
              *     has the "Ask for new photos" button, and shows prompt title cards. Apps use them to say "update the frame
              *     app"; nothing is withheld.
+             *     `remote_help`: the frame can join the operator's tailnet for remote help (the GitHub build on a rooted
+             *     frame, docs/spec/remote-help.md §5.4); only such frames can get a session.
              */
             features?: string[];
+            remote_help?: components["schemas"]["HeartbeatRemoteHelp"];
             uptime_s: number;
             wifi_ssid?: string | null;
             wifi_rssi_dbm?: number | null;
@@ -8226,7 +8322,7 @@ export interface components {
         Change: {
             seq: number;
             /** @enum {string} */
-            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "birthdays" | "comments" | "photo_request" | "prompts" | "reset";
+            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "birthdays" | "comments" | "photo_request" | "prompts" | "remote_help" | "reset";
             placement?: components["schemas"]["Placement"] & {
                 /** @description Frame rendition to download (present on placement.upsert when status is ready). */
                 media?: {
@@ -8286,6 +8382,8 @@ export interface components {
             photo_request?: components["schemas"]["FramePhotoRequest"] | null;
             /** @description `prompts` change (entity `id` = the frame): the current weekly prompts of its families, or null = none. */
             prompts?: components["schemas"]["FramePrompts"] | null;
+            /** @description `remote_help` change (entity `id` = the frame): the active remote help session, or null = no session (leave the tailnet and clean up). Old frame apps ignore it. */
+            remote_help?: components["schemas"]["FrameRemoteHelp"] | null;
         };
         /**
          * @description Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -9627,6 +9725,130 @@ export interface components {
              */
             server?: string;
         };
+        RemoteHelpStart: {
+            /**
+             * @description How long the session lasts.
+             * @enum {integer}
+             */
+            hours: 1 | 8 | 24;
+            /** @description Shown to the frame's members and kept in the log. */
+            reason: string;
+        };
+        /**
+         * @description A remote help session. Members (`getFrameRemoteHelp`, `remote_help.updated` to members) get it without
+         *     `tailnet_ip` and `error`.
+         */
+        RemoteHelpSession: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            /**
+             * @description `pending`: waiting for the frame to join the tailnet (ends as `failed` after 15 minutes). `on`: the frame reported it joined.
+             * @enum {string}
+             */
+            state: "pending" | "on" | "ended";
+            reason: string;
+            /** @description The operator who started it. */
+            started_by_name: string;
+            /** Format: date-time */
+            started_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            /** Format: date-time */
+            ended_at: string | null;
+            ended_by: components["schemas"]["RemoteHelpEndedBy"] | null;
+            /** @description The person who ended it (operator or owner/admin). */
+            ended_by_name: string | null;
+            /** @example kinframe-36339301 */
+            hostname: string;
+            /**
+             * @description Operator only. Reported by the frame.
+             * @example 100.64.0.9
+             */
+            tailnet_ip?: string | null;
+            /** @example adb connect kinframe-36339301:5555 */
+            adb_command: string;
+            /** @description Operator only. Why the frame or Headscale failed. */
+            error?: string | null;
+        };
+        /** @enum {string} */
+        RemoteHelpEndedBy: "operator" | "owner" | "frame" | "expired" | "unpaired" | "failed";
+        RemoteHelpPage: {
+            sessions: components["schemas"]["RemoteHelpSession"][];
+            next_cursor: string | null;
+        };
+        /** @description `FrameSummary.remote_help`: the active session in short. */
+        FrameRemoteHelpSummary: {
+            /** Format: date-time */
+            ends_at: string;
+            reason: string;
+        };
+        /**
+         * @description Payload of the `remote_help` change (docs/spec/remote-help.md §5.2, §5.4). `auth_key` is present only until
+         *     the frame reported `on` or `failed` in a heartbeat; a new change without it follows.
+         */
+        FrameRemoteHelp: {
+            session_id: components["schemas"]["Id"];
+            /** @enum {string} */
+            state: "active";
+            /** Format: date-time */
+            ends_at: string;
+            /**
+             * Format: uri
+             * @example https://headscale.appmire.be
+             */
+            login_server: string;
+            /** @description One-time */
+            auth_key?: string;
+            /**
+             * @description The tailnet host name: `kinframe-<serial or short device id>`, lowercase `[a-z0-9-]`, at most 63.
+             * @example kinframe-36339301
+             */
+            hostname: string;
+            /** @description The operator's ADB public key, one line of `adbkey.pub`. */
+            adb_key: string;
+            tailscale: {
+                /** @example 1.104.7 */
+                version: string;
+                arm: components["schemas"]["TailscaleBinary"];
+                arm64: components["schemas"]["TailscaleBinary"];
+            };
+        };
+        TailscaleBinary: {
+            /**
+             * Format: uri
+             * @example https://pkgs.tailscale.com/stable/tailscale_1.104.7_arm.tgz
+             */
+            url: string;
+            sha256: string;
+        };
+        /**
+         * @description The frame's remote help state (docs/spec/remote-help.md §5.4). The first heartbeat with `on` or `failed` for
+         *     the active session clears the stored pre-auth key; `on` stores `ip` for the operator, `failed` ends the
+         *     session (`ended_by: failed`, with `error` in the log). Heartbeats for another session id are ignored.
+         */
+        HeartbeatRemoteHelp: {
+            session_id: components["schemas"]["Id"];
+            /** @enum {string} */
+            state: "starting" | "on" | "failed" | "off";
+            /** @example 100.64.0.9 */
+            ip?: string | null;
+            error?: string | null;
+        };
+        /** @description `remote_help.updated`: a session started, came on or ended (the frame's members get the member view, the operator who started or ended it the full one). */
+        RemoteHelpEvent: {
+            /** @enum {string} */
+            type: "remote_help.updated";
+            frame_id: components["schemas"]["Id"];
+            session: components["schemas"]["RemoteHelpSession"];
+        };
+        /**
+         * @description Push `key`s of remote help (README §5.23). `remote_help_started`: the frame's members, at start.
+         *     `remote_help_on`: the operator who started it, when the frame joined. `remote_help_ended`: members and the
+         *     operator, not whoever ended it. `ids`: `frame_id`, `session_id`; `tag`: `remote_help:<frame_id>`.
+         * @enum {string}
+         */
+        RemoteHelpPushKey: "remote_help_started" | "remote_help_on" | "remote_help_ended";
         /**
          * @description `keep`: your photos stay with the family or frame, still credited to you (the default). `take`: they are taken away with the 30-day notice (README §5.21).
          * @enum {string}
@@ -9866,6 +10088,8 @@ export interface components {
             /** Format: date-time */
             created_at?: string;
             members: components["schemas"]["OperatorScopeMember"][];
+            /** @description Frames only. The frame's latest heartbeat lists the `remote_help` feature (docs/spec/remote-help.md §4); otherwise the operator's page says "not available (Play build or no root)". */
+            remote_help_supported?: boolean;
         };
         OperatorOwnershipMatches: {
             frames: components["schemas"]["OperatorScope"][];
@@ -15706,6 +15930,57 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    getFrameRemoteHelp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active session */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteHelpSession"];
+                };
+            };
+            /** @description No active session */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    stopFrameRemoteHelp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ended */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     getLeavePreview: {
         parameters: {
             query?: {
@@ -17629,6 +17904,25 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    deviceStopRemoteHelp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ended */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     deviceCheckUpdate: {
         parameters: {
             query?: {
@@ -18159,6 +18453,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OwnershipLogPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorStartRemoteHelp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoteHelpStart"];
+            };
+        };
+        responses: {
+            /** @description Started */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteHelpSession"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorStopRemoteHelp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ended */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorListRemoteHelp: {
+        parameters: {
+            query?: {
+                cursor?: components["parameters"]["Cursor"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sessions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemoteHelpPage"];
                 };
             };
             default: components["responses"]["Problem"];

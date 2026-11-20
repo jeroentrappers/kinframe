@@ -89,7 +89,9 @@ export type LiveEvent =
 	// Leaving and families on other servers (README §6.2, §5.21, §5.22)
 	| E['KeepRequestEvent']
 	| E['PlacementUpdatedEvent']
-	| E['RemoteSubscriptionEvent'];
+	| E['RemoteSubscriptionEvent']
+	// Remote help (docs/spec/remote-help.md)
+	| E['RemoteHelpEvent'];
 
 type Handler = (e: LiveEvent) => void;
 
