@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 )
 
 // Outbound call kinds, each with its own pace per chat (§14).
@@ -158,6 +160,7 @@ func (o *Outbox) dispatch(ctx context.Context, wg *sync.WaitGroup) time.Duration
 		o.running++
 		wg.Add(1)
 		go func() {
+			defer crash.Recover("telegram")
 			defer wg.Done()
 			o.run(ctx, k, j)
 		}()

@@ -29,6 +29,11 @@ type Config struct {
 	PublicURL  string // externally visible base URL, no trailing slash
 	ServerName string
 	Version    string
+	// Revision is the source revision the image was built from (KINFRAME_REVISION, the git sha); may be empty.
+	Revision string
+
+	// SentryDSN turns on crash reporting of the server itself (docs/spec/crash-reporting.md); empty = off.
+	SentryDSN string
 
 	DatabaseURL string
 	DataDir     string // media (fs backend), uploads, scratch space
@@ -325,6 +330,8 @@ func load(get func(string) string) (*Config, error) {
 		PublicURL:          strings.TrimRight(env("KINFRAME_PUBLIC_URL", "http://localhost:8110"), "/"),
 		ServerName:         env("KINFRAME_SERVER_NAME", "kinframe"),
 		Version:            env("KINFRAME_VERSION", "0.1.0"),
+		Revision:           env("KINFRAME_REVISION", ""),
+		SentryDSN:          strings.TrimSpace(env("KINFRAME_SENTRY_DSN", "")),
 		DatabaseURL:        env("KINFRAME_DATABASE_URL", ""),
 		DataDir:            env("KINFRAME_DATA_DIR", "./data"),
 		WebDir:             env("KINFRAME_WEB_DIR", ""),

@@ -22,6 +22,7 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/app"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/logtoboot"
 )
@@ -55,8 +56,18 @@ func run() error {
 	if cfg.LogJSON {
 		h = slog.NewJSONHandler(os.Stderr, opts)
 	}
-	log := slog.New(h)
+	log := slog.New(crash.LogHandler(h))
 	slog.SetDefault(log)
+
+	// Crash reporting (docs/spec/crash-reporting.md): off without KINFRAME_SENTRY_DSN. Flushed on the way out.
+	stopCrash, err := crash.Init(crash.Options{DSN: cfg.SentryDSN, Environment: cfg.Env,
+		Release: crash.Release(cfg.Version, cfg.Revision), ServerName: cfg.ServerName})
+	if err != nil {
+		log.Warn("crash reporting off", "err", err)
+	} else if crash.Enabled() {
+		log.Info("crash reporting on", "release", crash.Release(cfg.Version, cfg.Revision))
+	}
+	defer stopCrash()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

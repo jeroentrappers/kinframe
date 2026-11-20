@@ -16,6 +16,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/shop"
@@ -455,6 +456,7 @@ func (s *Server) sendMail(what string, msgs ...shop.Message) {
 		return
 	}
 	go func() {
+		defer crash.Recover("shop-mail")
 		for _, m := range msgs {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			if err := s.mailer.Send(ctx, m); err != nil {

@@ -17,6 +17,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
 
@@ -124,6 +125,7 @@ func (s *Service) background(fn func(ctx context.Context)) {
 	s.kicks.Add(1)
 	s.ctxMu.Unlock()
 	go func() {
+		defer crash.Recover("calendar")
 		defer s.kicks.Done()
 		fn(ctx)
 	}()
@@ -198,6 +200,7 @@ func (s *Service) syncAll(ctx context.Context, srcs []store.CalendarSource) {
 		wg.Add(1)
 		sem <- struct{}{}
 		go func() {
+			defer crash.Recover("calendar")
 			defer wg.Done()
 			defer func() { <-sem }()
 			s.syncOne(ctx, src)

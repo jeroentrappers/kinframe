@@ -16,6 +16,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
 
@@ -209,6 +210,7 @@ func (s *Service) Kick(frameID uuid.UUID) {
 	s.kicks.Add(1)
 	s.ctxMu.Unlock()
 	go func() {
+		defer crash.Recover("weather")
 		defer s.kicks.Done()
 		if err := s.Sync(ctx, &frameID); err != nil && ctx.Err() == nil {
 			s.Log.Error("weather sync", "frame", frameID, "err", err)

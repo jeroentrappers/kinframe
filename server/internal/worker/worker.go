@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/jeroentrappers/kinframe/server/internal/blob"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
@@ -102,6 +103,7 @@ func (w *Worker) Run(ctx context.Context) {
 	for i := 0; i < w.Workers; i++ {
 		wg.Add(1)
 		go func() {
+			defer crash.Recover("worker")
 			defer wg.Done()
 			w.loop(ctx)
 		}()

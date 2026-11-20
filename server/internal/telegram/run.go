@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 )
 
 // Lock elects the one consumer among the server's processes (a Postgres
@@ -40,6 +42,7 @@ func lead(ctx context.Context, lock Lock, interval time.Duration, log *slog.Logg
 	wctx, cancel := context.WithCancel(ctx)
 	done := make(chan struct{})
 	go func() {
+		defer crash.Recover("telegram")
 		defer close(done)
 		work(wctx)
 	}()
@@ -198,6 +201,7 @@ func (d *Dispatcher) round(ctx context.Context) {
 		d.active[c] = true
 		d.wg.Add(1)
 		go func(chat int64) {
+			defer crash.Recover("telegram")
 			defer d.wg.Done()
 			for ctx.Err() == nil && d.Next(ctx, chat) {
 			}

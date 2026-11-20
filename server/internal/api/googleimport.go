@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
@@ -397,6 +398,7 @@ func (s *Server) driveImport(id uuid.UUID) {
 	s.gi.wg.Add(1)
 	s.gi.mu.Unlock()
 	go func() {
+		defer crash.Recover("google-import")
 		defer s.gi.wg.Done()
 		defer func() {
 			s.gi.mu.Lock()

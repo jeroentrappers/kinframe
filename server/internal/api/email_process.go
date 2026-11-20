@@ -18,6 +18,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 	"github.com/jeroentrappers/kinframe/server/internal/mailin"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
@@ -189,6 +190,7 @@ func (s *Server) parseWithBudget(ctx context.Context, f *os.File) (*mailin.Parse
 		defer func() {
 			if r := recover(); r != nil {
 				s.log.Error("email: parser panic", "panic", r, "stack", string(debug.Stack()))
+				crash.Report("email", r)
 				ch <- result{err: fmt.Errorf("parser panic: %v", r)}
 			}
 		}()

@@ -16,6 +16,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
@@ -189,7 +190,7 @@ func (s *Server) RunTelegram(ctx context.Context) {
 	}
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go func() { defer wg.Done(); s.tg.out.Run(ctx) }()
+	go func() { defer wg.Done(); defer crash.Recover("telegram"); s.tg.out.Run(ctx) }()
 	defer wg.Wait()
 	backoff := time.Second
 	for {
@@ -288,11 +289,12 @@ func (s *Server) telegramConsume(ctx context.Context) {
 	s.telegramCommands(ctx)
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go func() { defer wg.Done(); s.tg.disp.Run(ctx) }()
-	go func() { defer wg.Done(); s.telegramCloser(ctx) }()
+	go func() { defer wg.Done(); defer crash.Recover("telegram"); s.tg.disp.Run(ctx) }()
+	go func() { defer wg.Done(); defer crash.Recover("telegram"); s.telegramCloser(ctx) }()
 	if mode == "polling" {
 		wg.Add(1)
 		go func() {
+			defer crash.Recover("telegram")
 			defer wg.Done()
 			p := &telegram.Poller{Client: s.tg.client, Log: log, Offset: s.st.TelegramPollOffset, Store: s.telegramIntakePoll}
 			p.Run(ctx)

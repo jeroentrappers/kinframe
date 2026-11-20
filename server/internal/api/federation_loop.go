@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/federation"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
@@ -228,6 +229,7 @@ func (s *Server) runPulls(ctx context.Context) {
 		wg.Add(1)
 		sem <- struct{}{}
 		go func(id uuid.UUID) {
+			defer crash.Recover("federation")
 			defer wg.Done()
 			defer func() { <-sem }()
 			s.pullFollow(ctx, id)

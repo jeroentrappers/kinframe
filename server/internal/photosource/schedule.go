@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 )
 
 // Scheduling rules (§6.1).
@@ -195,6 +197,7 @@ func (s *Scheduler) start(ctx context.Context, d Due, wait bool) {
 	s.running[d.ID] = true
 	s.wg.Add(1)
 	go func() {
+		defer crash.Recover("photo-sources")
 		defer s.wg.Done()
 		s.mu.Lock()
 		for s.active >= s.Parallel || s.hosts[d.Host] {

@@ -86,6 +86,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |
 | `KINFRAME_VERSION` | `0.1.0` | Reported in discovery |
+| `KINFRAME_REVISION` | — | Source revision (git sha) the image was built from; the Docker build sets it. Shortened, it ends the crash reporting release: `kinframe-server@<version>+<revision>` |
+| `KINFRAME_SENTRY_DSN` | — | Crash reporting of the server to a GlitchTip or Sentry project ([spec](../docs/spec/crash-reporting.md)): handler and background panics, and error logs (once an hour per message). Off when empty. No user, IP, headers, cookies, query strings or bodies are sent, and ids in paths are replaced by `*` |
 | `KINFRAME_FRAME_RELEASES_REPO` | `jeroentrappers/kinframe` | GitHub repo whose releases are mirrored for frame self-update (`off` disables) |
 | `KINFRAME_FRAME_RELEASES_DIR` | — | Also serve every `*.apk` dropped in this directory (self-hosted builds; see below) |
 | `KINFRAME_FRAME_RELEASES_POLL_MINUTES` | `30` | GitHub poll interval (also polled at start; ETag, rate limits respected) |

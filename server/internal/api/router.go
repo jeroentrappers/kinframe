@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -22,6 +23,7 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
@@ -406,7 +408,8 @@ func (s *Server) recoverer(next http.Handler) http.Handler {
 				if v == http.ErrAbortHandler {
 					panic(v)
 				}
-				s.log.Error("panic", "path", r.URL.Path, "panic", v)
+				s.log.Error("panic", "path", r.URL.Path, "panic", v, "stack", string(debug.Stack()))
+				crash.HTTPPanic(r, v)
 				problem.Write(w, r, problem.New(problem.ServerError, ""))
 			}
 		}()

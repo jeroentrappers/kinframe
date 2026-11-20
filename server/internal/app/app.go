@@ -21,6 +21,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
 	"github.com/jeroentrappers/kinframe/server/internal/calendar"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/netguard"
@@ -209,44 +210,41 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg}, nil
 }
 
-// RunBackground starts the media workers and the maintenance loop.
+// RunBackground starts the media workers and the maintenance loop. A panic in one of them is reported (crash
+// reporting, when on) and still crashes the process, as before.
 func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() { defer wg.Done(); a.Worker.Run(ctx) }()
-	go func() { defer wg.Done(); a.maintain(ctx) }()
-	wg.Add(1)
-	go func() { defer wg.Done(); a.API.RunBirthdayMornings(ctx) }()
-	wg.Add(1)
-	go func() { defer wg.Done(); a.API.RunPhotoSources(ctx) }()
-	wg.Add(1)
-	go func() { defer wg.Done(); a.API.RunEmailInbox(ctx) }()
-	wg.Add(1)
-	go func() { defer wg.Done(); a.API.RunTelegram(ctx) }()
-	wg.Add(3)
-	go func() { defer wg.Done(); a.API.RunSocial(ctx) }()
-	go func() { defer wg.Done(); a.API.RunChat(ctx) }()
-	go func() { defer wg.Done(); a.API.RunEngagement(ctx) }()
-	wg.Add(2)
-	go func() { defer wg.Done(); a.API.RunLeaving(ctx) }()
-	go func() { defer wg.Done(); a.API.RunFederation(ctx) }()
-	wg.Add(1)
-	go func() { defer wg.Done(); a.API.RunRemoteHelp(ctx) }()
-	if a.Releases != nil {
+	run := func(component string, f func(context.Context)) {
 		wg.Add(1)
-		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
+		go func() {
+			defer wg.Done()
+			defer crash.Recover(component)
+			f(ctx)
+		}()
+	}
+	run("worker", a.Worker.Run)
+	run("maintenance", a.maintain)
+	run("birthdays", a.API.RunBirthdayMornings)
+	run("photo-sources", a.API.RunPhotoSources)
+	run("email", a.API.RunEmailInbox)
+	run("telegram", a.API.RunTelegram)
+	run("social", a.API.RunSocial)
+	run("chat", a.API.RunChat)
+	run("engagement", a.API.RunEngagement)
+	run("leaving", a.API.RunLeaving)
+	run("federation", a.API.RunFederation)
+	run("remote-help", a.API.RunRemoteHelp)
+	if a.Releases != nil {
+		run("releases", a.Releases.Run)
 	}
 	if a.Registry != nil {
-		wg.Add(1)
-		go func() { defer wg.Done(); a.Registry.Run(ctx) }()
+		run("plugin-registry", a.Registry.Run)
 	}
 	if a.Weather != nil {
-		wg.Add(1)
-		go func() { defer wg.Done(); a.Weather.Run(ctx) }()
+		run("weather", a.Weather.Run)
 	}
 	if a.Calendar != nil {
-		wg.Add(1)
-		go func() { defer wg.Done(); a.Calendar.Run(ctx) }()
+		run("calendar", a.Calendar.Run)
 	}
 	return &wg
 }

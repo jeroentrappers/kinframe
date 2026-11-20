@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
+	"github.com/jeroentrappers/kinframe/server/internal/crash"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/settings"
 	"github.com/jeroentrappers/kinframe/server/internal/stations"
@@ -62,6 +63,7 @@ func (s *Server) stationUpload(w http.ResponseWriter, r *http.Request) {
 		if reg.Forward {
 			query := r.URL.RawQuery
 			go func() {
+				defer crash.Recover("stations")
 				fctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 				s.stationForward.Forward(fctx, query)
