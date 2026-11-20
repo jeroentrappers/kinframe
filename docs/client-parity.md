@@ -401,7 +401,7 @@ session runs.
 |---|---|---|---|---|---|
 | Operator: find a frame, start for 1, 8 or 24 hours with a reason, "not available (Play build or no root)" | yes | skipped | skipped | — | `operatorSearchOwnership` (`remote_help_supported`), `operatorStartRemoteHelp`. Web: Settings → Remote help. Operator tools are on the web. |
 | Operator: active sessions with state, end time, tailnet IP, copyable `adb connect`, Stop; log of past sessions | yes | skipped | skipped | — | `operatorListRemoteHelp`, `operatorStopRemoteHelp`; event `remote_help.updated`; push `remote_help_on`, `remote_help_ended`. |
-| Frame page banner "Remote help is on until 18:00 — started by the server operator: …", Stop for owner/admins | yes | planned | planned | — | `FrameSummary.remote_help`, `stopFrameRemoteHelp`, event `remote_help.updated`; push `remote_help_started`, `remote_help_ended`. |
+| Frame page banner "Remote help is on until 18:00 — started by the server operator: …", Stop for owner/admins | yes | skipped | skipped | — | `FrameSummary.remote_help`, `stopFrameRemoteHelp`, event `remote_help.updated`; push `remote_help_started`, `remote_help_ended`. The family apps only show the notifications (decided 2026-11-20: the banner adds nothing there); stopping is on the web or at the frame. |
 | Join the tailnet, ADB over it, corner badge with Stop (frame PIN if set), clean-up at the end | — | — | — | new | `remote_help` change, `deviceStopRemoteHelp`, heartbeat `remote_help` and feature `remote_help`. GitHub build on rooted frames only. |
 
 ## Account settings

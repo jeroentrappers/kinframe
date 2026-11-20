@@ -48,7 +48,7 @@ HTTPS calls to their server.
 | Action | Operator | Frame owner/admin | Other frame members | At the frame (PIN if set) |
 |---|---|---|---|---|
 | Start a session | ✓ | – | – | – |
-| See that a session runs | ✓ | ✓ (notification + frame page) | ✓ (notification + frame page) | ✓ (badge) |
+| See that a session runs | ✓ | ✓ (notification; frame page on the web) | ✓ (notification; frame page on the web) | ✓ (badge) |
 | Stop a session | ✓ | ✓ | – | ✓ |
 | Connect | ✓ (support devices) | – | – | – |
 
