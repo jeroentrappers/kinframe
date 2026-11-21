@@ -21,10 +21,11 @@ test('the frame asks for photos, Ben answers; reactions, comments and freshness'
 
 	const A = await signedIn(browser, anna);
 	const B = await signedIn(browser, ben);
-	await A.page.goto('/home');
+	await A.page.goto(`/frames/${frameId}`);
 	await B.page.goto('/home');
-	const strip = B.page.getByRole('navigation', { name: 'Your frames and families' });
-	await expect(strip).toBeVisible();
+	// Home is up (the family's people and frames), so the live events reach Ben.
+	await expect(B.page.getByRole('navigation', { name: 'Peeters: people and frames' })).toBeVisible();
+	await expect(A.page.getByRole('heading', { name: 'Oma’s frame', level: 1 })).toBeVisible();
 
 	// Ask for new photos from the frame: 201, then 200 within the day.
 	const r1 = await dev.raw('POST', '/v1/device/photo-requests');
@@ -36,14 +37,13 @@ test('the frame asks for photos, Ben answers; reactions, comments and freshness'
 	expect((r2.body as Json).id).toBe((r1.body as Json).id);
 	await expect.poll(async () => (await changesOf(dev)).some((c) => c.type === 'photo_request')).toBe(true);
 
-	// Anna's Home strip (her frame) shows it live; Ben isn't on the frame, so his strip only has the family.
-	const aStrip = A.page.getByRole('navigation', { name: 'Your frames and families' });
-	await expect(aStrip.getByText('Would like new photos')).toBeVisible();
-	await expect(strip.getByText('Would like new photos')).toHaveCount(0);
-	// Ben gets a toast; Send photos preselects the family that reaches Oma's frame.
+	// Anna's frame screen (her frame) shows it.
+	await A.page.reload();
+	await expect(A.page.getByText('Would like new photos')).toBeVisible();
+	// Ben isn't on the frame: he gets a toast; Send photos preselects the family that reaches Oma's frame.
 	await B.page.getByRole('button', { name: 'Send photos' }).click();
 	await expect(B.page).toHaveURL(/\/send\?frame=.+&request=.+/);
-	await expect(B.page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
+	await expect(B.page.getByTestId('destination')).toHaveText(/^Peeters/);
 	await B.page.goto('/home');
 	const fr = await anna.get(`/v1/frames/${frameId}`);
 	expect((fr.photo_request as Json).state).toBe('open');
@@ -57,7 +57,9 @@ test('the frame asks for photos, Ben answers; reactions, comments and freshness'
 			return (c?.photo_request as Json | undefined)?.answered_by_name;
 		})
 		.toBe('Ben');
-	await expect(aStrip.getByText('Would like new photos')).toHaveCount(0);
+	await A.page.reload();
+	await expect(A.page.getByText('Ben already sent new photos.')).toBeVisible();
+	await expect(A.page.getByText('Would like new photos')).toHaveCount(0);
 
 	// The frame reacts: the thread shows the frame's entry and its reaction.
 	const placement = (await changesOf(dev)).find((c) => c.type === 'placement.upsert' && (c.placement as Json)?.post_id === post) ?? (await changesOf(dev)).find((c) => c.type === 'placement.upsert');

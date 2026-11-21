@@ -10,6 +10,8 @@ test('Tom leaves and takes his photos; Lies asks to keep some, Tom allows one', 
 	const tom = await user(api, 'Tom');
 	const feed = await createFamily(lies, 'Janssens');
 	await join(lies, tom, feed);
+	// Without a family the app only offers getting started (simple-app.md §8): Tom has one of his own.
+	await createFamily(tom, 'Tom’s friends');
 	const oma = await claimFrame(api, lies, 'Oma’s frame');
 	const kitchen = await claimFrame(api, lies, 'Kitchen frame');
 	await lies.post(`/v1/feeds/${feed}/subscriptions`, { frame_id: oma.frameId }, 201);
@@ -40,7 +42,7 @@ test('Tom leaves and takes his photos; Lies asks to keep some, Tom allows one', 
 	await expect(sheet.getByText('Your photos sent straight to this frame: 1. The same choice applies to them.')).toBeVisible();
 	await sheet.getByRole('radio', { name: /Delete them too/ }).check();
 	await sheet.getByRole('button', { name: 'Leave', exact: true }).click();
-	await expect(T.page).toHaveURL(/\/feeds$/);
+	await expect(T.page).toHaveURL(/\/home$/);
 	await expect(T.page.getByText(/You left Janssens\. 4 photos taken away\. Frames keep them in their trash until/)).toBeVisible();
 	await expect(T.page.getByText(/You also left Kitchen frame\./)).toBeVisible();
 
@@ -107,12 +109,14 @@ test('leaving a frame with my photos: the browser frame empties, Lies asks for a
 	const frameId = (res.frame as Json).id as string;
 	await lies.patch(`/v1/frames/${frameId}`, { name: 'Kitchen frame' });
 	await joinFrame(lies, tom, frameId);
+	// Without a family the app only offers getting started (simple-app.md §8): Lies and Tom share one.
+	await join(lies, tom, await createFamily(lies, 'Janssens'));
 	const s = await send(tom, { frames: [frameId], n: 2 });
 	await ready(tom, s.id);
 	await expect(tv.locator('img.media').first()).toBeVisible({ timeout: 30_000 });
 
 	const T = await signedIn(browser, tom);
-	await T.page.goto(`/frames/${frameId}`);
+	await T.page.goto(`/frames/${frameId}?tab=settings`);
 	await T.page.getByRole('button', { name: 'Leave frame' }).click();
 	const sheet = T.page.getByRole('dialog', { name: 'Leave Kitchen frame?' });
 	await expect(sheet.getByRole('radio', { name: /Leave them on the frame/ })).toBeChecked();
@@ -166,6 +170,8 @@ test('removed by an admin: the photos stay; Tom takes them away later from his h
 
 	await lies.del(`/v1/feeds/${feed}/members/${tom.id}`);
 	expect((await onFrame(oma.dev)).size).toBe(2);
+	// Without a family the app only offers getting started (simple-app.md §8): Tom has one of his own.
+	await createFamily(tom, 'Tom’s friends');
 
 	const T = await signedIn(browser, tom);
 	await T.page.goto('/history');
@@ -362,12 +368,14 @@ test('the owner hands the frame over and leaves through the leave sheet, taking 
 	const lies = await user(api, 'Lies');
 	const oma = await claimFrame(api, tom, 'Oma’s frame');
 	await joinFrame(tom, lies, oma.frameId);
+	// Without a family the app only offers getting started (simple-app.md §8): Tom and Lies share one.
+	await join(tom, lies, await createFamily(tom, 'Janssens'));
 	const s = await send(tom, { frames: [oma.frameId], n: 2 });
 	await ready(tom, s.id);
 	await expect.poll(async () => (await onFrame(oma.dev)).size).toBe(2);
 
 	const T = await signedIn(browser, tom);
-	await T.page.goto(`/frames/${oma.frameId}`);
+	await T.page.goto(`/frames/${oma.frameId}?tab=settings`);
 	await T.page.getByRole('button', { name: 'Leave frame' }).click();
 	const tr = T.page.getByRole('dialog', { name: 'Leave Oma’s frame' });
 	await tr.getByRole('radio', { name: /Lies/ }).check();

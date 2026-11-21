@@ -78,6 +78,8 @@ test('a direct send to a frame has a thread for the frame’s people', async ({ 
 	const api = await newCtx();
 	const anna = await user(api, 'Anna');
 	const ben = await user(api, 'Ben');
+	// Without a family the app only offers getting started (simple-app.md §8): Anna and Ben share one.
+	await join(anna, ben, await createFamily(anna, 'Peeters'));
 	const { dev, frameId } = await claimFrame(api, anna, 'Oma’s frame');
 	// Ben joins at the frame (its code) and may see its library.
 	const { code } = await dev.post('/v1/device/code');
