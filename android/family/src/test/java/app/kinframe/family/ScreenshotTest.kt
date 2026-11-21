@@ -338,9 +338,45 @@ class ScreenshotTest {
             User("u2", "Oma Maria"), showFamily = true, a = app.kinframe.family.ui.family.SimpleViewActions({}, {}, {}, {}, {}))
     }
 
+    /** Neither a family nor a frame: getting started is the app, with sent history and settings still reachable. */
     @Test fun gettingStarted() = both("getting_started") {
         app.kinframe.family.ui.family.GettingStartedScreen(app.kinframe.family.ui.family.SetupStep.Choice, "", false, null,
-            app.kinframe.family.ui.family.SetupActions({}, {}, {}, {}, { _, _ -> }))
+            app.kinframe.family.ui.family.SetupActions({}, {}, {}, {}, { _, _ -> }, onHistory = {}, onSettings = {}))
+    }
+
+    @Test @Config(qualifiers = "nl-w411dp-h891dp-xxhdpi")
+    fun gettingStartedDutch() = shot("getting_started_nl_light", dark = false) {
+        app.kinframe.family.ui.family.GettingStartedScreen(app.kinframe.family.ui.family.SetupStep.Choice, "", false, null,
+            app.kinframe.family.ui.family.SetupActions({}, {}, {}, {}, { _, _ -> }, onHistory = {}, onSettings = {}))
+    }
+
+    /** On a frame but in no family: opened from Home, Cancel goes back to the app. */
+    @Test fun gettingStartedFromHome() = both("getting_started_cancel") {
+        app.kinframe.family.ui.family.GettingStartedScreen(app.kinframe.family.ui.family.SetupStep.Choice, "", false, null,
+            app.kinframe.family.ui.family.SetupActions({}, {}, {}, {}, { _, _ -> }, onCancel = {}))
+    }
+
+    /** On a frame but in no family: the normal app, Home with Start a family and Join my family. */
+    private val emptyHome by lazy {
+        app.kinframe.family.ui.home.HomeViewModel(object : FakeSocial() {}, object : FakeApi() {}, { "u1" }, kotlinx.coroutines.flow.emptyFlow(), engagement = false)
+    }
+
+    @Composable
+    private fun homeWithoutFamily() {
+        val vm = emptyHome
+        app.kinframe.family.ui.home.HomeScreen(
+            app.kinframe.family.ui.home.HomeState(posts = Load.Ready(emptyList())),
+            app.kinframe.family.ui.home.HomeActions(vm, "u1", {}, {}, {}, {}, {}, null, {}, {}, {}, {}, {}, start = {}, join = {}),
+        )
+    }
+
+    @Test fun homeWithoutAFamily() = both("home_no_family") { homeWithoutFamily() }
+
+    @Test @Config(qualifiers = "nl-w411dp-h891dp-xxhdpi")
+    fun homeWithoutAFamilyDutch() = shot("home_no_family_nl_light", dark = false) { homeWithoutFamily() }
+
+    @Test fun familyTabWithoutAFamily() = both("family_no_family") {
+        app.kinframe.family.ui.family.FamilyListScreen(emptyList(), null, {}, {}, {}, {})
     }
 
     @Test fun gettingStartedName() = both("getting_started_name") {

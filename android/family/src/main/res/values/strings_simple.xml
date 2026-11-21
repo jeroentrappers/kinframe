@@ -16,6 +16,8 @@
     <string name="home_invite">Invite</string>
     <string name="home_empty_title">Share your first photo</string>
     <string name="home_empty_body">Photos you share appear here and on the family’s frames.</string>
+    <!-- Home for someone on a frame but in no family (docs/spec/simple-app.md §8). -->
+    <string name="home_start_body">Your frames already work. A family is where you share photos with each other: start one, or join the family that invited you.</string>
     <string name="home_only_you">You’re the only one here so far. Invite the others.</string>
     <string name="home_invite_family">Invite family</string>
     <plurals name="home_on_frames">

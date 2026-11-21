@@ -43,6 +43,8 @@ internal fun frameAddedMessage(res: android.content.res.Resources, r: FrameAdded
 internal fun GettingStarted(
     graph: AppGraph, ready: Phase.Ready, feeds: FeedsViewModel, nav: Navigator, step: SetupStep, onStep: (SetupStep?) -> Unit,
     invite: (feedId: String, name: String) -> Unit, onCreated: (Feed) -> Unit,
+    /** Someone on a frame can go back to the app; otherwise getting started links to sent history and settings. */
+    canCancel: Boolean = false,
 ) {
     val fs by feeds.state.collectAsStateWithLifecycle()
     val me = graph.me.collectAsStateWithLifecycle().value ?: ready.me
@@ -57,6 +59,9 @@ internal fun GettingStarted(
             nav.push(Route.AddFrame(family = feedId))
         },
         onShareInvite = invite,
+        onCancel = if (canCancel) ({ onStep(null) }) else null,
+        onHistory = if (canCancel) null else ({ nav.push(Route.History) }),
+        onSettings = if (canCancel) null else ({ nav.push(Route.Settings()) }),
     ))
 }
 

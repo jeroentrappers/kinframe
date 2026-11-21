@@ -16,6 +16,8 @@
     <string name="home_invite">Uitnodigen</string>
     <string name="home_empty_title">Deel je eerste foto</string>
     <string name="home_empty_body">Foto’s die je deelt verschijnen hier en op de kaders van de familie.</string>
+    <!-- Home for someone on a frame but in no family (docs/spec/simple-app.md §8). -->
+    <string name="home_start_body">Je kaders werken al. In een familie deel je foto’s met elkaar: begin er een, of word lid van de familie die je uitnodigde.</string>
     <string name="home_only_you">Je bent hier voorlopig alleen. Nodig de anderen uit.</string>
     <string name="home_invite_family">Familie uitnodigen</string>
     <plurals name="home_on_frames">

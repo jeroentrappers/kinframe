@@ -18,6 +18,10 @@ class FamilyScope(
     val compose: () -> Unit,
     /** "Start a family" (getting started's name step). */
     val start: () -> Unit = {},
+    /** "Join my family" (a link or code). */
+    val join: () -> Unit = {},
+    /** On a frame but in no family (docs/spec/simple-app.md §8): Home offers [start] and [join]. */
+    val startOnHome: Boolean = false,
 ) {
     /** Several families: chips on Home, a family label on posts, a list on the Family tab. */
     val several: Boolean get() = all.size > 1

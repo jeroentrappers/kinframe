@@ -81,7 +81,7 @@ class SmokeTest {
     @Volatile private var failing = false
 
     private val me = User("u-me", "Jeroen", email = "jeroen@example.org", timezone = ZoneId.systemDefault().id)
-    private val frames = listOf(
+    private var frames = listOf(
         Frame("f-oma", "Oma’s frame", "Living room", "Jeroen", role = "owner", permissions = Permissions.ALL, online = true),
         Frame("f-opa", "Opa Jos", "Kitchen", "Lies", role = "member", permissions = Permissions(send = true), online = false),
     )
@@ -257,14 +257,38 @@ class SmokeTest {
         println("SmokeTest (failing=$failing): requests answered with an error: $unanswered")
     }
 
-    /** No family yet: only getting started shows; starting one asks for its name. */
+    /**
+     * Neither a family nor a frame: only getting started shows, but sent history and settings still open; starting a
+     * family asks for its name.
+     */
     @Test
-    fun withoutAFamilyOnlyGettingStartedShows() {
-        feeds = emptyList()
-        start()
+    fun withoutAFamilyOrAFrameOnlyGettingStartedShows() {
+        feeds = emptyList(); frames = emptyList()
+        val (_, _, activity) = start()
         assertTrue(compose.onAllNodes(isTab).fetchSemanticsNodes().isEmpty())
+        assertTrue("no way back to an app that isn't there", compose.onAllNodes(hasText(app.getString(R.string.common_cancel))).fetchSemanticsNodes().isEmpty())
+        openAndBack(activity, R.string.settings_sent_history)
+        openAndBack(activity, R.string.nav_settings)
         click(R.string.start_family)
         compose.onAllNodes(hasText(app.getString(R.string.start_name_title))).onFirst().assertExists()
+    }
+
+    /** On a frame but in no family: the normal app; Home offers Start a family, and Cancel goes back to the app. */
+    @Test
+    fun onAFrameWithoutAFamilyTheAppShows() {
+        feeds = emptyList()
+        val (_, _, activity) = start()
+        assertTrue("the tabs", compose.onAllNodes(isTab).fetchSemanticsNodes().isNotEmpty())
+        compose.onAllNodes(hasText(app.getString(R.string.home_start_body))).onFirst().assertExists()
+        click(R.string.start_family)
+        compose.onAllNodes(hasText(app.getString(R.string.start_name_title))).onFirst().assertExists()
+        assertTrue("getting started hides the tabs", compose.onAllNodes(isTab).fetchSemanticsNodes().isEmpty())
+        activity.onBackPressedDispatcher.onBackPressed()
+        settle()
+        // Back from the name step: the app again (getting started's choices only when there is nothing else).
+        assertTrue("back in the app", compose.onAllNodes(isTab).fetchSemanticsNodes().isNotEmpty())
+        openTab(R.string.nav_frames)
+        compose.onAllNodes(hasText("Oma’s frame")).onFirst().assertExists()
     }
 
     /** The simple view: no tab bar, a big "Send a heart", and "Normal view" in its settings sheet. */

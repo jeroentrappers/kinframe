@@ -35,6 +35,7 @@ import app.kinframe.family.ui.Route
 import app.kinframe.family.ui.family.Families
 import app.kinframe.family.ui.family.FamilyFrames
 import app.kinframe.family.ui.family.FamilyPrefs
+import app.kinframe.family.ui.family.GettingStartedRule
 import app.kinframe.family.ui.family.onlyMine
 import app.kinframe.family.ui.family.simplePosts
 import app.kinframe.family.ui.feeds.FeedDetailViewModel
@@ -315,6 +316,25 @@ class SimpleAppTest {
         vm.addToFamily("f1", "fd1") { result = it }
         assertEquals(FrameAdded.Active("Frame f1", "Peeters family"), result)
         assertEquals(listOf("fd1"), vm.state.value.shows["f1"]?.map { it.id })
+    }
+
+    @Test fun gettingStartedOnlyWithNeitherAFamilyNorAFrame() {
+        val none = Load.Ready(emptyList<Feed>()); val one = Load.Ready(listOf(family("fd1", "Trappers")))
+        val noFrames = Load.Ready(emptyList<Frame>()); val aFrame = Load.Ready(listOf(Frame("f1", "Oma", role = "member")))
+        assertTrue("neither: getting started", GettingStartedRule.gated(none, noFrames))
+        assertFalse("neither: no start card, getting started is the app", GettingStartedRule.startOnHome(none, noFrames))
+        assertFalse("on a frame (even as a member): the normal app", GettingStartedRule.gated(none, aFrame))
+        assertTrue("…with Start a family on Home", GettingStartedRule.startOnHome(none, aFrame))
+        assertFalse("in a family: the app", GettingStartedRule.gated(one, noFrames))
+        assertFalse("in a family: no start card", GettingStartedRule.startOnHome(one, aFrame))
+        assertFalse(GettingStartedRule.startOnHome(one, noFrames))
+        // Nothing is decided before both lists are in.
+        assertFalse("families loading", GettingStartedRule.gated(Load.Loading, noFrames))
+        assertFalse("frames loading", GettingStartedRule.gated(none, Load.Loading))
+        assertFalse("frames failed", GettingStartedRule.gated(none, Load.Error(R.string.app_name)))
+        assertFalse("families failed", GettingStartedRule.gated(Load.Error(R.string.app_name), noFrames))
+        assertFalse("families loading: no card either", GettingStartedRule.startOnHome(Load.Loading, aFrame))
+        assertTrue("frames still loading: the app, with the card", GettingStartedRule.startOnHome(none, Load.Loading))
     }
 
     @Test fun frameCardsShowWhatTheServerSays() {

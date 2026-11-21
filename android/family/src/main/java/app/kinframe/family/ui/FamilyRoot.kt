@@ -165,6 +165,7 @@ import app.kinframe.family.ui.family.FamilyScope
 import app.kinframe.family.ui.family.LocalFamily
 import app.kinframe.family.ui.family.ProfileActions
 import app.kinframe.family.ui.family.SetupStep
+import app.kinframe.family.ui.family.GettingStartedRule
 import app.kinframe.family.ui.family.ViewQuestionDialog
 import app.kinframe.family.ui.send.DestinationSheet
 import app.kinframe.family.ui.send.canChangeDestination
@@ -375,9 +376,14 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     }
     // The composer goes to the filtered family, with All to the home family.
     val compose: () -> Unit = { (ordered.firstOrNull { it.id == filter } ?: homeFamily)?.let { composer.preselectFeed(it.id) }; nav.compose() }
+    // Getting started only with neither a family nor a frame (docs/spec/simple-app.md §8), once both lists are in.
+    val framesState by frames.state.collectAsStateWithLifecycle()
+    val gated = GettingStartedRule.gated(feedsState.feeds, framesState.frames)
+    val startOnHome = GettingStartedRule.startOnHome(feedsState.feeds, framesState.frames)
     val familyScope = FamilyScope(
         all = ordered, home = homeFamily, filter = filter, setFilter = prefs::setHomeFilter,
         invite = invite, compose = compose, start = { setup = SetupStep.Name },
+        join = { nav.push(Route.AddFrame(join = true)) }, startOnHome = startOnHome,
     )
 
     BackHandler(enabled = nav.stack.size > 1 || nav.tab != HomeRoute) { if (!nav.pop()) nav.selectTab(HomeRoute) }
@@ -474,10 +480,9 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris -> composer.add(uris) }
     val pick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) }
 
-    // Without a family only "getting started" shows (docs/spec/simple-app.md §8), and it keeps showing while a new
-    // family is being set up.
-    val noFamily = families != null && families.isEmpty()
-    val setupStep = setup ?: if (noFamily) SetupStep.Choice else null
+    // With neither a family nor a frame only "getting started" shows (docs/spec/simple-app.md §8); it keeps showing
+    // while a new family is being set up. Someone on a frame opens it from Home and can cancel back to the app.
+    val setupStep = setup ?: if (gated) SetupStep.Choice else null
     val familyCounts = FamilyCounts(ordered.filter { it.isAdmin }.sumOf { it.pendingJoinRequestCount + it.pendingSubscriptionCount })
 
     CompositionLocalProvider(LocalToaster provides toaster, LocalShowOnTv provides { tvOpen = it }, LocalFamily provides familyScope) {
@@ -490,7 +495,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                         runCatching { FamilyInvites.create(api, id, java.util.UUID.randomUUID().toString()) }
                             .onSuccess { shareFeedInvite(context, res, it, name) }
                             .onFailure { toaster.show(res.getString(Problems.message(it))) }
-                    } }, onCreated = { })
+                    } }, onCreated = { }, canCancel = !gated)
                     SnackbarHost(snackbar, Modifier.align(androidx.compose.ui.Alignment.BottomCenter))
                 }
                 simple && ordered.isNotEmpty() && showChrome -> Box(Modifier.fillMaxSize()) {
@@ -657,6 +662,9 @@ private fun Screen(
         }
         // One family: straight to its profile. Several: the list (home family first, "Start a family" last).
         Route.Family -> when {
+            // On a frame but in no family: the list's Start a family, Join my family and settings, without families.
+            family.all.isEmpty() && family.startOnHome -> FamilyListScreen(emptyList(), null, onOpen = {}, onSettings = { nav.push(Route.Settings()) },
+                onStart = family.start, onJoin = family.join)
             family.all.isEmpty() -> Box(Modifier.fillMaxSize()) { CenteredSpinner() }
             !family.several -> FamilyProfileRoute(graph, api, family.all.single().id, nav, frames, feeds, composer, ready, nav.familySegment, { nav.familySegment = it }, onBack = null)
             else -> FamilyListScreen(family.all, family.home?.id,

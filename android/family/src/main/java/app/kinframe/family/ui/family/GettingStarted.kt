@@ -38,11 +38,13 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.kinframe.core.api.Feed
 import app.kinframe.core.design.Kin
 import app.kinframe.core.design.KinIcons
 import app.kinframe.family.R
 import app.kinframe.family.ui.ContentMaxWidth
 import app.kinframe.family.ui.KinTextField
+import app.kinframe.family.ui.Load
 import app.kinframe.family.ui.KinTopBar
 import app.kinframe.family.ui.PrimaryButton
 import app.kinframe.family.ui.QuietButton
@@ -60,6 +62,21 @@ sealed interface SetupStep : java.io.Serializable {
     data class Invite(val feedId: String, val name: String) : SetupStep
 }
 
+/**
+ * Who gets getting started (docs/spec/simple-app.md §8). Someone with neither a family nor a frame (owner, admin or
+ * member) sees only the getting-started choices; someone on a frame but in no family gets the normal app, with Start
+ * a family and Join my family on Home. Nothing is decided until both lists have loaded (an error is not loaded).
+ */
+object GettingStartedRule {
+    /** Only the getting-started choices (sent history, settings and links still open on top of them). */
+    fun gated(families: Load<List<Feed>>, frames: Load<List<app.kinframe.core.api.Frame>>): Boolean =
+        families is Load.Ready && families.value.isEmpty() && frames is Load.Ready && frames.value.isEmpty()
+
+    /** The normal app without a family: Home offers Start a family and Join my family. */
+    fun startOnHome(families: Load<List<Feed>>, frames: Load<List<app.kinframe.core.api.Frame>>): Boolean =
+        families is Load.Ready && families.value.isEmpty() && !gated(families, frames)
+}
+
 /** What getting started does; wired by the root. */
 class SetupActions(
     val onStep: (SetupStep?) -> Unit,
@@ -67,6 +84,12 @@ class SetupActions(
     val onJoin: () -> Unit,
     val onPair: (feedId: String) -> Unit,
     val onShareInvite: (feedId: String, name: String) -> Unit,
+    /** Back to the app (someone on a frame); null when getting started is all there is. */
+    val onCancel: (() -> Unit)? = null,
+    /** Settings › Sent history (where Ask to keep is answered) while getting started is all there is. */
+    val onHistory: (() -> Unit)? = null,
+    /** The app settings while getting started is all there is. */
+    val onSettings: (() -> Unit)? = null,
 )
 
 /**
@@ -77,12 +100,16 @@ class SetupActions(
 fun GettingStartedScreen(step: SetupStep, defaultName: String, creating: Boolean, error: Int?, a: SetupActions) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper).windowInsetsPadding(WindowInsets.safeDrawing)) {
+        // Someone on a frame came here from Home: back (or Cancel) returns to the app.
         val back: (() -> Unit)? = when (step) {
-            SetupStep.Choice -> null
-            SetupStep.Name -> ({ a.onStep(SetupStep.Choice) })
+            SetupStep.Choice -> a.onCancel
+            SetupStep.Name -> a.onCancel ?: { a.onStep(SetupStep.Choice) }
             else -> null
         }
-        if (back != null) KinTopBar("", onBack = back)
+        if (back != null) {
+            KinTopBar("", onBack = back)
+            androidx.activity.compose.BackHandler(onBack = back)
+        }
         Box(Modifier.weight(1f).imePadding(), contentAlignment = Alignment.TopCenter) {
             Column(
                 Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 32.dp),
@@ -116,6 +143,14 @@ private fun Choice(a: SetupActions) {
     Heading(stringResource(R.string.start_title), stringResource(R.string.start_lede))
     ChoiceCard(KinIcons.Frame, stringResource(R.string.start_family), stringResource(R.string.start_family_body), primary = true) { a.onStep(SetupStep.Name) }
     ChoiceCard(KinIcons.People, stringResource(R.string.start_join), stringResource(R.string.start_join_body), primary = false, onClick = a.onJoin)
+    a.onCancel?.let { QuietButton(stringResource(R.string.common_cancel), it, Modifier.fillMaxWidth()) }
+    // Without a family or a frame this is the whole app: sent history (Ask to keep) and settings stay reachable.
+    if (a.onHistory != null || a.onSettings != null) Row(
+        Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    ) {
+        a.onHistory?.let { QuietButton(stringResource(R.string.settings_sent_history), it) }
+        a.onSettings?.let { QuietButton(stringResource(R.string.nav_settings), it) }
+    }
 }
 
 @Composable

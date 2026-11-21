@@ -302,6 +302,9 @@ fun SocialRouteScreen(
                 onActivity = { nav.push(ActivityRoute) },
                 activityBadge = app.kinframe.family.ui.home.HomeRow.activity((s.posts as? Load.Ready)?.value.orEmpty()).size + s.openRequests.size,
                 invite = fam?.takeIf { it.canInvite }?.let { f -> { family.invite(f) } },
+                // On a frame but in no family (docs/spec/simple-app.md §8).
+                start = family.start.takeIf { family.startOnHome },
+                join = family.join.takeIf { family.startOnHome },
             ))
         }
         ChatsRoute -> {

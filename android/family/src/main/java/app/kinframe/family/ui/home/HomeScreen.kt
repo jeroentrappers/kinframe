@@ -112,6 +112,12 @@ class HomeActions(
     val activityBadge: Int = 0,
     /** The "Invite" bubble and "Invite family": the family invite share sheet; null when you may not invite. */
     val invite: (() -> Unit)? = null,
+    /**
+     * On a frame but in no family (docs/spec/simple-app.md §8): "Start a family" and "Join my family" in a card at the
+     * top instead of the family's row; null otherwise.
+     */
+    val start: (() -> Unit)? = null,
+    val join: (() -> Unit)? = null,
 )
 
 @Composable
@@ -125,7 +131,7 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
         if (a.families.size > 1) FilterChips(a)
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyColumn(Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth(), state = list, contentPadding = PaddingValues(bottom = 16.dp)) {
-                item("row") { FamilyRow(s, a) }
+                if (a.start != null) item("start") { StartCard(a.start, a.join) } else item("row") { FamilyRow(s, a) }
                 // Cards around the posts keep the page's side margins; the posts go edge to edge.
                 s.reminders?.takeIf { it.autoReduced }?.let {
                     item("reduced") {
@@ -175,7 +181,8 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                 when (val p = s.posts) {
                     Load.Loading -> item("loading") { Box(Modifier.padding(16.dp)) { SkeletonList(2, 320.dp) } }
                     is Load.Error -> item("error") { ErrorPanel(p.message, { a.vm.refresh() }) }
-                    is Load.Ready -> if (p.value.isEmpty()) item("empty") {
+                    // Without a family there is nothing to share to yet: the start card says what to do.
+                    is Load.Ready -> if (p.value.isEmpty()) { if (a.start == null) item("empty") {
                         EmptyState(stringResource(R.string.home_empty_title), stringResource(R.string.home_empty_body), Modifier.padding(top = 24.dp)) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                                 PrimaryButton(stringResource(R.string.home_empty_title), a.post, icon = KinIcons.Plus)
@@ -185,7 +192,7 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                                 }
                             }
                         }
-                    } else items(s.entries, key = { e -> when (e) { is HomeEntry.Post -> e.post.id; is HomeEntry.PromptHeader -> "h" + e.promptId + e.count } }) { e ->
+                    } } else items(s.entries, key = { e -> when (e) { is HomeEntry.Post -> e.post.id; is HomeEntry.PromptHeader -> "h" + e.promptId + e.count } }) { e ->
                         when (e) {
                             is HomeEntry.PromptHeader -> Text(
                                 pluralStringResource(R.plurals.engagement_answers_to, e.count, e.count, e.title), style = Kin.type.title, color = c.ink,
@@ -208,6 +215,17 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                 if (s.loadingMore) item("more") { Box(Modifier.padding(16.dp)) { SkeletonList(1, 200.dp) } }
             }
         }
+    }
+}
+
+/** On a frame but in no family: start one or join the family that invited you (docs/spec/simple-app.md §8). */
+@Composable
+private fun StartCard(start: () -> Unit, join: (() -> Unit)?) {
+    Card {
+        Text(stringResource(R.string.start_title), style = Kin.type.headline, color = Kin.colors.ink)
+        Text(stringResource(R.string.home_start_body), style = Kin.type.body, color = Kin.colors.inkSoft)
+        PrimaryButton(stringResource(R.string.start_family), start, Modifier.fillMaxWidth(), icon = KinIcons.Plus)
+        join?.let { SecondaryButton(stringResource(R.string.start_join), it, Modifier.fillMaxWidth(), icon = KinIcons.Link) }
     }
 }
 

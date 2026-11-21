@@ -145,7 +145,7 @@ fun FamilyListScreen(families: List<Feed>, home: String?, onOpen: (Feed) -> Unit
         }
         app.kinframe.family.ui.PageColumn(spacing = 8.dp) {
             families.forEach { f -> FamilyRow(f, selected = false, subtitle = familyCounts(f)) { onOpen(f) } }
-            HorizontalDivider(color = c.line, modifier = Modifier.padding(vertical = 8.dp))
+            if (families.isNotEmpty()) HorizontalDivider(color = c.line, modifier = Modifier.padding(vertical = 8.dp))
             SettingsLink(stringResource(R.string.family_start_another), KinIcons.Plus, onStart)
             SettingsLink(stringResource(R.string.family_join_another), KinIcons.Link, onJoin)
         }
