@@ -231,6 +231,7 @@
 		F202E18531BEA84CD55486B2 /* ios-strings-account.json in Resources */ = {isa = PBXBuildFile; fileRef = 30E692E828C86CCB18064467 /* ios-strings-account.json */; };
 		F218ED9D0AB0620171F030B4 /* Types+Components+Headers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11DB13FCB892D4D646303B0B /* Types+Components+Headers.swift */; };
 		F2D262589BCA8E001F9E1227 /* CalendarLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7681302EF650412C6357C93 /* CalendarLogic.swift */; };
+		4C2E64E4E72F1695D78881E9 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C6CB20E5098EC52BE9783ED /* ActivityView.swift */; };
 		F4A0D68BE6E901D8300A9DC3 /* HomeTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C1F47F13375F01972E1A0 /* HomeTab.swift */; };
 		F72191111BDE903F9E8956B8 /* FrameCalendarSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF6A893026A999244326648 /* FrameCalendarSection.swift */; };
 		F7608BC68BBB318A4B08EBE3 /* FreshSendSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A208BD86C40E476E6C30A724 /* FreshSendSheet.swift */; };
@@ -503,6 +504,7 @@
 		C17CB9BA9B77BFB859C9AD79 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		C35668FDF550D4D325BC1916 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
 		C3EC5104F5EA270D8F2443BE /* ShareToFrameSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareToFrameSheet.swift; sourceTree = "<group>"; };
+		2C6CB20E5098EC52BE9783ED /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		C44C1F47F13375F01972E1A0 /* HomeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTab.swift; sourceTree = "<group>"; };
 		C5418B2798C13F1DFA42C1A4 /* Discovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discovery.swift; sourceTree = "<group>"; };
 		C69BCC8DB970C83955622AF0 /* LeavingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeavingTests.swift; sourceTree = "<group>"; };
@@ -1021,6 +1023,7 @@
 			isa = PBXGroup;
 			children = (
 				A208BD86C40E476E6C30A724 /* FreshSendSheet.swift */,
+				2C6CB20E5098EC52BE9783ED /* ActivityView.swift */,
 				C44C1F47F13375F01972E1A0 /* HomeTab.swift */,
 				539D81CDD61E469C5757547A /* PostDetailView.swift */,
 				9B38797BC0D7B2F6CB479735 /* TimelineModel.swift */,
@@ -1511,6 +1514,7 @@
 				69E835C3968D454629CC4D92 /* GettingStarted.swift in Sources */,
 				D85FF1A3FD25956E7A7B7ABC /* GoogleImport.swift in Sources */,
 				32026BE44AAFB4EC2623EB1B /* HistoryModel.swift in Sources */,
+				4C2E64E4E72F1695D78881E9 /* ActivityView.swift in Sources */,
 				F4A0D68BE6E901D8300A9DC3 /* HomeTab.swift in Sources */,
 				7112A171D7A854AB6BF01B0E /* InviteView.swift in Sources */,
 				A7EFD5CFA75D8B5E17C340C0 /* ItemEditorSheet.swift in Sources */,

@@ -7,6 +7,62 @@
     "en": "Frames on these servers can’t show this family.",
     "nl": "Kaders op deze servers kunnen deze familie niet tonen."
   },
+  "simple.activity.frameRequests.one": {
+    "en": "{count} frame waits for your approval",
+    "nl": "{count} kader wacht op je goedkeuring"
+  },
+  "simple.activity.frameRequests.other": {
+    "en": "{count} frames wait for your approval",
+    "nl": "{count} kaders wachten op je goedkeuring"
+  },
+  "simple.activity.joinRequests.one": {
+    "en": "{count} person wants to join",
+    "nl": "{count} persoon wil erbij komen"
+  },
+  "simple.activity.joinRequests.other": {
+    "en": "{count} people want to join",
+    "nl": "{count} personen willen erbij komen"
+  },
+  "simple.activity.labelNew.one": {
+    "en": "Activity, {count} new",
+    "nl": "Activiteit, {count} nieuw"
+  },
+  "simple.activity.labelNew.other": {
+    "en": "Activity, {count} new",
+    "nl": "Activiteit, {count} nieuw"
+  },
+  "simple.activity.mentioned": {
+    "en": "You were mentioned on {name}’s post",
+    "nl": "Je bent genoemd bij het bericht van {name}"
+  },
+  "simple.activity.mentionedMine": {
+    "en": "You were mentioned on your post",
+    "nl": "Je bent genoemd bij je eigen bericht"
+  },
+  "simple.activity.newComments.one": {
+    "en": "{count} new comment on {name}’s post",
+    "nl": "{count} nieuwe reactie op het bericht van {name}"
+  },
+  "simple.activity.newComments.other": {
+    "en": "{count} new comments on {name}’s post",
+    "nl": "{count} nieuwe reacties op het bericht van {name}"
+  },
+  "simple.activity.newCommentsMine.one": {
+    "en": "{count} new comment on your post",
+    "nl": "{count} nieuwe reactie op je bericht"
+  },
+  "simple.activity.newCommentsMine.other": {
+    "en": "{count} new comments on your post",
+    "nl": "{count} nieuwe reacties op je bericht"
+  },
+  "simple.activity.none": {
+    "en": "Nothing new. You’re all caught up.",
+    "nl": "Niets nieuws. Je bent helemaal bij."
+  },
+  "simple.activity.title": {
+    "en": "Activity",
+    "nl": "Activiteit"
+  },
   "simple.addFamily.hint": {
     "en": "The frame shows it at once, with the last 50 posts. Families you're not in are added with their invite link for frames.",
     "nl": "Het kader toont ze meteen, met de laatste 50 berichten. Families waar je niet in zit, voeg je toe met hun uitnodigingslink voor kaders."

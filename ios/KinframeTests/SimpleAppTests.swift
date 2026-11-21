@@ -173,4 +173,102 @@ final class SimpleAppTests: XCTestCase {
         }
         L10n.setLanguage(.en)
     }
+
+    // MARK: Activity (§3.1)
+
+    private func post(_ id: String, feed: String = "feed1", poster: String = "u1", unread: Int = 0, mentions: Int = 0,
+                      send: String? = nil, kind: String = "feed", at: String = "2026-11-19T09:00:00Z") throws -> TimelinePost {
+        let s = send.map { #""send_id":"\#($0)","# } ?? ""
+        let json = #"{"id":"\#(id)","kind":"\#(kind)","feed_id":"\#(feed)","feed_name":"Peeters",\#(s)"poster":{"user_id":"\#(poster)","display_name":"Ben"},"created_at":"\#(at)","items":[],"thread":{"post_id":"\#(id)","state":"open","comment_count":3,"latest_comments":[],"reactions":{"total":0,"counts":[],"people":[],"frames":[]},"can_comment":true,"unread_count":\#(unread),"unread_mentions":\#(mentions)}}"#
+        return try SocialFixtures.decode(TimelinePost.self, json)
+    }
+
+    private func request(_ id: String, frame: String, state: String = "open", at: String = "2026-11-19T10:00:00Z",
+                         feeds: [String]? = nil) throws -> PhotoRequest {
+        let f = feeds.map { #","feed_ids":[\#($0.map { "\"\($0)\"" }.joined(separator: ","))]"# } ?? ""
+        let json = #"{"id":"\#(id)","frame_id":"\#(frame)","frame_name":"Oma","state":"\#(state)","created_at":"\#(at)","expires_at":"2026-11-30T10:00:00Z"\#(f)}"#
+        return try SocialFixtures.decode(PhotoRequest.self, json)
+    }
+
+    func testActivityListsPostsWithNewCommentsOrAMention() throws {
+        let list = try [
+            post("read"),
+            post("new", unread: 2),
+            post("mention", mentions: 1),
+            post("frame", unread: 1, kind: "frame"),
+            post("a", unread: 1, send: "s1"),
+            post("b", feed: "feed2", unread: 1, send: "s1"),
+            post("other", feed: "feed2", unread: 4),
+        ]
+        XCTAssertEqual(ActivityList.posts(list).map(\.id), ["new", "mention", "a", "other"], "family posts once per send")
+        XCTAssertEqual(ActivityList.posts(list, in: ["feed2"]).map(\.id), ["other"], "Home's filter")
+    }
+
+    func testActivityWordsForAPost() throws {
+        XCTAssertEqual(ActivityList.text(try post("p", unread: 2), me: "me"), "2 new comments on Ben’s post")
+        XCTAssertEqual(ActivityList.text(try post("p", unread: 1), me: "me"), "1 new comment on Ben’s post")
+        XCTAssertEqual(ActivityList.text(try post("p", poster: "me", unread: 3), me: "me"), "3 new comments on your post")
+        XCTAssertEqual(ActivityList.text(try post("p", unread: 2, mentions: 1), me: "me"), "You were mentioned on Ben’s post")
+        L10n.setLanguage(.nl)
+        XCTAssertEqual(ActivityList.text(try post("p", unread: 2), me: "me"), "2 nieuwe reacties op het bericht van Ben")
+        XCTAssertEqual(ActivityList.text(try post("p", poster: "me", unread: 1), me: "me"), "1 nieuwe reactie op je bericht")
+        L10n.setLanguage(.en)
+    }
+
+    func testActivityShowsWhatWaitsForAnAdmin() {
+        let list = ActivityList.pending([
+            .init(choice: c("peeters"), name: "Peeters", role: .owner, joinRequests: 2, frameRequests: 1),
+            .init(choice: c("opa"), name: "Opa", role: .poster, joinRequests: 3, frameRequests: 3),
+            .init(choice: c("kids"), name: "Kids", role: .admin, joinRequests: 0, frameRequests: 1),
+        ])
+        XCTAssertEqual(list, [
+            .joinRequests(c("peeters"), family: "Peeters", count: 2),
+            .frameRequests(c("peeters"), family: "Peeters", count: 1),
+            .frameRequests(c("kids"), family: "Kids", count: 1),
+        ], "admins only, nothing for 0")
+        XCTAssertEqual(list.map(\.text), ["2 people want to join", "1 frame waits for your approval", "1 frame waits for your approval"])
+        XCTAssertEqual(Set(list.map(\.id)).count, 3)
+        L10n.setLanguage(.nl)
+        XCTAssertEqual(list.map(\.text), ["2 personen willen erbij komen", "1 kader wacht op je goedkeuring", "1 kader wacht op je goedkeuring"])
+        L10n.setLanguage(.en)
+    }
+
+    func testActivityReadsTheCountsOfAFamily() throws {
+        let feed = try SchemaFixtures.decode(Feed.self, SchemaFixtures.feed)
+        let f = ActivityList.Family(feed, account: "a")
+        XCTAssertEqual(f.choice, c("feed1"))
+        XCTAssertEqual(f.joinRequests, 2)
+        XCTAssertTrue(ActivityList.Family.isAdmin(f.role))
+        XCTAssertFalse(ActivityList.Family.isAdmin(.poster))
+    }
+
+    func testActivityShowsOpenPhotoRequestsOncePerFrame() throws {
+        let list = try [
+            request("old", frame: "f1", at: "2026-11-18T10:00:00Z"),
+            request("new", frame: "f1", at: "2026-11-19T10:00:00Z"),
+            request("done", frame: "f2", state: "answered"),
+            request("opa", frame: "f3", at: "2026-11-17T10:00:00Z", feeds: ["feed2"]),
+        ]
+        XCTAssertEqual(ActivityList.requests(list).map(\.id), ["new", "opa"])
+        XCTAssertEqual(ActivityList.requests(list, in: ["feed1"]).map(\.id), ["new"], "another family's frame stays out")
+        XCTAssertEqual(ActivityList.requests(list, in: ["feed2"]).map(\.id), ["new", "opa"])
+    }
+
+    func testTheBell() {
+        XCTAssertEqual(ActivityList.badge(threads: 3, requests: 1), 4)
+        XCTAssertEqual(ActivityList.badge(threads: -1, requests: 0), 0)
+        XCTAssertEqual(ActivityList.label(badge: 0), "Activity")
+        XCTAssertEqual(ActivityList.label(badge: 4), "Activity, 4 new")
+    }
+
+    func testTheActivityWordingHasNoFollowing() {
+        for lang: AppLanguage in [.en, .nl] {
+            L10n.setLanguage(lang)
+            for text in [L("simple.activity.none"), Lp("simple.activity.frameRequests", count: 2), Lp("simple.activity.joinRequests", count: 1)] {
+                XCTAssertNil(text.range(of: lang == .en ? "follow" : "volg", options: .caseInsensitive), text)
+                XCTAssertNil(text.range(of: "feed", options: .caseInsensitive), text)
+            }
+        }
+        L10n.setLanguage(.en)
+    }
 }

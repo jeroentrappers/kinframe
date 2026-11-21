@@ -59688,6 +59688,244 @@
         }
       }
     },
+    "simple.activity.frameRequests.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} frame waits for your approval"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} kader wacht op je goedkeuring"
+          }
+        }
+      }
+    },
+    "simple.activity.frameRequests.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} frames wait for your approval"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} kaders wachten op je goedkeuring"
+          }
+        }
+      }
+    },
+    "simple.activity.joinRequests.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} person wants to join"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} persoon wil erbij komen"
+          }
+        }
+      }
+    },
+    "simple.activity.joinRequests.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} people want to join"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} personen willen erbij komen"
+          }
+        }
+      }
+    },
+    "simple.activity.labelNew.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity, {count} new"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activiteit, {count} nieuw"
+          }
+        }
+      }
+    },
+    "simple.activity.labelNew.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity, {count} new"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activiteit, {count} nieuw"
+          }
+        }
+      }
+    },
+    "simple.activity.mentioned": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You were mentioned on {name}’s post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent genoemd bij het bericht van {name}"
+          }
+        }
+      }
+    },
+    "simple.activity.mentionedMine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You were mentioned on your post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent genoemd bij je eigen bericht"
+          }
+        }
+      }
+    },
+    "simple.activity.newComments.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} new comment on {name}’s post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} nieuwe reactie op het bericht van {name}"
+          }
+        }
+      }
+    },
+    "simple.activity.newComments.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} new comments on {name}’s post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} nieuwe reacties op het bericht van {name}"
+          }
+        }
+      }
+    },
+    "simple.activity.newCommentsMine.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} new comment on your post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} nieuwe reactie op je bericht"
+          }
+        }
+      }
+    },
+    "simple.activity.newCommentsMine.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} new comments on your post"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} nieuwe reacties op je bericht"
+          }
+        }
+      }
+    },
+    "simple.activity.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing new. You’re all caught up."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets nieuws. Je bent helemaal bij."
+          }
+        }
+      }
+    },
+    "simple.activity.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activiteit"
+          }
+        }
+      }
+    },
     "simple.addFamily.hint": {
       "extractionState": "manual",
       "localizations": {

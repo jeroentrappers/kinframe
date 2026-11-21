@@ -261,3 +261,113 @@ public enum SimpleViewLogic {
         return min(max(0, index + delta), count - 1)
     }
 }
+
+/// Home's activity bell (§3.1), the same list as the web and Android apps: frames asking for new photos, what waits
+/// for an admin of a family (people who want to join, frames that wait for approval), then posts with new comments
+/// or a mention of you.
+public enum ActivityList {
+    /// A family as the list sees it: its role and the counts its detail carries (admins only; 0 for others).
+    public struct Family: Equatable, Sendable {
+        public var choice: FamilyChoice
+        public var name: String
+        public var role: FeedRole
+        public var joinRequests: Int
+        public var frameRequests: Int
+
+        public init(choice: FamilyChoice, name: String, role: FeedRole, joinRequests: Int = 0, frameRequests: Int = 0) {
+            self.choice = choice
+            self.name = name
+            self.role = role
+            self.joinRequests = joinRequests
+            self.frameRequests = frameRequests
+        }
+
+        public init(_ feed: Feed, account: String) {
+            self.init(choice: FamilyChoice(account: account, feedId: feed.id), name: feed.name, role: feed.role,
+                      joinRequests: feed.value2.pendingJoinRequestCount ?? 0, frameRequests: feed.value2.pendingSubscriptionCount ?? 0)
+        }
+
+        /// Only admins see and decide requests; their family details are worth loading.
+        public static func isAdmin(_ role: FeedRole) -> Bool { FeedAbilities(role: role).isAdmin }
+    }
+
+    /// Something that waits for you in a family; it opens the family's People or Frames, where you approve or decline.
+    public enum Pending: Hashable, Sendable, Identifiable {
+        case joinRequests(FamilyChoice, family: String, count: Int)
+        case frameRequests(FamilyChoice, family: String, count: Int)
+
+        public var id: String {
+            switch self {
+            case .joinRequests(let c, _, _): "j|" + c.account + "|" + c.feedId
+            case .frameRequests(let c, _, _): "s|" + c.account + "|" + c.feedId
+            }
+        }
+
+        public var choice: FamilyChoice {
+            switch self {
+            case .joinRequests(let c, _, _), .frameRequests(let c, _, _): c
+            }
+        }
+
+        public var family: String {
+            switch self {
+            case .joinRequests(_, let f, _), .frameRequests(_, let f, _): f
+            }
+        }
+
+        /// "2 people want to join", "1 frame waits for your approval".
+        public var text: String {
+            switch self {
+            case .joinRequests(_, _, let n): Lp("simple.activity.joinRequests", count: n)
+            case .frameRequests(_, _, let n): Lp("simple.activity.frameRequests", count: n)
+            }
+        }
+    }
+
+    /// Per family in list order: join requests, then frames waiting; admins only, nothing for a count of 0.
+    public static func pending(_ families: [Family]) -> [Pending] {
+        families.filter { Family.isAdmin($0.role) }.flatMap { f -> [Pending] in
+            (f.joinRequests > 0 ? [.joinRequests(f.choice, family: f.name, count: f.joinRequests)] : [])
+                + (f.frameRequests > 0 ? [.frameRequests(f.choice, family: f.name, count: f.frameRequests)] : [])
+        }
+    }
+
+    /// Posts with new comments or a mention of you, family posts only and a send to several families once; within
+    /// `feedIds` when Home is filtered to a family.
+    public static func posts(_ posts: [TimelinePost], in feedIds: Set<String>? = nil) -> [TimelinePost] {
+        HomeTimeline.families(posts).filter { p in
+            guard (p.thread.unreadCount ?? 0) > 0 || (p.thread.unreadMentions ?? 0) > 0 else { return false }
+            guard let feedIds else { return true }
+            return p.feedId.map(feedIds.contains) ?? false
+        }
+    }
+
+    /// "You were mentioned on Ben's post", "2 new comments on Ben's post" or "… on your post".
+    public static func text(_ p: TimelinePost, me: String?) -> String {
+        let mine = me != nil && p.poster.userId == me
+        let name = PersonName.display(p.poster)
+        if (p.thread.unreadMentions ?? 0) > 0 {
+            return mine ? L("simple.activity.mentionedMine") : L("simple.activity.mentioned", ["name": name])
+        }
+        let n = max(1, p.thread.unreadCount ?? 0)
+        return mine ? Lp("simple.activity.newCommentsMine", count: n) : Lp("simple.activity.newComments", count: n, ["name": name])
+    }
+
+    /// Open photo requests, one per frame, newest first; within `feedIds` when Home is filtered (a request without
+    /// families is the person's own frame and always shows).
+    public static func requests(_ list: [PhotoRequest], in feedIds: Set<String>? = nil) -> [PhotoRequest] {
+        var seen = Set<String>()
+        return list.filter { $0.state == .open }.sorted { $0.createdAt > $1.createdAt }.filter { r in
+            if let feedIds, let on = r.feedIds, !on.isEmpty, feedIds.isDisjoint(with: on) { return false }
+            return seen.insert(r.frameId).inserted
+        }
+    }
+
+    /// The number on the bell: unread comment threads (the server's badge) and open photo requests.
+    public static func badge(threads: Int, requests: Int) -> Int { max(0, threads) + max(0, requests) }
+
+    /// What the bell says to VoiceOver: "Activity" or "Activity, 3 new".
+    public static func label(badge: Int) -> String {
+        badge > 0 ? Lp("simple.activity.labelNew", count: badge) : L("simple.activity.title")
+    }
+}

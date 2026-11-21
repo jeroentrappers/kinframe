@@ -4,7 +4,7 @@ import SwiftUI
 /// Home (docs/spec/simple-app.md §3.1): one timeline of all the person's families (of every account), newest first.
 /// With several families, filter chips (All · each family, remembered on this device) and a family label on each
 /// post; a post sent to several families shows once. Under the chips the people and frames of the filtered family
-/// (with All: the home family) and "Invite".
+/// (with All: the home family) and "Invite". The bell in the top bar opens Activity.
 struct HomeTab: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
@@ -37,11 +37,38 @@ struct HomeTab: View {
             .pageBackground()
             .navigationTitle(L("simple.nav.home"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { bell }
+            }
+            .navigationDestination(for: ActivityRoute.self) { _ in ActivityView() }
             .socialDestinations()
         }
         .task(id: key) { await reload(fresh: true) }
         .onLiveEvent(app.events) { timelines[app.accountId]?.apply($0) }
         .onOtherAccountsLiveEvents(accounts) { m, e in timelines[m.accountId]?.apply(e) }
+    }
+
+    // MARK: Activity
+
+    /// New comments, photo requests and what waits for an admin (docs/spec/simple-app.md §3.1).
+    private var bell: some View {
+        let badge = accounts.activityBadge
+        return NavigationLink(value: ActivityRoute()) {
+            Image(systemName: "bell")
+                .frame(width: 44, height: 44)
+                .overlay(alignment: .topTrailing) {
+                    if badge > 0 {
+                        Text(badge > 99 ? "99+" : "\(badge)")
+                            .font(.caption2.weight(.bold).monospacedDigit())
+                            .foregroundStyle(Palette.onPrimary)
+                            .padding(.horizontal, 5)
+                            .frame(minWidth: 18, minHeight: 18)
+                            .background(Capsule().fill(Palette.primary))
+                            .offset(x: -2, y: 4)
+                    }
+                }
+        }
+        .accessibilityLabel(ActivityList.label(badge: badge))
     }
 
     // MARK: Chips

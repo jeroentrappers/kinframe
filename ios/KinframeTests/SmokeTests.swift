@@ -130,6 +130,7 @@ final class SmokeTests: XCTestCase {
         await settle()
 
         app.tab = .home
+        await push(ActivityRoute(), on: \.homePath)
         await push(PostRoute(postId: "p-1", account: app.accountId), on: \.homePath)
         await push(PersonRoute(userId: "u-lies", account: app.accountId), on: \.homePath)
         app.tab = .chats
