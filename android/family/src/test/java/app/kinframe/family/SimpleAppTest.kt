@@ -8,9 +8,10 @@ import app.kinframe.core.api.FeedPost
 import app.kinframe.core.api.FeedPoster
 import app.kinframe.core.api.FeedRole
 import app.kinframe.core.api.Frame
+import app.kinframe.core.api.FrameNowShowing
+import app.kinframe.core.api.FrameReactionsToday
 import app.kinframe.core.api.Item
 import app.kinframe.core.api.Permissions
-import app.kinframe.core.api.Placement
 import app.kinframe.core.api.PlacementsPage
 import app.kinframe.core.api.Subscription
 import app.kinframe.core.api.SubscriptionFeed
@@ -39,6 +40,7 @@ import app.kinframe.family.ui.family.simplePosts
 import app.kinframe.family.ui.feeds.FeedDetailViewModel
 import app.kinframe.family.ui.feeds.FeedNotice
 import app.kinframe.family.ui.frames.FrameAdded
+import app.kinframe.family.ui.frames.FrameCards
 import app.kinframe.family.ui.frames.FramesOrder
 import app.kinframe.family.ui.frames.FramesViewModel
 import app.kinframe.family.ui.home.HomeRow
@@ -132,9 +134,14 @@ class SimpleAppTest {
     @Test fun theHomeFamilyIsTheOneYouPostToMost() {
         val trappers = family("a", "Trappers"); val opa = family("b", "Opa & Oma", role = FeedRole.OWNER)
         val sister = Feed("c", "Sister", createdAt = "2026-01-01T00:00:00Z"); val brother = Feed("d", "Brother", createdAt = "2025-01-01T00:00:00Z")
-        assertEquals(trappers, Families.home(listOf(trappers, opa), mapOf("a" to 12, "b" to 3)))
+        assertEquals("the server's my_post_count", "a", Families.home(listOf(trappers.copy(myPostCount = 12), opa.copy(myPostCount = 3)))?.id)
+        assertEquals("posting most beats having created it", "a", Families.home(listOf(trappers.copy(myPostCount = 1), opa))?.id)
         assertEquals("a tie: the one you created", opa, Families.home(listOf(trappers, opa)))
+        assertEquals("a tie with counts too", "b", Families.home(listOf(trappers.copy(myPostCount = 4), opa.copy(myPostCount = 4)))?.id)
         assertEquals("else the oldest", brother, Families.home(listOf(sister, brother)))
+        assertEquals("created beats oldest", opa, Families.home(listOf(brother, opa)))
+        assertEquals("the order of the list doesn't matter", Families.home(listOf(sister, brother)), Families.home(listOf(brother, sister)))
+        assertEquals("one family is the home family", sister, Families.home(listOf(sister)))
         assertNull(Families.home(emptyList()))
         assertEquals(listOf("b", "d", "c"), Families.ordered(listOf(sister, opa, brother), opa).map { it.id })
     }
@@ -180,19 +187,19 @@ class SimpleAppTest {
             }
         }
         val kin = object : FakeApi() {
-            override suspend fun frames() = listOf(managed("f1", "Oma"))
+            override suspend fun frames() = listOf(managed("f1", "Oma").copy(nowShowing = FrameNowShowing("pl", "i", FrameNowShowing.SCREEN, thumbUrl = "thumb-f1")))
             override suspend fun feeds() = listOf(family("fd1", "Peeters"))
             override suspend fun feedMembers(feedId: String) = listOf(FeedMember("u2", "Anna"), FeedMember("me", "Jeroen"), FeedMember("u3", "Ben"))
             override suspend fun feedSubscriptions(feedId: String, status: String?) = listOf(subOf("f1"), subOf("f9"))
-            override suspend fun placements(frameId: String, visibility: String, cursor: String?, limit: Int, albumId: String?, onThisDay: String?, sort: String?) =
-                PlacementsPage(listOf(Placement("pl", frameId, Item("i", thumbUrl = "thumb-$frameId"))))
+            override suspend fun placements(frameId: String, visibility: String, cursor: String?, limit: Int, albumId: String?, onThisDay: String?, sort: String?): PlacementsPage =
+                error("the photo comes with the frame list (now_showing)")
         }
         val vm = HomeViewModel(social, kin, { "me" }, emptyFlow(), engagement = false, feedId = "fd1")
         assertEquals(listOf<String?>("fd1"), asked)
         val s = vm.state.value
         assertEquals("the person first", listOf("me", "u2", "u3"), s.members.map { it.userId })
         assertEquals(listOf("f1", "f9"), s.familyFrames.map { it.id })
-        assertEquals("only frames you can see the library of have a thumbnail", mapOf("f1" to "thumb-f1"), s.frameThumbs)
+        assertEquals("only frames that come with now_showing have a photo", mapOf("f1" to "thumb-f1"), s.frameThumbs)
     }
 
     @Test fun homeInvitesWhenYouAreAlone() {
@@ -308,6 +315,38 @@ class SimpleAppTest {
         vm.addToFamily("f1", "fd1") { result = it }
         assertEquals(FrameAdded.Active("Frame f1", "Peeters family"), result)
         assertEquals(listOf("fd1"), vm.state.value.shows["f1"]?.map { it.id })
+    }
+
+    @Test fun frameCardsShowWhatTheServerSays() {
+        val oma = managed("f1", "Oma").copy(online = true)
+        val screen = FrameNowShowing("pl1", "i1", FrameNowShowing.SCREEN, thumbUrl = "thumb", displayUrl = "display")
+        val placed = FrameNowShowing("pl2", "i2", FrameNowShowing.LAST_PLACED, thumbUrl = "thumb2")
+        assertNull("no now_showing: the drawing", FrameCards.photo(oma))
+        assertEquals("the card has the thumbnail", "thumb", FrameCards.photo(oma.copy(nowShowing = screen)))
+        assertEquals("the frame screen the display rendition", "display", FrameCards.photo(oma.copy(nowShowing = screen), large = true))
+        assertEquals("no display rendition: the thumbnail", "thumb2", FrameCards.photo(oma.copy(nowShowing = placed), large = true))
+        assertEquals("no thumbnail: the display rendition", "display", FrameCards.photo(oma.copy(nowShowing = screen.copy(thumbUrl = null))))
+        assertTrue("showing now: online and on screen", FrameCards.showingNow(oma.copy(nowShowing = screen)))
+        assertFalse("online, but the last placed photo", FrameCards.showingNow(oma.copy(nowShowing = placed)))
+        assertFalse("went offline since", FrameCards.showingNow(oma.copy(online = false, nowShowing = screen)))
+        assertFalse(FrameCards.showingNow(oma))
+        assertFalse("an unknown source", FrameCards.showingNow(oma.copy(nowShowing = screen.copy(source = "later"))))
+        assertEquals(3, FrameCards.lovedToday(oma.copy(reactionsToday = FrameReactionsToday(count = 5, itemCount = 3))))
+        assertNull("nothing today", FrameCards.lovedToday(oma.copy(reactionsToday = FrameReactionsToday(0, 0))))
+        assertNull("can't see the library", FrameCards.lovedToday(oma))
+    }
+
+    @Test fun frameCardFieldsParse() {
+        val f = app.kinframe.core.api.KinJson.decodeFromString(
+            Frame.serializer(),
+            """{"id":"f1","name":"Oma","online":true,"now_showing":{"placement_id":"pl","item_id":"i","source":"screen","thumb_url":"t","display_url":null,"since":"2026-11-21T08:00:00Z"},"reactions_today":{"count":4,"item_count":3}}""",
+        )
+        assertEquals(FrameNowShowing("pl", "i", "screen", "t", null, "2026-11-21T08:00:00Z"), f.nowShowing)
+        assertEquals(FrameReactionsToday(4, 3), f.reactionsToday)
+        val none = app.kinframe.core.api.KinJson.decodeFromString(Frame.serializer(), """{"id":"f1","name":"Oma","now_showing":null}""")
+        assertNull(none.nowShowing); assertNull(none.reactionsToday)
+        val feed = app.kinframe.core.api.KinJson.decodeFromString(Feed.serializer(), """{"id":"fd1","name":"Trappers","role":"owner","member_count":5,"subscription_count":2,"my_post_count":17}""")
+        assertEquals(17, feed.myPostCount)
     }
 
     // ---------------------------------------------------------------------------------------------- the family profile

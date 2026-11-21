@@ -30,6 +30,8 @@ data class Feed(
     val memberCount: Int = 0,
     /** Active and paused subscriptions. */
     val subscriptionCount: Int = 0,
+    /** The caller's live posts in this family: picks the home family (docs/spec/simple-app.md §3). */
+    val myPostCount: Int = 0,
     val lastPostAt: String? = null,
     val createdAt: String? = null,
     val ownerName: String? = null,

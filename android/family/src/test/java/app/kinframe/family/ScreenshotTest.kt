@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.kinframe.core.api.Frame
 import app.kinframe.core.api.FrameHealth
+import app.kinframe.core.api.FrameNowShowing
+import app.kinframe.core.api.FrameReactionsToday
 import app.kinframe.core.api.Heartbeat
 import app.kinframe.core.api.Invite
 import app.kinframe.core.api.Item
@@ -126,13 +128,28 @@ class ScreenshotTest {
     private fun ago(minutes: Long) = now.minusSeconds(minutes * 60).toString()
 
     private val frames = listOf(
+        // On screen now, loved 3 photos today.
         Frame("f-oma", "Oma’s frame", "Living room", "Jeroen", role = "owner", permissions = Permissions.ALL, online = true,
             screen = Screen(1280, 800, orientation = "landscape"), memberCount = 4, placementCount = 312, createdAt = ago(60 * 24 * 40),
-            inviteRequiresApproval = true),
-        Frame("f-opa", "Opa Jos", "Kitchen", "Lies", role = "member", permissions = Permissions(send = true), online = false, lastSeenAt = ago(180),
-            screen = Screen(800, 1280, orientation = "portrait")),
-        Frame("f-cabin", "Cabin in the Ardennes", null, "Jeroen", role = "admin", permissions = Permissions.ALL, online = true, needsUpdate = true),
+            inviteRequiresApproval = true,
+            nowShowing = FrameNowShowing("pl1", "x1", FrameNowShowing.SCREEN, thumbUrl = "photo:oma-now", displayUrl = "photo:oma-now", since = ago(2)),
+            reactionsToday = FrameReactionsToday(count = 4, itemCount = 3)),
+        // Offline: its last placed photo, one loved this morning.
+        Frame("f-opa", "Opa Jos", "Kitchen", "Lies", role = "member", permissions = Permissions(send = true, seeLibrary = true), online = false, lastSeenAt = ago(180),
+            screen = Screen(800, 1280, orientation = "portrait"),
+            nowShowing = FrameNowShowing("pl2", "x2", FrameNowShowing.LAST_PLACED, thumbUrl = "photo:opa-last", since = ago(60 * 20)),
+            reactionsToday = FrameReactionsToday(count = 1, itemCount = 1)),
+        // Nothing on it yet: the drawing, no reactions line.
+        Frame("f-cabin", "Cabin in the Ardennes", null, "Jeroen", role = "admin", permissions = Permissions.ALL, online = true, needsUpdate = true,
+            reactionsToday = FrameReactionsToday(0, 0)),
     )
+
+    /** The families each test frame shows: Oma's frame five (as in the reference family), Opa's one, the cabin none. */
+    private val frameShows = run {
+        val families = listOf("Trappers", "Opa & Oma Trappers", "Peeters", "Janssens", "De Smet")
+            .mapIndexed { i, n -> app.kinframe.core.api.SubscriptionFeed("fd${i + 1}", n) }
+        mapOf("f-oma" to families, "f-opa" to families.take(1))
+    }
 
     private val server = ServerChoice(
         "https://kinframe.appmire.be/".toHttpUrl(),
@@ -175,12 +192,15 @@ class ScreenshotTest {
         SignInScreen(server.copy(discovery = server.discovery.copy(devAuth = true)), OnboardingState(devEmail = "anna@example.org"), false, SignInReason.Frame, {}, {}, {}, {}, {})
     }
 
-    @Test fun framesList() = both("frames_list") { FramesScreen(FramesState(Load.Ready(frames)), {}, {}, {}) }
+    @Test fun framesList() = both("frames_list") { FramesScreen(FramesState(Load.Ready(frames), shows = frameShows), {}, {}, {}, onAddFamily = {}) }
 
     @Test fun framesEmpty() = both("frames_empty") { FramesScreen(FramesState(Load.Ready(emptyList())), {}, {}, {}) }
 
     @Test @Config(qualifiers = "w900dp-h1200dp-xhdpi")
-    fun framesTablet() = shot("frames_tablet_light", dark = false) { FramesScreen(FramesState(Load.Ready(frames)), {}, {}, {}) }
+    fun framesTablet() = shot("frames_tablet_light", dark = false) { FramesScreen(FramesState(Load.Ready(frames), shows = frameShows), {}, {}, {}, onAddFamily = {}) }
+
+    @Test @Config(qualifiers = "nl-w411dp-h891dp-xxhdpi")
+    fun framesDutch() = shot("frames_nl_light", dark = false) { FramesScreen(FramesState(Load.Ready(frames), shows = frameShows), {}, {}, {}, onAddFamily = {}) }
 
     @Test fun addFrameCode() = both("add_frame_code") {
         AddFrameScreen(AddFrameState(digits = "482139"), {}, {}, {}, {}, {}, {}, {}, {}, {})
@@ -245,8 +265,11 @@ class ScreenshotTest {
         invites = listOf(Invite("i1", "tok", "https://kinframe.appmire.be/i/tok", "Jeroen", 1, 0, "For cousin Lisa", now.plusSeconds(6 * 86_400).toString())),
     )
 
+    /** Oma's frame's screen: all five rows (docs/spec/simple-app.md §3.3). */
+    private val omaHome = FrameHomeActions({}, {}, shows = frameShows.getValue("f-oma"), addons = {})
+
     @Test fun frameOverview() = both("frame_overview") {
-        FrameDetailScreen(detail, FrameTab.Overview, {}, {}, {}, FrameHomeActions({}, {}), noop.copyMe("u1"), {}, {})
+        FrameDetailScreen(detail, FrameTab.Overview, {}, {}, {}, omaHome, noop.copyMe("u1"), {}, {}, calendar = {})
     }
 
     @Test fun framePeople() = both("frame_people") {
@@ -338,7 +361,7 @@ class ScreenshotTest {
 
     @Test fun framesOfTheFamilies() = both("frames_families") {
         val shows = listOf(app.kinframe.core.api.SubscriptionFeed("fd1", "Trappers"), app.kinframe.core.api.SubscriptionFeed("fd2", "Opa & Oma Trappers"))
-        FramesScreen(FramesState(Load.Ready(frames), shows = mapOf("f-oma" to shows, "f-opa" to shows.take(1)), thumbs = mapOf("f-oma" to "photo:oma"),
+        FramesScreen(FramesState(Load.Ready(frames), shows = mapOf("f-oma" to shows, "f-opa" to shows.take(1)),
             familyFrames = listOf(app.kinframe.family.ui.frames.FamilyFrame(app.kinframe.core.api.SubscriptionFrame("f-x", "Line’s parents", online = true), shows))),
             {}, {}, {}, onAddFamily = {}, onOpenFamilyFrame = {})
     }
@@ -348,7 +371,7 @@ class ScreenshotTest {
     }
 
     @Test fun frameSettingsAndHelp() = both("frame_settings_help") {
-        FrameDetailScreen(detail, FrameTab.Settings, {}, {}, {}, FrameHomeActions({}, {}), noop.copyMe("u1"), {}, {}, feeds = {})
+        FrameDetailScreen(detail, FrameTab.Settings, {}, {}, {}, omaHome, noop.copyMe("u1"), {}, {}, feeds = {})
     }
 
     @Test fun frameDevice() = both("frame_device") {

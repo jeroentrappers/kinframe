@@ -23,14 +23,30 @@ data class FramesState(
     val refreshing: Boolean = false,
     /** The families each frame shows (active subscriptions), by frame id. */
     val shows: Map<String, List<SubscriptionFeed>> = emptyMap(),
-    /** Each frame's last placed photo (frames whose library the person may see). */
-    val thumbs: Map<String, String> = emptyMap(),
     /** A frame being added to a family. */
     val adding: String? = null,
     /** Frames that show the person's families but that they aren't on (docs/spec/simple-app.md §3.3). */
     val familyFrames: List<FamilyFrame> = emptyList(),
 ) {
     val online: Int get() = (frames as? Load.Ready)?.value?.count { it.online } ?: 0
+}
+
+/**
+ * What a frame's card shows (docs/spec/simple-app.md §3.3, API README §5.5 "Frame cards"), from the server's
+ * `now_showing` and `reactions_today`. Both are absent for people who can't see the frame's library; the card then
+ * keeps its drawing and has no reactions line.
+ */
+object FrameCards {
+    /** The card's photo: the thumbnail, or with [large] the display rendition; null without `now_showing`. */
+    fun photo(frame: Frame, large: Boolean = false): String? = frame.nowShowing?.let { n ->
+        if (large) n.displayUrl ?: n.thumbUrl else n.thumbUrl ?: n.displayUrl
+    }
+
+    /** "Online · showing now": the frame is online and reported this slide on screen (`source: screen`). */
+    fun showingNow(frame: Frame): Boolean = frame.online && frame.nowShowing?.onScreen == true
+
+    /** How many photos the frame reacted to today ("Oma loved 3 photos today"); null hides the line. */
+    fun lovedToday(frame: Frame): Int? = frame.reactionsToday?.takeIf { it.count > 0 }?.itemCount?.takeIf { it > 0 }
 }
 
 /** A frame that shows one or more of the person's families, which they aren't on themselves. */
@@ -99,14 +115,8 @@ class FramesViewModel(private val api: KinApi, live: Flow<LiveEvent>) : ViewMode
         }
     }
 
-    /** Which family each frame shows, and its last placed photo. */
-    private suspend fun loadExtras(frames: List<Frame>) {
-        loadShows(frames.map { it.id })
-        val thumbs = frames.filter { it.can { p -> p.seeLibrary } }.mapNotNull { f ->
-            runCatching { api.placements(f.id, limit = 1).placements.firstOrNull()?.item?.thumbUrl }.getOrNull()?.let { f.id to it }
-        }.toMap()
-        _state.update { it.copy(thumbs = it.thumbs + thumbs) }
-    }
+    /** Which families each frame shows (the photo and today's reactions come with the frame list). */
+    private suspend fun loadExtras(frames: List<Frame>) = loadShows(frames.map { it.id })
 
     private suspend fun loadShows(frameIds: List<String>) {
         val shows = frameIds.mapNotNull { id ->

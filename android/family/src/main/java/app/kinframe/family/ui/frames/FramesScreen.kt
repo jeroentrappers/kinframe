@@ -130,16 +130,17 @@ private fun FamilyFrameCard(ff: FamilyFrame, onOpen: ((SubscriptionFrame) -> Uni
         Column(Modifier.weight(1f)) {
             Text(ff.frame.name, style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(showsLine(ff.shows), style = Kin.type.caption, color = c.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(if (ff.frame.online) stringResource(R.string.frames_online_now) else stringResource(R.string.frames_offline), style = Kin.type.caption,
+            Text(if (ff.frame.online) stringResource(R.string.frame_online) else stringResource(R.string.frames_offline), style = Kin.type.caption,
                 color = if (ff.frame.online) c.onSageSoft else c.inkFaint)
         }
     }
 }
 
-/** "Online · showing now" or "Offline since 2 hours ago". */
+/** "Online · showing now" (the frame reported the photo on screen), "Online", or "Offline since 2 hours ago". */
 @Composable
 fun frameStatus(frame: Frame): String = when {
-    frame.online -> stringResource(R.string.frames_online_now)
+    FrameCards.showingNow(frame) -> stringResource(R.string.frames_online_now)
+    frame.online -> stringResource(R.string.frame_online)
     frame.lastSeenAt != null -> stringResource(R.string.frames_offline_since, app.kinframe.family.util.Format.relative(frame.lastSeenAt!!))
     else -> stringResource(R.string.frames_offline)
 }
@@ -152,7 +153,12 @@ fun showsLine(shows: List<SubscriptionFeed>): String = when (shows.size) {
     else -> pluralStringResource(R.plurals.frames_shows_more, shows.size - 1, shows.first().name, shows.size - 1)
 }
 
-/** A frame's card: what it shows now, its status, name, which family it shows. */
+/** "Oma’s frame loved 3 photos today"; null when it reacted to nothing today (or the person can't see that). */
+@Composable
+fun lovedTodayLine(frame: Frame): String? =
+    FrameCards.lovedToday(frame)?.let { n -> pluralStringResource(R.plurals.frames_loved_today, n, frame.name, n) }
+
+/** A frame's card: what it shows now, its status, name, which family it shows, today's reactions. */
 @Composable
 fun FrameCard(frame: Frame, state: FramesState, onAddFamily: (() -> Unit)?, onOpen: () -> Unit, server: String? = null) {
     val c = Kin.colors
@@ -164,7 +170,7 @@ fun FrameCard(frame: Frame, state: FramesState, onAddFamily: (() -> Unit)?, onOp
             .border(1.dp, c.line, RoundedCornerShape(20.dp))
             .clickable(role = Role.Button, onClickLabel = stringResource(R.string.frames_open, frame.name), onClick = onOpen),
     ) {
-        FrameHero(frame, state.thumbs[frame.id])
+        FrameHero(frame, FrameCards.photo(frame))
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(frame.name, style = Kin.type.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
@@ -172,6 +178,7 @@ fun FrameCard(frame: Frame, state: FramesState, onAddFamily: (() -> Unit)?, onOp
             }
             server?.let { Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
             Text(showsLine(state.shows[frame.id].orEmpty()), style = Kin.type.body, color = c.inkSoft)
+            LovedToday(frame)
             if (onAddFamily != null) SecondaryButton(stringResource(R.string.frames_add_family), onAddFamily, enabled = state.adding == null, icon = KinIcons.Plus)
             if (frame.needsUpdate) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -183,9 +190,23 @@ fun FrameCard(frame: Frame, state: FramesState, onAddFamily: (() -> Unit)?, onOp
     }
 }
 
-/** The photo the frame shows (the last placed one), or the frame drawing, with the status chip. */
+/** Today's reactions under a frame card's name, with a heart; nothing when there are none. */
 @Composable
-fun FrameHero(frame: Frame, thumb: String?, modifier: Modifier = Modifier) {
+fun LovedToday(frame: Frame) {
+    val line = lovedTodayLine(frame) ?: return
+    val c = Kin.colors
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Icon(KinIcons.Heart, null, Modifier.size(15.dp), tint = c.accent)
+        Text(line, style = Kin.type.caption, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/**
+ * The photo the frame shows ([photo]: the one on screen now, else the last placed one), or the frame drawing when
+ * there is none, with the status chip.
+ */
+@Composable
+fun FrameHero(frame: Frame, photo: String?, modifier: Modifier = Modifier) {
     val c = Kin.colors
     val (a, b) = frameTint(frame.id)
     val status = frameStatus(frame)
@@ -195,7 +216,7 @@ fun FrameHero(frame: Frame, thumb: String?, modifier: Modifier = Modifier) {
             .semantics { contentDescription = status },
         contentAlignment = Alignment.Center,
     ) {
-        if (thumb != null) Thumb(thumb, null, Modifier.fillMaxSize(), corner = 0.dp)
+        if (photo != null) Thumb(photo, null, Modifier.fillMaxSize(), corner = 0.dp)
         else {
             val portrait = frame.screen?.orientation == "portrait"
             FrameArt(width = if (portrait) 64.dp else 128.dp, portrait = portrait)

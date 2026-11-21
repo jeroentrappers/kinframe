@@ -64,6 +64,11 @@
     <string name="frames_online_now">Online · showing now</string>
     <string name="frames_offline_since">Offline since %1$s</string>
     <string name="frames_offline">Offline</string>
+    <!-- Today's reactions from the frame (its local day); %1$s is the frame's name, %2$d the number of photos. -->
+    <plurals name="frames_loved_today">
+        <item quantity="one">%1$s loved %2$d photo today</item>
+        <item quantity="other">%1$s loved %2$d photos today</item>
+    </plurals>
     <string name="frames_other">Frames that show your families</string>
     <string name="frames_none_title">No frames yet</string>
     <string name="frames_none_body">A frame shows the family’s photos, at Oma’s or in your own living room.</string>

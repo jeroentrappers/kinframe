@@ -45,14 +45,17 @@ class FamilyPrefs(private val prefs: SharedPreferences) {
 /** The person's families (docs/spec/simple-app.md §2.1, §3): all of them together, the home family first. */
 object Families {
     /**
-     * The home family: the one the person posts to most ([myPosts] by family id); ties go to the one they created,
-     * else the oldest.
+     * The home family (docs/spec/simple-app.md §3): the one the person posts to most (`FeedSummary.my_post_count`);
+     * ties go to the one they created (they own it), else the oldest membership. `FeedSummary` has no join date,
+     * so the family's own age stands in for it (nobody joins a family before it exists); then the name, so the
+     * choice is stable.
      */
-    fun home(feeds: List<Feed>, myPosts: Map<String, Int> = emptyMap()): Feed? = feeds.sortedWith(
-        compareByDescending<Feed> { myPosts[it.id] ?: 0 }
+    fun home(feeds: List<Feed>): Feed? = feeds.sortedWith(
+        compareByDescending<Feed> { it.myPostCount }
             .thenByDescending { it.role == FeedRole.OWNER }
             .thenBy { it.createdAt ?: "\uFFFF" }
-            .thenBy { it.name.lowercase() },
+            .thenBy { it.name.lowercase() }
+            .thenBy { it.id },
     ).firstOrNull()
 
     /** The home family first, then the others by name. */

@@ -61,7 +61,7 @@ data class HomeState(
     val members: List<FeedMember> = emptyList(),
     /** The frames that show the family (active subscriptions). */
     val familyFrames: List<SubscriptionFrame> = emptyList(),
-    /** A frame's last placed photo (frames the person may see the library of). */
+    /** The photo each frame shows now, else its last placed one (`now_showing`; frames the person may see the library of). */
     val frameThumbs: Map<String, String> = emptyMap(),
 ) {
     /** A post sent to several families shows once (docs/spec/simple-app.md §3.1). */
@@ -131,9 +131,9 @@ class HomeViewModel(
         runCatching { kin.feedMembers(id) }.onSuccess { m -> _state.update { it.copy(members = HomeRow.people(m, me())) } }
         val shown = runCatching { kin.feedSubscriptions(id, SubscriptionStatus.ACTIVE) }.getOrNull()?.map { it.frame } ?: return
         _state.update { it.copy(familyFrames = shown.sortedBy { f -> f.name.lowercase() }) }
+        // The photo on each frame the person is on (`now_showing`, README §5.5); the others keep their drawing.
         val thumbs = shown.mapNotNull { sf ->
-            val f = frames?.firstOrNull { it.id == sf.id }?.takeIf { it.can { p -> p.seeLibrary } } ?: return@mapNotNull null
-            runCatching { kin.placements(f.id, limit = 1).placements.firstOrNull()?.item?.thumbUrl }.getOrNull()?.let { f.id to it }
+            frames?.firstOrNull { it.id == sf.id }?.let { app.kinframe.family.ui.frames.FrameCards.photo(it) }?.let { sf.id to it }
         }.toMap()
         _state.update { it.copy(frameThumbs = thumbs) }
     }

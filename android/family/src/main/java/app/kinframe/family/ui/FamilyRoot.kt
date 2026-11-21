@@ -325,7 +325,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     val badge by graph.social.badge.collectAsStateWithLifecycle()
 
     val frames: FramesViewModel = viewModel(key = "frames-$k") { FramesViewModel(api, graph.live.events) }
-    val feeds: FeedsViewModel = viewModel(key = "feeds-$k") { FeedsViewModel(api, graph.live.events, me = { id -> graph.accounts.meIdFor(id) }) }
+    val feeds: FeedsViewModel = viewModel(key = "feeds-$k") { FeedsViewModel(api, graph.live.events) }
     val composer: ComposerViewModel = viewModel(key = "composer-$k") {
         ComposerViewModel(
             api = { graph.api.value }, limits = { graph.servers.current.value?.limits ?: Limits() },
@@ -360,7 +360,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     val savedFilter by prefs.homeFilter.collectAsStateWithLifecycle()
     val simple by prefs.simpleView.collectAsStateWithLifecycle()
     val families = feedsState.feeds.valueOrNull
-    val homeFamily = families?.let { Families.home(it, feedsState.myPosts) }
+    val homeFamily = families?.let { Families.home(it) }
     val ordered = families?.let { Families.ordered(it, homeFamily) }.orEmpty()
     val filter = families?.let { Families.filter(it, savedFilter) }
     nav.singleFamily = ordered.size <= 1
@@ -1086,7 +1086,6 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         sendOnly = frameNow?.takeIf { it.can { p -> p.send } }?.let { { composer.preselectFrame(r.frameId); nav.compose() } },
         showOnTv = frameNow?.let { f -> { showOnTv(tvTarget(f, TvScope.All)) } },
         shows = fs0.shows[r.frameId].orEmpty(),
-        thumb = fs0.thumbs[r.frameId],
         addons = frameNow?.takeIf { it.can { p -> p.changeSettings } }?.let { { FramePlugins(api, r.frameId, acct.accountId) } },
     )
     FrameDetailScreen(

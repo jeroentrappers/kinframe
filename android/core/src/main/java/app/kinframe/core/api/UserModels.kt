@@ -98,12 +98,43 @@ data class Frame(
     val freshness: app.kinframe.core.social.Freshness? = null,
     /** The open "Ask for new photos", or one answered in the last 24 hours. */
     val photoRequest: app.kinframe.core.social.PhotoRequest? = null,
+    // ---- frame cards (README §5.5): absent without `see_library` and on older servers.
+    /** The photo for the frame's card: on screen now ([FrameNowShowing.SCREEN]) or the last placed one. */
+    val nowShowing: FrameNowShowing? = null,
+    /** Reactions and quick replies sent from the frame today (its local day). */
+    val reactionsToday: FrameReactionsToday? = null,
 ) {
     val isManager: Boolean get() = role == Role.OWNER || role == Role.ADMIN
 
     /** Owner and admin have every permission (README §4). */
     fun can(permission: (Permissions) -> Boolean): Boolean = isManager || permission(permissions)
 }
+
+/** `FrameSummary.now_showing` (README §5.5, "Frame cards"). */
+@Serializable
+data class FrameNowShowing(
+    val placementId: String,
+    val itemId: String,
+    /** [SCREEN] or [LAST_PLACED]; a string so a newer server never breaks parsing. */
+    val source: String,
+    /** Short-lived signed thumbnail URL. */
+    val thumbUrl: String? = null,
+    /** Short-lived signed display rendition, for a large card. */
+    val displayUrl: String? = null,
+    val since: String? = null,
+) {
+    /** The frame reported this slide on screen: showing now while the frame is online. */
+    val onScreen: Boolean get() = source == SCREEN
+
+    companion object {
+        const val SCREEN = "screen"
+        const val LAST_PLACED = "last_placed"
+    }
+}
+
+/** `FrameSummary.reactions_today`: [count] reactions and quick replies on [itemCount] distinct items. */
+@Serializable
+data class FrameReactionsToday(val count: Int = 0, val itemCount: Int = 0)
 
 @Serializable
 data class FrameHealth(

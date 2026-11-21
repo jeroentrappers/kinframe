@@ -64,6 +64,11 @@
     <string name="frames_online_now">Online · nu te zien</string>
     <string name="frames_offline_since">Offline sinds %1$s</string>
     <string name="frames_offline">Offline</string>
+    <!-- Today's reactions from the frame (its local day); %1$s is the frame's name, %2$d the number of photos. -->
+    <plurals name="frames_loved_today">
+        <item quantity="one">%1$s gaf vandaag %2$d foto een hartje</item>
+        <item quantity="other">%1$s gaf vandaag %2$d foto’s een hartje</item>
+    </plurals>
     <string name="frames_other">Kaders die je families tonen</string>
     <string name="frames_none_title">Nog geen kaders</string>
     <string name="frames_none_body">Een kader toont de foto’s van de familie, bij oma of in je eigen woonkamer.</string>

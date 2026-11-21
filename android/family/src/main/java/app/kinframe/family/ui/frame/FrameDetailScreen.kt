@@ -83,8 +83,6 @@ class FrameHomeActions(
     val showOnTv: (() -> Unit)?,
     /** The families the frame shows. */
     val shows: List<app.kinframe.core.api.SubscriptionFeed> = emptyList(),
-    /** The frame's last placed photo. */
-    val thumb: String? = null,
     /** Add-ons (plugins), with weather, under "Calendar, weather and add-ons"; null for people who don't manage it. */
     val addons: (@Composable () -> Unit)? = null,
 )
@@ -169,12 +167,13 @@ private fun FrameHome(frame: Frame, home: FrameHomeActions, extras: Boolean, onO
     PageColumn(spacing = 14.dp) {
         Column(Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)).background(c.surface)
             .border(1.dp, c.line, androidx.compose.foundation.shape.RoundedCornerShape(20.dp))) {
-            app.kinframe.family.ui.frames.FrameHero(frame, home.thumb)
+            app.kinframe.family.ui.frames.FrameHero(frame, app.kinframe.family.ui.frames.FrameCards.photo(frame, large = true))
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(frame.name, style = Kin.type.headline, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 val count = frame.placementCount?.let { " · " + pluralStringResource(R.plurals.frame_photo_count, it, it) }.orEmpty()
                 Text(app.kinframe.family.ui.frames.showsLine(home.shows) + count, style = Kin.type.body, color = c.inkSoft)
                 frame.location?.takeIf { it.isNotBlank() }?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
+                app.kinframe.family.ui.frames.LovedToday(frame)
                 if (frame.needsUpdate) Note(stringResource(R.string.frames_needs_update), tone = NoteTone.Warn)
             }
         }
