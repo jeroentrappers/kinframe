@@ -6,6 +6,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { startFlow, surnameOf } from '$lib/family.svelte';
 	import { feeds } from '$lib/feeds.svelte';
+	import { frames } from '$lib/frames.svelte';
 	import { newIdempotencyKey } from '$lib/logic';
 	import { isCode, problemMessage } from '$lib/problem';
 	import { t } from '$lib/i18n/index.svelte';
@@ -18,7 +19,8 @@
 	/** Getting started (simple-app.md §8): start a family, or join one with a link or code. */
 	const step = $derived(startFlow.step ?? 'choose');
 	const created = $derived(startFlow.feedId ? feeds.get(startFlow.feedId) : undefined);
-	const canCancel = $derived(feeds.list.length > 0);
+	// Someone already in a family, or on a frame (spec §8), can go back to the app.
+	const canCancel = $derived(feeds.list.length > 0 || frames.list.length > 0);
 
 	// ---- Start a family: the name, prefilled "<surname> family" when the account name has one.
 	let name = $state('');
@@ -177,7 +179,7 @@
 			</div>
 			{#if joinError}<p class="error-text" role="alert">{joinError}</p>{/if}
 			<div class="row-wrap">
-				<button class="btn btn-ghost" type="button" onclick={() => (startFlow.step = 'choose')}>{t('common.cancel')}</button>
+				<button class="btn btn-ghost" type="button" onclick={() => (canCancel ? finish() : (startFlow.step = 'choose'))}>{t('common.cancel')}</button>
 				<button class="btn btn-primary" type="submit" disabled={!joinText.trim() || joinBusy}>
 					{#if joinBusy}<span class="spinner" aria-hidden="true"></span>{/if}{t('start.joinGo')}
 				</button>

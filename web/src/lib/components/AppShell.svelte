@@ -4,7 +4,8 @@
 	import { live } from '$lib/live.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { feeds } from '$lib/feeds.svelte';
-	import { familyHref, startFlow, view } from '$lib/family.svelte';
+	import { familyHref, needsGettingStarted, startFlow, view } from '$lib/family.svelte';
+	import { frames } from '$lib/frames.svelte';
 	import { t, tn, type MessageKey } from '$lib/i18n/index.svelte';
 	import Logo from './Logo.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
@@ -33,10 +34,12 @@
 	const composing = $derived(under('/send')(path));
 	const isActive = (tab: Tab) => tab.match(path);
 
-	/** Without a family the app is the two getting-started choices (§8); invites, pairing and settings still open. */
-	const onboarding = $derived(
-		startFlow.step !== null || (feeds.loaded && feeds.list.length === 0 && /^\/(home|family|frames(?!\/add)|send|chats|history)(\/|$)/.test(path))
-	);
+	/**
+	 * Getting started (§8): with neither a family nor a frame, the app is the two getting-started choices. Someone on a
+	 * frame gets the normal app (Home offers the same choices). Sent history (Ask to keep answers), settings, invites
+	 * and pairing always open.
+	 */
+	const onboarding = $derived(startFlow.step !== null || needsGettingStarted(path, { feedsLoaded: feeds.loaded, families: feeds.list.length, framesKnown: frames.loaded || frames.error !== null, frames: frames.list.length }));
 	/** Simple view (§6): one big photo at a time, no tab bar. */
 	const bare = $derived(onboarding || (view.simple && under('/home')(path)));
 	const phoneTabs = $derived([...tabs.slice(0, 2), null, ...tabs.slice(2)]);

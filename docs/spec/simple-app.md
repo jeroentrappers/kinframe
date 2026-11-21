@@ -178,7 +178,9 @@ After joining someone else's family: the normal/simple view question (§6).
 
 There are no existing users or older servers to stay compatible with. The apps assume a server with families
 (discovery `feeds`) and social; no legacy frame-only navigation, no "start a family for your frame" migration card,
-and no fallbacks for old flows. Someone without a family sees only the getting-started choices. Old app routes and
+and no fallbacks for old flows. Someone with neither a family nor a frame sees only the getting-started choices,
+though sent history (to answer Ask to keep), settings and invite links still open; someone on a frame (owner, admin
+or member) but in no family gets the normal app, with Start a family and Join my family on Home. Old app routes and
 screens that the new navigation no longer reaches are deleted, not kept or redirected.
 
 ## 9. Out of scope

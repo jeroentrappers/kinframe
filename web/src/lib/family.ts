@@ -67,3 +67,16 @@ export function framesOf(subs: Subscription[]): FamilyFrame[] {
 		}));
 }
 
+
+/** Where someone without a family and without a frame only gets the getting-started choices (spec §8). */
+const GATED = /^\/(home|family|frames(?!\/add)|send|chats)(\/|$)/;
+
+/**
+ * Getting started (spec §8): someone with neither a family nor a frame (owner, admin or member) sees only the two
+ * choices on the app's main screens. Sent history (Ask to keep answers), settings, invites and pairing stay open,
+ * and someone on a frame gets the normal app. Undecided until both lists are known.
+ */
+export function needsGettingStarted(path: string, s: { feedsLoaded: boolean; families: number; framesKnown: boolean; frames: number }): boolean {
+	if (!s.feedsLoaded || !s.framesKnown || s.families > 0 || s.frames > 0) return false;
+	return GATED.test(path);
+}

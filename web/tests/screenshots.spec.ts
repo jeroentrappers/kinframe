@@ -279,7 +279,9 @@ for (const vp of VIEWPORTS) {
 	test(`getting started ${vp.tag}`, async ({ page }) => {
 		await page.setViewportSize(vp.viewport);
 		const s = socialState();
+		// Neither a family nor a frame (simple-app.md §8).
 		s.st.feeds = [];
+		s.st.frames = [];
 		await mockApi(page, s.st);
 		await page.goto('/');
 		await page.getByLabel('Email').fill('anna@example.org');

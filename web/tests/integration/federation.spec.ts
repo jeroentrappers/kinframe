@@ -97,8 +97,6 @@ test('a frame on server B follows a family on server A', async ({ browser }) => 
 
 	// --- B: Tom's browser frame "Oma's frame"; he adds the family from server A in the web app.
 	const tom = await user(api, 'Tom', { base: B });
-	// Without a family the app only offers getting started (simple-app.md §8): Tom has one on B.
-	await createFamily(tom, 'Tom’s friends');
 	const oma = await browserFrameOnB(browser, tom, 'Oma’s frame');
 	const T = await signedIn(browser, tom);
 	await T.page.goto(`/frames/${oma.frameId}?tab=settings`);
@@ -192,8 +190,6 @@ test('B unfollows; A blocks B for the family; the operator sees B among the know
 	const feed = await createFamily(anna, 'Peeters', { allow_remote_frames: true });
 	const inv = await anna.post(`/v1/feeds/${feed}/invites`, { purpose: 'subscribe', allow_remote: true }, 201);
 	const tom = await user(api, 'Tom', { base: B });
-	// Without a family the app only offers getting started (simple-app.md §8): Tom has one on B.
-	await createFamily(tom, 'Tom’s friends');
 	const { frameId } = await claimFrame(api, tom, 'Opa’s frame');
 
 	// Follow (API), approve on A (API), then unfollow in B's web app.

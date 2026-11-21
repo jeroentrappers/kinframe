@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Subscription } from './api/client';
-import { dedupePosts, framesOf, rankFamilies, surnameOf } from './family';
+import { dedupePosts, framesOf, needsGettingStarted, rankFamilies, surnameOf } from './family';
 
 describe('home family', () => {
 	const fam = (id: string, posts: number, role: 'owner' | 'admin' | 'poster' = 'poster', created = '2026-01-01T00:00:00Z') => ({ id, name: id, role, my_post_count: posts, created_at: created });
@@ -61,5 +61,24 @@ describe('framesOf', () => {
 			['f3', 'pending']
 		]);
 		expect(list[0]!.online).toBe(true);
+	});
+});
+
+describe('needsGettingStarted', () => {
+	const none = { feedsLoaded: true, families: 0, framesKnown: true, frames: 0 };
+	it('with neither a family nor a frame: the main screens are getting started', () => {
+		for (const p of ['/home', '/family', '/frames', '/frames/f1', '/send', '/chats', '/chats/c1']) expect(needsGettingStarted(p, none), p).toBe(true);
+	});
+	it('sent history, settings, invites and pairing stay open', () => {
+		for (const p of ['/history', '/history/s1', '/settings', '/settings/account', '/fi/tok', '/i/tok', '/frames/add', '/posts/p1']) expect(needsGettingStarted(p, none), p).toBe(false);
+	});
+	it('someone on a frame, or in a family, gets the normal app', () => {
+		expect(needsGettingStarted('/home', { ...none, frames: 1 })).toBe(false);
+		expect(needsGettingStarted('/frames/f1', { ...none, frames: 1 })).toBe(false);
+		expect(needsGettingStarted('/home', { ...none, families: 1 })).toBe(false);
+	});
+	it('waits until both lists are known', () => {
+		expect(needsGettingStarted('/home', { ...none, feedsLoaded: false })).toBe(false);
+		expect(needsGettingStarted('/home', { ...none, framesKnown: false })).toBe(false);
 	});
 });

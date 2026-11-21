@@ -8,7 +8,7 @@ import { auth } from './auth.svelte';
 import { framesOf, rankFamilies, type FamilyFrame } from './family';
 import { feeds } from './feeds.svelte';
 
-export { dedupePosts, surnameOf, type FamilyFrame } from './family';
+export { dedupePosts, needsGettingStarted, surnameOf, type FamilyFrame } from './family';
 
 const FILTER_KEY = 'kinframe.homeFilter';
 const SIMPLE_KEY = 'kinframe.simpleView';

@@ -6,7 +6,7 @@
 	import { canPostToFeed } from '$lib/feeds';
 	import { feeds } from '$lib/feeds.svelte';
 	import { frames } from '$lib/frames.svelte';
-	import { dedupePosts, families, view } from '$lib/family.svelte';
+	import { dedupePosts, families, startFlow, view } from '$lib/family.svelte';
 	import { badge } from '$lib/social.svelte';
 	import { live } from '$lib/live.svelte';
 	import { problemMessage } from '$lib/problem';
@@ -84,7 +84,7 @@
 	}
 
 	$effect(() => {
-		if (!feeds.loaded || !feeds.list.length || view.simple) return;
+		if (!feeds.loaded || (!feeds.list.length && !familyless) || (view.simple && feeds.list.length)) return;
 		void feedId;
 		void promptFilter;
 		void load();
@@ -184,13 +184,15 @@
 	let inviteOpen = $state(false);
 	const several = $derived(feeds.list.length > 1);
 	const alone = $derived((current?.member_count ?? 0) <= 1);
+	/** On a frame but in no family yet (spec §8): Home shows what reaches the frames, with the getting-started choices. */
+	const familyless = $derived(feeds.loaded && feeds.list.length === 0 && frames.list.length > 0);
 </script>
 
 <svelte:head><title>{t('social.homeTitle')} · kinframe</title></svelte:head>
 
 {#if current && view.simple}
 	<SimpleView />
-{:else if current}
+{:else if current || familyless}
 	<div class="container page home">
 		<header class="topbar">
 			{#if promptFilter}
@@ -215,8 +217,17 @@
 			</div>
 		{/if}
 
-		{#if !promptFilter}
+		{#if current && !promptFilter}
 			<FamilyRow feed={current} oninvite={() => (inviteOpen = true)} />
+		{:else if !current}
+			<div class="card start-card" data-testid="home-start">
+				<EmptyState compact art="people" title={t('start.title')} body={t('start.lede')}>
+					{#snippet actions()}
+						<button class="btn btn-primary" onclick={() => startFlow.begin('name')}><Icon name="plus" size={18} />{t('start.start')}</button>
+						<button class="btn" onclick={() => startFlow.begin('join')}><Icon name="link" size={18} />{t('start.join')}</button>
+					{/snippet}
+				</EmptyState>
+			</div>
 		{/if}
 
 		<div class="feed-col stack">
@@ -246,14 +257,14 @@
 					<div class="stack-sm"><span>{problemMessage(error)}</span><button class="btn btn-sm" onclick={() => load()}>{t('common.tryAgain')}</button></div>
 				</div>
 			{:else if posts.length === 0}
-				<div class="card">
+				{#if current}<div class="card">
 					<EmptyState compact art="send" title={t('family.emptyTitle')} body={alone ? t('family.emptyAlone') : t('family.emptyBody')}>
 						{#snippet actions()}
 							{#if canPostToFeed(current.role)}<a class="btn btn-primary" href="/send"><Icon name="plus" size={18} />{t('family.shareFirst')}</a>{/if}
 							{#if alone}<button class="btn" onclick={() => (inviteOpen = true)}><Icon name="users" size={18} />{t('family.invite')}</button>{/if}
 						{/snippet}
 					</EmptyState>
-				</div>
+				</div>{/if}
 			{:else}
 				<ul class="timeline" role="list" aria-label={t('social.timeline')}>
 					{#each rows as row (row.kind === 'post' ? row.post.id : `prompt:${row.prompt.id}:${row.posts[0]!.id}`)}
@@ -283,7 +294,7 @@
 	</div>
 
 	<ActivitySheet bind:open={activityOpen} feedIds={filtered ? [filtered.id] : feeds.list.map((f) => f.id)} />
-	<InviteSheet bind:open={inviteOpen} feed={current} />
+	{#if current}<InviteSheet bind:open={inviteOpen} feed={current} />{/if}
 {:else}
 	<div class="container page" aria-busy="true" aria-label={t('common.loading')}><div class="skeleton" style="height:420px"></div></div>
 {/if}

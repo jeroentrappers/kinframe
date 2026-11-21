@@ -70,7 +70,9 @@ async function signIn(page: Page, st: MockState) {
 
 test('without a family: start one, add the frame later, invite the family', async ({ page }) => {
 	const { st } = feedState();
+	// Neither a family nor a frame: only the getting-started choices (simple-app.md §8).
 	st.feeds = [];
+	st.frames = [];
 	st.subscriptions = [];
 	await signIn(page, st);
 	// Getting started (simple-app.md §8) instead of the frames list, Home and the composer.
@@ -94,6 +96,53 @@ test('without a family: start one, add the frame later, invite the family', asyn
 	await page.getByRole('button', { name: 'Done' }).click();
 	await expect(page).toHaveURL(/\/home$/);
 	await expect(page.getByRole('link', { name: 'Family' }).first()).toHaveAttribute('href', new RegExp(`/feeds/${st.feeds[0]!.id}$`));
+});
+
+test('without a family or a frame: sent history and settings still open', async ({ page }) => {
+	const { st } = feedState();
+	st.feeds = [];
+	st.frames = [];
+	st.subscriptions = [];
+	await signIn(page, st);
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toBeVisible();
+	// Sent history (where Ask to keep is answered) and the settings are not behind getting started.
+	await page.goto('/history');
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toHaveCount(0);
+	await expect(page.getByRole('main')).toBeVisible();
+	await page.goto('/settings');
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toHaveCount(0);
+	await page.goto('/chats');
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toBeVisible();
+});
+
+test('on a frame but in no family: the normal app, with Start a family and Join my family on Home', async ({ page }) => {
+	const { st, oma } = feedState();
+	st.feeds = [];
+	st.subscriptions = [];
+	await signIn(page, st);
+	// Frames and the frame screen work.
+	await expect(page.getByRole('heading', { name: 'Oma’s frame', level: 2 })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toHaveCount(0);
+	await page.getByRole('link', { name: 'Oma’s frame', exact: true }).click();
+	await expect(page.getByRole('heading', { name: 'Oma’s frame', level: 1 })).toBeVisible();
+	await page.goto(`/frames/${oma.id}?tab=settings`);
+	await expect(page.getByRole('heading', { name: 'Frame settings and help', level: 1 })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toHaveCount(0);
+	// Home: the getting-started choices inline, in the normal app.
+	await page.goto('/home');
+	const start = page.getByTestId('home-start');
+	await expect(start.getByRole('heading', { name: 'Welcome to kinframe' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Frames', exact: true }).first()).toBeVisible();
+	await start.getByRole('button', { name: 'Start a family' }).click();
+	await expect(page.getByLabel('Name of the family')).toBeVisible();
+	// Cancel goes back to the app: they are on a frame.
+	await page.getByRole('button', { name: 'Cancel' }).click();
+	await page.getByTestId('home-start').getByRole('button', { name: 'Join my family' }).click();
+	await expect(page.getByLabel('Invite link or code')).toBeVisible();
+	await page.getByRole('button', { name: 'Cancel' }).click();
+	await expect(page.getByTestId('home-start')).toBeVisible();
+	await page.goto('/settings');
+	await expect(page.getByRole('heading', { name: 'Welcome to kinframe' })).toHaveCount(0);
 });
 
 test('the family profile: counts, Photos with Only mine, People, Frames and the gear', async ({ page }) => {
