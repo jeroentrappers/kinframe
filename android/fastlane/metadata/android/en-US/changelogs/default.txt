@@ -1,8 +1,7 @@
-• 1.2.3: anonymous crash reports help us fix bugs (Settings → Privacy to turn off).
-• Home: everything your families share, with reactions from people and frames.
-• Comments on every photo, replies and @mentions.
-• Chats: one-to-one, groups, families and circles, voice messages.
-• Feeds are now families, with circles and readers.
-• Gentle reminders, Ask for new photos, family streak and weekly theme.
-• Leaving a family: your photos stay or go.
-• Several kinframe servers in one app.
+• A simpler kinframe: Home shows everything your families share; tap a family to see only theirs.
+• Share once to several families.
+• Frames shows what each frame is showing now and the photos it loved today.
+• Start a family without a frame, or join the family that invited you.
+• Activity: comments, mentions and requests in one place.
+• Sharper photos in the feed.
+• Live photos from HDR phones send again.

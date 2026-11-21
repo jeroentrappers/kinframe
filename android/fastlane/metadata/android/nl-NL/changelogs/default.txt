@@ -1,8 +1,7 @@
-• 1.2.3: anonieme crashrapporten helpen fouten oplossen (uit via Instellingen → Privacy).
-• Home: alles wat je families delen, met reacties van mensen en kaders.
-• Opmerkingen bij elke foto, antwoorden en @vermeldingen.
-• Chats: één-op-één, groepen, families en kringen, spraakberichten.
-• Feeds heten nu families, met kringen en meelezers.
-• Herinneringen, Vraag om nieuwe foto's, familiereeks en weekthema.
-• Familie verlaten: je foto's blijven of gaan mee.
-• Meerdere kinframe-servers in één app.
+• Een eenvoudiger kinframe: Home toont alles wat je families delen; tik op een familie om alleen die te zien.
+• Deel één keer met meerdere families.
+• Kaders toont wat elk kader nu laat zien en welke foto's het vandaag een hartje gaf.
+• Begin een familie zonder kader, of word lid van de familie die je uitnodigde.
+• Activiteit: reacties, vermeldingen en verzoeken op één plek.
+• Scherpere foto's in de feed.
+• Live foto's van HDR-telefoons worden weer verstuurd.
