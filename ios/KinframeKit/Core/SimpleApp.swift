@@ -89,7 +89,45 @@ public enum HomeFamily {
     }
 }
 
+/// Getting started (§8), the same rule as the web: someone with neither a family nor a frame (owner, admin or
+/// member) gets only the getting-started choices, with links to sent history and settings; someone on a frame but in
+/// no family gets the normal app, with "Start a family" and "Join my family" on Home. Undecided until both lists are
+/// known.
+public enum StartGate: Equatable, Sendable {
+    /// Still waiting for the family or the frame list.
+    case loading
+    /// Neither a family nor a frame.
+    case gettingStarted
+    /// The normal app.
+    case app
+
+    public static func decide(families: Int, familiesKnown: Bool, frames: Int, framesKnown: Bool) -> StartGate {
+        if families > 0 || frames > 0 { return .app }
+        guard familiesKnown, framesKnown else { return .loading }
+        return .gettingStarted
+    }
+
+    /// On a frame but in no family yet: Home shows what reaches the frames, with the getting-started choices.
+    public static func homeOffersStart(families: Int, familiesKnown: Bool, frames: Int) -> Bool {
+        familiesKnown && families == 0 && frames > 0
+    }
+
+    /// The simple view is for people in a family (it shows the family's photos).
+    public static func simpleView(_ mode: ViewMode, families: Int) -> Bool { mode == .simple && families > 0 }
+}
+
 public enum HomeTimeline {
+    /// What Home lists: with a family its posts (`families`); without one, what reaches the person's frames (a
+    /// send to several places still once).
+    public static func visible(_ posts: [TimelinePost], hasFamily: Bool) -> [TimelinePost] {
+        if hasFamily { return families(posts) }
+        var seen = Set<String>()
+        return posts.filter { p in
+            guard let send = p.sendId else { return true }
+            return seen.insert(send).inserted
+        }
+    }
+
     /// Family posts only (a send to one frame isn't in a family), and a post sent to several families once: the
     /// first of a send's posts stands for it.
     public static func families(_ posts: [TimelinePost]) -> [TimelinePost] {

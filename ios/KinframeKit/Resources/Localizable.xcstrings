@@ -61643,6 +61643,40 @@
         }
       }
     },
+    "simple.start.noFamilyBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What reaches your frames shows here. Start a family to share with everyone, or join yours with a link or a code."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat op je kaders aankomt, zie je hier. Start een familie om met iedereen te delen, of kom bij de jouwe met een link of een code."
+          }
+        }
+      }
+    },
+    "simple.start.noFamilyTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re not in a family yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je zit nog niet in een familie"
+          }
+        }
+      }
+    },
     "simple.start.title": {
       "extractionState": "manual",
       "localizations": {

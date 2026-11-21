@@ -272,6 +272,10 @@ final class Accounts {
     }
 
     var framesLoaded: Bool { active.allSatisfy(\.framesLoaded) }
+    /// Every signed-in account has said which frames it is on (or failed to say: getting started then decides).
+    var framesKnown: Bool { !active.isEmpty && active.allSatisfy { $0.framesLoaded || $0.framesError != nil } }
+    /// Every signed-in account has said which families it is in.
+    var familiesKnown: Bool { !active.isEmpty && active.allSatisfy(\.feedsLoaded) }
     /// Every account with families has loaded them (accounts without families never load any).
     var feedsLoaded: Bool { active.filter(\.feedsEnabled).allSatisfy(\.feedsLoaded) }
 

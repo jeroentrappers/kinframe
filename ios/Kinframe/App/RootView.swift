@@ -90,22 +90,25 @@ struct MainTabs: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
 
-    /// Every signed-in account has said which families it is in.
-    private var familiesKnown: Bool { !accounts.active.isEmpty && accounts.active.allSatisfy(\.feedsLoaded) }
+    /// Neither a family nor a frame: only getting started; on a frame without a family: the app (§8).
+    private var gate: StartGate {
+        StartGate.decide(families: accounts.feeds.count, familiesKnown: accounts.familiesKnown,
+                         frames: accounts.frames.count, framesKnown: accounts.framesKnown)
+    }
 
     var body: some View {
         @Bindable var app = app
         @Bindable var accounts = accounts
         Group {
-            if accounts.feeds.isEmpty, !familiesKnown {
+            switch gate {
+            case .loading:
                 LoadingView().frame(maxWidth: .infinity, maxHeight: .infinity).pageBackground()
-            } else if accounts.feeds.isEmpty {
-                // No family yet: only the getting-started choices (docs/spec/simple-app.md §8).
-                GettingStartedView()
-            } else if accounts.viewMode == .simple {
-                SimpleView()
-            } else {
-                tabs
+            case .gettingStarted:
+                // Neither a family nor a frame (docs/spec/simple-app.md §8): the choices, with sent history and
+                // settings still open.
+                GettingStartedRoot()
+            case .app:
+                if StartGate.simpleView(accounts.viewMode, families: accounts.feeds.count) { SimpleView() } else { tabs }
             }
         }
         .onAppear { app.consumePendingLink() }

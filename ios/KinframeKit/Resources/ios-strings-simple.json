@@ -467,6 +467,14 @@
     "en": "Peeters family",
     "nl": "Familie Peeters"
   },
+  "simple.start.noFamilyBody": {
+    "en": "What reaches your frames shows here. Start a family to share with everyone, or join yours with a link or a code.",
+    "nl": "Wat op je kaders aankomt, zie je hier. Start een familie om met iedereen te delen, of kom bij de jouwe met een link of een code."
+  },
+  "simple.start.noFamilyTitle": {
+    "en": "You’re not in a family yet",
+    "nl": "Je zit nog niet in een familie"
+  },
   "simple.start.title": {
     "en": "Welcome",
     "nl": "Welkom"

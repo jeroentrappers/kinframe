@@ -22,6 +22,7 @@ struct HomeTab: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 16) {
                     if accounts.hasSeveralFamilies { chips }
+                    if familyless { StartFamilyCard() }
                     if let fam = rowFamily {
                         HomeFamilyHeader(feed: fam.value)
                             .environment(fam.model)
@@ -111,7 +112,14 @@ struct HomeTab: View {
         accounts.active.compactMap { m in timelines[m.accountId].map { (m, $0) } }
     }
 
-    private func entries(_ t: TimelineModel) -> [TimelineEntry] { TimelineLogic.entries(HomeTimeline.families(t.posts)) }
+    /// On a frame but in no family yet (§8): what reaches the frames, with the getting-started choices on top.
+    private var familyless: Bool {
+        StartGate.homeOffersStart(families: accounts.feeds.count, familiesKnown: accounts.familiesKnown, frames: accounts.frames.count)
+    }
+
+    private func visible(_ t: TimelineModel) -> [TimelinePost] { HomeTimeline.visible(t.posts, hasFamily: !accounts.feeds.isEmpty) }
+
+    private func entries(_ t: TimelineModel) -> [TimelineEntry] { TimelineLogic.entries(visible(t)) }
 
     /// Every account's family posts interleaved by time, only as far back as every timeline has loaded.
     private var rows: [Row] {
@@ -135,11 +143,13 @@ struct HomeTab: View {
             LoadingView()
         } else if sources.allSatisfy({ $0.1.error != nil }), let error = sources.first?.1.error {
             ErrorRetryView(message: error) { Task { await reload(fresh: false) } }
-        } else if sources.allSatisfy({ HomeTimeline.families($0.1.posts).isEmpty }) {
-            EmptyStateView(systemImage: "photo.on.rectangle.angled", title: L("simple.home.emptyTitle"), message: L("simple.home.emptyBody")) {
-                Button(L("simple.home.share")) { app.compose(family: filter?.feedId) }.buttonStyle(.kf(.primary, large: true))
+        } else if sources.allSatisfy({ visible($0.1).isEmpty }) {
+            if !familyless {
+                EmptyStateView(systemImage: "photo.on.rectangle.angled", title: L("simple.home.emptyTitle"), message: L("simple.home.emptyBody")) {
+                    Button(L("simple.home.share")) { app.compose(family: filter?.feedId) }.buttonStyle(.kf(.primary, large: true))
+                }
+                .card(padding: 8)
             }
-            .card(padding: 8)
         } else {
             let rows = rows
             ForEach(rows, id: \.id) { row in

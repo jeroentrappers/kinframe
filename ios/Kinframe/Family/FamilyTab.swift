@@ -17,6 +17,9 @@ struct FamilyTab: View {
                     FamilyProfileView(feed: only.value)
                         .environment(only.model)
                         .id(only.model.accountId + "/" + only.value.id)
+                } else if accounts.familiesKnown {
+                    // On a frame but in no family yet (§8).
+                    GettingStartedView()
                 } else {
                     LoadingView()
                 }
@@ -30,15 +33,7 @@ struct FamilyTab: View {
             .navigationDestination(for: FamilyRoute.self) { route in
                 FamilyPageView(route: route).account(route.account, in: accounts)
             }
-            .navigationDestination(for: SentHistoryRoute.self) { _ in SentHistoryView() }
-            .navigationDestination(for: AppSettingsRoute.self) { _ in AppSettingsView() }
-            .navigationDestination(for: HistoryRoute.self) { route in
-                let owner = accounts.model(for: route.account)
-                if let api = owner.api {
-                    SendDetailView(model: SendDetailModel(api: api, id: route.sendId), onRemoved: { owner.historyVersion += 1 })
-                        .environment(owner)
-                }
-            }
+            .settingsAndHistoryDestinations()
             .socialDestinations()
         }
     }
@@ -354,5 +349,29 @@ private struct FamilySettingsList: View {
         } icon: {
             Image(systemName: symbol).foregroundStyle(Palette.primary)
         }
+    }
+}
+
+extension View {
+    /// Sent history, a send in it and the App settings: from Family's gear, and from getting started (§8).
+    func settingsAndHistoryDestinations() -> some View {
+        modifier(SettingsAndHistoryDestinations())
+    }
+}
+
+private struct SettingsAndHistoryDestinations: ViewModifier {
+    @Environment(Accounts.self) private var accounts
+
+    func body(content: Content) -> some View {
+        content
+            .navigationDestination(for: SentHistoryRoute.self) { _ in SentHistoryView() }
+            .navigationDestination(for: AppSettingsRoute.self) { _ in AppSettingsView() }
+            .navigationDestination(for: HistoryRoute.self) { route in
+                let owner = accounts.model(for: route.account)
+                if let api = owner.api {
+                    SendDetailView(model: SendDetailModel(api: api, id: route.sendId), onRemoved: { owner.historyVersion += 1 })
+                        .environment(owner)
+                }
+            }
     }
 }

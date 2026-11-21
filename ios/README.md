@@ -273,7 +273,9 @@ the frame shows from `now_showing`, "Online · showing now" only for a slide on 
 `reactions_today`; the drawing without them) and opens a frame as one list (photos, send to this frame only, calendar and add-ons, TV, settings and help); Family is
 the profile (Photos with "Only mine", People, Frames, "Invite family", "Add a frame" with the last 50 posts and no
 questions) or, with several families, a list of them; the gear has This family and App (accounts, notifications,
-privacy, simple view, sent history). Without a family the app shows only getting started (`Family/GettingStarted.swift`).
+privacy, simple view, sent history). With neither a family nor a frame the app shows only getting started
+(`Family/GettingStarted.swift`, with links to sent history and settings); on a frame without a family it is the normal
+app, with "Start a family" and "Join my family" on Home (`StartGate` in `SimpleApp.swift`).
 The simple view (`Family/SimpleView.swift`) is a per-device setting, asked once after joining a family. The logic the
 screens share is in `KinframeKit/Core/SimpleApp.swift`.
 

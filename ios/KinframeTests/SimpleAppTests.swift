@@ -340,4 +340,53 @@ final class SimpleAppTests: XCTestCase {
         XCTAssertNil(none.nowShowing)
         XCTAssertNil(none.reactionsToday)
     }
+
+    // MARK: Getting started (§8)
+
+    func testGettingStartedOnlyWithNeitherAFamilyNorAFrame() {
+        XCTAssertEqual(StartGate.decide(families: 0, familiesKnown: true, frames: 0, framesKnown: true), .gettingStarted)
+        XCTAssertEqual(StartGate.decide(families: 0, familiesKnown: true, frames: 1, framesKnown: true), .app, "on a frame: the app")
+        XCTAssertEqual(StartGate.decide(families: 2, familiesKnown: true, frames: 0, framesKnown: true), .app)
+        XCTAssertEqual(StartGate.decide(families: 1, familiesKnown: false, frames: 0, framesKnown: false), .app, "a family is enough")
+        XCTAssertEqual(StartGate.decide(families: 0, familiesKnown: false, frames: 1, framesKnown: true), .app, "a frame is enough")
+    }
+
+    func testNothingIsGatedWhileTheListsLoad() {
+        XCTAssertEqual(StartGate.decide(families: 0, familiesKnown: false, frames: 0, framesKnown: true), .loading)
+        XCTAssertEqual(StartGate.decide(families: 0, familiesKnown: true, frames: 0, framesKnown: false), .loading)
+        XCTAssertEqual(StartGate.decide(families: 0, familiesKnown: false, frames: 0, framesKnown: false), .loading)
+    }
+
+    func testHomeOffersAFamilyToSomeoneOnAFrame() {
+        XCTAssertTrue(StartGate.homeOffersStart(families: 0, familiesKnown: true, frames: 2))
+        XCTAssertFalse(StartGate.homeOffersStart(families: 1, familiesKnown: true, frames: 2))
+        XCTAssertFalse(StartGate.homeOffersStart(families: 0, familiesKnown: false, frames: 2), "not before the families are known")
+        XCTAssertFalse(StartGate.homeOffersStart(families: 0, familiesKnown: true, frames: 0))
+        XCTAssertTrue(StartGate.simpleView(.simple, families: 1))
+        XCTAssertFalse(StartGate.simpleView(.simple, families: 0), "the simple view needs a family")
+        XCTAssertFalse(StartGate.simpleView(.normal, families: 1))
+    }
+
+    func testHomeWithoutAFamilyShowsWhatReachesTheFrames() throws {
+        let list = try [
+            post("fam", unread: 0),
+            post("frame", kind: "frame"),
+            post("a", send: "s1", kind: "frame"),
+            post("b", send: "s1", kind: "frame"),
+        ]
+        XCTAssertEqual(HomeTimeline.visible(list, hasFamily: true).map(\.id), ["fam"])
+        XCTAssertEqual(HomeTimeline.visible(list, hasFamily: false).map(\.id), ["fam", "frame", "a"])
+    }
+
+    func testTheStartCardWording() {
+        for lang: AppLanguage in [.en, .nl] {
+            L10n.setLanguage(lang)
+            for text in [L("simple.start.noFamilyTitle"), L("simple.start.noFamilyBody")] {
+                XCTAssertFalse(text.isEmpty)
+                XCTAssertNil(text.range(of: lang == .en ? "follow" : "volg", options: .caseInsensitive), text)
+            }
+        }
+        XCTAssertTrue(L("simple.start.noFamilyBody").contains("kaders"))
+        L10n.setLanguage(.en)
+    }
 }

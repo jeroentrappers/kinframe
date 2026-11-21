@@ -1,7 +1,23 @@
 import KinframeKit
 import SwiftUI
 
-/// Getting started (docs/spec/simple-app.md §8): signed in without a family, the app offers only these two choices.
+/// Getting started for someone with neither a family nor a frame (docs/spec/simple-app.md §8): the two choices, and
+/// sent history (to answer "Ask to keep") and settings behind small links, in the family path so notifications
+/// that open them still land.
+struct GettingStartedRoot: View {
+    @Environment(AppModel.self) private var app
+
+    var body: some View {
+        @Bindable var app = app
+        NavigationStack(path: $app.familyPath) {
+            GettingStartedView()
+                .settingsAndHistoryDestinations()
+        }
+    }
+}
+
+/// Getting started (docs/spec/simple-app.md §8): without a family, "Start a family" and "Join my family", then
+/// links to sent history and settings. Pushes onto the surrounding navigation stack.
 struct GettingStartedView: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
@@ -18,13 +34,28 @@ struct GettingStartedView: View {
                 choice(symbol: "link", title: L("simple.start.join"), body: L("simple.start.joinBody")) {
                     accounts.startSheet = .join
                 }
+                HStack(spacing: 20) {
+                    NavigationLink(value: SentHistoryRoute(account: app.accountId)) {
+                        Label(L("simple.settings.sentHistory"), systemImage: "clock.arrow.circlepath")
+                    }
+                    NavigationLink(value: AppSettingsRoute(account: app.accountId)) {
+                        Label(L("simple.settings.title"), systemImage: "gearshape")
+                    }
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Palette.primarySoftText)
+                .padding(.top, 8)
+                .frame(maxWidth: .infinity)
             }
             .padding(24)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
         }
         .pageBackground()
-        .refreshable { await accounts.loadFeeds() }
+        .refreshable {
+            await accounts.loadFeeds()
+            await accounts.loadFrames()
+        }
     }
 
     private func choice(symbol: String, title: String, body: String, action: @escaping () -> Void) -> some View {
@@ -190,5 +221,28 @@ struct ViewModeQuestion: View {
             }
             .buttonStyle(.kf(.secondary, large: true, fill: true))
         }
+    }
+}
+
+/// Home for someone on a frame but in no family yet (§8): "Start a family" and "Join my family" above what reaches
+/// their frames. Cancel in those steps comes back here.
+struct StartFamilyCard: View {
+    @Environment(Accounts.self) private var accounts
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L("simple.start.noFamilyTitle")).font(.display(.title3)).foregroundStyle(Palette.text)
+                .accessibilityAddTraits(.isHeader)
+            Text(L("simple.start.noFamilyBody")).font(.subheadline).foregroundStyle(Palette.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 10) {
+                Button { accounts.startSheet = .start } label: { Label(L("simple.start.family"), systemImage: "plus") }
+                    .buttonStyle(.kf(.primary))
+                Button { accounts.startSheet = .join } label: { Label(L("simple.start.join"), systemImage: "link") }
+                    .buttonStyle(.kf(.secondary))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .card()
     }
 }
