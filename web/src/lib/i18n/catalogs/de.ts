@@ -3102,6 +3102,8 @@ const de: Catalog = {
 	'frameCard.addFamilyNone': 'Dieser Rahmen zeigt schon alle deine Familien. Um die Familie von jemand anderem zu zeigen, frag nach ihrem Einladungslink für Rahmen.',
 	'frameFeeds.title': 'Familien auf diesem Rahmen',
 	'frames.othersTitle': 'Rahmen, die deine Familien zeigen',
+	'frameCard.reactedToday.one': '{frame} hat heute einem Foto ein Herz geschenkt',
+	'frameCard.reactedToday.other': '{frame} hat heute {count} Fotos ein Herz geschenkt',
 };
 
 export default de;

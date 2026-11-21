@@ -3097,6 +3097,8 @@ const nl: Catalog = {
 	'frameCard.addFamilyNone': 'Dit kader toont al je families. Om de familie van iemand anders te tonen, vraag je hun uitnodigingslink voor kaders.',
 	'frameFeeds.title': 'Families op dit kader',
 	'frames.othersTitle': 'Kaders die je families tonen',
+	'frameCard.reactedToday.one': '{frame} vond vandaag een foto mooi',
+	'frameCard.reactedToday.other': '{frame} vond vandaag {count} foto’s mooi',
 };
 
 export default nl;

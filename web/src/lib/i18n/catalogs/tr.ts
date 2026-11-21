@@ -3093,6 +3093,8 @@ const tr: Catalog = {
 	'frameCard.addFamilyNone': 'Bu çerçeve tüm ailelerinizi zaten gösteriyor. Başka birinin ailesini göstermek için ondan çerçeveler için davet bağlantısını isteyin.',
 	'frameFeeds.title': 'Bu çerçevedeki aileler',
 	'frames.othersTitle': 'Ailelerinizi gösteren çerçeveler',
+	'frameCard.reactedToday.one': '{frame} bugün bir fotoğrafı sevdi',
+	'frameCard.reactedToday.other': '{frame} bugün {count} fotoğrafı sevdi',
 };
 
 export default tr;

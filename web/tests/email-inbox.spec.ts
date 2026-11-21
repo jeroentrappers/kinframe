@@ -19,7 +19,7 @@ function inboxState(on = true) {
 	const oma = makeFrame({ name: 'Oma', role: 'owner' });
 	st.frames = [oma];
 	st.settings[oma.id] = defaultSettings(1);
-	const feed: S['Feed'] = { id: uid('fd'), name: 'Peeters kids', cover_url: null, role: 'owner', member_count: 2, subscription_count: 3, created_at: ago(9000), owner_name: 'Anna' };
+	const feed: S['Feed'] = { id: uid('fd'), name: 'Peeters kids', cover_url: null, role: 'owner', member_count: 2, subscription_count: 3, my_post_count: 0, created_at: ago(9000), owner_name: 'Anna' };
 	st.feeds = [feed];
 	st.feedPosts[feed.id] = [];
 	return { st, oma, feed };

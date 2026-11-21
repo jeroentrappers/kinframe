@@ -3212,6 +3212,9 @@ const pt: Catalog = {
 	'frameCard.addFamilyNone': 'Este porta-retrato já mostra todas as suas famílias. Para mostrar a família de outra pessoa, peça o link de convite para porta-retratos dela.',
 	'frameFeeds.title': 'Famílias neste porta-retrato',
 	'frames.othersTitle': 'Porta-retratos que mostram suas famílias',
+	'frameCard.reactedToday.one': '{frame} adorou uma foto hoje',
+	'frameCard.reactedToday.many': '{frame} adorou {count} de fotos hoje',
+	'frameCard.reactedToday.other': '{frame} adorou {count} fotos hoje',
 };
 
 export default pt;

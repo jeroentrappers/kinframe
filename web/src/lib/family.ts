@@ -3,21 +3,19 @@
 import type { FeedSummary, Subscription } from './api/client';
 
 export interface MyMembership {
-	/** When I last posted in the family (FeedMember.last_posted_at). */
-	last_posted_at?: string | null;
+	/** When I joined the family (FeedMember.joined_at). */
 	joined_at?: string | null;
 }
 
 /**
- * The home family (spec §3): the family the person posts to most, ties broken by the one they created, else the
- * oldest membership. The server has no per-person post count, so "most" is read as "most recently posted to".
+ * The home family (spec §3): the family the person posts to most (`FeedSummary.my_post_count`), ties broken by the
+ * one they created, else the oldest membership (when the membership isn't known yet, the family's age stands in).
  */
-export function rankFamilies<T extends Pick<FeedSummary, 'id' | 'name' | 'role' | 'created_at'>>(list: T[], mine: Record<string, MyMembership | undefined>): T[] {
-	const posted = (f: T) => mine[f.id]?.last_posted_at ?? '';
+export function rankFamilies<T extends Pick<FeedSummary, 'id' | 'name' | 'role' | 'created_at' | 'my_post_count'>>(list: T[], mine: Record<string, MyMembership | undefined> = {}): T[] {
 	const joined = (f: T) => mine[f.id]?.joined_at ?? f.created_at ?? '';
 	return [...list].sort(
 		(a, b) =>
-			posted(b).localeCompare(posted(a)) ||
+			(b.my_post_count ?? 0) - (a.my_post_count ?? 0) ||
 			Number(b.role === 'owner') - Number(a.role === 'owner') ||
 			joined(a).localeCompare(joined(b)) ||
 			a.name.localeCompare(b.name)

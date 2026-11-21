@@ -3224,6 +3224,9 @@ const lt: Catalog = {
 	'frameCard.addFamilyNone': 'Šis rėmelis jau rodo visas jūsų šeimas. Norėdami rodyti kieno nors kito šeimą, paprašykite jo rėmelių pakvietimo nuorodos.',
 	'frameFeeds.title': 'Šeimos šiame rėmelyje',
 	'frames.othersTitle': 'Rėmeliai, kurie rodo jūsų šeimas',
+	'frameCard.reactedToday.one': '{frame}: šiandien patiko {count} nuotrauka',
+	'frameCard.reactedToday.few': '{frame}: šiandien patiko {count} nuotraukos',
+	'frameCard.reactedToday.other': '{frame}: šiandien patiko {count} nuotraukų',
 };
 
 export default lt;

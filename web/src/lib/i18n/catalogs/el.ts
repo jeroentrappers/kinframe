@@ -3093,6 +3093,8 @@ const el: Catalog = {
 	'frameCard.addFamilyNone': 'Αυτή η κορνίζα δείχνει ήδη όλες τις οικογένειές σας. Για να δείξετε την οικογένεια κάποιου άλλου, ζητήστε του τον σύνδεσμο πρόσκλησης για κορνίζες.',
 	'frameFeeds.title': 'Οικογένειες σε αυτή την κορνίζα',
 	'frames.othersTitle': 'Κορνίζες που δείχνουν τις οικογένειές σας',
+	'frameCard.reactedToday.one': '{frame}: σήμερα άρεσε μία φωτογραφία',
+	'frameCard.reactedToday.other': '{frame}: σήμερα άρεσαν {count} φωτογραφίες',
 };
 
 export default el;

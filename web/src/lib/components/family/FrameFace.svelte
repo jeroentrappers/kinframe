@@ -1,22 +1,25 @@
 <script lang="ts">
-	import { lastPhoto, type FramePhoto } from '$lib/frameFace';
+	import { framePhotoUrl } from '$lib/frameFace';
+	import { frames } from '$lib/frames.svelte';
 	import Icon from '../Icon.svelte';
-	import Thumb from '../Thumb.svelte';
 
-	/** A frame as a round face: its last photo, with a green ring while it is online. */
+	/**
+	 * A frame as a round face: the photo it shows (your own frames, from `now_showing`), with a green ring while it is
+	 * online. Frames that only show your family have no photo for you: the frame icon stays.
+	 */
 	let { frameId, online, size = 60 }: { frameId: string; online: boolean; size?: number } = $props();
 
-	let photo = $state<FramePhoto | null>(null);
+	const photo = $derived(framePhotoUrl(frames.get(frameId)));
+	let failed = $state(false);
 	$effect(() => {
-		const id = frameId;
-		photo = null;
-		void lastPhoto(id).then((p) => id === frameId && (photo = p));
+		void photo;
+		failed = false;
 	});
 </script>
 
 <span class="face" class:online style="--size:{size}px" aria-hidden="true">
 	<span class="inner">
-		{#if photo}<Thumb itemId={photo.itemId} kind={photo.kind} radius="50%" />{:else}<Icon name="frame" size={Math.round(size / 2.6)} />{/if}
+		{#if photo && !failed}<img src={photo} alt="" draggable="false" onerror={() => (failed = true)} />{:else}<Icon name="frame" size={Math.round(size / 2.6)} />{/if}
 	</span>
 </span>
 
@@ -45,12 +48,9 @@
 		color: var(--text-muted);
 		box-shadow: 0 0 0 2px var(--surface);
 	}
-	.inner :global(*) {
+	.inner img {
 		width: 100%;
 		height: 100%;
-	}
-	.inner :global(svg) {
-		width: auto;
-		height: auto;
+		object-fit: cover;
 	}
 </style>

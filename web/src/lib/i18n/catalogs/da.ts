@@ -3102,6 +3102,8 @@ const da: Catalog = {
 	'frameCard.addFamilyNone': 'Denne ramme viser allerede alle dine familier. Vil du vise en andens familie, så bed dem om deres invitationslink til rammer.',
 	'frameFeeds.title': 'Familier på denne ramme',
 	'frames.othersTitle': 'Rammer, der viser dine familier',
+	'frameCard.reactedToday.one': '{frame} elskede et billede i dag',
+	'frameCard.reactedToday.other': '{frame} elskede {count} billeder i dag',
 };
 
 export default da;

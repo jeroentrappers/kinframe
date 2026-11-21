@@ -3115,6 +3115,8 @@ const ko: Catalog = {
 	'frameCard.addFamilyNone': '이 액자는 이미 내 모든 가족을 보여 주고 있어요. 다른 사람의 가족을 보여 주려면 그 사람에게 액자용 초대 링크를 요청하세요.',
 	'frameFeeds.title': '이 액자의 가족',
 	'frames.othersTitle': '내 가족을 보여 주는 액자',
+	'frameCard.reactedToday.one': '{frame}에서 오늘 사진 {count}장을 좋아했어요',
+	'frameCard.reactedToday.other': '{frame}에서 오늘 사진 {count}장을 좋아했어요',
 };
 
 export default ko;

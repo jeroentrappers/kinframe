@@ -3342,6 +3342,10 @@ const ru: Catalog = {
 	'frameCard.addFamilyNone': 'Эта рамка уже показывает все ваши семьи. Чтобы показывать чужую семью, попросите ссылку-приглашение для рамок.',
 	'frameFeeds.title': 'Семьи на этой рамке',
 	'frames.othersTitle': 'Рамки, которые показывают ваши семьи',
+	'frameCard.reactedToday.one': '{frame}: сегодня понравилось {count} фото',
+	'frameCard.reactedToday.few': '{frame}: сегодня понравилось {count} фото',
+	'frameCard.reactedToday.many': '{frame}: сегодня понравилось {count} фото',
+	'frameCard.reactedToday.other': '{frame}: сегодня понравилось {count} фото',
 };
 
 export default ru;

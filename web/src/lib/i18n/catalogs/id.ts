@@ -3115,6 +3115,8 @@ const id: Catalog = {
 	'frameCard.addFamilyNone': 'Bingkai ini sudah menampilkan semua keluarga Anda. Untuk menampilkan keluarga orang lain, mintalah link undangan untuk bingkai dari mereka.',
 	'frameFeeds.title': 'Keluarga di bingkai ini',
 	'frames.othersTitle': 'Bingkai yang menampilkan keluarga Anda',
+	'frameCard.reactedToday.one': '{frame} menyukai satu foto hari ini',
+	'frameCard.reactedToday.other': '{frame} menyukai {count} foto hari ini',
 };
 
 export default id;

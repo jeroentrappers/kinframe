@@ -2,17 +2,31 @@ import { describe, expect, it } from 'vitest';
 import type { Subscription } from './api/client';
 import { dedupePosts, framesOf, rankFamilies, surnameOf } from './family';
 
-const fam = (id: string, name: string, last?: string) => ({ id, name, last_post_at: last ?? null, created_at: '2026-01-01T00:00:00Z' });
-
 describe('home family', () => {
-	const fam = (id: string, role: 'owner' | 'admin' | 'poster' = 'poster') => ({ id, name: id, role, created_at: '2026-01-01T00:00:00Z' });
-	it('is the family posted to most recently', () => {
-		const list = [fam('a'), fam('b')];
-		expect(rankFamilies(list, { a: { last_posted_at: '2026-11-01T00:00:00Z' }, b: { last_posted_at: '2026-11-10T00:00:00Z' } })[0]!.id).toBe('b');
+	const fam = (id: string, posts: number, role: 'owner' | 'admin' | 'poster' = 'poster', created = '2026-01-01T00:00:00Z') => ({ id, name: id, role, my_post_count: posts, created_at: created });
+	it('is the family you post to most', () => {
+		expect(rankFamilies([fam('a', 3), fam('b', 12), fam('c', 0, 'owner')]).map((f) => f.id)).toEqual(['b', 'a', 'c']);
 	});
-	it('without posts: the one you created, then the oldest membership', () => {
-		expect(rankFamilies([fam('a'), fam('b', 'owner')], {})[0]!.id).toBe('b');
-		expect(rankFamilies([fam('a'), fam('b')], { a: { joined_at: '2026-05-01T00:00:00Z' }, b: { joined_at: '2026-02-01T00:00:00Z' } })[0]!.id).toBe('b');
+	it('on a tie: the one you created', () => {
+		expect(rankFamilies([fam('a', 4), fam('b', 4, 'owner'), fam('c', 4, 'admin')])[0]!.id).toBe('b');
+		expect(rankFamilies([fam('a', 0), fam('b', 0, 'owner')])[0]!.id).toBe('b');
+	});
+	it('else the oldest membership', () => {
+		const list = [fam('a', 2), fam('b', 2)];
+		expect(rankFamilies(list, { a: { joined_at: '2026-05-01T00:00:00Z' }, b: { joined_at: '2026-02-01T00:00:00Z' } })[0]!.id).toBe('b');
+		expect(rankFamilies(list, { a: { joined_at: '2026-01-01T00:00:00Z' }, b: { joined_at: '2026-02-01T00:00:00Z' } })[0]!.id).toBe('a');
+	});
+	it('without the membership yet, the older family; then the name', () => {
+		expect(rankFamilies([fam('a', 0, 'poster', '2026-06-01T00:00:00Z'), fam('b', 0, 'poster', '2026-03-01T00:00:00Z')])[0]!.id).toBe('b');
+		expect(rankFamilies([fam('b', 1), fam('a', 1)])[0]!.id).toBe('a');
+	});
+	it('posting more beats having created the family', () => {
+		expect(rankFamilies([fam('mine', 1, 'owner'), fam('oma', 2)])[0]!.id).toBe('oma');
+	});
+	it('does not change the list it is given', () => {
+		const list = [fam('a', 1), fam('b', 2)];
+		rankFamilies(list);
+		expect(list.map((f) => f.id)).toEqual(['a', 'b']);
 	});
 });
 

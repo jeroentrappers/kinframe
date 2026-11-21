@@ -3224,6 +3224,9 @@ const fr: Catalog = {
 	'frameCard.addFamilyNone': 'Ce cadre affiche déjà toutes vos familles. Pour afficher la famille de quelqu’un d’autre, demandez-lui son lien d’invitation pour cadres.',
 	'frameFeeds.title': 'Familles sur ce cadre',
 	'frames.othersTitle': 'Cadres qui affichent vos familles',
+	'frameCard.reactedToday.one': '{frame} a adoré une photo aujourd’hui',
+	'frameCard.reactedToday.many': '{frame} a adoré {count} de photos aujourd’hui',
+	'frameCard.reactedToday.other': '{frame} a adoré {count} photos aujourd’hui',
 };
 
 export default fr;

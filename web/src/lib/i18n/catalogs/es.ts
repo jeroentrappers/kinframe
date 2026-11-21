@@ -3212,6 +3212,9 @@ const es: Catalog = {
 	'frameCard.addFamilyNone': 'Este marco ya muestra todas tus familias. Para mostrar la familia de otra persona, pídele su enlace de invitación para marcos.',
 	'frameFeeds.title': 'Familias en este marco',
 	'frames.othersTitle': 'Marcos que muestran tus familias',
+	'frameCard.reactedToday.one': 'A {frame} le encantó una foto hoy',
+	'frameCard.reactedToday.many': 'A {frame} le encantaron {count} de fotos hoy',
+	'frameCard.reactedToday.other': 'A {frame} le encantaron {count} fotos hoy',
 };
 
 export default es;

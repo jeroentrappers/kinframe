@@ -20,7 +20,7 @@ function feedState(opts: { feeds?: boolean } = {}) {
 		cover_url: null,
 		role: 'owner',
 		member_count: 3,
-		subscription_count: 5,
+		subscription_count: 5, my_post_count: 0,
 		last_post_at: ago(30),
 		created_at: ago(9000),
 		owner_name: 'Anna',
@@ -154,9 +154,23 @@ test('Add a frame: one of my frames shows the family at once, with the last 50 p
 
 test('Frames: which family each frame shows, Add a family, and frames that show your families', async ({ page }) => {
 	const { st, feed } = feedState();
-	const kitchen = makeFrame({ name: 'Kitchen', role: 'owner', online: true });
+	const signed = (id: string, v: string) => `http://localhost:${process.env.PW_PORT ?? 4173}/v1/media/signed/${id}/${v}?exp=1&sig=x`;
+	const kitchen = makeFrame({
+		name: 'Kitchen',
+		role: 'owner',
+		online: true,
+		now_showing: { placement_id: uid('pl'), item_id: 'it-screen', source: 'screen', thumb_url: signed('it-screen', 'thumb_512'), display_url: signed('it-screen', 'display'), since: ago(2) },
+		reactions_today: { count: 4, item_count: 3 }
+	});
 	const dad = makeFrame({ name: 'Dad’s frame', role: 'member', permissions: { send: true } });
 	st.frames.push(kitchen, dad);
+	// Oma's frame is offline: its card shows the last placed photo, and nothing was reacted to today.
+	Object.assign(st.frames[0]!, {
+		online: false,
+		last_seen_at: ago(180),
+		now_showing: { placement_id: uid('pl'), item_id: 'it-last', source: 'last_placed', thumb_url: signed('it-last', 'thumb_512'), display_url: null, since: ago(600) },
+		reactions_today: { count: 0, item_count: 0 }
+	});
 	st.subscriptions.push({ id: uid('sb'), status: 'active', history: 'none', feed: { id: feed.id, name: feed.name }, frame: { id: uid('f'), name: 'Tante’s frame' }, created_at: ago(500), activated_at: ago(500) });
 	await signIn(page, st);
 
@@ -165,7 +179,16 @@ test('Frames: which family each frame shows, Add a family, and frames that show 
 	await expect(cards.getByRole('heading', { level: 2 })).toHaveText(['Kitchen', 'Oma’s frame', 'Dad’s frame']);
 	const card = (name: string) => cards.filter({ has: page.getByRole('heading', { name, level: 2 }) });
 	await expect(card('Kitchen').getByText('Online · showing now')).toBeVisible();
+	await expect(card('Kitchen').locator('img.photo')).toHaveAttribute('src', /it-screen\/thumb_512/);
+	await expect(card('Kitchen').getByTestId('reactions-today')).toHaveText('Kitchen loved 3 photos today');
 	await expect(card('Oma’s frame').getByText('Shows Peeters kids')).toBeVisible();
+	await expect(card('Oma’s frame').getByText(/Offline since/)).toBeVisible();
+	await expect(card('Oma’s frame').locator('img.photo')).toHaveAttribute('src', /it-last\/thumb_512/);
+	await expect(card('Oma’s frame').getByTestId('reactions-today')).toHaveCount(0);
+	// Online, but no slide reported and no library access: no "showing now", no photo, no reactions line.
+	await expect(card('Dad’s frame').getByText('Online', { exact: true })).toBeVisible();
+	await expect(card('Dad’s frame').locator('img.photo')).toHaveCount(0);
+	await expect(card('Dad’s frame').getByTestId('reactions-today')).toHaveCount(0);
 	await expect(card('Dad’s frame').getByRole('button', { name: 'Add a family' })).toHaveCount(0);
 
 	// A frame without a family: add one, it shows at once.
@@ -176,9 +199,36 @@ test('Frames: which family each frame shows, Add a family, and frames that show 
 	await expect(card('Kitchen').getByText('Shows Peeters kids')).toBeVisible();
 	expect(st.calls.find((c) => c.method === 'POST' && c.path === `/v1/feeds/${feed.id}/subscriptions`)?.body).toEqual({ frame_id: kitchen.id, history: 'last_n', history_count: 50 });
 
-	// Frames you're not on that show one of your families.
+	// Frames you're not on that show one of your families: no photo for you, the frame icon stays.
 	await expect(page.getByRole('heading', { name: 'Frames that show your families' })).toBeVisible();
-	await expect(page.getByRole('listitem').filter({ hasText: 'Tante’s frame' })).toContainText('Shows Peeters kids');
+	const tante = page.getByRole('listitem').filter({ hasText: 'Tante’s frame' });
+	await expect(tante).toContainText('Shows Peeters kids');
+	await expect(tante.locator('img')).toHaveCount(0);
+
+	// The frame screen's card: the larger display rendition, with the thumbnail when there is none.
+	await card('Kitchen').getByRole('link', { name: 'Kitchen', exact: true }).click();
+	await expect(page.getByRole('heading', { name: 'Kitchen', level: 1 })).toBeVisible();
+	await expect(page.locator('article img.photo')).toHaveAttribute('src', /it-screen\/display/);
+	await expect(page.getByTestId('reactions-today')).toHaveText('Kitchen loved 3 photos today');
+	await page.goto(`/frames/${st.frames[0]!.id}`);
+	await expect(page.locator('article img.photo')).toHaveAttribute('src', /it-last\/thumb_512/);
+	// No more guessing the photo from the frame's library.
+	expect(st.calls.some((c) => /\/v1\/frames\/[^/]+\/placements$/.test(c.path) && c.query?.limit === '1')).toBe(false);
+});
+
+test('the home family is the one you post to most, then the one you created', async ({ page }) => {
+	const { st, feed } = feedState();
+	const oma: S['Feed'] = { ...feed, id: uid('fd'), name: 'Oma’s family', role: 'poster', my_post_count: 7, created_at: ago(3000), owner_name: 'Oma' };
+	const club: S['Feed'] = { ...feed, id: uid('fd'), name: 'Book club', role: 'poster', my_post_count: 0, created_at: ago(8000), owner_name: 'Ben' };
+	st.feeds.push(club, oma);
+	await signIn(page, st);
+	// Peeters kids: one post of mine (the mock counts them); Oma's family: seven.
+	await page.getByRole('link', { name: 'Family', exact: true }).first().click();
+	await expect(page).toHaveURL(/\/family$/);
+	await expect(page.getByRole('link', { name: /Peeters kids|Oma’s family|Book club/ })).toHaveText([/Oma’s family/, /Peeters kids/, /Book club/]);
+	// The composer sends to the home family by default.
+	await page.getByRole('link', { name: 'Share' }).first().click();
+	await expect(page.getByTestId('destination')).toContainText('Oma’s family');
 });
 
 test('approve a frame’s subscription request', async ({ page }) => {

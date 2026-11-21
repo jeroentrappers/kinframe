@@ -8,6 +8,7 @@
 	import { auth } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { frames } from '$lib/frames.svelte';
+	import { needsRefreshOnStatus } from '$lib/frameFace';
 	import { feeds } from '$lib/feeds.svelte';
 	import { directory, shows } from '$lib/family.svelte';
 	import { live } from '$lib/live.svelte';
@@ -99,7 +100,13 @@
 		void boot();
 		const off = live.on((e) => {
 			chats.handle(e);
-			if (e.type === 'frame.status') (frames.setStatus(e.frame_id, e.online, e.last_seen_at), directory.setOnline(e.frame_id, e.online, e.last_seen_at ?? null));
+			if (e.type === 'frame.status') {
+				// The card's photo follows: the slide on screen while online, the last placed photo once offline.
+				const refresh = needsRefreshOnStatus(frames.get(e.frame_id), e.online);
+				frames.setStatus(e.frame_id, e.online, e.last_seen_at);
+				directory.setOnline(e.frame_id, e.online, e.last_seen_at ?? null);
+				if (refresh) void frames.load(true);
+			}
 			else if (e.type === 'membership.updated') void frames.load(true);
 			else if (e.type === 'join_request') {
 				const name = frames.get(e.frame_id)?.name ?? '';

@@ -3588,6 +3588,12 @@ const ar: Catalog = {
 	'frameCard.addFamilyNone': 'هذا الإطار يعرض كل عائلاتك بالفعل. لعرض عائلة شخص آخر، اطلب منه رابط الدعوة للإطارات.',
 	'frameFeeds.title': 'العائلات على هذا الإطار',
 	'frames.othersTitle': 'الإطارات التي تعرض عائلاتك',
+	'frameCard.reactedToday.zero': 'لم يعجب {frame} أي صورة اليوم ({count})',
+	'frameCard.reactedToday.one': 'أعجب {frame} بصورة واحدة اليوم',
+	'frameCard.reactedToday.two': 'أعجب {frame} بصورتين ({count}) اليوم',
+	'frameCard.reactedToday.few': 'أعجب {frame} بـ{count} صور اليوم',
+	'frameCard.reactedToday.many': 'أعجب {frame} بـ{count} صورة اليوم',
+	'frameCard.reactedToday.other': 'أعجب {frame} بـ{count} صورة اليوم',
 };
 
 export default ar;

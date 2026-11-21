@@ -3220,6 +3220,9 @@ const he: Catalog = {
 	'frameCard.addFamilyNone': 'המסגרת הזו כבר מציגה את כל המשפחות שלכם. כדי להציג משפחה של מישהו אחר, בקשו ממנו את קישור ההזמנה שלו למסגרות.',
 	'frameFeeds.title': 'משפחות במסגרת הזו',
 	'frames.othersTitle': 'מסגרות שמציגות את המשפחות שלכם',
+	'frameCard.reactedToday.one': '{frame} אהבה תמונה אחת היום',
+	'frameCard.reactedToday.two': '{frame} אהבה {count} תמונות היום',
+	'frameCard.reactedToday.other': '{frame} אהבה {count} תמונות היום',
 };
 
 export default he;

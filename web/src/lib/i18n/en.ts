@@ -3131,6 +3131,8 @@ export const en = {
 	'frameCard.addFamilyNone': 'This frame already shows all your families. To show someone else’s family, ask them for their invite link for frames.',
 	'frameFeeds.title': 'Families on this frame',
 	'frames.othersTitle': 'Frames that show your families',
+	'frameCard.reactedToday.one': '{frame} loved a photo today',
+	'frameCard.reactedToday.other': '{frame} loved {count} photos today',
 } as const;
 
 export type MessageKey = keyof typeof en;

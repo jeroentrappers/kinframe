@@ -27,7 +27,7 @@ function bdayState(opts: { birthdays?: boolean; role?: S['FeedRole']; postersCan
 		cover_url: null,
 		role,
 		member_count: 2,
-		subscription_count: 1,
+		subscription_count: 1, my_post_count: 0,
 		created_at: ago(9000),
 		owner_name: 'Anna',
 		posters_can_add_birthdays: opts.postersCanAdd ?? false,

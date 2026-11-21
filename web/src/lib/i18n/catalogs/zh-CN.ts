@@ -3115,6 +3115,8 @@ const zhCN: Catalog = {
 	'frameCard.addFamilyNone': '这台相框已经显示你所有的家人群组。要显示别人的家人群组，请向对方索取相框的邀请链接。',
 	'frameFeeds.title': '这台相框上的家人群组',
 	'frames.othersTitle': '显示你的家人群组的相框',
+	'frameCard.reactedToday.one': '{frame} 今天喜欢了 {count} 张照片',
+	'frameCard.reactedToday.other': '{frame} 今天喜欢了 {count} 张照片',
 };
 
 export default zhCN;

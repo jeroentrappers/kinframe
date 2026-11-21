@@ -3341,6 +3341,10 @@ const sl: Catalog = {
 	'frameCard.addFamilyNone': 'Ta okvir že prikazuje vse vaše družine. Če želite prikazati družino nekoga drugega, ga prosite za povezavo za povabilo za okvirje.',
 	'frameFeeds.title': 'Družine na tem okvirju',
 	'frames.othersTitle': 'Okvirji, ki prikazujejo vaše družine',
+	'frameCard.reactedToday.one': '{frame}: danes je bila všeč {count} fotografija',
+	'frameCard.reactedToday.two': '{frame}: danes sta bili všeč {count} fotografiji',
+	'frameCard.reactedToday.few': '{frame}: danes so bile všeč {count} fotografije',
+	'frameCard.reactedToday.other': '{frame}: danes je bilo všeč {count} fotografij',
 };
 
 export default sl;

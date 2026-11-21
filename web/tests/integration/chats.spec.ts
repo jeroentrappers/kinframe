@@ -143,14 +143,21 @@ test('a circle: its chat, and posts only its members see', async ({ browser }) =
 	await expect(C.page.getByRole('link', { name: /Peeters/ })).toBeVisible();
 	await expect(C.page.getByRole('link', { name: /The cousins/ })).toHaveCount(0);
 
-	// Ben posts to the circle with the audience picker.
+	// Ben posts to the circle: Change on the composer's destination row, then the circle as the audience.
 	await B.page.goto(`/send?feed=${feed}`);
-	await B.page.getByTestId('audience').selectOption({ label: 'The cousins' });
+	await B.page.getByRole('button', { name: 'Change' }).click();
+	const sheet = B.page.getByRole('dialog', { name: 'Share with' });
+	await sheet.getByTestId('audience').selectOption({ label: 'The cousins' });
+	await sheet.getByRole('button', { name: 'Done' }).click();
+	await expect(B.page.getByTestId('destination')).toHaveText('Peeters · only The cousins');
 	await B.page.getByTestId('file-input').setInputFiles([{ name: 'c.png', mimeType: 'image/png', buffer: await gradientPng(320, 240, 10) }]);
 	await B.page.getByLabel('Caption for item 1').fill('Only cousins');
-	await B.page.getByRole('button', { name: /^Send/ }).first().click();
-	await expect(B.page).toHaveURL(/\/history\/.+/, { timeout: 20_000 });
-	const post = await postOf(ben, B.page.url().split('/').pop()!, feed);
+	// A family send lands on Home: the send id comes from the API's answer.
+	const sent = B.page.waitForResponse((r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/v1/sends', { timeout: 20_000 });
+	await B.page.getByRole('button', { name: 'Share', exact: true }).first().click();
+	const sendId = ((await (await sent).json()) as Json).id as string;
+	await expect(B.page).toHaveURL(/\/home$/, { timeout: 20_000 });
+	const post = await postOf(ben, sendId, feed);
 	expect(((await anna.get(`/v1/posts/${post}`)).circle as Json | undefined)?.id ?? (await anna.get(`/v1/posts/${post}`)).circle_id).toBe(circle!.id);
 
 	await A.page.goto('/home');

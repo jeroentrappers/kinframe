@@ -514,7 +514,18 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		}
 
 		// ---- frames
-		if (path === '/v1/frames' && method === 'GET') return json(route, 200, state.frames);
+		// Frame cards (README §5.5): a test's own now_showing wins, else the newest visible placement, for callers
+		// who can see the library.
+		const card = <F extends S['FrameSummary']>(f: F): F => {
+			if (f.now_showing !== undefined || !(f.role === 'owner' || f.role === 'admin' || f.permissions?.see_library)) return f;
+			const newest = (state.placements[f.id] ?? [])
+				.filter((p) => !p.hidden && !p.trashed && p.item.status === 'ready')
+				.sort((a, b) => (b.received_at ?? '').localeCompare(a.received_at ?? ''))[0];
+			if (!newest) return f;
+			const signed = (v: string) => `${BASE}/v1/media/signed/${newest.item.id}/${v}?exp=1&sig=x`;
+			return { ...f, now_showing: { placement_id: newest.id, item_id: newest.item.id, source: 'last_placed', thumb_url: signed('thumb_512'), display_url: signed('display'), since: newest.received_at ?? newest.item.created_at } };
+		};
+		if (path === '/v1/frames' && method === 'GET') return json(route, 200, state.frames.map(card));
 		if (path === '/v1/frames/redeem' && method === 'POST') {
 			const code = (body as { code: string }).code;
 			const entry = state.codes[code];
@@ -526,7 +537,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			const f = state.frames.find((x) => x.id === m![1]);
 			if (!f) return problem(route, 404, 'not_found', 'Not found');
 			if (method === 'PATCH') Object.assign(f, body);
-			return json(route, 200, f);
+			return json(route, 200, card(f));
 		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/transfer$/)) && method === 'POST') {
 			const f = state.frames.find((x) => x.id === m![1])!;
@@ -1146,7 +1157,10 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		const feedOf = (id: string) => state.feeds.find((f) => f.id === id);
 		const sumOf = (f: S['Feed']): S['FeedSummary'] => {
 			const { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at, freshness, streak, conversation_id } = f;
-			return { id, name, cover_url, role, member_count, subscription_count, last_post_at, created_at, freshness, streak, conversation_id };
+			// The caller's posts in the family, from the mock's posts when it has them.
+			const posts = state.feedPosts[id];
+			const my_post_count = posts ? posts.filter((p) => p.poster.user_id === state.me?.id).length : (f.my_post_count ?? 0);
+			return { id, name, cover_url, role, member_count, subscription_count, my_post_count, last_post_at, created_at, freshness, streak, conversation_id };
 		};
 		const subById = (id: string) => state.subscriptions.find((x) => x.id === id);
 		if (path === '/v1/feeds' && method === 'GET') return json(route, 200, state.feeds.map(sumOf));
@@ -1159,6 +1173,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 				role: 'owner',
 				member_count: 1,
 				subscription_count: 0,
+				my_post_count: 0,
 				last_post_at: null,
 				created_at: new Date().toISOString(),
 				owner_name: state.me!.display_name,
@@ -1184,7 +1199,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (!p) return problem(route, 404, 'invite_invalid', 'Invalid');
 			const b = (body ?? {}) as S['FeedInviteAccept'];
 			// Tests set `join_role: 'member'` for families whose new members are Readers (new_members_can_post off).
-			const summary: S['FeedSummary'] = { id: uid('fd'), name: p.feed_name, role: (p as { join_role?: S['FeedRole'] }).join_role ?? 'poster', member_count: (p.member_count ?? 1) + 1, subscription_count: 0, cover_url: null };
+			const summary: S['FeedSummary'] = { id: uid('fd'), name: p.feed_name, role: (p as { join_role?: S['FeedRole'] }).join_role ?? 'poster', member_count: (p.member_count ?? 1) + 1, subscription_count: 0, my_post_count: 0, cover_url: null };
 			if (p.purpose === 'subscribe') {
 				const subs = (b.frame_ids ?? []).map((fid) => {
 					const fr = state.frames.find((x) => x.id === fid)!;

@@ -3211,6 +3211,9 @@ const ro: Catalog = {
 	'frameCard.addFamilyNone': 'Această ramă afișează deja toate familiile dvs. Pentru a afișa familia altcuiva, cereți-i linkul de invitație pentru rame.',
 	'frameFeeds.title': 'Familii pe această ramă',
 	'frames.othersTitle': 'Rame care afișează familiile dvs.',
+	'frameCard.reactedToday.one': 'Lui {frame} i-a plăcut o fotografie azi',
+	'frameCard.reactedToday.few': 'Lui {frame} i-au plăcut {count} fotografii azi',
+	'frameCard.reactedToday.other': 'Lui {frame} i-au plăcut {count} de fotografii azi',
 };
 
 export default ro;

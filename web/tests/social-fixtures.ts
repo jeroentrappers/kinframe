@@ -37,7 +37,7 @@ export function socialState(opts: { flags?: boolean } = {}) {
 		cover_url: null,
 		role: 'owner',
 		member_count: 3,
-		subscription_count: 1,
+		subscription_count: 1, my_post_count: 0,
 		last_post_at: ago(30),
 		created_at: ago(9000),
 		owner_name: 'Anna',

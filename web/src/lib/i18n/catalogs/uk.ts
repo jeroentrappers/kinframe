@@ -3342,6 +3342,10 @@ const uk: Catalog = {
 	'frameCard.addFamilyNone': 'Ця рамка вже показує всі ваші родини. Щоб показувати чужу родину, попросіть посилання-запрошення для рамок.',
 	'frameFeeds.title': 'Родини на цій рамці',
 	'frames.othersTitle': 'Рамки, які показують ваші родини',
+	'frameCard.reactedToday.one': '{frame}: сьогодні сподобалося {count} фото',
+	'frameCard.reactedToday.few': '{frame}: сьогодні сподобалося {count} фото',
+	'frameCard.reactedToday.many': '{frame}: сьогодні сподобалося {count} фото',
+	'frameCard.reactedToday.other': '{frame}: сьогодні сподобалося {count} фото',
 };
 
 export default uk;

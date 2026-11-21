@@ -3090,6 +3090,8 @@ const sv: Catalog = {
 	'frameCard.addFamilyNone': 'Den här fotoramen visar redan alla dina familjer. Vill du visa någon annans familj ber du om deras inbjudningslänk för fotoramar.',
 	'frameFeeds.title': 'Familjer på den här fotoramen',
 	'frames.othersTitle': 'Fotoramar som visar dina familjer',
+	'frameCard.reactedToday.one': '{frame} älskade ett foto i dag',
+	'frameCard.reactedToday.other': '{frame} älskade {count} foton i dag',
 };
 
 export default sv;

@@ -3236,6 +3236,9 @@ const sr: Catalog = {
 	'frameCard.addFamilyNone': 'Овај рам већ приказује све ваше породице. Да бисте приказали туђу породицу, замолите ту особу за линк за позив за рамове.',
 	'frameFeeds.title': 'Породице на овом раму',
 	'frames.othersTitle': 'Рамови који приказују ваше породице',
+	'frameCard.reactedToday.one': '{frame}: danas se svidela {count} fotografija',
+	'frameCard.reactedToday.few': '{frame}: danas su se svidele {count} fotografije',
+	'frameCard.reactedToday.other': '{frame}: danas se svidelo {count} fotografija',
 };
 
 export default sr;

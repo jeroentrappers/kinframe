@@ -3341,6 +3341,10 @@ const pl: Catalog = {
 	'frameCard.addFamilyNone': 'Ta ramka pokazuje już wszystkie twoje rodziny. Aby pokazać rodzinę kogoś innego, poproś tę osobę o link z zaproszeniem dla ramek.',
 	'frameFeeds.title': 'Rodziny na tej ramce',
 	'frames.othersTitle': 'Ramki, które pokazują twoje rodziny',
+	'frameCard.reactedToday.one': '{frame} polubiła dziś jedno zdjęcie',
+	'frameCard.reactedToday.few': '{frame} polubiła dziś {count} zdjęcia',
+	'frameCard.reactedToday.many': '{frame} polubiła dziś {count} zdjęć',
+	'frameCard.reactedToday.other': '{frame} polubiła dziś {count} zdjęcia',
 };
 
 export default pl;

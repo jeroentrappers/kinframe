@@ -3223,6 +3223,9 @@ const it: Catalog = {
 	'frameCard.addFamilyNone': 'Questa cornice mostra già tutte le tue famiglie. Per mostrare la famiglia di qualcun altro, chiedi il suo link di invito per cornici.',
 	'frameFeeds.title': 'Famiglie su questa cornice',
 	'frames.othersTitle': 'Cornici che mostrano le tue famiglie',
+	'frameCard.reactedToday.one': 'Oggi a {frame} è piaciuta una foto',
+	'frameCard.reactedToday.many': 'Oggi a {frame} sono piaciute {count} di foto',
+	'frameCard.reactedToday.other': 'Oggi a {frame} sono piaciute {count} foto',
 };
 
 export default it;

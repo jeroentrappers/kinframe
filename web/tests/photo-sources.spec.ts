@@ -23,7 +23,7 @@ function sourcesState(opts: { on?: boolean; google?: boolean; privateNetworks?: 
 	st.settings[oma.id] = defaultSettings(1);
 	const garden: S['Album'] = { id: uid('a'), name: 'Garden', version: 1, placement_count: 0, placement_ids: [], schedule: null, photo_source_count: 0 };
 	st.albums[oma.id] = [garden];
-	const feed: S['Feed'] = { id: uid('fd'), name: 'Peeters kids', cover_url: null, role: 'owner', member_count: 2, subscription_count: 3, created_at: ago(9000), owner_name: 'Anna' };
+	const feed: S['Feed'] = { id: uid('fd'), name: 'Peeters kids', cover_url: null, role: 'owner', member_count: 2, subscription_count: 3, my_post_count: 0, created_at: ago(9000), owner_name: 'Anna' };
 	st.feeds = [feed];
 	st.feedPosts[feed.id] = [];
 	return { st, oma, garden, feed };

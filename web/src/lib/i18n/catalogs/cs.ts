@@ -3223,6 +3223,9 @@ const cs: Catalog = {
 	'frameCard.addFamilyNone': 'Tento rámeček už zobrazuje všechny vaše rodiny. Chcete-li zobrazit rodinu někoho jiného, požádejte ho o odkaz s pozvánkou pro rámečky.',
 	'frameFeeds.title': 'Rodiny na tomto rámečku',
 	'frames.othersTitle': 'Rámečky, které zobrazují vaše rodiny',
+	'frameCard.reactedToday.one': '{frame}: dnes se líbila jedna fotka',
+	'frameCard.reactedToday.few': '{frame}: dnes se líbily {count} fotky',
+	'frameCard.reactedToday.other': '{frame}: dnes se líbilo {count} fotek',
 };
 
 export default cs;

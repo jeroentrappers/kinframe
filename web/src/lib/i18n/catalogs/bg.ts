@@ -3118,6 +3118,8 @@ const bg: Catalog = {
 	'frameCard.addFamilyNone': 'Тази рамка вече показва всички ваши семейства. За да покажете семейството на някой друг, поискайте му връзката за покана за рамки.',
 	'frameFeeds.title': 'Семейства на тази рамка',
 	'frames.othersTitle': 'Рамки, които показват вашите семейства',
+	'frameCard.reactedToday.one': '{frame} хареса една снимка днес',
+	'frameCard.reactedToday.other': '{frame} хареса {count} снимки днес',
 };
 
 export default bg;

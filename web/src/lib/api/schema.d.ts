@@ -1191,8 +1191,8 @@ export interface paths {
         put?: never;
         /**
          * @description Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
-         *     `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
-         *     has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+         *     `change_settings`). The subscription is `active` at once for any feed role, poster too (feeds.md §4.1); only
+         *     frames on other servers wait for approval.
          *     `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
          *     this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
          */
@@ -5681,6 +5681,15 @@ export interface components {
             photo_request?: components["schemas"]["PhotoRequest"] | null;
             /** @description The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner. */
             remote_help?: components["schemas"]["FrameRemoteHelpSummary"] | null;
+            /**
+             * @description The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+             *     screen reports (`source: screen`, the device websocket's `now_showing`); otherwise its most recently placed
+             *     visible item (`source: last_placed`). Absent (null) when there is neither, and when the caller can't see
+             *     the library (`see_library`).
+             */
+            now_showing?: components["schemas"]["FrameNowShowing"] | null;
+            /** @description Reactions and quick replies sent from the frame today (README §5.5, "Frame cards"); absent when the caller can't see the library (`see_library`). */
+            reactions_today?: components["schemas"]["FrameReactionsToday"];
         };
         Frame: components["schemas"]["FrameSummary"] & {
             default_permissions?: components["schemas"]["Permissions"];
@@ -6193,6 +6202,8 @@ export interface components {
             member_count: number;
             /** @description Active and paused subscriptions. */
             subscription_count: number;
+            /** @description Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1). */
+            my_post_count: number;
             /** Format: date-time */
             last_post_at?: string | null;
             /** Format: date-time */
@@ -6267,7 +6278,7 @@ export interface components {
             name?: string;
             /** @description An item of a live post of this feed; null removes the cover. */
             cover_item_id?: components["schemas"]["Id"] | null;
-            /** @description Requests by non-admin members become active without approval. */
+            /** @description Frames on other servers become active without approval (members' requests always are). */
             auto_approve_subscriptions?: boolean;
             /** @description Join invites need an admin's approval. */
             invite_requires_approval?: boolean;
@@ -9797,6 +9808,42 @@ export interface components {
             sessions: components["schemas"]["RemoteHelpSession"][];
             next_cursor: string | null;
         };
+        /** @description `FrameSummary.now_showing`. */
+        FrameNowShowing: {
+            placement_id: components["schemas"]["Id"];
+            /**
+             * @description `screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn't connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).
+             * @enum {string}
+             */
+            source: "screen" | "last_placed";
+            item_id: components["schemas"]["Id"];
+            /**
+             * Format: uri
+             * @description Short-lived signed thumbnail URL (thumb_512, else thumb_256), usable in <img src>.
+             */
+            thumb_url?: string | null;
+            /**
+             * Format: uri
+             * @description Short-lived signed URL of the display rendition (`Item.display_url`), for a large card.
+             */
+            display_url?: string | null;
+            /**
+             * Format: date-time
+             * @description `screen`: when the slide came on screen (server time). `last_placed`: when it was placed on the frame (`Placement.received_at`).
+             */
+            since: string;
+        };
+        /**
+         * @description `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+         *     sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+         *     placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+         */
+        FrameReactionsToday: {
+            /** @description Reactions plus quick replies. */
+            count: number;
+            /** @description Distinct items they were on ("Oma loved 3 photos today"). */
+            item_count: number;
+        };
         /** @description `FrameSummary.remote_help`: the active session in short. */
         FrameRemoteHelpSummary: {
             /** Format: date-time */
@@ -12764,7 +12811,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Created (pending or active) */
+            /** @description Created (active) */
             201: {
                 headers: {
                     [name: string]: unknown;

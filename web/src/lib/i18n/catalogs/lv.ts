@@ -3225,6 +3225,9 @@ const lv: Catalog = {
 	'frameCard.addFamilyNone': 'Šis rāmis jau rāda visas jūsu ģimenes. Lai rādītu kāda cita ģimeni, palūdziet viņam rāmju uzaicinājuma saiti.',
 	'frameFeeds.title': 'Ģimenes šajā rāmī',
 	'frames.othersTitle': 'Rāmji, kas rāda jūsu ģimenes',
+	'frameCard.reactedToday.zero': '{frame}: šodien patika {count} fotoattēlu',
+	'frameCard.reactedToday.one': '{frame}: šodien patika {count} fotoattēls',
+	'frameCard.reactedToday.other': '{frame}: šodien patika {count} fotoattēli',
 };
 
 export default lv;

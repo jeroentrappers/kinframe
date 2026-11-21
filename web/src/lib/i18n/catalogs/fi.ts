@@ -3088,6 +3088,8 @@ const fi: Catalog = {
 	'frameCard.addFamilyNone': 'Tämä kuvakehys näyttää jo kaikki perheesi. Jos haluat näyttää jonkun toisen perheen, pyydä häneltä kuvakehysten kutsulinkki.',
 	'frameFeeds.title': 'Perheet tässä kuvakehyksessä',
 	'frames.othersTitle': 'Kuvakehykset, jotka näyttävät perheitäsi',
+	'frameCard.reactedToday.one': '{frame} tykkäsi tänään yhdestä kuvasta',
+	'frameCard.reactedToday.other': '{frame} tykkäsi tänään {count} kuvasta',
 };
 
 export default fi;

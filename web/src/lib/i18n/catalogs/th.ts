@@ -3115,6 +3115,8 @@ const th: Catalog = {
 	'frameCard.addFamilyNone': 'กรอบรูปนี้แสดงครอบครัวทั้งหมดของคุณแล้ว หากต้องการแสดงครอบครัวของคนอื่น ให้ขอลิงก์คำเชิญสำหรับกรอบรูปจากเขา',
 	'frameFeeds.title': 'ครอบครัวบนกรอบรูปนี้',
 	'frames.othersTitle': 'กรอบรูปที่แสดงครอบครัวของคุณ',
+	'frameCard.reactedToday.one': '{frame} ถูกใจรูป {count} รูปวันนี้',
+	'frameCard.reactedToday.other': '{frame} ถูกใจรูป {count} รูปวันนี้',
 };
 
 export default th;

@@ -3115,6 +3115,8 @@ const hi: Catalog = {
 	'frameCard.addFamilyNone': 'यह फ़्रेम पहले से आपके सभी परिवार दिखाता है। किसी और का परिवार दिखाने के लिए, उनसे फ़्रेम के लिए न्योता लिंक मांगें।',
 	'frameFeeds.title': 'इस फ़्रेम पर परिवार',
 	'frames.othersTitle': 'आपके परिवार दिखाने वाले फ़्रेम',
+	'frameCard.reactedToday.one': '{frame} को आज एक फ़ोटो पसंद आई',
+	'frameCard.reactedToday.other': '{frame} को आज {count} फ़ोटो पसंद आईं',
 };
 
 export default hi;

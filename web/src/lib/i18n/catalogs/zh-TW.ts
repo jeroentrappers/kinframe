@@ -3115,6 +3115,8 @@ const zhTW: Catalog = {
 	'frameCard.addFamilyNone': '這台相框已經顯示你所有的家人群組。若要顯示別人的家人群組，請向對方索取相框的邀請連結。',
 	'frameFeeds.title': '這台相框上的家人群組',
 	'frames.othersTitle': '顯示你的家人群組的相框',
+	'frameCard.reactedToday.one': '{frame} 今天喜歡了 {count} 張照片',
+	'frameCard.reactedToday.other': '{frame} 今天喜歡了 {count} 張照片',
 };
 
 export default zhTW;

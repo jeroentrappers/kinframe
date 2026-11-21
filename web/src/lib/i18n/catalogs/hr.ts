@@ -3235,6 +3235,9 @@ const hr: Catalog = {
 	'frameCard.addFamilyNone': 'Ovaj okvir već prikazuje sve vaše obitelji. Da biste prikazali nečiju drugu obitelj, zamolite tu osobu za poveznicu za pozivnicu za okvire.',
 	'frameFeeds.title': 'Obitelji na ovom okviru',
 	'frames.othersTitle': 'Okviri koji prikazuju vaše obitelji',
+	'frameCard.reactedToday.one': '{frame}: danas se svidjela {count} fotografija',
+	'frameCard.reactedToday.few': '{frame}: danas su se svidjele {count} fotografije',
+	'frameCard.reactedToday.other': '{frame}: danas se svidjelo {count} fotografija',
 };
 
 export default hr;

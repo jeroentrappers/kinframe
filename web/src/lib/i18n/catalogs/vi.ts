@@ -3115,6 +3115,8 @@ const vi: Catalog = {
 	'frameCard.addFamilyNone': 'Khung ảnh này đã hiện tất cả gia đình của bạn. Để hiện gia đình của người khác, hãy xin họ liên kết mời dành cho khung ảnh.',
 	'frameFeeds.title': 'Các gia đình trên khung ảnh này',
 	'frames.othersTitle': 'Khung ảnh hiện gia đình của bạn',
+	'frameCard.reactedToday.one': '{frame} đã thích {count} ảnh hôm nay',
+	'frameCard.reactedToday.other': '{frame} đã thích {count} ảnh hôm nay',
 };
 
 export default vi;

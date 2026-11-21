@@ -16,14 +16,16 @@ test('post, comment with a mention, reply, react, live updates, read, mute and c
 	const A = await signedIn(browser, anna);
 	const B = await signedIn(browser, ben);
 
-	// Ben posts through the send page.
+	// Ben posts through the composer, to the family on its destination row.
 	await B.page.goto(`/send?feed=${feed}`);
-	await expect(B.page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
+	await expect(B.page.getByTestId('destination')).toHaveText(/^Peeters/);
 	await B.page.getByTestId('file-input').setInputFiles([{ name: 'beach.png', mimeType: 'image/png', buffer: await gradientPng(640, 480, 40) }]);
 	await B.page.getByLabel('Caption for item 1').fill('Beach day');
-	await B.page.getByRole('button', { name: /^Send/ }).first().click();
-	await expect(B.page).toHaveURL(/\/history\/.+/, { timeout: 20_000 });
-	const sendId = B.page.url().split('/').pop()!;
+	// A family send lands on Home: the send id comes from the API's answer.
+	const sent = B.page.waitForResponse((r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/v1/sends', { timeout: 20_000 });
+	await B.page.getByRole('button', { name: 'Share', exact: true }).first().click();
+	const sendId = ((await (await sent).json()) as Json).id as string;
+	await expect(B.page).toHaveURL(/\/home$/, { timeout: 20_000 });
 	const post = await postOf(ben, sendId, feed);
 
 	// Anna's Home shows it.
@@ -69,7 +71,8 @@ test('post, comment with a mention, reply, react, live updates, read, mute and c
 	await C.page.getByRole('button', { name: 'Send', exact: true }).click();
 	await expect(A.page.getByText('So nice')).toBeVisible();
 	await C.page.goto('/send');
-	await expect(C.page.getByRole('checkbox', { name: /Peeters/ })).toHaveCount(0);
+	await expect(C.page.getByRole('heading', { name: 'You can’t share in this family' })).toBeVisible();
+	await expect(C.page.getByTestId('destination')).toHaveCount(0);
 
 	// Anna closes the thread: Ben's composer goes away live.
 	await A.page.getByRole('button', { name: 'Post options' }).click();
@@ -107,14 +110,20 @@ test('join from an invite link: a poster, and a Reader when new members don’t 
 	await B.page.goto(`/fi/${inv.token}`);
 	await B.page.getByRole('button', { name: 'Join family' }).click();
 	await expect(B.page.getByRole('heading', { name: 'You’re in Peeters' })).toBeVisible();
-	await expect(B.page.getByRole('link', { name: 'Post photos' })).toBeVisible();
+	// A poster joining someone else's family is asked once how to see it (simple-app.md §6).
+	await B.page.getByTestId('view-normal').click();
+	await expect(B.page).toHaveURL(/\/home$/);
 
 	await anna.patch(`/v1/feeds/${feed}`, { new_members_can_post: false });
 	const D = await signedIn(browser, dave);
 	await D.page.goto(`/fi/${inv.token}`);
 	await D.page.getByRole('button', { name: 'Join family' }).click();
 	await expect(D.page.getByRole('heading', { name: 'You’re in Peeters' })).toBeVisible();
-	await expect(D.page.getByRole('link', { name: 'Post photos' })).toHaveCount(0);
+	await D.page.getByTestId('view-normal').click();
+	await expect(D.page).toHaveURL(/\/home$/);
+	// A Reader: the composer says so instead of offering the family.
+	await D.page.goto('/send');
+	await expect(D.page.getByRole('heading', { name: 'You can’t share in this family' })).toBeVisible();
 	expect((await dave.get(`/v1/feeds/${feed}`)).role).toBe('member');
 
 	const A = await signedIn(browser, anna);

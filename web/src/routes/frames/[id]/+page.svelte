@@ -4,6 +4,7 @@
 	import { api, call, type Frame } from '$lib/api/client';
 	import { can, canManage, frames } from '$lib/frames.svelte';
 	import { FrameDrop } from '$lib/framedrop.svelte';
+	import { needsRefreshOnStatus } from '$lib/frameFace';
 	import { live } from '$lib/live.svelte';
 	import { softFade } from '$lib/motion';
 	import { problemMessage } from '$lib/problem';
@@ -44,8 +45,10 @@
 		return live.on((e) => {
 			if ('frame_id' in e && e.frame_id === frameId) {
 				if (e.type === 'frame.status' && frame) {
+					const refresh = needsRefreshOnStatus(frame, e.online);
 					frame.online = e.online;
 					frame.last_seen_at = e.last_seen_at ?? frame.last_seen_at;
+					if (refresh) void load(frameId);
 				} else if (e.type === 'membership.updated') void load(frameId);
 			}
 		});

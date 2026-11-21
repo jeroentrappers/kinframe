@@ -3,16 +3,16 @@
 	import { DROP_FRAME_ATTR } from '$lib/dropfiles';
 	import { shows } from '$lib/family.svelte';
 	import AddFamilySheet from './family/AddFamilySheet.svelte';
-	import { lastPhoto, type FramePhoto } from '$lib/frameFace';
+	import { framePhotoUrl, reactedToday, showingNow } from '$lib/frameFace';
 	import { can } from '$lib/frames.svelte';
 	import { relativeTime } from '$lib/format';
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import Icon from './Icon.svelte';
-	import Thumb from './Thumb.svelte';
 
 	/**
-	 * A frame card (simple-app.md §3.3): its last photo, online or offline, its name and the family it shows. On the
-	 * list it opens the frame; on the frame's own page (`link = false`) it is the header.
+	 * A frame card (simple-app.md §3.3): the photo it shows now (or the last placed one), online or offline, its name,
+	 * the family it shows and today's reactions. On the list it opens the frame; on the frame's own page
+	 * (`link = false`) it is the header, with the larger display rendition.
 	 */
 	let {
 		frame,
@@ -41,12 +41,15 @@
 	const sendable = $derived(can(frame, 'send'));
 	const manager = $derived(can(frame, 'change_settings'));
 
-	let photo = $state<FramePhoto | null>(null);
+	const photo = $derived(framePhotoUrl(frame, !link));
+	let photoFailed = $state(false);
 	$effect(() => {
-		const id = frame.id;
-		void lastPhoto(id).then((p) => id === frame.id && (photo = p));
-		void shows.load(id);
+		void photo;
+		photoFailed = false;
 	});
+	const now = $derived(showingNow(frame));
+	const reacted = $derived(reactedToday(frame));
+	$effect(() => void shows.load(frame.id));
 	const subs = $derived(shows.byFrame[frame.id]);
 	const showing = $derived((subs ?? []).filter((s) => s.status !== 'pending'));
 	const waiting = $derived((subs ?? []).filter((s) => s.status === 'pending'));
@@ -62,14 +65,14 @@
 	{...sendable ? { [DROP_FRAME_ATTR]: frame.id } : {}}
 >
 	<svelte:element this={link ? 'a' : 'div'} href={link ? `/frames/${frame.id}` : undefined} class="cover" style="--a:{tint[0]}; --b:{tint[1]}" aria-label={link ? t('frames.open', { name: frame.name }) : undefined}>
-		{#if photo}
-			<Thumb itemId={photo.itemId} kind={photo.kind} radius="0" />
+		{#if photo && !photoFailed}
+			<img class="photo" src={photo} alt="" draggable="false" onerror={() => (photoFailed = true)} />
 		{:else}
 			<span class="no-photo" aria-hidden="true"><Icon name="frame" size={34} /></span>
 		{/if}
 		<span class="chip" class:on={frame.online}>
 			<span class="dot" class:dot-online={frame.online} aria-hidden="true"></span>
-			{#if frame.online}{t('frameCard.showingNow')}{:else if frame.last_seen_at}{t('frameCard.offlineSince', { when: relativeTime(frame.last_seen_at, i18n.tag) })}{:else}{t('frame.offline')}{/if}
+			{#if now}{t('frameCard.showingNow')}{:else if frame.online}{t('frame.online')}{:else if frame.last_seen_at}{t('frameCard.offlineSince', { when: relativeTime(frame.last_seen_at, i18n.tag) })}{:else}{t('frame.offline')}{/if}
 		</span>
 	</svelte:element>
 	<div class="body">
@@ -89,6 +92,9 @@
 					<button class="btn btn-soft btn-sm add" onclick={() => (addOpen = true)}><Icon name="plus" size={16} />{t('frameCard.addFamily')}</button>
 				{/if}
 			{/if}
+		{/if}
+		{#if reacted !== null}
+			<p class="reacted" data-testid="reactions-today"><Icon name="heart" size={15} />{tn('frameCard.reactedToday', reacted, { frame: frame.name })}</p>
 		{/if}
 		{#if frame.needs_update}
 			<p class="update"><Icon name="info" size={15} />{t('frames.needsUpdate')}</p>
@@ -210,6 +216,15 @@
 	}
 	.add {
 		align-self: flex-start;
+	}
+	.reacted {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--primary);
+		font-weight: 600;
 	}
 	h1 {
 		font-size: 1.6rem;

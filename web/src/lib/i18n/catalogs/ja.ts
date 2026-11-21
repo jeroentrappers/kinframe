@@ -3114,6 +3114,8 @@ const ja: Catalog = {
 	'frameCard.addFamilyNone': 'このフレームはすでにあなたのすべての家族を表示しています。ほかの人の家族を表示するには、その人にフレーム用の招待リンクを頼んでください。',
 	'frameFeeds.title': 'このフレームの家族',
 	'frames.othersTitle': 'あなたの家族を表示しているフレーム',
+	'frameCard.reactedToday.one': '{frame} が今日 {count} 枚の写真にいいねしました',
+	'frameCard.reactedToday.other': '{frame} が今日 {count} 枚の写真にいいねしました',
 };
 
 export default ja;

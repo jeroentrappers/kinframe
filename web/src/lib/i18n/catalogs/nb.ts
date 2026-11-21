@@ -3090,6 +3090,8 @@ const nb: Catalog = {
 	'frameCard.addFamilyNone': 'Denne fotorammen viser allerede alle familiene dine. Vil du vise noen andres familie, ber du dem om invitasjonslenken deres for fotorammer.',
 	'frameFeeds.title': 'Familier på denne fotorammen',
 	'frames.othersTitle': 'Fotorammer som viser familiene dine',
+	'frameCard.reactedToday.one': '{frame} elsket et bilde i dag',
+	'frameCard.reactedToday.other': '{frame} elsket {count} bilder i dag',
 };
 
 export default nb;

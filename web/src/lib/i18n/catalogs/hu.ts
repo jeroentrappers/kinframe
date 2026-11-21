@@ -3105,6 +3105,8 @@ const hu: Catalog = {
 	'frameCard.addFamilyNone': 'Ez a képkeret már az összes családodat mutatja. Ha valaki más családját szeretnéd megjeleníteni, kérd el tőle a képkeretekhez szóló meghívólinkjét.',
 	'frameFeeds.title': 'Családok ezen a képkereten',
 	'frames.othersTitle': 'Képkeretek, amelyek a családjaidat mutatják',
+	'frameCard.reactedToday.one': '{frame} ma kedvelt egy fotót',
+	'frameCard.reactedToday.other': '{frame} ma {count} fotót kedvelt',
 };
 
 export default hu;
