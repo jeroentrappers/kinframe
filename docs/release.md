@@ -306,7 +306,7 @@ mkdir ~/actions-runner && cd ~/actions-runner
 curl -o runner.tar.gz -L <download URL from Settings → Actions → Runners → New self-hosted runner → macOS ARM64>
 tar xzf runner.tar.gz
 ./config.sh --url https://github.com/jeroentrappers/kinframe --token <token> --unattended \
-  --name mini4 --labels kinframe-release --work "$HOME/actions-runner-work"
+  --name mini4 --labels kinframe-release --work /Volumes/NVMESSD/actions-runner-work
 ./svc.sh install && ./svc.sh start && ./svc.sh status      # ~/Library/LaunchAgents/actions.runner.*.plist
 ```
 
@@ -314,7 +314,8 @@ Toolchains: Xcode (`xcode-select -p`), an iPhone simulator for the smoke test, a
 `zsh -lic 'cd ios && bundle install'` finds. sentry-cli (`brew install getsentry/tools/sentry-cli`) is needed for
 dSYM uploads, and Python 3 and openssl come with the Command Line Tools. The jobs no longer use
 `~/.appstoreconnect`, the `kinframe-signing` keychain or `~/Developer/github/kinframe`; manual releases still can.
-The checkout is a fresh, clean one in the runner's work directory.
+The checkout is a fresh, clean one in the runner's work directory. Keep that directory on the NVMe disk
+(`/Volumes/NVMESSD`): the internal disk is small, and the job points `TMPDIR` at the work directory's temp folder.
 
 ## By hand
 
