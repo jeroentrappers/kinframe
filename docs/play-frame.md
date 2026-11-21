@@ -165,6 +165,9 @@ build sends exactly the list it sent before.
 
 ## Releasing the Play build
 
+A `v*` tag releases the Play build through `.github/workflows/release.yml` ([release.md](release.md)), with the
+secrets below as environment secrets. By hand:
+
 The GitHub release workflow is unchanged in what it produces: same task output, same asset names
 (`kinframe-frame-<name>-<code>.apk` and `.sha256`), same signing. For the Play build of the same tag:
 

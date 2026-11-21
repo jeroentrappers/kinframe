@@ -1,4 +1,5 @@
-# Signing and App Store uploads for the iOS app. Run from ios/: `bundle exec fastlane <lane>`.
+# Signing and App Store uploads for the iOS app. Run from ios/: `bundle exec fastlane <lane>`. Releases normally run in
+# .github/workflows/release.yml (docs/release.md), which sets all of the below from secrets.
 #
 # Needs an App Store Connect API key (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH, read from ~/.appstoreconnect/env when
 # not set) and MATCH_PASSWORD. Signing identities go into a dedicated keychain (KINFRAME_KEYCHAIN, default
@@ -68,17 +69,10 @@ platform :ios do
     )
   end
 
-  desc "Submit build_number (waits for processing) for App Review with the current listing. Released automatically after approval."
+  desc "Submit build_number (waits for processing) for App Review with the current listing. Released automatically after approval. " \
+       "app_version: creates that App Store version when missing; metadata:true also uploads metadata/ (What's New)"
   lane :submit do |options|
-    deliver(
-      api_key: asc_key,
-      build_number: options.fetch(:build_number).to_s,
-      skip_metadata: true,
-      skip_screenshots: true,
-      submit_for_review: true,
-      submission_information: { add_id_info_uses_idfa: false, export_compliance_uses_encryption: false },
-      app_review_information: review_information,
-    )
+    submit_build("ios", options)
   end
 
   desc "Fetch the Mac Catalyst App Store certificates and profiles (read-only)"
@@ -112,6 +106,11 @@ platform :ios do
     upload_dsyms
     upload_to_testflight(api_key: asc_key, app_platform: "osx", pkg: Dir["build/mac/*.pkg"].first,
                          skip_waiting_for_build_processing: true) if options[:upload]
+  end
+
+  desc "Submit the Mac build build_number for App Review, like submit (app_version:, metadata:true). Released automatically."
+  lane :mac_submit do |options|
+    submit_build("osx", options)
   end
 
   desc "Smoke test: the signed-in app opens every screen against a fake server without crashing (KinframeTests/SmokeTests)."
@@ -161,6 +160,23 @@ def review_information
   info.merge(phone_number: ENV["REVIEW_PHONE"], demo_password: ENV.fetch("REVIEW_PASSWORD"), demo_required: true)
 end
 
+# deliver: submit build_number on platform (ios or osx) for App Review, released automatically after approval
+# (Deliverfile). Only one version per platform can be in review at a time; App Store Connect refuses a second.
+def submit_build(platform, options)
+  deliver(
+    api_key: asc_key,
+    platform: platform,
+    app_version: options[:app_version]&.to_s,
+    build_number: options.fetch(:build_number).to_s,
+    skip_metadata: !options[:metadata],
+    skip_screenshots: true,
+    submit_for_review: true,
+    automatic_release: true,
+    submission_information: { add_id_info_uses_idfa: false, export_compliance_uses_encryption: false },
+    app_review_information: review_information,
+  )
+end
+
 def asc_key
   @asc_key ||= app_store_connect_api_key(
     key_id: ENV.fetch("ASC_KEY_ID"),
@@ -176,6 +192,8 @@ end
 # ~/.appstoreconnect/env (API key) and ~/.appstoreconnect/signing.env (MATCH_PASSWORD, KINFRAME_KEYCHAIN_PASSWORD,
 # KINFRAME_SENTRY_DSN, SENTRY_AUTH_TOKEN): KEY=value lines; variables already set win.
 def load_local_env
+  # The release workflow passes everything in the environment (KINFRAME_NO_LOCAL_ENV=1, docs/release.md).
+  return if ENV["KINFRAME_NO_LOCAL_ENV"] == "1"
   %w[env signing.env review.env].each do |name|
     path = File.expand_path("~/.appstoreconnect/#{name}")
     next unless File.exist?(path)

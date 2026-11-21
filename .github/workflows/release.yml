@@ -1,0 +1,423 @@
+name: Release
+
+# One tag releases everything (docs/release.md): push vX.Y.Z on main and, after one approval, this workflow deploys the
+# server image to kinframe.appmire.be and ships the store apps. Two self-hosted runners do the work; they hold only
+# toolchains, never secrets, and pull requests never run on them:
+#   ryzen (labels self-hosted, Linux, kinframe-release): plan, server deploy, Android family app, frame app on Play
+#   mini4 (labels self-hosted, macOS, kinframe-release): iOS and Mac family app
+#
+#   plan → wait-image (ci.yml published the server image)
+#        → linux  [environment production]: server deploy → Android internal → production → frame app on Play
+#        → apple  [environment production]: waits for the server deploy → iOS upload → review → Mac upload → review
+#
+# Every secret is a secret of the GitHub environment `production` (required reviewer; docs/release.md#secrets), so only
+# the two jobs that reference it can read them, and only once approved. Both become ready together, so one approval
+# starts both. The jobs write what they need into $RUNNER_TEMP (scripts/release/runner-secrets.sh) and remove it at
+# the end, whatever happened.
+#
+# Versions: the server and frame app take the tag (v0.7.4 → image 0.7.4, frame 0.7.4 / 70499). The family apps take
+# VERSION_FAMILY at the tagged commit and ship on a tag only when that file changed since the previous release tag.
+# Build number (iOS, Mac) and family version code (Android): the commit count, as for manual releases.
+# workflow_dispatch releases an existing tag again with the parts you pick, whatever VERSION_FAMILY did.
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '!v*-*' # vX.Y.Z-beta.N and other prereleases: release-frame.yml only
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release tag to (re)release, e.g. v0.7.4'
+        required: true
+        type: string
+      server:
+        description: 'Deploy the server image to kinframe.appmire.be'
+        type: boolean
+        default: true
+      android:
+        description: 'Family app on Google Play (internal, then production 100%)'
+        type: boolean
+        default: true
+      ios:
+        description: 'Family app on the App Store (iOS)'
+        type: boolean
+        default: true
+      mac:
+        description: 'Family app on the Mac App Store (Mac Catalyst)'
+        type: boolean
+        default: true
+      frame_play:
+        description: 'Frame app on Google Play'
+        type: boolean
+        default: true
+      store_step_only:
+        description: 'Only the second store step for a build already uploaded: Play promote, App Review submit'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  FASTLANE_SKIP_UPDATE_CHECK: '1'
+  FASTLANE_HIDE_CHANGELOG: '1'
+  FASTLANE_HIDE_TIMESTAMP: '1'
+  # The Fastfiles ignore ~/.config/play and ~/.appstoreconnect: everything comes from the job.
+  KINFRAME_NO_LOCAL_ENV: '1'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    name: Plan
+    if: github.repository == 'jeroentrappers/kinframe'
+    runs-on: [self-hosted, Linux, kinframe-release]
+    timeout-minutes: 10
+    outputs:
+      tag: ${{ steps.plan.outputs.tag }}
+      sha: ${{ steps.plan.outputs.sha }}
+      image: ${{ steps.plan.outputs.image }}
+      family_version: ${{ steps.plan.outputs.family_version }}
+      build_number: ${{ steps.plan.outputs.build_number }}
+      server: ${{ steps.plan.outputs.server }}
+      android: ${{ steps.plan.outputs.android }}
+      ios: ${{ steps.plan.outputs.ios }}
+      mac: ${{ steps.plan.outputs.mac }}
+      frame_play: ${{ steps.plan.outputs.frame_play }}
+      linux: ${{ steps.plan.outputs.linux }}
+      apple: ${{ steps.plan.outputs.apple }}
+      store_step_only: ${{ steps.plan.outputs.store_step_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.version) || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Versions and parts
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+          IN_SERVER: ${{ inputs.server }}
+          IN_ANDROID: ${{ inputs.android }}
+          IN_IOS: ${{ inputs.ios }}
+          IN_MAC: ${{ inputs.mac }}
+          IN_FRAME_PLAY: ${{ inputs.frame_play }}
+          IN_STORE_STEP_ONLY: ${{ inputs.store_step_only }}
+        run: |
+          if [[ ! "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::$TAG is not a release tag vMAJOR.MINOR.PATCH (prereleases are not released here)"; exit 1
+          fi
+          git rev-parse -q --verify "refs/tags/$TAG" >/dev/null || { echo "::error::tag $TAG does not exist"; exit 1; }
+          sha="$(git rev-parse "refs/tags/$TAG^{commit}")"
+          git merge-base --is-ancestor "$sha" origin/main || { echo "::error::$TAG is not on main"; exit 1; }
+
+          family="$(git show "$sha:VERSION_FAMILY" 2>/dev/null | tr -d '[:space:]' || true)"
+          [[ "$family" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::VERSION_FAMILY at $TAG is not X.Y.Z"; exit 1; }
+          prev="$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' "$sha^" 2>/dev/null || true)"
+          prev_family=""
+          [[ -z "$prev" ]] || prev_family="$(git show "$prev:VERSION_FAMILY" 2>/dev/null | tr -d '[:space:]' || true)"
+
+          if [[ "$EVENT" == workflow_dispatch ]]; then
+            server="$IN_SERVER"; android="$IN_ANDROID"; ios="$IN_IOS"; mac="$IN_MAC"; frame_play="$IN_FRAME_PLAY"
+            store_step_only="$IN_STORE_STEP_ONLY"
+          else
+            server=true; frame_play=true; store_step_only=false
+            if [[ -n "$prev_family" && "$prev_family" != "$family" ]]; then
+              android=true; ios=true; mac=true
+            else
+              android=false; ios=false; mac=false
+              echo "::notice::VERSION_FAMILY is $family, as at ${prev:-the previous release}: the family apps are not released"
+            fi
+          fi
+          if [[ "$android$ios$mac" == *true* && -n "$prev" ]] \
+            && git diff --quiet "$prev" "$sha" -- ios/fastlane/metadata android/fastlane/metadata; then
+            echo "::warning::The family release notes did not change since $prev"
+          fi
+          linux=false; apple=false
+          [[ "$server$android$frame_play" != *true* ]] || linux=true
+          [[ "$ios$mac" != *true* ]] || apple=true
+
+          {
+            echo "tag=$TAG"
+            echo "sha=$sha"
+            echo "image=${TAG#v}"
+            echo "family_version=$family"
+            echo "build_number=$(git rev-list --count "$sha")"
+            echo "server=$server"
+            echo "android=$android"
+            echo "ios=$ios"
+            echo "mac=$mac"
+            echo "frame_play=$frame_play"
+            echo "linux=$linux"
+            echo "apple=$apple"
+            echo "store_step_only=$store_step_only"
+          } | tee -a "$GITHUB_OUTPUT"
+
+          {
+            echo "### Release $TAG (\`${sha:0:7}\`)"
+            echo
+            echo "| Part | Runs | Version |"
+            echo "|---|---|---|"
+            echo "| Server (kinframe.appmire.be) | $server | image \`${TAG#v}\` |"
+            echo "| Android family app | $android | $family ($(git rev-list --count "$sha")) |"
+            echo "| iOS family app | $ios | $family ($(git rev-list --count "$sha")) |"
+            echo "| Mac family app | $mac | $family ($(git rev-list --count "$sha")) |"
+            echo "| Frame app on Play | $frame_play | ${TAG#v} |"
+            if [[ "$store_step_only" == true ]]; then echo; echo "Store step only: promote and submit, no builds."; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Release notes (no emoji, store limits)
+        run: python3 -I scripts/release/check-release-notes.py
+
+  wait-image:
+    name: Wait for the server image
+    needs: plan
+    if: needs.plan.outputs.server == 'true'
+    runs-on: [self-hosted, Linux, kinframe-release]
+    timeout-minutes: 120
+    steps:
+      - name: ci.yml "Publish server image" for the tag
+        uses: actions/github-script@v7
+        env:
+          TAG: ${{ needs.plan.outputs.tag }}
+          SHA: ${{ needs.plan.outputs.sha }}
+        with:
+          script: |
+            const { TAG: tag, SHA: sha } = process.env;
+            const { owner, repo } = context.repo;
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            const started = Date.now();
+            for (;;) {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                owner, repo, workflow_id: 'ci.yml', event: 'push', head_sha: sha, per_page: 50,
+              });
+              // The tag's own run publishes the X.Y.Z image (a push to main only publishes sha-xxxxxxx).
+              const run = data.workflow_runs.filter((r) => r.head_branch === tag)
+                .sort((a, b) => b.run_attempt - a.run_attempt || b.id - a.id)[0];
+              if (!run) {
+                if (Date.now() - started > 15 * 60 * 1000) core.setFailed(`No ci.yml run for ${tag} (${sha})`);
+                else { core.info(`Waiting for ci.yml to start for ${tag}`); await sleep(30000); continue; }
+                return;
+              }
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+                owner, repo, run_id: run.id, filter: 'latest', per_page: 100,
+              });
+              const publish = jobs.find((j) => j.name === 'Publish server image');
+              if (publish && publish.status === 'completed') {
+                if (publish.conclusion === 'success') { core.info(`Image published: ${run.html_url}`); return; }
+                core.setFailed(`Publish server image: ${publish.conclusion} (${run.html_url})`);
+                return;
+              }
+              if (run.status === 'completed') {
+                core.setFailed(`ci.yml ${run.conclusion} without publishing the image (${run.html_url})`);
+                return;
+              }
+              core.info(`ci.yml ${run.status}, publish ${publish ? publish.status : 'not started'}: ${run.html_url}`);
+              await sleep(30000);
+            }
+
+  linux:
+    # The apple job waits for this job's step "Deploy the server" by these names.
+    name: Server, Android, frame app
+    needs: [plan, wait-image]
+    if: >-
+      ${{ !cancelled() && github.repository == 'jeroentrappers/kinframe' && needs.plan.result == 'success' &&
+      needs.plan.outputs.linux == 'true' &&
+      (needs.wait-image.result == 'success' || needs.wait-image.result == 'skipped') }}
+    runs-on: [self-hosted, Linux, kinframe-release]
+    environment: production
+    timeout-minutes: 120
+    env:
+      TAG: ${{ needs.plan.outputs.tag }}
+      SECOND_STEP_ONLY: ${{ needs.plan.outputs.store_step_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          fetch-depth: 0
+          clean: true
+          persist-credentials: false
+
+      - name: Deploy secrets to files
+        id: deploy_secrets
+        if: needs.plan.outputs.server == 'true'
+        env:
+          RELEASE_SSH_KNOWN_HOSTS: ${{ secrets.RELEASE_SSH_KNOWN_HOSTS }}
+          DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_REPO_KEY: ${{ secrets.DEPLOY_REPO_KEY }}
+          KINFRAME_DEPLOY_VAULT_PASSWORD: ${{ secrets.KINFRAME_DEPLOY_VAULT_PASSWORD }}
+          DEPLOY_GPG_PRIVATE_KEY: ${{ secrets.DEPLOY_GPG_PRIVATE_KEY }}
+          DEPLOY_GPG_PASSPHRASE: ${{ secrets.DEPLOY_GPG_PASSPHRASE }}
+        run: scripts/release/runner-secrets.sh deploy
+
+      - name: Deploy the server
+        id: server
+        if: needs.plan.outputs.server == 'true'
+        env:
+          IMAGE: ${{ needs.plan.outputs.image }}
+        run: scripts/release/in-login-shell.sh "$GITHUB_WORKSPACE/scripts/release/deploy-server.sh" "$IMAGE"
+
+      - name: Android secrets to files
+        id: android_secrets
+        if: >-
+          ${{ !cancelled() && steps.deploy_secrets.outcome != 'failure' && steps.server.outcome != 'failure' &&
+          (needs.plan.outputs.android == 'true' || needs.plan.outputs.frame_play == 'true') }}
+        env:
+          KINFRAME_UPLOAD_KEYSTORE_B64: ${{ secrets.KINFRAME_UPLOAD_KEYSTORE_B64 }}
+          KINFRAME_FRAME_UPLOAD_KEYSTORE_B64: ${{ secrets.KINFRAME_FRAME_UPLOAD_KEYSTORE_B64 }}
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.SUPPLY_JSON_KEY_DATA }}
+          KINFRAME_GOOGLE_SERVICES_JSON: ${{ secrets.KINFRAME_GOOGLE_SERVICES_JSON }}
+        run: |
+          scripts/release/runner-secrets.sh android
+          scripts/release/in-login-shell.sh bash -c 'cd android && bundle install --quiet'
+
+      - name: Android family app → internal
+        id: android
+        if: ${{ !cancelled() && steps.android_secrets.outcome == 'success' && needs.plan.outputs.android == 'true' && env.SECOND_STEP_ONLY != 'true' }}
+        working-directory: android
+        env:
+          VERSION_NAME: ${{ needs.plan.outputs.family_version }}
+          VERSION_CODE: ${{ needs.plan.outputs.build_number }}
+          PLAY_RELEASE_STATUS: completed # the family app is live; a draft could not be promoted
+          KINFRAME_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.KINFRAME_UPLOAD_KEYSTORE_PASSWORD }}
+          KINFRAME_UPLOAD_KEY_ALIAS: ${{ secrets.KINFRAME_UPLOAD_KEY_ALIAS }}
+          KINFRAME_UPLOAD_KEY_PASSWORD: ${{ secrets.KINFRAME_UPLOAD_KEY_PASSWORD }}
+          KINFRAME_SENTRY_DSN_FAMILY: ${{ secrets.KINFRAME_SENTRY_DSN_FAMILY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: ../scripts/release/in-login-shell.sh bundle exec fastlane android internal
+
+      - name: Android family app → production
+        if: ${{ !cancelled() && steps.android_secrets.outcome == 'success' && needs.plan.outputs.android == 'true' && steps.android.outcome != 'failure' }}
+        working-directory: android
+        run: ../scripts/release/in-login-shell.sh bundle exec fastlane android promote track:production rollout:1.0
+
+      - name: Frame app → Play internal
+        id: frame
+        if: ${{ !cancelled() && steps.android_secrets.outcome == 'success' && needs.plan.outputs.frame_play == 'true' && env.SECOND_STEP_ONLY != 'true' }}
+        working-directory: android
+        env:
+          # Repository variable (not a secret): draft until Google has reviewed the frame app, then completed.
+          PLAY_RELEASE_STATUS: ${{ vars.FRAME_PLAY_RELEASE_STATUS || 'draft' }}
+          KINFRAME_FRAME_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.KINFRAME_FRAME_UPLOAD_KEYSTORE_PASSWORD }}
+          KINFRAME_FRAME_UPLOAD_KEY_ALIAS: ${{ secrets.KINFRAME_FRAME_UPLOAD_KEY_ALIAS }}
+          KINFRAME_FRAME_UPLOAD_KEY_PASSWORD: ${{ secrets.KINFRAME_FRAME_UPLOAD_KEY_PASSWORD }}
+          KINFRAME_SENTRY_DSN_FRAME: ${{ secrets.KINFRAME_SENTRY_DSN_FRAME }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: ../scripts/release/in-login-shell.sh bundle exec fastlane android frame_internal "tag:$TAG"
+
+      - name: Frame app → Play production
+        if: ${{ !cancelled() && steps.android_secrets.outcome == 'success' && needs.plan.outputs.frame_play == 'true' && steps.frame.outcome != 'failure' }}
+        working-directory: android
+        env:
+          STATUS: ${{ vars.FRAME_PLAY_RELEASE_STATUS || 'draft' }}
+        run: |
+          if [[ "$STATUS" != completed ]]; then
+            echo "::notice::The frame app's Play releases are drafts (FRAME_PLAY_RELEASE_STATUS=$STATUS): not promoted"
+            exit 0
+          fi
+          ../scripts/release/in-login-shell.sh bundle exec fastlane android frame_promote track:production rollout:1.0
+
+      - name: Remove the secrets
+        if: always()
+        run: scripts/release/runner-secrets.sh cleanup
+
+  apple:
+    name: iOS and Mac
+    needs: [plan, wait-image]
+    if: >-
+      ${{ !cancelled() && github.repository == 'jeroentrappers/kinframe' && needs.plan.result == 'success' &&
+      needs.plan.outputs.apple == 'true' &&
+      (needs.wait-image.result == 'success' || needs.wait-image.result == 'skipped') }}
+    runs-on: [self-hosted, macOS, kinframe-release]
+    environment: production
+    timeout-minutes: 240
+    env:
+      MARKETING_VERSION: ${{ needs.plan.outputs.family_version }}
+      BUILD_NUMBER: ${{ needs.plan.outputs.build_number }}
+      SECOND_STEP_ONLY: ${{ needs.plan.outputs.store_step_only }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      KINFRAME_SENTRY_DSN: ${{ secrets.KINFRAME_SENTRY_DSN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      REVIEW_PHONE: ${{ secrets.REVIEW_PHONE }}
+      REVIEW_PASSWORD: ${{ secrets.REVIEW_PASSWORD }}
+    steps:
+      # A clean checkout in the runner's work directory, never ~/Developer/github/kinframe.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          fetch-depth: 0
+          clean: true
+          persist-credentials: false
+
+      - name: App Store secrets, temporary keychain
+        id: setup
+        env:
+          APP_STORE_CONNECT_API_KEY_JSON: ${{ secrets.APP_STORE_CONNECT_API_KEY_JSON }}
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
+          RELEASE_SSH_KNOWN_HOSTS: ${{ secrets.RELEASE_SSH_KNOWN_HOSTS }}
+        run: |
+          scripts/release/runner-secrets.sh apple
+          env -u CI scripts/release/in-login-shell.sh bash -c 'cd ios && bundle install --quiet'
+
+      - name: Wait for the server deploy
+        id: wait
+        if: needs.plan.outputs.server == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            for (;;) {
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+                owner, repo, run_id: context.runId, filter: 'latest', per_page: 100,
+              });
+              const job = jobs.find((j) => j.name === 'Server, Android, frame app');
+              const step = job && (job.steps || []).find((s) => s.name === 'Deploy the server');
+              if (step && step.status === 'completed') {
+                if (step.conclusion === 'success') { core.info('The server is deployed'); return; }
+                core.setFailed(`The server deploy ended ${step.conclusion}: the apps are not released`);
+                return;
+              }
+              if (job && job.status === 'completed') {
+                core.setFailed(`${job.name} ended ${job.conclusion} before the server was deployed`);
+                return;
+              }
+              core.info(`Server deploy ${step ? step.status : 'not started'}`);
+              await sleep(20000);
+            }
+
+      # CI unset: with it, the Fastfile would make a keychain of its own (setup_ci) instead of using KINFRAME_KEYCHAIN.
+      - name: iOS → App Store Connect
+        id: ios
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.wait.outcome != 'failure' && needs.plan.outputs.ios == 'true' && env.SECOND_STEP_ONLY != 'true' }}
+        working-directory: ios
+        run: env -u CI ../scripts/release/in-login-shell.sh bundle exec fastlane release upload:true
+
+      - name: iOS → App Review
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.wait.outcome != 'failure' && needs.plan.outputs.ios == 'true' && steps.ios.outcome != 'failure' }}
+        run: env -u CI scripts/release/in-login-shell.sh scripts/release/app-store-submit.sh ios "$MARKETING_VERSION" "$BUILD_NUMBER"
+
+      - name: Mac → App Store Connect
+        id: mac
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.wait.outcome != 'failure' && needs.plan.outputs.mac == 'true' && env.SECOND_STEP_ONLY != 'true' }}
+        working-directory: ios
+        run: env -u CI ../scripts/release/in-login-shell.sh bundle exec fastlane mac_release upload:true
+
+      - name: Mac → App Review
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.wait.outcome != 'failure' && needs.plan.outputs.mac == 'true' && steps.mac.outcome != 'failure' }}
+        run: env -u CI scripts/release/in-login-shell.sh scripts/release/app-store-submit.sh mac "$MARKETING_VERSION" "$BUILD_NUMBER"
+
+      - name: Remove the secrets and the keychain
+        if: always()
+        run: scripts/release/runner-secrets.sh cleanup

@@ -473,6 +473,9 @@ A committed Ansible Vault can be downloaded by anyone and its passphrase attacke
   mail server, using an SMTP-only app password rather than a mailbox password. `logto-bootstrap` creates the matching
   connector via the Management API.
 
+Releases deploy the hosted server from GitHub Actions: backup, version bump, play, health check and signed commit
+([release.md](release.md)). By hand:
+
 ```
 cd kinframe-deploy
 ansible-playbook site.yml --tags app     # deploy or upgrade the stack

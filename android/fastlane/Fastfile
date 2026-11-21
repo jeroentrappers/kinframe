@@ -13,6 +13,7 @@
 #   bundle exec fastlane android frame_metadata version_code:30099   store listing (fastlane/frame-metadata/android/)
 #   bundle exec fastlane android frame_promote track:production rollout:0.1
 #
+# Releases normally run in .github/workflows/release.yml (docs/release.md), which sets all of this from secrets.
 # Signing and Firebase come from ~/.config/play/kinframe-signing.env: KINFRAME_UPLOAD_* and KINFRAME_GOOGLE_SERVICES
 # for the family app, KINFRAME_FRAME_UPLOAD_* for the frame app (its own upload key), SUPPLY_JSON_KEY for both.
 # Family version: VERSION_NAME (default: latest v* tag), VERSION_CODE (default: git commit count, like iOS).
@@ -26,8 +27,9 @@ default_platform(:android)
 
 platform :android do
   before_all do
+    # The release workflow passes everything in the environment (KINFRAME_NO_LOCAL_ENV=1, docs/release.md).
     env = File.expand_path("~/.config/play/kinframe-signing.env")
-    if File.exist?(env)
+    if File.exist?(env) && ENV["KINFRAME_NO_LOCAL_ENV"] != "1"
       File.readlines(env).each do |l|
         k, v = l.strip.split("=", 2)
         ENV[k] ||= v if k && v && !k.start_with?("#")

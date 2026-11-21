@@ -15,6 +15,7 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
 | `docs/api/` | API contract (`openapi.yaml`) and protocol guide |
 | `docs/architecture.md` | Components, auth (Logto), server discovery, data flow |
 | `docs/deploy.md` | Hosted server (kinframe.appmire.be) and self-hosting |
+| `docs/release.md` | Releasing: one tag deploys the server and ships the store apps (GitHub Actions, self-hosted runners) |
 | `docs/hardware/` | Hardware profiles of tested frames |
 | `docs/i18n.md` | The 36 languages: where texts live, adding strings, right-to-left, glossary per language |
 | `docs/clean-room.md` | How kinframe was specified without copying Frameo |

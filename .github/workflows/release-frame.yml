@@ -52,10 +52,12 @@ jobs:
           fi
           name="${TAG#v}"
           code=$(( major * 1000000 + minor * 10000 + patch * 100 + n ))
-          echo "name=$name" >> "$GITHUB_OUTPUT"
-          echo "code=$code" >> "$GITHUB_OUTPUT"
-          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
-          echo "asset=kinframe-frame-$name-$code.apk" >> "$GITHUB_OUTPUT"
+          {
+            echo "name=$name"
+            echo "code=$code"
+            echo "prerelease=$prerelease"
+            echo "asset=kinframe-frame-$name-$code.apk"
+          } >> "$GITHUB_OUTPUT"
           echo "versionName=$name versionCode=$code prerelease=$prerelease"
 
       - uses: actions/setup-java@v4
@@ -109,7 +111,7 @@ jobs:
       - name: Verify signature and package
         run: |
           apk=frame/build/outputs/apk/github/release/frame-github-release.apk
-          bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          bt=$(printf '%s\n' "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
           "$bt/apksigner" verify --verbose --print-certs "$apk" | tee "$RUNNER_TEMP/certs.txt"
           if grep -q "CN=Android Debug" "$RUNNER_TEMP/certs.txt"; then echo "::error::APK is signed with the debug key"; exit 1; fi
           "$bt/aapt2" dump badging "$apk" | head -1 | tee "$RUNNER_TEMP/badging.txt"

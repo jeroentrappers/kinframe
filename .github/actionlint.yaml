@@ -1,0 +1,4 @@
+# actionlint (https://github.com/rhysd/actionlint): the self-hosted release runners (docs/release.md).
+self-hosted-runner:
+  labels:
+    - kinframe-release

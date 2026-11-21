@@ -51,6 +51,8 @@ keychain (`~/Library/Keychains/kinframe-signing.keychain-db`, password `KINFRAME
 | `renew_certificates` | Create missing certificates and profiles (changes the Apple account) |
 | `smoke_test [platform:mac]` | Run `SmokeTests` on an iPhone simulator (`SMOKE_SIMULATOR` picks one) or as Mac Catalyst, no signing |
 | `release [upload:true]` | Run the smoke test, archive Release and export the .ipa to `ios/build`; `upload:true` sends it to TestFlight |
+| `submit build_number:n [app_version:x metadata:true]` | Submit build n for App Review, released automatically after approval; `metadata:true` uploads `metadata/` (What's New) |
+| `mac_release [upload:true]`, `mac_submit …` | The same for the Mac Catalyst build |
 
 The app and the share extension share data through the App Group `group.app.kinframe.family` and the keychain group
 `$(AppIdentifierPrefix)app.kinframe.family.shared`. Universal Links use the associated domain
@@ -58,6 +60,9 @@ The app and the share extension share data through the App Group `group.app.kinf
 `KINFRAME_APPLE_TEAM_ID` is set (see `server/README.md`).
 
 ### Releasing
+
+Releases normally run in GitHub Actions: one `v*` tag, one approval ([docs/release.md](../docs/release.md)). The
+lanes below are what that workflow runs, and they still work by hand.
 
 `bundle exec fastlane release` archives a Release build signed with the App Store profiles and exports it with
 `ios/ExportOptions.plist`; `release upload:true` also uploads it to App Store Connect for TestFlight. The version is
