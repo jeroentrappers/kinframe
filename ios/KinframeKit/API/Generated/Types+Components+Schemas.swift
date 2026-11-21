@@ -2101,6 +2101,18 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FrameSummary/remote_help`.
             public var remoteHelp: Components.Schemas.FrameRemoteHelpSummary?
+            /// The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+            /// screen reports (`source: screen`, the device websocket's `now_showing`); otherwise its most recently placed
+            /// visible item (`source: last_placed`). Absent (null) when there is neither, and when the caller can't see
+            /// the library (`see_library`).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSummary/now_showing`.
+            public var nowShowing: Components.Schemas.FrameNowShowing?
+            /// Reactions and quick replies sent from the frame today (README §5.5, "Frame cards"); absent when the caller can't see the library (`see_library`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSummary/reactions_today`.
+            public var reactionsToday: Components.Schemas.FrameReactionsToday?
             /// Creates a new `FrameSummary`.
             ///
             /// - Parameters:
@@ -2119,6 +2131,8 @@ extension Components {
             ///   - freshness: How recently the frame got new photos from people (README §5.20). Absent on servers without `engagement`.
             ///   - photoRequest: The frame's "Ask for new photos": the open one, or one answered in the last 24 hours; null otherwise.
             ///   - remoteHelp: The frame's active remote help session (README §5.23), or null. Frame lists show a badge, the frame page a banner.
+            ///   - nowShowing: The photo for the frame card (README §5.5, "Frame cards"): while the frame is connected, the slide its
+            ///   - reactionsToday: Reactions and quick replies sent from the frame today (README §5.5, "Frame cards"); absent when the caller can't see the library (`see_library`).
             public init(
                 id: Components.Schemas.Id,
                 name: Swift.String,
@@ -2134,7 +2148,9 @@ extension Components {
                 deviceKind: Components.Schemas.DeviceKind? = nil,
                 freshness: Components.Schemas.Freshness? = nil,
                 photoRequest: Components.Schemas.PhotoRequest? = nil,
-                remoteHelp: Components.Schemas.FrameRemoteHelpSummary? = nil
+                remoteHelp: Components.Schemas.FrameRemoteHelpSummary? = nil,
+                nowShowing: Components.Schemas.FrameNowShowing? = nil,
+                reactionsToday: Components.Schemas.FrameReactionsToday? = nil
             ) {
                 self.id = id
                 self.name = name
@@ -2151,6 +2167,8 @@ extension Components {
                 self.freshness = freshness
                 self.photoRequest = photoRequest
                 self.remoteHelp = remoteHelp
+                self.nowShowing = nowShowing
+                self.reactionsToday = reactionsToday
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -2168,6 +2186,8 @@ extension Components {
                 case freshness
                 case photoRequest = "photo_request"
                 case remoteHelp = "remote_help"
+                case nowShowing = "now_showing"
+                case reactionsToday = "reactions_today"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Frame`.
@@ -4189,6 +4209,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedSummary/subscription_count`.
             public var subscriptionCount: Swift.Int
+            /// Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FeedSummary/my_post_count`.
+            public var myPostCount: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/FeedSummary/last_post_at`.
             public var lastPostAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/FeedSummary/created_at`.
@@ -4214,6 +4238,7 @@ extension Components {
             ///   - role:
             ///   - memberCount:
             ///   - subscriptionCount: Active and paused subscriptions.
+            ///   - myPostCount: Live (not removed) posts the caller made in this feed. Apps pick the home family with it (docs/spec/simple-app.md §2.1).
             ///   - lastPostAt:
             ///   - createdAt:
             ///   - freshness: How recently the family got new posts from people (README §5.20). Absent without `engagement`.
@@ -4226,6 +4251,7 @@ extension Components {
                 role: Components.Schemas.FeedRole,
                 memberCount: Swift.Int,
                 subscriptionCount: Swift.Int,
+                myPostCount: Swift.Int? = nil,
                 lastPostAt: Foundation.Date? = nil,
                 createdAt: Foundation.Date? = nil,
                 freshness: Components.Schemas.Freshness? = nil,
@@ -4238,6 +4264,7 @@ extension Components {
                 self.role = role
                 self.memberCount = memberCount
                 self.subscriptionCount = subscriptionCount
+                self.myPostCount = myPostCount
                 self.lastPostAt = lastPostAt
                 self.createdAt = createdAt
                 self.freshness = freshness
@@ -4251,6 +4278,7 @@ extension Components {
                 case role
                 case memberCount = "member_count"
                 case subscriptionCount = "subscription_count"
+                case myPostCount = "my_post_count"
                 case lastPostAt = "last_post_at"
                 case createdAt = "created_at"
                 case freshness
@@ -4519,7 +4547,7 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FeedUpdate/cover_item_id`.
             public var coverItemId: Components.Schemas.Id?
-            /// Requests by non-admin members become active without approval.
+            /// Frames on other servers become active without approval (members' requests always are).
             ///
             /// - Remark: Generated from `#/components/schemas/FeedUpdate/auto_approve_subscriptions`.
             public var autoApproveSubscriptions: Swift.Bool?
@@ -4558,7 +4586,7 @@ extension Components {
             /// - Parameters:
             ///   - name:
             ///   - coverItemId: An item of a live post of this feed; null removes the cover.
-            ///   - autoApproveSubscriptions: Requests by non-admin members become active without approval.
+            ///   - autoApproveSubscriptions: Frames on other servers become active without approval (members' requests always are).
             ///   - inviteRequiresApproval: Join invites need an admin's approval.
             ///   - membersSeeReactions: Every member sees frames' reactions and quick replies on every post.
             ///   - membersSeeReceipts: Every member sees per-frame receipts of every post.
@@ -18931,6 +18959,95 @@ extension Components {
             public enum CodingKeys: String, CodingKey {
                 case sessions
                 case nextCursor = "next_cursor"
+            }
+        }
+        /// `FrameSummary.now_showing`.
+        ///
+        /// - Remark: Generated from `#/components/schemas/FrameNowShowing`.
+        public struct FrameNowShowing: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FrameNowShowing/placement_id`.
+            public var placementId: Components.Schemas.Id
+            /// `screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn't connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameNowShowing/source`.
+            public var source: Swift.String
+            /// - Remark: Generated from `#/components/schemas/FrameNowShowing/item_id`.
+            public var itemId: Components.Schemas.Id
+            /// Short-lived signed thumbnail URL (thumb_512, else thumb_256), usable in <img src>.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameNowShowing/thumb_url`.
+            public var thumbUrl: Swift.String?
+            /// Short-lived signed URL of the display rendition (`Item.display_url`), for a large card.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameNowShowing/display_url`.
+            public var displayUrl: Swift.String?
+            /// `screen`: when the slide came on screen (server time). `last_placed`: when it was placed on the frame (`Placement.received_at`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameNowShowing/since`.
+            public var since: Foundation.Date
+            /// Creates a new `FrameNowShowing`.
+            ///
+            /// - Parameters:
+            ///   - placementId:
+            ///   - source: `screen`: the frame reported this slide on screen (its first tile for a collage), so it is showing now unless `FrameSummary.online` turned false since. `last_placed`: the frame isn't connected or reported nothing; this is the newest visible placement (delivered or seen, not hidden, trashed, waiting for moderation or suspended).
+            ///   - itemId:
+            ///   - thumbUrl: Short-lived signed thumbnail URL (thumb_512, else thumb_256), usable in <img src>.
+            ///   - displayUrl: Short-lived signed URL of the display rendition (`Item.display_url`), for a large card.
+            ///   - since: `screen`: when the slide came on screen (server time). `last_placed`: when it was placed on the frame (`Placement.received_at`).
+            public init(
+                placementId: Components.Schemas.Id,
+                source: Swift.String,
+                itemId: Components.Schemas.Id,
+                thumbUrl: Swift.String? = nil,
+                displayUrl: Swift.String? = nil,
+                since: Foundation.Date
+            ) {
+                self.placementId = placementId
+                self.source = source
+                self.itemId = itemId
+                self.thumbUrl = thumbUrl
+                self.displayUrl = displayUrl
+                self.since = since
+            }
+            public enum CodingKeys: String, CodingKey {
+                case placementId = "placement_id"
+                case source
+                case itemId = "item_id"
+                case thumbUrl = "thumb_url"
+                case displayUrl = "display_url"
+                case since
+            }
+        }
+        /// `FrameSummary.reactions_today`: frame reactions (`Placement.reaction`) and quick replies (`Placement.replies`)
+        /// sent from the frame since midnight in the frame's time zone (its settings' `locale.timezone`, else UTC), on
+        /// placements still in its library. A changed reaction counts once (the latest wins), a removed one not at all.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/FrameReactionsToday`.
+        public struct FrameReactionsToday: Codable, Hashable, Sendable {
+            /// Reactions plus quick replies.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameReactionsToday/count`.
+            public var count: Swift.Int
+            /// Distinct items they were on ("Oma loved 3 photos today").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameReactionsToday/item_count`.
+            public var itemCount: Swift.Int
+            /// Creates a new `FrameReactionsToday`.
+            ///
+            /// - Parameters:
+            ///   - count: Reactions plus quick replies.
+            ///   - itemCount: Distinct items they were on ("Oma loved 3 photos today").
+            public init(
+                count: Swift.Int,
+                itemCount: Swift.Int
+            ) {
+                self.count = count
+                self.itemCount = itemCount
+            }
+            public enum CodingKeys: String, CodingKey {
+                case count
+                case itemCount = "item_count"
             }
         }
         /// `FrameSummary.remote_help`: the active session in short.

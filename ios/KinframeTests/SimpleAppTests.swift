@@ -23,12 +23,13 @@ final class SimpleAppTests: XCTestCase {
     func testTheHomeFamilyIsTheOneYouPostToMost() {
         let new = Date()
         XCTAssertEqual(HomeFamily.pick([
-            .init(choice: c("trappers"), posts: 3, isOwner: false, since: new),
+            .init(choice: c("trappers"), posts: 3, isOwner: true, since: .distantPast),
             .init(choice: c("opa"), posts: 9, isOwner: false, since: new),
-        ]), c("opa"))
+        ]), c("opa"), "posting most beats having made it")
+        XCTAssertEqual(HomeFamily.pick([.init(choice: c("only"), posts: 0, isOwner: false, since: nil)]), c("only"))
     }
 
-    func testTiesGoToTheFamilyYouMadeThenTheOldest() {
+    func testTiesGoToTheFamilyYouMadeThenTheOldestThenNameAndId() {
         let old = Date(timeIntervalSince1970: 0), new = Date()
         XCTAssertEqual(HomeFamily.pick([
             .init(choice: c("sister"), posts: 0, isOwner: false, since: old),
@@ -38,24 +39,36 @@ final class SimpleAppTests: XCTestCase {
             .init(choice: c("new"), posts: 1, isOwner: false, since: new),
             .init(choice: c("old"), posts: 1, isOwner: false, since: old),
         ]), c("old"))
+        XCTAssertEqual(HomeFamily.pick([
+            .init(choice: c("unknown"), posts: 1, isOwner: false, since: nil),
+            .init(choice: c("known"), posts: 1, isOwner: false, since: new),
+        ]), c("known"), "an unknown age counts as newest")
+        let names = [HomeFamily.Candidate(choice: c("b"), posts: 2, isOwner: false, since: old, name: "peeters"),
+                     HomeFamily.Candidate(choice: c("a"), posts: 2, isOwner: false, since: old, name: "Janssens")]
+        XCTAssertEqual(HomeFamily.pick(names), c("a"), "then the name, ignoring case")
+        XCTAssertEqual(HomeFamily.pick(names.reversed()), c("a"), "the order of the list doesn't matter")
+        let same = [HomeFamily.Candidate(choice: c("z"), posts: 2, isOwner: false, since: old, name: "Peeters"),
+                    HomeFamily.Candidate(choice: c("y"), posts: 2, isOwner: false, since: old, name: "Peeters")]
+        XCTAssertEqual(HomeFamily.pick(same), c("y"), "then the id")
+        XCTAssertEqual(HomeFamily.pick(same.reversed()), c("y"))
         XCTAssertNil(HomeFamily.pick([]))
+    }
+
+    func testTheHomeFamilyUsesTheServersPostCount() throws {
+        let json = #"[{"id":"fd1","name":"Trappers","role":"owner","member_count":5,"subscription_count":2,"my_post_count":3,"created_at":"2026-01-01T00:00:00Z"},{"id":"fd2","name":"Opa","role":"poster","member_count":3,"subscription_count":1,"my_post_count":17,"created_at":"2026-02-01T00:00:00Z"},{"id":"fd3","name":"Old server","role":"owner","member_count":1,"subscription_count":0}]"#
+        let feeds = try SocialFixtures.decode([FeedSummary].self, json)
+        let candidates = feeds.map { HomeFamily.Candidate($0, account: "a") }
+        XCTAssertEqual(candidates.map(\.posts), [3, 17, 0], "a server without my_post_count counts 0")
+        XCTAssertEqual(candidates[0].isOwner, true)
+        XCTAssertEqual(candidates[0].name, "Trappers")
+        XCTAssertEqual(HomeFamily.pick(candidates), c("fd2"))
+        XCTAssertEqual(HomeFamily.pick(Array(candidates.prefix(1)) + [candidates[2]]), c("fd1"), "made by you and the oldest")
     }
 
     func testTheHomeFamilyIsListedFirst() {
         let list = [c("a"), c("b"), c("c")]
         XCTAssertEqual(HomeFamily.ordered(list, home: c("c")) { $0 }, [c("c"), c("a"), c("b")])
         XCTAssertEqual(HomeFamily.ordered(list, home: nil) { $0 }, list)
-    }
-
-    func testPostsAreCountedOnTheDevice() {
-        FamilyPostCounts.posted([c("a"), c("b")], defaults)
-        FamilyPostCounts.posted([c("a")], defaults)
-        var counts = FamilyPostCounts.load(defaults)
-        XCTAssertEqual(FamilyPostCounts.count(c("a"), in: counts), 2)
-        FamilyPostCounts.observed([c("a"): 1, c("b"): 5], defaults)
-        counts = FamilyPostCounts.load(defaults)
-        XCTAssertEqual(FamilyPostCounts.count(c("a"), in: counts), 2, "never fewer")
-        XCTAssertEqual(FamilyPostCounts.count(c("b"), in: counts), 5)
     }
 
     func testTheHomeFilterIsAFamilyYouAreStillIn() {
@@ -270,5 +283,61 @@ final class SimpleAppTests: XCTestCase {
             }
         }
         L10n.setLanguage(.en)
+    }
+
+    // MARK: Frame cards (§3.3)
+
+    private func showing(_ source: String = "screen", thumb: String? = "thumb", display: String? = "display") throws -> FrameNowShowing {
+        let t = thumb.map { #""thumb_url":"\#($0)","# } ?? ""
+        let d = display.map { #""display_url":"\#($0)","# } ?? ""
+        return try SocialFixtures.decode(FrameNowShowing.self, #"{"placement_id":"pl","item_id":"i",\#(t)\#(d)"source":"\#(source)","since":"2026-11-21T08:00:00Z"}"#)
+    }
+
+    func testTheCardShowsTheNowShowingPhoto() throws {
+        XCTAssertNil(FrameCards.photo(nil), "no now_showing: the drawing")
+        XCTAssertEqual(FrameCards.photo(try showing()), "thumb", "the card has the thumbnail")
+        XCTAssertEqual(FrameCards.photo(try showing(), large: true), "display", "the frame screen the display rendition")
+        XCTAssertEqual(FrameCards.photo(try showing(display: nil), large: true), "thumb")
+        XCTAssertEqual(FrameCards.photo(try showing(thumb: nil)), "display")
+        XCTAssertNil(FrameCards.photo(try showing(thumb: nil, display: nil)))
+    }
+
+    func testShowingNowOnlyForASlideOnScreen() throws {
+        XCTAssertTrue(FrameCards.showingNow(online: true, try showing()))
+        XCTAssertFalse(FrameCards.showingNow(online: true, try showing("last_placed")), "online, but the last placed photo")
+        XCTAssertFalse(FrameCards.showingNow(online: false, try showing()), "went offline since")
+        XCTAssertFalse(FrameCards.showingNow(online: true, nil))
+        XCTAssertFalse(FrameCards.showingNow(online: true, try showing("later")), "an unknown source")
+        XCTAssertEqual(FrameCards.status(online: true, lastSeen: nil, try showing()), "Online · showing now")
+        XCTAssertEqual(FrameCards.status(online: true, lastSeen: nil, try showing("last_placed")), "Online")
+        XCTAssertEqual(FrameCards.status(online: true, lastSeen: nil, nil), "Online")
+        XCTAssertEqual(FrameCards.status(online: false, lastSeen: nil, try showing("last_placed")), "Offline")
+        XCTAssertTrue(FrameCards.status(online: false, lastSeen: Date(timeIntervalSinceNow: -7200), try showing()).hasPrefix("Offline since "))
+    }
+
+    func testTheHeartsLine() throws {
+        let r = { (count: Int, items: Int) in
+            try SocialFixtures.decode(FrameReactionsToday.self, #"{"count":\#(count),"item_count":\#(items)}"#)
+        }
+        XCTAssertEqual(FrameCards.lovedTodayText(frame: "Oma’s frame", try r(5, 3)), "Oma’s frame loved 3 photos today")
+        XCTAssertEqual(FrameCards.lovedTodayText(frame: "Oma’s frame", try r(1, 1)), "Oma’s frame loved 1 photo today")
+        XCTAssertNil(FrameCards.lovedTodayText(frame: "Oma", try r(0, 0)), "nothing today")
+        XCTAssertNil(FrameCards.lovedTodayText(frame: "Oma", nil), "can't see the library")
+        L10n.setLanguage(.nl)
+        XCTAssertEqual(FrameCards.lovedTodayText(frame: "Oma’s frame", try r(4, 3)), "Oma’s frame gaf vandaag 3 foto’s een hartje")
+        XCTAssertEqual(FrameCards.lovedTodayText(frame: "Oma", try r(2, 1)), "Oma gaf vandaag 1 foto een hartje")
+        L10n.setLanguage(.en)
+    }
+
+    func testFrameCardFieldsDecode() throws {
+        let json = #"{"id":"f1","name":"Oma","role":"owner","permissions":{"send":true},"online":true,"now_showing":{"placement_id":"pl","item_id":"i","source":"screen","thumb_url":"https://cdn.example/t.jpg","display_url":null,"since":"2026-11-21T08:00:00Z"},"reactions_today":{"count":4,"item_count":3}}"#
+        let f = try SocialFixtures.decode(FrameSummary.self, json)
+        XCTAssertEqual(f.nowShowing?.source, "screen")
+        XCTAssertEqual(f.nowShowing?.thumbUrl, "https://cdn.example/t.jpg")
+        XCTAssertNil(f.nowShowing?.displayUrl)
+        XCTAssertEqual(f.reactionsToday?.itemCount, 3)
+        let none = try SocialFixtures.decode(FrameSummary.self, #"{"id":"f1","name":"Oma","role":"member","permissions":{},"online":false,"now_showing":null}"#)
+        XCTAssertNil(none.nowShowing)
+        XCTAssertNil(none.reactionsToday)
     }
 }

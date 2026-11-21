@@ -143,12 +143,14 @@ struct CardButtonStyle: ButtonStyle {
     }
 }
 
-/// A frame in the list: its picture with the status chip, the name, which family it shows (or "Add to Peeters
-/// family" for its managers when it shows none), and what needs doing.
+/// A frame in the list: the photo it shows now (else its last placed one, else its drawing) with the status chip, the
+/// name, today's hearts, which family it shows (or "Add a family" for its managers when it shows none), and what
+/// needs doing. On the frame's screen (`large`) the photo is the display rendition.
 struct FrameCard: View {
     @Environment(AppModel.self) private var app
     @Environment(Accounts.self) private var accounts
     let frame: FrameSummary
+    var large = false
     /// The live subscriptions of the frame; nil while unknown.
     var shows: [FeedSubscription]? = nil
     var added: (FeedSubscription) -> Void = { _ in }
@@ -167,6 +169,16 @@ struct FrameCard: View {
                     if frame.deviceKind == .browser {
                         Pill(L("frames.browserBadge"), systemImage: "globe")
                     }
+                }
+                if let loved = FrameCards.lovedTodayText(frame: frame.name, frame.reactionsToday) {
+                    Label {
+                        Text(loved).lineLimit(1)
+                    } icon: {
+                        Image(systemName: "heart.fill").foregroundStyle(Palette.primary)
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.text)
+                    .labelStyle(TightLabelStyle())
                 }
                 if let shows {
                     let active = shows.filter { $0.status == .active }
@@ -202,19 +214,24 @@ struct FrameCard: View {
 
     private var cover: some View {
         let (a, b) = Palette.tint(for: frame.id)
+        let photo = FrameCards.photo(frame.nowShowing, large: large)
         return ZStack(alignment: .bottomLeading) {
             RadialGradient(colors: [a, b], center: UnitPoint(x: 0.2, y: 0), startRadius: 0, endRadius: 420)
-            FrameIllustration(portrait: frame.screen?.orientation == .portrait)
-                .frame(height: 74)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if let photo {
+                RemoteThumb(url: photo).frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                FrameIllustration(portrait: frame.screen?.orientation == .portrait)
+                    .frame(height: 74)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
             FrameStatusChip(frame: frame).padding(10)
         }
-        .frame(height: 128)
+        .frame(height: photo == nil ? 128 : (large ? 240 : 180))
         .clipped()
     }
 }
 
-/// "Online · showing now" or "Offline since 3 hours ago".
+/// "Online · showing now" (a photo the frame reported on screen), "Online", or "Offline since 3 hours ago".
 struct FrameStatusChip: View {
     let frame: FrameSummary
 
@@ -228,11 +245,7 @@ struct FrameStatusChip: View {
         .background(Capsule().fill(Palette.surface.opacity(0.9)))
     }
 
-    private var text: String {
-        if frame.online { return L("simple.frame.onlineNow") }
-        guard let seen = frame.lastSeenAt else { return L("frame.offline") }
-        return L("simple.frame.offlineSince", ["when": Format.relative(seen, locale: L10n.locale)])
-    }
+    private var text: String { FrameCards.status(online: frame.online, lastSeen: frame.lastSeenAt, frame.nowShowing) }
 }
 
 struct TightLabelStyle: LabelStyle {

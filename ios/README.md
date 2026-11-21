@@ -267,9 +267,10 @@ a session there's no window on the external display, so iOS mirrors the phone as
 `+` · Chats · Family (a sidebar on iPad and Mac); `+` opens the composer sheet (`Send/ComposerSheet.swift`) instead
 of a tab. Home merges every family of every account (filter chips with several families, remembered per device; a
 send to several families shows once); its bell opens Activity (`Home/ActivityView.swift`: frames asking for photos,
-people who want to join and frames waiting for approval for admins, posts with new comments or a mention). The home family (posted to most, counted on the device; ties: created, then
-oldest) is the composer's default; "Change" ticks several families or a circle per family. Frames lists cards and
-opens a frame as one list (photos, send to this frame only, calendar and add-ons, TV, settings and help); Family is
+people who want to join and frames waiting for approval for admins, posts with new comments or a mention). The home family (posted to most by
+the server's `my_post_count`; ties: created, then oldest, then name) is the composer's default; "Change" ticks several families or a circle per family. Frames lists cards (the photo
+the frame shows from `now_showing`, "Online · showing now" only for a slide on screen, today's hearts from
+`reactions_today`; the drawing without them) and opens a frame as one list (photos, send to this frame only, calendar and add-ons, TV, settings and help); Family is
 the profile (Photos with "Only mine", People, Frames, "Invite family", "Add a frame" with the last 50 posts and no
 questions) or, with several families, a list of them; the gear has This family and App (accounts, notifications,
 privacy, simple view, sent history). Without a family the app shows only getting started (`Family/GettingStarted.swift`).

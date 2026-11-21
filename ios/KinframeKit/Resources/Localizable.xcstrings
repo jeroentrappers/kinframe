@@ -60674,6 +60674,40 @@
         }
       }
     },
+    "simple.frame.lovedToday.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} loved {count} photo today"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} gaf vandaag {count} foto een hartje"
+          }
+        }
+      }
+    },
+    "simple.frame.lovedToday.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} loved {count} photos today"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} gaf vandaag {count} foto’s een hartje"
+          }
+        }
+      }
+    },
     "simple.frame.offlineSince": {
       "extractionState": "manual",
       "localizations": {

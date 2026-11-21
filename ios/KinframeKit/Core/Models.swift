@@ -2,6 +2,8 @@ import Foundation
 
 // Short names for the generated API schemas used throughout the app.
 public typealias FrameSummary = Components.Schemas.FrameSummary
+public typealias FrameNowShowing = Components.Schemas.FrameNowShowing
+public typealias FrameReactionsToday = Components.Schemas.FrameReactionsToday
 public typealias FrameDetail = Components.Schemas.Frame
 public typealias FrameHealth = Components.Schemas.FrameHealth
 public typealias FrameSettings = Components.Schemas.FrameSettings

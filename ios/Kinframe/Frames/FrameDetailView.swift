@@ -134,7 +134,7 @@ struct FrameDetailView: View {
             if let model, let frame = model.summary {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        FrameCard(frame: frame)
+                        FrameCard(frame: frame, large: true)
                         VStack(spacing: 0) { rows(frame) }.card(padding: 0)
                     }
                     .pageColumn(PageWidth.text)

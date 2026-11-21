@@ -183,15 +183,6 @@ struct HomeTab: View {
         await withTaskGroup(of: Void.self) { g in
             for t in next.values { g.addTask { await t.load() } }
         }
-        // What Home shows of your own posts counts towards the home family.
-        var own: [FamilyChoice: Int] = [:]
-        for (id, t) in next {
-            guard let me = accounts.model(for: id).me?.id else { continue }
-            for p in t.posts where p.kind == .feed && p.poster.userId == me {
-                if let f = p.feedId { own[FamilyChoice(account: id, feedId: f), default: 0] += 1 }
-            }
-        }
-        accounts.noteOwnPosts(own)
     }
 }
 

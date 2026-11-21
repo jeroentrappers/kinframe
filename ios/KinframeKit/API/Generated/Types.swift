@@ -482,8 +482,8 @@ public protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/subscriptions/get(listFeedSubscriptions)`.
     func listFeedSubscriptions(_ input: Operations.ListFeedSubscriptions.Input) async throws -> Operations.ListFeedSubscriptions.Output
     /// Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
-    /// `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
-    /// has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+    /// `change_settings`). The subscription is `active` at once for any feed role, poster too (feeds.md §4.1); only
+    /// frames on other servers wait for approval.
     /// `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
     /// this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
     ///
@@ -3120,8 +3120,8 @@ extension APIProtocol {
         ))
     }
     /// Subscribe a frame to this feed. The caller must be a feed member and a manager of the frame (owner, admin or
-    /// `change_settings`). The subscription is `active` at once when the caller is owner/admin of the feed or the feed
-    /// has `auto_approve_subscriptions`; otherwise it is `pending` and the feed's owner and admins are notified.
+    /// `change_settings`). The subscription is `active` at once for any feed role, poster too (feeds.md §4.1); only
+    /// frames on other servers wait for approval.
     /// `409 already_subscribed` (with the existing subscription in `detail`) when the frame has a live subscription to
     /// this feed; `409 limit_reached` beyond `limits.max_subscriptions_per_feed`.
     ///

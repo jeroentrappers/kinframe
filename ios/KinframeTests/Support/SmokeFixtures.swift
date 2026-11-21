@@ -16,7 +16,7 @@ enum SmokeFixtures {
         "/v1/email-addresses/{addressId}/senders": #"[]"#,
         "/v1/feed-invites/{token}": #"{"token":"smoke","purpose":"join","feed_name":"smoke","invited_by_name":"smoke","requires_approval":false}"#,
         "/v1/feeds": #"[]"#,
-        "/v1/feeds/{feedId}": #"{"id":"smoke","name":"smoke","role":"owner","member_count":0,"subscription_count":0}"#,
+        "/v1/feeds/{feedId}": #"{"id":"smoke","name":"smoke","role":"owner","member_count":0,"subscription_count":0,"my_post_count":0}"#,
         "/v1/feeds/{feedId}/birthday-greetings": #"{"greetings":[],"next_cursor":null}"#,
         "/v1/feeds/{feedId}/birthdays": #"[]"#,
         "/v1/feeds/{feedId}/birthdays/{birthdayId}": #"{"id":"smoke","feed_id":"smoke","status":"pending","display_name":"Oma","day":1,"month":1,"show_age":false,"created_at":"2026-11-20T09:00:00Z"}"#,

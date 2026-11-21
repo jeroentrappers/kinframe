@@ -292,11 +292,11 @@ final class SmokeServer: URLProtocol, @unchecked Sendable {
     private static let me = #"{"id":"u-me","display_name":"Jeroen","email":"jeroen@example.org","timezone":"\#(TimeZone.current.identifier)","show_read_receipts":true,"created_at":"2025-01-02T10:00:00Z"}"#
     private static let all = #"{"send":true,"invite":true,"see_library":true,"manage_library":true,"change_settings":true}"#
     private static let frames = [
-        "f-oma": #"{"id":"f-oma","name":"Oma’s frame","location":"Living room","owner_name":"Jeroen","role":"owner","permissions":\#(all),"online":true,"last_seen_at":"2026-11-20T08:00:00Z","member_count":3,"placement_count":0,"default_permissions":{"send":true},"created_at":"2025-01-02T10:00:00Z"}"#,
+        "f-oma": #"{"id":"f-oma","name":"Oma’s frame","location":"Living room","owner_name":"Jeroen","role":"owner","permissions":\#(all),"online":true,"last_seen_at":"2026-11-20T08:00:00Z","now_showing":{"placement_id":"pl-1","item_id":"i-1","source":"screen","since":"2026-11-20T08:00:00Z"},"reactions_today":{"count":2,"item_count":2},"member_count":3,"placement_count":0,"default_permissions":{"send":true},"created_at":"2025-01-02T10:00:00Z"}"#,
         "f-opa": #"{"id":"f-opa","name":"Opa Jos","location":"Kitchen","owner_name":"Lies","role":"member","permissions":{"send":true},"online":false,"last_seen_at":null}"#,
     ]
     private static let feeds = [
-        "feed-1": #"{"id":"feed-1","name":"Trappers family","role":"owner","member_count":3,"subscription_count":1,"owner_name":"Jeroen","created_at":"2025-01-02T10:00:00Z","conversation_id":"c-1"}"#,
+        "feed-1": #"{"id":"feed-1","name":"Trappers family","role":"owner","member_count":3,"subscription_count":1,"my_post_count":4,"owner_name":"Jeroen","created_at":"2025-01-02T10:00:00Z","conversation_id":"c-1"}"#,
     ]
 
     /// What the screens need to get past loading; answered also when failing.

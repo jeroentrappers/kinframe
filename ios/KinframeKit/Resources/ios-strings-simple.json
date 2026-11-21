@@ -239,6 +239,14 @@
     "en": "Families on this frame",
     "nl": "Families op dit kader"
   },
+  "simple.frame.lovedToday.one": {
+    "en": "{frame} loved {count} photo today",
+    "nl": "{frame} gaf vandaag {count} foto een hartje"
+  },
+  "simple.frame.lovedToday.other": {
+    "en": "{frame} loved {count} photos today",
+    "nl": "{frame} gaf vandaag {count} foto’s een hartje"
+  },
   "simple.frame.offlineSince": {
     "en": "Offline since {when}",
     "nl": "Offline sinds {when}"

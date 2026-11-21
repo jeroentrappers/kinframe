@@ -47,7 +47,7 @@ struct FamilyRow: View {
                 ForEach(frames) { s in
                     Button { if app.frame(s.frame.id) != nil { app.openFrame(s.frame.id) } } label: {
                         Bubble(name: s.frame.name, online: s.frame.online ?? false) {
-                            FrameThumb(id: s.frame.id, size: 60)
+                            FrameThumb(id: s.frame.id, size: 60, photo: FrameCards.photo(app.frame(s.frame.id)?.nowShowing))
                         }
                     }
                     .buttonStyle(.plain)
@@ -88,17 +88,22 @@ struct FamilyRow: View {
     }
 }
 
-/// A frame's picture in rows and cards: its calm tint with a miniature frame (the API has no now-showing image).
+/// A frame's picture in rows and cards: the photo it shows (`now_showing`, frames you're on) or its calm tint with a
+/// miniature frame.
 struct FrameThumb: View {
     let id: String
     var size: CGFloat = 60
     var portrait = false
+    var photo: String? = nil
 
     var body: some View {
         let (a, b) = Palette.tint(for: id)
         RadialGradient(colors: [a, b], center: UnitPoint(x: 0.2, y: 0), startRadius: 0, endRadius: size * 1.6)
-            .overlay { FrameIllustration(portrait: portrait).frame(height: size * 0.55) }
+            .overlay {
+                if let photo { RemoteThumb(url: photo) } else { FrameIllustration(portrait: portrait).frame(height: size * 0.55) }
+            }
             .frame(width: size, height: size)
+            .clipped()
             .accessibilityHidden(true)
     }
 }
@@ -127,7 +132,7 @@ struct AddFrameToFamilySheet: View {
                         ForEach(candidates) { f in
                             Button { Task { await add(f) } } label: {
                                 HStack(spacing: 12) {
-                                    FrameThumb(id: f.id, size: 44).clipShape(RoundedRectangle(cornerRadius: 10))
+                                    FrameThumb(id: f.id, size: 44, photo: FrameCards.photo(f.nowShowing)).clipShape(RoundedRectangle(cornerRadius: 10))
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(f.name).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
                                         OnlineStatus(online: f.online, lastSeen: f.lastSeenAt)

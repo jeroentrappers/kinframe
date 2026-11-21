@@ -283,18 +283,9 @@ final class Accounts {
     /// Several families: Home has filter chips, Family a list, posts a family label.
     var hasSeveralFamilies: Bool { feeds.count > 1 }
 
-    /// Posts per family seen on this device (sent here, or the person's own posts Home showed).
-    private(set) var postCounts: [String: Int] = FamilyPostCounts.load()
-
-    /// The family the person posts to most: the composer's default, first in lists.
+    /// The family the person posts to most (the server's `my_post_count`): the composer's default, first in lists.
     var homeFamily: Owned<FeedSummary>? {
-        let counts = postCounts
-        let candidates = feeds.map { o in
-            let c = FamilyChoice(account: o.model.accountId, feedId: o.value.id)
-            return HomeFamily.Candidate(choice: c, posts: FamilyPostCounts.count(c, in: counts), isOwner: o.value.role == .owner,
-                                        since: o.value.createdAt)
-        }
-        guard let home = HomeFamily.pick(candidates) else { return nil }
+        guard let home = HomeFamily.pick(feeds.map { HomeFamily.Candidate($0.value, account: $0.model.accountId) }) else { return nil }
         return family(home)
     }
 
@@ -318,17 +309,6 @@ final class Accounts {
             storedHomeFilter = newValue
             HomeFilter.save(newValue)
         }
-    }
-
-    func notePosted(_ families: [FamilyChoice]) {
-        FamilyPostCounts.posted(families)
-        postCounts = FamilyPostCounts.load()
-    }
-
-    func noteOwnPosts(_ counts: [FamilyChoice: Int]) {
-        FamilyPostCounts.observed(counts)
-        let fresh = FamilyPostCounts.load()
-        if fresh != postCounts { postCounts = fresh }
     }
 
     /// Getting started's sheets (§8). Shown by `MainTabs`, so they stay while the first family arrives.

@@ -37,32 +37,47 @@ public enum HomeFilter {
     }
 }
 
-/// The home family (§3): the family the person posts to most; ties go to one they created, then the oldest.
+/// The home family (§3): the family the person posts to most (`FeedSummary.my_post_count`, the server's count of
+/// their live posts); ties go to the one they created, then the oldest (a family's age stands in for when they
+/// joined), then the name and the id, so the choice is stable. The same rule as the web and Android.
 public enum HomeFamily {
     public struct Candidate: Equatable, Sendable {
         public var choice: FamilyChoice
         public var posts: Int
         public var isOwner: Bool
-        /// When the person joined (or the family was made); nil is unknown, counted as newest.
+        /// When the family was made; nil is unknown, counted as newest.
         public var since: Date?
+        public var name: String
 
-        public init(choice: FamilyChoice, posts: Int, isOwner: Bool, since: Date?) {
+        public init(choice: FamilyChoice, posts: Int, isOwner: Bool, since: Date?, name: String = "") {
             self.choice = choice
             self.posts = posts
             self.isOwner = isOwner
             self.since = since
+            self.name = name
+        }
+
+        /// A family of `account` as `GET /v1/feeds` lists it; a server without `my_post_count` counts 0.
+        public init(_ feed: FeedSummary, account: String) {
+            self.init(choice: FamilyChoice(account: account, feedId: feed.id), posts: feed.myPostCount ?? 0,
+                      isOwner: feed.role == .owner, since: feed.createdAt, name: feed.name)
         }
     }
 
+    /// Whether `x` comes before `y`: more posts, then owned, then older, then name, then id.
+    static func before(_ x: Candidate, _ y: Candidate) -> Bool {
+        if x.posts != y.posts { return x.posts > y.posts }
+        if x.isOwner != y.isOwner { return x.isOwner }
+        let (dx, dy) = (x.since ?? .distantFuture, y.since ?? .distantFuture)
+        if dx != dy { return dx < dy }
+        let (nx, ny) = (x.name.lowercased(), y.name.lowercased())
+        if nx != ny { return nx < ny }
+        if x.choice.feedId != y.choice.feedId { return x.choice.feedId < y.choice.feedId }
+        return x.choice.account < y.choice.account
+    }
+
     public static func pick(_ candidates: [Candidate]) -> FamilyChoice? {
-        candidates.enumerated().min { a, b in
-            let (x, y) = (a.element, b.element)
-            if x.posts != y.posts { return x.posts > y.posts }
-            if x.isOwner != y.isOwner { return x.isOwner }
-            let (dx, dy) = (x.since ?? .distantFuture, y.since ?? .distantFuture)
-            if dx != dy { return dx < dy }
-            return a.offset < b.offset
-        }?.element.choice
+        candidates.min(by: before)?.choice
     }
 
     /// The families in list order: the home family first, the others as they came.
@@ -71,37 +86,6 @@ public enum HomeFamily {
         var out = list
         out.insert(out.remove(at: i), at: 0)
         return out
-    }
-}
-
-/// How often the person posted to each family on this device, and in what Home showed of theirs.
-public enum FamilyPostCounts {
-    private static let key = "familyPostCounts"
-
-    private static func id(_ c: FamilyChoice) -> String { c.account + "|" + c.feedId }
-
-    public static func load(_ defaults: UserDefaults = .standard) -> [String: Int] {
-        defaults.dictionary(forKey: key) as? [String: Int] ?? [:]
-    }
-
-    public static func count(_ c: FamilyChoice, in counts: [String: Int]) -> Int { counts[id(c)] ?? 0 }
-
-    /// A post was shared to these families.
-    public static func posted(_ families: [FamilyChoice], _ defaults: UserDefaults = .standard) {
-        var all = load(defaults)
-        for c in families { all[id(c), default: 0] += 1 }
-        defaults.set(all, forKey: key)
-    }
-
-    /// Home showed this many of the person's own posts in a family: never count fewer.
-    public static func observed(_ counts: [FamilyChoice: Int], _ defaults: UserDefaults = .standard) {
-        var all = load(defaults)
-        var changed = false
-        for (c, n) in counts where n > (all[id(c)] ?? 0) {
-            all[id(c)] = n
-            changed = true
-        }
-        if changed { defaults.set(all, forKey: key) }
     }
 }
 
@@ -369,5 +353,41 @@ public enum ActivityList {
     /// What the bell says to VoiceOver: "Activity" or "Activity, 3 new".
     public static func label(badge: Int) -> String {
         badge > 0 ? Lp("simple.activity.labelNew", count: badge) : L("simple.activity.title")
+    }
+}
+
+/// What a frame's card shows (§3.3, API README §5.5 "Frame cards"), from `FrameSummary.now_showing` and
+/// `reactions_today`. Both are absent for people who can't see the frame's library, on older servers and on frames
+/// known only from a family (`Subscription.frame`): the card keeps its drawing and has no hearts line.
+public enum FrameCards {
+    /// The card's photo: the thumbnail, or with `large` (the frame screen) the display rendition, each falling back
+    /// to the other; nil keeps the drawing.
+    public static func photo(_ n: FrameNowShowing?, large: Bool = false) -> String? {
+        guard let n else { return nil }
+        return large ? n.displayUrl ?? n.thumbUrl : n.thumbUrl ?? n.displayUrl
+    }
+
+    /// "Online · showing now": the frame is online and reported this slide on screen (`source: screen`).
+    public static func showingNow(online: Bool, _ n: FrameNowShowing?) -> Bool {
+        online && n?.source == "screen"
+    }
+
+    /// The status chip: "Online · showing now", "Online", or "Offline since 3 hours ago" (over the last placed photo).
+    public static func status(online: Bool, lastSeen: Date?, _ n: FrameNowShowing?) -> String {
+        if showingNow(online: online, n) { return L("simple.frame.onlineNow") }
+        if online { return L("frame.online") }
+        guard let lastSeen else { return L("frame.offline") }
+        return L("simple.frame.offlineSince", ["when": Format.relative(lastSeen, locale: L10n.locale)])
+    }
+
+    /// How many photos the frame gave a heart today; nil hides the line.
+    public static func lovedToday(_ r: FrameReactionsToday?) -> Int? {
+        guard let r, r.count > 0, r.itemCount > 0 else { return nil }
+        return r.itemCount
+    }
+
+    /// "Oma's frame loved 3 photos today"; nil when it loved nothing today (or that isn't known).
+    public static func lovedTodayText(frame: String, _ r: FrameReactionsToday?) -> String? {
+        lovedToday(r).map { Lp("simple.frame.lovedToday", count: $0, ["frame": frame]) }
     }
 }

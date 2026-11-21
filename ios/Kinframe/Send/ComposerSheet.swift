@@ -426,7 +426,6 @@ struct ComposerSheet: View {
 
     private func send() {
         guard model.canSend else { return }
-        let sentTo = families.map(\.0.choice)
         do {
             // One job per server with chosen families; the first prepares the media for all (one upload each).
             let targets = owners.compactMap { m in
@@ -434,7 +433,6 @@ struct ComposerSheet: View {
                                                           feeds: m.feeds.filter { $0.role != .member }) }
             }
             let jobs = try model.makeJobs(targets, store: app.outbox.store)
-            accounts.notePosted(sentTo)
             guard let job = jobs.first else { return }
             try app.outbox.enqueue(jobs)
             withAnimation { sendingJob = job.id }
