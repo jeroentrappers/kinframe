@@ -9,7 +9,7 @@ kinframe_dir: /opt/kinframe
 # Images
 kinframe_image: ghcr.io/jeroentrappers/kinframe-server
 kinframe_version: main            # image tag: main, sha-xxxxxxx or a release like 0.1.0
-logto_version: "1.43.0"
+logto_version: "1.46.0"
 postgres_version: "17-alpine"
 
 # Public names (TLS is terminated in front of these ports)

@@ -26,7 +26,7 @@ checks they're free before the first deploy.
 | Service | Image | Notes |
 |---|---|---|
 | `server` | `ghcr.io/jeroentrappers/kinframe-server:<tag>` | Go API, media worker (ffmpeg + libvips), serves the built web SPA. Binds `127.0.0.1:8110`. Media volume `/opt/kinframe/media`. |
-| `logto` | `svhd/logto:1.43.0` (same pin as appmire-logto) | Binds `127.0.0.1:8111` (core) and `127.0.0.1:8112` (admin). `ENDPOINT=https://auth.kinframe.appmire.be`, `ADMIN_ENDPOINT=http://localhost:8112`, `TRUST_PROXY_HEADER=1`. |
+| `logto` | `svhd/logto:1.46.0` (same pin as appmire-logto) | Binds `127.0.0.1:8111` (core) and `127.0.0.1:8112` (admin). `ENDPOINT=https://auth.kinframe.appmire.be`, `ADMIN_ENDPOINT=http://localhost:8112`, `TRUST_PROXY_HEADER=1`. |
 | `postgres` | `postgres:17-alpine` | Databases `kinframe` and `logto`, each with its own role. Not exposed. |
 | `minio` (optional, `kinframe_minio: true`) | `pgsty/silo:RELEASE.2026-10-18T00-00-00Z` | S3-compatible object store for media, volume `miniodata`, only on the compose network. Console on `127.0.0.1:<kinframe_minio_console_port>` when that is set (default: not exposed). See [Media storage](#media-storage-s3). |
 | `minio-bootstrap` | same image, `minio-bootstrap.sh` | One-shot, idempotent: private bucket, a policy limited to that bucket, and the `kinframe_s3_access_key` user with it. The server only gets that user, never the root credentials. |

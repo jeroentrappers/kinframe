@@ -29,11 +29,11 @@ services:
 
   # Optional: real OIDC. Dev auth mode (KINFRAME_DEV_AUTH=1) works without it.
   logto:
-    image: svhd/logto:1.43.0
+    image: svhd/logto:1.46.0
     profiles: [logto]
     depends_on:
       postgres: { condition: service_healthy }
-    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm run alteration deploy 1.46.0 && npm start"]
     environment:
       TRUST_PROXY_HEADER: "1"
       DB_URL: postgres://logto:logto-dev@postgres:5432/logto # dev only

@@ -29,7 +29,9 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
     # `db seed --swe` initialises the schema on the first run and skips it afterwards.
-    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+    # `alteration deploy` applies a version bump's schema changes (Logto will not start with any
+    # pending) and is a no-op otherwise. It stops at the pinned version, never ahead of the image.
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm run alteration deploy {{ logto_version }} && npm start"]
     env_file: ./logto.env
     ports:
       - "127.0.0.1:{{ logto_core_port }}:3001"
