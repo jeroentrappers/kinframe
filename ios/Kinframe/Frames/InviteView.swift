@@ -52,8 +52,7 @@ struct InviteView: View {
             .frame(maxWidth: .infinity)
         }
         .pageBackground()
-        .navigationTitle(L("invite.title"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("invite.title"))
         .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } } }
         .task { await load() }
     }

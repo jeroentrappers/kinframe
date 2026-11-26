@@ -91,8 +91,7 @@ struct SendEventSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("cal.sendTitle"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("cal.sendTitle"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

@@ -211,8 +211,7 @@ struct PostDetailView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(L("social.post"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("social.post"))
         .toolbar { ToolbarItem(placement: .topBarTrailing) { if let post = model?.post { menu(post) } } }
         .task {
             guard model == nil, let api = app.api else { return }

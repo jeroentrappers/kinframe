@@ -81,7 +81,7 @@ struct FramesTab: View {
                 await loadShows()
             }
             .pageBackground()
-            .navigationTitle(L("simple.nav.frames"))
+            .pageTitle(L("simple.nav.frames"))
             .navigationDestination(for: FrameRoute.self) { route in
                 Group {
                     if let page = route.page { FramePageView(route: route, page: page) } else { FrameDetailView(route: route) }

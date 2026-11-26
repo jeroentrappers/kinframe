@@ -161,8 +161,7 @@ private struct SimpleSettingsSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("simple.view.settings"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("simple.view.settings"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
         }
     }

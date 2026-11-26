@@ -60,8 +60,7 @@ struct ItemEditorSheet: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .pageBackground()
-                .navigationTitle(L("send.adjustTitle"))
-                .navigationBarTitleDisplayMode(.inline)
+                .pageTitle(L("send.adjustTitle"))
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(L("common.done")) { dismiss() }.fontWeight(.semibold)

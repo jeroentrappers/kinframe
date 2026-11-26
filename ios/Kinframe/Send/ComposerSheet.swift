@@ -119,8 +119,7 @@ struct ComposerSheet: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .pageBackground()
-            .navigationTitle(frame.map { L("simple.compose.toFrameTitle", ["frame": $0.name]) } ?? L("simple.compose.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(frame.map { L("simple.compose.toFrameTitle", ["frame": $0.name]) } ?? L("simple.compose.title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
             }
@@ -516,8 +515,7 @@ private struct DestinationSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("simple.compose.change"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("simple.compose.change"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

@@ -63,8 +63,7 @@ struct AddFrameView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .pageBackground()
-        .navigationTitle(context == .sheet ? L("add.title") : context == .join ? L("simple.start.join") : "")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(context == .sheet ? L("add.title") : context == .join ? L("simple.start.join") : "")
         .toolbar {
             if context != .onboarding {
                 ToolbarItem(placement: .cancellationAction) {

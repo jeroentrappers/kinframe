@@ -114,7 +114,7 @@ struct AppSettingsView: View {
             #endif
             }
             .pageBackground()
-            .navigationTitle(embedded ? app.serverName : L("simple.settings.account"))
+            .pageTitle(embedded ? app.serverName : L("simple.settings.account"))
             .confirmationDialog(L("settings.signOut"), isPresented: $confirmSignOut, titleVisibility: .hidden) {
                 Button(L("settings.signOut"), role: .destructive) { Task { await accounts.signOut(app) } }
             }

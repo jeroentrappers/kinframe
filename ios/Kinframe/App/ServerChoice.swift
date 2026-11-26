@@ -33,8 +33,7 @@ struct ServerChoiceSheet<Content: View>: View {
                         Text(message)
                     }
                 }
-                .navigationTitle(title)
-                .navigationBarTitleDisplayMode(.inline)
+                .pageTitle(title)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } }
                 }

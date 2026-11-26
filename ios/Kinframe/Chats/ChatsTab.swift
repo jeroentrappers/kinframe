@@ -71,7 +71,7 @@ struct ChatsTab: View {
                 await loadAll()
             }
             .pageBackground()
-            .navigationTitle(L("chat.title"))
+            .pageTitle(L("chat.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { showArchived = true } label: { Image(systemName: "archivebox").frame(width: 44, height: 44) }
@@ -231,8 +231,7 @@ private struct ArchivedChatsSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("chat.archived"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("chat.archived"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task {
                 for m in accounts {

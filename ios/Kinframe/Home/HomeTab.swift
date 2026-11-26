@@ -36,8 +36,7 @@ struct HomeTab: View {
             }
             .refreshable { await reload(fresh: false) }
             .pageBackground()
-            .navigationTitle(L("simple.nav.home"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("simple.nav.home"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) { bell }
             }

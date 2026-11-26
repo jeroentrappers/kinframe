@@ -68,7 +68,7 @@ private struct AccountDetailView: View {
                     Button(L("servers.account.remove"), role: .destructive) { Task { await accounts.signOut(model) } }
                 }
             }
-            .navigationTitle(model.serverName)
+            .pageTitle(model.serverName)
         } else {
             AppSettingsView(embedded: true)
                 .environment(model)
@@ -126,8 +126,7 @@ struct AddServerSheet: View {
                 }
             }
             .environment(request.model)
-            .navigationTitle(L("servers.account.add"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("servers.account.add"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L("common.cancel")) { accounts.cancelAdding(request) }

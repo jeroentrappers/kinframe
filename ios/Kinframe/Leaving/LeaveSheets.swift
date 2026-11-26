@@ -73,8 +73,7 @@ struct LeaveFeedSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("leaving.leaveTitle", ["name": name]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("leaving.leaveTitle", ["name": name]))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() }.disabled(busy) }
             }
@@ -146,8 +145,7 @@ struct LeaveFrameSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("overview.leaveConfirm", ["name": frame.name]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("overview.leaveConfirm", ["name": frame.name]))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() }.disabled(busy) }
             }
@@ -232,8 +230,7 @@ struct TakeAwaySheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("leaving.takeAway.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("leaving.takeAway.title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() }.disabled(busy) }
             }

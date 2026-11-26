@@ -121,8 +121,7 @@ struct TakenAwayGroupSheet: View {
                 .frame(maxWidth: .infinity)
             }
             .pageBackground()
-            .navigationTitle(LeavingText.groupTitle(group))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(LeavingText.groupTitle(group))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } }
             }
@@ -226,8 +225,7 @@ struct KeepRequestAnswerSheet: View {
                 .frame(maxWidth: .infinity)
             }
             .pageBackground()
-            .navigationTitle(L("leaving.toMe.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("leaving.toMe.title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() }.disabled(busy) }
             }

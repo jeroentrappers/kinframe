@@ -76,7 +76,7 @@ private struct FamilyListView: View {
             .frame(maxWidth: .infinity)
         }
         .refreshable { await accounts.loadFeeds() }
-        .navigationTitle(L("simple.nav.family"))
+        .pageTitle(L("simple.nav.family"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: AppSettingsRoute(account: app.accountId)) {
@@ -124,8 +124,7 @@ struct FamilyProfileView: View {
             .frame(maxWidth: .infinity)
         }
         .refreshable { await model?.load() }
-        .navigationTitle(feed.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(feed.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: FamilyRoute(feedId: feed.id, page: .settings, account: app.accountId)) {
@@ -272,8 +271,7 @@ struct FamilyPageView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(title)
         .task {
             guard model == nil, let api = app.api else { return }
             let m = FeedDetailModel(api: api, id: route.feedId, birthdaysEnabled: app.birthdaysEnabled)

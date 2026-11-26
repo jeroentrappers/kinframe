@@ -25,7 +25,7 @@ struct SentHistoryView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(L("simple.settings.sentHistory"))
+        .pageTitle(L("simple.settings.sentHistory"))
         .task(id: app.api?.baseURL) {
             guard let api = app.api else { return }
             if model == nil { model = HistoryModel(api: api) }

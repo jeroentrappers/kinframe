@@ -78,8 +78,7 @@ struct ActivityView: View {
         }
         .refreshable { await load() }
         .pageBackground()
-        .navigationTitle(L("simple.activity.title"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("simple.activity.title"))
         // Again after coming back from a post (its comments are read now).
         .task { await load() }
     }

@@ -68,8 +68,7 @@ struct PersonView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(person.map { PersonName.display($0.person) } ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(person.map { PersonName.display($0.person) } ?? "")
         .task { await load() }
         .confirmationDialog(L("chat.person.blockConfirm", ["name": person.map { PersonName.display($0.person) } ?? ""]), isPresented: $confirmBlock, titleVisibility: .visible) {
             Button(L("chat.blockShort"), role: .destructive) { Task { await setBlocked(true) } }
@@ -152,7 +151,7 @@ struct BlockedPeopleView: View {
         .listRowBackground(Palette.surface)
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("chat.blockedPeople"))
+        .pageTitle(L("chat.blockedPeople"))
         .task { list = (try? await app.api?.blocks()) ?? [] }
     }
 
@@ -221,8 +220,7 @@ struct ReportsView: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L(feedId == nil ? "chat.report.operatorTitle" : "chat.operatorReports"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L(feedId == nil ? "chat.report.operatorTitle" : "chat.operatorReports"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task { await load() }
             .refreshable { await load() }

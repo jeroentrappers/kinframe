@@ -147,8 +147,7 @@ struct FrameDetailView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(model?.summary?.name ?? app.frame(route.id)?.name ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(model?.summary?.name ?? app.frame(route.id)?.name ?? "")
         .task {
             guard model == nil, let api = app.api else { return }
             let m = FrameDetailModel(api: api, id: route.id)
@@ -266,8 +265,7 @@ struct FramePageView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(title)
         .task {
             guard model == nil, let api = app.api else { return }
             let m = FrameDetailModel(api: api, id: route.id)

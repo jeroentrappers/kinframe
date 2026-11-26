@@ -352,8 +352,7 @@ private struct MemberSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(member.displayName)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(member.displayName)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -462,8 +461,7 @@ private struct InviteCreateSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("people.invite"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("people.invite"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(created == nil ? L("common.cancel") : L("common.done")) { dismiss() } }
                 if created == nil {

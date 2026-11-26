@@ -157,8 +157,7 @@ struct PhotoSourceSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(title)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

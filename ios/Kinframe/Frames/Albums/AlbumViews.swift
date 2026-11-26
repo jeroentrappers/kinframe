@@ -135,8 +135,7 @@ struct AlbumNameSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(title)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -207,8 +206,7 @@ struct AlbumPickerSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(Lp("albums.addTitle", count: count))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(Lp("albums.addTitle", count: count))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -304,8 +302,7 @@ struct AlbumScheduleSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("albums.scheduleTitle", ["name": album.name]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("albums.scheduleTitle", ["name": album.name]))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -398,8 +395,7 @@ struct AlbumArrangeSheet: View {
             .environment(\.editMode, .constant(.active))
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("albums.arrange"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("albums.arrange"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

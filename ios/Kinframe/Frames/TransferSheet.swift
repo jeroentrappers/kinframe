@@ -51,8 +51,7 @@ struct TransferSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(title)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     if confirming {
@@ -292,8 +291,7 @@ struct ReplaceDeviceSheet: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .pageBackground()
-            .navigationTitle(L("replace.title", ["name": frame.name]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("replace.title", ["name": frame.name]))
             .toolbar {
                 if !model.done {
                     ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }

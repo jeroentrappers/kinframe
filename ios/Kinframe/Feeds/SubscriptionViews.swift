@@ -379,8 +379,7 @@ private struct HistorySheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("ios.feeds.act.history"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.feeds.act.history"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

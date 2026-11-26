@@ -253,8 +253,7 @@ struct GoogleImportSheet: View {
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity)
             .pageBackground()
-            .navigationTitle(L("ios.gi.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.gi.title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     if controller.flow.canCancel {

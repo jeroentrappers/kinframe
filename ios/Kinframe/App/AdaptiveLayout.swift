@@ -16,6 +16,13 @@ enum PageWidth {
 }
 
 extension View {
+    /// Every page's title: one style everywhere, the small title in the navigation bar, so the top of the screen is the
+    /// same height on every tab and page. Use this instead of `navigationTitle` + a display mode.
+    func pageTitle<S: StringProtocol>(_ title: S) -> some View {
+        navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+    }
+
     /// Centers the page content in a column of at most `maxWidth`, with the usual 16 pt gutters.
     func pageColumn(_ maxWidth: CGFloat = PageWidth.text) -> some View {
         padding(16)

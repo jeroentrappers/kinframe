@@ -245,8 +245,7 @@ struct TelegramConnectSheet: View {
                 .frame(maxWidth: .infinity)
             }
             .pageBackground()
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(title)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(progress.isFinal ? L("common.done") : L("common.cancel")) { close() }
@@ -438,8 +437,7 @@ struct TelegramChatSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(chat.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(chat.title)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task { await load() }
             .refreshable { await load() }

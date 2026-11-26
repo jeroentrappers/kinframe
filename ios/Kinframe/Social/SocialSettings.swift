@@ -137,7 +137,7 @@ struct ReminderSettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("engagement.remindersTitle"))
+        .pageTitle(L("engagement.remindersTitle"))
         .task { await app.social.loadReminders() }
     }
 
@@ -192,7 +192,7 @@ struct MilestonesView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("engagement.milestone.title"))
+        .pageTitle(L("engagement.milestone.title"))
         .task { await app.social.loadMilestones() }
     }
 

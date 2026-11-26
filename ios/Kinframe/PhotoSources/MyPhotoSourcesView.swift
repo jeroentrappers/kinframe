@@ -30,8 +30,7 @@ struct MyPhotoSourcesView: View {
         }
         .refreshable { await model.load() }
         .pageBackground()
-        .navigationTitle(L("ios.ps.mine"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("ios.ps.mine"))
         .task { await model.load() }
         .sheet(item: $editing) { r in
             PhotoSourceSheet(api: model.api, mode: .edit(r.source, r.focus)) { model.upsert($0) }

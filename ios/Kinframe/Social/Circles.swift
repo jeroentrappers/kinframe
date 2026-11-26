@@ -117,8 +117,7 @@ struct CircleEditSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("social.newCircle"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("social.newCircle"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -231,8 +230,7 @@ struct CircleDetailView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(circle?.name ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(circle?.name ?? "")
         .task { await load() }
         .sheet(isPresented: $adding) {
             CircleAddSheet(members: members.filter { m in !(circle?.members.contains { $0.userId == m.userId } ?? false) }) { ids in
@@ -346,8 +344,7 @@ private struct CircleAddSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("social.circle.add"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("social.circle.add"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

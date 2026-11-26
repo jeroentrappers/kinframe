@@ -76,8 +76,7 @@ struct CalendarSourceSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(editing ? L("cal.editTitle") : L("cal.addTitle"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(editing ? L("cal.editTitle") : L("cal.addTitle"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

@@ -727,8 +727,7 @@ struct PlacementSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(placement.item.kind == .video ? L("ios.library.video") : L("library.photo"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(placement.item.kind == .video ? L("ios.library.video") : L("library.photo"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.close")) { dismiss() } } }
         }
         .presentationDetents([.large])

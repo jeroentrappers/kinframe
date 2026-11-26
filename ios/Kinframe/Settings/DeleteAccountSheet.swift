@@ -60,8 +60,7 @@ struct DeleteAccountSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("account.deleteTitle"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("account.deleteTitle"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L("common.cancel")) { dismiss() }.disabled(deleting)

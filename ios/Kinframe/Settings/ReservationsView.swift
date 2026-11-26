@@ -112,8 +112,7 @@ struct ReservationsView: View {
         }
         .refreshable { await model.load() }
         .pageBackground()
-        .navigationTitle(L("reservations.title"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("reservations.title"))
         .task { if model.list == nil { await model.load() } }
         .sheet(item: $exported) { file in ActivitySheet(items: [file.url]) }
     }

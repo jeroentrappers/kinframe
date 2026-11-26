@@ -236,8 +236,7 @@ private struct CoverPicker: View {
                 .padding(4)
             }
             .pageBackground()
-            .navigationTitle(L("ios.feeds.cover"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.feeds.cover"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } } }
         }
     }

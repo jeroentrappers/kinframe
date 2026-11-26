@@ -65,8 +65,7 @@ struct NewChatSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L(adding == nil ? "chat.newChat" : "chat.addPeople"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L(adding == nil ? "chat.newChat" : "chat.addPeople"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -206,8 +205,7 @@ struct ConversationInfoView: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("chat.details"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("chat.details"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { Task { await rename(); dismiss() } } } }
             .onAppear { name = c?.name ?? "" }
             .onChange(of: photoPick) { _, item in
@@ -355,8 +353,7 @@ struct PutOnFrameSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("chat.putOnFrame"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("chat.putOnFrame"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -434,8 +431,7 @@ struct ShareInChatSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("social.shareInChat"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("social.shareInChat"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } } }
             .task { if !app.social.conversationsLoaded { await app.social.loadConversations() } }
         }

@@ -62,8 +62,7 @@ struct SendDetailView: View {
             .frame(maxWidth: .infinity)
         }
         .pageBackground()
-        .navigationTitle(L("detail.title"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("detail.title"))
         .toolbar {
             if model.send != nil, !removed {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -316,8 +315,7 @@ private struct CaptionEditor: View {
             }
             .padding(16)
             .pageBackground()
-            .navigationTitle(L("detail.editCaptionN", ["n": number]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("detail.editCaptionN", ["n": number]))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -393,8 +391,7 @@ private struct ForwardToFeedSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("ios.feeds.forward"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.feeds.forward"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -461,8 +458,7 @@ private struct SendFeedReceiptsSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(feedName)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(feedName)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task {
                 do {

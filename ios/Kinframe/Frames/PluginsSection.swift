@@ -247,8 +247,7 @@ struct PluginCatalogSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("plugins.add"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("plugins.add"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } } }
         }
         .presentationDetents([.medium, .large])
@@ -348,8 +347,7 @@ struct ConfirmAddSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .pageBackground()
-            .navigationTitle(L("plugins.confirmTitle", ["name": plugin.name(tag)]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("plugins.confirmTitle", ["name": plugin.name(tag)]))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel"), action: cancel) }
                 ToolbarItem(placement: .confirmationAction) { Button(L("plugins.addOne"), action: add).fontWeight(.semibold) }

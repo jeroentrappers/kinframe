@@ -136,8 +136,7 @@ struct RemoteBlockServerSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("servers.remote.blocked.add"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("servers.remote.blocked.add"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

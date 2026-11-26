@@ -127,8 +127,7 @@ struct FreshSendSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("engagement.sendSomething", ["frame": frameName]))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("engagement.sendSomething", ["frame": frameName]))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } } }
             .task {
                 guard let api = app.api else { return }
@@ -192,8 +191,7 @@ struct WeeklySummarySheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("engagement.summary.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("engagement.summary.title"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task {
                 do { summary = try await app.api?.weeklySummary(weekOf) } catch { missing = true }

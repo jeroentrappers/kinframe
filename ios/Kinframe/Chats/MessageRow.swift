@@ -306,8 +306,7 @@ struct RecapSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("engagement.monthlyRecap"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("engagement.monthlyRecap"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
         }
     }

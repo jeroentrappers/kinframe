@@ -276,8 +276,7 @@ struct EmailCreateSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("ios.em.createTitle"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.em.createTitle"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

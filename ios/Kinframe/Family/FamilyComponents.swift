@@ -161,8 +161,7 @@ struct AddFrameToFamilySheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("simple.family.addFrame"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("simple.family.addFrame"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } } }
             .sheet(isPresented: $pairing) {
                 if let api = app.api {
@@ -244,8 +243,7 @@ struct AddFamilyToFrameSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("simple.addFamily.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("simple.addFamily.title"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } } }
         }
     }

@@ -52,8 +52,7 @@ struct EmailAddressSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(address.name)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(address.name)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } }
             }
@@ -450,8 +449,7 @@ struct EmailHeldMessageView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("ios.em.heldTitle"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("ios.em.heldTitle"))
         .task { await load() }
         .alert(L("ios.em.deleteMailTitle"), isPresented: $confirmDelete) {
             Button(L("ios.em.deleteMail"), role: .destructive) { Task { await delete() } }
@@ -555,8 +553,7 @@ struct EmailRecentMailView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("ios.em.recent"))
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(L("ios.em.recent"))
         .task { await load(reset: true) }
         .refreshable { await load(reset: true) }
     }
@@ -616,8 +613,7 @@ struct EmailAddSenderSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("ios.em.addSender"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.em.addSender"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -671,8 +667,7 @@ struct EmailRenameSenderSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("ios.em.renameSender"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("ios.em.renameSender"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -749,8 +744,7 @@ struct EmailEditSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(field == .slug ? L("ios.em.changeSlug") : L("ios.em.rename"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(field == .slug ? L("ios.em.changeSlug") : L("ios.em.rename"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

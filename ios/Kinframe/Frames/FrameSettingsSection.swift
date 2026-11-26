@@ -474,8 +474,7 @@ struct LocationPicker: View {
             }
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: L("location.placeholder"))
             .overlay { if searching { ProgressView() } }
-            .navigationTitle(L("location.search"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("location.search"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } } }
             .task(id: query) { await search() }
         }

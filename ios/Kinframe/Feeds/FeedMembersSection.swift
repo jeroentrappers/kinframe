@@ -315,8 +315,7 @@ private struct FeedMemberSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(member.displayName)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(member.displayName)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -437,8 +436,7 @@ private struct FeedInviteCreateSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("people.invite"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("people.invite"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -527,8 +525,7 @@ struct FeedInviteShareSheet: View {
                 .frame(maxWidth: .infinity)
             }
             .pageBackground()
-            .navigationTitle(invite.purpose == .join ? L("ios.feeds.inviteJoin") : L("ios.feeds.inviteSubscribe"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(invite.purpose == .join ? L("ios.feeds.inviteJoin") : L("ios.feeds.inviteSubscribe"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
         }
     }

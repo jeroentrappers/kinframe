@@ -66,8 +66,7 @@ struct TvSheet: View {
             }
             }
             .pageBackground()
-            .navigationTitle(L("tv.title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("tv.title"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.close")) { dismiss() } } }
             .task {
                 if add == nil { add = AddFrameModel(api: api) }

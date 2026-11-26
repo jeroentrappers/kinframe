@@ -53,8 +53,7 @@ struct RemoteFollowSheet: View {
                 .frame(maxWidth: .infinity)
             }
             .pageBackground()
-            .navigationTitle(preview.map { L("servers.remote.confirmTitle", ["feed": $0.feedName]) } ?? L("remote.add"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(preview.map { L("servers.remote.confirmTitle", ["feed": $0.feedName]) } ?? L("remote.add"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 if preview != nil {

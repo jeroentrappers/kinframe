@@ -22,8 +22,7 @@ struct PluginEditorSheet: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .pageBackground()
-                .navigationTitle(plugin?.name(model.tag) ?? e.draft.pluginId)
-                .navigationBarTitleDisplayMode(.inline)
+                .pageTitle(plugin?.name(model.tag) ?? e.draft.pluginId)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { model.editor = nil } }
                     ToolbarItem(placement: .confirmationAction) {
@@ -273,8 +272,7 @@ private struct PresetInputsSheet: View {
                     Text(L("plugins.presetNeeds"))
                 }
             }
-            .navigationTitle(plugin.presetLabel(preset, tag))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(plugin.presetLabel(preset, tag))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

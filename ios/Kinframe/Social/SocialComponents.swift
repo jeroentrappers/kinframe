@@ -152,8 +152,7 @@ struct ReactionListSheet: View {
                 }
             }
             .pageBackground()
-            .navigationTitle(L("social.whoReacted"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("social.whoReacted"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
             .task { await load() }
         }
@@ -389,8 +388,7 @@ struct ReportSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("chat.reportTitle.\(kind.rawValue)"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("chat.reportTitle.\(kind.rawValue)"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

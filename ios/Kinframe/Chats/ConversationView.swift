@@ -40,8 +40,7 @@ struct ConversationView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(model?.conversation.map(ChatList.title) ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(model?.conversation.map(ChatList.title) ?? "")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 if let c = model?.conversation {

@@ -312,8 +312,7 @@ struct EventDetailSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(event.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(event.title)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
         }
     }

@@ -69,7 +69,7 @@ struct MemoriesSettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .pageBackground()
-        .navigationTitle(L("leaving.memoriesTitle"))
+        .pageTitle(L("leaving.memoriesTitle"))
         .task { await load() }
         .sheet(isPresented: $adding) {
             HidePersonPicker(api: api, hidden: Set(prefs?.hiddenPeople.map(\.userId) ?? [])) { id in
@@ -136,8 +136,7 @@ private struct HidePersonPicker: View {
             .searchable(text: $query)
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("leaving.memories.add"))
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(L("leaving.memories.add"))
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } } }
             .task { await load() }
         }
