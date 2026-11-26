@@ -1,7 +1,1 @@
-A simpler kinframe.
-- Home shows everything your families share in one place. Tap a family to see only theirs.
-- Share once to several families.
-- Frames shows what each frame is showing right now and how many photos it loved today.
-- Start a family without a frame, or join the family that invited you.
-- Activity: new comments, mentions and requests in one place.
-- Sharper photos in the feed.
+- Every tab now has the same header, so the top of the screen no longer jumps when you switch tabs.

@@ -1,7 +1,1 @@
-Een eenvoudiger kinframe.
-- Home toont alles wat je families delen op één plek. Tik op een familie om alleen die te zien.
-- Deel één keer met meerdere families.
-- Kaders toont wat elk kader nu laat zien en hoeveel foto's het vandaag een hartje gaf.
-- Begin een familie zonder kader, of word lid van de familie die je uitnodigde.
-- Activiteit: nieuwe reacties, vermeldingen en verzoeken op één plek.
-- Scherpere foto's in de feed.
+- Elk tabblad heeft nu dezelfde kop, zodat de bovenkant van het scherm niet meer verspringt als je van tabblad wisselt.

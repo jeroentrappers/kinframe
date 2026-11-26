@@ -1,7 +1,2 @@
-• Een eenvoudiger kinframe: Home toont alles wat je families delen; tik op een familie om alleen die te zien.
-• Deel één keer met meerdere families.
-• Kaders toont wat elk kader nu laat zien en welke foto's het vandaag een hartje gaf.
-• Begin een familie zonder kader, of word lid van de familie die je uitnodigde.
-• Activiteit: reacties, vermeldingen en verzoeken op één plek.
-• Scherpere foto's in de feed.
-• Live foto's van HDR-telefoons worden weer verstuurd.
+• Minder lege ruimte bovenaan Chats, Nieuw bericht en andere schermen.
+• Elk tabblad heeft nu dezelfde kop.
