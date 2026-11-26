@@ -232,10 +232,7 @@ private fun StartCard(start: () -> Unit, join: (() -> Unit)?) {
 /** "Home" (with one family its name) and the activity button. */
 @Composable
 private fun HomeTopBar(a: HomeActions) {
-    val c = Kin.colors
-    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(a.families.singleOrNull()?.name ?: stringResource(R.string.social_nav_home), style = Kin.type.headline, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f).semantics { heading() })
+    app.kinframe.family.ui.KinTabHeader(a.families.singleOrNull()?.name ?: stringResource(R.string.social_nav_home)) {
         IconButton(a.onActivity) { app.kinframe.family.ui.BadgedIcon(KinIcons.Heart, a.activityBadge, stringResource(R.string.home_activity)) }
     }
 }

@@ -98,9 +98,7 @@ fun memberNames(names: List<String>): String {
 fun FamilyProfileScreen(state: FeedDetailState, segment: FeedTab, onSegment: (FeedTab) -> Unit, a: FeedActions, p: ProfileActions) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.surface)) {
-        Row(Modifier.fillMaxWidth().padding(start = if (p.onBack != null) 4.dp else 16.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            p.onBack?.let { IconButton(it) { Icon(KinIcons.ChevronLeft, stringResource(R.string.common_back), tint = c.ink) } }
-            Text(stringResource(R.string.nav_family), style = Kin.type.title, color = c.ink, modifier = Modifier.weight(1f).semantics { heading() })
+        app.kinframe.family.ui.KinTabHeader(stringResource(R.string.nav_family), onBack = p.onBack) {
             IconButton(p.onSettings) { Icon(KinIcons.Settings, stringResource(R.string.nav_settings), tint = c.ink) }
         }
         when (val f = state.feed) {

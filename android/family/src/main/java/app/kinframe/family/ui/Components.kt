@@ -114,6 +114,25 @@ fun KinTopBar(title: String, onBack: (() -> Unit)? = null, subtitle: String? = n
     )
 }
 
+/**
+ * The header of a main tab (Home, Frames, Chats, Family): the same height, type and margins on every tab, so the top
+ * of the screen doesn't move when switching tabs. [onBack] for the same page opened from elsewhere.
+ */
+@Composable
+fun KinTabHeader(title: String, modifier: Modifier = Modifier, onBack: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
+    Row(
+        modifier.fillMaxWidth().height(64.dp).padding(start = if (onBack != null) 4.dp else 16.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        onBack?.let { IconButton(onClick = it) { Icon(KinIcons.ChevronLeft, stringResource(R.string.common_back), tint = Kin.colors.ink) } }
+        Text(
+            title, style = Kin.type.headline, color = Kin.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).semantics { heading() },
+        )
+        actions()
+    }
+}
+
 /** A centred, width-limited, scrollable column: the standard page body. */
 @Composable
 fun PageColumn(

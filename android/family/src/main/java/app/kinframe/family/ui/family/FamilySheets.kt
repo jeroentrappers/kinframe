@@ -139,8 +139,7 @@ fun familyCounts(f: Feed): String =
 fun FamilyListScreen(families: List<Feed>, home: String?, onOpen: (Feed) -> Unit, onSettings: () -> Unit, onStart: () -> Unit, onJoin: () -> Unit) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.family_list_title), style = Kin.type.headline, color = c.ink, modifier = Modifier.weight(1f))
+        app.kinframe.family.ui.KinTabHeader(stringResource(R.string.family_list_title)) {
             androidx.compose.material3.IconButton(onSettings) { Icon(KinIcons.Settings, stringResource(R.string.nav_settings), tint = c.ink) }
         }
         app.kinframe.family.ui.PageColumn(spacing = 8.dp) {

@@ -76,39 +76,39 @@ fun FramesScreen(
     serverChip: (Frame) -> String? = { null },
 ) {
     val c = Kin.colors
-    PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = onRefresh, modifier = Modifier.fillMaxSize().background(c.paper)) {
-        when (val f = state.frames) {
-            Load.Loading -> FramesSkeleton()
-            is Load.Error -> ErrorPanel(f.message, onRefresh, Modifier.padding(top = 80.dp))
-            is Load.Ready -> if (f.value.isEmpty() && state.familyFrames.isEmpty()) {
-                Column(Modifier.fillMaxSize().padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    EmptyState(
-                        stringResource(R.string.frames_none_title), stringResource(R.string.frames_none_body),
-                        art = { FrameArt(width = 180.dp) },
-                    ) { PrimaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus) }
-                }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 300.dp),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(stringResource(R.string.nav_frames), style = Kin.type.headline, color = c.ink, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
+    Column(Modifier.fillMaxSize().background(c.paper)) {
+        app.kinframe.family.ui.KinTabHeader(stringResource(R.string.nav_frames))
+        PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = onRefresh, modifier = Modifier.weight(1f)) {
+            when (val f = state.frames) {
+                Load.Loading -> FramesSkeleton()
+                is Load.Error -> ErrorPanel(f.message, onRefresh, Modifier.padding(top = 80.dp))
+                is Load.Ready -> if (f.value.isEmpty() && state.familyFrames.isEmpty()) {
+                    Column(Modifier.fillMaxSize().padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        EmptyState(
+                            stringResource(R.string.frames_none_title), stringResource(R.string.frames_none_body),
+                            art = { FrameArt(width = 180.dp) },
+                        ) { PrimaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus) }
                     }
-                    items(f.value, key = { it.id }) { frame ->
-                        val add = onAddFamily?.takeIf { frame.can { p -> p.changeSettings } && state.shows[frame.id].orEmpty().isEmpty() }
-                        FrameCard(frame, state, add?.let { a -> { a(frame) } }, { onOpen(frame) }, serverChip(frame))
-                    }
-                    if (state.familyFrames.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(stringResource(R.string.frames_other), style = Kin.type.title, color = c.ink, modifier = Modifier.padding(top = 8.dp))
-                    }
-                    items(state.familyFrames, key = { "ff" + it.frame.id }) { ff -> FamilyFrameCard(ff, onOpenFamilyFrame) }
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
-                            SecondaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus)
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 300.dp),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        items(f.value, key = { it.id }) { frame ->
+                            val add = onAddFamily?.takeIf { frame.can { p -> p.changeSettings } && state.shows[frame.id].orEmpty().isEmpty() }
+                            FrameCard(frame, state, add?.let { a -> { a(frame) } }, { onOpen(frame) }, serverChip(frame))
+                        }
+                        if (state.familyFrames.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) {
+                            Text(stringResource(R.string.frames_other), style = Kin.type.title, color = c.ink, modifier = Modifier.padding(top = 8.dp))
+                        }
+                        items(state.familyFrames, key = { "ff" + it.frame.id }) { ff -> FamilyFrameCard(ff, onOpenFamilyFrame) }
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
+                                SecondaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus)
+                            }
                         }
                     }
                 }

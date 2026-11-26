@@ -151,7 +151,7 @@ fun ChatsScreen(
 ) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(R.string.chat_title)) {
+        app.kinframe.family.ui.KinTabHeader(stringResource(R.string.chat_title)) {
             IconButton(onNewGroup) { Icon(KinIcons.People, stringResource(R.string.chat_new_group), tint = c.inkSoft) }
             IconButton(onNew) { Icon(KinIcons.Plus, stringResource(R.string.chat_new), tint = c.accent) }
             topActions()
