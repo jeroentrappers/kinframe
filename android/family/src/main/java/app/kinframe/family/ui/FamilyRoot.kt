@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -540,7 +541,8 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                             }
                         },
                     ) { pad ->
-                        Column(Modifier.fillMaxSize().padding(pad)) {
+                        // The bars' insets are padded here: consumed, so the screens' top bars don't add the status bar again.
+                        Column(Modifier.fillMaxSize().padding(pad).consumeWindowInsets(pad)) {
                             val update by graph.updates.state.collectAsStateWithLifecycle()
                             (update as? UpdateState.Available)?.takeIf { showChrome }?.let { available ->
                                 UpdateBanner(onUpdate = { context.openStore(available.storeUrl) }, onDismiss = graph.updates::dismiss)
