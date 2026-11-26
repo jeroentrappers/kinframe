@@ -64,7 +64,9 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         defer { stream.close() }
         var data = Data()
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
-        while stream.hasBytesAvailable {
+        // Read to the end (0) or an error (-1): right after open, hasBytesAvailable can still be false for a body
+        // stream whose data hasn't arrived yet, which made tests see an empty body now and then.
+        while true {
             let n = stream.read(&buffer, maxLength: buffer.count)
             if n <= 0 { break }
             data.append(buffer, count: n)
