@@ -1,0 +1,50 @@
+{
+  "ios.framing.editHint": {
+    "en": "Tap a preview to zoom in and move the photo for that frame shape.",
+    "nl": "Tik op een voorbeeld om de foto voor die vorm in te zoomen en te verschuiven."
+  },
+  "ios.framing.editLandscape": {
+    "en": "Landscape framing",
+    "nl": "Kadrering liggend"
+  },
+  "ios.framing.editPortrait": {
+    "en": "Portrait framing",
+    "nl": "Kadrering staand"
+  },
+  "ios.framing.editorHint": {
+    "en": "Drag to move the photo. Pinch or use the slider to zoom.",
+    "nl": "Sleep om de foto te verschuiven. Knijp of gebruik de schuifregelaar om te zoomen."
+  },
+  "ios.framing.openHint": {
+    "en": "Opens the zoom and position for this frame shape.",
+    "nl": "Opent zoom en positie voor deze vorm van kader."
+  },
+  "ios.framing.reset": {
+    "en": "Reset",
+    "nl": "Herstellen"
+  },
+  "ios.framing.soft": {
+    "en": "May look less sharp on the frame.",
+    "nl": "Kan er op het kader minder scherp uitzien."
+  },
+  "ios.framing.value": {
+    "en": "{orientation}: {zoom}, centred {x}%, {y}%",
+    "nl": "{orientation}: {zoom}, gecentreerd op {x}%, {y}%"
+  },
+  "ios.framing.zoom": {
+    "en": "Zoom",
+    "nl": "Zoom"
+  },
+  "ios.framing.zoomIn": {
+    "en": "Zoom in",
+    "nl": "Inzoomen"
+  },
+  "ios.framing.zoomOut": {
+    "en": "Zoom out",
+    "nl": "Uitzoomen"
+  },
+  "ios.framing.zoomed": {
+    "en": "{orientation}, zoomed {zoom}",
+    "nl": "{orientation}, ingezoomd {zoom}"
+  }
+}

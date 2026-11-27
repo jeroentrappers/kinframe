@@ -1705,7 +1705,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PUT /v1/device/plugins/status`.
     /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)`.
     func devicePutPluginStatus(_ input: Operations.DevicePutPluginStatus.Input) async throws -> Operations.DevicePutPluginStatus.Output
-    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override).
     ///
     /// - Remark: HTTP `PATCH /v1/device/placements/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/placements/{placementId}/patch(devicePatchPlacement)`.
@@ -5817,7 +5817,7 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override).
     ///
     /// - Remark: HTTP `PATCH /v1/device/placements/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/placements/{placementId}/patch(devicePatchPlacement)`.

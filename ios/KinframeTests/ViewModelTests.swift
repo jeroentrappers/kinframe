@@ -261,6 +261,28 @@ final class ComposeModelTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: store.directory(job.id).appending(path: job.items[0].upload.file).path))
         XCTAssertTrue(model.drafts.isEmpty)
     }
+
+    /// docs/spec/framing.md §4: a focal tap moves the views' centres; only changed orientations go out, and the focal
+    /// point sent is the landscape view's centre.
+    func testFramingInTheJob() async throws {
+        let model = ComposeModel(limits: .defaults, staging: dir.appending(path: "staging"))
+        await model.add(files: [(file("a.jpg"), "a.jpg"), (file("b.jpg"), "b.jpg")])
+        let a = model.drafts[0].id, b = model.drafts[1].id
+        model.setView(a, .landscape, FramingView(x: 0.3, y: 0.4, zoom: 2))
+        model.setFocal(a, CGPoint(x: 0.7, y: 0.2))
+        XCTAssertEqual(model.drafts[0].framing, ItemFraming(landscape: FramingView(x: 0.7, y: 0.2, zoom: 2)))
+        model.setView(b, .portrait, FramingView(x: 0.6, y: 0.5, zoom: 3))
+        model.setView(b, .portrait, nil)
+        XCTAssertNil(model.drafts[1].framing, "Reset removes the view")
+        model.frameIds = ["f1"]
+        let store = OutboxStore(root: dir.appending(path: "outbox"))
+        let frame = try OutboxRunner.decoder.decode(FrameSummary.self, from: Data(frameJSON.utf8))
+        let job = try model.makeJob(server: URL(string: "https://k.example.org")!, frames: [frame], store: store)
+        XCTAssertEqual(job.items[0].framing?.landscape?.zoom, 2)
+        XCTAssertNil(job.items[0].framing?.portrait)
+        XCTAssertEqual(job.items[0].focal?.x, 0.7)
+        XCTAssertNil(job.items[1].framing)
+    }
 }
 
 @MainActor

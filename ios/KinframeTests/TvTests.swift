@@ -15,6 +15,31 @@ final class TvLogicTests: XCTestCase {
                expiresAt: expires, createdAt: Date())
     }
 
+    /// docs/spec/framing.md §6: the TV uses the view for its orientation and the §3 crop.
+    func testSlideFraming() throws {
+        var s = slide("p1")
+        s.width = 4000
+        s.height = 3000
+        s.focalPoint = .init(x: 0.5, y: 0)
+        let tv = CGSize(width: 1920, height: 1080)
+        // Without framing: the focal point at 1×, today's cover crop.
+        XCTAssertEqual(TvLogic.view(s, screen: tv), .init(view: FramingView(x: 0.5, y: 0, zoom: 1), chosen: false))
+        let plain = try XCTUnwrap(TvLogic.crop(s, screen: tv))
+        XCTAssertEqual(plain.minY, 0, accuracy: 0.001)
+        XCTAssertEqual(plain.width, 1, accuracy: 0.001)
+        // A landscape TV takes the landscape view, a portrait screen the portrait one.
+        s.framing = ItemFraming(landscape: FramingView(x: 0.25, y: 0.5, zoom: 2), portrait: FramingView(x: 0.8, y: 0.5, zoom: 3))
+        XCTAssertEqual(TvLogic.view(s, screen: tv), .init(view: FramingView(x: 0.25, y: 0.5, zoom: 2), chosen: true))
+        XCTAssertEqual(TvLogic.view(s, screen: CGSize(width: 1080, height: 1920)).view.zoom, 3)
+        let framed = try XCTUnwrap(TvLogic.crop(s, screen: tv))
+        XCTAssertEqual(framed.width, 0.5, accuracy: 0.001)
+        XCTAssertEqual(framed.minX, 0, accuracy: 0.001)
+        XCTAssertEqual(framed.midY, 0.5, accuracy: 0.001)
+        // No size, no crop (the stage falls back to the focal alignment).
+        s.width = 0
+        XCTAssertNil(TvLogic.crop(s, screen: tv))
+    }
+
     func testLinkBodyFollowsScopeAndPurpose() {
         let all = TvLogic.linkBody(scope: .all, interval: 15, purpose: .tv)
         XCTAssertEqual(all.intervalSeconds, 15)

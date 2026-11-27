@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 public typealias TvLink = Components.Schemas.TvLink
@@ -78,6 +79,19 @@ public enum TvLogic {
         c.path = (c.path.hasSuffix("/") ? String(c.path.dropLast()) : c.path) + "/tv/\(link.frameId)"
         c.queryItems = [URLQueryItem(name: "t", value: link.token)]
         return c.url
+    }
+
+    /// The view a filled slide uses on a screen (docs/spec/framing.md §3.1, §6): `framing` is already the
+    /// placement's effective framing, `focal_point` its effective focal point.
+    public static func view(_ s: TvSlide, screen: CGSize) -> Framing.Choice {
+        Framing.view(for: ScreenOrientation(screen), framing: s.framing, focal: s.focalPoint)
+    }
+
+    /// The part of the photo that fills the screen (§3, fractions of the photo), nil without a known size.
+    public static func crop(_ s: TvSlide, screen: CGSize) -> CGRect? {
+        guard s.width > 0, s.height > 0, screen.width > 0, screen.height > 0 else { return nil }
+        return Framing.unitCrop(screenAspect: Double(screen.width / screen.height), photoAspect: Double(s.width) / Double(s.height),
+                                view: view(s, screen: screen).view)
     }
 
     /// The second line under a caption: "Oma · 12 May 2024".

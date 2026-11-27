@@ -88,6 +88,9 @@ public struct Discovery: Codable, Equatable, Sendable {
     /// Frames here can follow families on other servers, families here can allow frames on other servers
     /// (`remote_families`, README §5.22). Hidden while off.
     public var remoteFamilies: Bool = false
+    /// The server stores framing, zoom and position per orientation (`framing`, docs/spec/framing.md §7): senders
+    /// offer zoom only then.
+    public var framing: Bool = false
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -123,6 +126,7 @@ public struct Discovery: Codable, Equatable, Sendable {
         case baseURL = "base_url"
         case leaving
         case remoteFamilies = "remote_families"
+        case framing
     }
 
     public init(from decoder: Decoder) throws {
@@ -160,6 +164,7 @@ public struct Discovery: Codable, Equatable, Sendable {
         baseURL = (try? c.decodeIfPresent(String.self, forKey: .baseURL)).flatMap { $0?.isEmpty == false ? $0 : nil }
         leaving = (try? c.decodeIfPresent(Bool.self, forKey: .leaving)) ?? false
         remoteFamilies = (try? c.decodeIfPresent(Bool.self, forKey: .remoteFamilies)) ?? false
+        framing = (try? c.decodeIfPresent(Bool.self, forKey: .framing)) ?? false
         // The server sends the shop's configuration (an object); we keep only whether there is one.
         if let b = try? c.decode(Bool.self, forKey: .shop) {
             shop = b

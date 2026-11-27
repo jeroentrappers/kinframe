@@ -4,7 +4,8 @@ import KinframeKit
 import SwiftUI
 
 /// Framing and caption for one item (web: ItemEditor): fill or fit, the focus point (tap the photo), landscape and
-/// portrait previews, the caption, and for videos the trim window and sound.
+/// portrait previews (with framing on the server, a tap opens zoom and position for that shape, docs/spec/framing.md
+/// §4), the caption, and for videos the trim window and sound.
 struct ItemEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     /// "Caption applied to all 4 items", after "Use for all".
@@ -12,7 +13,10 @@ struct ItemEditorSheet: View {
     @Bindable var model: ComposeModel
     let draftId: UUID
     let frames: [FrameSummary]
+    /// The server stores framing (`discovery.framing`): the previews open the zoom editor.
+    var framingEnabled = false
     @State private var preview: UIImage?
+    @State private var framingEditor: ScreenOrientation?
 
     private var draft: Draft? { model.drafts.first { $0.id == draftId } }
     private var number: Int { (model.drafts.firstIndex { $0.id == draftId } ?? 0) + 1 }
@@ -23,12 +27,25 @@ struct ItemEditorSheet: View {
         return 16.0 / 10
     }
 
+    /// The preview's shape for an orientation.
+    private func boxAspect(_ o: ScreenOrientation) -> Double {
+        o == .landscape ? max(screenAspect, 1 / screenAspect) : min(screenAspect, 1 / screenAspect)
+    }
+
+    /// Zoom is offered for photos in fill mode only (framing.md §2, §4).
+    private func canFrame(_ draft: Draft) -> Bool {
+        framingEnabled && draft.fit == .fill && draft.kind == .photo
+    }
+
     var body: some View {
         NavigationStack {
             if let draft {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        FocalPicker(image: preview, aspect: draft.aspect ?? 1, focal: binding(\.focal, default: CGPoint(x: 0.5, y: 0.5)), enabled: draft.fit == .fill)
+                        FocalPicker(image: preview, aspect: draft.aspect ?? 1, focal: Binding(
+                            get: { draft.focal },
+                            set: { p in model.setFocal(draftId, p) }
+                        ), enabled: draft.fit == .fill)
                             .frame(maxWidth: .infinity)
 
                         fitPicker(draft)
@@ -36,11 +53,15 @@ struct ItemEditorSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(L("send.previewsLabel")).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
                             HStack(alignment: .bottom, spacing: 16) {
-                                FramePreviewBox(image: preview, imageAspect: draft.aspect ?? 1, focal: draft.focal, fit: draft.fit,
-                                                boxAspect: max(screenAspect, 1 / screenAspect), label: L("send.landscape"))
-                                FramePreviewBox(image: preview, imageAspect: draft.aspect ?? 1, focal: draft.focal, fit: draft.fit,
-                                                boxAspect: min(screenAspect, 1 / screenAspect), label: L("send.portrait"))
+                                previewBox(draft, .landscape)
+                                previewBox(draft, .portrait)
                                     .frame(width: 104)
+                            }
+                            if canFrame(draft) {
+                                Text(L("ios.framing.editHint"))
+                                    .font(.footnote)
+                                    .foregroundStyle(Palette.textMuted)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
 
@@ -76,9 +97,33 @@ struct ItemEditorSheet: View {
                     }
                 }
                 .task(id: draft.trim?.startMs) { await loadPreview(draft) }
+                .sheet(item: $framingEditor) { o in
+                    FramingEditorSheet(image: preview, photoAspect: draft.aspect ?? 1, boxAspect: boxAspect(o), orientation: o,
+                                       pixelSize: draft.info?.pixelSize, focal: draft.focal, initial: draft.framing?[o]) { view in
+                        model.setView(draftId, o, view)
+                    }
+                }
             }
         }
         .presentationDragIndicator(.visible)
+    }
+
+    /// A small preview showing the §3 result; with framing it opens the editor for its shape.
+    @ViewBuilder
+    private func previewBox(_ draft: Draft, _ o: ScreenOrientation) -> some View {
+        let label = o == .landscape ? L("send.landscape") : L("send.portrait")
+        // Framing applies in fill mode only; in fit mode it is kept but unused (framing.md §2).
+        let view = Framing.view(for: o, framing: draft.fit == .fill ? draft.framing : nil,
+                                focal: FocalPoint(x: draft.focal.x, y: draft.focal.y)).view
+        let box = FramePreviewBox(image: preview, imageAspect: draft.aspect ?? 1, view: view, fit: draft.fit, boxAspect: boxAspect(o), label: label)
+        if canFrame(draft) {
+            Button { framingEditor = o } label: { box }
+                .buttonStyle(.plain)
+                .accessibilityLabel(view.zoom > 1 ? L("ios.framing.zoomed", ["orientation": label, "zoom": Framing.zoomText(view.zoom)]) : label)
+                .accessibilityHint(L("ios.framing.openHint"))
+        } else {
+            box
+        }
     }
 
     private func binding<T>(_ keyPath: WritableKeyPath<Draft, T>, default value: T) -> Binding<T> {
@@ -245,7 +290,8 @@ struct FocalPicker: View {
 struct FramePreviewBox: View {
     let image: UIImage?
     let imageAspect: Double
-    let focal: CGPoint
+    /// The view to show (framing.md §3): the focal point at 1× without framing.
+    let view: FramingView
     let fit: Fit
     let boxAspect: Double
     let label: String
@@ -261,18 +307,15 @@ struct FramePreviewBox: View {
                             Image(uiImage: image).resizable().scaledToFill().frame(width: w, height: h).blur(radius: 14).opacity(0.75).clipped()
                             Image(uiImage: image).resizable().scaledToFit().frame(width: w, height: h)
                         } else {
-                            let pos = Framing.coverPosition(focal: focal, imageAspect: imageAspect, boxAspect: boxAspect)
-                            let iw = imageAspect >= boxAspect ? h * imageAspect : w
-                            let ih = imageAspect >= boxAspect ? h : w / imageAspect
-                            Image(uiImage: image).resizable()
-                                .frame(width: iw, height: ih)
-                                .offset(x: -(iw - w) * pos.x, y: -(ih - h) * pos.y)
+                            CroppedPhoto(image: Image(uiImage: image),
+                                         crop: Framing.unitCrop(screenAspect: boxAspect, photoAspect: imageAspect, view: view))
+                                .frame(width: w, height: h)
                         }
                     }
                 }
                 .frame(width: w, height: h)
                 .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
-                .animation(.snappy(duration: 0.2), value: focal)
+                .animation(.snappy(duration: 0.2), value: view)
                 .animation(.snappy(duration: 0.2), value: fit)
             }
             .aspectRatio(boxAspect, contentMode: .fit)

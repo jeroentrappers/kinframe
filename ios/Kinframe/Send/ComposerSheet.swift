@@ -127,7 +127,9 @@ struct ComposerSheet: View {
                 if sendingJob == nil, destination != nil, !model.drafts.isEmpty || importing > 0 { sendBar }
             }
             .sheet(item: Binding(get: { editing.map(EditingID.init) }, set: { editing = $0?.id })) { item in
-                ItemEditorSheet(model: model, draftId: item.id, frames: frame.map { [$0] } ?? [])
+                ItemEditorSheet(model: model, draftId: item.id, frames: frame.map { [$0] } ?? [],
+                                // Zoom only when every server it goes to stores framing (docs/spec/framing.md §7).
+                                framingEnabled: owners.allSatisfy { $0.discovery?.framing == true })
             }
             .sheet(isPresented: $changing) {
                 DestinationSheet(current: destination, postable: postable) { d, names in

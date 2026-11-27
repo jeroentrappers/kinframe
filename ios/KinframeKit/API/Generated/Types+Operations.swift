@@ -5470,25 +5470,33 @@ public enum Operations {
                     public var focalPoint: Components.Schemas.FocalPoint?
                     /// - Remark: Generated from `#/paths/v1/items/{itemId}/PATCH/requestBody/json/fit`.
                     public var fit: Components.Schemas.Fit?
+                    /// Replaces the framing; null clears it. Without `focal_point`, the focal point moves to its centre.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/items/{itemId}/PATCH/requestBody/json/framing`.
+                    public var framing: Components.Schemas.Framing?
                     /// Creates a new `JsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - caption:
                     ///   - focalPoint:
                     ///   - fit:
+                    ///   - framing: Replaces the framing; null clears it. Without `focal_point`, the focal point moves to its centre.
                     public init(
                         caption: Swift.String? = nil,
                         focalPoint: Components.Schemas.FocalPoint? = nil,
-                        fit: Components.Schemas.Fit? = nil
+                        fit: Components.Schemas.Fit? = nil,
+                        framing: Components.Schemas.Framing? = nil
                     ) {
                         self.caption = caption
                         self.focalPoint = focalPoint
                         self.fit = fit
+                        self.framing = framing
                     }
                     public enum CodingKeys: String, CodingKey {
                         case caption
                         case focalPoint = "focal_point"
                         case fit
+                        case framing
                     }
                 }
                 /// - Remark: Generated from `#/paths/v1/items/{itemId}/PATCH/requestBody/content/application\/json`.
@@ -43849,7 +43857,7 @@ public enum Operations {
             }
         }
     }
-    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override).
     ///
     /// - Remark: HTTP `PATCH /v1/device/placements/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/placements/{placementId}/patch(devicePatchPlacement)`.
@@ -43893,6 +43901,10 @@ public enum Operations {
                     public var fit: Components.Schemas.Fit?
                     /// - Remark: Generated from `#/paths/v1/device/placements/{placementId}/PATCH/requestBody/json/focal_point`.
                     public var focalPoint: Components.Schemas.FocalPoint?
+                    /// The frame's own framing for this placement (`framing_override`); null clears it.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/device/placements/{placementId}/PATCH/requestBody/json/framing`.
+                    public var framing: Components.Schemas.Framing?
                     /// - Remark: Generated from `#/paths/v1/device/placements/{placementId}/PATCH/requestBody/json/rotation`.
                     @frozen public enum RotationPayload: Int, Codable, Hashable, Sendable, CaseIterable {
                         case _0 = 0
@@ -43909,18 +43921,21 @@ public enum Operations {
                     ///   - trashed:
                     ///   - fit:
                     ///   - focalPoint:
+                    ///   - framing: The frame's own framing for this placement (`framing_override`); null clears it.
                     ///   - rotation:
                     public init(
                         hidden: Swift.Bool? = nil,
                         trashed: Swift.Bool? = nil,
                         fit: Components.Schemas.Fit? = nil,
                         focalPoint: Components.Schemas.FocalPoint? = nil,
+                        framing: Components.Schemas.Framing? = nil,
                         rotation: Operations.DevicePatchPlacement.Input.Body.JsonPayload.RotationPayload? = nil
                     ) {
                         self.hidden = hidden
                         self.trashed = trashed
                         self.fit = fit
                         self.focalPoint = focalPoint
+                        self.framing = framing
                         self.rotation = rotation
                     }
                     public enum CodingKeys: String, CodingKey {
@@ -43928,6 +43943,7 @@ public enum Operations {
                         case trashed
                         case fit
                         case focalPoint = "focal_point"
+                        case framing
                         case rotation
                     }
                 }

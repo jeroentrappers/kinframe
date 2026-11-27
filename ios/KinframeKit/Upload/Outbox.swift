@@ -14,6 +14,8 @@ public struct OutboxItem: Codable, Equatable, Sendable {
     public var caption: String?
     public var fit: Fit?
     public var focal: FocalPoint?
+    /// Zoom and position per orientation, only those the person changed (docs/spec/framing.md §4).
+    public var framing: ItemFraming?
     public var trim: Trim?
     public var includeAudio: Bool?
     public var capturedAt: Date?
@@ -32,13 +34,14 @@ public struct OutboxItem: Codable, Equatable, Sendable {
     public var liveAudio: Bool?
 
     public init(upload: TusUpload, kind: MediaKind, caption: String? = nil, fit: Fit? = nil, focal: FocalPoint? = nil,
-                trim: Trim? = nil, includeAudio: Bool? = nil, capturedAt: Date? = nil, thumbnail: String? = nil,
+                framing: ItemFraming? = nil, trim: Trim? = nil, includeAudio: Bool? = nil, capturedAt: Date? = nil, thumbnail: String? = nil,
                 motion: TusUpload? = nil, liveAudio: Bool? = nil) {
         self.upload = upload
         self.kind = kind
         self.caption = caption
         self.fit = fit
         self.focal = focal
+        self.framing = framing
         self.trim = trim
         self.includeAudio = includeAudio
         self.capturedAt = capturedAt
@@ -158,6 +161,7 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
                 var caption: String?
                 var fit: String?
                 var focal_point: FocalPoint?
+                var framing: ItemFraming?
                 var trim: Trim?
                 var include_audio: Bool?
                 var captured_at: String?
@@ -191,6 +195,7 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
                 caption: caption?.isEmpty == false ? caption : nil,
                 fit: i.fit?.rawValue,
                 focal_point: i.focal,
+                framing: i.kind == .photo ? i.framing : nil,
                 // A prepared video already has the trim applied; the server would transcode to apply it again.
                 trim: i.kind == .video && !i.baked ? i.trim : nil,
                 include_audio: includeAudio,

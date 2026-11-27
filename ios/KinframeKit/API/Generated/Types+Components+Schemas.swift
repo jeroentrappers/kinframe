@@ -308,6 +308,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/google_photos_import`.
             public var googlePhotosImport: Swift.Bool?
+            /// True when the server stores framing (zoom and position per orientation, docs/spec/framing.md).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/framing`.
+            public var framing: Swift.Bool?
             /// True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
             /// (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
             ///
@@ -432,6 +436,7 @@ extension Components {
             ///   - photoSourceProviders: The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
             ///   - photoSourcesPrivateNetworks: True when sources may reach private network addresses (a home-network Immich such as
             ///   - googlePhotosImport: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+            ///   - framing: True when the server stores framing (zoom and position per orientation, docs/spec/framing.md).
             ///   - emailInbox: True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
             ///   - emailInboxDomain: The mail domain of inbox addresses (`<slug>-<random>@<domain>`); null without `email_inbox`.
             ///   - telegram: True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
@@ -472,6 +477,7 @@ extension Components {
                 photoSourceProviders: [Components.Schemas.PhotoSourceProvider]? = nil,
                 photoSourcesPrivateNetworks: Swift.Bool? = nil,
                 googlePhotosImport: Swift.Bool? = nil,
+                framing: Swift.Bool? = nil,
                 emailInbox: Swift.Bool? = nil,
                 emailInboxDomain: Swift.String? = nil,
                 telegram: Swift.Bool? = nil,
@@ -512,6 +518,7 @@ extension Components {
                 self.photoSourceProviders = photoSourceProviders
                 self.photoSourcesPrivateNetworks = photoSourcesPrivateNetworks
                 self.googlePhotosImport = googlePhotosImport
+                self.framing = framing
                 self.emailInbox = emailInbox
                 self.emailInboxDomain = emailInboxDomain
                 self.telegram = telegram
@@ -553,6 +560,7 @@ extension Components {
                 case photoSourceProviders = "photo_source_providers"
                 case photoSourcesPrivateNetworks = "photo_sources_private_networks"
                 case googlePhotosImport = "google_photos_import"
+                case framing
                 case emailInbox = "email_inbox"
                 case emailInboxDomain = "email_inbox_domain"
                 case telegram
@@ -2993,6 +3001,64 @@ extension Components {
                 case y
             }
         }
+        /// Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+        /// `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Framing`.
+        public struct Framing: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Framing/landscape`.
+            public var landscape: Components.Schemas.FramingView?
+            /// - Remark: Generated from `#/components/schemas/Framing/portrait`.
+            public var portrait: Components.Schemas.FramingView?
+            /// Creates a new `Framing`.
+            ///
+            /// - Parameters:
+            ///   - landscape:
+            ///   - portrait:
+            public init(
+                landscape: Components.Schemas.FramingView? = nil,
+                portrait: Components.Schemas.FramingView? = nil
+            ) {
+                self.landscape = landscape
+                self.portrait = portrait
+            }
+            public enum CodingKeys: String, CodingKey {
+                case landscape
+                case portrait
+            }
+        }
+        /// The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop.
+        ///
+        /// - Remark: Generated from `#/components/schemas/FramingView`.
+        public struct FramingView: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FramingView/x`.
+            public var x: Swift.Double
+            /// - Remark: Generated from `#/components/schemas/FramingView/y`.
+            public var y: Swift.Double
+            /// - Remark: Generated from `#/components/schemas/FramingView/zoom`.
+            public var zoom: Swift.Double
+            /// Creates a new `FramingView`.
+            ///
+            /// - Parameters:
+            ///   - x:
+            ///   - y:
+            ///   - zoom:
+            public init(
+                x: Swift.Double,
+                y: Swift.Double,
+                zoom: Swift.Double
+            ) {
+                self.x = x
+                self.y = y
+                self.zoom = zoom
+            }
+            public enum CodingKeys: String, CodingKey {
+                case x
+                case y
+                case zoom
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/Reaction`.
         @frozen public enum Reaction: String, Codable, Hashable, Sendable, CaseIterable {
             case love = "love"
@@ -3045,6 +3111,8 @@ extension Components {
                 public var focalPoint: Components.Schemas.FocalPoint?
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/fit`.
                 public var fit: Components.Schemas.Fit?
+                /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/framing`.
+                public var framing: Components.Schemas.Framing?
                 /// Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                 ///
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/trim`.
@@ -3116,6 +3184,7 @@ extension Components {
                 ///   - caption:
                 ///   - focalPoint:
                 ///   - fit:
+                ///   - framing:
                 ///   - trim: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                 ///   - includeAudio: For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
                 ///   - capturedAt: Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
@@ -3129,6 +3198,7 @@ extension Components {
                     caption: Swift.String? = nil,
                     focalPoint: Components.Schemas.FocalPoint? = nil,
                     fit: Components.Schemas.Fit? = nil,
+                    framing: Components.Schemas.Framing? = nil,
                     trim: Components.Schemas.SendCreate.ItemsPayloadPayload.TrimPayload? = nil,
                     includeAudio: Swift.Bool? = nil,
                     capturedAt: Foundation.Date? = nil,
@@ -3142,6 +3212,7 @@ extension Components {
                     self.caption = caption
                     self.focalPoint = focalPoint
                     self.fit = fit
+                    self.framing = framing
                     self.trim = trim
                     self.includeAudio = includeAudio
                     self.capturedAt = capturedAt
@@ -3156,6 +3227,7 @@ extension Components {
                     case caption
                     case focalPoint = "focal_point"
                     case fit
+                    case framing
                     case trim
                     case includeAudio = "include_audio"
                     case capturedAt = "captured_at"
@@ -3227,6 +3299,8 @@ extension Components {
             public var focalPoint: Components.Schemas.FocalPoint?
             /// - Remark: Generated from `#/components/schemas/Item/fit`.
             public var fit: Components.Schemas.Fit?
+            /// - Remark: Generated from `#/components/schemas/Item/framing`.
+            public var framing: Components.Schemas.Framing?
             /// - Remark: Generated from `#/components/schemas/Item/width`.
             public var width: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/Item/height`.
@@ -3304,6 +3378,7 @@ extension Components {
             ///   - captionEdited:
             ///   - focalPoint:
             ///   - fit:
+            ///   - framing:
             ///   - width:
             ///   - height:
             ///   - durationMs:
@@ -3330,6 +3405,7 @@ extension Components {
                 captionEdited: Swift.Bool? = nil,
                 focalPoint: Components.Schemas.FocalPoint? = nil,
                 fit: Components.Schemas.Fit? = nil,
+                framing: Components.Schemas.Framing? = nil,
                 width: Swift.Int? = nil,
                 height: Swift.Int? = nil,
                 durationMs: Swift.Int? = nil,
@@ -3356,6 +3432,7 @@ extension Components {
                 self.captionEdited = captionEdited
                 self.focalPoint = focalPoint
                 self.fit = fit
+                self.framing = framing
                 self.width = width
                 self.height = height
                 self.durationMs = durationMs
@@ -3383,6 +3460,7 @@ extension Components {
                 case captionEdited = "caption_edited"
                 case focalPoint = "focal_point"
                 case fit
+                case framing
                 case width
                 case height
                 case durationMs = "duration_ms"
@@ -3541,6 +3619,8 @@ extension Components {
             public var fitOverride: Components.Schemas.Fit?
             /// - Remark: Generated from `#/components/schemas/Placement/focal_override`.
             public var focalOverride: Components.Schemas.FocalPoint?
+            /// - Remark: Generated from `#/components/schemas/Placement/framing_override`.
+            public var framingOverride: Components.Schemas.Framing?
             /// - Remark: Generated from `#/components/schemas/Placement/rotation`.
             @frozen public enum RotationPayload: Int, Codable, Hashable, Sendable, CaseIterable {
                 case _0 = 0
@@ -3646,6 +3726,7 @@ extension Components {
             ///   - pendingModeration:
             ///   - fitOverride:
             ///   - focalOverride:
+            ///   - framingOverride:
             ///   - rotation:
             ///   - reaction:
             ///   - replies:
@@ -3674,6 +3755,7 @@ extension Components {
                 pendingModeration: Swift.Bool? = nil,
                 fitOverride: Components.Schemas.Fit? = nil,
                 focalOverride: Components.Schemas.FocalPoint? = nil,
+                framingOverride: Components.Schemas.Framing? = nil,
                 rotation: Components.Schemas.Placement.RotationPayload? = nil,
                 reaction: Components.Schemas.Reaction? = nil,
                 replies: Components.Schemas.Placement.RepliesPayload? = nil,
@@ -3702,6 +3784,7 @@ extension Components {
                 self.pendingModeration = pendingModeration
                 self.fitOverride = fitOverride
                 self.focalOverride = focalOverride
+                self.framingOverride = framingOverride
                 self.rotation = rotation
                 self.reaction = reaction
                 self.replies = replies
@@ -3731,6 +3814,7 @@ extension Components {
                 case pendingModeration = "pending_moderation"
                 case fitOverride = "fit_override"
                 case focalOverride = "focal_override"
+                case framingOverride = "framing_override"
                 case rotation
                 case reaction
                 case replies
@@ -9577,6 +9661,10 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/TvSlide/focal_point`.
             public var focalPoint: Components.Schemas.FocalPoint?
+            /// The placement's framing (its override, else the item's), docs/spec/framing.md §6.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/framing`.
+            public var framing: Components.Schemas.Framing?
             /// The placement's fit override, else the item's; null = the frame setting.
             ///
             /// - Remark: Generated from `#/components/schemas/TvSlide/fit`.
@@ -9611,6 +9699,7 @@ extension Components {
             ///   - height:
             ///   - durationMs:
             ///   - focalPoint: The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+            ///   - framing: The placement's framing (its override, else the item's), docs/spec/framing.md §6.
             ///   - fit: The placement's fit override, else the item's; null = the frame setting.
             ///   - rotation: Clockwise rotation set on the frame for this placement.
             public init(
@@ -9628,6 +9717,7 @@ extension Components {
                 height: Swift.Int,
                 durationMs: Swift.Int? = nil,
                 focalPoint: Components.Schemas.FocalPoint? = nil,
+                framing: Components.Schemas.Framing? = nil,
                 fit: Components.Schemas.Fit? = nil,
                 rotation: Components.Schemas.TvSlide.RotationPayload? = nil
             ) {
@@ -9645,6 +9735,7 @@ extension Components {
                 self.height = height
                 self.durationMs = durationMs
                 self.focalPoint = focalPoint
+                self.framing = framing
                 self.fit = fit
                 self.rotation = rotation
             }
@@ -9663,6 +9754,7 @@ extension Components {
                 case height
                 case durationMs = "duration_ms"
                 case focalPoint = "focal_point"
+                case framing
                 case fit
                 case rotation
             }
@@ -21546,6 +21638,8 @@ extension Components {
             public var focalPoint: Components.Schemas.FocalPoint?
             /// - Remark: Generated from `#/components/schemas/FederationItem/fit`.
             public var fit: Components.Schemas.Fit?
+            /// - Remark: Generated from `#/components/schemas/FederationItem/framing`.
+            public var framing: Components.Schemas.Framing?
             /// - Remark: Generated from `#/components/schemas/FederationItem/width`.
             public var width: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/FederationItem/height`.
@@ -21581,6 +21675,7 @@ extension Components {
             ///   - capturedAt:
             ///   - focalPoint:
             ///   - fit:
+            ///   - framing:
             ///   - width:
             ///   - height:
             ///   - durationMs:
@@ -21598,6 +21693,7 @@ extension Components {
                 capturedAt: Foundation.Date? = nil,
                 focalPoint: Components.Schemas.FocalPoint? = nil,
                 fit: Components.Schemas.Fit? = nil,
+                framing: Components.Schemas.Framing? = nil,
                 width: Swift.Int? = nil,
                 height: Swift.Int? = nil,
                 durationMs: Swift.Int? = nil,
@@ -21615,6 +21711,7 @@ extension Components {
                 self.capturedAt = capturedAt
                 self.focalPoint = focalPoint
                 self.fit = fit
+                self.framing = framing
                 self.width = width
                 self.height = height
                 self.durationMs = durationMs
@@ -21633,6 +21730,7 @@ extension Components {
                 case capturedAt = "captured_at"
                 case focalPoint = "focal_point"
                 case fit
+                case framing
                 case width
                 case height
                 case durationMs = "duration_ms"

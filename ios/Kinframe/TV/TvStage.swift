@@ -108,7 +108,8 @@ struct TvStageView: View {
     }
 }
 
-/// One slide: a photo with its fit and focal point, or a video playing to the end.
+/// One slide: a photo with its fit, focal point and framing, or a video playing to the end. The stage has no Ken
+/// Burns motion, so a framed photo stays still inside its view (framing.md §3.4).
 private struct TvSlideView: View {
     let slide: TvSlide
     let tick: Int
@@ -126,10 +127,16 @@ private struct TvSlideView: View {
                                 image.resizable().scaledToFill().blur(radius: 40).opacity(0.5)
                                     .frame(width: geo.size.width, height: geo.size.height).clipped()
                             }
-                            image.resizable()
-                                .aspectRatio(contentMode: fill ? .fill : .fit)
-                                .frame(width: geo.size.width, height: geo.size.height, alignment: alignment)
-                                .clipped()
+                            if fill, let crop = TvLogic.crop(slide, screen: geo.size) {
+                                // The view for the TV's orientation, cropped by the one rule (docs/spec/framing.md §3, §6).
+                                CroppedPhoto(image: image, crop: crop)
+                                    .frame(width: geo.size.width, height: geo.size.height)
+                            } else {
+                                image.resizable()
+                                    .aspectRatio(contentMode: fill ? .fill : .fit)
+                                    .frame(width: geo.size.width, height: geo.size.height, alignment: alignment)
+                                    .clipped()
+                            }
                         }
                     } else if phase.error != nil {
                         Image(systemName: "photo").font(.largeTitle).foregroundStyle(.white.opacity(0.4))
@@ -143,7 +150,7 @@ private struct TvSlideView: View {
         .ignoresSafeArea()
     }
 
-    /// Where a filled photo is anchored, from its focal point.
+    /// Where a filled photo is anchored, from its focal point (only when the slide has no size).
     private var alignment: Alignment {
         guard let f = slide.focalPoint else { return .center }
         let h: HorizontalAlignment = f.x < 0.34 ? .leading : f.x > 0.66 ? .trailing : .center

@@ -23335,7 +23335,7 @@ public struct Client: APIProtocol {
             }
         )
     }
-    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+    /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override).
     ///
     /// - Remark: HTTP `PATCH /v1/device/placements/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/placements/{placementId}/patch(devicePatchPlacement)`.

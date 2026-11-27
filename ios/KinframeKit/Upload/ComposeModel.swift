@@ -14,6 +14,8 @@ public struct Draft: Identifiable, Sendable {
     public var caption: String?
     public var fit: Fit = .fill
     public var focal = CGPoint(x: 0.5, y: 0.5)
+    /// Zoom and position per orientation (docs/spec/framing.md §4): only the orientations the person changed.
+    public var framing: ItemFraming?
     public var trim: Trim?
     public var includeAudio = true
     /// The motion clip of a Live Photo, staged next to the still.
@@ -144,6 +146,24 @@ public final class ComposeModel {
         change(&drafts[i])
     }
 
+    /// A tap on the photo: the focal point, and both views' centres move there keeping their zoom (framing.md §4).
+    public func setFocal(_ id: UUID, _ point: CGPoint) {
+        let p = Framing.clampFocal(point)
+        update(id) { d in
+            d.focal = p
+            d.framing = Framing.recentred(d.framing, at: p)
+        }
+    }
+
+    /// Sets (or with nil, resets) one orientation's view.
+    public func setView(_ id: UUID, _ o: ScreenOrientation, _ view: FramingView?) {
+        update(id) { d in
+            var f = d.framing ?? ItemFraming()
+            f[o] = view
+            d.framing = Framing.sendable(f)
+        }
+    }
+
     public func caption(of draft: Draft) -> String {
         draft.caption ?? sharedCaption
     }
@@ -255,13 +275,16 @@ public final class ComposeModel {
                     try? FileManager.default.removeItem(at: clip)
                 }
             }
-            let focal = Framing.clampFocal(d.focal)
+            // Framing is for photos (videos ignore it, framing.md §2); the focal point follows its centre (§2.1).
+            let framing = d.kind == .photo ? Framing.sendable(d.framing) : nil
+            let focal = Framing.focal(for: framing, tapped: d.focal)
             items.append(OutboxItem(
                 upload: upload,
                 kind: d.kind,
                 caption: caption(of: d).trimmingCharacters(in: .whitespacesAndNewlines),
                 fit: d.fit,
                 focal: FocalPoint(x: focal.x, y: focal.y),
+                framing: framing,
                 trim: d.kind == .video ? d.trim : nil,
                 includeAudio: d.kind == .video ? d.includeAudio : nil,
                 thumbnail: thumbnail,

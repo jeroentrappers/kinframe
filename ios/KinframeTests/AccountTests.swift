@@ -68,6 +68,12 @@ final class AccountLogicTests: XCTestCase {
         XCTAssertNil(WebLinks.page("/privacy", web: "not a url"))
     }
 
+    func testDiscoveryFramingFlag() throws {
+        let base = #""name":"k","version":"1","api":"https://k.example.org/v1""#
+        XCTAssertTrue(try JSONDecoder().decode(Discovery.self, from: Data("{\(base),\"framing\":true}".utf8)).framing)
+        XCTAssertFalse(try JSONDecoder().decode(Discovery.self, from: Data("{\(base)}".utf8)).framing, "older servers")
+    }
+
     func testDiscoveryKnowsWhetherThereIsAShop() throws {
         let base = #""name":"k","version":"1","api":"https://k.example.org/v1""#
         let withShop = try JSONDecoder().decode(Discovery.self, from: Data("{\(base),\"shop\":{\"brand\":\"kinframe\",\"currency\":\"EUR\"}}".utf8))
