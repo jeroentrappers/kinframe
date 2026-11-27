@@ -1,6 +1,6 @@
 # Framing: zoom and position per orientation
 
-Status: building (2026-11-27). Extends the focal point (product-spec.md §4 "Adjust", §5 "Fill/fit").
+Status: built 2026-11-27 (server, web, iOS, Android); open: edit after sending on iOS and web, the frame's own editor. Extends the focal point (product-spec.md §4 "Adjust", §5 "Fill/fit").
 
 ## 1. Why
 
@@ -163,8 +163,9 @@ the view for its orientation (always landscape in practice) and follows §3 and 
 
 | | Android family | iOS / Mac | Web | Android frame | Browser frame | TV |
 |---|---|---|---|---|---|---|
-| Show framing (§3) | — | — | — | yes | yes | yes (iOS TV stage) |
-| Edit framing when sending and after | yes | yes | yes | — | — | — |
+| Show framing (§3) | — | — | — | yes | yes | yes (web; iOS TV stage without Ken Burns) |
+| Edit framing when sending | yes | yes | yes | — | — | — |
+| Edit framing after sending | yes | later | later | — | — | — |
 | Frame owner's override: shown | — | — | — | yes | yes | yes |
 | Frame owner's override: editor on the frame | — | — | — | later | later | — |
 

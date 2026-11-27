@@ -146,6 +146,7 @@ in `ios-strings*.json`.
 | Choose a folder, paste, drop anywhere | yes | skipped | skipped | Desktop browser inputs; the picker and the share sheet cover a phone. |
 | Captions, apply to all | yes | yes | yes | |
 | Fill or fit, focal point, landscape and portrait previews | yes | yes | yes | |
+| Framing: zoom and position per orientation (docs/spec/framing.md) | new | new | new | When `discovery.framing`. Edit after sending: Android only so far. |
 | Trim videos, keep or drop the sound | yes | yes | yes | |
 | Live and Motion Photos | yes | yes | yes | |
 | Prepare on the device (photo-master-v1, video-master-v1) | yes | yes | yes | No client uploads full originals: a file that can't be prepared goes as it is only when it is already within 2560 px (web: a JPEG or WebP) or 1080p/30 fps, otherwise the item shows an error and isn't sent. The web app falls back to WebAssembly for photos (HEIC through libheif); a browser without an AAC encoder sends videos muted, with a note on the item. iOS prepares in the share extension too. |
