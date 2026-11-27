@@ -1,2 +1,2 @@
-• Minder lege ruimte bovenaan Chats, Nieuw bericht en andere schermen.
-• Elk tabblad heeft nu dezelfde kop.
+• Inzoomen en verschuiven: tik op het liggende of staande voorbeeld van een foto om in te zoomen en precies te kiezen wat het kader toont.
+• Wijzig het inzoomen en verschuiven van foto's die je al stuurde, vanuit de details van het bericht.

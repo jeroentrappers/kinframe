@@ -1,1 +1,2 @@
-- Elk tabblad heeft nu dezelfde kop, zodat de bovenkant van het scherm niet meer verspringt als je van tabblad wisselt.
+- Inzoomen en verschuiven: tik op het liggende of staande voorbeeld van een foto om in te zoomen en precies te kiezen wat het kader toont, apart voor liggende en staande kaders.
+- Op de Mac opent een melding van een fotobron nu Mijn fotobronnen.

@@ -1,1 +1,2 @@
-- Every tab now has the same header, so the top of the screen no longer jumps when you switch tabs.
+- Zoom and position: tap the landscape or portrait preview of a photo to zoom in and choose exactly what the frame shows, separately for landscape and portrait frames.
+- On the Mac, a photo source notification now opens My photo sources.

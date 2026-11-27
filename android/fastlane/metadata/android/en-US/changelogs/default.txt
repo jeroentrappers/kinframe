@@ -1,2 +1,2 @@
-• Less empty space at the top of Chats, New post and other screens.
-• Every tab now has the same header.
+• Zoom and position: tap the landscape or portrait preview of a photo to zoom in and choose exactly what the frame shows.
+• Change the zoom and position of photos you already sent, from the send's details.
