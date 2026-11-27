@@ -5371,8 +5371,9 @@ type Change struct {
 		FocalOverride *FocalPoint `json:"focal_override,omitempty"`
 
 		// FrameId UUIDv7
-		FrameId Id   `json:"frame_id"`
-		Hidden  bool `json:"hidden"`
+		FrameId         Id       `json:"frame_id"`
+		FramingOverride *Framing `json:"framing_override,omitempty"`
+		Hidden          bool     `json:"hidden"`
 
 		// Id UUIDv7
 		Id   Id   `json:"id"`
@@ -5975,6 +5976,9 @@ type Discovery struct {
 
 	// Feeds True when the server supports feeds and subscriptions (docs/spec/feeds.md).
 	Feeds *bool `json:"feeds,omitempty"`
+
+	// Framing True when the server stores framing (zoom and position per orientation, docs/spec/framing.md).
+	Framing *bool `json:"framing,omitempty"`
 
 	// GooglePhotosImport True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
 	GooglePhotosImport *bool `json:"google_photos_import,omitempty"`
@@ -6612,8 +6616,12 @@ type FederationItem struct {
 
 	// FocalPoint Relative to the master rendition, 0..1 from top-left.
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
-	HasAudio   *bool       `json:"has_audio,omitempty"`
-	Height     *int        `json:"height,omitempty"`
+
+	// Framing Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+	// `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+	Framing  *Framing `json:"framing,omitempty"`
+	HasAudio *bool    `json:"has_audio,omitempty"`
+	Height   *int     `json:"height,omitempty"`
 
 	// Id UUIDv7
 	Id Id `json:"id"`
@@ -7802,6 +7810,23 @@ type FrameUpdate struct {
 	VersionName string `json:"version_name"`
 }
 
+// Framing Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+// `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+type Framing struct {
+	// Landscape The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop.
+	Landscape *FramingView `json:"landscape,omitempty"`
+
+	// Portrait The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop.
+	Portrait *FramingView `json:"portrait,omitempty"`
+}
+
+// FramingView The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop.
+type FramingView struct {
+	X    float32 `json:"x"`
+	Y    float32 `json:"y"`
+	Zoom float32 `json:"zoom"`
+}
+
 // Freshness How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
 // today) down to 0 (14 days or more). Words, not numbers: `fresh` "Fresh", `recent` "4 days", `quiet`
 // "2 weeks quiet", `never` "No photos yet".
@@ -8050,9 +8075,10 @@ type Item struct {
 
 	// FormerSenderName Handed over when its sender deleted their account with "Leave my photos to the families" (README §5.21):
 	// `sender_id` is now the new owner; show "<former_sender_name> (former member)" as the credit.
-	FormerSenderName *string `json:"former_sender_name,omitempty"`
-	HasAudio         *bool   `json:"has_audio,omitempty"`
-	Height           *int    `json:"height,omitempty"`
+	FormerSenderName *string  `json:"former_sender_name,omitempty"`
+	Framing          *Framing `json:"framing,omitempty"`
+	HasAudio         *bool    `json:"has_audio,omitempty"`
+	Height           *int     `json:"height,omitempty"`
 
 	// Id UUIDv7
 	Id Id `json:"id"`
@@ -9394,8 +9420,9 @@ type Placement struct {
 	FocalOverride *FocalPoint `json:"focal_override,omitempty"`
 
 	// FrameId UUIDv7
-	FrameId Id   `json:"frame_id"`
-	Hidden  bool `json:"hidden"`
+	FrameId         Id       `json:"frame_id"`
+	FramingOverride *Framing `json:"framing_override,omitempty"`
+	Hidden          bool     `json:"hidden"`
 
 	// Id UUIDv7
 	Id   Id   `json:"id"`
@@ -10318,6 +10345,10 @@ type SendCreate struct {
 
 		// FocalPoint Relative to the master rendition, 0..1 from top-left.
 		FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+
+		// Framing Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+		// `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+		Framing *Framing `json:"framing,omitempty"`
 
 		// Height Prepared uploads only. Pixel height the client produced.
 		Height *int `json:"height,omitempty"`
@@ -11408,7 +11439,10 @@ type TvSlide struct {
 
 	// FocalPoint The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
-	Height     int         `json:"height"`
+
+	// Framing The placement's framing (its override, else the item's), docs/spec/framing.md §6.
+	Framing *Framing `json:"framing,omitempty"`
+	Height  int      `json:"height"`
 
 	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
 	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
@@ -11865,10 +11899,13 @@ type DevicePatchPlacementJSONBody struct {
 	Fit *Fit `json:"fit,omitempty"`
 
 	// FocalPoint Relative to the master rendition, 0..1 from top-left.
-	FocalPoint *FocalPoint                           `json:"focal_point,omitempty"`
-	Hidden     *bool                                 `json:"hidden,omitempty"`
-	Rotation   *DevicePatchPlacementJSONBodyRotation `json:"rotation,omitempty"`
-	Trashed    *bool                                 `json:"trashed,omitempty"`
+	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+
+	// Framing The frame's own framing for this placement (`framing_override`); null clears it.
+	Framing  *Framing                              `json:"framing,omitempty"`
+	Hidden   *bool                                 `json:"hidden,omitempty"`
+	Rotation *DevicePatchPlacementJSONBodyRotation `json:"rotation,omitempty"`
+	Trashed  *bool                                 `json:"trashed,omitempty"`
 }
 
 // DevicePatchPlacementJSONBodyRotation defines parameters for DevicePatchPlacement.
@@ -12225,6 +12262,9 @@ type UpdateItemJSONBody struct {
 
 	// FocalPoint Relative to the master rendition, 0..1 from top-left.
 	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+
+	// Framing Replaces the framing; null clears it. Without `focal_point`, the focal point moves to its centre.
+	Framing *Framing `json:"framing,omitempty"`
 }
 
 // CreateKeepRequestParams defines parameters for CreateKeepRequest.

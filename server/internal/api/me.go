@@ -53,6 +53,7 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.PhotoSourceProviders = &providers
 	d.PhotoSourcesPrivateNetworks = ptr(len(providers) > 0 && s.guard.PrivateAllowed())
 	d.GooglePhotosImport = ptr(s.ps.google.Configured())
+	d.Framing = ptr(true) // docs/spec/framing.md
 	s.telegramDiscovery(&d)
 	s.socialDiscovery(&d)
 	s.chatDiscovery(&d)

@@ -613,6 +613,9 @@ paths:
                 caption: { type: [string, 'null'], maxLength: 280 }
                 focal_point: { $ref: '#/components/schemas/FocalPoint' }
                 fit: { $ref: '#/components/schemas/Fit' }
+                framing:
+                  oneOf: [ { $ref: '#/components/schemas/Framing' }, { type: 'null' } ]
+                  description: Replaces the framing; null clears it. Without `focal_point`, the focal point moves to its centre.
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Item' } } } }
         default: { $ref: '#/components/responses/Problem' }
@@ -3999,7 +4002,7 @@ paths:
       tags: [device]
       operationId: devicePatchPlacement
       security: [ { deviceAuth: [] } ]
-      description: Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+      description: Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override).
       parameters: [ { $ref: '#/components/parameters/PlacementId' } ]
       requestBody:
         required: true
@@ -4012,6 +4015,9 @@ paths:
                 trashed: { type: boolean }
                 fit: { $ref: '#/components/schemas/Fit' }
                 focal_point: { $ref: '#/components/schemas/FocalPoint' }
+                framing:
+                  oneOf: [ { $ref: '#/components/schemas/Framing' }, { type: 'null' } ]
+                  description: The frame's own framing for this placement (`framing_override`); null clears it.
                 rotation: { type: integer, enum: [0, 90, 180, 270] }
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
@@ -5114,6 +5120,10 @@ components:
           type: boolean
           default: false
           description: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+        framing:
+          type: boolean
+          default: false
+          description: True when the server stores framing (zoom and position per orientation, docs/spec/framing.md).
         email_inbox:
           type: boolean
           default: false
@@ -5806,6 +5816,24 @@ components:
         x: { type: number, minimum: 0, maximum: 1 }
         y: { type: number, minimum: 0, maximum: 1 }
 
+    Framing:
+      type: object
+      description: |
+        Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+        `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+      properties:
+        landscape: { $ref: '#/components/schemas/FramingView' }
+        portrait: { $ref: '#/components/schemas/FramingView' }
+
+    FramingView:
+      type: object
+      description: The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop.
+      required: [x, y, zoom]
+      properties:
+        x: { type: number, minimum: 0, maximum: 1 }
+        y: { type: number, minimum: 0, maximum: 1 }
+        zoom: { type: number, minimum: 1, maximum: 4 }
+
     Reaction:
       type: string
       enum: [love, laugh, wow, sad]
@@ -5854,6 +5882,7 @@ components:
               caption: { type: [string, 'null'], maxLength: 280 }
               focal_point: { $ref: '#/components/schemas/FocalPoint' }
               fit: { $ref: '#/components/schemas/Fit' }
+              framing: { $ref: '#/components/schemas/Framing' }
               trim:
                 type: object
                 description: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
@@ -5909,6 +5938,7 @@ components:
         caption_edited: { type: boolean }
         focal_point: { $ref: '#/components/schemas/FocalPoint' }
         fit: { $ref: '#/components/schemas/Fit' }
+        framing: { oneOf: [ { $ref: '#/components/schemas/Framing' }, { type: 'null' } ] }
         width: { type: integer }
         height: { type: integer }
         duration_ms: { type: [integer, 'null'] }
@@ -6025,6 +6055,7 @@ components:
         pending_moderation: { type: boolean }
         fit_override: { oneOf: [ { $ref: '#/components/schemas/Fit' }, { type: 'null' } ] }
         focal_override: { oneOf: [ { $ref: '#/components/schemas/FocalPoint' }, { type: 'null' } ] }
+        framing_override: { oneOf: [ { $ref: '#/components/schemas/Framing' }, { type: 'null' } ] }
         rotation: { type: integer, enum: [0, 90, 180, 270] }
         reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
         replies:
@@ -7597,6 +7628,9 @@ components:
         focal_point:
           oneOf: [ { $ref: '#/components/schemas/FocalPoint' }, { type: 'null' } ]
           description: The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+        framing:
+          oneOf: [ { $ref: '#/components/schemas/Framing' }, { type: 'null' } ]
+          description: The placement's framing (its override, else the item's), docs/spec/framing.md §6.
         fit: { oneOf: [ { $ref: '#/components/schemas/Fit' }, { type: 'null' } ], description: 'The placement''s fit override, else the item''s; null = the frame setting.' }
         rotation: { type: integer, enum: [0, 90, 180, 270], description: Clockwise rotation set on the frame for this placement. }
 
@@ -10472,6 +10506,7 @@ components:
         captured_at: { type: [string, 'null'], format: date-time }
         focal_point: { $ref: '#/components/schemas/FocalPoint' }
         fit: { $ref: '#/components/schemas/Fit' }
+        framing: { $ref: '#/components/schemas/Framing' }
         width: { type: integer }
         height: { type: integer }
         duration_ms: { type: [integer, 'null'] }

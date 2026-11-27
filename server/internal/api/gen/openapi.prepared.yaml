@@ -1898,6 +1898,10 @@ components:
                     default: false
                     description: True when the server supports feeds and subscriptions (docs/spec/feeds.md).
                     type: boolean
+                framing:
+                    default: false
+                    description: True when the server stores framing (zoom and position per orientation, docs/spec/framing.md).
+                    type: boolean
                 google_photos_import:
                     default: false
                     description: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
@@ -2984,6 +2988,8 @@ components:
                     $ref: '#/components/schemas/Fit'
                 focal_point:
                     $ref: '#/components/schemas/FocalPoint'
+                framing:
+                    $ref: '#/components/schemas/Framing'
                 has_audio:
                     nullable: true
                     type: boolean
@@ -4895,6 +4901,36 @@ components:
                 - size
                 - published_at
             type: object
+        Framing:
+            description: |
+                Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+                `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+            properties:
+                landscape:
+                    $ref: '#/components/schemas/FramingView'
+                portrait:
+                    $ref: '#/components/schemas/FramingView'
+            type: object
+        FramingView:
+            description: The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop.
+            properties:
+                x:
+                    maximum: 1
+                    minimum: 0
+                    type: number
+                "y":
+                    maximum: 1
+                    minimum: 0
+                    type: number
+                zoom:
+                    maximum: 4
+                    minimum: 1
+                    type: number
+            required:
+                - x
+                - "y"
+                - zoom
+            type: object
         Freshness:
             description: |
                 How recently a frame (or family) got new photos from people (README §5.20). The ring: `level` from 1 (shared
@@ -5324,6 +5360,10 @@ components:
                         `sender_id` is now the new owner; show "<former_sender_name> (former member)" as the credit.
                     nullable: true
                     type: string
+                framing:
+                    allOf:
+                        - $ref: '#/components/schemas/Framing'
+                    nullable: true
                 has_audio:
                     nullable: true
                     type: boolean
@@ -7529,6 +7569,10 @@ components:
                     nullable: true
                 frame_id:
                     $ref: '#/components/schemas/Id'
+                framing_override:
+                    allOf:
+                        - $ref: '#/components/schemas/Framing'
+                    nullable: true
                 hidden:
                     type: boolean
                 id:
@@ -9110,6 +9154,8 @@ components:
                                 $ref: '#/components/schemas/Fit'
                             focal_point:
                                 $ref: '#/components/schemas/FocalPoint'
+                            framing:
+                                $ref: '#/components/schemas/Framing'
                             height:
                                 description: Prepared uploads only. Pixel height the client produced.
                                 minimum: 1
@@ -10961,6 +11007,11 @@ components:
                         - $ref: '#/components/schemas/FocalPoint'
                     description: The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
                     nullable: true
+                framing:
+                    allOf:
+                        - $ref: '#/components/schemas/Framing'
+                    description: The placement's framing (its override, else the item's), docs/spec/framing.md §6.
+                    nullable: true
                 height:
                     type: integer
                 kind:
@@ -12610,7 +12661,7 @@ paths:
                 - device
     /v1/device/placements/{placementId}:
         patch:
-            description: Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+            description: Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override).
             operationId: devicePatchPlacement
             parameters:
                 - $ref: '#/components/parameters/PlacementId'
@@ -12623,6 +12674,11 @@ paths:
                                     $ref: '#/components/schemas/Fit'
                                 focal_point:
                                     $ref: '#/components/schemas/FocalPoint'
+                                framing:
+                                    allOf:
+                                        - $ref: '#/components/schemas/Framing'
+                                    description: The frame's own framing for this placement (`framing_override`); null clears it.
+                                    nullable: true
                                 hidden:
                                     type: boolean
                                 rotation:
@@ -16521,6 +16577,11 @@ paths:
                                     $ref: '#/components/schemas/Fit'
                                 focal_point:
                                     $ref: '#/components/schemas/FocalPoint'
+                                framing:
+                                    allOf:
+                                        - $ref: '#/components/schemas/Framing'
+                                    description: Replaces the framing; null clears it. Without `focal_point`, the focal point moves to its centre.
+                                    nullable: true
                             type: object
                 required: true
             responses:

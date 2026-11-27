@@ -690,6 +690,13 @@ func (s *Server) DevicePatchPlacement(ctx context.Context, req gen.DevicePatchPl
 		x, y := float64(b.FocalPoint.X), float64(b.FocalPoint.Y)
 		p.FocalOverrideX, p.FocalOverrideY = &x, &y
 	}
+	if _, null := rawField(ctx, "framing"); null || b.Framing != nil {
+		raw, err := framingJSON(b.Framing)
+		if err != nil {
+			return nil, err
+		}
+		p.SetFraming, p.Framing = true, raw
+	}
 	if b.Rotation != nil {
 		v := int(*b.Rotation)
 		p.Rotation = &v

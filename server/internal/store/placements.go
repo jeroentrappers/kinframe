@@ -25,12 +25,14 @@ type Placement struct {
 	FitOverride       *string    `db:"fit_override"`
 	FocalOverrideX    *float64   `db:"focal_override_x"`
 	FocalOverrideY    *float64   `db:"focal_override_y"`
-	Rotation          int        `db:"rotation"`
-	Reaction          *string    `db:"reaction"`
-	DeliveredAt       *time.Time `db:"delivered_at"`
-	SeenAt            *time.Time `db:"seen_at"`
-	ReceivedAt        time.Time  `db:"received_at"`
-	RemovedAt         *time.Time `db:"removed_at"`
+	// FramingOverride is the frame's own framing (docs/spec/framing.md), JSON; nil = none.
+	FramingOverride json.RawMessage `db:"framing_override"`
+	Rotation        int             `db:"rotation"`
+	Reaction        *string         `db:"reaction"`
+	DeliveredAt     *time.Time      `db:"delivered_at"`
+	SeenAt          *time.Time      `db:"seen_at"`
+	ReceivedAt      time.Time       `db:"received_at"`
+	RemovedAt       *time.Time      `db:"removed_at"`
 	// SharedByUserID is the member who shared this placement from another
 	// frame's library; nil when the item's sender placed it.
 	SharedByUserID *uuid.UUID `db:"shared_by_user_id"`
@@ -48,7 +50,7 @@ type Placement struct {
 }
 
 const placementCols = `p.id, p.frame_id, p.item_id, p.send_id, p.status, p.hidden, p.trashed_at, p.pending_moderation,
-	p.fit_override, p.focal_override_x, p.focal_override_y, p.rotation, p.reaction, p.delivered_at, p.seen_at,
+	p.fit_override, p.focal_override_x, p.focal_override_y, p.framing_override, p.rotation, p.reaction, p.delivered_at, p.seen_at,
 	p.received_at, p.removed_at, p.shared_by_user_id, p.origin AS placement_origin, p.origin_feed_id, p.held_directly, p.feed_suspended, p.backfill`
 
 type Reply struct {
@@ -72,7 +74,7 @@ type PlacementRow struct {
 
 // placementRowCols omits p.item_id: ItemRow supplies the item_id column for both structs.
 const placementRowCols = `p.id, p.frame_id, p.send_id, p.status, p.hidden, p.trashed_at, p.pending_moderation,
-	p.fit_override, p.focal_override_x, p.focal_override_y, p.rotation, p.reaction, p.delivered_at, p.seen_at,
+	p.fit_override, p.focal_override_x, p.focal_override_y, p.framing_override, p.rotation, p.reaction, p.delivered_at, p.seen_at,
 	p.received_at, p.removed_at, p.shared_by_user_id, p.origin AS placement_origin, p.origin_feed_id, p.held_directly, p.feed_suspended, p.backfill`
 
 const placementRowSelect = `SELECT ` + placementRowCols + `, ` + itemRowCols + `,
@@ -142,7 +144,10 @@ type PlacementPatch struct {
 	FitOverride    *string
 	FocalOverrideX *float64
 	FocalOverrideY *float64
-	Rotation       *int
+	// SetFraming replaces framing_override with Framing (nil clears it).
+	SetFraming bool
+	Framing    json.RawMessage
+	Rotation   *int
 }
 
 // UpdatePlacement applies a patch and records the change in the frame's feed.
@@ -154,8 +159,10 @@ func (tx *Tx) UpdatePlacement(ctx context.Context, frameID, id uuid.UUID, p Plac
 			pending_moderation = CASE WHEN $5::boolean IS NULL THEN pending_moderation ELSE NOT $5 END,
 			fit_override = COALESCE($6, fit_override),
 			focal_override_x = COALESCE($7, focal_override_x), focal_override_y = COALESCE($8, focal_override_y),
-			rotation = COALESCE($9, rotation)
-		WHERE id = $1 AND frame_id = $2`, id, frameID, p.Hidden, p.Trashed, p.Approved, p.FitOverride, p.FocalOverrideX, p.FocalOverrideY, p.Rotation)
+			rotation = COALESCE($9, rotation),
+			framing_override = CASE WHEN $10 THEN $11::jsonb ELSE framing_override END
+		WHERE id = $1 AND frame_id = $2`, id, frameID, p.Hidden, p.Trashed, p.Approved, p.FitOverride, p.FocalOverrideX, p.FocalOverrideY, p.Rotation,
+		p.SetFraming, nullJSON(p.Framing))
 	if err != nil {
 		return err
 	}

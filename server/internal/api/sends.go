@@ -157,6 +157,7 @@ type preparedItem struct {
 	focalX  *float64
 	focalY  *float64
 	fit     *string
+	framing json.RawMessage
 	hint    *time.Time
 	decl    media.Declared
 	// audioExplicit: include_audio was sent as true (live clips are muted otherwise).
@@ -231,6 +232,16 @@ func (s *Server) prepareItems(ctx context.Context, body *gen.CreateSendJSONReque
 		if it.Fit != nil {
 			f := string(*it.Fit)
 			p.fit = &f
+		}
+		if raw, msg := framingNorm(it.Framing); msg != "" {
+			fail(i, problem.ValidationFailed, "framing", msg)
+			continue
+		} else if raw != nil {
+			p.framing = raw
+			if p.focalX == nil {
+				x, y, _ := framingCentre(raw)
+				p.focalX, p.focalY = &x, &y
+			}
 		}
 		if usedUploads[it.UploadId] {
 			fail(i, problem.ValidationFailed, "upload_id", "the same upload appears twice")
@@ -474,6 +485,7 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 			if err := tx.CreateItem(ctx, store.Item{
 				ID: itemID, MediaID: mediaID, SenderUserID: &u.ID, Caption: p.caption,
 				FocalX: p.focalX, FocalY: p.focalY, Fit: p.fit, CapturedHint: p.hint, MotionMediaID: motionID,
+				Framing: p.photoFraming(),
 			}); err != nil {
 				return err
 			}
@@ -545,6 +557,14 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 
 // createMotion creates (or reuses) the motion media of a live item. The clip is
 // muted unless the sender asked for audio explicitly.
+// photoFraming is the item's framing, dropped for videos (docs/spec/framing.md §2).
+func (p preparedItem) photoFraming() json.RawMessage {
+	if p.kind == media.Video {
+		return nil
+	}
+	return p.framing
+}
+
 func (s *Server) createMotion(ctx context.Context, tx *store.Tx, i int, p preparedItem) (*uuid.UUID, error) {
 	m := p.motion
 	if m == nil {
@@ -786,6 +806,20 @@ func (s *Server) UpdateItem(ctx context.Context, req gen.UpdateItemRequestObject
 	if b.Fit != nil {
 		f := string(*b.Fit)
 		p.Fit = &f
+	}
+	if _, null := rawField(ctx, "framing"); null || b.Framing != nil {
+		raw, err := framingJSON(b.Framing)
+		if err != nil {
+			return nil, err
+		}
+		if it.Kind == string(media.Video) {
+			raw = nil // videos have no framing (docs/spec/framing.md §2)
+		}
+		p.SetFraming, p.Framing = true, raw
+		if p.FocalX == nil && raw != nil {
+			x, y, _ := framingCentre(raw)
+			p.FocalX, p.FocalY = &x, &y
+		}
 	}
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
 		if err := tx.UpdateItem(ctx, req.ItemId, p); err != nil {

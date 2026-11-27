@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,31 +37,32 @@ func (s *Store) FederationPosts(ctx context.Context, ids []uuid.UUID) ([]Federat
 
 // FederationItemRow is a live item of a post with its master.
 type FederationItemRow struct {
-	PostID       uuid.UUID  `db:"post_id"`
-	ItemID       uuid.UUID  `db:"item_id"`
-	Position     int        `db:"position"`
-	Caption      *string    `db:"caption"`
-	FocalX       *float64   `db:"focal_x"`
-	FocalY       *float64   `db:"focal_y"`
-	Fit          *string    `db:"fit"`
-	CapturedAt   *time.Time `db:"captured_at"`
-	Kind         string     `db:"kind"`
-	Status       string     `db:"status"`
-	Width        *int       `db:"width"`
-	Height       *int       `db:"height"`
-	DurationMS   *int       `db:"duration_ms"`
-	HasAudio     *bool      `db:"has_audio"`
-	MasterKey    *string    `db:"master_key"`
-	MasterSHA256 *string    `db:"master_sha256"`
-	MasterBytes  *int64     `db:"master_bytes"`
-	MasterMime   *string    `db:"master_mime"`
-	MotionKey    *string    `db:"motion_key"`
-	MotionStatus *string    `db:"motion_status"`
+	PostID       uuid.UUID       `db:"post_id"`
+	ItemID       uuid.UUID       `db:"item_id"`
+	Position     int             `db:"position"`
+	Caption      *string         `db:"caption"`
+	FocalX       *float64        `db:"focal_x"`
+	FocalY       *float64        `db:"focal_y"`
+	Fit          *string         `db:"fit"`
+	Framing      json.RawMessage `db:"framing"`
+	CapturedAt   *time.Time      `db:"captured_at"`
+	Kind         string          `db:"kind"`
+	Status       string          `db:"status"`
+	Width        *int            `db:"width"`
+	Height       *int            `db:"height"`
+	DurationMS   *int            `db:"duration_ms"`
+	HasAudio     *bool           `db:"has_audio"`
+	MasterKey    *string         `db:"master_key"`
+	MasterSHA256 *string         `db:"master_sha256"`
+	MasterBytes  *int64          `db:"master_bytes"`
+	MasterMime   *string         `db:"master_mime"`
+	MotionKey    *string         `db:"motion_key"`
+	MotionStatus *string         `db:"motion_status"`
 }
 
 // FederationPostItems lists the live items of posts, in post order.
 func (s *Store) FederationPostItems(ctx context.Context, postIDs []uuid.UUID) ([]FederationItemRow, error) {
-	return many[FederationItemRow](s.Pool.Query(ctx, `SELECT pi.post_id, pi.item_id, pi.position, i.caption, i.focal_x, i.focal_y, i.fit,
+	return many[FederationItemRow](s.Pool.Query(ctx, `SELECT pi.post_id, pi.item_id, pi.position, i.caption, i.focal_x, i.focal_y, i.fit, i.framing,
 		COALESCE(i.captured_override, m.captured_at, i.captured_hint) AS captured_at, m.kind, m.status, m.width, m.height, m.duration_ms,
 		m.has_audio, m.master_key, m.master_sha256, m.master_bytes, m.master_mime, mm.master_key AS motion_key, mm.status AS motion_status
 		FROM feed_post_items pi JOIN items i ON i.id = pi.item_id JOIN media m ON m.id = i.media_id LEFT JOIN media mm ON mm.id = i.motion_media_id

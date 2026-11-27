@@ -592,6 +592,7 @@ func (s *Server) federationPosts(ctx context.Context, x *store.RemoteSubscriber,
 		if it.Fit != nil {
 			fi.Fit = ptr(gen.Fit(*it.Fit))
 		}
+		fi.Framing = framingOut(it.Framing)
 		if it.MotionKey != nil && it.MotionStatus != nil && *it.MotionStatus == "ready" {
 			fi.Kind = gen.MediaKindLive
 			fi.MotionUrl = ptr(s.signedURL(*it.MotionKey, time.Hour))

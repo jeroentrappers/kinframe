@@ -809,6 +809,9 @@ func (s *Server) placeCopy(ctx context.Context, fl *store.RemoteFollow, p *gen.F
 			x, y := float64(it.FocalPoint.X), float64(it.FocalPoint.Y)
 			item.FocalX, item.FocalY = &x, &y
 		}
+		if raw, msg := framingNorm(it.Framing); msg == "" && it.Kind != gen.MediaKindVideo {
+			item.Framing = raw // a remote server's invalid framing is dropped, not the photo
+		}
 		if motion != nil {
 			mid := store.NewID()
 			mpath, mmime := motion.path, motion.mime

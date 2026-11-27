@@ -197,6 +197,7 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if it.Fit != nil {
 		out.Fit = ptr(gen.Fit(*it.Fit))
 	}
+	out.Framing = framingOut(it.Framing)
 	if it.Thumb256Key != nil {
 		out.ThumbUrl = ptr(s.signedURL(*it.Thumb256Key, thumbURLTTL))
 	}
@@ -234,6 +235,7 @@ func (s *Server) placementJSON(p *store.PlacementRow) gen.Placement {
 	if p.FocalOverrideX != nil && p.FocalOverrideY != nil {
 		out.FocalOverride = &gen.FocalPoint{X: float32(*p.FocalOverrideX), Y: float32(*p.FocalOverrideY)}
 	}
+	out.FramingOverride = framingOut(p.FramingOverride)
 	if p.Reaction != nil {
 		out.Reaction = ptr(gen.Reaction(*p.Reaction))
 	}

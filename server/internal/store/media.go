@@ -280,7 +280,9 @@ type Item struct {
 	FocalX        *float64   `db:"focal_x"`
 	FocalY        *float64   `db:"focal_y"`
 	Fit           *string    `db:"fit"`
-	CapturedHint  *time.Time `db:"captured_hint"`
+	// Framing is the sender's zoom and position per orientation (docs/spec/framing.md), JSON; nil = none.
+	Framing      json.RawMessage `db:"framing"`
+	CapturedHint *time.Time      `db:"captured_hint"`
 	// MotionMediaID is the clip of a Live/Motion Photo.
 	MotionMediaID *uuid.UUID `db:"motion_media_id"`
 	// Origin, OriginSenderName and OriginKey describe an item a frame imported
@@ -300,42 +302,44 @@ type Item struct {
 func (tx *Tx) CreateItem(ctx context.Context, it Item) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO items (id, media_id, sender_user_id, sender_frame_id, caption, focal_x, focal_y, fit, captured_hint, motion_media_id,
-			origin, origin_sender_name, origin_key, via, via_source_id, captured_override, via_label, via_email_address_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+			origin, origin_sender_name, origin_key, via, via_source_id, captured_override, via_label, via_email_address_id, framing)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
 		it.ID, it.MediaID, it.SenderUserID, it.SenderFrameID, it.Caption, it.FocalX, it.FocalY, it.Fit, it.CapturedHint, it.MotionMediaID,
-		it.Origin, it.OriginSenderName, it.OriginKey, it.Via, it.ViaSourceID, it.CapturedOverride, it.ViaLabel, it.ViaEmailAddressID)
+		it.Origin, it.OriginSenderName, it.OriginKey, it.Via, it.ViaSourceID, it.CapturedOverride, it.ViaLabel, it.ViaEmailAddressID,
+		nullJSON(it.Framing))
 	return err
 }
 
 // ItemRow is an item joined with its media and sender, as the API shows it.
 type ItemRow struct {
-	ItemID          uuid.UUID  `db:"item_id"`
-	MediaID         uuid.UUID  `db:"media_id"`
-	SenderUserID    *uuid.UUID `db:"sender_user_id"`
-	SenderFrameID   *uuid.UUID `db:"sender_frame_id"`
-	SenderName      string     `db:"sender_name"`
-	SenderAvatarKey *string    `db:"sender_avatar_key"`
-	Caption         *string    `db:"caption"`
-	CaptionEdited   bool       `db:"caption_edited"`
-	FocalX          *float64   `db:"focal_x"`
-	FocalY          *float64   `db:"focal_y"`
-	Fit             *string    `db:"fit"`
-	Thumb256Key     *string    `db:"thumb256_key"`
-	Thumb512Key     *string    `db:"thumb512_key"`
-	DisplayKey      *string    `db:"display_key"`
-	ItemCreatedAt   time.Time  `db:"item_created_at"`
-	CapturedHint    *time.Time `db:"captured_hint"`
-	Kind            string     `db:"kind"`
-	MediaStatus     string     `db:"media_status"`
-	FailureCode     *string    `db:"failure_code"`
-	Width           *int       `db:"width"`
-	Height          *int       `db:"height"`
-	DurationMS      *int       `db:"duration_ms"`
-	HasAudio        *bool      `db:"has_audio"`
-	CapturedAt      *time.Time `db:"captured_at"`
-	MasterKey       *string    `db:"master_key"`
-	MasterMime      *string    `db:"master_mime"`
-	PosterKey       *string    `db:"poster_key"`
+	ItemID          uuid.UUID       `db:"item_id"`
+	MediaID         uuid.UUID       `db:"media_id"`
+	SenderUserID    *uuid.UUID      `db:"sender_user_id"`
+	SenderFrameID   *uuid.UUID      `db:"sender_frame_id"`
+	SenderName      string          `db:"sender_name"`
+	SenderAvatarKey *string         `db:"sender_avatar_key"`
+	Caption         *string         `db:"caption"`
+	CaptionEdited   bool            `db:"caption_edited"`
+	FocalX          *float64        `db:"focal_x"`
+	FocalY          *float64        `db:"focal_y"`
+	Fit             *string         `db:"fit"`
+	Framing         json.RawMessage `db:"framing"`
+	Thumb256Key     *string         `db:"thumb256_key"`
+	Thumb512Key     *string         `db:"thumb512_key"`
+	DisplayKey      *string         `db:"display_key"`
+	ItemCreatedAt   time.Time       `db:"item_created_at"`
+	CapturedHint    *time.Time      `db:"captured_hint"`
+	Kind            string          `db:"kind"`
+	MediaStatus     string          `db:"media_status"`
+	FailureCode     *string         `db:"failure_code"`
+	Width           *int            `db:"width"`
+	Height          *int            `db:"height"`
+	DurationMS      *int            `db:"duration_ms"`
+	HasAudio        *bool           `db:"has_audio"`
+	CapturedAt      *time.Time      `db:"captured_at"`
+	MasterKey       *string         `db:"master_key"`
+	MasterMime      *string         `db:"master_mime"`
+	PosterKey       *string         `db:"poster_key"`
 	// The Live/Motion Photo clip, if any.
 	MotionMediaID    *uuid.UUID `db:"motion_media_id"`
 	MotionStatus     *string    `db:"motion_status"`
@@ -370,7 +374,7 @@ func (r *ItemRow) IsLive() bool {
 const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_frame_id,
 	COALESCE(i.former_sender_name, su.display_name, sf.name, (SELECT rsd.display_name FROM remote_senders rsd WHERE rsd.id = i.remote_sender_id), '') AS sender_name,
 	su.avatar_key AS sender_avatar_key,
-	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.thumb256_key, i.thumb512_key,
+	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.framing, i.thumb256_key, i.thumb512_key,
 	i.display_key, i.created_at AS item_created_at, i.captured_hint,
 	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio,
 	COALESCE(i.captured_override, m.captured_at) AS captured_at,
@@ -400,6 +404,9 @@ type ItemPatch struct {
 	FocalX       *float64
 	FocalY       *float64
 	Fit          *string
+	// SetFraming replaces the framing with Framing (nil clears it).
+	SetFraming bool
+	Framing    json.RawMessage
 }
 
 func (tx *Tx) UpdateItem(ctx context.Context, id uuid.UUID, p ItemPatch) error {
@@ -407,8 +414,9 @@ func (tx *Tx) UpdateItem(ctx context.Context, id uuid.UUID, p ItemPatch) error {
 	_, err := tx.Exec(ctx, `
 		UPDATE items SET caption = CASE WHEN $2 THEN NULL WHEN $3::text IS NOT NULL THEN $3 ELSE caption END,
 			caption_edited = caption_edited OR $4,
-			focal_x = COALESCE($5, focal_x), focal_y = COALESCE($6, focal_y), fit = COALESCE($7, fit)
-		WHERE id = $1`, id, p.ClearCaption, p.Caption, captionChanged, p.FocalX, p.FocalY, p.Fit)
+			focal_x = COALESCE($5, focal_x), focal_y = COALESCE($6, focal_y), fit = COALESCE($7, fit),
+			framing = CASE WHEN $8 THEN $9::jsonb ELSE framing END
+		WHERE id = $1`, id, p.ClearCaption, p.Caption, captionChanged, p.FocalX, p.FocalY, p.Fit, p.SetFraming, nullJSON(p.Framing))
 	return err
 }
 
