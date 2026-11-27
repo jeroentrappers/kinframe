@@ -364,6 +364,10 @@ private struct SettingsAndHistoryDestinations: ViewModifier {
         content
             .navigationDestination(for: SentHistoryRoute.self) { _ in SentHistoryView() }
             .navigationDestination(for: AppSettingsRoute.self) { _ in AppSettingsView() }
+            .navigationDestination(for: MyPhotoSourcesRoute.self) { route in
+                let owner = accounts.model(for: route.account)
+                if let api = owner.api { MyPhotoSourcesView(api: api).environment(owner) }
+            }
             .navigationDestination(for: HistoryRoute.self) { route in
                 let owner = accounts.model(for: route.account)
                 if let api = owner.api {

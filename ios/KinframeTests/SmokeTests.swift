@@ -125,7 +125,6 @@ final class SmokeTests: XCTestCase {
         await settle()
         await quiet()
         XCTAssertEqual(app.tab, .family)
-        app.showMyPhotoSources = false
         app.familyPath = NavigationPath()
         await settle()
 

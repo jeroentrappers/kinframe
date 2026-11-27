@@ -59,6 +59,11 @@ struct AppSettingsRoute: Hashable {
     var account: String? = nil
 }
 
+/// Settings › App › My photo sources, pushed after `AppSettingsRoute` (a photo source's notification).
+struct MyPhotoSourcesRoute: Hashable {
+    var account: String? = nil
+}
+
 /// A frame's screen (`page` nil) or one of the pages behind its rows (§3.3).
 struct FrameRoute: Hashable {
     var id: String

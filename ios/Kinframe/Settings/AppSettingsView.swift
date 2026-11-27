@@ -143,9 +143,6 @@ struct AppSettingsView: View {
                 if DebugLaunch.takeSheet("deleteAccount") { deletingAccount = true }
             }
             #endif
-            .navigationDestination(isPresented: Binding(get: { app.showMyPhotoSources }, set: { app.showMyPhotoSources = $0 })) {
-                if let api = app.api { MyPhotoSourcesView(api: api) }
-            }
             .onAppear { name = app.me?.displayName ?? "" }
             .onChange(of: app.me?.displayName) { name = app.me?.displayName ?? "" }
             .onChange(of: avatarPick) { _, item in

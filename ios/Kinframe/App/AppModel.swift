@@ -589,13 +589,14 @@ final class AppModel {
             openFrame(frameId, page: .photos, albumId: albumId)
         } else {
             tab = .family
-            familyPath = NavigationPath([AppSettingsRoute(account: accountId)])
-            showMyPhotoSources = true
+            // Both screens as one path: a destination on the settings page itself, flagged in the same update as
+            // its push, was dropped on the Mac (Catalyst) and My photo sources never opened.
+            var path = NavigationPath()
+            path.append(AppSettingsRoute(account: accountId))
+            path.append(MyPhotoSourcesRoute(account: accountId))
+            familyPath = path
         }
     }
-
-    /// Settings opens "My photo sources" (from a notification).
-    var showMyPhotoSources = false
 
     // MARK: Foreground
 
