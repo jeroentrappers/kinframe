@@ -266,8 +266,9 @@ func (s *Server) tvSlide(r *store.PlacementRow) (gen.TvSlide, bool) {
 	} else if r.FocalX != nil && r.FocalY != nil {
 		sl.FocalPoint = &gen.FocalPoint{X: float32(*r.FocalX), Y: float32(*r.FocalY)}
 	}
-	// The frame's own framing, else the item's (docs/spec/framing.md §6).
-	if sl.Framing = framingOut(r.FramingOverride); sl.Framing == nil {
+	// The frame's own framing, else the item's (docs/spec/framing.md §6). A frame's focal override (§3.1 step 2)
+	// comes before the item's framing: then there is none, and focal_point is that override.
+	if sl.Framing = framingOut(r.FramingOverride); sl.Framing == nil && r.FocalOverrideX == nil {
 		sl.Framing = framingOut(r.ItemRow.Framing)
 	}
 	if r.FitOverride != nil {

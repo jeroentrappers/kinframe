@@ -97,6 +97,15 @@ With a view from steps 1 or 3 (the person chose the crop), Ken Burns stays insid
 view, scaled between 1.00 and 1.08, with a drift of at most 3% of the screen. No wide pull-out to the whole photo.
 Without one, today's motion applies unchanged.
 
+The motion, the same on every renderer (frame and TV must match): from the placement's Ken Burns random sequence
+(the same seed as today), `scale = 1.04 + r1 · 0.04`, `reach = min(0.03, (scale − 1) / 2) · (0.5 + 0.5 · r2)`,
+`angle = r3 · 2π`. Two keys on the usual Catmull-Rom loop: the view itself `{scale 1, x 0, y 0}`, then
+`{scale, cos(angle) · reach, sin(angle) · reach}` (translations as fractions of the screen), one key every half the
+slide's hold time, so the slide starts and ends at the view.
+
+On the TV, `TvSlide.framing` is already the effective framing; when the frame has only a focal override (§3.1 step 2)
+the server sends no framing and `focal_point` is that override.
+
 ### 3.5 Pairs and collages
 
 A tile uses the view's centre (`x`, `y`) as its focal point and ignores `zoom`: tiles have their own shape and size.

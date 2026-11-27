@@ -4116,7 +4116,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** @description Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override). */
+        /** @description Actions taken at the frame (hide/unhide, trash/restore, local fit/focal/framing override). */
         patch: operations["devicePatchPlacement"];
         trace?: never;
     };
@@ -5073,6 +5073,11 @@ export interface components {
              */
             google_photos_import?: boolean;
             /**
+             * @description True when the server stores framing (zoom and position per orientation, docs/spec/framing.md).
+             * @default false
+             */
+            framing?: boolean;
+            /**
              * @description True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
              *     (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
              * @default false
@@ -5879,6 +5884,20 @@ export interface components {
             x: number;
             y: number;
         };
+        /**
+         * @description Zoom and position per screen orientation, for photos shown in fill mode (docs/spec/framing.md). A screen uses
+         *     `landscape` when its width is at least its height, else `portrait`; a missing view means the focal point at 1×.
+         */
+        Framing: {
+            landscape?: components["schemas"]["FramingView"];
+            portrait?: components["schemas"]["FramingView"];
+        };
+        /** @description The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop. */
+        FramingView: {
+            x: number;
+            y: number;
+            zoom: number;
+        };
         /** @enum {string} */
         Reaction: "love" | "laugh" | "wow" | "sad";
         /** @enum {string} */
@@ -5910,6 +5929,7 @@ export interface components {
                 caption?: string | null;
                 focal_point?: components["schemas"]["FocalPoint"];
                 fit?: components["schemas"]["Fit"];
+                framing?: components["schemas"]["Framing"];
                 /** @description Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter). */
                 trim?: {
                     start_ms?: number;
@@ -5958,6 +5978,7 @@ export interface components {
             caption_edited?: boolean;
             focal_point?: components["schemas"]["FocalPoint"];
             fit?: components["schemas"]["Fit"];
+            framing?: components["schemas"]["Framing"] | null;
             width?: number;
             height?: number;
             duration_ms?: number | null;
@@ -6061,6 +6082,7 @@ export interface components {
             pending_moderation?: boolean;
             fit_override?: components["schemas"]["Fit"] | null;
             focal_override?: components["schemas"]["FocalPoint"] | null;
+            framing_override?: components["schemas"]["Framing"] | null;
             /** @enum {integer} */
             rotation?: 0 | 90 | 180 | 270;
             reaction?: components["schemas"]["Reaction"] | null;
@@ -7612,6 +7634,8 @@ export interface components {
             duration_ms?: number | null;
             /** @description The placement's focal point (its override, else the item's), for filling the screen and Ken Burns. */
             focal_point?: components["schemas"]["FocalPoint"] | null;
+            /** @description The placement's framing (its override, else the item's), docs/spec/framing.md §6. */
+            framing?: components["schemas"]["Framing"] | null;
             /** @description The placement's fit override, else the item's; null = the frame setting. */
             fit?: components["schemas"]["Fit"] | null;
             /**
@@ -10436,6 +10460,7 @@ export interface components {
             captured_at?: string | null;
             focal_point?: components["schemas"]["FocalPoint"];
             fit?: components["schemas"]["Fit"];
+            framing?: components["schemas"]["Framing"];
             width?: number;
             height?: number;
             duration_ms?: number | null;
@@ -11541,6 +11566,8 @@ export interface operations {
                     caption?: string | null;
                     focal_point?: components["schemas"]["FocalPoint"];
                     fit?: components["schemas"]["Fit"];
+                    /** @description Replaces the framing; null clears it. Without `focal_point`, the focal point moves to its centre. */
+                    framing?: components["schemas"]["Framing"] | null;
                 };
             };
         };
@@ -17554,6 +17581,8 @@ export interface operations {
                     trashed?: boolean;
                     fit?: components["schemas"]["Fit"];
                     focal_point?: components["schemas"]["FocalPoint"];
+                    /** @description The frame's own framing for this placement (`framing_override`); null clears it. */
+                    framing?: components["schemas"]["Framing"] | null;
                     /** @enum {integer} */
                     rotation?: 0 | 90 | 180 | 270;
                 };

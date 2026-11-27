@@ -59,6 +59,7 @@
 					height: pl.height,
 					fit: pl.fit ?? (fill ? 'fill' : 'fit'),
 					focal: pl.focal,
+					views: pl.kind === 'video' ? null : pl.views,
 					rotation: pl.rotation
 				}
 			],

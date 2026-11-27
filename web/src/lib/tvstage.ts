@@ -1,5 +1,6 @@
 // What a full-screen TV stage shows (the mirror of a frame, a browser frame), and the small
 // pure helpers its renderer uses. Kept apart from the component so they are unit-tested.
+import { cropStyle, orientationOf, type ChosenView, type FramingViews } from './framing';
 import type { KbKey } from './kenburns';
 import { coverPosition } from './logic';
 
@@ -12,6 +13,8 @@ export interface StageTile {
 	height: number;
 	fit: 'fill' | 'fit';
 	focal: { x: number; y: number } | null;
+	/** Photos: the view per screen orientation (docs/spec/framing.md §3.1); null for videos. */
+	views?: FramingViews | null;
 	rotation: number;
 }
 
@@ -48,11 +51,31 @@ export function videoPositionNow(v: StageVideo, now: number): number {
 	return Math.max(0, v.positionMs + (v.playing ? now - v.at : 0));
 }
 
-/** CSS object-position for a tile filling a box of `boxAspect` (centred on its focal point). */
-export function tileObjectPosition(t: Pick<StageTile, 'width' | 'height' | 'focal' | 'rotation'>, boxAspect: number): string {
-	if (!t.focal || !t.width || !t.height || t.rotation % 180 !== 0) return '50% 50%';
-	const p = coverPosition(t.focal, t.width / t.height, boxAspect);
+/** The view a tile uses on a stage of `stageAspect` (its orientation, framing.md §3.1), or null. */
+export function tileView(t: Pick<StageTile, 'views'>, stageAspect: number): ChosenView | null {
+	return t.views ? t.views[orientationOf(stageAspect, 1)] : null;
+}
+
+/**
+ * CSS object-position for a tile filling a box of `boxAspect`, centred on its focal point: the view's
+ * centre when it has views (zoom 1, and collage tiles ignore the zoom, framing.md §3.5).
+ */
+export function tileObjectPosition(t: Pick<StageTile, 'width' | 'height' | 'focal' | 'rotation' | 'views'>, boxAspect: number, stageAspect = boxAspect): string {
+	const v = tileView(t, stageAspect);
+	const focal = v ? { x: v.view.x, y: v.view.y } : t.focal;
+	if (!focal || !t.width || !t.height || t.rotation % 180 !== 0) return '50% 50%';
+	const p = coverPosition(focal, t.width / t.height, boxAspect);
 	return `${p.x.toFixed(2)}% ${p.y.toFixed(2)}%`;
+}
+
+/**
+ * The inline style that draws a single photo zoomed in on its view (framing.md §3) filling the
+ * stage, or null when the plain cover crop does (zoom 1, no size, or turned a quarter).
+ */
+export function tileCropStyle(t: Pick<StageTile, 'width' | 'height' | 'rotation' | 'views' | 'kind'>, stageAspect: number): string | null {
+	const v = tileView(t, stageAspect);
+	if (!v || t.kind === 'video' || v.view.zoom <= 1.0005 || !t.width || !t.height || t.rotation % 180 !== 0) return null;
+	return cropStyle(t.width, t.height, stageAspect, v.view);
 }
 
 /** Grid areas for a collage of n tiles (the frame's own layout differs in detail). */

@@ -2,11 +2,21 @@
 	// The full-screen slide renderer shared by the TV mirror and the browser frame: the same
 	// transitions as the frame (cross-fade, slide, cut), Ken Burns with the frame's motion,
 	// fill on the focal point or the whole photo over a blurred backdrop, collages, and
-	// videos that can follow someone else's playback position.
+	// videos that can follow someone else's playback position. Photos follow their framing for the
+	// stage's orientation (docs/spec/framing.md §3, §3.4, §3.5).
 	import { untrack } from 'svelte';
-	import { kenBurnsKeyframes } from '$lib/kenburns';
+	import { framedKenBurnsKeys, kenBurnsKeyframes } from '$lib/kenburns';
 	import { reducedMotion } from '$lib/motion';
-	import { collageClass, remainingTransition, tileObjectPosition, videoPositionNow, type StageSlide, type StageVideo } from '$lib/tvstage';
+	import {
+		collageClass,
+		remainingTransition,
+		tileCropStyle,
+		tileObjectPosition,
+		tileView,
+		videoPositionNow,
+		type StageSlide,
+		type StageVideo
+	} from '$lib/tvstage';
 
 	let {
 		slide,
@@ -81,7 +91,12 @@
 	function kenBurns(node: HTMLElement, s: StageSlide) {
 		if (!s.kenBurns || reducedMotion()) return {};
 		const duration = s.holdMs + 15_000;
-		const anim = node.animate(kenBurnsKeyframes(s.kenBurns, duration), { duration, easing: 'linear', fill: 'forwards' });
+		// A view the person chose: the motion stays inside it (framing.md §3.4).
+		const only = s.tiles.length === 1 ? s.tiles[0]! : null;
+		const stageAspect = node.clientWidth > 0 && node.clientHeight > 0 ? node.clientWidth / node.clientHeight : aspect;
+		const framed = only && only.kind !== 'video' ? tileView(only, stageAspect)?.chosen : false;
+		const frames = framed && only ? kenBurnsKeyframes(framedKenBurnsKeys(only.id), duration, s.holdMs / 2) : kenBurnsKeyframes(s.kenBurns, duration);
+		const anim = node.animate(frames, { duration, easing: 'linear', fill: 'forwards' });
 		anim.currentTime = Math.max(0, Date.now() - s.startedAt);
 		return { destroy: () => anim.cancel() };
 	}
@@ -149,13 +164,18 @@
 								{muted}
 								{loop}
 								preload="auto"
-								style:object-position={tileObjectPosition(t, tileAspect(n, i))}
+								style:object-position={tileObjectPosition(t, tileAspect(n, i), aspect)}
 								use:follow={l.out ? null : s.video}
 								use:volumeOf={volume}
 								onended={() => !l.out && onvideoended?.()}
 							></video>
 						{:else}
-							<img class="media" class:cover={fill || n > 1} src={t.src} alt="" style:object-position={tileObjectPosition(t, tileAspect(n, i))} />
+							{@const crop = fill && n === 1 ? tileCropStyle(t, aspect) : null}
+							{#if crop}
+								<div class="media framed"><img class="crop" src={t.src} alt="" style={crop} /></div>
+							{:else}
+								<img class="media" class:cover={fill || n > 1} src={t.src} alt="" style:object-position={tileObjectPosition(t, tileAspect(n, i), aspect)} />
+							{/if}
 						{/if}
 					</div>
 				{/each}
@@ -234,6 +254,15 @@
 	}
 	.media.cover {
 		object-fit: cover;
+	}
+	/* Zoomed in on a framing view: the photo, larger than the stage, placed so the view fills it. */
+	.media.framed {
+		overflow: hidden;
+	}
+	.crop {
+		position: absolute;
+		max-width: none;
+		max-height: none;
 	}
 	/* A photo turned on the frame: swap the box, then rotate it into place. */
 	.r90 .media,

@@ -3,6 +3,7 @@
 // renders, and keeps the websocket connected.
 import type { components } from './api/schema';
 import { backoffMs } from './device/socket';
+import { pickViews } from './framing';
 import { kenBurnsKeys } from './kenburns';
 import { clockSkew, type StageSlide, type StageTile } from './tvstage';
 
@@ -29,6 +30,8 @@ export function tileOf(s: MirrorSlide, fill: boolean): StageTile {
 		height: s.height,
 		fit: s.fit ?? (fill ? 'fill' : 'fit'),
 		focal: s.focal_point ?? null,
+		// `framing` is already the effective one (override, else the item's), docs/spec/framing.md §6.
+		views: s.kind === 'video' ? null : pickViews({ framing: s.framing ?? null, focal: s.focal_point ?? null }),
 		rotation: s.rotation ?? 0
 	};
 }

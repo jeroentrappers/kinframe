@@ -2,6 +2,7 @@
 // Kept in memory: a reload syncs again from 0 (a snapshot), which is cheap for a library
 // and keeps localStorage for the credential only.
 import type { components } from '../api/schema';
+import { pickViews, type FramingViews } from '../framing';
 import type { Change, ChangesPage, DeviceClient } from './client';
 import { senderName, type FramePhotoRequest, type FramePrompt, type PlacementComments } from './social';
 
@@ -23,6 +24,11 @@ export interface FramePlacement {
 	receivedAt: string;
 	fit: 'fill' | 'fit' | null;
 	focal: { x: number; y: number } | null;
+	/** The item's framing and this frame's override (docs/spec/framing.md §5), kept with the placement. */
+	framing: S['Framing'] | null;
+	framingOverride: S['Framing'] | null;
+	/** Photos: the view each screen orientation uses (§3.1); null for videos (they ignore framing). */
+	views: FramingViews | null;
 	rotation: 0 | 90 | 180 | 270;
 	reaction: S['Reaction'] | null;
 	albumIds: string[];
@@ -55,6 +61,8 @@ export function toFramePlacement(p: PlacementChange): FramePlacement {
 	const it = p.item;
 	const media = p.media;
 	const focal = p.focal_override ?? it.focal_point ?? null;
+	const framing = it.framing ?? null;
+	const framingOverride = p.framing_override ?? null;
 	return {
 		id: p.id,
 		kind: it.kind,
@@ -67,6 +75,12 @@ export function toFramePlacement(p: PlacementChange): FramePlacement {
 		receivedAt: p.received_at ?? it.created_at,
 		fit: p.fit_override ?? it.fit ?? null,
 		focal: focal ? { x: focal.x, y: focal.y } : null,
+		framing,
+		framingOverride,
+		views:
+			it.kind === 'video'
+				? null
+				: pickViews({ framingOverride, focalOverride: p.focal_override ?? null, framing, focal: it.focal_point ?? null }),
 		rotation: (p.rotation ?? 0) as FramePlacement['rotation'],
 		reaction: p.reaction ?? null,
 		albumIds: p.album_ids ?? [],

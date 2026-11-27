@@ -1,3 +1,4 @@
+import type { Framing } from '../framing';
 import type { PrepProfile } from './plan';
 
 /** What the composer knows about an uploaded item when it builds the `POST /v1/sends` item. */
@@ -7,6 +8,8 @@ export interface SendItemInput {
 	caption: string | null;
 	fit: 'fill' | 'fit';
 	focal: { x: number; y: number };
+	/** Photos: the orientations the person framed (docs/spec/framing.md §4); null or absent sends none. */
+	framing?: Framing | null;
 	/** Original video trim for the server (only when the upload is not a prepared master). */
 	trim: { start_ms: number; end_ms: number } | undefined;
 	includeAudio: boolean;
@@ -25,6 +28,8 @@ export function sendItemBody(i: SendItemInput) {
 		fit: i.fit,
 		focal_point: i.focal
 	};
+	// Videos ignore framing (framing.md §2); only the orientations that were changed are sent (§4).
+	if (i.kind === 'photo' && i.framing && (i.framing.landscape || i.framing.portrait)) out.framing = i.framing;
 	if (i.kind === 'video') {
 		out.include_audio = i.includeAudio;
 		// A prepared master already has the trim applied (and the server refuses to trim a stream copy).

@@ -6,15 +6,22 @@
 		src,
 		kind = 'photo',
 		focal = $bindable({ x: 0.5, y: 0.5 }),
-		alt
-	}: { src: string; kind?: 'photo' | 'video'; focal?: Focal; alt: string } = $props();
+		alt,
+		onchange
+	}: { src: string; kind?: 'photo' | 'video'; focal?: Focal; alt: string; onchange?: (focal: Focal) => void } = $props();
+
+	/** A new point picked by the person (pointer or keys). */
+	function pick(f: Focal) {
+		focal = f;
+		onchange?.(f);
+	}
 
 	let media: HTMLElement | undefined = $state();
 
 	function setFromPointer(e: PointerEvent) {
 		if (!media) return;
 		const r = media.getBoundingClientRect();
-		focal = clampFocal((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+		pick(clampFocal((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height));
 	}
 
 	function onKey(e: KeyboardEvent) {
@@ -28,10 +35,10 @@
 		const delta = d[e.key];
 		if (delta) {
 			e.preventDefault();
-			focal = clampFocal(focal.x + delta[0], focal.y + delta[1]);
+			pick(clampFocal(focal.x + delta[0], focal.y + delta[1]));
 		} else if (e.key === 'Home') {
 			e.preventDefault();
-			focal = { x: 0.5, y: 0.5 };
+			pick({ x: 0.5, y: 0.5 });
 		}
 	}
 

@@ -86,6 +86,11 @@ class DiscoveryState {
 		return this.doc?.feeds === true;
 	}
 
+	/** Zoom and position per orientation (docs/spec/framing.md §4, §7): editors offer it only when the server stores it. */
+	get framing() {
+		return this.doc?.framing === true;
+	}
+
 	/** Birthday lists in feeds (docs/spec/birthdays.md): only together with feeds. Off hides every birthday UI. */
 	get birthdays() {
 		return this.feeds && this.doc?.birthdays === true;

@@ -40,6 +40,16 @@ describe('TV mirror', () => {
 		expect(mirrorSlide(state({ showing: null }), local)).toBeNull();
 	});
 
+	it('carries the effective framing per orientation (framing.md §6)', () => {
+		const framing = { landscape: { x: 0.3, y: 0.6, zoom: 2.5 } };
+		const st = state({ showing: { ...state().showing!, slides: [slide('p1', { focal_point: { x: 0.2, y: 0.4 }, framing })] } });
+		const t = mirrorSlide(st, Date.now())!.tiles[0]!;
+		expect(t.views?.landscape).toEqual({ view: { x: 0.3, y: 0.6, zoom: 2.5 }, chosen: true });
+		expect(t.views?.portrait).toEqual({ view: { x: 0.2, y: 0.4, zoom: 1 }, chosen: false });
+		const video = state({ showing: { ...state().showing!, slides: [slide('v', { kind: 'video', framing })] } });
+		expect(mirrorSlide(video, Date.now())!.tiles[0]!.views).toBeNull();
+	});
+
 	it('connects next to the API', () => {
 		expect(mirrorUrl('', 'https://k.test', 'abc')).toBe('wss://k.test/v1/tv/abc/mirror');
 		expect(mirrorUrl('http://api.local:8110', 'https://k.test', 'a b')).toBe('ws://api.local:8110/v1/tv/a%20b/mirror');

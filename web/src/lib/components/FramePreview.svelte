@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { boxAspectOf, cropStyle, type FramingView } from '$lib/framing';
 	import { coverPosition, type Focal } from '$lib/logic';
+	import Icon from './Icon.svelte';
 
 	let {
 		src,
@@ -9,7 +11,10 @@
 		fit,
 		screenAspect = 16 / 10,
 		orientation = 'landscape',
-		label
+		label,
+		view = null,
+		onedit,
+		editLabel
 	}: {
 		src: string;
 		kind?: 'photo' | 'video';
@@ -19,13 +24,21 @@
 		screenAspect?: number;
 		orientation?: 'landscape' | 'portrait';
 		label: string;
+		/** This orientation's framing view (docs/spec/framing.md §4: the preview shows the §3 result). */
+		view?: FramingView | null;
+		/** Set when the preview opens the framing editor. */
+		onedit?: () => void;
+		editLabel?: string;
 	} = $props();
 
-	const boxAspect = $derived(orientation === 'landscape' ? Math.max(screenAspect, 1 / screenAspect) : Math.min(screenAspect, 1 / screenAspect));
-	const pos = $derived(coverPosition(focal, imageAspect || 1, boxAspect));
+	const boxAspect = $derived(boxAspectOf(orientation, screenAspect));
+	const centre = $derived(view ? { x: view.x, y: view.y } : focal);
+	const pos = $derived(coverPosition(centre, imageAspect || 1, boxAspect));
+	// Zoomed in: a positioned, scaled image inside the screen (object-view-box isn't everywhere).
+	const crop = $derived(kind === 'photo' && fit === 'fill' && view && view.zoom > 1.0005 ? cropStyle(imageAspect || 1, 1, boxAspect, view) : null);
 </script>
 
-<figure class="preview {orientation}">
+{#snippet bezel()}
 	<div class="bezel">
 		<div class="screen" style="aspect-ratio:{boxAspect}">
 			{#if kind === 'video'}
@@ -42,14 +55,27 @@
 					style="object-position:{pos.x}% {pos.y}%"
 					aria-hidden="true"
 				></video>
+			{:else if crop}
+				<img class="crop" {src} alt="" style={crop} draggable="false" />
 			{:else}
 				{#if fit === 'fit'}
 					<img class="bg" {src} alt="" aria-hidden="true" />
 				{/if}
-				<img class="fg" class:contain={fit === 'fit'} {src} alt="" style="object-position:{pos.x}% {pos.y}%" />
+				<img class="fg" class:contain={fit === 'fit'} {src} alt="" style="object-position:{pos.x}% {pos.y}%" draggable="false" />
 			{/if}
 		</div>
 	</div>
+{/snippet}
+
+<figure class="preview {orientation}">
+	{#if onedit}
+		<button type="button" class="edit" onclick={onedit} aria-label={editLabel ?? label}>
+			{@render bezel()}
+			<span class="edit-badge" aria-hidden="true"><Icon name="crop" size={14} /></span>
+		</button>
+	{:else}
+		{@render bezel()}
+	{/if}
 	<figcaption>{label}</figcaption>
 </figure>
 
@@ -92,6 +118,37 @@
 	.fg.contain {
 		object-fit: contain;
 		object-position: 50% 50% !important;
+	}
+	.crop {
+		position: absolute;
+		max-width: none;
+		max-height: none;
+	}
+	.edit {
+		position: relative;
+		display: block;
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: none;
+		border-radius: 12px;
+		cursor: zoom-in;
+	}
+	.edit:focus-visible {
+		outline: 3px solid var(--focus, var(--accent));
+		outline-offset: 2px;
+	}
+	.edit-badge {
+		position: absolute;
+		right: 12px;
+		bottom: 12px;
+		display: grid;
+		place-items: center;
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		background: rgb(0 0 0 / 0.55);
+		color: #fff;
 	}
 	.bg {
 		filter: blur(14px) brightness(0.75);

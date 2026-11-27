@@ -26,12 +26,17 @@ export function javaHash(s: string): number {
 const f32 = Math.fround;
 const MASK64 = (1n << 64n) - 1n;
 
-export function kenBurnsKeys(id: string, focalX: number | null, focalY: number | null): KbKey[] {
+/** The frame's random sequence for a placement (java.util.Random-style seed, 64-bit LCG). */
+function sequence(id: string): () => number {
 	let h = BigInt.asUintN(64, BigInt(javaHash(id))) ^ 0x5deece66dn;
-	const rnd = () => {
+	return () => {
 		h = (h * 6364136223846793005n + 1442695040888963407n) & MASK64;
 		return f32(Number((h >> 40n) & 0xffffffn) / 16_777_216);
 	};
+}
+
+export function kenBurnsKeys(id: string, focalX: number | null, focalY: number | null): KbKey[] {
+	const rnd = sequence(id);
 	const keys: KbKey[] = [];
 	for (let k = 0; k < KEYS; k++) {
 		const close = k % 2 === 1;
@@ -47,6 +52,26 @@ export function kenBurnsKeys(id: string, focalX: number | null, focalY: number |
 		}
 	}
 	return keys;
+}
+
+/** Ken Burns inside a chosen framing (docs/spec/framing.md §3.4): at most this scale and this drift (of the screen). */
+export const FRAMED_MAX_SCALE = 1.08;
+export const FRAMED_MAX_DRIFT = 0.03;
+
+/**
+ * §3.4: with a view the person chose, the motion stays inside it: a loop of two keys, the view itself
+ * and a slight push in (1.04..1.08) drifting at most 3% of the screen. Played with a segment of half the
+ * hold time, it starts at the view, pushes in and is back at the view when the slide ends.
+ */
+export function framedKenBurnsKeys(id: string): KbKey[] {
+	const rnd = sequence(id);
+	const scale = f32(1.04 + rnd() * (FRAMED_MAX_SCALE - 1.04));
+	const reach = Math.min(FRAMED_MAX_DRIFT, (scale - 1) / 2) * (0.5 + 0.5 * rnd());
+	const angle = rnd() * 2 * Math.PI;
+	return [
+		{ scale: 1, x: 0, y: 0 },
+		{ scale, x: Math.cos(angle) * reach, y: Math.sin(angle) * reach }
+	];
 }
 
 function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
@@ -72,15 +97,16 @@ export function kenBurnsAt(keys: KbKey[], t: number): KbKey {
 }
 
 /**
- * Web Animations keyframes for `durationMs` of motion (sampled four times per segment;
+ * Web Animations keyframes for `durationMs` of motion, one key every `segmentMs` (sampled four times per segment;
  * linear in between is indistinguishable at this pace). Translations are fractions of the
  * stage size, as CSS percentages of the moving element.
  */
-export function kenBurnsKeyframes(keys: KbKey[], durationMs: number): Keyframe[] {
-	const steps = Math.max(2, Math.ceil((durationMs / SEGMENT_MS) * 4));
+export function kenBurnsKeyframes(keys: KbKey[], durationMs: number, segmentMs = SEGMENT_MS): Keyframe[] {
+	const seg = segmentMs > 0 ? segmentMs : SEGMENT_MS;
+	const steps = Math.max(2, Math.ceil((durationMs / seg) * 4));
 	const out: Keyframe[] = [];
 	for (let i = 0; i <= steps; i++) {
-		const t = ((i / steps) * durationMs) / SEGMENT_MS;
+		const t = ((i / steps) * durationMs) / seg;
 		const f = kenBurnsAt(keys, t);
 		out.push({ offset: i / steps, transform: `translate(${(f.x * 100).toFixed(3)}%, ${(f.y * 100).toFixed(3)}%) scale(${f.scale.toFixed(4)})` });
 	}

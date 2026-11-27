@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { DraftItem } from '$lib/compose.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 	import { CAPTION_MAX, captionRemaining } from '$lib/format';
+	import { framingOrNull, recentre, sendFocal, type Framing, type FramingView, type Orientation } from '$lib/framing';
 	import { t } from '$lib/i18n/index.svelte';
 	import FocalPicker from './FocalPicker.svelte';
 	import FramePreview from './FramePreview.svelte';
+	import FramingEditor from './FramingEditor.svelte';
 	import Icon from './Icon.svelte';
 	import TrimEditor from './TrimEditor.svelte';
 
@@ -16,6 +19,34 @@
 
 	const aspect = $derived(item.width && item.height ? item.width / item.height : 4 / 3);
 	const remaining = $derived(captionRemaining(item.caption));
+
+	// Framing (docs/spec/framing.md §4): only when the server stores it and the photo fills the screen.
+	const framingOn = $derived(discovery.framing && item.kind === 'photo' && item.previewable && item.fit === 'fill');
+	let framingOpen = $state(false);
+	let framingFor = $state<Orientation>('landscape');
+	const orientationLabel = (o: Orientation) => (o === 'landscape' ? t('send.landscape') : t('send.portrait'));
+
+	function editFraming(o: Orientation) {
+		framingFor = o;
+		framingOpen = true;
+	}
+
+	/** The focal point the send carries (the framing's centre, §4), which screens without a view use (§3.1). */
+	const shownFocal = $derived(sendFocal(item.framing, item.focal));
+	/** Where Reset puts an orientation: the focal point once its own view is gone. */
+	function focalWithout(o: Orientation) {
+		const rest: Framing = { ...(item.framing ?? {}) };
+		delete rest[o];
+		return sendFocal(rest, item.focal);
+	}
+
+	/** Done in the editor: keep this orientation's view, or remove it (Reset). Only changed orientations are sent. */
+	function saveFraming(o: Orientation, view: FramingView | null) {
+		const next = { ...(item.framing ?? {}) };
+		if (view) next[o] = { x: view.x, y: view.y, zoom: view.zoom };
+		else delete next[o];
+		item.framing = framingOrNull(next);
+	}
 </script>
 
 <div class="editor">
@@ -24,7 +55,13 @@
 	{/if}
 	<div class="left">
 		{#if item.previewable}
-			<FocalPicker src={item.previewUrl} kind={item.kind} bind:focal={item.focal} alt={item.file.name} />
+			<FocalPicker
+				src={item.previewUrl}
+				kind={item.kind}
+				bind:focal={item.focal}
+				alt={item.file.name}
+				onchange={(f) => (item.framing = recentre(item.framing, f, aspect, screenAspect))}
+			/>
 		{:else}
 			<div class="callout"><Icon name="info" />{t('send.noPreview')}</div>
 		{/if}
@@ -36,23 +73,30 @@
 					src={item.previewUrl}
 					kind={item.kind}
 					imageAspect={aspect}
-					focal={item.focal}
+					focal={shownFocal}
 					fit={item.fit}
 					{screenAspect}
 					orientation="landscape"
 					label={t('send.landscape')}
+					view={framingOn ? (item.framing?.landscape ?? null) : null}
+					onedit={framingOn ? () => editFraming('landscape') : undefined}
+					editLabel={t('framing.editLabel', { orientation: t('send.landscape') })}
 				/>
 				<FramePreview
 					src={item.previewUrl}
 					kind={item.kind}
 					imageAspect={aspect}
-					focal={item.focal}
+					focal={shownFocal}
 					fit={item.fit}
 					{screenAspect}
 					orientation="portrait"
 					label={t('send.portrait')}
+					view={framingOn ? (item.framing?.portrait ?? null) : null}
+					onedit={framingOn ? () => editFraming('portrait') : undefined}
+					editLabel={t('framing.editLabel', { orientation: t('send.portrait') })}
 				/>
 			</div>
+			{#if framingOn}<p class="hint">{t('framing.tapHint')}</p>{/if}
 		{/if}
 
 		<fieldset class="fit">
@@ -87,6 +131,22 @@
 		</div>
 	</div>
 </div>
+
+{#if framingOn}
+	<FramingEditor
+		bind:open={framingOpen}
+		src={item.previewUrl}
+		orientation={framingFor}
+		label={orientationLabel(framingFor)}
+		{screenAspect}
+		imageAspect={aspect}
+		width={item.width}
+		height={item.height}
+		current={item.framing?.[framingFor] ?? null}
+		focal={focalWithout(framingFor)}
+		onsave={(v) => saveFraming(framingFor, v)}
+	/>
+{/if}
 
 <style>
 	.editor {

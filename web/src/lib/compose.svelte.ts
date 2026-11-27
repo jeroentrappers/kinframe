@@ -12,6 +12,7 @@ import {
 	type Focal,
 	type ItemIssue
 } from './logic';
+import { sendFocal, type Framing } from './framing';
 import { probeImage, probeVideo, sha256Hex } from './media';
 import { defaultTrim, isTrimmed, keptSeconds, trimForApi, type Trim } from './parity';
 import { issueText } from './issueText';
@@ -50,7 +51,10 @@ export interface DraftItem {
 	includeAudio: boolean;
 	caption: string;
 	fit: 'fill' | 'fit';
+	/** The tapped focal point; with a framing the send uses its centre (docs/spec/framing.md §4, `sendFocal`). */
 	focal: Focal;
+	/** Zoom and position per orientation, only the orientations the person changed; null: none. */
+	framing: Framing | null;
 	issue: ItemIssue | null;
 	/** Bytes this item uploads (the prepared files once known, else the originals). */
 	bytes: number;
@@ -154,6 +158,7 @@ class Compose {
 				caption: '',
 				fit: 'fill',
 				focal: { x: 0.5, y: 0.5 },
+				framing: null,
 				issue: itemIssue({ kind, bytes: file.size }, limits),
 				bytes: file.size + (clip?.size ?? 0),
 				uploaded: 0,
@@ -485,7 +490,8 @@ class Compose {
 					uploadId: i.uploadId!,
 					caption: i.caption.trim() || null,
 					fit: i.fit,
-					focal: i.focal,
+					focal: sendFocal(i.framing, i.focal),
+					framing: i.framing,
 					trim: trimForApi(i.trim, i.durationS),
 					includeAudio: i.includeAudio,
 					prepared: i.prepared,

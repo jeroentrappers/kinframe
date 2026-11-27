@@ -2,6 +2,7 @@
 	import { compose, type DraftItem } from '$lib/compose.svelte';
 	import { tm } from '$lib/i18n/media';
 	import { CAPTION_MAX, captionRemaining, formatDuration } from '$lib/format';
+	import { sendFocal } from '$lib/framing';
 	import { coverPosition } from '$lib/logic';
 	import { isTrimmed, keptSeconds } from '$lib/parity';
 	import { issueText } from '$lib/issueText';
@@ -21,7 +22,8 @@
 	const trimmed = $derived(isTrimmed(item.trim, item.durationS));
 	const kept = $derived(keptSeconds(item.trim, item.durationS));
 	const aspect = $derived(item.width && item.height ? item.width / item.height : 1);
-	const pos = $derived(coverPosition(item.focal, aspect, 1));
+	// The thumbnail follows the framing's centre, like the server's (docs/spec/framing.md §2.1).
+	const pos = $derived(coverPosition(sendFocal(item.framing, item.focal), aspect, 1));
 	const pct = $derived(item.bytes ? Math.min(100, Math.round((item.uploaded / item.bytes) * 100)) : 0);
 	const prepPct = $derived(Math.round(item.prepProgress * 100));
 	const issue = $derived(item.issue ? issueText(item.issue) : null);

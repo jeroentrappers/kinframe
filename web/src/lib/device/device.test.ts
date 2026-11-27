@@ -3,7 +3,7 @@ import { DeviceClient, DeviceRevokedError } from './client';
 import { CredentialStore, credentialsKey } from './credentials';
 import { FrameEngine } from './engine';
 import { FakeServer, FakeSocket, placementChange } from './fakeServer';
-import { FrameFeed } from './feed';
+import { FrameFeed, toFramePlacement } from './feed';
 import { Playlist, orderIds, uniform } from './playlist';
 import { sleepState } from './sleep';
 import { backoffMs, DeviceSocket, UNAUTHORIZED } from './socket';
@@ -113,6 +113,23 @@ describe('device websocket', () => {
 });
 
 describe('change feed', () => {
+	it('keeps the framing and picks the view per orientation (framing.md §3.1, §5)', () => {
+		const base = placementChange('a');
+		const framed = { ...base, framing_override: { portrait: { x: 0.8, y: 0.4, zoom: 3 } }, item: { ...base.item, focal_point: { x: 0.4, y: 0.5 }, framing: { landscape: { x: 0.3, y: 0.5, zoom: 2 } } } };
+		const p = toFramePlacement(framed);
+		expect(p.framing).toEqual({ landscape: { x: 0.3, y: 0.5, zoom: 2 } });
+		expect(p.framingOverride).toEqual({ portrait: { x: 0.8, y: 0.4, zoom: 3 } });
+		expect(p.views).toEqual({
+			landscape: { view: { x: 0.3, y: 0.5, zoom: 2 }, chosen: true },
+			portrait: { view: { x: 0.8, y: 0.4, zoom: 3 }, chosen: true }
+		});
+		// A focal override made before framing beats the item's framing, at zoom 1.
+		expect(toFramePlacement({ ...framed, framing_override: null, focal_override: { x: 0.1, y: 0.2 } }).views?.landscape).toEqual({ view: { x: 0.1, y: 0.2, zoom: 1 }, chosen: false });
+		// Without framing: the focal point at 1×. Videos ignore framing.
+		expect(toFramePlacement(base).views?.landscape).toEqual({ view: { x: 0.5, y: 0.5, zoom: 1 }, chosen: false });
+		expect(toFramePlacement(placementChange('v', { kind: 'video' })).views).toBeNull();
+	});
+
 	it('applies upserts, removals, settings and resets; only later arrivals are new', () => {
 		const f = new FrameFeed();
 		f.apply({ changes: [{ seq: 1, type: 'placement.upsert', placement: placementChange('a') }, { seq: 2, type: 'settings', settings: { version: 1 } }], next_seq: 2, has_more: false });
