@@ -153,6 +153,14 @@
     <string name="send_landscape">Liggend</string>
     <string name="send_portrait">Staand</string>
     <string name="send_previews_label">Zo ziet het eruit op het kader</string>
+    <string name="send_framing_hint">Tik op een voorbeeld om in te zoomen of de foto te verschuiven voor die vorm van kader.</string>
+    <string name="send_framing_title_landscape">Liggende kaders</string>
+    <string name="send_framing_title_portrait">Staande kaders</string>
+    <string name="send_framing_help">Sleep om het kader te verschuiven, knijp of gebruik de schuifregelaar om te zoomen.</string>
+    <string name="send_framing_zoom">Zoom</string>
+    <string name="send_framing_zoom_value">%1$s×</string>
+    <string name="send_framing_soft">Kan minder scherp ogen op het kader.</string>
+    <string name="send_framing_reset">Herstellen</string>
     <string name="send_issue_too_large">Te groot. De limiet is %1$s.</string>
     <string name="send_issue_too_long">Te lang. Video’s mogen tot %1$s duren. Knip hem in om te versturen.</string>
     <plurals name="send_issues">
@@ -251,6 +259,9 @@
     <string name="detail_edited">Aangepast</string>
     <string name="detail_edit_caption">Onderschrift van item %1$d bewerken</string>
     <string name="detail_caption_saved">Onderschrift aangepast op elk kader</string>
+    <string name="detail_framing">Zoomen en verschuiven</string>
+    <string name="detail_edit_framing">Zoomen en verschuiven van item %1$d</string>
+    <string name="detail_framing_saved">Zoom en positie aangepast op elk kader</string>
     <string name="detail_replies">Antwoorden</string>
 
     <string name="failure_unsupported_media">Dit bestandstype wordt niet ondersteund.</string>
@@ -566,6 +577,16 @@
     <string name="a11y_photo">Foto</string>
     <string name="a11y_video">Video</string>
     <string name="a11y_focal_picker">Voorbeeld van de foto. Dubbeltik om het belangrijkste punt te kiezen.</string>
+    <string name="a11y_framing_preview">Voorbeeld %1$s</string>
+    <string name="a11y_framing_edit">zoomen en verschuiven</string>
+    <string name="a11y_framing_window">Kadervenster over de foto</string>
+    <string name="a11y_framing_value">%1$s: %2$s, gecentreerd op %3$d%%, %4$d%%</string>
+    <string name="a11y_framing_zoom_in">Inzoomen</string>
+    <string name="a11y_framing_zoom_out">Uitzoomen</string>
+    <string name="a11y_framing_move_left">Naar links</string>
+    <string name="a11y_framing_move_right">Naar rechts</string>
+    <string name="a11y_framing_move_up">Naar boven</string>
+    <string name="a11y_framing_move_down">Naar beneden</string>
     <string name="a11y_select_item">Item selecteren</string>
 
     <!-- problems (ProblemCode) -->

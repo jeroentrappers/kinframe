@@ -136,6 +136,41 @@ class DeliveryTest {
 }
 
 class FramingTest {
+    // ---- zoom per orientation (docs/spec/framing.md §3, §4)
+
+    @Test fun visiblePartAtZoomOneIsTheCoverCrop() {
+        // 4:3 photo in a 16:10 window: full width, 5/6 of the height, centred on the focal point as far as it goes.
+        val v = Framing.visible(Framing.View(0.5f, 0.1f), 4f / 3f, Framing.LANDSCAPE)
+        assertEquals(1f, v.width, 0.001f); assertEquals(0.8333f, v.height, 0.001f)
+        assertEquals(0f, v.top, 0.001f)
+    }
+
+    @Test fun zoomHalvesTheWindowAndStaysOnThePhoto() {
+        val v = Framing.visible(Framing.View(0.95f, 0.5f, 2f), 4f / 3f, Framing.LANDSCAPE)
+        assertEquals(0.5f, v.width, 0.001f)
+        assertEquals(0.5f, v.left, 0.001f)
+        val c = Framing.clampView(Framing.View(0.95f, 0.5f, 9f), 4f / 3f, Framing.LANDSCAPE)
+        assertEquals(4f, c.zoom, 0.001f); assertEquals(0.875f, c.x, 0.001f)
+        assertEquals(1f, Framing.clampView(Framing.View(0.5f, 0.5f, 0.3f), 4f / 3f, Framing.LANDSCAPE).zoom, 0.001f)
+    }
+
+    @Test fun softWarningBelow960PixelsAcrossTheLongSide() {
+        // 4000 × 3000 photo: the master is 2560 wide; at 2× 1280 px show across a landscape frame, at 3× only 853.
+        assertFalse(Framing.mayLookSoft(Framing.View(0.5f, 0.5f, 2f), 4000, 3000, Framing.LANDSCAPE))
+        assertTrue(Framing.mayLookSoft(Framing.View(0.5f, 0.5f, 3f), 4000, 3000, Framing.LANDSCAPE))
+        // Portrait frames: the long side is the height; 1920 master px tall at 2× is 960, just enough.
+        assertFalse(Framing.mayLookSoft(Framing.View(0.5f, 0.5f, 2f), 4000, 3000, Framing.PORTRAIT))
+        assertFalse(Framing.mayLookSoft(Framing.View(0.5f, 0.5f, 4f), null, null, Framing.PORTRAIT))
+    }
+
+    @Test fun focalPointFollowsTheLandscapeViewElsePortraitElseTheTap() {
+        val l = Framing.View(0.2f, 0.3f, 2f)
+        val p = Framing.View(0.7f, 0.6f, 1.5f)
+        assertEquals(0.2f to 0.3f, Framing.focalFor(l, p, 0.5f to 0.5f))
+        assertEquals(0.7f to 0.6f, Framing.focalFor(null, p, 0.5f to 0.5f))
+        assertEquals(0.4f to 0.5f, Framing.focalFor(null, null, 0.4f to 0.5f))
+    }
+
     @Test fun centredFocalNeedsNoShift() {
         val (x, y) = Framing.coverBias(0.5f, 0.5f, 4f / 3f, Framing.LANDSCAPE)
         assertEquals(0f, x, 0.001f); assertEquals(0f, y, 0.001f)

@@ -98,7 +98,7 @@ class AlbumOnlyModeTest : SyncTestBase() {
             d.version = 9
         }
         val room = Room.databaseBuilder(app, FrameDatabase::class.java, file.absolutePath)
-            .addMigrations(FrameDatabase.MIGRATION_9_10, FrameDatabase.MIGRATION_10_11, FrameDatabase.MIGRATION_11_12).allowMainThreadQueries().build()
+            .addMigrations(FrameDatabase.MIGRATION_9_10, FrameDatabase.MIGRATION_10_11, FrameDatabase.MIGRATION_11_12, FrameDatabase.MIGRATION_12_13).allowMainThreadQueries().build()
         assertEquals(42L, room.syncState().get()!!.nextSeq)
         room.albumFlags().put(AlbumFlagEntity("a1", true))
         assertEquals(listOf("a1"), room.albumFlags().albumOnlyIds())

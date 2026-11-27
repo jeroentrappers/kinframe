@@ -30,6 +30,8 @@ data class OutboxItem(
     val fit: String? = null,
     val focalX: Double? = null,
     val focalY: Double? = null,
+    /** Zoom and position per orientation, only the ones the person changed (docs/spec/framing.md §4). */
+    val framing: app.kinframe.core.api.Framing? = null,
     val trimStartMs: Long? = null,
     val trimEndMs: Long? = null,
     val includeAudio: Boolean = true,
@@ -127,6 +129,7 @@ data class OutboxItem(
             uploadId = requireNotNull(uploadId),
             caption = caption?.takeIf { it.isNotBlank() },
             focalPoint = if (focalX != null && focalY != null) FocalPoint(focalX, focalY) else null,
+            framing = framing?.takeUnless { video || it.isEmpty },
             fit = fit,
             trim = if (video && !baked && (trimStartMs != null || trimEndMs != null) && trimEndMs != null) Trim(trimStartMs ?: 0, trimEndMs) else null,
             includeAudio = if (video && !includeAudio) false else null,

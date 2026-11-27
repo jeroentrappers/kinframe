@@ -158,6 +158,50 @@ class ViewModelTest {
         assertTrue(vm.state.value.items.isEmpty())
     }
 
+    @Test fun composerSendsOnlyTheChangedOrientationsAndTheirCentreAsFocalPoint() = runTest {
+        var queued: OutboxSend? = null
+        var framingOn = true
+        val vm = ComposerViewModel(
+            api = { object : FakeApi() { override suspend fun frames() = listOf(frame("f1", "Oma")) } },
+            limits = { Limits() }, server = { "" },
+            inspect = { uri -> info(uri.lastPathSegment!!.toInt()) },
+            enqueue = { queued = it },
+            framing = { framingOn },
+        )
+        vm.preselectFrame("f1")
+        vm.add(listOf(Uri.parse("content://media/1"), Uri.parse("content://media/2")))
+        assertTrue(vm.state.value.framingEnabled)
+        val (a, b) = vm.state.value.items.map { it.id }
+        // 4:3 photo: a portrait view at 2×, clamped inside the photo and rounded.
+        vm.setView(a, landscape = false, app.kinframe.family.send.Framing.View(0.99f, 0.4f, 2f))
+        val pv = vm.state.value.items[0].portrait!!
+        assertEquals(1f - (10f / 16f / (4f / 3f)) / 2 / 2, pv.x, 0.001f)
+        // Tapping the focal point moves the view's centre there and keeps its zoom; landscape stays unset.
+        vm.setFocal(a, 0.5f, 0.5f)
+        assertEquals(app.kinframe.family.send.Framing.View(0.5f, 0.5f, 2f), vm.state.value.items[0].portrait)
+        assertNull(vm.state.value.items[0].landscape)
+        vm.setView(b, landscape = true, app.kinframe.family.send.Framing.View(0.3f, 0.6f, 1.5f))
+        vm.resetView(b, landscape = true)
+        vm.send()
+        val q = queued!!
+        assertNull(q.items[0].framing!!.landscape)
+        assertEquals(app.kinframe.core.api.FramingView(0.5, 0.5, 2.0), q.items[0].framing!!.portrait)
+        assertEquals(0.5, q.items[0].focalX!!, 0.001)
+        assertNull(q.items[1].framing)
+        // A server without framing gets none, and the tapped point as focal point.
+        framingOn = false
+        vm.loadFrames()
+        vm.preselectFrame("f1")
+        vm.add(listOf(Uri.parse("content://media/3")))
+        val c = vm.state.value.items.single().id
+        vm.setFocal(c, 0.1f, 0.2f)
+        vm.setView(c, landscape = true, app.kinframe.family.send.Framing.View(0.7f, 0.5f, 3f))
+        assertTrue(!vm.state.value.framingEnabled)
+        vm.send()
+        assertNull(queued!!.items.single().framing)
+        assertEquals(0.1, queued!!.items.single().focalX!!, 0.001)
+    }
+
     @Test fun composerFlagsOversizeAndTrimsLongVideos() = runTest {
         val vm = ComposerViewModel(
             api = { object : FakeApi() { override suspend fun frames() = listOf(frame("f1", "Oma")) } },

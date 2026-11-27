@@ -36,8 +36,13 @@ class SlideRenderer {
         val caption: CaptionSpec? = null,
         /** px per dp. */
         val density: Float = 1f,
-        /** Fill was picked for this photo on the frame: honoured even where it crops a lot (a panorama). */
+        /**
+         * Fill was picked for this photo on the frame, or it has a framing for this orientation (docs/spec/framing.md
+         * §3.2): honoured even where it crops a lot (a panorama).
+         */
         val fillChosen: Boolean = false,
+        /** The view's zoom over the cover crop in fill mode (docs/spec/framing.md §3); [focalX]/[focalY] are its centre. */
+        val zoom: Double = 1.0,
     )
 
     data class CaptionSpec(
@@ -115,10 +120,13 @@ class SlideRenderer {
         }
     }
 
-    /** Size the decoded source must at least have for the chosen mode. */
+    /**
+     * Size the decoded source must at least have for the chosen mode. A zoomed view needs the screen size times the
+     * zoom, so the visible part is decoded at screen resolution (docs/spec/framing.md §3.3).
+     */
     private fun needed(srcW: Int, srcH: Int, r: Request): Pair<Int, Int> {
         val fill = useFill(srcW, srcH, r)
-        val scale = if (fill) max(r.screenW.toFloat() / srcW, r.screenH.toFloat() / srcH)
+        val scale = if (fill) max(r.screenW.toFloat() / srcW, r.screenH.toFloat() / srcH) * FocalCrop.clampZoom(r.zoom).toFloat()
         else minOf(r.screenW.toFloat() / srcW, r.screenH.toFloat() / srcH)
         return (srcW * scale).roundToInt().coerceAtLeast(1) to (srcH * scale).roundToInt().coerceAtLeast(1)
     }
@@ -132,7 +140,7 @@ class SlideRenderer {
         canvas.drawColor(Color.BLACK)
         val dst = Rect(0, 0, r.screenW, r.screenH)
         if (useFill(src.width, src.height, r)) {
-            val c = FocalCrop.fillSource(src.width, src.height, r.screenW, r.screenH, r.focalX ?: 0.5, r.focalY ?: 0.5)
+            val c = FocalCrop.viewSource(src.width, src.height, r.screenW, r.screenH, r.focalX ?: 0.5, r.focalY ?: 0.5, r.zoom)
             canvas.drawBitmap(src, Rect(c.left.roundToInt(), c.top.roundToInt(), c.right.roundToInt(), c.bottom.roundToInt()), dst, paint)
         } else {
             if (r.blurBars) drawBlurredBackground(canvas, src, r)
@@ -145,7 +153,10 @@ class SlideRenderer {
         return out
     }
 
-    /** One photo of a collage or a smart pair. [label] is a short caption ("Anna · Yesterday") or null. */
+    /**
+     * One photo of a collage or a smart pair. [label] is a short caption ("Anna · Yesterday") or null. [focalX]/[focalY]
+     * are the centre of the photo's view for the screen; tiles ignore its zoom (docs/spec/framing.md §3.5).
+     */
     data class TileRequest(
         val file: File,
         val rotation: Int,

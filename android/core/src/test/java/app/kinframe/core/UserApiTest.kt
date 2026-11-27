@@ -118,6 +118,23 @@ class UserApiTest {
     }
 
     @Test
+    fun framingRoundTripsOnItemsPlacementsAndSends() {
+        val json = app.kinframe.core.api.KinJson
+        val p = json.decodeFromString(app.kinframe.core.api.Placement.serializer(),
+            """{"id":"p1","item":{"id":"i1","framing":{"landscape":{"x":0.4,"y":0.3,"zoom":2}}},"framing_override":{"portrait":{"x":0.5,"y":0.5,"zoom":1.5}}}""")
+        assertEquals(app.kinframe.core.api.FramingView(0.4, 0.3, 2.0), p.item.framing!!.of(landscape = true))
+        assertEquals(null, p.item.framing!!.portrait)
+        assertEquals(1.5, p.framingOverride!!.of(landscape = false)!!.zoom, 0.0)
+        assertTrue(json.decodeFromString(app.kinframe.core.api.Discovery.serializer(), """{"name":"k","framing":true}""").framing)
+        assertFalse(json.decodeFromString(app.kinframe.core.api.Discovery.serializer(), """{"name":"k"}""").framing)
+        // Only the orientations set go out; no framing at all leaves the field out.
+        val item = SendItemCreate("u1", framing = app.kinframe.core.api.Framing(portrait = app.kinframe.core.api.FramingView(0.2, 0.8, 3.0)))
+        assertEquals("""{"x":0.2,"y":0.8,"zoom":3.0}""", json.encodeToJsonElement(SendItemCreate.serializer(), item).let { (it as kotlinx.serialization.json.JsonObject)["framing"]!!.let { f -> (f as kotlinx.serialization.json.JsonObject)["portrait"].toString() } })
+        assertFalse("landscape" in json.encodeToString(SendItemCreate.serializer(), item))
+        assertFalse("framing" in json.encodeToString(SendItemCreate.serializer(), SendItemCreate("u1")))
+    }
+
+    @Test
     fun bulkKeepsTheColonPath() = runBlocking {
         server.enqueue(json("""{"ok":["p1"],"failed":[{"id":"p2","code":"forbidden"}]}"""))
         val r = api.bulkPlacements("f1", listOf("p1", "p2"), BulkAction.HIDE)

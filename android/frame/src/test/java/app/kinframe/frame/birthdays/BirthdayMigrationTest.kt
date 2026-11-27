@@ -43,7 +43,7 @@ class BirthdayMigrationTest {
             db.version = 8
         }
         val room = Room.databaseBuilder(app, FrameDatabase::class.java, file.absolutePath)
-            .addMigrations(FrameDatabase.MIGRATION_8_9, FrameDatabase.MIGRATION_9_10, FrameDatabase.MIGRATION_10_11, FrameDatabase.MIGRATION_11_12).allowMainThreadQueries().build()
+            .addMigrations(FrameDatabase.MIGRATION_8_9, FrameDatabase.MIGRATION_9_10, FrameDatabase.MIGRATION_10_11, FrameDatabase.MIGRATION_11_12, FrameDatabase.MIGRATION_12_13).allowMainThreadQueries().build()
         val st = room.syncState().get()!!
         assertEquals(42L, st.nextSeq)
         assertEquals("{}", st.calendarJson)

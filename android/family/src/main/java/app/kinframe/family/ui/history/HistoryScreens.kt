@@ -324,9 +324,12 @@ fun SendDetailScreen(
     onPostToFeed: (() -> Unit)? = null,
     /** Opens a feed this send was posted to (its receipts). */
     onOpenFeed: ((app.kinframe.core.api.SendFeed) -> Unit)? = null,
+    /** Zoom and position of a photo (docs/spec/framing.md §4); null when the server doesn't store framing. */
+    onSaveFraming: ((String, app.kinframe.core.api.Framing?) -> Unit)? = null,
 ) {
     val c = Kin.colors
     var confirm by rememberSaveable { mutableStateOf(false) }
+    var framingItem by rememberSaveable { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().background(c.paper)) {
         KinTopBar(stringResource(R.string.detail_title), onBack = onBack)
         when (val s = state.send) {
@@ -337,7 +340,18 @@ fun SendDetailScreen(
                 PageColumn {
                     Text(stringResource(R.string.detail_sent_at, Format.date(send.createdAt) + " " + Format.time(send.createdAt)), style = Kin.type.caption, color = c.inkSoft)
                     if (state.unsent) Note(stringResource(R.string.detail_unsent), tone = NoteTone.Good, icon = KinIcons.Check)
-                    send.items.forEachIndexed { i, item -> ItemRow(i, item, state, onEditCaption, onCaption, onSaveCaption, onCancelEdit) }
+                    send.items.forEachIndexed { i, item ->
+                        ItemRow(i, item, state, onEditCaption, onCaption, onSaveCaption, onCancelEdit,
+                            onFraming = if (onSaveFraming != null && !state.unsent && canFrame(item)) ({ framingItem = item.id }) else null)
+                    }
+                    framingItem?.let { id -> send.items.firstOrNull { it.id == id } }?.let { item ->
+                        app.kinframe.family.ui.send.SentFramingDialog(
+                            item.displayUrl, item.width!!.toFloat() / item.height!!, item.width, item.height,
+                            (item.focalPoint?.x ?: 0.5).toFloat(), (item.focalPoint?.y ?: 0.5).toFloat(), item.framing, state.saving,
+                            onSave = { f -> onSaveFraming?.invoke(item.id, f); framingItem = null },
+                            onDismiss = { framingItem = null },
+                        )
+                    }
                     if (send.frames.isNotEmpty() || send.feeds.isEmpty()) SectionTitle(stringResource(R.string.detail_delivery_label))
                     Delivery.frames(send).forEach { d ->
                         Surface(Modifier.fillMaxWidth()) {
@@ -375,6 +389,14 @@ fun SendDetailScreen(
     }
 }
 
+/**
+ * Zoom and position can be changed after sending for photos shown in fill mode whose uncropped rendition and size are
+ * known (docs/spec/framing.md §4); videos ignore framing.
+ */
+private fun canFrame(item: Item): Boolean =
+    item.kind != MediaKind.VIDEO && item.status != "failed" && item.fit != "fit" && item.displayUrl != null &&
+        (item.width ?: 0) > 0 && (item.height ?: 0) > 0
+
 @Composable
 private fun ItemRow(
     index: Int,
@@ -384,6 +406,7 @@ private fun ItemRow(
     onCaption: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
+    onFraming: (() -> Unit)? = null,
 ) {
     val c = Kin.colors
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -410,6 +433,10 @@ private fun ItemRow(
                 Text(item.caption?.takeIf { it.isNotBlank() } ?: stringResource(R.string.detail_no_caption), style = Kin.type.body,
                     color = if (item.caption.isNullOrBlank()) c.inkFaint else c.ink)
                 if (item.captionEdited) Text(stringResource(R.string.detail_edited), style = Kin.type.caption, color = c.inkFaint)
+                if (onFraming != null) {
+                    val label = stringResource(R.string.detail_edit_framing, index + 1)
+                    QuietButton(stringResource(R.string.detail_framing), onFraming, Modifier.semantics { contentDescription = label })
+                }
             }
         }
         if (state.editingItem != item.id) {

@@ -472,7 +472,8 @@ fun SlideshowScreen(c: FrameController) {
                         // Time in segments (see KenBurns), at a constant pace from the fade-in until well past the fade-out:
                         // the camera never stops while the photo is visible.
                         val ms = (hold + 15_000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-                        LaunchedEffect(Unit) { motion.animateTo(ms.toFloat() / KenBurns.SEGMENT_MS, tween(ms, easing = LinearEasing)) }
+                        // A chosen view plays one key every half the hold, so it starts and ends at the view (framing.md §3.4).
+                        LaunchedEffect(Unit) { motion.animateTo(ms.toFloat() / kb.segmentMs(hold), tween(ms, easing = LinearEasing)) }
                     }
                     // Where the transition and the finger put the slide; Ken Burns adds its motion to the photo only.
                     val place: GraphicsLayerScope.() -> Unit = {
@@ -841,12 +842,17 @@ private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
     val settings by c.g.settings.settings.collectAsState()
     val vw = p.width ?: wPx
     val vh = p.height ?: hPx
-    val fill = p.fit == "fill" || (p.fit == null && settings.slideshow.fill && !FocalCrop.cropTooAggressive(vw, vh, wPx, hPx))
-    val scale = if (fill) maxOf(wPx.toFloat() / vw, hPx.toFloat() / vh) else minOf(wPx.toFloat() / vw, hPx.toFloat() / vh)
+    // A live photo's clip plays over the still in the same view (docs/spec/framing.md §3); videos ignore framing.
+    val view = FramingPick.of(p, wPx, hPx)
+    val fills = p.fit == "fill" || (p.fit == null && settings.slideshow.fill)
+    val fill = fills && (p.fit == "fill" || view.chosen || !FocalCrop.cropTooAggressive(vw, vh, wPx, hPx))
+    val zoom = if (fill) view.zoom else 1.0
+    val scale = if (fill) maxOf(wPx.toFloat() / vw, hPx.toFloat() / vh) * zoom.toFloat() else minOf(wPx.toFloat() / vw, hPx.toFloat() / vh)
     val dw = (vw * scale).roundToInt()
     val dh = (vh * scale).roundToInt()
-    val left = if (fill) (wPx / 2f - (p.focalX ?: 0.5).toFloat() * dw).coerceIn((wPx - dw).toFloat(), 0f) else (wPx - dw) / 2f
-    val top = if (fill) (hPx / 2f - (p.focalY ?: 0.5).toFloat() * dh).coerceIn((hPx - dh).toFloat(), 0f) else (hPx - dh) / 2f
+    val crop = if (fill) FocalCrop.viewSource(vw, vh, wPx, hPx, view.x, view.y, zoom) else null
+    val left = if (crop != null) -crop.left * scale else (wPx - dw) / 2f
+    val top = if (crop != null) -crop.top * scale else (hPx - dh) / 2f
     val d = LocalDensity.current
     Box(Modifier.fillMaxSize().clip(androidx.compose.ui.graphics.RectangleShape)) {
         AndroidView(

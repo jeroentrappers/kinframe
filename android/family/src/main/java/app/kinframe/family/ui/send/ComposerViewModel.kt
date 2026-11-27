@@ -39,11 +39,28 @@ data class DraftItem(
     val includeAudio: Boolean = true,
     /** A Motion Photo goes out live unless the person turns that off ("send as still only"). */
     val sendLive: Boolean = true,
+    /** Zoom and position for landscape and portrait frames (docs/spec/framing.md §4); null: the focal point at 1×. */
+    val landscape: Framing.View? = null,
+    val portrait: Framing.View? = null,
 ) {
     val isVideo: Boolean get() = info.kind == MediaKind.VIDEO
     val isLive: Boolean get() = info.motionPhoto && sendLive
     val aspect: Float? get() = info.width?.let { w -> info.height?.takeIf { it > 0 }?.let { h -> w.toFloat() / h } }
+
+    /** The view for an orientation: the one the person made, else the focal point at 1×. */
+    fun view(landscape: Boolean): Framing.View = (if (landscape) this.landscape else portrait) ?: Framing.View(focalX, focalY)
+
+    /** What goes out as `framing`: only the orientations the person changed, none for videos. */
+    val framing: app.kinframe.core.api.Framing? get() {
+        if (isVideo || (landscape == null && portrait == null)) return null
+        fun v(f: Framing.View?) = f?.let { app.kinframe.core.api.FramingView(it.x.toDouble(), it.y.toDouble(), it.zoom.toDouble()) }
+        return app.kinframe.core.api.Framing(v(landscape), v(portrait))
+    }
     val sendDurationMs: Long? get() = trim?.let { it.second - it.first } ?: info.durationMs
+
+    /** The focal point that goes out: the framing's centre when it goes out too, else the tapped point. */
+    fun sendFocal(withFraming: Boolean): Pair<Float, Float> =
+        if (withFraming && framing != null) Framing.focalFor(landscape, portrait, focalX to focalY) else focalX to focalY
 }
 
 enum class ItemIssue { TooLarge, TooLong, TooShort }
@@ -113,7 +130,20 @@ data class ComposerState(
      * for that frame alone; otherwise the destination is a family (or one of its circles).
      */
     val frameOnly: Boolean = false,
+    /** Discovery `framing` of the primary server: zoom per orientation can be offered (docs/spec/framing.md §7). */
+    val framingDefault: Boolean = false,
+    /** Each frame's and family's server `framing` flag; missing ones use [framingDefault]. */
+    val framingOf: Map<String, Boolean> = emptyMap(),
 ) {
+    /**
+     * The editor offers zoom and position (docs/spec/framing.md §4) when every chosen recipient's server stores framing
+     * (multi-server.md §2.2), else the primary server's flag while nothing is chosen.
+     */
+    val framingEnabled: Boolean get() {
+        val ids = selected + selectedFeeds
+        return if (ids.isEmpty()) framingDefault else ids.all { framingOf[it] ?: framingDefault }
+    }
+
     /** The families this goes to (one send to several families), none for a frame-only send. */
     val destinationFamilies: List<Feed> get() = if (frameOnly) emptyList() else feeds.filter { it.id in selectedFeeds }
 
@@ -208,8 +238,12 @@ class ComposerViewModel(
     private val serverLabel: (String) -> String? = { null },
     /** A frame's or family's server limits (its own server's discovery); null uses [limits]. */
     private val limitsFor: (String) -> Limits? = { null },
+    /** Discovery `framing` of the primary server. */
+    private val framing: () -> Boolean = { false },
+    /** A frame's or family's server `framing` flag; null uses [framing]. */
+    private val framingFor: (String) -> Boolean? = { null },
 ) : ViewModel() {
-    private val _state = MutableStateFlow(ComposerState(limits = limits()))
+    private val _state = MutableStateFlow(ComposerState(limits = limits(), framingDefault = framing()))
     val state: StateFlow<ComposerState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<ComposerEvent>(extraBufferCapacity = 4)
@@ -224,7 +258,7 @@ class ComposerViewModel(
 
     fun loadFrames() = viewModelScope.launch {
         val a = api() ?: return@launch
-        _state.update { it.copy(limits = limits()) }
+        _state.update { it.copy(limits = limits(), framingDefault = framing()) }
         familiesReady = kotlinx.coroutines.CompletableDeferred()
         if (feedsEnabled()) launch { loadFeeds(a) }
         else _state.update { it.copy(feeds = emptyList(), selectedFeeds = emptySet()) }
@@ -242,7 +276,7 @@ class ComposerViewModel(
                     else -> emptySet()
                 }
                 s.copy(frames = Load.Ready(frames), selected = sel, frameOnly = sel.isNotEmpty(), serverOf = s.serverOf + labels(frames.map { it.id }),
-                    limitsOf = s.limitsOf + serverLimits(frames.map { it.id }))
+                    limitsOf = s.limitsOf + serverLimits(frames.map { it.id }), framingOf = s.framingOf + framingFlags(frames.map { it.id }))
             }
             // A frame you're not on asked for photos (or went quiet) and reached you through a family: preselect the
             // families whose posts reach it (README §5.20).
@@ -260,7 +294,8 @@ class ComposerViewModel(
         _state.update { s ->
             val pre = preselectFeed?.takeIf { id -> feeds.any { it.id == id } }
             s.copy(feeds = feeds, selectedFeeds = if (pre != null) setOf(pre) else Recipients.keep(s.selectedFeeds, feeds.map { it.id }),
-                serverOf = s.serverOf + labels(feeds.map { it.id }), limitsOf = s.limitsOf + serverLimits(feeds.map { it.id }))
+                serverOf = s.serverOf + labels(feeds.map { it.id }), limitsOf = s.limitsOf + serverLimits(feeds.map { it.id }),
+                framingOf = s.framingOf + framingFlags(feeds.map { it.id }))
         }
         familiesReady?.complete(Unit)
     }
@@ -269,6 +304,8 @@ class ComposerViewModel(
 
     private fun serverLimits(ids: List<String>): Map<String, ServerLimits> =
         ids.mapNotNull { id -> limitsFor(id)?.let { id to ServerLimits(serverLabel(id), it) } }.toMap()
+
+    private fun framingFlags(ids: List<String>): Map<String, Boolean> = ids.mapNotNull { id -> framingFor(id)?.let { id to it } }.toMap()
 
     private var familiesReady: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
@@ -405,10 +442,30 @@ class ComposerViewModel(
 
     fun setFill(id: String, fill: Boolean) = change(id) { it.copy(fill = fill) }
 
+    /**
+     * The tapped focal point. It also moves both views' centres there and keeps their zoom (docs/spec/framing.md §4);
+     * with no views it is the old focal point.
+     */
     fun setFocal(id: String, x: Float, y: Float) {
         val (fx, fy) = Framing.clampFocal(x, y)
-        change(id) { it.copy(focalX = fx, focalY = fy) }
+        change(id) { item ->
+            val a = item.aspect ?: DEFAULT_ASPECT
+            item.copy(
+                focalX = fx, focalY = fy,
+                landscape = item.landscape?.let { Framing.clampView(it.copy(x = fx, y = fy), a, Framing.LANDSCAPE) },
+                portrait = item.portrait?.let { Framing.clampView(it.copy(x = fx, y = fy), a, Framing.PORTRAIT) },
+            )
+        }
     }
+
+    /** "Done" in the large preview: keeps this orientation's view, clamped to the photo. */
+    fun setView(id: String, landscape: Boolean, view: Framing.View) = change(id) { item ->
+        val v = Framing.clampView(view, item.aspect ?: DEFAULT_ASPECT, if (landscape) Framing.LANDSCAPE else Framing.PORTRAIT)
+        if (landscape) item.copy(landscape = v) else item.copy(portrait = v)
+    }
+
+    /** "Reset": back to the focal point at 1× for this orientation (the view is removed). */
+    fun resetView(id: String, landscape: Boolean) = change(id) { if (landscape) it.copy(landscape = null) else it.copy(portrait = null) }
 
     fun setTrim(id: String, start: Long, end: Long, moved: TrimHandle) = change(id) { item ->
         val d = item.info.durationMs ?: return@change item
@@ -430,6 +487,8 @@ class ComposerViewModel(
         val frames = s.sendableFrames.filter { it.id in s.selected }
         val feeds = s.feeds.filter { it.id in s.selectedFeeds }
         if (!Recipients.valid(frames.map { it.id }, feeds.map { it.id })) return
+        // Servers without framing get none (they would only keep the focal point anyway).
+        val withFraming = s.framingEnabled
         val outbox = OutboxSend(
             feedIds = feeds.map { it.id },
             feedNames = feeds.map { it.name },
@@ -450,8 +509,10 @@ class ComposerViewModel(
                     kind = d.info.kind,
                     caption = d.caption.trim().ifEmpty { null },
                     fit = if (d.fill) "fill" else "fit",
-                    focalX = d.focalX.toDouble(),
-                    focalY = d.focalY.toDouble(),
+                    // With a framing the focal point is its landscape centre, else the portrait one (framing.md §4).
+                    focalX = d.sendFocal(withFraming).first.toDouble(),
+                    focalY = d.sendFocal(withFraming).second.toDouble(),
+                    framing = d.framing.takeIf { withFraming },
                     trimStartMs = d.trim?.first,
                     trimEndMs = d.trim?.second,
                     includeAudio = d.includeAudio,
@@ -475,5 +536,7 @@ class ComposerViewModel(
 
     companion object {
         const val CAPTION_MAX = 280
+        /** The editor's shape for a photo whose size isn't known. */
+        const val DEFAULT_ASPECT = 4f / 3f
     }
 }

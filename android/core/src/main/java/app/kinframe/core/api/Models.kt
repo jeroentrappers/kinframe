@@ -86,6 +86,8 @@ data class Discovery(
     val leaving: Boolean = false,
     /** Frames here can follow families on other servers, families here can allow them (README §5.22). */
     val remoteFamilies: Boolean = false,
+    /** The server stores framing (zoom and position per orientation, docs/spec/framing.md): senders offer zoom. */
+    val framing: Boolean = false,
 ) {
     /** The photo source providers to offer: none when the server has sources off. */
     val sourceProviders: List<String>
@@ -245,6 +247,27 @@ data class FrameCode(
 @Serializable
 data class FocalPoint(val x: Double, val y: Double)
 
+/**
+ * Zoom and position per screen orientation (docs/spec/framing.md §2). A screen uses [landscape] when its width is at
+ * least its height, else [portrait]; a missing view means the focal point at 1×.
+ */
+@Serializable
+data class Framing(val landscape: FramingView? = null, val portrait: FramingView? = null) {
+    /** The view for a screen of that orientation, or null. */
+    fun of(landscape: Boolean): FramingView? = if (landscape) this.landscape else portrait
+
+    val isEmpty: Boolean get() = landscape == null && portrait == null
+}
+
+/** The centre of the visible part (0..1 of the master, from top-left) and the zoom over the cover crop (1..4). */
+@Serializable
+data class FramingView(val x: Double, val y: Double, val zoom: Double = 1.0) {
+    companion object {
+        const val MIN_ZOOM = 1.0
+        const val MAX_ZOOM = 4.0
+    }
+}
+
 @Serializable
 data class Item(
     val id: String,
@@ -256,6 +279,8 @@ data class Item(
     val caption: String? = null,
     val captionEdited: Boolean = false,
     val focalPoint: FocalPoint? = null,
+    /** Zoom and position per orientation (docs/spec/framing.md); photos and live photos only, used in fill mode. */
+    val framing: Framing? = null,
     val fit: String? = null,
     val width: Int? = null,
     val height: Int? = null,
@@ -350,6 +375,8 @@ data class Placement(
     val pendingModeration: Boolean = false,
     val fitOverride: String? = null,
     val focalOverride: FocalPoint? = null,
+    /** The frame owner's own framing for this placement (docs/spec/framing.md §3.1 step 1). */
+    val framingOverride: Framing? = null,
     val rotation: Int = 0,
     val reaction: String? = null,
     val deliveredAt: String? = null,

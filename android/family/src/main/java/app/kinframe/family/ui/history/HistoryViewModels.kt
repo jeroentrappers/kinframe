@@ -136,6 +136,7 @@ data class SendDetailState(
 
 sealed interface SendDetailEvent {
     data object CaptionSaved : SendDetailEvent
+    data object FramingSaved : SendDetailEvent
     data object Unsent : SendDetailEvent
     /** Posted to feeds with "Post to a feed" (names of the feeds). */
     data class Forwarded(val feeds: List<String>) : SendDetailEvent
@@ -198,6 +199,34 @@ class SendDetailViewModel(private val api: KinApi, private val sendId: String, l
                     )
                 }
                 _events.tryEmit(SendDetailEvent.CaptionSaved)
+            } catch (e: Exception) {
+                _state.update { it.copy(saving = false, error = Problems.message(e)) }
+            }
+        }
+    }
+
+    /**
+     * Zoom and position after sending (docs/spec/framing.md §4): the whole new [framing] replaces the item's, null
+     * clears it. With a framing the focal point moves to its landscape centre, else the portrait one, for frames and
+     * apps that don't know framing (§2.1).
+     */
+    fun saveFraming(itemId: String, framing: app.kinframe.core.api.Framing?) {
+        if (state.value.saving) return
+        _state.update { it.copy(saving = true, error = null) }
+        viewModelScope.launch {
+            try {
+                val body = buildJsonObject {
+                    put("framing", framing?.let { app.kinframe.core.api.KinJson.encodeToJsonElement(app.kinframe.core.api.Framing.serializer(), it) } ?: JsonNull)
+                    (framing?.landscape ?: framing?.portrait)?.let { v ->
+                        put("focal_point", buildJsonObject { put("x", JsonPrimitive(v.x)); put("y", JsonPrimitive(v.y)) })
+                    }
+                }
+                val item = api.updateItem(itemId, body)
+                _state.update { st ->
+                    val send = (st.send as? Load.Ready)?.value
+                    st.copy(saving = false, send = send?.let { Load.Ready(it.copy(items = it.items.map { i -> if (i.id == itemId) item else i })) } ?: st.send)
+                }
+                _events.tryEmit(SendDetailEvent.FramingSaved)
             } catch (e: Exception) {
                 _state.update { it.copy(saving = false, error = Problems.message(e)) }
             }

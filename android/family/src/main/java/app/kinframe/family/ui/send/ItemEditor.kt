@@ -1,6 +1,5 @@
 package app.kinframe.family.ui.send
 
-import android.os.Build
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -26,10 +25,12 @@ import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -85,10 +86,17 @@ fun ItemEditor(
     onAudio: (String, Boolean) -> Unit,
     onRemove: (String) -> Unit,
     onLive: (String, Boolean) -> Unit = { _, _ -> },
+    /** "Done" in the large preview (docs/spec/framing.md §4): this orientation's view. */
+    onView: (String, Boolean, Framing.View) -> Unit = { _, _, _ -> },
+    /** "Reset" in the large preview: back to the focal point at 1×. */
+    onResetView: (String, Boolean) -> Unit = { _, _ -> },
 ) {
     val item = state.items.getOrNull(index) ?: return
     val c = Kin.colors
     val count = state.items.size
+    // Zoom per orientation: photos in fill mode, when the servers store it (framing.md §4).
+    val framing = state.framingEnabled && item.fill && !item.isVideo
+    var editingView by remember(item.id) { mutableStateOf<Boolean?>(null) }
     Column(Modifier.fillMaxSize().background(c.paper)) {
         KinTopBar(
             stringResource(if (item.isVideo) R.string.send_video_n else R.string.send_photo_n, index + 1) + " / $count",
@@ -124,15 +132,18 @@ fun ItemEditor(
                 Text(stringResource(if (item.fill) R.string.send_fill_hint else R.string.send_fit_hint), style = Kin.type.caption, color = c.inkSoft)
 
                 Text(stringResource(R.string.send_previews_label), style = Kin.type.label, color = c.inkSoft)
-                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.Bottom) {
-                    Column(Modifier.weight(1.6f), horizontalAlignment = Alignment.CenterHorizontally) {
-                        FramePreview(item, Framing.LANDSCAPE, Modifier.fillMaxWidth())
-                        Text(stringResource(R.string.send_landscape), style = Kin.type.caption, color = c.inkSoft, modifier = Modifier.padding(top = 4.dp))
-                    }
-                    Column(Modifier.weight(0.75f), horizontalAlignment = Alignment.CenterHorizontally) {
-                        FramePreview(item, Framing.PORTRAIT, Modifier.fillMaxWidth())
-                        Text(stringResource(R.string.send_portrait), style = Kin.type.caption, color = c.inkSoft, modifier = Modifier.padding(top = 4.dp))
-                    }
+                val aspect = item.aspect ?: ComposerViewModel.DEFAULT_ASPECT
+                FramePreviews(item.info.uri, aspect, item.fill, item.view(true), item.view(false),
+                    onEdit = if (framing) ({ editingView = it }) else null)
+                if (framing) Text(stringResource(R.string.send_framing_hint), style = Kin.type.caption, color = c.inkSoft)
+                editingView?.takeIf { framing }?.let { landscape ->
+                    FramingDialog(
+                        item.info.uri, aspect, item.info.width, item.info.height, landscape,
+                        initial = if (landscape) item.landscape else item.portrait, focalX = item.focalX, focalY = item.focalY,
+                        onDone = { v -> onView(item.id, landscape, v); editingView = null },
+                        onReset = { onResetView(item.id, landscape); editingView = null },
+                        onDismiss = { editingView = null },
+                    )
                 }
 
                 if (item.isVideo && item.info.durationMs != null) TrimEditor(item, state.sendLimits.limits.maxVideoSeconds * 1000L, onTrim, onAudio)
@@ -206,26 +217,6 @@ private fun FocalPicker(item: DraftItem, enabled: Boolean, onFocal: (Float, Floa
                     drawCircle(Color.White, 4.dp.toPx(), p)
                 }
             }
-        }
-    }
-}
-
-/** How the item looks on a frame of [boxAspect]: cropped at the focal point, or whole with soft edges. */
-@Composable
-fun FramePreview(item: DraftItem, boxAspect: Float, modifier: Modifier = Modifier) {
-    val imageAspect = item.aspect ?: (4f / 3f)
-    Box(
-        modifier.aspectRatio(boxAspect).clip(RoundedCornerShape(10.dp)).background(Color(0xFF2F2823)).padding(4.dp)
-            .clip(RoundedCornerShape(6.dp)).background(Color.Black),
-    ) {
-        if (item.fill) {
-            val (bx, by) = Framing.coverBias(item.focalX, item.focalY, imageAspect, boxAspect)
-            AsyncImage(item.info.uri, null, contentScale = ContentScale.Crop, alignment = BiasAlignment(bx, by), modifier = Modifier.fillMaxSize())
-        } else {
-            val blurred = if (Build.VERSION.SDK_INT >= 31) Modifier.fillMaxSize().blur(18.dp) else Modifier.fillMaxSize()
-            AsyncImage(item.info.uri, null, contentScale = ContentScale.Crop, modifier = blurred)
-            Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.25f)))
-            AsyncImage(item.info.uri, null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
         }
     }
 }

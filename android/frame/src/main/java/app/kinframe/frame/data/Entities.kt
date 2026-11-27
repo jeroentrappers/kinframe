@@ -84,6 +84,13 @@ data class PlacementEntity(
     val viaService: String? = null,
     /** The weekly prompt this feed post answers (`Placement.prompt_id`): its title card shows first (family-social.md §9.3). */
     val promptId: String? = null,
+    // ---- framing (docs/spec/framing.md §5): kept with the placement so frames without network keep showing it
+    /** The item's framing (`item.framing`, JSON `Framing`), or null. */
+    val framing: String? = null,
+    /** The frame owner's framing for this placement (`placement.framing_override`, JSON `Framing`), or null. */
+    val framingOverride: String? = null,
+    /** [focalX]/[focalY] are the placement's `focal_override`, which comes before the item's framing (§3.1 step 2). */
+    @ColumnInfo(defaultValue = "0") val focalOverridden: Boolean = false,
 ) {
     val feedIdList: List<String> get() = feedIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     /** The feed to credit, when this photo came through one. */

@@ -12,10 +12,18 @@ object FocalCrop {
 
     /**
      * Fill mode: the part of the source (in source pixels) that covers the whole screen, centred on the focal point
-     * ([fx], [fy] in 0..1 from top-left) as far as the image edges allow.
+     * ([fx], [fy] in 0..1 from top-left) as far as the image edges allow. [viewSource] at zoom 1.
      */
-    fun fillSource(srcW: Int, srcH: Int, dstW: Int, dstH: Int, fx: Double = 0.5, fy: Double = 0.5): Rect {
-        val scale = max(dstW.toFloat() / srcW, dstH.toFloat() / srcH)
+    fun fillSource(srcW: Int, srcH: Int, dstW: Int, dstH: Int, fx: Double = 0.5, fy: Double = 0.5): Rect =
+        viewSource(srcW, srcH, dstW, dstH, fx, fy, 1.0)
+
+    /**
+     * The one framing rule (docs/spec/framing.md §3): the part of the source drawn to fill the screen for a view
+     * centred at ([fx], [fy]) with [zoom] over the cover crop (1..4; 2 shows half the width and height of it), kept
+     * inside the photo.
+     */
+    fun viewSource(srcW: Int, srcH: Int, dstW: Int, dstH: Int, fx: Double, fy: Double, zoom: Double): Rect {
+        val scale = max(dstW.toFloat() / srcW, dstH.toFloat() / srcH) * clampZoom(zoom).toFloat()
         val cw = min(srcW.toFloat(), dstW / scale)
         val ch = min(srcH.toFloat(), dstH / scale)
         val cx = (fx.coerceIn(0.0, 1.0) * srcW).toFloat()
@@ -24,6 +32,9 @@ object FocalCrop {
         val top = (cy - ch / 2).coerceIn(0f, srcH - ch)
         return Rect(left, top, left + cw, top + ch)
     }
+
+    /** Zoom kept to the range a view allows (docs/spec/framing.md §2, 1..4); NaN from a bad document counts as 1. */
+    fun clampZoom(zoom: Double): Double = if (zoom.isNaN()) 1.0 else zoom.coerceIn(1.0, 4.0)
 
     /** Fit mode: where the whole image goes on the screen (letterboxed, centred). */
     fun fitDest(srcW: Int, srcH: Int, dstW: Int, dstH: Int): Rect {

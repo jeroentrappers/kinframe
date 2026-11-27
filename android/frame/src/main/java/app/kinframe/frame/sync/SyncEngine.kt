@@ -5,6 +5,7 @@ import app.kinframe.core.api.Change
 import app.kinframe.core.api.ChangeType
 import app.kinframe.core.api.DeviceApi
 import app.kinframe.core.api.FramePhotoRequest
+import app.kinframe.core.api.Framing
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.Placement
 import app.kinframe.frame.data.AlbumFlagEntity
@@ -226,6 +227,10 @@ class SyncEngine(
             receivedAt = parseTime(p.receivedAt) ?: parseTime(item.createdAt) ?: existing?.receivedAt ?: now(),
             focalX = focal?.x,
             focalY = focal?.y,
+            // Kept apart so the slideshow can pick the view per screen orientation (docs/spec/framing.md §3.1).
+            framing = item.framing?.takeUnless { it.isEmpty }?.let { KinJson.encodeToString(Framing.serializer(), it) },
+            framingOverride = p.framingOverride?.takeUnless { it.isEmpty }?.let { KinJson.encodeToString(Framing.serializer(), it) },
+            focalOverridden = p.focalOverride != null,
             fit = p.fitOverride ?: item.fit,
             rotation = p.rotation,
             hidden = p.hidden,

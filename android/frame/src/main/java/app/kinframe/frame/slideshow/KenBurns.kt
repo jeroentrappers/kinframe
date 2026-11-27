@@ -28,7 +28,17 @@ object KenBurns {
      * Keyframes of a closed loop. Time is measured in segments: t = 1 is [keys][1], and the motion keeps going past
      * the last key back to the first.
      */
-    data class Params(val keys: List<Key>) {
+    data class Params(
+        val keys: List<Key>,
+        /**
+         * Motion inside a chosen view ([inside], docs/spec/framing.md §3.4): played with one key every half the slide's
+         * hold time instead of [SEGMENT_MS], so the slide starts and ends at the view.
+         */
+        val framed: Boolean = false,
+    ) {
+        /** How long one segment lasts for a slide held [holdMs]. */
+        fun segmentMs(holdMs: Long): Long = if (framed) (holdMs / 2).coerceAtLeast(1) else SEGMENT_MS
+
         fun scaleAt(t: Float) = at(t).scale
         fun xAt(t: Float) = at(t).x
         fun yAt(t: Float) = at(t).y
@@ -64,11 +74,7 @@ object KenBurns {
      * test). Even keys are wide, odd keys close; the first close framing is the focal point when there is one.
      */
     fun params(id: String, focalX: Double?, focalY: Double?): Params {
-        var h = id.hashCode().toLong() xor 0x5DEECE66DL
-        fun rnd(): Float {
-            h = h * 6364136223846793005L + 1442695040888963407L
-            return ((h ushr 40).toInt() and 0xFFFFFF) / 16_777_216f
-        }
+        val rnd = sequence(id)
         val keys = (0 until KEYS).map { k ->
             val close = k % 2 == 1
             val scale = if (close) CLOSE_MIN + rnd() * (MAX_ZOOM - CLOSE_MIN) else WIDE_MIN + rnd() * (WIDE_MAX - WIDE_MIN)
@@ -88,6 +94,35 @@ object KenBurns {
             }
         }
         return Params(keys)
+    }
+
+    /** Ken Burns inside a chosen view (docs/spec/framing.md §3.4): at most this scale over the view... */
+    const val INSIDE_MAX = 1.08f
+    /** ...and at most this drift, as a fraction of the screen. */
+    const val INSIDE_DRIFT = 0.03f
+
+    /**
+     * Motion for a photo whose crop the person chose (a framing for this orientation, docs/spec/framing.md §3.4): it
+     * stays inside the view instead of pulling out to the whole photo. Two keys on the loop, the view itself and a
+     * slight push in (1.04..[INSIDE_MAX]) drifting at most [INSIDE_DRIFT], from the placement's random sequence (the
+     * same as [params]). The formula is shared with the TV (web `framedKenBurnsKeys`), so both move the same way.
+     */
+    fun inside(id: String): Params {
+        val rnd = sequence(id)
+        // In double, rounded where the web rounds (Math.fround), so frame and TV agree to the last bit that shows.
+        val scale = (1.04 + rnd() * (INSIDE_MAX.toDouble() - 1.04)).toFloat()
+        val reach = minOf(INSIDE_DRIFT.toDouble(), (scale - 1.0) / 2) * (0.5 + 0.5 * rnd())
+        val angle = rnd() * 2.0 * Math.PI
+        return Params(listOf(Key(1f, 0f, 0f), Key(scale, (cos(angle) * reach).toFloat(), (sin(angle) * reach).toFloat())), framed = true)
+    }
+
+    /** The placement's random sequence: a 64-bit LCG seeded from the id, 24-bit floats in 0..1. */
+    private fun sequence(id: String): () -> Float {
+        var h = id.hashCode().toLong() xor 0x5DEECE66DL
+        return {
+            h = h * 6364136223846793005L + 1442695040888963407L
+            ((h ushr 40).toInt() and 0xFFFFFF) / 16_777_216f
+        }
     }
 
     private fun catmullRom(p0: Float, p1: Float, p2: Float, p3: Float, t: Float): Float {

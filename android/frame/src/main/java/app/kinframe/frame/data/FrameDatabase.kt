@@ -8,7 +8,7 @@ import androidx.room.withTransaction
 
 @Database(
     entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class, FeedTombstoneEntity::class, BirthdayGreetingEntity::class, AlbumFlagEntity::class, PlacementCommentsEntity::class, CommentCardShownEntity::class],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -36,6 +36,19 @@ abstract class FrameDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "frame.db"
+
+        /**
+         * v13: framing (docs/spec/framing.md §5): the item's framing, the placement's framing override and whether the
+         * stored focal point is the placement's override. Rows stored before have none until
+         * their next upsert, and show as before.
+         */
+        val MIGRATION_12_13 = object : androidx.room.migration.Migration(12, 13) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN framing TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN framingOverride TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN focalOverridden INTEGER NOT NULL DEFAULT 0")
+            }
+        }
 
         /**
          * v12: family social (docs/spec/family-social.md §8, §9.3): the prompt a placement answers, the frame's photo
@@ -150,7 +163,7 @@ abstract class FrameDatabase : RoomDatabase() {
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

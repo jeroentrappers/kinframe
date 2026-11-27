@@ -58,6 +58,27 @@ class SyncEngineTest : SyncTestBase() {
     }
 
     @Test
+    fun framingAndItsOverrideAreStoredWithThePlacement() = runBlocking {
+        val framed = """{"id":"p1","frame_id":"f","item":{"id":"i1","kind":"photo","sender_id":"u1","focal_point":{"x":0.4,"y":0.3},
+            "framing":{"landscape":{"x":0.4,"y":0.3,"zoom":2}},"created_at":"2026-10-20T10:00:00Z"},
+            "framing_override":{"portrait":{"x":0.6,"y":0.5,"zoom":1.5}},"status":"ready","received_at":"2026-10-20T10:00:00Z"}"""
+        val overridden = """{"id":"p2","frame_id":"f","item":{"id":"i2","kind":"photo","sender_id":"u1","framing":{"portrait":{"x":0.2,"y":0.2,"zoom":3}},
+            "created_at":"2026-10-20T10:00:00Z"},"focal_override":{"x":0.9,"y":0.1},"status":"ready","received_at":"2026-10-20T10:00:00Z"}"""
+        fake.pages[0] = page(3, false, up(1, framed), up(2, overridden), up(3, placement("p3", byteArrayOf(3))))
+        engine.pull()
+        val p1 = db.placements().get("p1")!!
+        assertEquals(app.kinframe.frame.slideshow.FramingPick.View(0.4, 0.3, 2.0, chosen = true), app.kinframe.frame.slideshow.FramingPick.of(p1, 1280, 800))
+        assertEquals(app.kinframe.frame.slideshow.FramingPick.View(0.6, 0.5, 1.5, chosen = true), app.kinframe.frame.slideshow.FramingPick.of(p1, 800, 1280))
+        assertFalse(p1.focalOverridden)
+        // A focal override (frames before framing) comes before the item's framing (framing.md §3.1).
+        val p2 = db.placements().get("p2")!!
+        assertTrue(p2.focalOverridden)
+        assertEquals(app.kinframe.frame.slideshow.FramingPick.View(0.9, 0.1, 1.0, chosen = false), app.kinframe.frame.slideshow.FramingPick.of(p2, 800, 1280))
+        val p3 = db.placements().get("p3")!!
+        assertNull(p3.framing); assertNull(p3.framingOverride)
+    }
+
+    @Test
     fun weatherIsPersistedAndClearedByNull() = runBlocking {
         val weather = """{"fetched_at":"2026-10-22T12:05:00Z","location":{"name":"Gent"},"current":{"temp_c":14.6,"code":2,"is_day":true},"daily":[]}"""
         fake.pages[0] = page(1, false, """{"seq":1,"type":"weather","weather":$weather}""")

@@ -22,7 +22,7 @@ import java.io.File
 
 /**
  * The 11 → 12 migration (family social) keeps the frame's data: a database built from the exported v11 schema opens
- * with only [FrameDatabase.MIGRATION_11_12] and no destructive fallback, so Room's schema check passes and the cursor,
+ * with [FrameDatabase.MIGRATION_11_12] (and the later ones) and no destructive fallback, so Room's schema check passes and the cursor,
  * the placements and their local files survive.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -52,7 +52,7 @@ class SocialMigrationTest {
             db.version = 11
         }
         val room = Room.databaseBuilder(app, FrameDatabase::class.java, file.absolutePath)
-            .addMigrations(FrameDatabase.MIGRATION_11_12).allowMainThreadQueries().build()
+            .addMigrations(FrameDatabase.MIGRATION_11_12, FrameDatabase.MIGRATION_12_13).allowMainThreadQueries().build()
         val st = room.syncState().get()!!
         assertEquals(42L, st.nextSeq)
         assertEquals("{}", st.birthdaysJson)

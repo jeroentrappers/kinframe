@@ -4,11 +4,72 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-/** Focal-point framing and video trimming rules, shared by the editor and its tests. */
+/** Focal-point framing, zoom per orientation and video trimming rules, shared by the editor and its tests. */
 object Framing {
     /** Frame screens are 16:10 (landscape) or 10:16 (portrait). */
     const val LANDSCAPE = 16f / 10f
     const val PORTRAIT = 10f / 16f
+
+    const val MIN_ZOOM = 1f
+    const val MAX_ZOOM = 4f
+
+    /** Below this many photo pixels across the screen's long side the editor warns softly (docs/spec/framing.md §4). */
+    const val SHARP_PX = 960
+
+    /** The master rendition's long edge (README §5.3): what the frame has to show the visible part with. */
+    const val MASTER_LONG_EDGE = 2560
+
+    /** A view for one orientation (docs/spec/framing.md §2): centre of the visible part in 0..1 and zoom 1..4. */
+    data class View(val x: Float, val y: Float, val zoom: Float = 1f)
+
+    /** The visible part of the photo, as fractions of its width and height from the top-left. */
+    data class Visible(val left: Float, val top: Float, val width: Float, val height: Float) {
+        val centerX: Float get() = left + width / 2
+        val centerY: Float get() = top + height / 2
+    }
+
+    /**
+     * The one framing rule (docs/spec/framing.md §3) in photo fractions: the cover crop of a photo of [imageAspect] in
+     * a box of [boxAspect], narrowed by the zoom around the view's centre and kept inside the photo.
+     */
+    fun visible(view: View, imageAspect: Float, boxAspect: Float): Visible {
+        val zoom = view.zoom.coerceIn(MIN_ZOOM, MAX_ZOOM)
+        // Cover: the wider shape loses its sides, the taller one its top and bottom.
+        val w = (if (imageAspect >= boxAspect) boxAspect / imageAspect else 1f) / zoom
+        val h = (if (imageAspect >= boxAspect) 1f else imageAspect / boxAspect) / zoom
+        val left = (view.x.coerceIn(0f, 1f) - w / 2).coerceIn(0f, 1f - w)
+        val top = (view.y.coerceIn(0f, 1f) - h / 2).coerceIn(0f, 1f - h)
+        return Visible(left, top, w, h)
+    }
+
+    /**
+     * A view the window can show: zoom in 1..4 and the centre moved so the window stays on the photo (the clamp of §3),
+     * rounded to 3 decimals like the server does ([round] false while a gesture is still moving it).
+     */
+    fun clampView(view: View, imageAspect: Float, boxAspect: Float, round: Boolean = true): View {
+        val z = view.zoom.coerceIn(MIN_ZOOM, MAX_ZOOM)
+        val v = visible(view.copy(zoom = z), imageAspect, boxAspect)
+        fun r(f: Float) = if (round) (f.coerceIn(0f, 1f) * 1000).roundToInt() / 1000f else f.coerceIn(0f, 1f)
+        return View(r(v.centerX), r(v.centerY), if (round) (z * 1000).roundToInt() / 1000f else z)
+    }
+
+    /**
+     * Photo pixels across the screen's long side for this view: the item's size scaled to the master's long edge, times
+     * the visible fraction of that side. Below [SHARP_PX] the editor says it may look less sharp (§4).
+     */
+    fun visiblePixels(view: View, width: Int, height: Int, boxAspect: Float): Int {
+        if (width <= 0 || height <= 0) return Int.MAX_VALUE
+        val scale = min(1f, MASTER_LONG_EDGE.toFloat() / max(width, height))
+        val v = visible(view, width.toFloat() / height, boxAspect)
+        return if (boxAspect >= 1f) (v.width * width * scale).roundToInt() else (v.height * height * scale).roundToInt()
+    }
+
+    fun mayLookSoft(view: View, width: Int?, height: Int?, boxAspect: Float): Boolean =
+        width != null && height != null && visiblePixels(view, width, height, boxAspect) < SHARP_PX
+
+    /** The focal point to send with a framing: the landscape view's centre, else the portrait one's, else [tapped] (§4). */
+    fun focalFor(landscape: View?, portrait: View?, tapped: Pair<Float, Float>): Pair<Float, Float> =
+        landscape?.let { it.x to it.y } ?: portrait?.let { it.x to it.y } ?: tapped
 
     /** Shortest video the app sends (product spec 4.3: trimming, min 3 s). */
     const val MIN_VIDEO_MS = 3_000L

@@ -338,6 +338,9 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
             serverLabel = { id -> graph.accounts.chipFor(id) },
             // Each recipient's own server limits: the strictest applies to the selection (multi-server.md §2.2).
             limitsFor = { id -> graph.accounts.contextFor(id).server?.limits },
+            // Zoom per orientation only where the recipients' servers store it (docs/spec/framing.md §7).
+            framing = { graph.servers.current.value?.discovery?.framing == true },
+            framingFor = { id -> graph.accounts.contextFor(id).discovery?.framing },
         )
     }
     val history: HistoryViewModel = viewModel(key = "history-$k") { HistoryViewModel(api, graph.live.events, graph.sent) }
@@ -687,6 +690,7 @@ private fun Screen(
                     s, editing, composer::edit, { composer.edit(null) },
                     composer::setCaption, composer::applyCaptionToAll, composer::setFill, composer::setFocal,
                     composer::setTrim, composer::setIncludeAudio, composer::remove, composer::setSendLive,
+                    composer::setView, composer::resetView,
                 )
             } else {
                 ComposeScreen(s, pick, composer::edit, composer::remove, composer::clear, composer::send, { nav.pop() }, { composer.loadFrames() },
@@ -822,6 +826,7 @@ private fun Screen(
                 vm.events.collect { e ->
                     when (e) {
                         SendDetailEvent.CaptionSaved -> toaster.show(res.getString(R.string.detail_caption_saved))
+                        SendDetailEvent.FramingSaved -> toaster.show(res.getString(R.string.detail_framing_saved))
                         SendDetailEvent.Unsent -> { toaster.show(res.getString(R.string.detail_unsent)); history.removeLocally(r.sendId); nav.pop() }
                         is SendDetailEvent.Forwarded -> toaster.show(res.getString(R.string.detail_posted_to_feed, e.feeds.joinToString(", ")))
                     }
@@ -847,6 +852,8 @@ private fun Screen(
             SendDetailScreen(s, { nav.pop() }, { vm.load() }, vm::startEdit, vm::onCaption, vm::saveCaption, vm::cancelEdit, vm::unsend,
                 onPostToFeed = if (myFeeds.isNotEmpty()) ({ postingToFeed = true }) else null,
                 onOpenFeed = { f -> nav.push(PostRoute(f.postId)) },
+                // Zoom and position after sending, where the send's server stores framing (docs/spec/framing.md §4).
+                onSaveFraming = if ((graph.accounts.contextFor(r.sendId).discovery ?: ready.server.discovery).framing) vm::saveFraming else null,
                 onShare = if (canShare && send != null) { ids -> Sharing.source(send, ids)?.let(share::open) } else null,
                 onShowOnTv = if (tvFrame != null && tvIds.isNotEmpty()) ({
                     showOnTv(TvTarget(tvFrame.frameId, tvFrame.frameName, canMirror = known?.can { it.seeLibrary } == true,

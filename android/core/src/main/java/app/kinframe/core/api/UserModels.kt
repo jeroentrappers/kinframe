@@ -217,6 +217,8 @@ data class SendItemCreate(
     val uploadId: String,
     val caption: String? = null,
     val focalPoint: FocalPoint? = null,
+    /** Only the orientations the person changed (docs/spec/framing.md §4); left out when none. */
+    val framing: Framing? = null,
     val fit: String? = null,
     val trim: Trim? = null,
     val includeAudio: Boolean? = null,

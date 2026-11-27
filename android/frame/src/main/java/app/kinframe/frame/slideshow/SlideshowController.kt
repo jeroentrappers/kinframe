@@ -243,6 +243,7 @@ class SlideshowController(private val c: FrameController) {
         if (cur != null) playable[cur.id]?.let { fresh ->
             if (fresh.caption != cur.caption || fresh.reaction != cur.reaction || fresh.captionEdited != cur.captionEdited ||
                 fresh.fit != cur.fit || fresh.focalX != cur.focalX || fresh.focalY != cur.focalY || fresh.rotation != cur.rotation ||
+                fresh.framing != cur.framing || fresh.framingOverride != cur.framingOverride || fresh.focalOverridden != cur.focalOverridden ||
                 fresh.originFeedName != cur.originFeedName || // a feed rename updates the credit
                 fresh.viaLabel != cur.viaLabel || fresh.viaService != cur.viaService
             ) refresh = true
@@ -357,8 +358,10 @@ class SlideshowController(private val c: FrameController) {
         val group = groupFor(p)
         group.drop(1).forEach { playlist.consume(it.id) }
         val base = if (group.size > 1) obtainGroup(group) else obtain(p)
-        val kb = if (settings.slideshow.transition == "kenburns" && group.size == 1 && !p.isVideo && base.image != null)
-            KenBurns.params(p.id, p.focalX, p.focalY) else null
+        val kb = if (settings.slideshow.transition == "kenburns" && group.size == 1 && !p.isVideo && base.image != null) {
+            // A crop the person chose: the motion stays inside it (docs/spec/framing.md §3.4).
+            if (fills(p) && view(p).chosen) KenBurns.inside(p.id) else KenBurns.params(p.id, p.focalX, p.focalY)
+        } else null
         val slide = if (kb != null) base.copy(kenBurns = kb) else base
         stopVideo()
         val prev = _stage.value
@@ -428,6 +431,15 @@ class SlideshowController(private val c: FrameController) {
         return if (p.rotation % 180 != 0) h.toFloat() / w else w.toFloat() / h
     }
 
+    /** The effective fit is fill (the photo's own, else the slideshow setting); framing applies only then. */
+    private fun fills(p: PlacementEntity): Boolean = (p.fit ?: if (settings.slideshow.fill) "fill" else "fit") == "fill"
+
+    /** The view of [p] for this screen's orientation (docs/spec/framing.md §3.1). */
+    private fun view(p: PlacementEntity): FramingPick.View = FramingPick.of(p, screenW, screenH)
+
+    /** Framed with a zoom for this screen's orientation: shown alone, big (docs/spec/framing.md §3.5). */
+    private fun zoomed(p: PlacementEntity): Boolean = !p.isVideo && fills(p) && view(p).zoomed
+
     /**
      * What goes on screen with [p]: a collage of the next photos (setting `collage`), a smart pair of two
      * same-orientation photos that would otherwise be cropped awkwardly (`pair_portraits`), or just [p].
@@ -437,8 +449,10 @@ class SlideshowController(private val c: FrameController) {
         if (p.isVideo || screenW == 0) return listOf(p)
         // A live photo whose clip will play stays alone, like a video.
         if (p.isLive && p.motionLocalFile != null && settings.slideshow.livePhotos != app.kinframe.core.api.LivePhotos.OFF) return listOf(p)
+        // A photo framed with a zoom is meant to be seen big: never paired, nor put in a collage (framing.md §3.5).
+        if (zoomed(p)) return listOf(p)
         val ss = settings.slideshow
-        val photos = playlist.upcoming(12).mapNotNull { playable[it] }.filter { !it.isVideo }
+        val photos = playlist.upcoming(12).mapNotNull { playable[it] }.filter { !it.isVideo && !zoomed(it) }
         splitCells()?.let { cells ->
             // Split layout: always two photos, each in the cell its shape fits (a portrait in the tall one).
             val partner = Collage.splitPartner(aspect(p) ?: 1f, listOf(cells.big, cells.small), photos.map { it.id to aspect(it) }, screenW, screenH)
@@ -464,7 +478,7 @@ class SlideshowController(private val c: FrameController) {
         val placed = if (split != null) Collage.placeInto(listOf(split.big, split.small), aspects, screenW, screenH) else Collage.place(aspects, screenW, screenH)
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
-        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}:${it.originFeedName}:${it.viaLabel}:${it.viaService}" } +
+        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.framing}:${it.framingOverride}:${it.focalOverridden}:${it.rotation}:${it.caption}:${it.sharedByName}:${it.originFeedName}:${it.viaLabel}:${it.viaService}" } +
             "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}|split=${split != null}:$splitSide"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }
@@ -473,8 +487,10 @@ class SlideshowController(private val c: FrameController) {
             val dateMs = when (settings.slideshow.captionDate) { "taken" -> q.capturedAt ?: q.receivedAt; "none" -> null; else -> q.receivedAt }
             val meta = listOfNotNull(Credit.of(ctx, q), dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
                 .joinToString(" · ").ifEmpty { null }
+            // A tile uses its view's centre and ignores the zoom: tiles have their own shape (framing.md §3.5).
+            val v = view(q)
             SlideRenderer.TileRequest(
-                g.media.file(q.localFile ?: ""), q.rotation, q.focalX, q.focalY, t.cell,
+                g.media.file(q.localFile ?: ""), q.rotation, v.x, v.y, t.cell,
                 label = meta.takeIf { withLabels }, caption = q.caption?.takeIf { withLabels && it.isNotBlank() },
             )
         }
@@ -540,14 +556,18 @@ class SlideshowController(private val c: FrameController) {
         cache[key]?.let { return it }
         val slide = withContext(renderDispatcher) {
             val file = g.media.file(p.localFile ?: "")
+            val fill = fills(p)
+            // The view for this screen's orientation (docs/spec/framing.md §3.1); a framing counts as fill chosen (§3.2).
+            val v = view(p)
             val request = SlideRenderer.Request(
                 file, p.isVideo, screenW, screenH,
-                fill = (p.fit ?: if (settings.slideshow.fill) "fill" else "fit") == "fill",
-                focalX = p.focalX, focalY = p.focalY, rotation = p.rotation,
+                fill = fill,
+                focalX = v.x, focalY = v.y, rotation = p.rotation,
                 blurBars = settings.slideshow.background == "blur",
                 caption = caption,
                 density = g.app.resources.displayMetrics.density,
-                fillChosen = p.fit == "fill",
+                fillChosen = p.fit == "fill" || (fill && v.chosen),
+                zoom = if (fill) v.zoom else 1.0,
             )
             // Videos and live photos: the caption stays readable above the playing clip. Ken Burns: it stays still.
             val strip = if (p.isVideo || p.isLive || separate) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
@@ -569,7 +589,7 @@ class SlideshowController(private val c: FrameController) {
     }
 
     private fun renderKey(p: PlacementEntity) =
-        "${p.id}|${p.localFile}|${p.fit}|${p.focalX}|${p.focalY}|${p.rotation}|${settings.slideshow.fill}|${settings.slideshow.background}|${screenW}x$screenH"
+        "${p.id}|${p.localFile}|${p.fit}|${p.focalX}|${p.focalY}|${p.framing}|${p.framingOverride}|${p.focalOverridden}|${p.rotation}|${settings.slideshow.fill}|${settings.slideshow.background}|${screenW}x$screenH"
 
     /** Items whose files must not be evicted: on screen now, fading out, or up next. */
     fun protectedIds(): Set<String> = buildSet {

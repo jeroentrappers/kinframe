@@ -155,6 +155,14 @@
     <string name="send_landscape">Landscape</string>
     <string name="send_portrait">Portrait</string>
     <string name="send_previews_label">How it looks on the frame</string>
+    <string name="send_framing_hint">Tap a preview to zoom in or move the photo for that frame shape.</string>
+    <string name="send_framing_title_landscape">Landscape frames</string>
+    <string name="send_framing_title_portrait">Portrait frames</string>
+    <string name="send_framing_help">Drag to move the frame, pinch or use the slider to zoom.</string>
+    <string name="send_framing_zoom">Zoom</string>
+    <string name="send_framing_zoom_value">%1$s×</string>
+    <string name="send_framing_soft">May look less sharp on the frame.</string>
+    <string name="send_framing_reset">Reset</string>
     <string name="send_issue_too_large">Too large. The limit is %1$s.</string>
     <string name="send_issue_too_long">Too long. Videos can be up to %1$s. Trim it to send.</string>
     <plurals name="send_issues">
@@ -254,6 +262,9 @@
     <string name="detail_edited">Edited</string>
     <string name="detail_edit_caption">Edit caption of item %1$d</string>
     <string name="detail_caption_saved">Caption updated on every frame</string>
+    <string name="detail_framing">Zoom and position</string>
+    <string name="detail_edit_framing">Zoom and position of item %1$d</string>
+    <string name="detail_framing_saved">Zoom and position updated on every frame</string>
     <string name="detail_replies">Replies</string>
 
     <string name="failure_unsupported_media">This file type isn’t supported.</string>
@@ -569,6 +580,16 @@
     <string name="a11y_photo">Photo</string>
     <string name="a11y_video">Video</string>
     <string name="a11y_focal_picker">Photo preview. Double tap to set the focus point.</string>
+    <string name="a11y_framing_preview">%1$s preview</string>
+    <string name="a11y_framing_edit">zoom and position</string>
+    <string name="a11y_framing_window">Frame window over the photo</string>
+    <string name="a11y_framing_value">%1$s: %2$s, centred %3$d%%, %4$d%%</string>
+    <string name="a11y_framing_zoom_in">Zoom in</string>
+    <string name="a11y_framing_zoom_out">Zoom out</string>
+    <string name="a11y_framing_move_left">Move left</string>
+    <string name="a11y_framing_move_right">Move right</string>
+    <string name="a11y_framing_move_up">Move up</string>
+    <string name="a11y_framing_move_down">Move down</string>
     <string name="a11y_select_item">Select item</string>
 
     <!-- problems (ProblemCode) -->
