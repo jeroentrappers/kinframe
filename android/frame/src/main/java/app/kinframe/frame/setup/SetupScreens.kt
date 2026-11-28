@@ -1,12 +1,7 @@
 package app.kinframe.frame.setup
 
-import android.Manifest
 import android.app.Activity
-import android.content.Intent
-import android.os.Build
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -37,8 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -49,7 +42,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,7 +62,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.api.ServerUrl
@@ -91,7 +82,6 @@ import app.kinframe.frame.R
 import app.kinframe.frame.ui.Format
 import app.kinframe.frame.ui.LanguageGrid
 import app.kinframe.frame.ui.QrCode
-import app.kinframe.frame.ui.StatusCard
 import kotlinx.coroutines.delay
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import kotlin.math.cos
@@ -202,143 +192,25 @@ internal fun LanguageStepContent(selected: String, onSelect: (String) -> Unit) {
 
 @Composable
 private fun WifiStep(c: SetupController) {
-    val context = LocalContext.current
-    val graph = remember { FrameApp.graph(context) }
+    val graph = FrameApp.graph(LocalContext.current)
     val net by graph.network.status.collectAsState()
-    val scanner = remember { WifiScanner(context.applicationContext) }
-    val networks by scanner.networks.collectAsState()
-    var hasPermission by remember { mutableStateOf(scanner.hasPermission()) }
-    var joining by remember { mutableStateOf<WifiScanner.Network?>(null) }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        hasPermission = granted
-        if (granted) scanner.start()
-    }
-    DisposableEffect(Unit) {
-        if (scanner.inAppSupported && hasPermission) scanner.start()
-        onDispose { scanner.stop() }
-    }
-    LaunchedEffect(Unit) {
-        while (true) { delay(10_000); graph.network.refresh(); scanner.scan() }
-    }
-    val openSystem: () -> Unit = {
-        val i = if (Build.VERSION.SDK_INT >= 29) Intent(Settings.Panel.ACTION_WIFI) else Intent(Settings.ACTION_WIFI_SETTINGS)
-        runCatching { context.startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-    }
+    val picker = rememberWifiPicker()
     StepScaffold(
         index = 1, onBack = { c.back() },
         primary = { KinButton(stringResource(R.string.action_continue), { c.goTo(SetupStep.TimeZone) }, enabled = net.connected) },
     ) {
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
-            Column(Modifier.weight(1f)) {
-                KinHeading(stringResource(R.string.setup_wifi_title), stringResource(R.string.setup_wifi_body))
-                Spacer(Modifier.height(28.dp))
-                KinCard(Modifier.fillMaxWidth()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        KinIcon(if (net.connected) KinIcons.Wifi else KinIcons.WifiOff, null, tint = if (net.connected) Kin.colors.sage else Kin.colors.inkSoft, size = 36.dp)
-                        Column(Modifier.padding(start = 18.dp)) {
-                            Text(
-                                if (net.connected) stringResource(R.string.wifi_connected_to, net.ssid ?: stringResource(R.string.wifi_network)) else stringResource(R.string.wifi_not_connected),
-                                style = Kin.type.bodyStrong,
-                            )
-                            Text(
-                                when {
-                                    !net.connected -> stringResource(R.string.wifi_not_connected_hint)
-                                    !net.validated -> stringResource(R.string.wifi_no_internet)
-                                    else -> stringResource(R.string.wifi_signal, signalWord(net.level))
-                                },
-                                style = Kin.type.caption, color = Kin.colors.inkSoft,
-                            )
-                        }
-                    }
-                }
-                val portal by graph.controller.portal.loginUrl.collectAsState()
-                LaunchedEffect(net.connected, net.validated, net.captivePortal) {
-                    if (net.connected) graph.controller.portal.check()
-                }
-                if (net.connected && portal != null) {
-                    Spacer(Modifier.height(16.dp))
-                    StatusCard(
-                        KinIcons.Login, stringResource(R.string.status_card_portal_title), stringResource(R.string.status_card_portal_body),
-                        Kin.colors.accent, onDismiss = {}, action = stringResource(R.string.status_card_portal_action),
-                        onAction = { graph.controller.portalOpen.value = true }, dismissible = false,
-                    )
-                }
-                Spacer(Modifier.height(20.dp))
-                KinButton(stringResource(R.string.wifi_open_settings), openSystem, style = KinButtonStyle.Secondary)
-            }
-            if (scanner.inAppSupported) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.wifi_networks), style = Kin.type.label, color = Kin.colors.inkSoft)
-                    Spacer(Modifier.height(10.dp))
-                    when {
-                        !hasPermission -> KinCard(Modifier.fillMaxWidth()) {
-                            Column {
-                                Text(stringResource(R.string.wifi_permission_body), style = Kin.type.body, color = Kin.colors.inkSoft)
-                                Spacer(Modifier.height(14.dp))
-                                KinButton(stringResource(R.string.wifi_show_networks), { permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) }, style = KinButtonStyle.Secondary)
-                            }
-                        }
-                        networks.isEmpty() -> Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(22.dp), color = Kin.colors.accent, strokeWidth = 2.dp)
-                            Text(stringResource(R.string.wifi_scanning), style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 12.dp))
-                        }
-                        else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(networks, key = { it.ssid }) { n ->
-                                KinCard(Modifier.fillMaxWidth(), selected = n.connected, padding = 18.dp, onClick = { if (!n.connected) joining = n }) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        KinIcon(if (n.level >= 2) KinIcons.Wifi else KinIcons.WifiWeak, null, tint = Kin.colors.inkSoft)
-                                        Text(n.ssid, style = Kin.type.bodyStrong, modifier = Modifier.padding(start = 14.dp).weight(1f), maxLines = 1)
-                                        if (n.secured) KinIcon(KinIcons.Lock, null, tint = Kin.colors.inkFaint, size = 20.dp)
-                                        if (n.connected) KinIcon(KinIcons.Check, null, tint = Kin.colors.accent, modifier = Modifier.padding(start = 8.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        WifiContent(picker, Modifier.fillMaxSize()) {
+            KinHeading(stringResource(R.string.setup_wifi_title), stringResource(R.string.setup_wifi_body))
+            Spacer(Modifier.height(28.dp))
         }
     }
-    joining?.let { n ->
-        WifiPasswordDialog(n, onCancel = { joining = null }) { pw ->
-            scanner.connect(n.ssid, pw)
-            joining = null
-        }
-    }
+    WifiJoinDialog(picker)
 }
 
 @Composable
 fun signalWord(level: Int): String = stringResource(
     when (level) { 0 -> R.string.signal_0; 1 -> R.string.signal_1; 2 -> R.string.signal_2; 3 -> R.string.signal_3; else -> R.string.signal_4 },
 )
-
-@Composable
-private fun WifiPasswordDialog(n: WifiScanner.Network, onCancel: () -> Unit, onJoin: (String?) -> Unit) {
-    var pw by remember { mutableStateOf("") }
-    Box(Modifier.fillMaxSize().background(Kin.colors.scrim).clickable(onClick = onCancel), contentAlignment = Alignment.TopCenter) {
-        KinCard(Modifier.padding(top = 60.dp).widthIn(max = 560.dp).clickable(enabled = false) {}) {
-            Column {
-                Text(n.ssid, style = Kin.type.title)
-                Spacer(Modifier.height(16.dp))
-                if (n.secured) {
-                    OutlinedTextField(
-                        pw, { pw = it }, singleLine = true, label = { Text(stringResource(R.string.wifi_password)) },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Go),
-                        keyboardActions = KeyboardActions(onGo = { onJoin(pw) }),
-                        modifier = Modifier.fillMaxWidth(), textStyle = Kin.type.body,
-                    )
-                    Spacer(Modifier.height(16.dp))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Spacer(Modifier.weight(1f))
-                    KinButton(stringResource(R.string.action_cancel), onCancel, style = KinButtonStyle.Quiet)
-                    KinButton(stringResource(R.string.wifi_join), { onJoin(pw.ifEmpty { null }) }, enabled = !n.secured || pw.length >= 8)
-                }
-            }
-        }
-    }
-}
 
 // ---------------------------------------------------------------------------------------------- server
 

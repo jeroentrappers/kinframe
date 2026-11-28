@@ -2,7 +2,6 @@ package app.kinframe.frame.ui
 
 import android.app.Activity
 import android.content.Intent
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -85,6 +84,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     val scope = rememberCoroutineScope()
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var choosingPin by remember { mutableStateOf(false) }
+    var wifiOpen by remember { mutableStateOf(false) }
     val dismissKeyboard = app.kinframe.frame.plugins.rememberKeyboardDismiss()
     LaunchedEffect(lastTouch) { delay(5 * 60_000); onClose() }
 
@@ -128,10 +128,11 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 UpdatesSection(c, s, ::section)
                 app.kinframe.frame.frameo.FrameoSettingsSection(c) { title, content -> SectionCard(title, content) }
                 RemovableSection(c)
-                AboutSection(c)
+                AboutSection(c) { wifiOpen = true }
                 Spacer(Modifier.height(40.dp))
             }
         }
+        if (wifiOpen) app.kinframe.frame.setup.WifiSettingsScreen(onBack = { wifiOpen = false })
         if (choosingPin) {
             SetPinFlow(onDone = { pin -> choosingPin = false; scope.launch { c.setOwnerPin(pin) } }, onCancel = { choosingPin = false })
         }
@@ -486,7 +487,7 @@ private fun LanguageSection(c: FrameController) {
 }
 
 @Composable
-private fun AboutSection(c: FrameController) {
+private fun AboutSection(c: FrameController, onWifi: () -> Unit) {
     val context = LocalContext.current
     val net by c.g.network.status.collectAsState()
     val sync by c.syncState.collectAsState()
@@ -499,13 +500,8 @@ private fun AboutSection(c: FrameController) {
         )
         InfoRow(stringResource(R.string.about_version), "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            KinButton(stringResource(R.string.wifi_open_settings), {
-                (context as? Activity)?.let { a ->
-                    c.gate.authorize(OwnerGate.Reason.Wifi) {
-                        runCatching { a.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-                    }
-                }
-            }, style = KinButtonStyle.Secondary)
+            // In the app: Android's Wi-Fi settings have no way back on frames without a navigation bar.
+            KinButton(stringResource(R.string.wifi_open_settings), { c.gate.authorize(OwnerGate.Reason.Wifi) { onWifi() } }, style = KinButtonStyle.Secondary)
             KinButton(stringResource(R.string.about_android_settings), { (context as? Activity)?.let { c.openAndroidSettings(it) } }, style = KinButtonStyle.Quiet)
         }
     }
